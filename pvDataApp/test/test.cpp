@@ -32,6 +32,11 @@ int main(int argc,char *argv[])
     TypeFunc::toString(*myString,type);
     printf("%s\n",myString->c_str());
     myString->clear();
+    *myString += "fieldName ";
+    std::string const & fieldName = scalar.getFieldName();
+    *myString += fieldName;
+    printf("%s\n",myString->c_str());
+    myString->clear();
     scalar.toString(*myString);
     printf("%s\n",myString->c_str());
     return(0);

@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS pvData C++<br />
 Overview<br />
-2010.08.02</h1>
+2010.08.10</h1>
 CONTENTS 
 <hr />
 
@@ -27,26 +27,9 @@ following is done:</p>
     Scalar</dd>
   <dt>test</dt>
     <dd>A test of Scalar.</dd>
-  <dt>As mentioned below there are major problems with the current
+  <dt>As mentioned below there are problems with the current
   implementation.</dt>
 </dl>
-
-<p>Since the last version the following are the main changes:</p>
-<ul>
-  <li>The name space no longer has the trailing " namespace pvData {" </li>
-  <li>A typedef has been added to define a StringConst and all string
-    arguments are now a StringConst. See gargage collection below for
-  details.</li>
-  <li>typedefs have been added for FieldPtr, ScalarPtr, etc. These make the
-    boost stuff somewhat transparent.</li>
-  <li>The array arguments have been changed from using * to using [].</li>
-  <li>Other arguments were change to be more understandable.</li>
-  <li>All the toString methods were changed from something like: 
-    <pre>    static const std::string toString(...</pre>
-    to 
-    <pre>static void toString(std::string &amp;buf,</pre>
-    This should be more efficent.</li>
-</ul>
 <hr />
 
 <h2 style="text-align: center">Building</h2>
@@ -76,14 +59,14 @@ type:</p>
 <p>The pure virtual classes defined in pvData.h now work. But there are still
 some things that are not so nice. Amoung these are:</p>
 <ul>
-  <li>User code sees pointers instead of references. Can this be changed
-    while keeping the boost::shared_ptr support?</li>
+  <li>In FieldCreateFactory.cpp look for "WHY DO I". It asks why the derived
+    class must also define methods defined in the base class. If it does not
+    then a compilation error occurs. WHY??? </li>
   <li>The toString methods have an argument of "std::string &amp;buf" instead
-    of "std::string *". But in the test code I could not create a
-    "std::string &amp;" to work. I do not know why.</li>
+    of "std::string *". Does this seem correct?</li>
   <li>Can arguments and return descriptions be defined better?</li>
   <li>Is const present everywhere it should be? Remember that introspection
-    classes are immutable and are shared whereever possible.</li>
+    classes are immutable.</li>
   <li>The code is NOT thread safe. When we decide for sure what thread/lock
     support to choose I will fix this.</li>
 </ul>
@@ -94,14 +77,6 @@ with c++</p>
 
 <h2 style="text-align: center">Garbage Collection</h2>
 <hr />
-
-<p>boost::shared_ptr is currenly used for implementations of Field, Scalar,
-etc. It is also used for all string arguments passed to methods. Since string
-values are freely shared by pvData, pvAccess, etc, this is really important.
-questions:</p>
-<ol>
-  <li>Is the implementation using shared_ptr correctly?</li>
-  <li>Should other things currently defined use stared_ptr?</li>
-</ol>
+<p>Not yet implemented. Lets get class structure correct first.</p>
 </body>
 </html>
