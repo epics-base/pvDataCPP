@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
+  <title>EPICS pvData C++</title>
+</head>
+
+<body>
+<h1 style="text-align: center">EPICS pvData C++<br />
+Overview<br />
+2010.08.02</h1>
+CONTENTS 
+<hr />
+
+<h2 style="text-align: center">Introduction</h2>
+<hr />
+
+<p>This project has the begining of the C++ implementation of pvData. The
+following is done:</p>
+<dl>
+  <dt>introspection interfaces</dt>
+    <dd>The introspection interfaces for clients are described.</dd>
+  <dt>introspection implementation</dt>
+    <dd>The following have been implemented: Type, ScalarType, Field,
+    Scalar</dd>
+  <dt>test</dt>
+    <dd>A test of Scalar.</dd>
+  <dt>As mentioned below there are major problems with the current
+  implementation.</dt>
+</dl>
+
+<p>Since the last version the following are the main changes:</p>
+<ul>
+  <li>The name space no longer has the trailing " namespace pvData {" </li>
+  <li>A typedef has been added to define a StringConst and all string
+    arguments are now a StringConst. See gargage collection below for
+  details.</li>
+  <li>typedefs have been added for FieldPtr, ScalarPtr, etc. These make the
+    boost stuff somewhat transparent.</li>
+  <li>The array arguments have been changed from using * to using [].</li>
+  <li>Other arguments were change to be more understandable.</li>
+  <li>All the toString methods were changed from something like: 
+    <pre>    static const std::string toString(...</pre>
+    to 
+    <pre>static void toString(std::string &amp;buf,</pre>
+    This should be more efficent.</li>
+</ul>
+<hr />
+
+<h2 style="text-align: center">Building</h2>
+<hr />
+
+<p>The project is structured as an epics base client application. Edit
+configure/RELEASE so that it references your EPICS base and then just
+type:</p>
+<pre>   make</pre>
+
+<p>At the top. Then execute the test in the bin directory.</p>
+
+<p>pvDataApp has the following sub directories:</p>
+<dl>
+  <dt>pv</dt>
+    <dd>pvData.h has the interface descriptions for client code.</dd>
+  <dt>factory</dt>
+    <dd>FieldCreateFactory.cpp has the current implementation</dd>
+  <dt>test</dt>
+    <dd>Has a test for the current implementation.</dd>
+</dl>
+<hr />
+
+<h2 style="text-align: center">Questions about Classes</h2>
+<hr />
+
+<p>The pure virtual classes defined in pvData.h now work. But there are still
+some things that are not so nice. Amoung these are:</p>
+<ul>
+  <li>User code sees pointers instead of references. Can this be changed
+    while keeping the boost::shared_ptr support?</li>
+  <li>The toString methods have an argument of "std::string &amp;buf" instead
+    of "std::string *". But in the test code I could not create a
+    "std::string &amp;" to work. I do not know why.</li>
+  <li>Can arguments and return descriptions be defined better?</li>
+  <li>Is const present everywhere it should be? Remember that introspection
+    classes are immutable and are shared whereever possible.</li>
+  <li>The code is NOT thread safe. When we decide for sure what thread/lock
+    support to choose I will fix this.</li>
+</ul>
+
+<p>HELP WILL BE GREATLY APPRECIATED. because I am still coming up to speed
+with c++</p>
+<hr />
+
+<h2 style="text-align: center">Garbage Collection</h2>
+<hr />
+
+<p>boost::shared_ptr is currenly used for implementations of Field, Scalar,
+etc. It is also used for all string arguments passed to methods. Since string
+values are freely shared by pvData, pvAccess, etc, this is really important.
+questions:</p>
+<ol>
+  <li>Is the implementation using shared_ptr correctly?</li>
+  <li>Should other things currently defined use stared_ptr?</li>
+</ol>
+</body>
+</html>
