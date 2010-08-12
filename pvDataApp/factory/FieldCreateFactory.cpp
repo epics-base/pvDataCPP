@@ -10,78 +10,28 @@
 
 namespace epics { namespace pvData {
 
-    void TypeFunc::toString(std::string &buf,const Type type) {
-        static const std::string unknownString = "logic error unknown Type";
-        switch(type) {
-        case scalar : buf += "scalar"; break;
-        case scalarArray : buf += "scalarArray"; break;
-        case structure : buf += "structure"; break;
-        case structureArray : buf += "structureArray"; break;
-        default:
-        throw std::invalid_argument(unknownString);
-        }
+    static void newLine(std::string & buffer,int indentLevel) {
+        buffer += "\n";
+        for(int i=0; i<indentLevel; i++) buffer += "    ";
     }
 
+    Field::~Field(){}
 
-    bool ScalarTypeFunc::isInteger(ScalarType type) {
-        if(type>=pvByte && type<=pvLong) return true;
-        return false;
-    }
-
-    bool ScalarTypeFunc::isNumeric(ScalarType type) {
-        if(type>=pvByte && type<=pvDouble) return true;
-        return false;
-    }
-
-    bool ScalarTypeFunc::isPrimitive(ScalarType type) {
-        if(type>=pvBoolean && type<=pvDouble) return true;
-        return false;
-    }
-
-    ScalarType ScalarTypeFunc::getScalarType(std::string const& pvalue) {
-        static const std::string unknownString = "error unknown ScalarType";
-        if(pvalue.compare("boolean")==0) return pvBoolean;
-        if(pvalue.compare("byte")==0) return pvByte;
-        if(pvalue.compare("short")==0) return pvShort;
-        if(pvalue.compare("int")==0) return pvInt;
-        if(pvalue.compare("long")==0) return pvLong;
-        if(pvalue.compare("float")==0) return pvFloat;
-        if(pvalue.compare("double")==0) return pvDouble;
-        if(pvalue.compare("string")==0) return pvString;
-        throw std::invalid_argument(unknownString);
-    }
-    void ScalarTypeFunc::toString(std::string &buf,const ScalarType scalarType) {
-        static const std::string unknownString = "logic error unknown ScalarType";
-        switch(scalarType) {
-        case pvBoolean : buf += "pvBoolean"; return;
-        case pvByte : buf += "pvByte"; return;;
-        case pvShort : buf += "pvShort"; return;
-        case pvInt : buf += "pvInt"; return;
-        case pvLong : buf += "pvLong"; return;
-        case pvFloat : buf += "pvFloat"; return;
-        case pvDouble : buf += "pvDouble"; return;
-        case pvString : buf += "pvString"; return;
-        }
-        throw std::invalid_argument(unknownString);
-    }
-
-   Field::~Field(){}
-
-   class BaseField : public Field {
-   public:
+    class BaseField : public Field {
+    public:
        BaseField(std::string const& fieldName,Type type);
        ~BaseField();
        virtual std::string const& getFieldName() const;
        virtual Type getType() const;
        virtual void toString(std::string &buf) const;
        virtual void toString(std::string &buf,int indentLevel) const;
-   private:
+    private:
        std::string const fieldName;
        Type type;
     };
 
     BaseField::~BaseField() {
-        delete(&fieldName);
+        delete &fieldName;
     }
 
     BaseField::BaseField(std::string const& fieldName,Type type)
@@ -91,25 +41,26 @@ namespace epics { namespace pvData {
     Type BaseField::getType() const {return type;}
     void BaseField::toString(std::string &buf) const{toString(buf,0);}
     void BaseField::toString(std::string &buffer,int indentLevel) const{
-        for(int i=0; i<indentLevel; i++) buffer += "    ";
+        newLine(buffer,indentLevel);
         buffer += "field ";
         buffer += fieldName.c_str();
         buffer += " type ";
         TypeFunc::toString(buffer,type);
     }
 
-   Scalar::~Scalar(){}
+    Scalar::~Scalar(){}
 
-    class BaseScalar: public BaseField,public Scalar {
+    class BaseScalar: private BaseField,public Scalar {
     public:
         BaseScalar(std::string const& fieldName,ScalarType scalarType);
         ~BaseScalar();
-// WHY DO I HAVE TO DESCRIBE AND DEFINE THESE??
-virtual std::string const& getFieldName() const;
-virtual Type getType() const;
-       virtual ScalarType getScalarType() const { return scalarType;}
-       virtual void toString(std::string &buf) const;
-       virtual void toString(std::string &buf,int indentLevel) const;
+        virtual std::string const& getFieldName() const{
+            return BaseField::getFieldName();
+        }
+        virtual Type getType() const{return BaseField::getType();}
+        virtual ScalarType getScalarType() const { return scalarType;}
+        virtual void toString(std::string &buf) const {toString(buf,0);}
+        virtual void toString(std::string &buf,int indentLevel) const;
     private:
         ScalarType scalarType;
     };
@@ -119,44 +70,145 @@ virtual Type getType() const;
     BaseScalar::~BaseScalar() {}
 
 
-std::string const& BaseScalar::getFieldName() const
-{
-    return BaseField::getFieldName();
-}
-Type BaseScalar::getType() const
-{
-   return BaseField::getType();
-}
-    void BaseScalar::toString(std::string &buf) const{toString(buf,0);}
     void BaseScalar::toString(std::string &buffer,int indentLevel) const{
         BaseField::toString(buffer,indentLevel);
         buffer +=  " scalarType ";
         ScalarTypeFunc::toString(buffer,scalarType);
     }
 
+    ScalarArray::~ScalarArray(){}
+
+    class BaseScalarArray: private BaseField,public ScalarArray {
+    public:
+        BaseScalarArray(std::string const& fieldName,ScalarType elementType);
+        ~BaseScalarArray();
+        virtual std::string const& getFieldName() const{
+            return BaseField::getFieldName();
+        }
+        virtual Type getType() const{return BaseField::getType();}
+        virtual ScalarType getElementType() const { return elementType;}
+        virtual void toString(std::string &buf) const {toString(buf,0);}
+        virtual void toString(std::string &buf,int indentLevel) const;
+    private:
+        ScalarType elementType;
+    };
+
+    BaseScalarArray::BaseScalarArray
+           (std::string const& fieldName,ScalarType elementType)
+           : BaseField(fieldName,scalar),elementType(elementType){}
+    BaseScalarArray::~BaseScalarArray() {}
+
+
+    void BaseScalarArray::toString(std::string &buffer,int indentLevel) const{
+        BaseField::toString(buffer,indentLevel);
+        buffer +=  " elementType ";
+        ScalarTypeFunc::toString(buffer,elementType);
+    }
+
+    Structure::~Structure(){}
+
+    class BaseStructure: private BaseField,public Structure {
+    public:
+        BaseStructure(std::string const& fieldName,
+            int numberFields,FieldPtrConstArray fields);
+        ~BaseStructure();
+        virtual std::string const & getFieldName() const{
+            return BaseField::getFieldName();
+         }
+        virtual Type getType() const{return BaseField::getType();}
+        virtual int const getNumberFields() const {return numberFields;}
+        virtual StringPtrConstArray getFieldNames() const { return fieldNames;}
+        virtual FieldPtrConst getField(std::string const& fieldName) const;
+        virtual int getFieldIndex(std::string const& fieldName) const;
+        virtual FieldPtrConstArray getFields() const { return fields;}
+        virtual void toString(std::string &buf) const {toString(buf,0);}
+        virtual void toString(std::string &buf,int indentLevel) const;
+    private:
+        int numberFields;
+        FieldPtrConstArray  fields;
+        StringPtrConst* fieldNames;
+    };
+
+    BaseStructure::BaseStructure (std::string const& fieldName,
+        int numberFields, FieldPtrConstArray fields)
+        : BaseField(fieldName,structure),
+          numberFields(numberFields),
+          fields(fields),
+          fieldNames(new StringPtrConst[numberFields])
+    {
+        for(int i=0; i<numberFields; i++) {
+            fieldNames[i] = &fields[i]->getFieldName();
+        }
+    }
+    BaseStructure::~BaseStructure() {
+        for(int i=0; i<numberFields; i++) {
+            delete &fieldNames[i];
+        }
+	delete[] fieldNames;
+        delete[] fields;
+    }
+
+    FieldPtrConst  BaseStructure::getField(std::string const& fieldName) const {
+        for(int i=0; i<numberFields; i++) {
+            Field const &field =  *fields[i];
+            int result = fieldName.compare(field.getFieldName());
+            if(result==0) return &field;
+        }
+        return 0;
+    }
+
+    int BaseStructure::getFieldIndex(std::string const& fieldName) const {
+        for(int i=0; i<numberFields; i++) {
+            Field const &field =  *fields[i];
+            int result = fieldName.compare(field.getFieldName());
+            if(result==0) return i;
+        }
+        return -1;
+    }
+
+    void BaseStructure::toString(std::string &buffer,int indentLevel) const{
+        BaseField::toString(buffer,indentLevel);
+        buffer += " {";
+        for(int i=0; i<numberFields; i++) {
+            Field const &field =  *fields[i];
+            field.toString(buffer,indentLevel+1);
+        }
+        newLine(buffer,indentLevel);
+        buffer +=  "}";
+    }
+
 static std::string notImplemented = "not implemented";
 
   FieldCreate::FieldCreate(){};
 
-   Field const & FieldCreate::create(std::string const& fieldName, Field const & field) const
+   Field const & FieldCreate::create(std::string const& fieldName,
+       Field const & field) const
    {
         throw std::invalid_argument(notImplemented);
    }
-   Scalar const &  FieldCreate::createScalar(std::string const& fieldName,ScalarType scalarType) const
+   Scalar const &  FieldCreate::createScalar(std::string const& fieldName,
+       ScalarType scalarType) const
    {
          BaseScalar *baseScalar = new BaseScalar(fieldName,scalarType);
          return *baseScalar;
    }
  
-   ScalarArray const & FieldCreate::createScalarArray(std::string const& fieldName,ScalarType elementType) const
+   ScalarArray const & FieldCreate::createScalarArray(
+       std::string const& fieldName,ScalarType elementType) const
    {
-        throw std::invalid_argument(notImplemented);
+         BaseScalarArray *baseScalarArray = new BaseScalarArray(fieldName,elementType);
+         return *baseScalarArray;
    }
-   Structure const & FieldCreate::createStructure (std::string const& fieldName,Field const * const fields) const
+   Structure const & FieldCreate::createStructure (
+       std::string const& fieldName,int numberFields,
+       FieldPtrConst fields[]) const
    {
-        throw std::invalid_argument(notImplemented);
+         BaseStructure *baseStructure = new BaseStructure(
+             fieldName,numberFields,fields);
+         return *baseStructure;
    }
-   StructureArray const & FieldCreate::createStructureArray(std::string const& fieldName,Structure const & structure) const
+   StructureArray const & FieldCreate::createStructureArray(
+       std::string const& fieldName,Structure const & structure) const
    {
         throw std::invalid_argument(notImplemented);
    }

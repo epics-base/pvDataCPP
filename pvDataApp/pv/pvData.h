@@ -61,16 +61,22 @@ namespace epics { namespace pvData {
     class ScalarArray : public Field{
     public:
        virtual ~ScalarArray();
-       virtual ScalarType  getScalerType() const = 0;
+       virtual ScalarType  getElementType() const = 0;
     };
+
+    typedef Field const * FieldPtrConst;
+    typedef FieldPtrConst * FieldPtrConstArray;
+    typedef std::string const * StringPtrConst;
+    typedef StringPtrConst * StringPtrConstArray;
 
     class Structure : public Field {
     public:
        virtual ~Structure();
-       virtual std::string const * const getFieldNames() const = 0;
-       virtual Field const &  getField(std::string const& fieldName) const = 0;
+       virtual int const getNumberFields() const = 0;
+       virtual StringPtrConstArray getFieldNames() const = 0;
+       virtual FieldPtrConst getField(std::string const& fieldName) const = 0;
        virtual int getFieldIndex(std::string const& fieldName) const = 0;
-       virtual Field const * const getFields() const = 0;
+       virtual FieldPtrConstArray getFields() const = 0;
     };
 
     class StructureArray : public Field{
@@ -85,7 +91,7 @@ namespace epics { namespace pvData {
        Field const &  create(std::string const& fieldName,Field const &  field) const;
        Scalar const &  createScalar(std::string const& fieldName,ScalarType scalarType) const;
        ScalarArray const & createScalarArray(std::string const& fieldName,ScalarType elementType) const;
-       Structure const & createStructure (std::string const& fieldName,Field const * const  fields) const;
+       Structure const & createStructure (std::string const& fieldName,int numberFields,FieldPtrConstArray fields) const;
        StructureArray const & createStructureArray(std::string const& fieldName,Structure const & structure) const;
     protected:
        FieldCreate();

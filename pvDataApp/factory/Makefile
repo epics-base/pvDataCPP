@@ -2,6 +2,7 @@ TOP=../..
 
 include $(TOP)/configure/CONFIG
 
+LIBSRCS += TypeFunc.cpp
 LIBSRCS += FieldCreateFactory.cpp
 
 LIBRARY=pvFactory

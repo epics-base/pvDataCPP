@@ -39,5 +39,19 @@ int main(int argc,char *argv[])
     myString->clear();
     scalar.toString(*myString);
     printf("%s\n",myString->c_str());
+    ScalarArray const & scalarArray = fieldCreate.createScalarArray(valueName,pvString);
+    myString->clear();
+    scalarArray.toString(*myString);
+    printf("%s\n",myString->c_str());
+    int numberFields = 2;
+    FieldPtrConst fields[numberFields];
+    std::string  name0("high");
+    std::string  name1("low");
+    fields[0] = &fieldCreate.createScalar(name0,pvDouble);
+    fields[1] = &fieldCreate.createScalar(name1,pvDouble);
+    Structure const & structure = fieldCreate.createStructure(valueName,numberFields,fields);
+    myString->clear();
+    structure.toString(*myString);
+    printf("%s\n",myString->c_str());
     return(0);
 }
