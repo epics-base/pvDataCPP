@@ -53,5 +53,9 @@ int main(int argc,char *argv[])
     myString->clear();
     structure.toString(*myString);
     printf("%s\n",myString->c_str());
+    Field const & field = structure;
+    myString->clear();
+    field.toString(*myString);
+    printf("as Field\n%s/n",myString->c_str());
     return(0);
 }
