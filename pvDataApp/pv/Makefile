@@ -2,6 +2,7 @@ TOP=../..
 
 include $(TOP)/configure/CONFIG
 
+INC += pvIntrospect.h
 INC += pvData.h
 
 include $(TOP)/configure/RULES
