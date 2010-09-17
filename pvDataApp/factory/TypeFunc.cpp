@@ -4,8 +4,6 @@
 #include <string>
 #include <cstdio>
 
-#include <boost/smart_ptr.hpp>
-
 #include "pvData.h"
 
 namespace epics { namespace pvData {

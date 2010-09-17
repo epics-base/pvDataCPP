@@ -1,4 +1,4 @@
-/* pvData.h */
+/* pvIntrospect.h */
 #include <string>
 #include <stdexcept>
 #ifndef PVINTROSPECT_H
@@ -9,12 +9,16 @@ namespace epics { namespace pvData {
     class ScalarArray;
     class Structure;
     class StructureArray;
+
     typedef std::string * StringPtr;
-    typedef std::string const * StringConstPtr;  //pointer to constant string
-    typedef StringConstPtr * StringConstPtrArray;//array of pointers to constant string
-    typedef Field const * FieldConstPtr;         //pointer to constant field
-    typedef FieldConstPtr * FieldConstPtrArray;  //array of pointers to const field
-    typedef Scalar const * ScalarConstPtr;         //pointer to constant field
+    // pointer to constant string
+    typedef std::string const * StringConstPtr;
+    //array of pointers to constant string
+    typedef StringConstPtr * StringConstPtrArray;
+
+    typedef Field const * FieldConstPtr;
+    typedef FieldConstPtr * FieldConstPtrArray;
+    typedef Scalar const * ScalarConstPtr;
     typedef ScalarArray const * ScalarArrayConstPtr;
     typedef Structure const * StructureConstPtr;
     typedef StructureArray const * StructureArrayConstPtr;
@@ -54,6 +58,9 @@ namespace epics { namespace pvData {
     class Field {
     public:
        virtual ~Field();
+       virtual void incReferenceCount() const = 0;
+       virtual void decReferenceCount() const = 0;
+       virtual int getReferenceCount() const = 0;
        virtual StringConstPtr getFieldName() const = 0;
        virtual Type getType() const = 0;
        virtual void toString(StringPtr buf) const = 0;
@@ -78,7 +85,6 @@ namespace epics { namespace pvData {
     public:
        virtual ~Structure();
        virtual int const getNumberFields() const = 0;
-       virtual StringConstPtrArray getFieldNames() const = 0;
        virtual FieldConstPtr getField(StringConstPtr fieldName) const = 0;
        virtual int getFieldIndex(StringConstPtr fieldName) const = 0;
        virtual FieldConstPtrArray getFields() const = 0;

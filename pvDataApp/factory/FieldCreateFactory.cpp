@@ -1,17 +1,12 @@
-
+/*FieldCreateFactory.cpp*/
 #include <cstddef>
 #include <cstdlib>
 #include <string>
 #include <cstdio>
-#include <boost/smart_ptr.hpp>
 #include "pvData.h"
+#include "factory.h"
 
 namespace epics { namespace pvData {
-
-    static void newLine(StringPtr buffer,int indentLevel) {
-        *buffer += "\n";
-        for(int i=0; i<indentLevel; i++) *buffer += "    ";
-    }
 
     Field::~Field(){}
 
@@ -19,25 +14,39 @@ namespace epics { namespace pvData {
     public:
        BaseField(StringConstPtr fieldName,Type type);
        virtual ~BaseField();
-       virtual StringConstPtr getFieldName() const;
-       virtual Type getType() const;
-       virtual void toString(StringPtr buf) const;
+       virtual void decReferenceCount() const;
+       virtual void incReferenceCount() const {referenceCount++;}
+       virtual int getReferenceCount() const {return referenceCount;}
+       virtual StringConstPtr getFieldName() const {return &fieldName;}
+       virtual Type getType() const {return type;}
+       virtual void toString(StringPtr buf) const {return toString(buf,0);}
        virtual void toString(StringPtr buf,int indentLevel) const;
     private:
+       BaseField(BaseField const & ); // not implemented
+       BaseField & operator=(BaseField const &); //not implemented
        std::string const fieldName;
        Type type;
+       mutable volatile int referenceCount;
     };
 
+    BaseField::BaseField(StringConstPtr fieldName,Type type)
+       :fieldName(*fieldName),type(type), referenceCount(0){}
+
     BaseField::~BaseField() {
-        delete &fieldName;
+        // note that c++ automatically calls destructor for fieldName
+        if(debugLevel==highDebug) printf("~BaseField %s\n",fieldName.c_str());
     }
 
-    BaseField::BaseField(StringConstPtr fieldName,Type type)
-       :fieldName(*fieldName),type(type){}
+    void BaseField::decReferenceCount() const {
+         if(referenceCount<=0) {
+              std::string message("logicError field ");
+              message += fieldName;
+              throw std::logic_error(message);
+         }
+         referenceCount--;
+         if(referenceCount==0) delete this;
+    }
  
-    StringConstPtr BaseField::getFieldName() const {return &fieldName;}
-    Type BaseField::getType() const {return type;}
-    void BaseField::toString(StringPtr buf) const{toString(buf,0);}
     void BaseField::toString(StringPtr buffer,int indentLevel) const{
         newLine(buffer,indentLevel);
         *buffer += "field ";
@@ -52,9 +61,10 @@ namespace epics { namespace pvData {
     public:
         BaseScalar(StringConstPtr fieldName,ScalarType scalarType);
         virtual ~BaseScalar();
-        virtual StringConstPtr getFieldName() const{
-            return BaseField::getFieldName();
-        }
+        virtual void incReferenceCount() const {BaseField::incReferenceCount();}
+        virtual void decReferenceCount() const {BaseField::decReferenceCount();}
+        virtual int getReferenceCount() const {return BaseField::getReferenceCount();}
+        virtual StringConstPtr getFieldName() const{ return BaseField::getFieldName(); }
         virtual Type getType() const{return BaseField::getType();}
         virtual ScalarType getScalarType() const { return scalarType;}
         virtual void toString(StringPtr buf) const {toString(buf,0);}
@@ -80,9 +90,10 @@ namespace epics { namespace pvData {
     public:
         BaseScalarArray(StringConstPtr fieldName,ScalarType elementType);
         virtual ~BaseScalarArray();
-        virtual StringConstPtr getFieldName() const{
-            return BaseField::getFieldName();
-        }
+        virtual void incReferenceCount() const {BaseField::incReferenceCount();}
+        virtual void decReferenceCount() const {BaseField::decReferenceCount();}
+        virtual int getReferenceCount() const {return BaseField::getReferenceCount();}
+        virtual StringConstPtr getFieldName() const{ return BaseField::getFieldName(); }
         virtual Type getType() const{return BaseField::getType();}
         virtual ScalarType getElementType() const { return elementType;}
         virtual void toString(StringPtr buf) const {toString(buf,0);}
@@ -107,15 +118,14 @@ namespace epics { namespace pvData {
 
     class BaseStructure: private BaseField,public Structure {
     public:
-        BaseStructure(StringConstPtr fieldName,
-            int numberFields,FieldConstPtrArray fields);
+        BaseStructure(StringConstPtr fieldName, int numberFields,FieldConstPtrArray fields);
         virtual ~BaseStructure();
-        virtual StringConstPtr getFieldName() const{
-            return BaseField::getFieldName();
-         }
+        virtual void incReferenceCount() const {BaseField::incReferenceCount();}
+        virtual void decReferenceCount() const {BaseField::decReferenceCount();}
+        virtual int getReferenceCount() const {return BaseField::getReferenceCount();}
+        virtual StringConstPtr getFieldName() const{ return BaseField::getFieldName(); }
         virtual Type getType() const{return BaseField::getType();}
         virtual int const getNumberFields() const {return numberFields;}
-        virtual StringConstPtrArray getFieldNames() const { return fieldNames;}
         virtual FieldConstPtr getField(StringConstPtr fieldName) const;
         virtual int getFieldIndex(StringConstPtr fieldName) const;
         virtual FieldConstPtrArray getFields() const { return fields;}
@@ -124,26 +134,36 @@ namespace epics { namespace pvData {
     private:
         int numberFields;
         FieldConstPtrArray  fields;
-        StringConstPtr* fieldNames;
     };
 
     BaseStructure::BaseStructure (StringConstPtr fieldName,
         int numberFields, FieldConstPtrArray fields)
-        : BaseField(fieldName,structure),
+    : BaseField(fieldName,structure),
           numberFields(numberFields),
-          fields(fields),
-          fieldNames(new StringConstPtr[numberFields])
+          fields(fields)
     {
         for(int i=0; i<numberFields; i++) {
-            fieldNames[i] = fields[i]->getFieldName();
+            StringConstPtr name = fields[i]->getFieldName();
+            // look for duplicates
+            for(int j=i+1; j<numberFields; j++) {
+                StringConstPtr otherName = fields[j]->getFieldName();
+                int result = name->compare(*otherName);
+                if(result==0) {
+                    std::string message("duplicate fieldName ");
+                    message += *name;
+                    throw std::invalid_argument(message);
+                }
+            }
+            // inc reference counter
+            fields[i]->incReferenceCount();
         }
     }
     BaseStructure::~BaseStructure() {
+        if(debugLevel==highDebug) printf("~BaseStructure %s\n",BaseField::getFieldName()->c_str());
         for(int i=0; i<numberFields; i++) {
-            delete fieldNames[i];
+            FieldConstPtr pfield = fields[i];
+            pfield->decReferenceCount();
         }
-	delete[] fieldNames;
-        delete[] fields;
     }
 
     FieldConstPtr  BaseStructure::getField(StringConstPtr fieldName) const {
@@ -181,6 +201,9 @@ namespace epics { namespace pvData {
     public:
         BaseStructureArray(StringConstPtr fieldName,StructureConstPtr structure);
         virtual ~BaseStructureArray();
+        virtual void incReferenceCount() const {BaseField::incReferenceCount();}
+        virtual void decReferenceCount() const {BaseField::decReferenceCount();}
+        virtual int getReferenceCount() const {return BaseField::getReferenceCount();}
         virtual StringConstPtr getFieldName() const{
             return BaseField::getFieldName();
          }
@@ -193,9 +216,15 @@ namespace epics { namespace pvData {
     };
 
     BaseStructureArray::BaseStructureArray(StringConstPtr fieldName,StructureConstPtr structure)
-    : BaseField(fieldName,structureArray),pstructure(structure) {}
+    : BaseField(fieldName,structureArray),pstructure(structure)
+    {
+        pstructure->incReferenceCount();
+    }
 
-    BaseStructureArray::~BaseStructureArray() {}
+    BaseStructureArray::~BaseStructureArray() {
+        if(debugLevel==highDebug) printf("~BaseStructureArray\n");
+        pstructure->decReferenceCount();
+    }
 
 
     void BaseStructureArray::toString(StringPtr buffer,int indentLevel) const {
@@ -203,9 +232,6 @@ namespace epics { namespace pvData {
         *buffer +=  " structure ";
         pstructure->toString(buffer,indentLevel + 1);
     }
-
-static std::string notImplemented = "not implemented";
-static std::string logicError = "Logic Error. Should never get here";
 
   FieldCreate::FieldCreate(){};
 
@@ -233,7 +259,8 @@ static std::string logicError = "Logic Error. Should never get here";
    StructureArrayConstPtr FieldCreate::createStructureArray(
        StringConstPtr fieldName,StructureConstPtr structure) const
    {
-        throw std::invalid_argument(notImplemented);
+        BaseStructureArray *baseStructureArray = new BaseStructureArray(fieldName,structure);
+        return baseStructureArray;
    }
 
    FieldConstPtr FieldCreate::create(StringConstPtr fieldName,
@@ -258,7 +285,9 @@ static std::string logicError = "Logic Error. Should never get here";
            return createStructureArray(fieldName,pstructureArray->getStructure());
        }
        }
-       throw std::logic_error(logicError);
+       std::string message("field ");
+       message += *fieldName;
+       throw std::logic_error(message);
    }
 
    static FieldCreate* instance = 0;
