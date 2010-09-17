@@ -6,6 +6,7 @@
 #include "pvData.h"
 #include "factory.h"
 #include "AbstractPVField.h"
+#include "BasePVDouble.h"
 
 namespace epics { namespace pvData {
 
@@ -27,6 +28,13 @@ namespace epics { namespace pvData {
 
    PVScalar *PVDataCreate::createPVScalar(PVStructure *parent,ScalarConstPtr scalar) const
    {
+        ScalarType scalarType = scalar->getScalarType();
+        switch(scalarType) {
+        case pvDouble:
+            return new BasePVDouble(parent,scalar);
+        default:
+            throw std::logic_error(notImplemented);
+        }
         throw std::logic_error(notImplemented);
    };
 

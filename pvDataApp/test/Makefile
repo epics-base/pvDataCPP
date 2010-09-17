@@ -10,7 +10,7 @@ PROD_HOST += testDumpStdString
 testDumpStdString_SRCS += testDumpStdString.cpp
 testDumpStdString_LIBS += pvFactory
 
-PROD_HOST = testPVScalar
+PROD_HOST += testPVScalar
 testPVScalar_SRCS += testPVScalar.cpp
 testPVScalar_LIBS += pvFactory
 

@@ -1,4 +1,6 @@
-/*AbstractPVField.cpp*/
+/*AbstractPVField.h*/
+#ifndef ABSTRACTPVFIELD_H
+#define ABSTRACTPVFIELD_H
 #include <cstddef>
 #include <cstdlib>
 #include <string>
@@ -7,6 +9,8 @@
 #include "factory.h"
 
 namespace epics { namespace pvData {
+
+    PVField::~PVField(){}
 
     class AbstractPVField : public PVField {
     public:
@@ -20,16 +24,16 @@ namespace epics { namespace pvData {
         virtual int getFieldOffset() const;
         virtual int getNextFieldOffset() const;
         virtual int getNumberFields() const;
-        virtual PVAuxInfo * getPVAuxInfo() const;
-        virtual epicsBoolean isImmutable() const;
-        virtual void setImmutable();
-        virtual FieldConstPtr getField() const;
-        virtual PVStructure * getParent() const;
+        virtual PVAuxInfo * getPVAuxInfo() const {return pvAuxInfo;}
+        virtual epicsBoolean isImmutable() const {return immutable;}
+        virtual void setImmutable() {immutable = epicsTrue;}
+        virtual FieldConstPtr getField() const {return field;}
+        virtual PVStructure * getParent() const {return parent;}
         virtual void replacePVField(PVField * newPVField);
         virtual void renameField(StringConstPtr  newName);
         virtual void postPut() const;
         virtual void setPostHandler(PostHandler *ppostHandler);
-        virtual void toString(StringPtr buf) const;
+        virtual void toString(StringPtr buf) const {toString(buf,0);}
         virtual void toString(StringPtr buf,int indentLevel) const;
     protected:
         void replaceStructure();
@@ -86,4 +90,41 @@ namespace epics { namespace pvData {
          throw std::logic_error(requesterPresent);
      }
 
+     int AbstractPVField::getFieldOffset() const
+     {
+         return -1;
+     }
+
+     int AbstractPVField::getNextFieldOffset() const
+     {
+         return -1;
+     }
+
+     int AbstractPVField::getNumberFields() const
+     {
+         return -1;
+     }
+
+     void AbstractPVField::replacePVField(PVField * newPVField)
+     {
+     }
+
+     void AbstractPVField::renameField(StringConstPtr  newName)
+     {
+     }
+
+     void AbstractPVField::postPut() const
+     {
+     }
+
+     void AbstractPVField::setPostHandler(PostHandler *ppostHandler)
+     {
+     }
+
+     void AbstractPVField::toString(StringPtr buf,int indentLevel) const
+     {
+     }
+
+
 }}
+#endif  /* ABSTRACTPVFIELD_H */
