@@ -7,17 +7,16 @@
 #include <cstdio>
 #include "pvData.h"
 #include "factory.h"
-#include "AbstractPVField.h"
+#include "AbstractPVScalar.h"
 
 namespace epics { namespace pvData {
 
-    PVScalar::~PVScalar() {}
     PVDouble::~PVDouble() {}
 
-    class BasePVDouble : public AbstractPVField, public PVDouble {
+    class BasePVDouble : public AbstractPVScalar, public PVDouble {
     public:
         BasePVDouble(PVStructure *parent,ScalarConstPtr scalar)
-        : AbstractPVField(parent,scalar),value(0.0) {}
+        : AbstractPVScalar(parent,scalar),value(0.0) {}
         virtual ~BasePVDouble() {}
         // from Requester
         virtual StringConstPtr getRequesterName() const{
