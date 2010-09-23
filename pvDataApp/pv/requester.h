@@ -5,7 +5,7 @@
 #include "pvIntrospect.h"
 namespace epics { namespace pvData { 
     
-    enum MessageType {info,warning,error,fatalError};
+    enum MessageType {infoMessage,warningMessage,errorMessage,fatalErrorMessage};
 
     static std::string messageTypeName[] = {"info","warning","error","fatalError"};
     

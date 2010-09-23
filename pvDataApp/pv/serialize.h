@@ -17,8 +17,10 @@ namespace epics { namespace pvData {
 
     class Serializable {
     public:
-        virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) const = 0;
-        virtual void deserialize(ByteBuffer *pbuffer,DeserializableControl *pflusher) = 0;
+        virtual void serialize(ByteBuffer *pbuffer,
+            SerializableControl *pflusher) const = 0;
+        virtual void deserialize(ByteBuffer *pbuffer,
+            DeserializableControl *pflusher) = 0;
     };
 
     class BitSetSerializable {

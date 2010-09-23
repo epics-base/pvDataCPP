@@ -13,16 +13,13 @@ namespace epics { namespace pvData {
 
     PVScalar::~PVScalar() {}
 
-    class AbstractPVScalar : public AbstractPVField{
-    public:
-        AbstractPVScalar(PVStructure *parent,ScalarConstPtr scalar)
-        : AbstractPVField(parent,scalar) {}
-        virtual ~AbstractPVScalar() {}
-        virtual Scalar *getScalar()const {
-            return (Scalar*)AbstractPVField::getField();
-        }
-    };
+    PVScalar::PVScalar(PVStructure *parent,ScalarConstPtr scalar)
+    : PVField(parent,scalar) {}
 
+    ScalarConstPtr PVScalar::getScalar() const
+    {
+       return (ScalarConstPtr) PVField::getField();
+    }
 
 }}
 #endif  /* ABSTRACTPVSCALAR_H */

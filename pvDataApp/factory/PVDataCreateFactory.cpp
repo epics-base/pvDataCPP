@@ -6,27 +6,66 @@
 #include "pvData.h"
 #include "factory.h"
 #include "AbstractPVField.h"
+#include "AbstractPVScalar.h"
+#include "AbstractPVArray.h"
+#include "AbstractPVScalarArray.h"
 #include "BasePVDouble.h"
+#include "AbstractPVArray.h"
+#include "BasePVDoubleArray.h"
+#include "BasePVStructure.h"
+#include "BasePVStructureArray.h"
 
 namespace epics { namespace pvData {
 
    static std::string notImplemented("not implemented");
 
+   static FieldCreate * fieldCreate = 0;
+   static PVDataCreate* pvDataCreate = 0;
+
    PVDataCreate::PVDataCreate(){};
 
    PVField *PVDataCreate::createPVField(PVStructure *parent,
-           FieldConstPtr field) const
+           FieldConstPtr field)
    {
-       throw std::logic_error(notImplemented);
+        switch(field->getType()) {
+        case scalar:
+            return createPVScalar(parent,(ScalarConstPtr)field);
+        case scalarArray:
+            return (PVField *)createPVScalarArray(parent,
+                (ScalarArrayConstPtr)field);
+        case structure:
+            return (PVField *)createPVStructure(parent,
+                (StructureConstPtr)field);
+        case structureArray:
+            return createPVStructureArray(parent,
+                (StructureArrayConstPtr)field);
+        }
+        std::string message("PVDataCreate::createPVField");
+        throw std::invalid_argument(message);
    };
 
    PVField *PVDataCreate::createPVField(PVStructure *parent,
-           StringConstPtr fieldName,FieldConstPtr fieldToClone) const
+           StringConstPtr fieldName,PVField * fieldToClone)
    {
-        throw std::logic_error(notImplemented);
+        switch(fieldToClone->getField()->getType()) {
+        case scalar:
+            return createPVScalar(parent,fieldName,(PVScalar*)fieldToClone);
+        case scalarArray:
+            return (PVField *)createPVScalarArray(parent,fieldName,
+                (PVScalarArray *)fieldToClone);
+        case structure:
+            return (PVField *)createPVStructure(parent,fieldName,
+                (PVStructure *)fieldToClone);
+        case structureArray:
+           std::string message(
+           "PVDataCreate::createPVField structureArray not valid fieldToClone");
+           throw std::invalid_argument(message);
+        }
+        std::string message("PVDataCreate::createPVField");
+        throw std::logic_error(message);
    };
 
-   PVScalar *PVDataCreate::createPVScalar(PVStructure *parent,ScalarConstPtr scalar) const
+   PVScalar *PVDataCreate::createPVScalar(PVStructure *parent,ScalarConstPtr scalar)
    {
         ScalarType scalarType = scalar->getScalarType();
         switch(scalarType) {
@@ -41,19 +80,37 @@ namespace epics { namespace pvData {
    PVScalar *PVDataCreate::createPVScalar(PVStructure *parent,
            StringConstPtr fieldName,ScalarType scalarType)
    {
-        throw std::logic_error(notImplemented);
+        if(fieldCreate==0) fieldCreate = getFieldCreate();
+        ScalarConstPtr scalar = fieldCreate->createScalar(fieldName,scalarType);
+        return createPVScalar(parent,scalar);
    };
 
    PVScalar *PVDataCreate::createPVScalar(PVStructure *parent,
-           StringConstPtr fieldName,ScalarConstPtr scalarToClone) const
+           StringConstPtr fieldName,PVScalar * scalarToClone)
    {
-        throw std::logic_error(notImplemented);
+        PVScalar *pvScalar = createPVScalar(parent,fieldName,
+            scalarToClone->getScalar()->getScalarType());
+        //MARTY MUST CALL CONVERT
+        //MARTY MUST COPY AUXInfo
+        return pvScalar;
    };
 
    PVScalarArray *PVDataCreate::createPVScalarArray(PVStructure *parent,
-           ScalarArrayConstPtr scalarArray) const
+           ScalarArrayConstPtr scalarArray)
    {
+        switch(scalarArray->getElementType()) {
+        case pvBoolean: break;
+        case pvByte:    break;
+        case pvShort:   break;
+        case pvInt:     break;
+        case pvLong:    break;
+        case pvFloat:   break;
+        case pvDouble:
+              return new BasePVDoubleArray(parent,scalarArray);
+        case pvString:  break;
+        }
         throw std::logic_error(notImplemented);
+        
    };
 
    PVScalarArray *PVDataCreate::createPVScalarArray(PVStructure *parent,
@@ -63,13 +120,13 @@ namespace epics { namespace pvData {
    };
 
    PVScalarArray *PVDataCreate::createPVScalarArray(PVStructure *parent,
-           StringConstPtr fieldName,ScalarArrayConstPtr scalarArrayToClone) const
+           StringConstPtr fieldName,PVScalarArray * scalarArrayToClone)
    {
         throw std::logic_error(notImplemented);
    };
 
    PVStructureArray *PVDataCreate::createPVStructureArray(PVStructure *parent,
-           StructureArrayConstPtr structureArray) const
+           StructureArrayConstPtr structureArray)
    {
         throw std::logic_error(notImplemented);
    };
@@ -77,7 +134,7 @@ namespace epics { namespace pvData {
    PVStructure *PVDataCreate::createPVStructure(PVStructure *parent,
            StructureConstPtr structure)
    {
-        throw std::logic_error(notImplemented);
+        return new BasePVStructure(parent,structure);
    };
 
    PVStructure *PVDataCreate::createPVStructure(PVStructure *parent,
@@ -92,7 +149,6 @@ namespace epics { namespace pvData {
         throw std::logic_error(notImplemented);
    };
 
-   static PVDataCreate* instance = 0;
 
    class PVDataCreateExt : public PVDataCreate {
    public:
@@ -100,8 +156,8 @@ namespace epics { namespace pvData {
    };
 
     PVDataCreate * getPVDataCreate() {
-           if(instance==0) instance = new PVDataCreateExt();
-            return instance;
+           if(pvDataCreate==0) pvDataCreate = new PVDataCreateExt();
+            return pvDataCreate;
     }
 
 }}

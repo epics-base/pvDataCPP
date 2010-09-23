@@ -10,121 +10,191 @@
 
 namespace epics { namespace pvData {
 
-    PVField::~PVField(){}
-
-    class AbstractPVField : public PVField {
+    class PVFieldPvt {
     public:
-        AbstractPVField(PVStructure *parent,FieldConstPtr field);
-        virtual ~AbstractPVField();
-        // from Requester
-        virtual StringConstPtr getRequesterName() const;
-        virtual void message(StringConstPtr message,MessageType messageType) const;
-        // from PVField
-        virtual void setRequester(Requester *prequester);
-        virtual int getFieldOffset() const;
-        virtual int getNextFieldOffset() const;
-        virtual int getNumberFields() const;
-        virtual PVAuxInfo * getPVAuxInfo() const {return pvAuxInfo;}
-        virtual epicsBoolean isImmutable() const {return immutable;}
-        virtual void setImmutable() {immutable = epicsTrue;}
-        virtual FieldConstPtr getField() const {return field;}
-        virtual PVStructure * getParent() const {return parent;}
-        virtual void replacePVField(PVField * newPVField);
-        virtual void renameField(StringConstPtr  newName);
-        virtual void postPut() const;
-        virtual void setPostHandler(PostHandler *ppostHandler);
-        virtual void toString(StringPtr buf) const {toString(buf,0);}
-        virtual void toString(StringPtr buf,int indentLevel) const;
-    protected:
-        void replaceStructure();
-    private:
-        AbstractPVField(AbstractPVField const & ); // not implemented
-        AbstractPVField & operator=(AbstractPVField const &); //not implemented
+        PVFieldPvt(PVStructure *parent,FieldConstPtr field);
+        ~PVFieldPvt();
+        PVStructure *parent;
+        FieldConstPtr field;
         int fieldOffset;
         int nextFieldOffset;
         PVAuxInfo *pvAuxInfo;
         epicsBoolean immutable;
-        PVStructure *parent;
-        FieldConstPtr field;
         Requester *requester;
         PostHandler *postHandler;
     };
 
-    AbstractPVField::AbstractPVField(PVStructure *parent,FieldConstPtr field)
-    : fieldOffset(0),nextFieldOffset(0),pvAuxInfo(0),immutable(epicsFalse),
-      parent(parent),field(field),requester(0),postHandler(0)
+    PVFieldPvt::PVFieldPvt(PVStructure *parent,FieldConstPtr field)
+    : parent(parent),field(field),
+      fieldOffset(0), nextFieldOffset(0),
+      pvAuxInfo(0),
+      immutable(epicsFalse),requester(0),postHandler(0)
     {
         field->incReferenceCount();
     }
 
-    AbstractPVField::~AbstractPVField()
+    PVFieldPvt::~PVFieldPvt()
     {
         field->decReferenceCount();
     }
 
-     StringConstPtr AbstractPVField::getRequesterName() const
+
+    PVField::PVField(PVStructure *parent,FieldConstPtr field)
+    : pImpl(new PVFieldPvt(parent,field))
+    {}
+
+    PVField::~PVField()
+    {
+        delete pImpl;
+    }
+
+     StringConstPtr PVField::getRequesterName() const
      {
          static std::string none("none");
-         if(requester!=0) return requester->getRequesterName();
+         if(pImpl->requester!=0) return pImpl->requester->getRequesterName();
          return &none;
      }
 
-     void AbstractPVField::message(StringConstPtr message,MessageType messageType) const
+     void PVField::message(StringConstPtr message,MessageType messageType) const 
      {
-         if(requester) {
-             requester->message(message,messageType);
+         if(pImpl->requester) {
+             pImpl->requester->message(message,messageType);
          } else {
              printf("%s %s %s\n",
                  messageTypeName[messageType].c_str(),
-                 field->getFieldName()->c_str(),
+                 pImpl->field->getFieldName()->c_str(),
                  message->c_str());
          }
      }
-     void AbstractPVField::setRequester(Requester *prequester)
+     void PVField::setRequester(Requester *prequester)
      {
-         static std::string requesterPresent = "Logic Error. requester is already present";
-         if(requester==0) {
-             requester = prequester;
+         static std::string requesterPresent =
+             "Logic Error. requester is already present";
+         if(pImpl->requester==0) {
+             pImpl->requester = prequester;
              return;
          }
          throw std::logic_error(requesterPresent);
      }
 
-     int AbstractPVField::getFieldOffset() const
+     int PVField::getFieldOffset() const
      {
-         return -1;
+         if(pImpl->nextFieldOffset==0) computeOffset(this);
+         return pImpl->fieldOffset;
      }
 
-     int AbstractPVField::getNextFieldOffset() const
+     int PVField::getNextFieldOffset() const
      {
-         return -1;
+         if(pImpl->nextFieldOffset==0) computeOffset(this);
+         return pImpl->nextFieldOffset;
      }
 
-     int AbstractPVField::getNumberFields() const
+     int PVField::getNumberFields() const
      {
-         return -1;
+         if(pImpl->nextFieldOffset==0) computeOffset(this);
+         return (pImpl->nextFieldOffset - pImpl->fieldOffset);
      }
 
-     void AbstractPVField::replacePVField(PVField * newPVField)
+     PVAuxInfo * PVField::getPVAuxInfo(){
+         if(pImpl->pvAuxInfo==0) {
+             pImpl->pvAuxInfo = new PVAuxInfo(this);
+         }
+         return pImpl->pvAuxInfo;
+     }
+
+     epicsBoolean PVField::isImmutable() const {return pImpl->immutable;}
+
+     void PVField::setImmutable() {pImpl->immutable = epicsTrue;}
+
+     FieldConstPtr PVField::getField() const {return pImpl->field;}
+
+     PVStructure * PVField::getParent() const {return pImpl->parent;}
+
+     void PVField::replacePVField(PVField * newPVField)
      {
      }
 
-     void AbstractPVField::renameField(StringConstPtr  newName)
+     void PVField::renameField(StringConstPtr  newName)
      {
      }
 
-     void AbstractPVField::postPut() const
+     void PVField::postPut() const
      {
      }
 
-     void AbstractPVField::setPostHandler(PostHandler *ppostHandler)
+     void PVField::setPostHandler(PostHandler *ppostHandler)
      {
      }
 
-     void AbstractPVField::toString(StringPtr buf,int indentLevel) const
+     void PVField::toString(StringPtr buf) const {toString(buf,0);}
+
+     void PVField::toString(StringPtr buf,int indentLevel) const
      {
      }
 
+     void PVField::computeOffset(PVField  const * const pvField) {
+    	PVStructure *pvTop = pvField->getParent();
+    	if(pvTop==0) {
+    		pvTop = (PVStructure *)pvField;
+    	} else {
+    		while(pvTop->getParent()!=0) {
+                    pvTop = pvTop->getParent();
+                }
+    	}
+        int offset = 0;
+        int nextOffset = 1;
+        PVFieldArrayPtr pvFields = pvTop->getPVFields();
+        for(int i=0; i < pvTop->getStructure()->getNumberFields(); i++) {
+            offset = nextOffset;
+            PVField *pvField = pvFields[i];
+            FieldConstPtr field = pvField->getField();
+            switch(field->getType()) {
+            case scalar:
+            case scalarArray:
+            case structureArray:{
+                nextOffset++;
+                pvField->pImpl->fieldOffset = offset;
+                pvField->pImpl->nextFieldOffset = nextOffset;
+                break;
+            }
+            case structure: {
+                pvField->computeOffset(pvField,offset);
+                nextOffset = pvField->getNextFieldOffset();
+            }
+            }
+        }
+        PVField *top = (PVField *)pvTop;
+        top->pImpl->fieldOffset = 0;
+        top->pImpl->nextFieldOffset = nextOffset;
+     }
+
+     void PVField::computeOffset(PVField  const * const pvField,int offset) {
+        int beginOffset = offset;
+        int nextOffset = offset + 1;
+        PVStructure *pvStructure = (PVStructure *)pvField;
+        PVFieldArrayPtr pvFields = pvStructure->getPVFields();
+        for(int i=0; i < pvStructure->getStructure()->getNumberFields(); i++) {
+            offset = nextOffset;
+            PVField *pvSubField = pvFields[i];
+            FieldConstPtr field = pvSubField->getField();
+            switch(field->getType()) {
+            case scalar:
+            case scalarArray:
+            case structureArray: {
+                nextOffset++;
+                pvSubField->pImpl->fieldOffset = offset;
+                pvSubField->pImpl->nextFieldOffset = nextOffset;
+                break;
+            }
+            case structure: {
+                pvSubField->computeOffset(pvSubField,offset);
+                nextOffset = pvSubField->getNextFieldOffset();
+            }
+            }
+        }
+        pvField->pImpl->fieldOffset = beginOffset;
+        pvField->pImpl->nextFieldOffset = nextOffset;
+     }
 
 }}
 #endif  /* ABSTRACTPVFIELD_H */
