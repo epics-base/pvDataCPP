@@ -2,8 +2,10 @@ TOP=../..
 
 include $(TOP)/configure/CONFIG
 
-INC += pvIntrospect.h
-INC += pvData.h
+INC += requester.h
+INC += serialize.h
+INC += bitSet.h
+INC += byteBuffer.h
 
 include $(TOP)/configure/RULES
 #----------------------------------------
