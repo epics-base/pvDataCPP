@@ -3,7 +3,9 @@
 #include <cstdlib>
 #include <string>
 #include <cstdio>
+#include <epicsMutex.h>
 #include "pvData.h"
+#include "convert.h"
 #include "factory.h"
 #include "AbstractPVField.h"
 #include "AbstractPVScalar.h"
@@ -16,8 +18,6 @@
 #include "BasePVStructureArray.h"
 
 namespace epics { namespace pvData {
-
-   static std::string notImplemented("not implemented");
 
    static FieldCreate * fieldCreate = 0;
    static PVDataCreate* pvDataCreate = 0;
@@ -156,8 +156,11 @@ namespace epics { namespace pvData {
    };
 
     PVDataCreate * getPVDataCreate() {
-           if(pvDataCreate==0) pvDataCreate = new PVDataCreateExt();
-            return pvDataCreate;
+        static epicsMutex *lock =  new epicsMutex();
+        lock->lock();
+            if(pvDataCreate==0) pvDataCreate = new PVDataCreateExt();
+        lock->unlock();
+        return pvDataCreate;
     }
 
 }}

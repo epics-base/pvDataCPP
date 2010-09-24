@@ -16,8 +16,11 @@ LIBSRCS += TypeFunc.cpp
 LIBSRCS += PVAuxInfoImpl.cpp
 LIBSRCS += FieldCreateFactory.cpp
 LIBSRCS += PVDataCreateFactory.cpp
+LIBSRCS += Convert.cpp
 
 LIBRARY=pvFactory
+
+pvFactory_LIBS += Com
 
 include $(TOP)/configure/RULES
 #----------------------------------------

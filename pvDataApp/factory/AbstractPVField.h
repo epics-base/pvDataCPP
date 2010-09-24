@@ -10,6 +10,11 @@
 
 namespace epics { namespace pvData {
 
+
+static std::string notImplemented("not implemented");
+
+    static Convert *convert = 0;
+
     class PVFieldPvt {
     public:
         PVFieldPvt(PVStructure *parent,FieldConstPtr field);
@@ -22,7 +27,14 @@ namespace epics { namespace pvData {
         epicsBoolean immutable;
         Requester *requester;
         PostHandler *postHandler;
+    private:
+        static void init();
     };
+
+    void PVFieldPvt::init()
+    {
+        convert = getConvert();
+    }
 
     PVFieldPvt::PVFieldPvt(PVStructure *parent,FieldConstPtr field)
     : parent(parent),field(field),
@@ -112,24 +124,29 @@ namespace epics { namespace pvData {
 
      void PVField::replacePVField(PVField * newPVField)
      {
+         throw std::logic_error(notImplemented);
      }
 
      void PVField::renameField(StringConstPtr  newName)
      {
+        throw std::logic_error(notImplemented);
      }
 
      void PVField::postPut() const
      {
+        throw std::logic_error(notImplemented);
      }
 
      void PVField::setPostHandler(PostHandler *ppostHandler)
      {
+        throw std::logic_error(notImplemented);
      }
 
      void PVField::toString(StringPtr buf) const {toString(buf,0);}
 
      void PVField::toString(StringPtr buf,int indentLevel) const
      {
+        throw std::logic_error(notImplemented);
      }
 
      void PVField::computeOffset(PVField  const * const pvField) {

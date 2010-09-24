@@ -8,10 +8,5 @@ namespace epics { namespace pvData {
 
     static DebugLevel debugLevel = highDebug;
 
-    static void newLine(StringPtr buffer,int indentLevel) {
-        *buffer += "\n";
-        for(int i=0; i<indentLevel; i++) *buffer += "    ";
-    }
-
 }}
 #endif /*FACTORY_H */

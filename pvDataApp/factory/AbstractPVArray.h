@@ -76,5 +76,10 @@ namespace epics { namespace pvData {
 
      void PVArray::toString(StringPtr buf) const {toString(buf,0);}
 
+     void PVArray::toString(StringPtr buf, int indentLevel) const
+     {
+        throw std::logic_error(notImplemented);
+     }
+
 }}
 #endif  /* ABSTRACTPVARRAY_H */

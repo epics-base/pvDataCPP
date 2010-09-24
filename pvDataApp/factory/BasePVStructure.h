@@ -39,7 +39,7 @@ namespace epics { namespace pvData {
         pImpl->numberFields = numberFields;
         pImpl->pvFields = new PVFieldPtr[numberFields];
         for(int i=0; i<numberFields; i++) {
-            // MARTY FINISH THIS
+            throw std::logic_error(notImplemented);
         }
     }
 
@@ -60,123 +60,132 @@ namespace epics { namespace pvData {
 
     PVFieldPtr PVStructure::getSubField(StringConstPtr fieldName)
     {
-        return 0;
+        throw std::logic_error(notImplemented);
     }
 
     PVFieldPtr PVStructure::getSubField(int fieldOffset)
     {
-        return 0;
+        throw std::logic_error(notImplemented);
     }
 
     void PVStructure::appendPVField(PVFieldPtr pvField)
     {
+        throw std::logic_error(notImplemented);
     }
 
     void PVStructure::appendPVFields(PVFieldArrayPtr pvFields)
     {
+        throw std::logic_error(notImplemented);
     }
 
     void PVStructure::removePVField(StringConstPtr fieldName)
     {
+        throw std::logic_error(notImplemented);
     }
 
     PVBoolean *PVStructure::getBooleanField(StringConstPtr fieldName)
     {
-        return 0;
+        throw std::logic_error(notImplemented);
     }
 
     PVByte *PVStructure::getByteField(StringConstPtr fieldName)
     {
-        return 0;
+        throw std::logic_error(notImplemented);
     }
 
     PVShort *PVStructure::getShortField(StringConstPtr fieldName)
     {
-        return 0;
+        throw std::logic_error(notImplemented);
     }
 
     PVInt *PVStructure::getIntField(StringConstPtr fieldName)
     {
-        return 0;
+        throw std::logic_error(notImplemented);
     }
 
     PVLong *PVStructure::getLongField(StringConstPtr fieldName)
     {
-        return 0;
+        throw std::logic_error(notImplemented);
     }
 
     PVFloat *PVStructure::getFloatField(StringConstPtr fieldName)
     {
-        return 0;
+        throw std::logic_error(notImplemented);
     }
 
     PVDouble *PVStructure::getDoubleField(StringConstPtr fieldName)
     {
-        return 0;
+        throw std::logic_error(notImplemented);
     }
 
     PVString *PVStructure::getStringField(StringConstPtr fieldName)
     {
-        return 0;
+        throw std::logic_error(notImplemented);
     }
 
     PVStructure *PVStructure::getStructureField(StringConstPtr fieldName)
     {
-        return 0;
+        throw std::logic_error(notImplemented);
     }
 
     PVScalarArray *PVStructure::getScalarArrayField(
         StringConstPtr fieldName,ScalarType elementType)
     {
-        return 0;
+        throw std::logic_error(notImplemented);
     }
 
     PVStructureArray *PVStructure::getStructureArrayField(
         StringConstPtr fieldName)
     {
-        return 0;
+        throw std::logic_error(notImplemented);
     }
 
     StringConstPtr PVStructure::getExtendsStructureName()
     {
-        return 0;
+        throw std::logic_error(notImplemented);
     }
 
     epicsBoolean PVStructure::putExtendsStructureName(
         StringConstPtr extendsStructureName)
     {
-        return epicsFalse;
+        throw std::logic_error(notImplemented);
     }
 
     void PVStructure::toString(StringPtr buf) const {toString(buf,0);}
 
     void PVStructure::toString(StringPtr buf,int indentLevel) const
     {
+        throw std::logic_error(notImplemented);
     }
 
     void PVStructure::serialize(
         ByteBuffer *pbuffer,SerializableControl *pflusher) const
     {
+        throw std::logic_error(notImplemented);
     }
 
     void PVStructure::deserialize(
         ByteBuffer *pbuffer,DeserializableControl *pflusher)
     {
+        throw std::logic_error(notImplemented);
     }
 
     void PVStructure::serialize(ByteBuffer *pbuffer,
             SerializableControl *pflusher, int offset, int count) const
     {
+        throw std::logic_error(notImplemented);
     }
 
     void PVStructure::serialize(ByteBuffer *pbuffer,
             SerializableControl *pflusher,BitSet *pbitSet) const
     {
+        throw std::logic_error(notImplemented);
     }
 
     void PVStructure::deserialize(ByteBuffer *pbuffer,
             DeserializableControl*pflusher,BitSet *pbitSet)
     {
+        throw std::logic_error(notImplemented);
     }
 
     class BasePVStructure : public PVStructure {

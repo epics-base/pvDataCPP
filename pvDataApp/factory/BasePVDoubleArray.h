@@ -37,10 +37,10 @@ namespace epics { namespace pvData {
         DoubleArrayPtr doubleArray;
     };
 
-    BasePVDoubleArray::BasePVDoubleArray(PVStructure *parent,ScalarArrayConstPtr scalarArray)
+    BasePVDoubleArray::BasePVDoubleArray(PVStructure *parent,
+        ScalarArrayConstPtr scalarArray)
     : PVDoubleArray(parent,scalarArray),doubleArray(new double[0])
-    {
-    }
+    { } 
 
     BasePVDoubleArray::~BasePVDoubleArray()
     {
@@ -49,6 +49,7 @@ namespace epics { namespace pvData {
 
     void BasePVDoubleArray::setCapacity(int capacity)
     {
+        throw std::logic_error(notImplemented);
     }
 
     int BasePVDoubleArray::get(int offset, int length,
@@ -66,29 +67,37 @@ namespace epics { namespace pvData {
 
     void BasePVDoubleArray::shareData(DoubleArrayPtr from)
     {
-    }
-
-    void BasePVDoubleArray::serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) const
-    {
-    }
-
-    void BasePVDoubleArray::deserialize(ByteBuffer *pbuffer,DeserializableControl *pflusher)
-    {
+        throw std::logic_error(notImplemented);
     }
 
     void BasePVDoubleArray::serialize(ByteBuffer *pbuffer,
-            SerializableControl *pflusher, int offset, int count) const
+         SerializableControl *pflusher) const
     {
+        throw std::logic_error(notImplemented);
+    }
+
+    void BasePVDoubleArray::deserialize(ByteBuffer *pbuffer,
+         DeserializableControl *pflusher)
+    {
+        throw std::logic_error(notImplemented);
+    }
+
+    void BasePVDoubleArray::serialize(ByteBuffer *pbuffer,
+         SerializableControl *pflusher, int offset, int count) const
+    {
+        throw std::logic_error(notImplemented);
     }
 
     void BasePVDoubleArray::toString(StringPtr buf)const
     {
+        toString(buf,1);
     }
 
     void BasePVDoubleArray::toString(StringPtr buf,int indentLevel)const
     {
+        convert->getString(buf,this,indentLevel);
+        PVArray::toString(buf,indentLevel);
     }
-
 
 }}
 #endif  /* BASEPVDOUBLEARRAY_H */

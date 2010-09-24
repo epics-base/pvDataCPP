@@ -25,32 +25,32 @@ void testDouble() {
     double value = 2;
     pvValue->put(value);
     double getValue = pvValue->get();
+    printf("put %lf get %lf\n",value,getValue);
     if(value!=getValue) {
         fprintf(stderr,"ERROR getValue put %f get %f\n",value,getValue);
+    }
+    FieldConstPtr field = pvValue->getField();
+    buffer->clear();
+    field->toString(buffer);
+    printf("%s\n",buffer->c_str());
+    epicsBoolean isImmutable = pvValue->isImmutable();
+    PVStructure *pvParent = pvValue->getParent();
+    printf("immutable %s parent %p\n",
+        ((isImmutable==epicsFalse) ? "false" : "true"),
+        pvParent);
+    int offset = pvValue->getFieldOffset();
+    int nextOffset = pvValue->getNextFieldOffset();
+    int numberFields = pvValue->getNumberFields();
+    printf("offset %d nextOffset %d numberFields %d\n",
+        offset,nextOffset,numberFields);
+    ScalarConstPtr scalar = dynamic_cast<ScalarConstPtr>(field);
+    if(scalar!=field) {
+        fprintf(stderr,"ERROR field!=scalar field %p scalar %p\n",field,scalar);
     }
     buffer->clear();
     *buffer += "value ";
     pvValue->toString(buffer);
     printf("%s\n",buffer->c_str());
-    int offset = pvValue->getFieldOffset();
-    int nextOffset = pvValue->getNextFieldOffset();
-    int numberFields = pvValue->getNumberFields();
-    PVAuxInfo *auxInfo = pvValue->getPVAuxInfo();
-    epicsBoolean isImmutable = pvValue->isImmutable();
-    PVStructure *pvParent = pvValue->getParent();
-    printf("offset %d nextOffset %d numberFields %d auxInfo %p immutable %s parent %p\n",
-        offset,nextOffset,numberFields,auxInfo,
-        ((isImmutable==epicsFalse) ? "false" : "true"),
-        pvParent);
-    FieldConstPtr field = pvValue->getField();
-    buffer->clear();
-    *buffer += "field ";
-    field->toString(buffer);
-    printf("%s\n",buffer->c_str());
-    ScalarConstPtr scalar = dynamic_cast<ScalarConstPtr>(field);
-    if(scalar!=field) {
-        fprintf(stderr,"ERROR field!=scalar field %p scalar %p\n",field,scalar);
-    }
     delete pvValue;
 }
 

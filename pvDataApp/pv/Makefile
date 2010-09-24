@@ -4,6 +4,7 @@ include $(TOP)/configure/CONFIG
 
 INC += pvIntrospect.h
 INC += pvData.h
+INC += convert.h
 
 include $(TOP)/configure/RULES
 #----------------------------------------

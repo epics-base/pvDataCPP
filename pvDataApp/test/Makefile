@@ -2,9 +2,9 @@ TOP=../..
 
 include $(TOP)/configure/CONFIG
 
-PROD_HOST += test
-test_SRCS += test.cpp
-test_LIBS += pvFactory
+PROD_HOST += testIntrospect
+testIntrospect_SRCS += testIntrospect.cpp
+testIntrospect_LIBS += pvFactory
 
 PROD_HOST += testDumpStdString
 testDumpStdString_SRCS += testDumpStdString.cpp

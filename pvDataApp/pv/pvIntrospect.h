@@ -11,6 +11,7 @@ namespace epics { namespace pvData {
     class StructureArray;
 
     typedef std::string * StringPtr;
+    typedef StringPtr * StringPtrArray;
     // pointer to constant string
     typedef std::string const * StringConstPtr;
     //array of pointers to constant string

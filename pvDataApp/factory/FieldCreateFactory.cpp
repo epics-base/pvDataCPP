@@ -3,10 +3,17 @@
 #include <cstdlib>
 #include <string>
 #include <cstdio>
-#include "pvData.h"
+#include <epicsMutex.h>
+#include "pvIntrospect.h"
 #include "factory.h"
 
 namespace epics { namespace pvData {
+
+    static void newLine(StringPtr buffer, int indentLevel)
+    {
+        *buffer += "\n";
+        for(int i=0; i<indentLevel; i++) *buffer += "    ";
+    }
 
     Field::~Field(){}
 
@@ -292,14 +299,18 @@ namespace epics { namespace pvData {
 
    static FieldCreate* instance = 0;
 
+
    class FieldCreateExt : public FieldCreate {
    public:
        FieldCreateExt(): FieldCreate(){};
    };
 
-    FieldCreate * getFieldCreate() {
-           if(instance==0) instance = new FieldCreateExt();
-            return instance;
-    }
+   FieldCreate * getFieldCreate() {
+       static epicsMutex *lock =  new epicsMutex();
+       lock->lock();
+       if(instance==0) instance = new FieldCreateExt();
+       lock->unlock();
+       return instance;
+   }
 
 }}

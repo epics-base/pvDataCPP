@@ -4,7 +4,7 @@
 #include <string>
 #include <cstdio>
 
-#include "pvData.h"
+#include "pvIntrospect.h"
 
 namespace epics { namespace pvData {
 

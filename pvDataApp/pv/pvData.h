@@ -45,6 +45,7 @@ namespace epics { namespace pvData {
         void toString(StringPtr buf);
         void toString(StringPtr buf,int indentLevel);
     private:
+        static void init();
         PVAuxInfo(); // not implemented
         PVAuxInfo(PVAuxInfo const & ); // not implemented
         PVAuxInfo & operator=(PVAuxInfo const &); //not implemented

@@ -1,6 +1,4 @@
-/*AbstractPVScalar.h*/
-#ifndef ABSTRACTPVSCALAR_H
-#define ABSTRACTPVSCALAR_H
+/*PVAuxInfo.cpp*/
 #include <cstddef>
 #include <cstdlib>
 #include <string>
@@ -27,6 +25,10 @@ namespace epics { namespace pvData {
     { }
 
     PVAuxInfo::~PVAuxInfo() { delete pImpl;}
+
+    void PVAuxInfo::init() {
+        pvDataCreate = getPVDataCreate();
+    }
     
     PVField * PVAuxInfo::getPVField() {
         return pImpl->pvField;
@@ -44,7 +46,6 @@ namespace epics { namespace pvData {
             ScalarTypeFunc::toString(&message,scalarType);
             pImpl->pvField->message(&message,errorMessage);
         }
-        if(pvDataCreate==0) pvDataCreate = getPVDataCreate();
         PVScalar *pvScalar = pvDataCreate->createPVScalar(0,key,scalarType);
         pImpl->theMap.insert(std::pair<StringConstPtr,PVScalar * >(key, pvScalar));
         return pvScalar;
@@ -81,4 +82,3 @@ namespace epics { namespace pvData {
         }
     }
 }}
-#endif  /* ABSTRACTPVSCALAR_H */
