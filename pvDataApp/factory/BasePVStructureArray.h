@@ -85,9 +85,9 @@ namespace epics { namespace pvData {
         throw std::logic_error(notImplemented);
     }
 
-    void PVStructureArray::toString(StringPtr buf) const {toString(buf,0);}
+    void PVStructureArray::toString(StringBuilder buf) const {toString(buf,0);}
 
-    void PVStructureArray::toString(StringPtr buf,int indentLevel) const
+    void PVStructureArray::toString(StringBuilder buf,int indentLevel) const
     {
         throw std::logic_error(notImplemented);
     }
@@ -99,10 +99,6 @@ namespace epics { namespace pvData {
         : PVStructureArray(parent,structureArray) {}
         ~BasePVStructureArray(){}
     private:
-        // following not implemented
-        BasePVStructureArray();
-        BasePVStructureArray(BasePVStructureArray const & );
-        BasePVStructureArray & operator=(BasePVStructureArray const &);
     };
 
 }}

@@ -2,6 +2,8 @@ TOP=../..
 
 include $(TOP)/configure/CONFIG
 
+INC += noDefaultMethods.h
+INC += lock.h
 INC += requester.h
 INC += serialize.h
 INC += bitSet.h

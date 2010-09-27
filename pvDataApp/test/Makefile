@@ -6,10 +6,6 @@ PROD_HOST += testIntrospect
 testIntrospect_SRCS += testIntrospect.cpp
 testIntrospect_LIBS += pvFactory
 
-PROD_HOST += testDumpStdString
-testDumpStdString_SRCS += testDumpStdString.cpp
-testDumpStdString_LIBS += pvFactory
-
 PROD_HOST += testPVAuxInfo
 testPVAuxInfo_SRCS += testPVAuxInfo.cpp
 testPVAuxInfo_LIBS += pvFactory

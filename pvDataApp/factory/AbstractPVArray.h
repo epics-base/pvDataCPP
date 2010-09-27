@@ -30,11 +30,11 @@ namespace epics { namespace pvData {
 
      int PVArray::getLength() const {return pImpl->length;}
 
-     static std::string fieldImmutable("field is immutable");
+     static StringConst fieldImmutable("field is immutable");
 
      void PVArray::setLength(int length) {
         if(PVField::isImmutable()) {
-           PVField::message(&fieldImmutable,errorMessage);
+           PVField::message(fieldImmutable,errorMessage);
            return;
         }
         if(length>pImpl->capacity) this->setCapacity(length);
@@ -54,29 +54,29 @@ namespace epics { namespace pvData {
      void PVArray::setCapacityImmutable(epicsBoolean isMutable)
      {
         if(isMutable && PVField::isImmutable()) {
-           PVField::message(&fieldImmutable,errorMessage);
+           PVField::message(fieldImmutable,errorMessage);
            return;
         }
         pImpl->capacityMutable = isMutable;
      }
 
-     static std::string capacityImmutable("capacity is immutable");
+     static StringConst capacityImmutable("capacity is immutable");
 
      void PVArray::setCapacity(int capacity) {
         if(PVField::isImmutable()) {
-           PVField::message(&fieldImmutable,errorMessage);
+           PVField::message(fieldImmutable,errorMessage);
            return;
         }
         if(pImpl->capacityMutable==epicsFalse) {
-           PVField::message(&capacityImmutable,errorMessage);
+           PVField::message(capacityImmutable,errorMessage);
            return;
         }
         pImpl->capacity = capacity;
      }
 
-     void PVArray::toString(StringPtr buf) const {toString(buf,0);}
+     void PVArray::toString(StringBuilder buf) const {toString(buf,0);}
 
-     void PVArray::toString(StringPtr buf, int indentLevel) const
+     void PVArray::toString(StringBuilder buf, int indentLevel) const
      {
         throw std::logic_error(notImplemented);
      }

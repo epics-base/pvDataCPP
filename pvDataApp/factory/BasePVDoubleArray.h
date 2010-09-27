@@ -30,11 +30,10 @@ namespace epics { namespace pvData {
        virtual void deserialize(ByteBuffer *pbuffer,DeserializableControl *pflusher);
        virtual void serialize(ByteBuffer *pbuffer,
             SerializableControl *pflusher, int offset, int count) const;
-       virtual void toString(StringPtr buf)const;
-       virtual void toString(StringPtr buf,int indentLevel)const;
+       virtual void toString(StringBuilder buf)const;
+       virtual void toString(StringBuilder buf,int indentLevel)const;
     private:
-        BasePVDoubleArray(); // not implemented
-        DoubleArrayPtr doubleArray;
+        double *doubleArray;
     };
 
     BasePVDoubleArray::BasePVDoubleArray(PVStructure *parent,
@@ -88,12 +87,12 @@ namespace epics { namespace pvData {
         throw std::logic_error(notImplemented);
     }
 
-    void BasePVDoubleArray::toString(StringPtr buf)const
+    void BasePVDoubleArray::toString(StringBuilder buf)const
     {
         toString(buf,1);
     }
 
-    void BasePVDoubleArray::toString(StringPtr buf,int indentLevel)const
+    void BasePVDoubleArray::toString(StringBuilder buf,int indentLevel)const
     {
         convert->getString(buf,this,indentLevel);
         PVArray::toString(buf,indentLevel);

@@ -3,7 +3,7 @@
 #include <cstdlib>
 #include <string>
 #include <cstdio>
-#include <epicsMutex.h>
+#include <lock.h>
 #include "pvData.h"
 #include "convert.h"
 #include "factory.h"
@@ -40,12 +40,12 @@ namespace epics { namespace pvData {
             return createPVStructureArray(parent,
                 (StructureArrayConstPtr)field);
         }
-        std::string message("PVDataCreate::createPVField");
+        String  message("PVDataCreate::createPVField");
         throw std::invalid_argument(message);
    };
 
    PVField *PVDataCreate::createPVField(PVStructure *parent,
-           StringConstPtr fieldName,PVField * fieldToClone)
+           StringConst fieldName,PVField * fieldToClone)
    {
         switch(fieldToClone->getField()->getType()) {
         case scalar:
@@ -57,11 +57,11 @@ namespace epics { namespace pvData {
             return (PVField *)createPVStructure(parent,fieldName,
                 (PVStructure *)fieldToClone);
         case structureArray:
-           std::string message(
+           String message(
            "PVDataCreate::createPVField structureArray not valid fieldToClone");
            throw std::invalid_argument(message);
         }
-        std::string message("PVDataCreate::createPVField");
+        String message("PVDataCreate::createPVField");
         throw std::logic_error(message);
    };
 
@@ -78,7 +78,7 @@ namespace epics { namespace pvData {
    };
 
    PVScalar *PVDataCreate::createPVScalar(PVStructure *parent,
-           StringConstPtr fieldName,ScalarType scalarType)
+           StringConst fieldName,ScalarType scalarType)
    {
         if(fieldCreate==0) fieldCreate = getFieldCreate();
         ScalarConstPtr scalar = fieldCreate->createScalar(fieldName,scalarType);
@@ -86,7 +86,7 @@ namespace epics { namespace pvData {
    };
 
    PVScalar *PVDataCreate::createPVScalar(PVStructure *parent,
-           StringConstPtr fieldName,PVScalar * scalarToClone)
+           StringConst fieldName,PVScalar * scalarToClone)
    {
         PVScalar *pvScalar = createPVScalar(parent,fieldName,
             scalarToClone->getScalar()->getScalarType());
@@ -114,13 +114,13 @@ namespace epics { namespace pvData {
    };
 
    PVScalarArray *PVDataCreate::createPVScalarArray(PVStructure *parent,
-           StringConstPtr fieldName,ScalarType elementType)
+           StringConst fieldName,ScalarType elementType)
    {
         throw std::logic_error(notImplemented);
    };
 
    PVScalarArray *PVDataCreate::createPVScalarArray(PVStructure *parent,
-           StringConstPtr fieldName,PVScalarArray * scalarArrayToClone)
+           StringConst fieldName,PVScalarArray * scalarArrayToClone)
    {
         throw std::logic_error(notImplemented);
    };
@@ -138,13 +138,13 @@ namespace epics { namespace pvData {
    };
 
    PVStructure *PVDataCreate::createPVStructure(PVStructure *parent,
-           StringConstPtr fieldName,FieldConstPtrArray fields)
+           StringConst fieldName,FieldConstPtrArray fields)
    {
         throw std::logic_error(notImplemented);
    };
 
    PVStructure *PVDataCreate::createPVStructure(PVStructure *parent,
-           StringConstPtr fieldName,PVStructure *structToClone)
+           StringConst fieldName,PVStructure *structToClone)
    {
         throw std::logic_error(notImplemented);
    };
@@ -156,10 +156,10 @@ namespace epics { namespace pvData {
    };
 
     PVDataCreate * getPVDataCreate() {
-        static epicsMutex *lock =  new epicsMutex();
-        lock->lock();
-            if(pvDataCreate==0) pvDataCreate = new PVDataCreateExt();
-        lock->unlock();
+        static Mutex *mutex = new Mutex();
+        Lock xx(mutex);
+
+        if(pvDataCreate==0) pvDataCreate = new PVDataCreateExt();
         return pvDataCreate;
     }
 

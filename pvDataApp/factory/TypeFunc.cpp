@@ -8,8 +8,8 @@
 
 namespace epics { namespace pvData {
 
-    void TypeFunc::toString(StringPtr buf,const Type type) {
-        static const std::string unknownString = "logic error unknown Type";
+    void TypeFunc::toString(StringBuilder buf,const Type type) {
+        static StringConst unknownString = "logic error unknown Type";
         switch(type) {
         case scalar : *buf += "scalar"; break;
         case scalarArray : *buf += "scalarArray"; break;
@@ -36,20 +36,20 @@ namespace epics { namespace pvData {
         return false;
     }
 
-    ScalarType ScalarTypeFunc::getScalarType(StringConstPtr pvalue) {
-        static const std::string unknownString = "error unknown ScalarType";
-        if(pvalue->compare("boolean")==0) return pvBoolean;
-        if(pvalue->compare("byte")==0) return pvByte;
-        if(pvalue->compare("short")==0) return pvShort;
-        if(pvalue->compare("int")==0) return pvInt;
-        if(pvalue->compare("long")==0) return pvLong;
-        if(pvalue->compare("float")==0) return pvFloat;
-        if(pvalue->compare("double")==0) return pvDouble;
-        if(pvalue->compare("string")==0) return pvString;
+    ScalarType ScalarTypeFunc::getScalarType(StringConst pvalue) {
+        static StringConst unknownString = "error unknown ScalarType";
+        if(pvalue.compare("boolean")==0) return pvBoolean;
+        if(pvalue.compare("byte")==0) return pvByte;
+        if(pvalue.compare("short")==0) return pvShort;
+        if(pvalue.compare("int")==0) return pvInt;
+        if(pvalue.compare("long")==0) return pvLong;
+        if(pvalue.compare("float")==0) return pvFloat;
+        if(pvalue.compare("double")==0) return pvDouble;
+        if(pvalue.compare("string")==0) return pvString;
         throw std::invalid_argument(unknownString);
     }
-    void ScalarTypeFunc::toString(StringPtr buf,const ScalarType scalarType) {
-        static const std::string unknownString = "logic error unknown ScalarType";
+    void ScalarTypeFunc::toString(StringBuilder buf,const ScalarType scalarType) {
+        static StringConst unknownString = "logic error unknown ScalarType";
         switch(scalarType) {
         case pvBoolean : *buf += "pvBoolean"; return;
         case pvByte : *buf += "pvByte"; return;;

@@ -3,7 +3,6 @@
 #ifndef BYTEBUFFER_H
 #define BYTEBUFFER_H
 #include "epicsTypes.h"
-#include "pvIntrospect.h"
 namespace epics { namespace pvData { 
 
 // not sure why I have to define epicsInt64
@@ -21,7 +20,7 @@ class ByteBuffer {
     virtual epicsInt64 getLong() const = 0;
     virtual float getFloat() const = 0;
     virtual double getDouble() const = 0;
-    virtual StringConstPtr getString() const = 0;
+    virtual StringConst getString() const = 0;
     virtual ByteBuffer * putBoolean(epicsBoolean value) const = 0;
     virtual ByteBuffer * putByte(epicsInt8 value) const = 0;
     virtual ByteBuffer * geShort(epicsInt16 value) const = 0;
@@ -29,7 +28,7 @@ class ByteBuffer {
     virtual ByteBuffer * putLong(epicsInt64 value) const = 0;
     virtual ByteBuffer * putFloat(float value) const = 0;
     virtual ByteBuffer * putDouble(double value) const = 0;
-    virtual ByteBuffer * putString(StringConstPtr value) const = 0;
+    virtual ByteBuffer * putString(StringConst value) const = 0;
     // Must define arrays
 };
 

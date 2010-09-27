@@ -24,15 +24,11 @@ namespace epics { namespace pvData {
             SerializableControl *pflusher) const;
         virtual void deserialize(ByteBuffer *pbuffer,
             DeserializableControl *pflusher);
-        virtual void toString(StringPtr buf)const;
-        virtual void toString(StringPtr buf,int indentLevel)const;
+        virtual void toString(StringBuilder buf)const;
+        virtual void toString(StringBuilder buf,int indentLevel)const;
     private:
-        BasePVDouble(); // not implemented
-        BasePVDouble(BasePVDouble const & ); // not implemented
-        BasePVDouble & operator=(BasePVDouble const &); //not implemented
         double value;
     };
-
 
     BasePVDouble::BasePVDouble(PVStructure *parent,ScalarConstPtr scalar)
     : PVDouble(parent,scalar),value(0.0)
@@ -56,9 +52,9 @@ namespace epics { namespace pvData {
         throw std::logic_error(notImplemented);
     }
 
-    void BasePVDouble::toString(StringPtr buf)const {toString(buf,0);}
+    void BasePVDouble::toString(StringBuilder buf)const {toString(buf,0);}
 
-    void BasePVDouble::toString(StringPtr buf,int indentLevel) const
+    void BasePVDouble::toString(StringBuilder buf,int indentLevel) const
     {
         convert->getString(buf,this,indentLevel);
         PVField::toString(buf,indentLevel);

@@ -13,13 +13,12 @@ using namespace epics::pvData;
 
 static FieldCreate * pfieldCreate = 0;
 static PVDataCreate *pvDataCreate = 0;
-static std::string theBuffer("");
-static std::string *buffer = &theBuffer;
+static String buffer("");
 
 void testDouble() {
     printf("\ntestDouble\n");
-    std::string valueName("value");
-    ScalarConstPtr pscalar = pfieldCreate->createScalar(&valueName,pvDouble);
+    StringConst valueName("value");
+    ScalarConstPtr pscalar = pfieldCreate->createScalar(valueName,pvDouble);
     PVScalar *pvScalar = pvDataCreate->createPVScalar(0,pscalar);
     PVDouble *pvValue = (PVDouble *)pvScalar;
     double value = 2;
@@ -30,9 +29,9 @@ void testDouble() {
         fprintf(stderr,"ERROR getValue put %f get %f\n",value,getValue);
     }
     FieldConstPtr field = pvValue->getField();
-    buffer->clear();
-    field->toString(buffer);
-    printf("%s\n",buffer->c_str());
+    buffer.clear();
+    field->toString(&buffer);
+    printf("%s\n",buffer.c_str());
     epicsBoolean isImmutable = pvValue->isImmutable();
     PVStructure *pvParent = pvValue->getParent();
     printf("immutable %s parent %p\n",
@@ -47,10 +46,10 @@ void testDouble() {
     if(scalar!=field) {
         fprintf(stderr,"ERROR field!=scalar field %p scalar %p\n",field,scalar);
     }
-    buffer->clear();
-    *buffer += "value ";
-    pvValue->toString(buffer);
-    printf("%s\n",buffer->c_str());
+    buffer.clear();
+    buffer += "value ";
+    pvValue->toString(&buffer);
+    printf("%s\n",buffer.c_str());
     delete pvValue;
 }
 

@@ -12,15 +12,15 @@ namespace epics { namespace pvData {
     public:
         Convert();
         ~Convert();
-        void getFullName(StringConstPtr buf,PVField const *pvField);
-        void getString(StringPtr buf,PVField const * pvField,int indentLevel);
-        void getString(StringPtr buf,PVField const * pvField);
-        void fromString(PVScalar *pv, StringConstPtr from);
-        int fromString(PVScalarArray *pv, StringConstPtr from);
+        void getFullName(StringConst buf,PVField const *pvField);
+        void getString(StringBuilder buf,PVField const * pvField,int indentLevel);
+        void getString(StringBuilder buf,PVField const * pvField);
+        void fromString(PVScalar *pv, StringConst from);
+        int fromString(PVScalarArray *pv, StringConst from);
         int fromStringArray(PVScalarArray *pv, int offset, int length,
-            StringPtrArray from, int fromOffset);
+            StringConstArray from, int fromOffset);
         int toStringArray(PVScalarArray const *pv, int offset, int length,
-            StringPtrArray to, int fromOffset);
+            StringConstArray to, int fromOffset);
         epicsBoolean isCopyCompatible(FieldConstPtr from, FieldConstPtr to);
         void copy(PVField const *from,PVField *to);
         epicsBoolean isCopyScalarCompatible(
@@ -73,7 +73,7 @@ namespace epics { namespace pvData {
             float from[], int fromOffset);
         int fromDoubleArray(PVScalarArray *pv, int offset, int length,
             double from[], int fromOffset);
-        void newLine(StringPtr buf, int indentLevel);
+        void newLine(StringBuilder buf, int indentLevel);
 
     private:
         Convert(Convert const & ); // not implemented

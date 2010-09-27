@@ -17,7 +17,7 @@ namespace epics { namespace pvData {
 
         int numberFields;
         PVFieldArrayPtr pvFields;
-        std::string const extendsStructureName;
+        StringConst const extendsStructureName;
     };
 
     PVStructurePvt::PVStructurePvt()
@@ -58,7 +58,7 @@ namespace epics { namespace pvData {
         return pImpl->pvFields;
     }
 
-    PVFieldPtr PVStructure::getSubField(StringConstPtr fieldName)
+    PVFieldPtr PVStructure::getSubField(StringConst fieldName)
     {
         throw std::logic_error(notImplemented);
     }
@@ -78,82 +78,82 @@ namespace epics { namespace pvData {
         throw std::logic_error(notImplemented);
     }
 
-    void PVStructure::removePVField(StringConstPtr fieldName)
+    void PVStructure::removePVField(StringConst fieldName)
     {
         throw std::logic_error(notImplemented);
     }
 
-    PVBoolean *PVStructure::getBooleanField(StringConstPtr fieldName)
+    PVBoolean *PVStructure::getBooleanField(StringConst fieldName)
     {
         throw std::logic_error(notImplemented);
     }
 
-    PVByte *PVStructure::getByteField(StringConstPtr fieldName)
+    PVByte *PVStructure::getByteField(StringConst fieldName)
     {
         throw std::logic_error(notImplemented);
     }
 
-    PVShort *PVStructure::getShortField(StringConstPtr fieldName)
+    PVShort *PVStructure::getShortField(StringConst fieldName)
     {
         throw std::logic_error(notImplemented);
     }
 
-    PVInt *PVStructure::getIntField(StringConstPtr fieldName)
+    PVInt *PVStructure::getIntField(StringConst fieldName)
     {
         throw std::logic_error(notImplemented);
     }
 
-    PVLong *PVStructure::getLongField(StringConstPtr fieldName)
+    PVLong *PVStructure::getLongField(StringConst fieldName)
     {
         throw std::logic_error(notImplemented);
     }
 
-    PVFloat *PVStructure::getFloatField(StringConstPtr fieldName)
+    PVFloat *PVStructure::getFloatField(StringConst fieldName)
     {
         throw std::logic_error(notImplemented);
     }
 
-    PVDouble *PVStructure::getDoubleField(StringConstPtr fieldName)
+    PVDouble *PVStructure::getDoubleField(StringConst fieldName)
     {
         throw std::logic_error(notImplemented);
     }
 
-    PVString *PVStructure::getStringField(StringConstPtr fieldName)
+    PVString *PVStructure::getStringField(StringConst fieldName)
     {
         throw std::logic_error(notImplemented);
     }
 
-    PVStructure *PVStructure::getStructureField(StringConstPtr fieldName)
+    PVStructure *PVStructure::getStructureField(StringConst fieldName)
     {
         throw std::logic_error(notImplemented);
     }
 
     PVScalarArray *PVStructure::getScalarArrayField(
-        StringConstPtr fieldName,ScalarType elementType)
+        StringConst fieldName,ScalarType elementType)
     {
         throw std::logic_error(notImplemented);
     }
 
     PVStructureArray *PVStructure::getStructureArrayField(
-        StringConstPtr fieldName)
+        StringConst fieldName)
     {
         throw std::logic_error(notImplemented);
     }
 
-    StringConstPtr PVStructure::getExtendsStructureName()
+    StringConst PVStructure::getExtendsStructureName()
     {
         throw std::logic_error(notImplemented);
     }
 
     epicsBoolean PVStructure::putExtendsStructureName(
-        StringConstPtr extendsStructureName)
+        StringConst extendsStructureName)
     {
         throw std::logic_error(notImplemented);
     }
 
-    void PVStructure::toString(StringPtr buf) const {toString(buf,0);}
+    void PVStructure::toString(StringBuilder buf) const {toString(buf,0);}
 
-    void PVStructure::toString(StringPtr buf,int indentLevel) const
+    void PVStructure::toString(StringBuilder buf,int indentLevel) const
     {
         throw std::logic_error(notImplemented);
     }
@@ -193,10 +193,6 @@ namespace epics { namespace pvData {
         BasePVStructure(PVStructure *parent,StructureConstPtr structure);
         ~BasePVStructure();
     private:
-        BasePVStructure(); // not implemented
-        BasePVStructure(BasePVStructure const & ); // not implemented
-        BasePVStructure& operator=(BasePVStructure const &); //not implemented
-
     };
 
     BasePVStructure::BasePVStructure(PVStructure *parent,StructureConstPtr structure)

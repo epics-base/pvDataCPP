@@ -1,7 +1,7 @@
 /* Convert.cpp */
 #include <string>
 #include <stdexcept>
-#include <epicsMutex.h>
+#include <lock.h>
 #include "convert.h"
 
 namespace epics { namespace pvData { 
@@ -12,39 +12,39 @@ static std::string notImplemented("not implemented");
 
     Convert::~Convert(){}
 
-    void Convert::getFullName(StringConstPtr buf,PVField const *pvField)
+    void Convert::getFullName(StringConst buf,PVField const *pvField)
     {
         throw std::logic_error(notImplemented);
     }
 
-    void Convert::getString(StringPtr buf,PVField const * pvField,int indentLevel)
+    void Convert::getString(StringBuilder buf,PVField const * pvField,int indentLevel)
     {
         throw std::logic_error(notImplemented);
     }
 
-    void Convert::getString(StringPtr buf,PVField const *pvField)
+    void Convert::getString(StringBuilder buf,PVField const *pvField)
     {
         throw std::logic_error(notImplemented);
     }
 
-    void Convert::fromString(PVScalar *pv, StringConstPtr from)
+    void Convert::fromString(PVScalar *pv, StringConst from)
     {
         throw std::logic_error(notImplemented);
     }
 
-    int Convert::fromString(PVScalarArray *pv, StringConstPtr from)
+    int Convert::fromString(PVScalarArray *pv, StringConst from)
     {
         throw std::logic_error(notImplemented);
     }
 
     int Convert::fromStringArray(PVScalarArray *pv, int offset, int length,
-        StringPtrArray from, int fromOffset)
+        StringConstArray from, int fromOffset)
     {
         throw std::logic_error(notImplemented);
     }
 
     int Convert::toStringArray(PVScalarArray const *pv, int offset, int length,
-        StringPtrArray to, int fromOffset)
+        StringConstArray to, int fromOffset)
     {
         throw std::logic_error(notImplemented);
     }
@@ -237,7 +237,7 @@ static std::string notImplemented("not implemented");
         throw std::logic_error(notImplemented);
     }
 
-    void Convert::newLine(StringPtr buffer, int indentLevel)
+    void Convert::newLine(StringBuilder buffer, int indentLevel)
     {
         *buffer += "\n";
         for(int i=0; i<indentLevel; i++) *buffer += "    ";
@@ -253,10 +253,10 @@ static std::string notImplemented("not implemented");
     };
 
     Convert * getConvert() {
-        static epicsMutex *lock =  new epicsMutex();
-        lock->lock();
-            if(instance==0) instance = new ConvertExt();
-        lock->unlock();
+        static Mutex *mutex = new Mutex();
+        Lock xx(mutex);
+
+        if(instance==0) instance = new ConvertExt();
         return instance;
     }
     

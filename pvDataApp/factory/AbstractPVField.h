@@ -11,7 +11,7 @@
 namespace epics { namespace pvData {
 
 
-static std::string notImplemented("not implemented");
+static StringConst notImplemented("not implemented");
 
     static Convert *convert = 0;
 
@@ -60,27 +60,27 @@ static std::string notImplemented("not implemented");
         delete pImpl;
     }
 
-     StringConstPtr PVField::getRequesterName() const
+     StringConst PVField::getRequesterName() const
      {
-         static std::string none("none");
+         static StringConst none("none");
          if(pImpl->requester!=0) return pImpl->requester->getRequesterName();
-         return &none;
+         return none;
      }
 
-     void PVField::message(StringConstPtr message,MessageType messageType) const 
+     void PVField::message(StringConst message,MessageType messageType) const 
      {
          if(pImpl->requester) {
              pImpl->requester->message(message,messageType);
          } else {
              printf("%s %s %s\n",
                  messageTypeName[messageType].c_str(),
-                 pImpl->field->getFieldName()->c_str(),
-                 message->c_str());
+                 pImpl->field->getFieldName().c_str(),
+                 message.c_str());
          }
      }
      void PVField::setRequester(Requester *prequester)
      {
-         static std::string requesterPresent =
+         static StringConst requesterPresent =
              "Logic Error. requester is already present";
          if(pImpl->requester==0) {
              pImpl->requester = prequester;
@@ -127,7 +127,7 @@ static std::string notImplemented("not implemented");
          throw std::logic_error(notImplemented);
      }
 
-     void PVField::renameField(StringConstPtr  newName)
+     void PVField::renameField(StringConst  newName)
      {
         throw std::logic_error(notImplemented);
      }
@@ -142,9 +142,9 @@ static std::string notImplemented("not implemented");
         throw std::logic_error(notImplemented);
      }
 
-     void PVField::toString(StringPtr buf) const {toString(buf,0);}
+     void PVField::toString(StringBuilder buf) const {toString(buf,0);}
 
-     void PVField::toString(StringPtr buf,int indentLevel) const
+     void PVField::toString(StringBuilder buf,int indentLevel) const
      {
         throw std::logic_error(notImplemented);
      }
