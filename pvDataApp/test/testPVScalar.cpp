@@ -17,7 +17,7 @@ static String buffer("");
 
 void testDouble() {
     printf("\ntestDouble\n");
-    StringConst valueName("value");
+    String valueName("value");
     ScalarConstPtr pscalar = pfieldCreate->createScalar(valueName,pvDouble);
     PVScalar *pvScalar = pvDataCreate->createPVScalar(0,pscalar);
     PVDouble *pvValue = (PVDouble *)pvScalar;

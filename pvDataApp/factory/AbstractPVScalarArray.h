@@ -17,7 +17,7 @@ namespace epics { namespace pvData {
         ScalarArrayConstPtr scalarArray)
     : PVArray(parent,scalarArray) {}
 
-    ScalarArrayConstPtr PVScalarArray::getScalarArray() const
+    ScalarArrayConstPtr PVScalarArray::getScalarArray() 
     {
        return (ScalarArrayConstPtr) PVField::getField();
     }

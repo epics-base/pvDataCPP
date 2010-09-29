@@ -5,10 +5,15 @@
 #include "byteBuffer.h"
 namespace epics { namespace pvData { 
 
+    class SerializableControl;
+    class DeserializableControl;
+    class Serializable;
+    class BitSetSerializable;
+    class SerializableArray;
 
     class SerializableControl {
-        virtual void flushSerializeBuffer() const =0;
-        virtual void ensureBuffer(int size) const =0;
+        virtual void flushSerializeBuffer() =0;
+        virtual void ensureBuffer(int size) =0;
     };
 
     class DeserializableControl {
@@ -17,25 +22,25 @@ namespace epics { namespace pvData {
 
     class Serializable {
     public:
-        virtual void serialize(ByteBuffer *pbuffer,
-            SerializableControl *pflusher) const = 0;
-        virtual void deserialize(ByteBuffer *pbuffer,
-            DeserializableControl *pflusher) = 0;
+        virtual void serialize(ByteBuffer *buffer,
+            SerializableControl *flusher) = 0;
+        virtual void deserialize(ByteBuffer *buffer,
+            DeserializableControl *flusher) = 0;
     };
 
     class BitSetSerializable {
     public:
-        virtual void serialize(ByteBuffer *pbuffer,
-            SerializableControl *pflusher,BitSet *pbitSet) const = 0;
-        virtual void deserialize(ByteBuffer *pbuffer,
-            DeserializableControl*pflusher,BitSet *pbitSet) = 0;
+        virtual void serialize(ByteBuffer *buffer,
+            SerializableControl *flusher,BitSet *bitSet) = 0;
+        virtual void deserialize(ByteBuffer *buffer,
+            DeserializableControl *flusher,BitSet *bitSet) = 0;
     };
 
 
     class SerializableArray : public Serializable {
     public:
-        virtual void serialize(ByteBuffer *pbuffer,
-            SerializableControl *pflusher, int offset, int count) const = 0;
+        virtual void serialize(ByteBuffer *buffer,
+            SerializableControl *flusher, int offset, int count) = 0;
     };
 
 }}

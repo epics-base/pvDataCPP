@@ -17,7 +17,7 @@ namespace epics { namespace pvData {
 
         StructureArrayConstPtr structureArray;
         StructureArrayData *structureArrayData;
-        PVStructureArrayPtr pvStructureArray;
+        PVStructurePtrArray pvStructureArray;
     };
     PVStructureArrayPvt::PVStructureArrayPvt(
         StructureArrayConstPtr structureArray)
@@ -45,30 +45,30 @@ namespace epics { namespace pvData {
         delete pImpl;
     }
 
-    StructureArrayConstPtr PVStructureArray::getStructureArray() const
+    StructureArrayConstPtr PVStructureArray::getStructureArray() 
     {
         return pImpl->structureArray;
     }
 
     int PVStructureArray::get(
-        int offset, int length, StructureArrayData *data) const
+        int offset, int length, StructureArrayData *data) 
     {
         throw std::logic_error(notImplemented);
     }
 
     int PVStructureArray::put(int offset,int length,
-        PVStructureArrayPtr  from, int fromOffset)
+        PVStructurePtrArray  from, int fromOffset)
     {
         throw std::logic_error(notImplemented);
     }
 
-    void PVStructureArray::shareData(PVStructureArrayPtr from)
+    void PVStructureArray::shareData(StructureArrayData *from)
     {
         throw std::logic_error(notImplemented);
     }
 
     void PVStructureArray::serialize(ByteBuffer *pbuffer,
-        SerializableControl *pflusher) const
+        SerializableControl *pflusher) 
     {
         throw std::logic_error(notImplemented);
     }
@@ -80,14 +80,19 @@ namespace epics { namespace pvData {
     }
 
     void PVStructureArray::serialize(ByteBuffer *pbuffer,
-            SerializableControl *pflusher, int offset, int count) const
+            SerializableControl *pflusher, int offset, int count) 
     {
         throw std::logic_error(notImplemented);
     }
 
-    void PVStructureArray::toString(StringBuilder buf) const {toString(buf,0);}
+    void PVStructureArray::toString(StringBuilder buf)  {toString(buf,0);}
 
-    void PVStructureArray::toString(StringBuilder buf,int indentLevel) const
+    void PVStructureArray::toString(StringBuilder buf,int indentLevel) 
+    {
+        throw std::logic_error(notImplemented);
+    }
+
+    epicsBoolean PVStructureArray::equals(PVField  *pv) 
     {
         throw std::logic_error(notImplemented);
     }

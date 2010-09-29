@@ -11,7 +11,7 @@
 namespace epics { namespace pvData {
 
 
-static StringConst notImplemented("not implemented");
+static String notImplemented("not implemented");
 
     static Convert *convert = 0;
 
@@ -60,14 +60,14 @@ static StringConst notImplemented("not implemented");
         delete pImpl;
     }
 
-     StringConst PVField::getRequesterName() const
+     String PVField::getRequesterName() 
      {
-         static StringConst none("none");
+         static String none("none");
          if(pImpl->requester!=0) return pImpl->requester->getRequesterName();
          return none;
      }
 
-     void PVField::message(StringConst message,MessageType messageType) const 
+     void PVField::message(String message,MessageType messageType)  
      {
          if(pImpl->requester) {
              pImpl->requester->message(message,messageType);
@@ -80,7 +80,7 @@ static StringConst notImplemented("not implemented");
      }
      void PVField::setRequester(Requester *prequester)
      {
-         static StringConst requesterPresent =
+         static String requesterPresent =
              "Logic Error. requester is already present";
          if(pImpl->requester==0) {
              pImpl->requester = prequester;
@@ -89,19 +89,19 @@ static StringConst notImplemented("not implemented");
          throw std::logic_error(requesterPresent);
      }
 
-     int PVField::getFieldOffset() const
+     int PVField::getFieldOffset() 
      {
          if(pImpl->nextFieldOffset==0) computeOffset(this);
          return pImpl->fieldOffset;
      }
 
-     int PVField::getNextFieldOffset() const
+     int PVField::getNextFieldOffset() 
      {
          if(pImpl->nextFieldOffset==0) computeOffset(this);
          return pImpl->nextFieldOffset;
      }
 
-     int PVField::getNumberFields() const
+     int PVField::getNumberFields() 
      {
          if(pImpl->nextFieldOffset==0) computeOffset(this);
          return (pImpl->nextFieldOffset - pImpl->fieldOffset);
@@ -114,25 +114,25 @@ static StringConst notImplemented("not implemented");
          return pImpl->pvAuxInfo;
      }
 
-     epicsBoolean PVField::isImmutable() const {return pImpl->immutable;}
+     epicsBoolean PVField::isImmutable()  {return pImpl->immutable;}
 
      void PVField::setImmutable() {pImpl->immutable = epicsTrue;}
 
-     FieldConstPtr PVField::getField() const {return pImpl->field;}
+     FieldConstPtr PVField::getField()  {return pImpl->field;}
 
-     PVStructure * PVField::getParent() const {return pImpl->parent;}
+     PVStructure * PVField::getParent()  {return pImpl->parent;}
 
      void PVField::replacePVField(PVField * newPVField)
      {
          throw std::logic_error(notImplemented);
      }
 
-     void PVField::renameField(StringConst  newName)
+     void PVField::renameField(String  newName)
      {
         throw std::logic_error(notImplemented);
      }
 
-     void PVField::postPut() const
+     void PVField::postPut() 
      {
         throw std::logic_error(notImplemented);
      }
@@ -142,14 +142,14 @@ static StringConst notImplemented("not implemented");
         throw std::logic_error(notImplemented);
      }
 
-     void PVField::toString(StringBuilder buf) const {toString(buf,0);}
+     void PVField::toString(StringBuilder buf)  {toString(buf,0);}
 
-     void PVField::toString(StringBuilder buf,int indentLevel) const
+     void PVField::toString(StringBuilder buf,int indentLevel) 
      {
         throw std::logic_error(notImplemented);
      }
 
-     void PVField::computeOffset(PVField  const * const pvField) {
+     void PVField::computeOffset(PVField   *  pvField) {
     	PVStructure *pvTop = pvField->getParent();
     	if(pvTop==0) {
     		pvTop = (PVStructure *)pvField;
@@ -160,7 +160,7 @@ static StringConst notImplemented("not implemented");
     	}
         int offset = 0;
         int nextOffset = 1;
-        PVFieldArrayPtr pvFields = pvTop->getPVFields();
+        PVFieldPtrArray pvFields = pvTop->getPVFields();
         for(int i=0; i < pvTop->getStructure()->getNumberFields(); i++) {
             offset = nextOffset;
             PVField *pvField = pvFields[i];
@@ -185,11 +185,11 @@ static StringConst notImplemented("not implemented");
         top->pImpl->nextFieldOffset = nextOffset;
      }
 
-     void PVField::computeOffset(PVField  const * const pvField,int offset) {
+     void PVField::computeOffset(PVField   *  pvField,int offset) {
         int beginOffset = offset;
         int nextOffset = offset + 1;
         PVStructure *pvStructure = (PVStructure *)pvField;
-        PVFieldArrayPtr pvFields = pvStructure->getPVFields();
+        PVFieldPtrArray pvFields = pvStructure->getPVFields();
         for(int i=0; i < pvStructure->getStructure()->getNumberFields(); i++) {
             offset = nextOffset;
             PVField *pvSubField = pvFields[i];

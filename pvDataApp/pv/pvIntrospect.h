@@ -1,6 +1,7 @@
 /* pvIntrospect.h */
 #include <string>
 #include <stdexcept>
+#include <epicsTypes.h>
 #ifndef PVINTROSPECT_H
 #define PVINTROSPECT_H
 #include "noDefaultMethods.h"
@@ -13,8 +14,7 @@ namespace epics { namespace pvData {
 
     typedef std::string String;
     typedef std::string * StringBuilder;
-    typedef std::string const StringConst;
-    typedef StringConst * StringConstArray;
+    typedef String* StringArray;
 
     typedef Field const * FieldConstPtr;
     typedef FieldConstPtr * FieldConstPtrArray;
@@ -48,18 +48,18 @@ namespace epics { namespace pvData {
 
     class ScalarTypeFunc {
     public:
-        static bool isInteger(ScalarType type);
-        static bool isNumeric(ScalarType type);
-        static bool isPrimitive(ScalarType type);
-        static ScalarType getScalarType(StringConst value);
-        static void toString(StringBuilder buf,const ScalarType scalarType);
+        static epicsBoolean isInteger(ScalarType type);
+        static epicsBoolean isNumeric(ScalarType type);
+        static epicsBoolean isPrimitive(ScalarType type);
+        static ScalarType getScalarType(String value);
+        static void toString(StringBuilder buf,ScalarType scalarType);
     };
 
     class Field : private NoDefaultMethods {
     public:
        virtual ~Field();
        virtual int getReferenceCount() const = 0;
-       virtual StringConst getFieldName() const = 0;
+       virtual String getFieldName() const = 0;
        virtual Type getType() const = 0;
        virtual void toString(StringBuilder buf) const = 0;
        virtual void toString(StringBuilder buf,int indentLevel) const = 0;
@@ -89,8 +89,8 @@ namespace epics { namespace pvData {
     public:
        virtual ~Structure();
        virtual int const getNumberFields() const = 0;
-       virtual FieldConstPtr getField(StringConst fieldName) const = 0;
-       virtual int getFieldIndex(StringConst fieldName) const = 0;
+       virtual FieldConstPtr getField(String fieldName) const = 0;
+       virtual int getFieldIndex(String fieldName) const = 0;
        virtual FieldConstPtrArray getFields() const = 0;
     };
 
@@ -103,13 +103,13 @@ namespace epics { namespace pvData {
 
     class FieldCreate {
     public:
-       FieldConstPtr  create(StringConst fieldName,FieldConstPtr  field) const;
-       ScalarConstPtr  createScalar(StringConst fieldName,ScalarType scalarType) const;
-       ScalarArrayConstPtr createScalarArray(StringConst fieldName,
+       FieldConstPtr  create(String fieldName,FieldConstPtr  field) const;
+       ScalarConstPtr  createScalar(String fieldName,ScalarType scalarType) const;
+       ScalarArrayConstPtr createScalarArray(String fieldName,
            ScalarType elementType) const;
-       StructureConstPtr createStructure (StringConst fieldName,
+       StructureConstPtr createStructure (String fieldName,
            int numberFields,FieldConstPtrArray fields) const;
-       StructureArrayConstPtr createStructureArray(StringConst fieldName,
+       StructureArrayConstPtr createStructureArray(String fieldName,
            StructureConstPtr structure) const;
     protected:
        FieldCreate();

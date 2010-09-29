@@ -8,58 +8,58 @@
 
 namespace epics { namespace pvData { 
 
-    class Convert {
+    class Convert : NoDefaultMethods {
     public:
         Convert();
         ~Convert();
-        void getFullName(StringConst buf,PVField const *pvField);
-        void getString(StringBuilder buf,PVField const * pvField,int indentLevel);
-        void getString(StringBuilder buf,PVField const * pvField);
-        void fromString(PVScalar *pv, StringConst from);
-        int fromString(PVScalarArray *pv, StringConst from);
+        void getFullName(StringBuilder buf,PVField *pvField);
+        void getString(StringBuilder buf,PVField * pvField,int indentLevel);
+        void getString(StringBuilder buf,PVField *pvField);
+        void fromString(PVScalar *pv, String from);
+        int fromString(PVScalarArray *pv, String from);
         int fromStringArray(PVScalarArray *pv, int offset, int length,
-            StringConstArray from, int fromOffset);
-        int toStringArray(PVScalarArray const *pv, int offset, int length,
-            StringConstArray to, int fromOffset);
+            StringArray from, int fromOffset);
+        int toStringArray(PVScalarArray *pv, int offset, int length,
+            StringArray to, int toOffset);
         epicsBoolean isCopyCompatible(FieldConstPtr from, FieldConstPtr to);
-        void copy(PVField const *from,PVField *to);
+        void copy(PVField *from,PVField *to);
         epicsBoolean isCopyScalarCompatible(
              ScalarConstPtr from, ScalarConstPtr to);
-        void copyScalar(PVScalar const *from, PVScalar *to);
+        void copyScalar(PVScalar *from, PVScalar *to);
         epicsBoolean isCopyScalarArrayCompatible(ScalarArrayConstPtr from,
             ScalarArrayConstPtr to);
-        int copyScalarArray(PVScalarArray const *from, int offset,
+        int copyScalarArray(PVScalarArray *from, int offset,
             PVScalarArray *to, int toOffset, int length);
         epicsBoolean isCopyStructureCompatible(
             StructureConstPtr from, StructureConstPtr to);
-        void copyStructure(PVStructure const *from, PVStructure *to);
+        void copyStructure(PVStructure *from, PVStructure *to);
         epicsBoolean isCopyStructureArrayCompatible(
             StructureArrayConstPtr from, StructureArrayConstPtr to);
         void copyStructureArray(
-            PVStructureArray const *from, PVStructureArray *to);
-        epicsInt8 toByte(PVScalar const *pv);
-        epicsInt16 toShort(PVScalar const *pv);
-        epicsInt32 toInt(PVScalar const *pv);
-        epicsInt64 toLong(PVScalar const *pv);
-        float toFloat(PVScalar const *pv);
-        double toDouble(PVScalar const *pv);
+            PVStructureArray *from, PVStructureArray *to);
+        epicsInt8 toByte(PVScalar *pv);
+        epicsInt16 toShort(PVScalar *pv);
+        epicsInt32 toInt(PVScalar *pv);
+        epicsInt64 toLong(PVScalar *pv);
+        float toFloat(PVScalar *pv);
+        double toDouble(PVScalar *pv);
         void fromByte(PVScalar *pv,epicsInt8 from);
         void  fromShort(PVScalar *pv,epicsInt16 from);
         void  fromInt(PVScalar *pv, epicsInt32 from);
         void  fromLong(PVScalar *pv, epicsInt64 from);
         void  fromFloat(PVScalar* pv, float from);
         void  fromDouble(PVScalar *pv, double from);
-        int toByteArray(PVScalarArray const *pv, int offset, int length,
+        int toByteArray(PVScalarArray *pv, int offset, int length,
             epicsInt8 to[], int toOffset);
-        int toShortArray(PVScalarArray const *pv, int offset, int length,
+        int toShortArray(PVScalarArray *pv, int offset, int length,
             epicsInt16 to[], int toOffset);
-        int toIntArray(PVScalarArray const *pv, int offset, int length,
+        int toIntArray(PVScalarArray *pv, int offset, int length,
             epicsInt32 to[], int toOffset);
-        int toLongArray(PVScalarArray const *pv, int offset, int length,
+        int toLongArray(PVScalarArray *pv, int offset, int length,
             epicsInt64 to[], int toOffset);
-        int toFloatArray(PVScalarArray const *pv, int offset, int length,
+        int toFloatArray(PVScalarArray *pv, int offset, int length,
             float to[], int toOffset);
-        int toDoubleArray(PVScalarArray const *pv, int offset, int length,
+        int toDoubleArray(PVScalarArray *pv, int offset, int length,
             double to[], int toOffset);
         int fromByteArray(PVScalarArray *pv, int offset, int length,
             epicsInt8 from[], int fromOffset);
@@ -74,10 +74,6 @@ namespace epics { namespace pvData {
         int fromDoubleArray(PVScalarArray *pv, int offset, int length,
             double from[], int fromOffset);
         void newLine(StringBuilder buf, int indentLevel);
-
-    private:
-        Convert(Convert const & ); // not implemented
-        Convert & operator=(Convert const &); //not implemented
     };
 
     extern Convert * getConvert();

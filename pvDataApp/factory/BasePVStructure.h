@@ -16,8 +16,8 @@ namespace epics { namespace pvData {
         ~PVStructurePvt();
 
         int numberFields;
-        PVFieldArrayPtr pvFields;
-        StringConst const extendsStructureName;
+        PVFieldPtrArray pvFields;
+        String extendsStructureName;
     };
 
     PVStructurePvt::PVStructurePvt()
@@ -53,12 +53,12 @@ namespace epics { namespace pvData {
         return (StructureConstPtr)PVField::getField();
     }
 
-    PVFieldArrayPtr PVStructure::getPVFields()
+    PVFieldPtrArray PVStructure::getPVFields()
     {
         return pImpl->pvFields;
     }
 
-    PVFieldPtr PVStructure::getSubField(StringConst fieldName)
+    PVFieldPtr PVStructure::getSubField(String fieldName)
     {
         throw std::logic_error(notImplemented);
     }
@@ -73,93 +73,93 @@ namespace epics { namespace pvData {
         throw std::logic_error(notImplemented);
     }
 
-    void PVStructure::appendPVFields(PVFieldArrayPtr pvFields)
+    void PVStructure::appendPVFields(PVFieldPtrArray pvFields)
     {
         throw std::logic_error(notImplemented);
     }
 
-    void PVStructure::removePVField(StringConst fieldName)
+    void PVStructure::removePVField(String fieldName)
     {
         throw std::logic_error(notImplemented);
     }
 
-    PVBoolean *PVStructure::getBooleanField(StringConst fieldName)
+    PVBoolean *PVStructure::getBooleanField(String fieldName)
     {
         throw std::logic_error(notImplemented);
     }
 
-    PVByte *PVStructure::getByteField(StringConst fieldName)
+    PVByte *PVStructure::getByteField(String fieldName)
     {
         throw std::logic_error(notImplemented);
     }
 
-    PVShort *PVStructure::getShortField(StringConst fieldName)
+    PVShort *PVStructure::getShortField(String fieldName)
     {
         throw std::logic_error(notImplemented);
     }
 
-    PVInt *PVStructure::getIntField(StringConst fieldName)
+    PVInt *PVStructure::getIntField(String fieldName)
     {
         throw std::logic_error(notImplemented);
     }
 
-    PVLong *PVStructure::getLongField(StringConst fieldName)
+    PVLong *PVStructure::getLongField(String fieldName)
     {
         throw std::logic_error(notImplemented);
     }
 
-    PVFloat *PVStructure::getFloatField(StringConst fieldName)
+    PVFloat *PVStructure::getFloatField(String fieldName)
     {
         throw std::logic_error(notImplemented);
     }
 
-    PVDouble *PVStructure::getDoubleField(StringConst fieldName)
+    PVDouble *PVStructure::getDoubleField(String fieldName)
     {
         throw std::logic_error(notImplemented);
     }
 
-    PVString *PVStructure::getStringField(StringConst fieldName)
+    PVString *PVStructure::getStringField(String fieldName)
     {
         throw std::logic_error(notImplemented);
     }
 
-    PVStructure *PVStructure::getStructureField(StringConst fieldName)
+    PVStructure *PVStructure::getStructureField(String fieldName)
     {
         throw std::logic_error(notImplemented);
     }
 
     PVScalarArray *PVStructure::getScalarArrayField(
-        StringConst fieldName,ScalarType elementType)
+        String fieldName,ScalarType elementType)
     {
         throw std::logic_error(notImplemented);
     }
 
     PVStructureArray *PVStructure::getStructureArrayField(
-        StringConst fieldName)
+        String fieldName)
     {
         throw std::logic_error(notImplemented);
     }
 
-    StringConst PVStructure::getExtendsStructureName()
+    String PVStructure::getExtendsStructureName()
     {
         throw std::logic_error(notImplemented);
     }
 
     epicsBoolean PVStructure::putExtendsStructureName(
-        StringConst extendsStructureName)
+        String extendsStructureName)
     {
         throw std::logic_error(notImplemented);
     }
 
-    void PVStructure::toString(StringBuilder buf) const {toString(buf,0);}
+    void PVStructure::toString(StringBuilder buf)  {toString(buf,0);}
 
-    void PVStructure::toString(StringBuilder buf,int indentLevel) const
+    void PVStructure::toString(StringBuilder buf,int indentLevel) 
     {
         throw std::logic_error(notImplemented);
     }
 
     void PVStructure::serialize(
-        ByteBuffer *pbuffer,SerializableControl *pflusher) const
+        ByteBuffer *pbuffer,SerializableControl *pflusher) 
     {
         throw std::logic_error(notImplemented);
     }
@@ -171,19 +171,24 @@ namespace epics { namespace pvData {
     }
 
     void PVStructure::serialize(ByteBuffer *pbuffer,
-            SerializableControl *pflusher, int offset, int count) const
+            SerializableControl *pflusher, int offset, int count) 
     {
         throw std::logic_error(notImplemented);
     }
 
     void PVStructure::serialize(ByteBuffer *pbuffer,
-            SerializableControl *pflusher,BitSet *pbitSet) const
+            SerializableControl *pflusher,BitSet *pbitSet) 
     {
         throw std::logic_error(notImplemented);
     }
 
     void PVStructure::deserialize(ByteBuffer *pbuffer,
             DeserializableControl*pflusher,BitSet *pbitSet)
+    {
+        throw std::logic_error(notImplemented);
+    }
+
+    epicsBoolean PVStructure::equals(PVField  *pv) 
     {
         throw std::logic_error(notImplemented);
     }

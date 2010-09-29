@@ -17,6 +17,7 @@ LIBSRCS += PVAuxInfoImpl.cpp
 LIBSRCS += FieldCreateFactory.cpp
 LIBSRCS += PVDataCreateFactory.cpp
 LIBSRCS += Convert.cpp
+LIBSRCS += StandardField.cpp
 
 LIBRARY=pvFactory
 

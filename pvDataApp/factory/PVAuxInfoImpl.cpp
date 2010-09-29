@@ -15,10 +15,10 @@ namespace epics { namespace pvData {
     public:
         PVAuxInfoPvt(PVField *pvField)
         :  pvField(pvField),
-           theMap(std::map<StringConst, PVScalar * >())
+           theMap(std::map<String, PVScalar * >())
         {} 
         PVField *pvField;
-        std::map<StringConst, PVScalar * > theMap;
+        std::map<String, PVScalar * > theMap;
     };
 
     PVAuxInfo::PVAuxInfo(PVField *pvField)
@@ -35,9 +35,9 @@ namespace epics { namespace pvData {
         return pImpl->pvField;
     }
 
-    typedef std::map<StringConst,PVScalar * >::const_iterator map_iterator;
+    typedef std::map<String,PVScalar * >::const_iterator map_iterator;
 
-    PVScalar * PVAuxInfo::createInfo(StringConst key,ScalarType scalarType)
+    PVScalar * PVAuxInfo::createInfo(String key,ScalarType scalarType)
     {
         map_iterator i = pImpl->theMap.find(key);
         if(i!=pImpl->theMap.end()) {
@@ -48,17 +48,17 @@ namespace epics { namespace pvData {
             pImpl->pvField->message(message,errorMessage);
         }
         PVScalar *pvScalar = pvDataCreate->createPVScalar(0,key,scalarType);
-        pImpl->theMap.insert(std::pair<StringConst,PVScalar * >(key, pvScalar));
+        pImpl->theMap.insert(std::pair<String,PVScalar * >(key, pvScalar));
         return pvScalar;
 
     }
 
-    std::map<StringConst, PVScalar * > *PVAuxInfo::getInfos()
+    std::map<String, PVScalar * > *PVAuxInfo::getInfos()
     {
         return &pImpl->theMap;
     }
 
-    PVScalar * PVAuxInfo::getInfo(StringConst key)
+    PVScalar * PVAuxInfo::getInfo(String key)
     {
         map_iterator i = pImpl->theMap.find(key);
         if(i!=pImpl->theMap.end()) return i->second;
@@ -74,7 +74,7 @@ namespace epics { namespace pvData {
     {
         map_iterator i = pImpl->theMap.begin();
         while(i!=pImpl->theMap.end()) {
-             StringConst key = i->first;
+             String key = i->first;
              PVScalar *value = i->second;
              *buf += " ";
              *buf += key.c_str();

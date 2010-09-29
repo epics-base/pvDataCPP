@@ -19,6 +19,7 @@ namespace epics { namespace pvData {
         epicsMutex *lockPtr;
     };
 
+
     class Lock : private NoDefaultMethods {
     public:
         explicit Lock(Mutex *pm)

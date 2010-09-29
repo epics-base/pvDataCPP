@@ -3,13 +3,14 @@
 #include <cstdlib>
 #include <string>
 #include <cstdio>
+#include <epicsTypes.h>
 
 #include "pvIntrospect.h"
 
 namespace epics { namespace pvData {
 
     void TypeFunc::toString(StringBuilder buf,const Type type) {
-        static StringConst unknownString = "logic error unknown Type";
+        static String unknownString = "logic error unknown Type";
         switch(type) {
         case scalar : *buf += "scalar"; break;
         case scalarArray : *buf += "scalarArray"; break;
@@ -21,24 +22,24 @@ namespace epics { namespace pvData {
     }
 
 
-    bool ScalarTypeFunc::isInteger(ScalarType type) {
-        if(type>=pvByte && type<=pvLong) return true;
-        return false;
+    epicsBoolean ScalarTypeFunc::isInteger(ScalarType type) {
+        if(type>=pvByte && type<=pvLong) return epicsTrue;
+        return epicsFalse;
     }
 
-    bool ScalarTypeFunc::isNumeric(ScalarType type) {
-        if(type>=pvByte && type<=pvDouble) return true;
-        return false;
+    epicsBoolean ScalarTypeFunc::isNumeric(ScalarType type) {
+        if(type>=pvByte && type<=pvDouble) return epicsTrue;
+        return epicsFalse;
     }
 
-    bool ScalarTypeFunc::isPrimitive(ScalarType type) {
-        if(type>=pvBoolean && type<=pvDouble) return true;
-        return false;
+    epicsBoolean ScalarTypeFunc::isPrimitive(ScalarType type) {
+        if(type>=pvBoolean && type<=pvDouble) return epicsTrue;
+        return epicsFalse;
     }
 
-    ScalarType ScalarTypeFunc::getScalarType(StringConst pvalue) {
-        static StringConst unknownString = "error unknown ScalarType";
-        if(pvalue.compare("boolean")==0) return pvBoolean;
+    ScalarType ScalarTypeFunc::getScalarType(String pvalue) {
+        static String unknownString = "error unknown ScalarType";
+        if(pvalue.compare("epicsBooleanean")==0) return pvBoolean;
         if(pvalue.compare("byte")==0) return pvByte;
         if(pvalue.compare("short")==0) return pvShort;
         if(pvalue.compare("int")==0) return pvInt;
@@ -49,7 +50,7 @@ namespace epics { namespace pvData {
         throw std::invalid_argument(unknownString);
     }
     void ScalarTypeFunc::toString(StringBuilder buf,const ScalarType scalarType) {
-        static StringConst unknownString = "logic error unknown ScalarType";
+        static String unknownString = "logic error unknown ScalarType";
         switch(scalarType) {
         case pvBoolean : *buf += "pvBoolean"; return;
         case pvByte : *buf += "pvByte"; return;;

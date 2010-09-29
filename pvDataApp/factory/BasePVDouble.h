@@ -18,14 +18,15 @@ namespace epics { namespace pvData {
     public:
         BasePVDouble(PVStructure *parent,ScalarConstPtr scalar);
         virtual ~BasePVDouble();
-        virtual double get()const;
+        virtual double get();
         virtual void put(double val);
         virtual void serialize(ByteBuffer *pbuffer,
-            SerializableControl *pflusher) const;
+            SerializableControl *pflusher) ;
         virtual void deserialize(ByteBuffer *pbuffer,
             DeserializableControl *pflusher);
-        virtual void toString(StringBuilder buf)const;
-        virtual void toString(StringBuilder buf,int indentLevel)const;
+        virtual void toString(StringBuilder buf);
+        virtual void toString(StringBuilder buf,int indentLevel);
+        virtual epicsBoolean equals(PVField  *pv) ;
     private:
         double value;
     };
@@ -36,12 +37,12 @@ namespace epics { namespace pvData {
 
     BasePVDouble::~BasePVDouble() {}
 
-    double BasePVDouble::get()const { return value;}
+    double BasePVDouble::get() { return value;}
 
     void BasePVDouble::put(double val){value = val;}
 
     void BasePVDouble::serialize(ByteBuffer *pbuffer,
-        SerializableControl *pflusher) const
+        SerializableControl *pflusher) 
     {
         throw std::logic_error(notImplemented);
     }
@@ -52,12 +53,17 @@ namespace epics { namespace pvData {
         throw std::logic_error(notImplemented);
     }
 
-    void BasePVDouble::toString(StringBuilder buf)const {toString(buf,0);}
+    void BasePVDouble::toString(StringBuilder buf) {toString(buf,0);}
 
-    void BasePVDouble::toString(StringBuilder buf,int indentLevel) const
+    void BasePVDouble::toString(StringBuilder buf,int indentLevel) 
     {
         convert->getString(buf,this,indentLevel);
         PVField::toString(buf,indentLevel);
+    }
+
+    epicsBoolean BasePVDouble::equals(PVField  *) 
+    {
+        throw std::logic_error(notImplemented);
     }
 
 }}

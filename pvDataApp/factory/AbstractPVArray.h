@@ -28,9 +28,11 @@ namespace epics { namespace pvData {
         delete pImpl;
     }
 
-     int PVArray::getLength() const {return pImpl->length;}
+     int PVArray::getLength()  {return pImpl->length;}
 
-     static StringConst fieldImmutable("field is immutable");
+     int PVArray::getCapacity()  {return pImpl->capacity;}
+
+     static String fieldImmutable("field is immutable");
 
      void PVArray::setLength(int length) {
         if(PVField::isImmutable()) {
@@ -43,7 +45,7 @@ namespace epics { namespace pvData {
      }
 
 
-     epicsBoolean PVArray::isCapacityImmutable() const
+     epicsBoolean PVArray::isCapacityImmutable() 
      {
           if(PVField::isImmutable()) {
               return epicsFalse;
@@ -60,7 +62,7 @@ namespace epics { namespace pvData {
         pImpl->capacityMutable = isMutable;
      }
 
-     static StringConst capacityImmutable("capacity is immutable");
+     static String capacityImmutable("capacity is immutable");
 
      void PVArray::setCapacity(int capacity) {
         if(PVField::isImmutable()) {
@@ -74,9 +76,9 @@ namespace epics { namespace pvData {
         pImpl->capacity = capacity;
      }
 
-     void PVArray::toString(StringBuilder buf) const {toString(buf,0);}
+     void PVArray::toString(StringBuilder buf)  {toString(buf,0);}
 
-     void PVArray::toString(StringBuilder buf, int indentLevel) const
+     void PVArray::toString(StringBuilder buf, int indentLevel) 
      {
         throw std::logic_error(notImplemented);
      }

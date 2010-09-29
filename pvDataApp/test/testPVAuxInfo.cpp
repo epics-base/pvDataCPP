@@ -17,7 +17,7 @@ static String buffer("");
 
 void testDouble() {
     printf("\ntestDouble\n");
-    StringConst valueName("value");
+    String valueName("value");
     ScalarConstPtr pscalar = fieldCreate->createScalar(valueName,pvDouble);
     PVScalar *pvScalar = pvDataCreate->createPVScalar(0,pscalar);
     PVDouble *pvValue = dynamic_cast<PVDouble *>(pvScalar);
@@ -28,7 +28,7 @@ void testDouble() {
         fprintf(stderr,"ERROR getValue put %f get %f\n",value,getValue);
     }
     PVAuxInfo *auxInfo = pvValue->getPVAuxInfo();
-    StringConst stringName("string");
+    String stringName("string");
     pvScalar = auxInfo->createInfo(stringName,pvDouble);
     PVDouble *doubleInfo = dynamic_cast<PVDouble *>(pvScalar);
     doubleInfo->put(100.0);

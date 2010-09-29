@@ -11,6 +11,9 @@
 #include "serialize.h"
 namespace epics { namespace pvData { 
 
+    class PVAuxInfo;
+    class PostHandler;
+
     class PVField;
     class PVScalar;
     class PVBoolean;
@@ -35,6 +38,8 @@ namespace epics { namespace pvData {
     class PVStructure;
     class PVStructureArray;
 
+
+
     // NOTE this prevents compiler from generating default methods for this and 
     // derived classes
     class PVAuxInfo : private NoDefaultMethods {
@@ -42,9 +47,9 @@ namespace epics { namespace pvData {
         PVAuxInfo(PVField *pvField);
         ~PVAuxInfo();
         PVField * getPVField();
-        PVScalar * createInfo(StringConst key,ScalarType scalarType);
-        std::map<StringConst, PVScalar * > *getInfos();
-        PVScalar * getInfo(StringConst key);
+        PVScalar * createInfo(String key,ScalarType scalarType);
+        std::map<String, PVScalar * > *getInfos();
+        PVScalar * getInfo(String key);
         void toString(StringBuilder buf);
         void toString(StringBuilder buf,int indentLevel);
     private:
@@ -59,38 +64,39 @@ namespace epics { namespace pvData {
     class PVField : public Requester, public Serializable ,private NoDefaultMethods{
     public:
         virtual ~PVField();
-        StringConst getRequesterName() const;
-        virtual void message(StringConst message,MessageType messageType) const;
+        String getRequesterName() ;
+        virtual void message(String message,MessageType messageType) ;
         virtual void setRequester(Requester *prequester);
-        int getFieldOffset() const;
-        int getNextFieldOffset() const;
-        int getNumberFields() const;
+        int getFieldOffset() ;
+        int getNextFieldOffset() ;
+        int getNumberFields() ;
         PVAuxInfo * getPVAuxInfo();
-        epicsBoolean isImmutable() const;
+        epicsBoolean isImmutable() ;
         void setImmutable();
-        FieldConstPtr getField() const;
-        PVStructure * getParent() const;
+        FieldConstPtr getField() ;
+        PVStructure * getParent() ;
         void replacePVField(PVField * newPVField);
-        void renameField(StringConst  newName);
-        void postPut() const;
+        void renameField(String  newName);
+        void postPut() ;
         void setPostHandler(PostHandler *postHandler);
-        virtual void toString(StringBuilder buf) const;
-        virtual void toString(StringBuilder buf,int indentLevel) const;
+        virtual void toString(StringBuilder buf) ;
+        virtual void toString(StringBuilder buf,int indentLevel) ;
+        virtual epicsBoolean equals(PVField *pv)  = 0;
     protected:
         PVField(PVStructure *parent,FieldConstPtr field);
         void replaceStructure();
     private:
         class PVFieldPvt *pImpl;
-        static void computeOffset(const PVField * const pvField);
-        static void computeOffset(const PVField * const pvField,int offset);
+        static void computeOffset(PVField *pvField);
+        static void computeOffset(PVField *pvField,int offset);
     };
 
     class PVScalar : public PVField {
     public:
         virtual ~PVScalar();
-        ScalarConstPtr getScalar() const;
-        virtual void toString(StringBuilder buf) const = 0;
-        virtual void toString(StringBuilder buf,int indentLevel) const = 0;
+        ScalarConstPtr getScalar() ;
+        virtual void toString(StringBuilder buf)  = 0;
+        virtual void toString(StringBuilder buf,int indentLevel)  = 0;
     protected:
         PVScalar(PVStructure *parent,ScalarConstPtr scalar);
     };
@@ -98,131 +104,129 @@ namespace epics { namespace pvData {
     class PVArray : public PVField, public SerializableArray {
     public:
         virtual ~PVArray();
-        int getLength() const;
+        int getLength() ;
         void setLength(int length);
-        int getCapacity() const;
-        epicsBoolean isCapacityImmutable() const;
+        int getCapacity() ;
+        epicsBoolean isCapacityImmutable() ;
         void setCapacityImmutable(epicsBoolean isMutable);
         virtual void setCapacity(int capacity) = 0;
         virtual void serialize(ByteBuffer *pbuffer,
-            SerializableControl *pflusher) const = 0;
+            SerializableControl *pflusher)  = 0;
         virtual void deserialize(ByteBuffer *pbuffer,
             DeserializableControl *pflusher) = 0;
         virtual void serialize(ByteBuffer *pbuffer,
-            SerializableControl *pflusher, int offset, int count) const = 0;
-        virtual void toString(StringBuilder buf) const;
-        virtual void toString(StringBuilder buf,int indentLevel) const = 0;
+            SerializableControl *pflusher, int offset, int count)  = 0;
+        virtual void toString(StringBuilder buf) ;
+        virtual void toString(StringBuilder buf,int indentLevel)  = 0;
     protected:
         PVArray(PVStructure *parent,FieldConstPtr field);
     private:
-        class PVArrayPvt *pImpl;
+        class PVArrayPvt * pImpl;
     };
 
 
     class PVScalarArray : public PVArray {
     public:
         virtual ~PVScalarArray();
-        ScalarArrayConstPtr getScalarArray() const;
+        ScalarArrayConstPtr getScalarArray() ;
         virtual void setCapacity(int capacity) = 0;
         virtual void serialize(ByteBuffer *pbuffer,
-            SerializableControl *pflusher) const = 0;
+            SerializableControl *pflusher)  = 0;
         virtual void deserialize(ByteBuffer *pbuffer,
             DeserializableControl *pflusher) = 0;
         virtual void serialize(ByteBuffer *pbuffer,
-            SerializableControl *pflusher, int offset, int count) const = 0;
-        virtual void toString(StringBuilder buf) const = 0;
-        virtual void toString(StringBuilder buf,int indentLevel) const = 0;
+            SerializableControl *pflusher, int offset, int count)  = 0;
+        virtual void toString(StringBuilder buf)  = 0;
+        virtual void toString(StringBuilder buf,int indentLevel)  = 0;
     protected:
         PVScalarArray(PVStructure *parent,ScalarArrayConstPtr scalarArray);
     private:
     };
 
     typedef PVStructure * PVStructurePtr;
-    typedef PVStructurePtr * PVStructureArrayPtr;
-
+    typedef PVStructurePtr* PVStructurePtrArray;
     class StructureArrayData {
     public:
-        PVStructureArrayPtr data;
+        PVStructurePtrArray data;
         int offset;
     };
 
     class PVStructureArray : public PVArray {
     public:
         virtual ~PVStructureArray();
-        virtual StructureArrayConstPtr getStructureArray() const;
+        virtual StructureArrayConstPtr getStructureArray() ;
         virtual int get(int offset, int length,
-            StructureArrayData *data) const;
+            StructureArrayData *data) ;
         virtual int put(int offset,int length,
-            PVStructureArrayPtr  from, int fromOffset);
-        virtual void shareData(PVStructureArrayPtr from);
+            PVStructurePtrArray from, int fromOffset);
+        virtual void shareData(StructureArrayData *from);
         virtual void serialize(ByteBuffer *pbuffer,
-            SerializableControl *pflusher) const;
-        virtual void deserialize(ByteBuffer *pbuffer,
+            SerializableControl *pflusher) ;
+        virtual void deserialize(ByteBuffer *buffer,
             DeserializableControl *pflusher);
         virtual void serialize(ByteBuffer *pbuffer,
-            SerializableControl *pflusher, int offset, int count) const;
-        virtual void toString(StringBuilder buf) const;
-        virtual void toString(StringBuilder buf,int indentLevel) const;
+            SerializableControl *pflusher, int offset, int count) ;
+        virtual void toString(StringBuilder buf) ;
+        virtual void toString(StringBuilder buf,int indentLevel) ;
+        virtual epicsBoolean equals(PVField *pv) ;
     protected:
         PVStructureArray(PVStructure *parent,
             StructureArrayConstPtr structureArray);
     private:
-        PVStructureArray(); // not implemented
-        PVStructureArray(PVStructureArray const & ); // not implemented
-        PVStructureArray & operator=(PVStructureArray const &); //not implemented
         class PVStructureArrayPvt *pImpl;
     };
     
-    typedef PVField * PVFieldPtr;
-    typedef PVFieldPtr * PVFieldArrayPtr;
+    typedef PVField* PVFieldPtr;
+    typedef PVFieldPtr * PVFieldPtrArray;
 
     class PVStructure : public PVField,public BitSetSerializable {
     public:
         virtual ~PVStructure();
         StructureConstPtr getStructure();
-        PVFieldArrayPtr getPVFields();
-        PVFieldPtr getSubField(StringConst fieldName);
-        PVFieldPtr getSubField(int fieldOffset);
-        void appendPVField(PVField * pvField);
-        void appendPVFields(PVFieldArrayPtr pvFields);
-        void removePVField(StringConst fieldName);
-        PVBoolean *getBooleanField(StringConst fieldName);
-        PVByte *getByteField(StringConst fieldName);
-        PVShort *getShortField(StringConst fieldName);
-        PVInt *getIntField(StringConst fieldName);
-        PVLong *getLongField(StringConst fieldName);
-        PVFloat *getFloatField(StringConst fieldName);
-        PVDouble *getDoubleField(StringConst fieldName);
-        PVString *getStringField(StringConst fieldName);
-        PVStructure *getStructureField(StringConst fieldName);
+        PVFieldPtrArray getPVFields();
+        PVField *getSubField(String fieldName);
+        PVField *getSubField(int fieldOffset);
+        void appendPVField(PVField *pvField);
+        void appendPVFields(PVFieldPtrArray pvFields);
+        void removePVField(String fieldName);
+        PVBoolean *getBooleanField(String fieldName);
+        PVByte *getByteField(String fieldName);
+        PVShort *getShortField(String fieldName);
+        PVInt *getIntField(String fieldName);
+        PVLong *getLongField(String fieldName);
+        PVFloat *getFloatField(String fieldName);
+        PVDouble *getDoubleField(String fieldName);
+        PVString *getStringField(String fieldName);
+        PVStructure *getStructureField(String fieldName);
         PVScalarArray *getScalarArrayField(
-            StringConst fieldName,ScalarType elementType);
-        PVStructureArray *getStructureArrayField(StringConst fieldName);
-        StringConst getExtendsStructureName();
+            String fieldName,ScalarType elementType);
+        PVStructureArray *getStructureArrayField(String fieldName);
+        String getExtendsStructureName();
         epicsBoolean putExtendsStructureName(
-            StringConst extendsStructureName);
-        virtual void toString(StringBuilder buf) const;
-        virtual void toString(StringBuilder buf,int indentLevel) const;
+            String extendsStructureName);
+        virtual void toString(StringBuilder buf) ;
+        virtual void toString(StringBuilder buf,int indentLevel) ;
+        virtual epicsBoolean equals(PVField *pv) ;
         virtual void serialize(
-            ByteBuffer *pbuffer,SerializableControl *pflusher) const;
+            ByteBuffer *pbuffer,SerializableControl *pflusher) ;
         virtual void deserialize(
             ByteBuffer *pbuffer,DeserializableControl *pflusher);
         virtual void serialize(ByteBuffer *pbuffer,
-            SerializableControl *pflusher, int offset, int count) const;
+            SerializableControl *pflusher, int offset, int count) ;
         virtual void serialize(ByteBuffer *pbuffer,
-            SerializableControl *pflusher,BitSet *pbitSet) const;
+            SerializableControl *pflusher,BitSet *pbitSet) ;
         virtual void deserialize(ByteBuffer *pbuffer,
             DeserializableControl*pflusher,BitSet *pbitSet);
     protected:
         PVStructure(PVStructure *parent,StructureConstPtr structure);
     private:
-        class PVStructurePvt *pImpl;
+        class PVStructurePvt * pImpl;
     };
 
     class PVBoolean : public PVScalar {
     public:
         virtual ~PVBoolean();
-        virtual epicsBoolean get() const = 0;
+        virtual epicsBoolean get()  = 0;
         virtual void put(epicsBoolean value) = 0;
     protected:
         PVBoolean(PVStructure *parent,ScalarConstPtr scalar)
@@ -233,7 +237,7 @@ namespace epics { namespace pvData {
     class PVByte : public PVScalar {
     public:
         virtual ~PVByte();
-        virtual epicsInt8 get() const = 0;
+        virtual epicsInt8 get()  = 0;
         virtual void put(epicsInt8 value) = 0;
     protected:
         PVByte(PVStructure *parent,ScalarConstPtr scalar)
@@ -244,7 +248,7 @@ namespace epics { namespace pvData {
     class PVShort : public PVScalar {
     public:
         virtual ~PVShort();
-        virtual epicsInt16 get() const = 0;
+        virtual epicsInt16 get()  = 0;
         virtual void put(epicsInt16 value) = 0;
     protected:
         PVShort(PVStructure *parent,ScalarConstPtr scalar)
@@ -255,7 +259,7 @@ namespace epics { namespace pvData {
     class PVInt : public PVScalar{
     public:
         virtual ~PVInt();
-        virtual epicsInt32 get() const = 0;
+        virtual epicsInt32 get()  = 0;
         virtual void put(epicsInt32 value) = 0;
     protected:
         PVInt(PVStructure *parent,ScalarConstPtr scalar)
@@ -266,7 +270,7 @@ namespace epics { namespace pvData {
     class PVLong : public PVScalar {
     public:
         virtual ~PVLong();
-        virtual epicsInt64 get() const = 0;
+        virtual epicsInt64 get()  = 0;
         virtual void put(epicsInt64 value) = 0;
     protected:
         PVLong(PVStructure *parent,ScalarConstPtr scalar)
@@ -277,7 +281,7 @@ namespace epics { namespace pvData {
     class PVFloat : public PVScalar {
     public:
         virtual ~PVFloat();
-        virtual float get() const = 0;
+        virtual float get()  = 0;
         virtual void put(float value) = 0;
     protected:
         PVFloat(PVStructure *parent,ScalarConstPtr scalar)
@@ -288,7 +292,7 @@ namespace epics { namespace pvData {
     class PVDouble : public PVScalar {
     public:
         virtual ~PVDouble();
-        virtual double get() const = 0;
+        virtual double get()  = 0;
         virtual void put(double value) = 0;
     protected:
         PVDouble(PVStructure *parent,ScalarConstPtr scalar)
@@ -299,123 +303,122 @@ namespace epics { namespace pvData {
     class PVString : public PVScalar {
     public:
         virtual ~PVString();
-        virtual StringConst get() const = 0;
-        virtual void put(StringConst value) = 0;
+        virtual String get()  = 0;
+        virtual void put(String value) = 0;
     protected:
         PVString(PVStructure *parent,ScalarConstPtr scalar)
         : PVScalar(parent,scalar) {}
     private:
     };
 
-    typedef epicsBoolean * EpicsBooleanArrayPtr;
 
+    typedef epicsBoolean * BooleanArray;
     class BooleanArrayData {
     public:
-        EpicsBooleanArrayPtr data;
+        BooleanArray data;
         int offset;
     };
 
     class PVBooleanArray : public PVScalarArray {
     public:
         virtual ~PVBooleanArray();
-        virtual void toString(StringBuilder buf) const;
-        virtual void toString(StringBuilder buf,int indentLevel) const;
-        virtual int get(int offset, int length, BooleanArrayData *data) const;
-        virtual int put(int offset,int length, EpicsBooleanArrayPtr  from, int fromOffset);
-        virtual void shareData(EpicsBooleanArrayPtr from);
-        virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) const;
+        virtual void toString(StringBuilder buf) ;
+        virtual void toString(StringBuilder buf,int indentLevel) ;
+        virtual int get(int offset, int length, BooleanArrayData *data) ;
+        virtual int put(int offset,int length, BooleanArray from, int fromOffset);
+        virtual void shareData(BooleanArrayData *from);
+        virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) ;
         virtual void deserialize(ByteBuffer *pbuffer,DeserializableControl *pflusher);
     protected:
         PVBooleanArray(PVStructure *parent,ScalarConstPtr scalar);
     private:
     };
 
-    typedef signed char * ByteArrayPtr;
 
+    typedef epicsInt8 * ByteArray;
     class ByteArrayData {
     public:
-        ByteArrayPtr data;
+        ByteArray data;
         int offset;
     };
 
     class PVByteArray : public PVScalarArray {
     public:
         virtual ~PVByteArray();
-        virtual void toString(StringBuilder buf) const;
-        virtual void toString(StringBuilder buf,int indentLevel) const;
-        virtual int get(int offset, int length, ByteArrayData *data) const;
-        virtual int put(int offset,int length, ByteArrayPtr  from, int fromOffset);
-        virtual void shareData(ByteArrayPtr from);
-        virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) const;
+        virtual void toString(StringBuilder buf) ;
+        virtual void toString(StringBuilder buf,int indentLevel) ;
+        virtual int get(int offset, int length, ByteArrayData *data) ;
+        virtual int put(int offset,int length, ByteArray  from, int fromOffset);
+        virtual void shareData(ByteArrayData *from);
+        virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) ;
         virtual void deserialize(ByteBuffer *pbuffer,DeserializableControl *pflusher);
     protected:
         PVByteArray(PVStructure *parent,ScalarConstPtr scalar);
     private:
     };
 
-    typedef short * ShortArrayPtr;
 
+    typedef epicsInt16 * ShortArray;
     class ShortArrayData {
     public:
-        ShortArrayPtr data;
+        ShortArray data;
         int offset;
     };
 
     class PVShortArray : public PVScalarArray {
     public:
         virtual ~PVShortArray();
-        virtual void toString(StringBuilder buf) const;
-        virtual void toString(StringBuilder buf,int indentLevel) const;
-        virtual int get(int offset, int length, ShortArrayData *data) const;
-        virtual int put(int offset,int length, ShortArrayPtr  from, int fromOffset);
-        virtual void shareData(ShortArrayPtr from);
-        virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) const;
+        virtual void toString(StringBuilder buf) ;
+        virtual void toString(StringBuilder buf,int indentLevel) ;
+        virtual int get(int offset, int length, ShortArrayData *data) ;
+        virtual int put(int offset,int length, ShortArray  from, int fromOffset);
+        virtual void shareData(ShortArrayData *from);
+        virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) ;
         virtual void deserialize(ByteBuffer *pbuffer,DeserializableControl *pflusher);
     protected:
         PVShortArray(PVStructure *parent,ScalarConstPtr scalar);
     private:
     };
 
-    typedef int * IntArrayPtr;
-
+    typedef epicsInt32 * IntArray;
     class IntArrayData {
     public:
-        IntArrayPtr data;
+        IntArray data;
         int offset;
     };
 
     class PVIntArray : public PVScalarArray {
     public:
         virtual ~PVIntArray();
-        virtual void toString(StringBuilder buf) const;
-        virtual void toString(StringBuilder buf,int indentLevel) const;
-        virtual int get(int offset, int length, IntArrayData *data) const;
-        virtual int put(int offset,int length, IntArrayPtr  from, int fromOffset);
-        virtual void shareData(IntArrayPtr from);
-        virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) const;
+        virtual void toString(StringBuilder buf) ;
+        virtual void toString(StringBuilder buf,int indentLevel) ;
+        virtual int get(int offset, int length, IntArrayData *data) ;
+        virtual int put(int offset,int length, IntArray  from, int fromOffset);
+        virtual void shareData(IntArrayData *from);
+        virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) ;
         virtual void deserialize(ByteBuffer *pbuffer,DeserializableControl *pflusher);
     protected:
         PVIntArray(PVStructure *parent,ScalarConstPtr scalar);
     private:
     };
 
-    typedef long * LongArrayPtr;
 
+    typedef epicsInt64 * LongArray;
     class LongArrayData {
     public:
-        LongArrayPtr data;
+        LongArray data;
         int offset;
     };
 
     class PVLongArray : public PVScalarArray {
     public:
         virtual ~PVLongArray();
-        virtual void toString(StringBuilder buf) const;
-        virtual void toString(StringBuilder buf,int indentLevel) const;
-        virtual int get(int offset, int length, LongArrayData *data) const;
-        virtual int put(int offset,int length, LongArrayPtr  from, int fromOffset);
-        virtual void shareData(LongArrayPtr from);
-        virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) const;
+        virtual void toString(StringBuilder buf) ;
+        virtual void toString(StringBuilder buf,int indentLevel) ;
+        virtual int get(int offset, int length, LongArrayData *data) ;
+        virtual int put(int offset,int length, LongArray  from, int fromOffset);
+        virtual void shareData(LongArrayData *from);
+        virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) ;
         virtual void deserialize(ByteBuffer *pbuffer,DeserializableControl *pflusher);
     protected:
         PVLongArray(PVStructure *parent,ScalarConstPtr scalar);
@@ -423,69 +426,68 @@ namespace epics { namespace pvData {
     };
 
 
-    typedef float * FloatArrayPtr;
-
+    typedef float * FloatArray;
     class FloatArrayData {
     public:
-        FloatArrayPtr data;
+        FloatArray data;
         int offset;
     };
 
     class PVFloatArray : public PVScalarArray {
     public:
         virtual ~PVFloatArray();
-        virtual void toString(StringBuilder buf) const;
-        virtual void toString(StringBuilder buf,int indentLevel) const;
-        virtual int get(int offset, int length, FloatArrayData *data) const;
-        virtual int put(int offset,int length, FloatArrayPtr  from, int fromOffset);
-        virtual void shareData(FloatArrayPtr from);
-        virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) const;
+        virtual void toString(StringBuilder buf) ;
+        virtual void toString(StringBuilder buf,int indentLevel) ;
+        virtual int get(int offset, int length, FloatArrayData *data) ;
+        virtual int put(int offset,int length, FloatArray  from, int fromOffset);
+        virtual void shareData(FloatArrayData *from);
+        virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) ;
         virtual void deserialize(ByteBuffer *pbuffer,DeserializableControl *pflusher);
     protected:
         PVFloatArray(PVStructure *parent,ScalarConstPtr scalar);
     private:
     };
 
-    typedef double * DoubleArrayPtr;
 
+    typedef double * DoubleArray;
     class DoubleArrayData {
     public:
-        DoubleArrayPtr data;
+        DoubleArray data;
         int offset;
     };
 
     class PVDoubleArray : public PVScalarArray {
     public:
         virtual ~PVDoubleArray();
-        virtual void toString(StringBuilder buf) const = 0;
-        virtual void toString(StringBuilder buf,int indentLevel) const = 0;
-        virtual int get(int offset, int length, DoubleArrayData *data) const = 0;
-        virtual int put(int offset,int length, DoubleArrayPtr  from, int fromOffset) = 0;
-        virtual void shareData(DoubleArrayPtr from) = 0;
-        virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) const = 0;
+        virtual void toString(StringBuilder buf)  = 0;
+        virtual void toString(StringBuilder buf,int indentLevel)  = 0;
+        virtual int get(int offset, int length, DoubleArrayData *data)  = 0;
+        virtual int put(int offset,int length, DoubleArray  from, int fromOffset) = 0;
+        virtual void shareData(DoubleArrayData *from) = 0;
+        virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher)  = 0;
         virtual void deserialize(ByteBuffer *pbuffer,DeserializableControl *pflusher) = 0;
     protected:
         PVDoubleArray(PVStructure *parent,ScalarArrayConstPtr scalar);
     private:
     };
 
-    typedef std::string * StringArrayPtr;
 
+    typedef String * StringPtrArray;
     class StringArrayData {
     public:
-        StringArrayPtr data;
+        StringPtrArray data;
         int offset;
     };
 
     class PVStringArray : public PVScalarArray {
     public:
         virtual ~PVStringArray();
-        virtual void toString(StringBuilder buf) const;
-        virtual void toString(StringBuilder buf,int indentLevel) const;
-        virtual int get(int offset, int length, StringArrayData *data) const;
-        virtual int put(int offset,int length, StringArrayPtr  from, int fromOffset);
-        virtual void shareData(StringArrayPtr from);
-        virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) const;
+        virtual void toString(StringBuilder buf) ;
+        virtual void toString(StringBuilder buf,int indentLevel) ;
+        virtual int get(int offset, int length, StringArrayData *data) ;
+        virtual int put(int offset,int length, StringArray  from, int fromOffset);
+        virtual void shareData(StringArrayData from);
+        virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) ;
         virtual void deserialize(ByteBuffer *pbuffer,DeserializableControl *pflusher);
     protected:
         PVStringArray(PVStructure *parent,ScalarConstPtr scalar);
@@ -497,26 +499,26 @@ namespace epics { namespace pvData {
        PVField *createPVField(PVStructure *parent,
            FieldConstPtr field);
        PVField *createPVField(PVStructure *parent,
-           StringConst fieldName,PVField * fieldToClone);
+           String fieldName,PVField * fieldToClone);
        PVScalar *createPVScalar(PVStructure *parent,ScalarConstPtr scalar);
        PVScalar *createPVScalar(PVStructure *parent,
-           StringConst fieldName,ScalarType scalarType);
+           String fieldName,ScalarType scalarType);
        PVScalar *createPVScalar(PVStructure *parent,
-           StringConst fieldName,PVScalar * scalarToClone);
+           String fieldName,PVScalar * scalarToClone);
        PVScalarArray *createPVScalarArray(PVStructure *parent,
            ScalarArrayConstPtr scalarArray);
        PVScalarArray *createPVScalarArray(PVStructure *parent,
-           StringConst fieldName,ScalarType elementType);
+           String fieldName,ScalarType elementType);
        PVScalarArray *createPVScalarArray(PVStructure *parent,
-           StringConst fieldName,PVScalarArray * scalarArrayToClone);
+           String fieldName,PVScalarArray * scalarArrayToClone);
        PVStructureArray *createPVStructureArray(PVStructure *parent,
            StructureArrayConstPtr structureArray);
        PVStructure *createPVStructure(PVStructure *parent,
            StructureConstPtr structure);
        PVStructure *createPVStructure(PVStructure *parent,
-           StringConst fieldName,FieldConstPtrArray fields);
+           String fieldName,FieldConstPtrArray fields);
        PVStructure *createPVStructure(PVStructure *parent,
-           StringConst fieldName,PVStructure *structToClone);
+           String fieldName,PVStructure *structToClone);
     protected:
        PVDataCreate();
     };

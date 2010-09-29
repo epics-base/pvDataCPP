@@ -3,7 +3,8 @@
 #include <cstdlib>
 #include <string>
 #include <cstdio>
-#include <lock.h>
+#include "lock.h"
+#include "pvIntrospect.h"
 #include "pvData.h"
 #include "convert.h"
 #include "factory.h"
@@ -45,7 +46,7 @@ namespace epics { namespace pvData {
    };
 
    PVField *PVDataCreate::createPVField(PVStructure *parent,
-           StringConst fieldName,PVField * fieldToClone)
+           String fieldName,PVField * fieldToClone)
    {
         switch(fieldToClone->getField()->getType()) {
         case scalar:
@@ -78,7 +79,7 @@ namespace epics { namespace pvData {
    };
 
    PVScalar *PVDataCreate::createPVScalar(PVStructure *parent,
-           StringConst fieldName,ScalarType scalarType)
+           String fieldName,ScalarType scalarType)
    {
         if(fieldCreate==0) fieldCreate = getFieldCreate();
         ScalarConstPtr scalar = fieldCreate->createScalar(fieldName,scalarType);
@@ -86,7 +87,7 @@ namespace epics { namespace pvData {
    };
 
    PVScalar *PVDataCreate::createPVScalar(PVStructure *parent,
-           StringConst fieldName,PVScalar * scalarToClone)
+           String fieldName,PVScalar * scalarToClone)
    {
         PVScalar *pvScalar = createPVScalar(parent,fieldName,
             scalarToClone->getScalar()->getScalarType());
@@ -114,13 +115,13 @@ namespace epics { namespace pvData {
    };
 
    PVScalarArray *PVDataCreate::createPVScalarArray(PVStructure *parent,
-           StringConst fieldName,ScalarType elementType)
+           String fieldName,ScalarType elementType)
    {
         throw std::logic_error(notImplemented);
    };
 
    PVScalarArray *PVDataCreate::createPVScalarArray(PVStructure *parent,
-           StringConst fieldName,PVScalarArray * scalarArrayToClone)
+           String fieldName,PVScalarArray * scalarArrayToClone)
    {
         throw std::logic_error(notImplemented);
    };
@@ -138,13 +139,13 @@ namespace epics { namespace pvData {
    };
 
    PVStructure *PVDataCreate::createPVStructure(PVStructure *parent,
-           StringConst fieldName,FieldConstPtrArray fields)
+           String fieldName,FieldConstPtrArray fields)
    {
         throw std::logic_error(notImplemented);
    };
 
    PVStructure *PVDataCreate::createPVStructure(PVStructure *parent,
-           StringConst fieldName,PVStructure *structToClone)
+           String fieldName,PVStructure *structToClone)
    {
         throw std::logic_error(notImplemented);
    };

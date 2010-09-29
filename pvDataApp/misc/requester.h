@@ -3,15 +3,22 @@
 #ifndef REQUESTER_H
 #define REQUESTER_H
 namespace epics { namespace pvData { 
-    
-    enum MessageType {infoMessage,warningMessage,errorMessage,fatalErrorMessage};
 
-    static std::string messageTypeName[] = {"info","warning","error","fatalError"};
+    class Requester;
+    
+    enum MessageType {
+       infoMessage,warningMessage,errorMessage,fatalErrorMessage
+    };
+
+    static std::string messageTypeName[] = {
+       "info","warning","error","fatalError"
+    };
     
     class Requester {
     public:
-        virtual StringConst getRequesterName() const = 0;
-        virtual void message(StringConst message,MessageType messageType) const = 0;
+        virtual String getRequesterName() = 0;
+        virtual void message(String message,MessageType messageType) = 0;
     };
+
 }}
 #endif  /* REQUESTER_H */

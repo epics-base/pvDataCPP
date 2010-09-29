@@ -20,22 +20,22 @@ namespace epics { namespace pvData {
 
     class BaseField : public Field {
     public:
-       BaseField(StringConst fieldName,Type type);
+       BaseField(String fieldName,Type type);
        virtual ~BaseField();
        virtual void decReferenceCount() const;
        virtual void incReferenceCount() const {referenceCount++;}
        virtual int getReferenceCount() const {return referenceCount;}
-       virtual StringConst getFieldName() const {return fieldName;}
+       virtual String getFieldName() const {return fieldName;}
        virtual Type getType() const {return type;}
        virtual void toString(StringBuilder buf) const {return toString(buf,0);}
        virtual void toString(StringBuilder buf,int indentLevel) const;
     private:
-       StringConst fieldName;
+       String fieldName;
        Type type;
        mutable volatile int referenceCount;
     };
 
-    BaseField::BaseField(StringConst fieldName,Type type)
+    BaseField::BaseField(String fieldName,Type type)
        :fieldName(fieldName),type(type), referenceCount(0){}
 
     BaseField::~BaseField() {
@@ -65,12 +65,12 @@ namespace epics { namespace pvData {
 
     class BaseScalar: private BaseField,public Scalar {
     public:
-        BaseScalar(StringConst fieldName,ScalarType scalarType);
+        BaseScalar(String fieldName,ScalarType scalarType);
         virtual ~BaseScalar();
         virtual void incReferenceCount() const {BaseField::incReferenceCount();}
         virtual void decReferenceCount() const {BaseField::decReferenceCount();}
         virtual int getReferenceCount() const {return BaseField::getReferenceCount();}
-        virtual StringConst getFieldName() const{ return BaseField::getFieldName(); }
+        virtual String getFieldName() const{ return BaseField::getFieldName(); }
         virtual Type getType() const{return BaseField::getType();}
         virtual ScalarType getScalarType() const { return scalarType;}
         virtual void toString(StringBuilder buf) const {toString(buf,0);}
@@ -79,7 +79,7 @@ namespace epics { namespace pvData {
         ScalarType scalarType;
     };
 
-    BaseScalar::BaseScalar(StringConst fieldName,ScalarType scalarType)
+    BaseScalar::BaseScalar(String fieldName,ScalarType scalarType)
            : BaseField(fieldName,scalar),scalarType(scalarType){}
     BaseScalar::~BaseScalar() {}
 
@@ -94,12 +94,12 @@ namespace epics { namespace pvData {
 
     class BaseScalarArray: private BaseField,public ScalarArray {
     public:
-        BaseScalarArray(StringConst fieldName,ScalarType elementType);
+        BaseScalarArray(String fieldName,ScalarType elementType);
         virtual ~BaseScalarArray();
         virtual void incReferenceCount() const {BaseField::incReferenceCount();}
         virtual void decReferenceCount() const {BaseField::decReferenceCount();}
         virtual int getReferenceCount() const {return BaseField::getReferenceCount();}
-        virtual StringConst getFieldName() const{ return BaseField::getFieldName(); }
+        virtual String getFieldName() const{ return BaseField::getFieldName(); }
         virtual Type getType() const{return BaseField::getType();}
         virtual ScalarType getElementType() const { return elementType;}
         virtual void toString(StringBuilder buf) const {toString(buf,0);}
@@ -109,7 +109,7 @@ namespace epics { namespace pvData {
     };
 
     BaseScalarArray::BaseScalarArray
-           (StringConst fieldName,ScalarType elementType)
+           (String fieldName,ScalarType elementType)
            : BaseField(fieldName,scalar),elementType(elementType){}
     BaseScalarArray::~BaseScalarArray() {}
 
@@ -124,16 +124,16 @@ namespace epics { namespace pvData {
 
     class BaseStructure: private BaseField,public Structure {
     public:
-        BaseStructure(StringConst fieldName, int numberFields,FieldConstPtrArray fields);
+        BaseStructure(String fieldName, int numberFields,FieldConstPtrArray fields);
         virtual ~BaseStructure();
         virtual void incReferenceCount() const {BaseField::incReferenceCount();}
         virtual void decReferenceCount() const {BaseField::decReferenceCount();}
         virtual int getReferenceCount() const {return BaseField::getReferenceCount();}
-        virtual StringConst getFieldName() const{ return BaseField::getFieldName(); }
+        virtual String getFieldName() const{ return BaseField::getFieldName(); }
         virtual Type getType() const{return BaseField::getType();}
         virtual int const getNumberFields() const {return numberFields;}
-        virtual FieldConstPtr getField(StringConst fieldName) const;
-        virtual int getFieldIndex(StringConst fieldName) const;
+        virtual FieldConstPtr getField(String fieldName) const;
+        virtual int getFieldIndex(String fieldName) const;
         virtual FieldConstPtrArray getFields() const { return fields;}
         virtual void toString(StringBuilder buf) const {toString(buf,0);}
         virtual void toString(StringBuilder buf,int indentLevel) const;
@@ -142,17 +142,17 @@ namespace epics { namespace pvData {
         FieldConstPtrArray  fields;
     };
 
-    BaseStructure::BaseStructure (StringConst fieldName,
+    BaseStructure::BaseStructure (String fieldName,
         int numberFields, FieldConstPtrArray fields)
     : BaseField(fieldName,structure),
           numberFields(numberFields),
           fields(fields)
     {
         for(int i=0; i<numberFields; i++) {
-            StringConst name = fields[i]->getFieldName();
+            String name = fields[i]->getFieldName();
             // look for duplicates
             for(int j=i+1; j<numberFields; j++) {
-                StringConst otherName = fields[j]->getFieldName();
+                String otherName = fields[j]->getFieldName();
                 int result = name.compare(otherName);
                 if(result==0) {
                     String  message("duplicate fieldName ");
@@ -172,7 +172,7 @@ namespace epics { namespace pvData {
         }
     }
 
-    FieldConstPtr  BaseStructure::getField(StringConst fieldName) const {
+    FieldConstPtr  BaseStructure::getField(String fieldName) const {
         for(int i=0; i<numberFields; i++) {
             FieldConstPtr pfield = fields[i];
             int result = fieldName.compare(pfield->getFieldName());
@@ -181,7 +181,7 @@ namespace epics { namespace pvData {
         return 0;
     }
 
-    int BaseStructure::getFieldIndex(StringConst fieldName) const {
+    int BaseStructure::getFieldIndex(String fieldName) const {
         for(int i=0; i<numberFields; i++) {
             FieldConstPtr pfield = fields[i];
             int result = fieldName.compare(pfield->getFieldName());
@@ -205,12 +205,12 @@ namespace epics { namespace pvData {
 
     class BaseStructureArray: private BaseField,public StructureArray {
     public:
-        BaseStructureArray(StringConst fieldName,StructureConstPtr structure);
+        BaseStructureArray(String fieldName,StructureConstPtr structure);
         virtual ~BaseStructureArray();
         virtual void incReferenceCount() const {BaseField::incReferenceCount();}
         virtual void decReferenceCount() const {BaseField::decReferenceCount();}
         virtual int getReferenceCount() const {return BaseField::getReferenceCount();}
-        virtual StringConst getFieldName() const{
+        virtual String getFieldName() const{
             return BaseField::getFieldName();
          }
         virtual Type getType() const{return BaseField::getType();}
@@ -221,7 +221,7 @@ namespace epics { namespace pvData {
         StructureConstPtr pstructure;
     };
 
-    BaseStructureArray::BaseStructureArray(StringConst fieldName,StructureConstPtr structure)
+    BaseStructureArray::BaseStructureArray(String fieldName,StructureConstPtr structure)
     : BaseField(fieldName,structureArray),pstructure(structure)
     {
         pstructure->incReferenceCount();
@@ -241,7 +241,7 @@ namespace epics { namespace pvData {
 
   FieldCreate::FieldCreate(){};
 
-   ScalarConstPtr  FieldCreate::createScalar(StringConst fieldName,
+   ScalarConstPtr  FieldCreate::createScalar(String fieldName,
        ScalarType scalarType) const
    {
          BaseScalar *baseScalar = new BaseScalar(fieldName,scalarType);
@@ -249,13 +249,13 @@ namespace epics { namespace pvData {
    }
  
    ScalarArrayConstPtr FieldCreate::createScalarArray(
-       StringConst fieldName,ScalarType elementType) const
+       String fieldName,ScalarType elementType) const
    {
          BaseScalarArray *baseScalarArray = new BaseScalarArray(fieldName,elementType);
          return baseScalarArray;
    }
    StructureConstPtr FieldCreate::createStructure (
-       StringConst fieldName,int numberFields,
+       String fieldName,int numberFields,
        FieldConstPtr fields[]) const
    {
          BaseStructure *baseStructure = new BaseStructure(
@@ -263,13 +263,13 @@ namespace epics { namespace pvData {
          return baseStructure;
    }
    StructureArrayConstPtr FieldCreate::createStructureArray(
-       StringConst fieldName,StructureConstPtr structure) const
+       String fieldName,StructureConstPtr structure) const
    {
         BaseStructureArray *baseStructureArray = new BaseStructureArray(fieldName,structure);
         return baseStructureArray;
    }
 
-   FieldConstPtr FieldCreate::create(StringConst fieldName,
+   FieldConstPtr FieldCreate::create(String fieldName,
        FieldConstPtr pfield) const
    {
        Type type = pfield->getType();

@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <string>
 #include <cstdio>
+#include <epicsTypes.h>
 #include "pvData.h"
 #include "factory.h"
 #include "AbstractPVScalarArray.h"
@@ -21,17 +22,18 @@ namespace epics { namespace pvData {
         BasePVDoubleArray(PVStructure *parent,ScalarArrayConstPtr scalarArray);
         virtual ~BasePVDoubleArray();
         virtual void setCapacity(int capacity);
-        virtual int get(int offset, int length, DoubleArrayData *data) const;
-        virtual int put(int offset,int length,DoubleArrayPtr from,
+        virtual int get(int offset, int length, DoubleArrayData *data) ;
+        virtual int put(int offset,int length,DoubleArray from,
            int fromOffset);
-        virtual void shareData(DoubleArrayPtr from);
-       // from Serializable
-       virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) const;
-       virtual void deserialize(ByteBuffer *pbuffer,DeserializableControl *pflusher);
-       virtual void serialize(ByteBuffer *pbuffer,
-            SerializableControl *pflusher, int offset, int count) const;
-       virtual void toString(StringBuilder buf)const;
-       virtual void toString(StringBuilder buf,int indentLevel)const;
+        virtual void shareData(DoubleArrayData *from);
+        // from Serializable
+        virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) ;
+        virtual void deserialize(ByteBuffer *pbuffer,DeserializableControl *pflusher);
+        virtual void serialize(ByteBuffer *pbuffer,
+             SerializableControl *pflusher, int offset, int count) ;
+        virtual void toString(StringBuilder buf);
+        virtual void toString(StringBuilder buf,int indentLevel);
+        virtual epicsBoolean equals(PVField  *pv) ;
     private:
         double *doubleArray;
     };
@@ -52,25 +54,25 @@ namespace epics { namespace pvData {
     }
 
     int BasePVDoubleArray::get(int offset, int length,
-        DoubleArrayData *data) const
+        DoubleArrayData *data) 
     {
         data->data = doubleArray;
         return getLength();
     }
 
     int BasePVDoubleArray::put(int offset,int length,
-        DoubleArrayPtr from,int fromOffset)
+        DoubleArray from,int fromOffset)
     {
         return getLength();
     }
 
-    void BasePVDoubleArray::shareData(DoubleArrayPtr from)
+    void BasePVDoubleArray::shareData(DoubleArrayData *from)
     {
         throw std::logic_error(notImplemented);
     }
 
     void BasePVDoubleArray::serialize(ByteBuffer *pbuffer,
-         SerializableControl *pflusher) const
+         SerializableControl *pflusher) 
     {
         throw std::logic_error(notImplemented);
     }
@@ -82,21 +84,25 @@ namespace epics { namespace pvData {
     }
 
     void BasePVDoubleArray::serialize(ByteBuffer *pbuffer,
-         SerializableControl *pflusher, int offset, int count) const
+         SerializableControl *pflusher, int offset, int count) 
     {
         throw std::logic_error(notImplemented);
     }
 
-    void BasePVDoubleArray::toString(StringBuilder buf)const
+    void BasePVDoubleArray::toString(StringBuilder buf)
     {
         toString(buf,1);
     }
 
-    void BasePVDoubleArray::toString(StringBuilder buf,int indentLevel)const
+    void BasePVDoubleArray::toString(StringBuilder buf,int indentLevel)
     {
         convert->getString(buf,this,indentLevel);
         PVArray::toString(buf,indentLevel);
     }
 
+    epicsBoolean BasePVDoubleArray::equals(PVField  *pv) 
+    {
+        throw std::logic_error(notImplemented);
+    }
 }}
 #endif  /* BASEPVDOUBLEARRAY_H */

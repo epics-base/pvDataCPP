@@ -24,7 +24,7 @@ int main(int argc,char *argv[])
     ScalarTypeFunc::toString(&myString,scalarType);
     printf("%s\n",myString.c_str());
     FieldCreate * pfieldCreate = getFieldCreate();
-    StringConst valueName("value");
+    String valueName("value");
     ScalarConstPtr pscalar = pfieldCreate->createScalar(valueName,scalarType);
     type = pscalar->getType();
     myString.clear();
@@ -33,7 +33,7 @@ int main(int argc,char *argv[])
     printf("%s\n",myString.c_str());
     myString.clear();
     myString += "fieldName ";
-    StringConst fieldName = pscalar->getFieldName();
+    String fieldName = pscalar->getFieldName();
     myString += fieldName;
     printf("%s\n",myString.c_str());
     myString.clear();
@@ -45,8 +45,8 @@ int main(int argc,char *argv[])
     printf("%s\n",myString.c_str());
     int numberFields = 2;
     FieldConstPtr fields[numberFields];
-    StringConst  name0("high");
-    StringConst  name1("low");
+    String  name0("high");
+    String  name1("low");
     fields[0] = pfieldCreate->createScalar(name0,pvDouble);
     fields[1] = pfieldCreate->createScalar(name1,pvDouble);
     StructureConstPtr pstructure = pfieldCreate->createStructure(
