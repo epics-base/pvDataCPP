@@ -12,7 +12,14 @@
 #include "AbstractPVScalar.h"
 #include "AbstractPVArray.h"
 #include "AbstractPVScalarArray.h"
+#include "BasePVBoolean.h"
+#include "BasePVByte.h"
+#include "BasePVShort.h"
+#include "BasePVInt.h"
+#include "BasePVLong.h"
+#include "BasePVFloat.h"
 #include "BasePVDouble.h"
+#include "BasePVString.h"
 #include "AbstractPVArray.h"
 #include "BasePVDoubleArray.h"
 #include "BasePVStructure.h"
@@ -70,8 +77,22 @@ namespace epics { namespace pvData {
    {
         ScalarType scalarType = scalar->getScalarType();
         switch(scalarType) {
+        case pvBoolean:
+            return new BasePVBoolean(parent,scalar);
+        case pvByte:
+            return new BasePVByte(parent,scalar);
+        case pvShort:
+            return new BasePVShort(parent,scalar);
+        case pvInt:
+            return new BasePVInt(parent,scalar);
+        case pvLong:
+            return new BasePVLong(parent,scalar);
+        case pvFloat:
+            return new BasePVFloat(parent,scalar);
         case pvDouble:
             return new BasePVDouble(parent,scalar);
+        case pvString:
+            return new BasePVString(parent,scalar);
         default:
             throw std::logic_error(notImplemented);
         }

@@ -13,6 +13,7 @@ namespace epics { namespace pvData {
         Convert();
         ~Convert();
         void getFullName(StringBuilder buf,PVField *pvField);
+        epicsBoolean equals(PVField *a,PVField *b);
         void getString(StringBuilder buf,PVField * pvField,int indentLevel);
         void getString(StringBuilder buf,PVField *pvField);
         void fromString(PVScalar *pv, String from);

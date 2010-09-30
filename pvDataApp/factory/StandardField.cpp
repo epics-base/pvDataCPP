@@ -2,6 +2,8 @@
 #include <string>
 #include <stdexcept>
 #include <lock.h>
+#include "pvIntrospect.h"
+#include "pvData.h"
 #include "convert.h"
 #include "standardField.h"
 
@@ -13,14 +15,18 @@ static String notImplemented("not implemented");
 
     StandardField::~StandardField(){}
 
-    PVScalar * StandardField::scalarValue(ScalarType type)
+    PVScalar * StandardField::scalarValue(ScalarType scalarType)
     {
-        throw std::logic_error(notImplemented);
+        ScalarConstPtr scalar = getFieldCreate()->createScalar(
+           String("value"),scalarType);
+        return getPVDataCreate()->createPVScalar(0,scalar);
     }
 
     PVScalarArray * StandardField::scalarArrayValue(ScalarType elementType)
     {
-        throw std::logic_error(notImplemented);
+        ScalarArrayConstPtr scalarArray = getFieldCreate()->createScalarArray(
+           String("value"),elementType);
+        return getPVDataCreate()->createPVScalarArray(0,scalarArray);
     }
 
     PVStructure * StandardField::scalarValue(ScalarType type,String properties)

@@ -2,6 +2,7 @@
 #include <string>
 #ifndef REQUESTER_H
 #define REQUESTER_H
+#include "pvIntrospect.h"
 namespace epics { namespace pvData { 
 
     class Requester;

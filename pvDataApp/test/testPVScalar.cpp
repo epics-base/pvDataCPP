@@ -7,7 +7,10 @@
 #include <string.h>
 #include <stdio.h>
 
+#include "requester.h"
+#include "pvIntrospect.h"
 #include "pvData.h"
+#include "standardField.h"
 
 using namespace epics::pvData;
 
@@ -15,16 +18,218 @@ static FieldCreate * pfieldCreate = 0;
 static PVDataCreate *pvDataCreate = 0;
 static String buffer("");
 
-void testDouble() {
-    printf("\ntestDouble\n");
-    String valueName("value");
-    ScalarConstPtr pscalar = pfieldCreate->createScalar(valueName,pvDouble);
-    PVScalar *pvScalar = pvDataCreate->createPVScalar(0,pscalar);
-    PVDouble *pvValue = (PVDouble *)pvScalar;
-    double value = 2;
+void testBoolean() {
+    printf("\ntestBoolean\n");
+    PVScalar *pvScalar = getStandardField()->scalarValue(pvBoolean);
+    PVBoolean *pvValue = (PVBoolean *)pvScalar;
+    epicsBoolean value = epicsTrue;
     pvValue->put(value);
-    double getValue = pvValue->get();
-    printf("put %lf get %lf\n",value,getValue);
+    epicsBoolean getValue = pvValue->get();
+    printf("put %s get %s\n",
+        ((value==epicsFalse) ? "false" : "true"),
+        ((getValue==epicsFalse) ? "false" : "true"));
+    if(value!=getValue) {
+        fprintf(stderr,"ERROR getValue put %s get %s\n",
+            ((value==epicsFalse) ? "false" : "true"),
+            ((getValue==epicsFalse) ? "false" : "true"));
+    }
+    FieldConstPtr field = pvValue->getField();
+    buffer.clear();
+    field->toString(&buffer);
+    printf("%s\n",buffer.c_str());
+    epicsBoolean isImmutable = pvValue->isImmutable();
+    PVStructure *pvParent = pvValue->getParent();
+    printf("immutable %s parent %p\n",
+        ((isImmutable==epicsFalse) ? "false" : "true"),
+        pvParent);
+    int offset = pvValue->getFieldOffset();
+    int nextOffset = pvValue->getNextFieldOffset();
+    int numberFields = pvValue->getNumberFields();
+    printf("offset %d nextOffset %d numberFields %d\n",
+        offset,nextOffset,numberFields);
+    ScalarConstPtr scalar = dynamic_cast<ScalarConstPtr>(field);
+    if(scalar!=field) {
+        fprintf(stderr,"ERROR field!=scalar field %p scalar %p\n",field,scalar);
+    }
+    buffer.clear();
+    buffer += "value ";
+    pvValue->toString(&buffer);
+    printf("%s\n",buffer.c_str());
+    pvScalar->message(String("this is a test message"),infoMessage);
+    PVScalar *other = getStandardField()->scalarValue(pvDouble);
+    epicsBoolean isEqual = pvScalar->equals(other);
+    printf("expect false isEqual %s\n",(isEqual ? "true" : "false"));
+    delete pvValue;
+}
+
+void testByte() {
+    printf("\ntestByte\n");
+    PVScalar *pvScalar = getStandardField()->scalarValue(pvByte);
+    PVByte *pvValue = (PVByte *)pvScalar;
+    epicsInt8 value = 2;
+    pvValue->put(value);
+    int getValue = pvValue->get();
+    printf("put %d get %d\n",value,getValue);
+    if(value!=getValue) {
+        fprintf(stderr,"ERROR getValue put %d get %d\n",value,getValue);
+    }
+    FieldConstPtr field = pvValue->getField();
+    buffer.clear();
+    field->toString(&buffer);
+    printf("%s\n",buffer.c_str());
+    epicsBoolean isImmutable = pvValue->isImmutable();
+    PVStructure *pvParent = pvValue->getParent();
+    printf("immutable %s parent %p\n",
+        ((isImmutable==epicsFalse) ? "false" : "true"),
+        pvParent);
+    int offset = pvValue->getFieldOffset();
+    int nextOffset = pvValue->getNextFieldOffset();
+    int numberFields = pvValue->getNumberFields();
+    printf("offset %d nextOffset %d numberFields %d\n",
+        offset,nextOffset,numberFields);
+    ScalarConstPtr scalar = dynamic_cast<ScalarConstPtr>(field);
+    if(scalar!=field) {
+        fprintf(stderr,"ERROR field!=scalar field %p scalar %p\n",field,scalar);
+    }
+    buffer.clear();
+    buffer += "value ";
+    pvValue->toString(&buffer);
+    printf("%s\n",buffer.c_str());
+    pvScalar->message(String("this is a test message"),infoMessage);
+    PVScalar *other = getStandardField()->scalarValue(pvDouble);
+    epicsBoolean isEqual = pvScalar->equals(other);
+    printf("expect false isEqual %s\n",(isEqual ? "true" : "false"));
+    delete pvValue;
+}
+
+void testShort() {
+    printf("\ntestShort\n");
+    PVScalar *pvScalar = getStandardField()->scalarValue(pvShort);
+    PVShort *pvValue = (PVShort *)pvScalar;
+    epicsInt16 value = 2;
+    pvValue->put(value);
+    int getValue = pvValue->get();
+    printf("put %d get %d\n",value,getValue);
+    if(value!=getValue) {
+        fprintf(stderr,"ERROR getValue put %d get %d\n",value,getValue);
+    }
+    FieldConstPtr field = pvValue->getField();
+    buffer.clear();
+    field->toString(&buffer);
+    printf("%s\n",buffer.c_str());
+    epicsBoolean isImmutable = pvValue->isImmutable();
+    PVStructure *pvParent = pvValue->getParent();
+    printf("immutable %s parent %p\n",
+        ((isImmutable==epicsFalse) ? "false" : "true"),
+        pvParent);
+    int offset = pvValue->getFieldOffset();
+    int nextOffset = pvValue->getNextFieldOffset();
+    int numberFields = pvValue->getNumberFields();
+    printf("offset %d nextOffset %d numberFields %d\n",
+        offset,nextOffset,numberFields);
+    ScalarConstPtr scalar = dynamic_cast<ScalarConstPtr>(field);
+    if(scalar!=field) {
+        fprintf(stderr,"ERROR field!=scalar field %p scalar %p\n",field,scalar);
+    }
+    buffer.clear();
+    buffer += "value ";
+    pvValue->toString(&buffer);
+    printf("%s\n",buffer.c_str());
+    pvScalar->message(String("this is a test message"),infoMessage);
+    PVScalar *other = getStandardField()->scalarValue(pvDouble);
+    epicsBoolean isEqual = pvScalar->equals(other);
+    printf("expect false isEqual %s\n",(isEqual ? "true" : "false"));
+    delete pvValue;
+}
+
+void testInt() {
+    printf("\ntestInt\n");
+    PVScalar *pvScalar = getStandardField()->scalarValue(pvInt);
+    PVInt *pvValue = (PVInt *)pvScalar;
+    epicsInt32 value = 2;
+    pvValue->put(value);
+    int getValue = pvValue->get();
+    printf("put %d get %d\n",value,getValue);
+    if(value!=getValue) {
+        fprintf(stderr,"ERROR getValue put %d get %d\n",value,getValue);
+    }
+    FieldConstPtr field = pvValue->getField();
+    buffer.clear();
+    field->toString(&buffer);
+    printf("%s\n",buffer.c_str());
+    epicsBoolean isImmutable = pvValue->isImmutable();
+    PVStructure *pvParent = pvValue->getParent();
+    printf("immutable %s parent %p\n",
+        ((isImmutable==epicsFalse) ? "false" : "true"),
+        pvParent);
+    int offset = pvValue->getFieldOffset();
+    int nextOffset = pvValue->getNextFieldOffset();
+    int numberFields = pvValue->getNumberFields();
+    printf("offset %d nextOffset %d numberFields %d\n",
+        offset,nextOffset,numberFields);
+    ScalarConstPtr scalar = dynamic_cast<ScalarConstPtr>(field);
+    if(scalar!=field) {
+        fprintf(stderr,"ERROR field!=scalar field %p scalar %p\n",field,scalar);
+    }
+    buffer.clear();
+    buffer += "value ";
+    pvValue->toString(&buffer);
+    printf("%s\n",buffer.c_str());
+    pvScalar->message(String("this is a test message"),infoMessage);
+    PVScalar *other = getStandardField()->scalarValue(pvDouble);
+    epicsBoolean isEqual = pvScalar->equals(other);
+    printf("expect false isEqual %s\n",(isEqual ? "true" : "false"));
+    delete pvValue;
+}
+
+void testLong() {
+    printf("\ntestLong\n");
+    PVScalar *pvScalar = getStandardField()->scalarValue(pvLong);
+    PVLong *pvValue = (PVLong *)pvScalar;
+    epicsInt64 value = 2;
+    pvValue->put(value);
+    epicsInt64 getValue = pvValue->get();
+    printf("put %ld get %ld\n",(long int)value,(long int)getValue);
+    if(value!=getValue) {
+        fprintf(stderr,"ERROR getValue put %ld get %ld\n",(long int)value,(long int)getValue);
+    }
+    FieldConstPtr field = pvValue->getField();
+    buffer.clear();
+    field->toString(&buffer);
+    printf("%s\n",buffer.c_str());
+    epicsBoolean isImmutable = pvValue->isImmutable();
+    PVStructure *pvParent = pvValue->getParent();
+    printf("immutable %s parent %p\n",
+        ((isImmutable==epicsFalse) ? "false" : "true"),
+        pvParent);
+    int offset = pvValue->getFieldOffset();
+    int nextOffset = pvValue->getNextFieldOffset();
+    int numberFields = pvValue->getNumberFields();
+    printf("offset %d nextOffset %d numberFields %d\n",
+        offset,nextOffset,numberFields);
+    ScalarConstPtr scalar = dynamic_cast<ScalarConstPtr>(field);
+    if(scalar!=field) {
+        fprintf(stderr,"ERROR field!=scalar field %p scalar %p\n",field,scalar);
+    }
+    buffer.clear();
+    buffer += "value ";
+    pvValue->toString(&buffer);
+    printf("%s\n",buffer.c_str());
+    pvScalar->message(String("this is a test message"),infoMessage);
+    PVScalar *other = getStandardField()->scalarValue(pvDouble);
+    epicsBoolean isEqual = pvScalar->equals(other);
+    printf("expect false isEqual %s\n",(isEqual ? "true" : "false"));
+    delete pvValue;
+}
+
+void testFloat() {
+    printf("\ntestFloat\n");
+    PVScalar *pvScalar = getStandardField()->scalarValue(pvFloat);
+    PVFloat *pvValue = (PVFloat *)pvScalar;
+    float value = 2;
+    pvValue->put(value);
+    float getValue = pvValue->get();
+    printf("put %f get %f\n",value,getValue);
     if(value!=getValue) {
         fprintf(stderr,"ERROR getValue put %f get %f\n",value,getValue);
     }
@@ -50,6 +255,88 @@ void testDouble() {
     buffer += "value ";
     pvValue->toString(&buffer);
     printf("%s\n",buffer.c_str());
+    pvScalar->message(String("this is a test message"),infoMessage);
+    epicsBoolean isEqual = pvScalar->equals(pvScalar);
+    printf("expect true isEqual %s\n",(isEqual ? "true" : "false"));
+    delete pvValue;
+}
+
+void testDouble() {
+    printf("\ntestDouble\n");
+    PVScalar *pvScalar = getStandardField()->scalarValue(pvDouble);
+    PVDouble *pvValue = (PVDouble *)pvScalar;
+    double value = 2;
+    pvValue->put(value);
+    double getValue = pvValue->get();
+    printf("put %lf get %lf\n",value,getValue);
+    if(value!=getValue) {
+        fprintf(stderr,"ERROR getValue put %lf get %lf\n",value,getValue);
+    }
+    FieldConstPtr field = pvValue->getField();
+    buffer.clear();
+    field->toString(&buffer);
+    printf("%s\n",buffer.c_str());
+    epicsBoolean isImmutable = pvValue->isImmutable();
+    PVStructure *pvParent = pvValue->getParent();
+    printf("immutable %s parent %p\n",
+        ((isImmutable==epicsFalse) ? "false" : "true"),
+        pvParent);
+    int offset = pvValue->getFieldOffset();
+    int nextOffset = pvValue->getNextFieldOffset();
+    int numberFields = pvValue->getNumberFields();
+    printf("offset %d nextOffset %d numberFields %d\n",
+        offset,nextOffset,numberFields);
+    ScalarConstPtr scalar = dynamic_cast<ScalarConstPtr>(field);
+    if(scalar!=field) {
+        fprintf(stderr,"ERROR field!=scalar field %p scalar %p\n",field,scalar);
+    }
+    buffer.clear();
+    buffer += "value ";
+    pvValue->toString(&buffer);
+    printf("%s\n",buffer.c_str());
+    pvScalar->message(String("this is a test message"),infoMessage);
+    epicsBoolean isEqual = pvScalar->equals(pvScalar);
+    printf("expect true isEqual %s\n",(isEqual ? "true" : "false"));
+    delete pvValue;
+}
+
+void testString() {
+    printf("\ntestString\n");
+    PVScalar *pvScalar = getStandardField()->scalarValue(pvString);
+    PVString *pvValue = (PVString *)pvScalar;
+    String value = "testString";
+    pvValue->put(value);
+    String getValue = pvValue->get();
+    printf("put %s get %s\n",value.c_str(),getValue.c_str());
+    if(value!=getValue) {
+        fprintf(stderr,"ERROR getValue put %s get %s\n",
+            value.c_str(),getValue.c_str());
+    }
+    FieldConstPtr field = pvValue->getField();
+    buffer.clear();
+    field->toString(&buffer);
+    printf("%s\n",buffer.c_str());
+    epicsBoolean isImmutable = pvValue->isImmutable();
+    PVStructure *pvParent = pvValue->getParent();
+    printf("immutable %s parent %p\n",
+        ((isImmutable==epicsFalse) ? "false" : "true"),
+        pvParent);
+    int offset = pvValue->getFieldOffset();
+    int nextOffset = pvValue->getNextFieldOffset();
+    int numberFields = pvValue->getNumberFields();
+    printf("offset %d nextOffset %d numberFields %d\n",
+        offset,nextOffset,numberFields);
+    ScalarConstPtr scalar = dynamic_cast<ScalarConstPtr>(field);
+    if(scalar!=field) {
+        fprintf(stderr,"ERROR field!=scalar field %p scalar %p\n",field,scalar);
+    }
+    buffer.clear();
+    buffer += "value ";
+    pvValue->toString(&buffer);
+    printf("%s\n",buffer.c_str());
+    pvScalar->message(String("this is a test message"),infoMessage);
+    epicsBoolean isEqual = pvScalar->equals(pvScalar);
+    printf("expect true isEqual %s\n",(isEqual ? "true" : "false"));
     delete pvValue;
 }
 
@@ -57,7 +344,14 @@ int main(int argc,char *argv[])
 {
     pfieldCreate = getFieldCreate();
     pvDataCreate = getPVDataCreate();
+    testBoolean();
+    testByte();
+    testShort();
+    testInt();
+    testLong();
+    testFloat();
     testDouble();
+    testString();
     return(0);
 }
 

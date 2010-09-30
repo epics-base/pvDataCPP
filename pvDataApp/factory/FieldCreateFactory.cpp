@@ -9,7 +9,7 @@
 
 namespace epics { namespace pvData {
 
-    static DebugLevel debugLevel = highDebug;
+    static DebugLevel debugLevel = lowDebug;
     static void newLine(StringBuilder buffer, int indentLevel)
     {
         *buffer += "\n";

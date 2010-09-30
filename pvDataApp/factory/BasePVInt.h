@@ -1,6 +1,6 @@
-/*BasePVDouble.h*/
-#ifndef BASEPVDOUBLE_H
-#define BASEPVDOUBLE_H
+/*BasePVInt.h*/
+#ifndef BASEPVINT_H
+#define BASEPVINT_H
 #include <cstddef>
 #include <cstdlib>
 #include <string>
@@ -12,14 +12,14 @@
 
 namespace epics { namespace pvData {
 
-    PVDouble::~PVDouble() {}
+    PVInt::~PVInt() {}
 
-    class BasePVDouble : public PVDouble {
+    class BasePVInt : public PVInt {
     public:
-        BasePVDouble(PVStructure *parent,ScalarConstPtr scalar);
-        virtual ~BasePVDouble();
-        virtual double get();
-        virtual void put(double val);
+        BasePVInt(PVStructure *parent,ScalarConstPtr scalar);
+        virtual ~BasePVInt();
+        virtual epicsInt32 get();
+        virtual void put(epicsInt32 val);
         virtual void serialize(ByteBuffer *pbuffer,
             SerializableControl *pflusher) ;
         virtual void deserialize(ByteBuffer *pbuffer,
@@ -28,43 +28,43 @@ namespace epics { namespace pvData {
         virtual void toString(StringBuilder buf,int indentLevel);
         virtual epicsBoolean equals(PVField  *pv) ;
     private:
-        double value;
+        epicsInt32 value;
     };
 
-    BasePVDouble::BasePVDouble(PVStructure *parent,ScalarConstPtr scalar)
-    : PVDouble(parent,scalar),value(0.0)
+    BasePVInt::BasePVInt(PVStructure *parent,ScalarConstPtr scalar)
+    : PVInt(parent,scalar),value(0.0)
     {}
 
-    BasePVDouble::~BasePVDouble() {}
+    BasePVInt::~BasePVInt() {}
 
-    double BasePVDouble::get() { return value;}
+    epicsInt32 BasePVInt::get() { return value;}
 
-    void BasePVDouble::put(double val){value = val;}
+    void BasePVInt::put(epicsInt32 val){value = val;}
 
-    void BasePVDouble::serialize(ByteBuffer *pbuffer,
+    void BasePVInt::serialize(ByteBuffer *pbuffer,
         SerializableControl *pflusher) 
     {
         throw std::logic_error(notImplemented);
     }
 
-    void BasePVDouble::deserialize(ByteBuffer *pbuffer,
+    void BasePVInt::deserialize(ByteBuffer *pbuffer,
         DeserializableControl *pflusher)
     {
         throw std::logic_error(notImplemented);
     }
 
-    void BasePVDouble::toString(StringBuilder buf) {toString(buf,0);}
+    void BasePVInt::toString(StringBuilder buf) {toString(buf,0);}
 
-    void BasePVDouble::toString(StringBuilder buf,int indentLevel) 
+    void BasePVInt::toString(StringBuilder buf,int indentLevel) 
     {
         getConvert()->getString(buf,this,indentLevel);
         PVField::toString(buf,indentLevel);
     }
 
-    epicsBoolean BasePVDouble::equals(PVField  *pvField) 
+    epicsBoolean BasePVInt::equals(PVField  *pvField) 
     {
         return getConvert()->equals(this,pvField);
     }
 
 }}
-#endif  /* BASEPVDOUBLE_H */
+#endif  /* BASEPVINT_H */

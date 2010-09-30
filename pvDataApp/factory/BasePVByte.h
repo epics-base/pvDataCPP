@@ -1,6 +1,6 @@
-/*BasePVDouble.h*/
-#ifndef BASEPVDOUBLE_H
-#define BASEPVDOUBLE_H
+/*BasePVByte.h*/
+#ifndef BASEPVBYTE_H
+#define BASEPVBYTE_H
 #include <cstddef>
 #include <cstdlib>
 #include <string>
@@ -12,14 +12,14 @@
 
 namespace epics { namespace pvData {
 
-    PVDouble::~PVDouble() {}
+    PVByte::~PVByte() {}
 
-    class BasePVDouble : public PVDouble {
+    class BasePVByte : public PVByte {
     public:
-        BasePVDouble(PVStructure *parent,ScalarConstPtr scalar);
-        virtual ~BasePVDouble();
-        virtual double get();
-        virtual void put(double val);
+        BasePVByte(PVStructure *parent,ScalarConstPtr scalar);
+        virtual ~BasePVByte();
+        virtual epicsInt8 get();
+        virtual void put(epicsInt8 val);
         virtual void serialize(ByteBuffer *pbuffer,
             SerializableControl *pflusher) ;
         virtual void deserialize(ByteBuffer *pbuffer,
@@ -28,43 +28,43 @@ namespace epics { namespace pvData {
         virtual void toString(StringBuilder buf,int indentLevel);
         virtual epicsBoolean equals(PVField  *pv) ;
     private:
-        double value;
+        epicsInt8 value;
     };
 
-    BasePVDouble::BasePVDouble(PVStructure *parent,ScalarConstPtr scalar)
-    : PVDouble(parent,scalar),value(0.0)
+    BasePVByte::BasePVByte(PVStructure *parent,ScalarConstPtr scalar)
+    : PVByte(parent,scalar),value(0.0)
     {}
 
-    BasePVDouble::~BasePVDouble() {}
+    BasePVByte::~BasePVByte() {}
 
-    double BasePVDouble::get() { return value;}
+    epicsInt8 BasePVByte::get() { return value;}
 
-    void BasePVDouble::put(double val){value = val;}
+    void BasePVByte::put(epicsInt8 val){value = val;}
 
-    void BasePVDouble::serialize(ByteBuffer *pbuffer,
+    void BasePVByte::serialize(ByteBuffer *pbuffer,
         SerializableControl *pflusher) 
     {
         throw std::logic_error(notImplemented);
     }
 
-    void BasePVDouble::deserialize(ByteBuffer *pbuffer,
+    void BasePVByte::deserialize(ByteBuffer *pbuffer,
         DeserializableControl *pflusher)
     {
         throw std::logic_error(notImplemented);
     }
 
-    void BasePVDouble::toString(StringBuilder buf) {toString(buf,0);}
+    void BasePVByte::toString(StringBuilder buf) {toString(buf,0);}
 
-    void BasePVDouble::toString(StringBuilder buf,int indentLevel) 
+    void BasePVByte::toString(StringBuilder buf,int indentLevel) 
     {
         getConvert()->getString(buf,this,indentLevel);
         PVField::toString(buf,indentLevel);
     }
 
-    epicsBoolean BasePVDouble::equals(PVField  *pvField) 
+    epicsBoolean BasePVByte::equals(PVField  *pvField) 
     {
         return getConvert()->equals(this,pvField);
     }
 
 }}
-#endif  /* BASEPVDOUBLE_H */
+#endif  /* BASEPVBYTE_H */

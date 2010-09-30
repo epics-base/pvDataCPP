@@ -29,12 +29,16 @@ void testDouble() {
     }
     PVAuxInfo *auxInfo = pvValue->getPVAuxInfo();
     String stringName("string");
-    pvScalar = auxInfo->createInfo(stringName,pvDouble);
-    PVDouble *doubleInfo = dynamic_cast<PVDouble *>(pvScalar);
+    PVScalar *pvAux = auxInfo->createInfo(stringName,pvDouble);
+    PVDouble *doubleInfo = dynamic_cast<PVDouble *>(pvAux);
     doubleInfo->put(100.0);
-    pvScalar = auxInfo->getInfo(stringName);
+    pvAux = auxInfo->getInfo(stringName);
     buffer.clear();
-    buffer += "stringInfo ";
+    buffer += "auxInfo ";
+    printf("\ncalling toString\n");
+    printf("%s\n",buffer.c_str());
+    buffer.clear();
+    buffer += "pvScalar ";
     pvScalar->toString(&buffer);
     printf("%s\n",buffer.c_str());
     delete pvValue;

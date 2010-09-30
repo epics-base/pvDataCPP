@@ -96,7 +96,7 @@ namespace epics { namespace pvData {
 
     void BasePVDoubleArray::toString(StringBuilder buf,int indentLevel)
     {
-        convert->getString(buf,this,indentLevel);
+        getConvert()->getString(buf,this,indentLevel);
         PVArray::toString(buf,indentLevel);
     }
 

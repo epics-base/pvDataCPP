@@ -15,6 +15,7 @@ static Convert* convert = 0;
 
 static String notImplemented("not implemented");
 
+static epicsBoolean convertEquals(PVField *a,PVField *b);
 static int convertFromByteArray(PVScalarArray *pv, int offset,
     int len,epicsInt8 from[], int fromOffset);
 static int convertToByteArray(PVScalarArray *pv, int offset,
@@ -95,6 +96,11 @@ void Convert::getFullName(StringBuilder buf,PVField * pvField)
              buf->insert(0,name);
          }
     }
+}
+
+epicsBoolean Convert::equals(PVField *a,PVField *b)
+{
+    return convertEquals(a,b);
 }
 
 void Convert::getString(StringBuilder buf,PVField * pvField,int indentLevel)
@@ -732,6 +738,109 @@ void Convert::newLine(StringBuilder buffer, int indentLevel)
     for(int i=0; i<indentLevel; i++) *buffer += "    ";
 }
 
+static epicsBoolean scalarEquals(PVScalar *a,PVScalar *b)
+{
+    ScalarType ascalarType = a->getScalar()->getScalarType();
+    ScalarType bscalarType = b->getScalar()->getScalarType();
+    if(ascalarType!=bscalarType) return epicsFalse;
+    switch(ascalarType) {
+        case pvBoolean: {
+            PVBoolean *pa = (PVBoolean *)a;
+            PVBoolean *pb = (PVBoolean *)b;
+            epicsBoolean avalue = pa->get();
+            epicsBoolean bvalue = pb->get();
+            return ((avalue==bvalue) ? epicsTrue : epicsFalse);
+        }
+        case pvByte: {
+            PVByte *pa = (PVByte *)a;
+            PVByte *pb = (PVByte *)b;
+            epicsInt8 avalue = pa->get();
+            epicsInt8 bvalue = pb->get();
+            return ((avalue==bvalue) ? epicsTrue : epicsFalse);
+        }
+        case pvShort: {
+            PVShort *pa = (PVShort *)a;
+            PVShort *pb = (PVShort *)b;
+            epicsInt16 avalue = pa->get();
+            epicsInt16 bvalue = pb->get();
+            return ((avalue==bvalue) ? epicsTrue : epicsFalse);
+        }
+        case pvInt: {
+            PVInt *pa = (PVInt *)a;
+            PVInt *pb = (PVInt *)b;
+            epicsInt32 avalue = pa->get();
+            epicsInt32 bvalue = pb->get();
+            return ((avalue==bvalue) ? epicsTrue : epicsFalse);
+        }
+        case pvLong: {
+            PVLong *pa = (PVLong *)a;
+            PVLong *pb = (PVLong *)b;
+            epicsInt64 avalue = pa->get();
+            epicsInt64 bvalue = pb->get();
+            return ((avalue==bvalue) ? epicsTrue : epicsFalse);
+        }
+        case pvFloat: {
+            PVFloat *pa = (PVFloat *)a;
+            PVFloat *pb = (PVFloat *)b;
+            float avalue = pa->get();
+            float bvalue = pb->get();
+            return ((avalue==bvalue) ? epicsTrue : epicsFalse);
+        }
+        case pvDouble: {
+            PVDouble *pa = (PVDouble *)a;
+            PVDouble *pb = (PVDouble *)b;
+            double avalue = pa->get();
+            double bvalue = pb->get();
+            return ((avalue==bvalue) ? epicsTrue : epicsFalse);
+        }
+        case pvString: {
+            PVString *pa = (PVString *)a;
+            PVString *pb = (PVString *)b;
+            String avalue = pa->get();
+            String bvalue = pb->get();
+            return ((avalue==bvalue) ? epicsTrue : epicsFalse);
+        }
+    }
+    String message("should not get here");
+    throw std::logic_error(message);
+}
+
+static epicsBoolean arrayEquals(PVScalarArray *a,PVScalarArray *b)
+{
+    throw std::logic_error(notImplemented);
+}
+
+static epicsBoolean structureArrayEquals(PVStructureArray *a,PVStructureArray *b)
+{
+    throw std::logic_error(notImplemented);
+}
+
+static epicsBoolean structureEquals(PVStructure *a,PVStructure *b)
+{
+    throw std::logic_error(notImplemented);
+}
+
+epicsBoolean convertEquals(PVField *a,PVField *b)
+{
+    if(a==b) return epicsTrue;
+    Type atype = a->getField()->getType();
+    Type btype = b->getField()->getType();
+    if(atype!=btype) return epicsFalse;
+    if(atype==scalar) return scalarEquals((PVScalar *)a,(PVScalar *)b);
+    if(atype==scalarArray) {
+         return arrayEquals((PVScalarArray *)a,(PVScalarArray *)b);
+    }
+    if(atype==structureArray) {
+         return structureArrayEquals(
+             (PVStructureArray *)a,(PVStructureArray *)b);
+    }
+    if(atype==structure) {
+        return structureEquals((PVStructure *)a,(PVStructure *)b);
+    }
+    String message("should not get here");
+    throw std::logic_error(message);
+}
+
 int convertFromByteArray(PVScalarArray *pv, int offset, int len,epicsInt8 from[], int fromOffset)
 {
     throw std::logic_error(notImplemented);
@@ -805,7 +914,78 @@ int convertToStringArray(PVScalarArray * pv, int offset, int len,String to[], in
 
 void convertToString(StringBuilder buffer,PVField * pv,int indentLevel)
 {
-    throw std::logic_error(notImplemented);
+    Type type = pv->getField()->getType();
+    if(type==scalarArray) {
+        return convertArray(buffer,(PVScalarArray *)pv,indentLevel);
+    }
+    if(type==structure) {
+        return convertStructure(buffer,(PVStructure*)pv,indentLevel);
+    }
+    if(type==structureArray) {
+    	return convertStructureArray(buffer,(PVStructureArray*)pv,indentLevel);
+    }
+    PVScalar *pvScalar = (PVScalar*)pv;
+    switch(pvScalar->getScalar()->getScalarType()) {
+    case pvBoolean: {
+            PVBoolean *data = (PVBoolean*)pv;
+            epicsBoolean value = data->get();
+            if(value) {
+                *buffer += "true";
+            } else {
+                *buffer += "false";
+            }
+        }
+        return;
+    case pvByte: {
+            PVByte *data = (PVByte*)pv;
+            char xxx[30];
+            sprintf(xxx,"%d",(int)data->get());
+            *buffer += xxx;
+        }
+        return;
+    case pvShort: {
+            PVShort *data = (PVShort*)pv;
+            char xxx[30];
+            sprintf(xxx,"%d",(int)data->get());
+            *buffer += xxx;
+        }
+        return;
+    case pvInt: {
+            PVInt *data = (PVInt*)pv;
+            char xxx[30];
+            sprintf(xxx,"%d",(int)data->get());
+            *buffer += xxx;
+        }
+        return;
+    case pvLong: {
+            PVLong *data = (PVLong*)pv;
+            char xxx[30];
+            sprintf(xxx,"%ld",(long int)data->get());
+            *buffer += xxx;
+        }
+        return;
+    case pvFloat: {
+            PVFloat *data = (PVFloat*)pv;
+            char xxx[30];
+            sprintf(xxx,"%g",data->get());
+            *buffer += xxx;
+        }
+        return;
+    case pvDouble: {
+            PVDouble *data = (PVDouble*)pv;
+            char xxx[30];
+            sprintf(xxx,"%lg",data->get());
+            *buffer += xxx;
+        }
+        return;
+    case pvString: {
+            PVString *data = (PVString*)pv;
+            *buffer += data->get();
+        }
+        return;
+    default:
+        *buffer += "unknown ScalarType";
+    }
 }
 
 void convertStructure(StringBuilder buffer,PVStructure *data,int indentLevel)

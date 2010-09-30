@@ -9,8 +9,6 @@
 
 namespace epics { namespace pvData {
 
-    static PVDataCreate *pvDataCreate =0;
-
     class PVAuxInfoPvt {
     public:
         PVAuxInfoPvt(PVField *pvField)
@@ -26,10 +24,6 @@ namespace epics { namespace pvData {
     { }
 
     PVAuxInfo::~PVAuxInfo() { delete pImpl;}
-
-    void PVAuxInfo::init() {
-        pvDataCreate = getPVDataCreate();
-    }
     
     PVField * PVAuxInfo::getPVField() {
         return pImpl->pvField;
@@ -47,7 +41,7 @@ namespace epics { namespace pvData {
             ScalarTypeFunc::toString(&message,scalarType);
             pImpl->pvField->message(message,errorMessage);
         }
-        PVScalar *pvScalar = pvDataCreate->createPVScalar(0,key,scalarType);
+        PVScalar *pvScalar = getPVDataCreate()->createPVScalar(0,key,scalarType);
         pImpl->theMap.insert(std::pair<String,PVScalar * >(key, pvScalar));
         return pvScalar;
 
@@ -80,6 +74,7 @@ namespace epics { namespace pvData {
              *buf += key.c_str();
              *buf += " ";
              value->toString(buf);
+             i++;
         }
     }
 }}

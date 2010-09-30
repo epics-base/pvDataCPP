@@ -13,8 +13,6 @@ namespace epics { namespace pvData {
 
 static String notImplemented("not implemented");
 
-    static Convert *convert = 0;
-
     class PVFieldPvt {
     public:
         PVFieldPvt(PVStructure *parent,FieldConstPtr field);
@@ -27,14 +25,7 @@ static String notImplemented("not implemented");
         epicsBoolean immutable;
         Requester *requester;
         PostHandler *postHandler;
-    private:
-        static void init();
     };
-
-    void PVFieldPvt::init()
-    {
-        convert = getConvert();
-    }
 
     PVFieldPvt::PVFieldPvt(PVStructure *parent,FieldConstPtr field)
     : parent(parent),field(field),
@@ -42,6 +33,7 @@ static String notImplemented("not implemented");
       pvAuxInfo(0),
       immutable(epicsFalse),requester(0),postHandler(0)
     {
+        delete pvAuxInfo;
         field->incReferenceCount();
     }
 
@@ -146,11 +138,17 @@ static String notImplemented("not implemented");
 
      void PVField::toString(StringBuilder buf,int indentLevel) 
      {
-        throw std::logic_error(notImplemented);
+        if(pImpl->pvAuxInfo==0) return;
+        pImpl->pvAuxInfo->toString(buf,indentLevel);
      }
 
      void PVField::computeOffset(PVField   *  pvField) {
     	PVStructure *pvTop = pvField->getParent();
+        Type type = pvField->getField()->getType();
+        if(type!=structure) {
+            pvField->pImpl->nextFieldOffset = 1;
+            return;
+        }
     	if(pvTop==0) {
     		pvTop = (PVStructure *)pvField;
     	} else {
