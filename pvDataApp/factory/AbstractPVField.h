@@ -126,7 +126,7 @@ static String notImplemented("not implemented");
 
      void PVField::postPut() 
      {
-        throw std::logic_error(notImplemented);
+        if(pImpl->postHandler!=0) pImpl->postHandler->postPut();
      }
 
      void PVField::setPostHandler(PostHandler *ppostHandler)

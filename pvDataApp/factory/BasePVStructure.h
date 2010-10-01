@@ -21,7 +21,7 @@ namespace epics { namespace pvData {
     };
 
     PVStructurePvt::PVStructurePvt()
-    : numberFields(0), pvFields(0),extendsStructureName(0)
+    : numberFields(0), pvFields(0),extendsStructureName("")
     {
     }
 

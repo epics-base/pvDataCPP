@@ -110,7 +110,7 @@ namespace epics { namespace pvData {
 
     BaseScalarArray::BaseScalarArray
            (String fieldName,ScalarType elementType)
-           : BaseField(fieldName,scalar),elementType(elementType){}
+           : BaseField(fieldName,scalarArray),elementType(elementType){}
     BaseScalarArray::~BaseScalarArray() {}
 
 
@@ -305,8 +305,8 @@ namespace epics { namespace pvData {
    };
 
    FieldCreate * getFieldCreate() {
-       static Mutex *mutex = new Mutex();
-       Lock xx(mutex);
+       static Mutex mutex = Mutex();
+       Lock xx(&mutex);
 
        if(instance==0) instance = new FieldCreateExt();
        return instance;

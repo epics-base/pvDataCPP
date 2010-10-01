@@ -14,6 +14,14 @@ PROD_HOST += testPVScalar
 testPVScalar_SRCS += testPVScalar.cpp
 testPVScalar_LIBS += pvFactory
 
+PROD_HOST += testPVScalarArray
+testPVScalarArray_SRCS += testPVScalarArray.cpp
+testPVScalarArray_LIBS += pvFactory
+
+PROD_HOST += testSimpleStructure
+testSimpleStructure_SRCS += testSimpleStructure.cpp
+testSimpleStructure_LIBS += pvFactory
+
 include $(TOP)/configure/RULES
 #----------------------------------------
 #  ADD RULES AFTER THIS LINE

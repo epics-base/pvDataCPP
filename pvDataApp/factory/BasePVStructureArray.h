@@ -62,7 +62,8 @@ namespace epics { namespace pvData {
         throw std::logic_error(notImplemented);
     }
 
-    void PVStructureArray::shareData(StructureArrayData *from)
+    void PVStructureArray::shareData(
+        PVStructurePtrArray value,int capacity,int length)
     {
         throw std::logic_error(notImplemented);
     }

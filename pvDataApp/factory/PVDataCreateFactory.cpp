@@ -21,7 +21,14 @@
 #include "BasePVDouble.h"
 #include "BasePVString.h"
 #include "AbstractPVArray.h"
+#include "BasePVBooleanArray.h"
+#include "BasePVByteArray.h"
+#include "BasePVShortArray.h"
+#include "BasePVIntArray.h"
+#include "BasePVLongArray.h"
+#include "BasePVFloatArray.h"
 #include "BasePVDoubleArray.h"
+#include "BasePVStringArray.h"
 #include "BasePVStructure.h"
 #include "BasePVStructureArray.h"
 
@@ -121,15 +128,22 @@ namespace epics { namespace pvData {
            ScalarArrayConstPtr scalarArray)
    {
         switch(scalarArray->getElementType()) {
-        case pvBoolean: break;
-        case pvByte:    break;
-        case pvShort:   break;
-        case pvInt:     break;
-        case pvLong:    break;
-        case pvFloat:   break;
+        case pvBoolean:
+              return new BasePVBooleanArray(parent,scalarArray);
+        case pvByte:
+              return new BasePVByteArray(parent,scalarArray);
+        case pvShort:
+              return new BasePVShortArray(parent,scalarArray);
+        case pvInt:
+              return new BasePVIntArray(parent,scalarArray);
+        case pvLong:
+              return new BasePVLongArray(parent,scalarArray);
+        case pvFloat:
+              return new BasePVFloatArray(parent,scalarArray);
         case pvDouble:
               return new BasePVDoubleArray(parent,scalarArray);
-        case pvString:  break;
+        case pvString:
+              return new BasePVStringArray(parent,scalarArray);
         }
         throw std::logic_error(notImplemented);
         
@@ -178,8 +192,8 @@ namespace epics { namespace pvData {
    };
 
     PVDataCreate * getPVDataCreate() {
-        static Mutex *mutex = new Mutex();
-        Lock xx(mutex);
+        static Mutex mutex = Mutex();
+        Lock xx(&mutex);
 
         if(pvDataCreate==0) pvDataCreate = new PVDataCreateExt();
         return pvDataCreate;

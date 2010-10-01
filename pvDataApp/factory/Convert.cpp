@@ -199,7 +199,7 @@ int Convert::fromString(PVScalarArray *pv, String from)
     int num = fromStringArray(pv,0,length,valueArray,0);
     if(num<length) length = num;
     pv->setLength(length);
-    delete valueArray;
+    delete[] valueArray;
     return length;
 }
 
@@ -995,7 +995,171 @@ void convertStructure(StringBuilder buffer,PVStructure *data,int indentLevel)
 
 void convertArray(StringBuilder buffer,PVScalarArray * pv,int indentLevel)
 {
-    throw std::logic_error(notImplemented);
+    ScalarArrayConstPtr array = pv->getScalarArray();
+    ScalarType type = array->getElementType();
+    switch(type) {
+    case pvBoolean: {
+            PVBooleanArray *pvdata = (PVBooleanArray*)pv;
+            BooleanArrayData data = BooleanArrayData();
+            *buffer += "[";
+            for(int i=0; i < pvdata->getLength(); i++) {
+                if(i!=0) *buffer += ",";
+                int num = pvdata->get(i,1,&data);
+                if(num==1) {
+                     epicsBoolean * value = data.data;
+                     if(value[data.offset]) {
+                         *buffer += "true";
+                     } else {
+                         *buffer += "false";
+                     }
+                } else {
+                     *buffer += "???? ";
+                }
+            }
+            *buffer += "]";
+            break;
+        }
+    case pvByte: {
+            PVByteArray *pvdata = (PVByteArray*)pv;
+            ByteArrayData data = ByteArrayData();
+            *buffer += "[";
+            for(int i=0; i < pvdata->getLength(); i++) {
+                if(i!=0) *buffer += ",";
+                int num = pvdata->get(i,1,&data);
+                if(num==1) {
+                     int val = data.data[data.offset];
+                     char buf[16];
+                     sprintf(buf,"%d",val);
+                     *buffer += buf;
+                } else {
+                     *buffer += "???? ";
+                }
+            }
+            *buffer += "]";
+            break;
+        }
+    case pvShort: {
+            PVShortArray *pvdata = (PVShortArray*)pv;
+            ShortArrayData data = ShortArrayData();
+            *buffer += "[";
+            for(int i=0; i < pvdata->getLength(); i++) {
+                if(i!=0) *buffer += ',';
+                int num = pvdata->get(i,1,&data);
+                if(num==1) {
+                     int val = data.data[data.offset];
+                     char buf[16];
+                     sprintf(buf,"%d",val);
+                     *buffer += buf;
+                } else {
+                     *buffer += "???? ";
+                }
+            }
+            *buffer += "]";
+            break;
+        }
+    case pvInt: {
+            PVIntArray *pvdata = (PVIntArray*)pv;
+            IntArrayData data = IntArrayData();
+            *buffer += "[";
+            for(int i=0; i < pvdata->getLength(); i++) {
+                if(i!=0) *buffer += ',';
+                int num = pvdata->get(i,1,&data);
+                if(num==1) {
+                     int val = data.data[data.offset];
+                     char buf[16];
+                     sprintf(buf,"%d",val);
+                     *buffer += buf;
+                } else {
+                     *buffer += "???? ";
+                }
+            }
+            *buffer += "]";
+            break;
+        }
+    case pvLong: {
+            PVLongArray *pvdata = (PVLongArray*)pv;
+            LongArrayData data = LongArrayData();
+            *buffer += "[";
+            for(int i=0; i < pvdata->getLength(); i++) {
+                if(i!=0) *buffer += ',';
+                int num = pvdata->get(i,1,&data);
+                if(num==1) {
+                     long int val = data.data[data.offset];
+                     char buf[16];
+                     sprintf(buf,"%ld",val);
+                     *buffer += buf;
+                } else {
+                     *buffer += "???? ";
+                }
+            }
+            *buffer += "]";
+            break;
+        }
+    case pvFloat: {
+            PVFloatArray *pvdata = (PVFloatArray*)pv;
+            FloatArrayData data = FloatArrayData();
+            *buffer += "[";
+            for(int i=0; i < pvdata->getLength(); i++) {
+                if(i!=0) *buffer += ',';
+                int num = pvdata->get(i,1,&data);
+                if(num==1) {
+                     float val = data.data[data.offset];
+                     char buf[16];
+                     sprintf(buf,"%f",val);
+                     *buffer += buf;
+                } else {
+                     *buffer += "???? ";
+                }
+            }
+            *buffer += "]";
+            break;
+        }
+    case pvDouble: {
+            PVDoubleArray *pvdata = (PVDoubleArray*)pv;
+            DoubleArrayData data = DoubleArrayData();
+            *buffer += "[";
+            for(int i=0; i < pvdata->getLength(); i++) {
+                if(i!=0) *buffer += ',';
+                int num = pvdata->get(i,1,&data);
+                if(num==1) {
+                     double val = data.data[data.offset];
+                     char buf[16];
+                     sprintf(buf,"%lf",val);
+                     *buffer += buf;
+                } else {
+                     *buffer += "???? ";
+                }
+            }
+            *buffer += ("]");
+            break;
+        }
+    case pvString: {
+    	PVStringArray *pvdata = (PVStringArray*)pv;
+    	StringArrayData data = StringArrayData();
+    	*buffer += "[";
+    	for(int i=0; i < pvdata->getLength(); i++) {
+    		if(i!=0) *buffer += ",";
+    		int num = pvdata->get(i,1,&data);
+    		StringPtrArray value = data.data;
+                if(num==1) {
+                    if(value[data.offset].length()>0) {
+                         *buffer += value[data.offset].c_str();
+                    } else {
+                         *buffer += "null";
+                    }
+    		} else {
+    			*buffer += "null";
+    		}
+    	}
+    	*buffer += "]";
+    	break;
+    }
+    default:
+        *buffer += " array element is unknown ScalarType";
+    }
+    if(pv->isImmutable()) {
+        *buffer += " immutable ";
+    }
 }
 
 void convertStructureArray(StringBuilder buffer,PVStructureArray * pvdata,int indentLevel)
@@ -1019,8 +1183,8 @@ public:
 };
 
 Convert * getConvert() {
-    static Mutex *mutex = new Mutex();
-    Lock xx(mutex);
+    static Mutex mutex = Mutex();
+    Lock xx(&mutex);
 
     if(convert==0){
         convert = new ConvertExt();

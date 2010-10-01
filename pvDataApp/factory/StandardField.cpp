@@ -71,8 +71,8 @@ static String notImplemented("not implemented");
     };
 
     StandardField * getStandardField() {
-        static Mutex *mutex = new Mutex();
-        Lock xx(mutex);
+        static Mutex mutex = Mutex();
+        Lock xx(&mutex);
 
         if(instance==0) instance = new StandardFieldExt();
         return instance;

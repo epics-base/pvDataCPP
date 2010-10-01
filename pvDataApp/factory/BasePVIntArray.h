@@ -1,6 +1,6 @@
-/*BasePVDoubleArray.h*/
-#ifndef BASEPVDOUBLEARRAY_H
-#define BASEPVDOUBLEARRAY_H
+/*BasePVIntArray.h*/
+#ifndef BASEPVINTARRAY_H
+#define BASEPVINTARRAY_H
 #include <cstddef>
 #include <cstdlib>
 #include <string>
@@ -12,20 +12,20 @@
 
 namespace epics { namespace pvData {
 
-    PVDoubleArray::~PVDoubleArray() {}
+    PVIntArray::~PVIntArray() {}
 
-    PVDoubleArray::PVDoubleArray(PVStructure *parent,ScalarArrayConstPtr scalar)
+    PVIntArray::PVIntArray(PVStructure *parent,ScalarArrayConstPtr scalar)
     : PVScalarArray(parent,scalar) {}
 
-    class BasePVDoubleArray : public PVDoubleArray {
+    class BasePVIntArray : public PVIntArray {
     public:
-        BasePVDoubleArray(PVStructure *parent,ScalarArrayConstPtr scalarArray);
-        virtual ~BasePVDoubleArray();
+        BasePVIntArray(PVStructure *parent,ScalarArrayConstPtr scalarArray);
+        virtual ~BasePVIntArray();
         virtual void setCapacity(int capacity);
-        virtual int get(int offset, int length, DoubleArrayData *data) ;
-        virtual int put(int offset,int length,DoubleArray from,
+        virtual int get(int offset, int length, IntArrayData *data) ;
+        virtual int put(int offset,int length,IntArray from,
            int fromOffset);
-        virtual void shareData(double value[],int capacity,int length);
+        virtual void shareData(epicsInt32 value[],int capacity,int length);
         // from Serializable
         virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) ;
         virtual void deserialize(ByteBuffer *pbuffer,DeserializableControl *pflusher);
@@ -35,20 +35,20 @@ namespace epics { namespace pvData {
         virtual void toString(StringBuilder buf,int indentLevel);
         virtual epicsBoolean equals(PVField  *pv) ;
     private:
-        double *value;
+        epicsInt32 *value;
     };
 
-    BasePVDoubleArray::BasePVDoubleArray(PVStructure *parent,
+    BasePVIntArray::BasePVIntArray(PVStructure *parent,
         ScalarArrayConstPtr scalarArray)
-    : PVDoubleArray(parent,scalarArray),value(new double[0])
+    : PVIntArray(parent,scalarArray),value(new epicsInt32[0])
     { } 
 
-    BasePVDoubleArray::~BasePVDoubleArray()
+    BasePVIntArray::~BasePVIntArray()
     {
         delete[] value;
     }
 
-    void BasePVDoubleArray::setCapacity(int capacity)
+    void BasePVIntArray::setCapacity(int capacity)
     {
         if(PVArray::getCapacity()==capacity) return;
         if(!PVArray::isCapacityMutable()) {
@@ -58,14 +58,14 @@ namespace epics { namespace pvData {
         }
         int length = PVArray::getLength();
         if(length>capacity) length = capacity;
-        double *newValue = new double[capacity]; 
+        epicsInt32 *newValue = new epicsInt32[capacity]; 
         for(int i=0; i<length; i++) newValue[i] = value[i];
         delete[]value;
         value = newValue;
         PVArray::setCapacityLength(capacity,length);
     }
 
-    int BasePVDoubleArray::get(int offset, int len, DoubleArrayData *data) 
+    int BasePVIntArray::get(int offset, int len, IntArrayData *data) 
     {
         int n = len;
         int length = PVArray::getLength();
@@ -78,8 +78,8 @@ namespace epics { namespace pvData {
         return n;
     }
 
-    int BasePVDoubleArray::put(int offset,int len,
-        DoubleArray from,int fromOffset)
+    int BasePVIntArray::put(int offset,int len,
+        IntArray from,int fromOffset)
     {
         if(PVField::isImmutable()) {
             PVField::message("field is immutable",errorMessage);
@@ -107,47 +107,47 @@ namespace epics { namespace pvData {
         return len;      
     }
 
-    void BasePVDoubleArray::shareData(
-        double shareValue[],int capacity,int length)
+    void BasePVIntArray::shareData(
+        epicsInt32 shareValue[],int capacity,int length)
     {
         delete[] value;
         value = shareValue;
         PVArray::setCapacityLength(capacity,length);
     }
 
-    void BasePVDoubleArray::serialize(ByteBuffer *pbuffer,
+    void BasePVIntArray::serialize(ByteBuffer *pbuffer,
          SerializableControl *pflusher) 
     {
         throw std::logic_error(notImplemented);
     }
 
-    void BasePVDoubleArray::deserialize(ByteBuffer *pbuffer,
+    void BasePVIntArray::deserialize(ByteBuffer *pbuffer,
          DeserializableControl *pflusher)
     {
         throw std::logic_error(notImplemented);
     }
 
-    void BasePVDoubleArray::serialize(ByteBuffer *pbuffer,
+    void BasePVIntArray::serialize(ByteBuffer *pbuffer,
          SerializableControl *pflusher, int offset, int count) 
     {
         throw std::logic_error(notImplemented);
     }
 
-    void BasePVDoubleArray::toString(StringBuilder buf)
+    void BasePVIntArray::toString(StringBuilder buf)
     {
         toString(buf,1);
     }
 
-    void BasePVDoubleArray::toString(StringBuilder buf,int indentLevel)
+    void BasePVIntArray::toString(StringBuilder buf,int indentLevel)
     {
         getConvert()->getString(buf,this,indentLevel);
 
         PVField::toString(buf,indentLevel);
     }
 
-    epicsBoolean BasePVDoubleArray::equals(PVField  *pv) 
+    epicsBoolean BasePVIntArray::equals(PVField  *pv) 
     {
         return getConvert()->equals(this,pv);
     }
 }}
-#endif  /* BASEPVDOUBLEARRAY_H */
+#endif  /* BASEPVINTARRAY_H */
