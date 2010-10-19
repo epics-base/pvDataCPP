@@ -9,6 +9,12 @@ INC += serialize.h
 INC += bitSet.h
 INC += byteBuffer.h
 
+LIBSRCS += bitSet.cpp
+
+LIBRARY=pvMisc
+
+pvMisc_LIBS += Com
+
 include $(TOP)/configure/RULES
 #----------------------------------------
 #  ADD RULES AFTER THIS LINE
