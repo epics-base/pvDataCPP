@@ -25,7 +25,7 @@ namespace epics { namespace pvData {
         virtual int get(int offset, int length, BooleanArrayData *data) ;
         virtual int put(int offset,int length,BooleanArray from,
            int fromOffset);
-        virtual void shareData(epicsBoolean value[],int capacity,int length);
+        virtual void shareData(bool value[],int capacity,int length);
         // from Serializable
         virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) ;
         virtual void deserialize(ByteBuffer *pbuffer,DeserializableControl *pflusher);
@@ -33,14 +33,14 @@ namespace epics { namespace pvData {
              SerializableControl *pflusher, int offset, int count) ;
         virtual void toString(StringBuilder buf);
         virtual void toString(StringBuilder buf,int indentLevel);
-        virtual epicsBoolean equals(PVField  *pv) ;
+        virtual bool operator==(PVField  *pv) ;
     private:
-        epicsBoolean *value;
+        bool *value;
     };
 
     BasePVBooleanArray::BasePVBooleanArray(PVStructure *parent,
         ScalarArrayConstPtr scalarArray)
-    : PVBooleanArray(parent,scalarArray),value(new epicsBoolean[0])
+    : PVBooleanArray(parent,scalarArray),value(new bool[0])
     { } 
 
     BasePVBooleanArray::~BasePVBooleanArray()
@@ -58,7 +58,7 @@ namespace epics { namespace pvData {
         }
         int length = PVArray::getLength();
         if(length>capacity) length = capacity;
-        epicsBoolean *newValue = new epicsBoolean[capacity]; 
+        bool *newValue = new bool[capacity]; 
         for(int i=0; i<length; i++) newValue[i] = value[i];
         delete[]value;
         value = newValue;
@@ -108,7 +108,7 @@ namespace epics { namespace pvData {
     }
 
     void BasePVBooleanArray::shareData(
-        epicsBoolean shareValue[],int capacity,int length)
+        bool shareValue[],int capacity,int length)
     {
         delete[] value;
         value = shareValue;
@@ -145,7 +145,7 @@ namespace epics { namespace pvData {
         PVField::toString(buf,indentLevel);
     }
 
-    epicsBoolean BasePVBooleanArray::equals(PVField  *pv) 
+    bool BasePVBooleanArray::operator==(PVField  *pv) 
     {
         return getConvert()->equals(this,pv);
     }

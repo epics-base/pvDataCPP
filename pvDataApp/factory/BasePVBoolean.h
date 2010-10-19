@@ -18,17 +18,17 @@ namespace epics { namespace pvData {
     public:
         BasePVBoolean(PVStructure *parent,ScalarConstPtr scalar);
         virtual ~BasePVBoolean();
-        virtual epicsBoolean get();
-        virtual void put(epicsBoolean val);
+        virtual bool get();
+        virtual void put(bool val);
         virtual void serialize(ByteBuffer *pbuffer,
             SerializableControl *pflusher) ;
         virtual void deserialize(ByteBuffer *pbuffer,
             DeserializableControl *pflusher);
         virtual void toString(StringBuilder buf);
         virtual void toString(StringBuilder buf,int indentLevel);
-        virtual epicsBoolean equals(PVField  *pv) ;
+        virtual bool operator==(PVField  *pv) ;
     private:
-        epicsBoolean value;
+        bool value;
     };
 
     BasePVBoolean::BasePVBoolean(PVStructure *parent,ScalarConstPtr scalar)
@@ -37,9 +37,9 @@ namespace epics { namespace pvData {
 
     BasePVBoolean::~BasePVBoolean() {}
 
-    epicsBoolean BasePVBoolean::get() { return value;}
+    bool BasePVBoolean::get() { return value;}
 
-    void BasePVBoolean::put(epicsBoolean val){value = val;}
+    void BasePVBoolean::put(bool val){value = val;}
 
     void BasePVBoolean::serialize(ByteBuffer *pbuffer,
         SerializableControl *pflusher) 
@@ -61,7 +61,7 @@ namespace epics { namespace pvData {
         PVField::toString(buf,indentLevel);
     }
 
-    epicsBoolean BasePVBoolean::equals(PVField  *pvField) 
+    bool BasePVBoolean::operator==(PVField  *pvField) 
     {
         return getConvert()->equals(this,pvField);
     }

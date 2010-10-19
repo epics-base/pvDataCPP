@@ -26,7 +26,7 @@ namespace epics { namespace pvData {
             DeserializableControl *pflusher);
         virtual void toString(StringBuilder buf);
         virtual void toString(StringBuilder buf,int indentLevel);
-        virtual epicsBoolean equals(PVField  *pv) ;
+        virtual bool operator==(PVField  *pv) ;
     private:
         float value;
     };
@@ -61,7 +61,7 @@ namespace epics { namespace pvData {
         PVField::toString(buf,indentLevel);
     }
 
-    epicsBoolean BasePVFloat::equals(PVField  *pvField) 
+    bool BasePVFloat::operator==(PVField  *pvField) 
     {
         return getConvert()->equals(this,pvField);
     }

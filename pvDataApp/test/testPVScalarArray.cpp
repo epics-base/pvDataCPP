@@ -24,12 +24,12 @@ void testBooleanArray() {
         getStandardField()->scalarArrayValue(pvBoolean);
     PVBooleanArray *pvValue = (PVBooleanArray *)pvScalarArray;
     int length = 5;
-    epicsBoolean *value = new epicsBoolean[length];
+    bool *value = new bool[length];
     for(int i=0; i<length; i++) value[i] = epicsTrue;
     pvValue->put(0,length,value,0);
     BooleanArrayData data = BooleanArrayData();
     pvValue->get(0,length,&data);
-    epicsBoolean * getValue = data.data;
+    bool * getValue = data.data;
     printf("(orig,get):");
     for(int i=0; i< length; i++) {
         printf("(%s,%s) ",

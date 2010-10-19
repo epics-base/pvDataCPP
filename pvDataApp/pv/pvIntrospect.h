@@ -48,9 +48,9 @@ namespace epics { namespace pvData {
 
     class ScalarTypeFunc {
     public:
-        static epicsBoolean isInteger(ScalarType type);
-        static epicsBoolean isNumeric(ScalarType type);
-        static epicsBoolean isPrimitive(ScalarType type);
+        static bool isInteger(ScalarType type);
+        static bool isNumeric(ScalarType type);
+        static bool isPrimitive(ScalarType type);
         static ScalarType getScalarType(String value);
         static void toString(StringBuilder buf,ScalarType scalarType);
     };

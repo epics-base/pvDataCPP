@@ -38,8 +38,6 @@ namespace epics { namespace pvData {
     class PVStructure;
     class PVStructureArray;
 
-
-
     // NOTE this prevents compiler from generating default methods for this and 
     // derived classes
     class PVAuxInfo : private NoDefaultMethods {
@@ -72,7 +70,7 @@ namespace epics { namespace pvData {
         int getNextFieldOffset() ;
         int getNumberFields() ;
         PVAuxInfo * getPVAuxInfo();
-        epicsBoolean isImmutable() ;
+        bool isImmutable() ;
         void setImmutable();
         FieldConstPtr getField() ;
         PVStructure * getParent() ;
@@ -82,7 +80,7 @@ namespace epics { namespace pvData {
         void setPostHandler(PostHandler *postHandler);
         virtual void toString(StringBuilder buf) ;
         virtual void toString(StringBuilder buf,int indentLevel) ;
-        virtual epicsBoolean equals(PVField *pv) = 0;
+        virtual bool operator==(PVField *pv) = 0;
     protected:
         PVField(PVStructure *parent,FieldConstPtr field);
         void replaceStructure();
@@ -108,8 +106,8 @@ namespace epics { namespace pvData {
         int getLength() ;
         void setLength(int length);
         int getCapacity() ;
-        epicsBoolean isCapacityMutable() ;
-        void setCapacityMutable(epicsBoolean isMutable);
+        bool isCapacityMutable() ;
+        void setCapacityMutable(bool isMutable);
         virtual void setCapacity(int capacity) = 0;
         virtual void serialize(ByteBuffer *pbuffer,
             SerializableControl *pflusher) = 0;
@@ -171,7 +169,7 @@ namespace epics { namespace pvData {
             SerializableControl *pflusher, int offset, int count) = 0;
         virtual void toString(StringBuilder buf) = 0;
         virtual void toString(StringBuilder buf,int indentLevel) = 0;
-        virtual epicsBoolean equals(PVField *pv) = 0;
+        virtual bool operator==(PVField *pv) = 0;
     protected:
         PVStructureArray(PVStructure *parent,
             StructureArrayConstPtr structureArray);
@@ -205,11 +203,11 @@ namespace epics { namespace pvData {
             String fieldName,ScalarType elementType);
         PVStructureArray *getStructureArrayField(String fieldName);
         String getExtendsStructureName();
-        epicsBoolean putExtendsStructureName(
+        bool putExtendsStructureName(
             String extendsStructureName);
         virtual void toString(StringBuilder buf) ;
         virtual void toString(StringBuilder buf,int indentLevel) ;
-        virtual epicsBoolean equals(PVField *pv) ;
+        virtual bool operator==(PVField *pv) ;
         virtual void serialize(
             ByteBuffer *pbuffer,SerializableControl *pflusher) ;
         virtual void deserialize(
@@ -229,8 +227,8 @@ namespace epics { namespace pvData {
     class PVBoolean : public PVScalar {
     public:
         virtual ~PVBoolean();
-        virtual epicsBoolean get() = 0;
-        virtual void put(epicsBoolean value) = 0;
+        virtual bool get() = 0;
+        virtual void put(bool value) = 0;
     protected:
         PVBoolean(PVStructure *parent,ScalarConstPtr scalar)
         : PVScalar(parent,scalar) {}
@@ -315,7 +313,7 @@ namespace epics { namespace pvData {
     };
 
 
-    typedef epicsBoolean * BooleanArray;
+    typedef bool * BooleanArray;
     class BooleanArrayData {
     public:
         BooleanArray data;
@@ -329,7 +327,7 @@ namespace epics { namespace pvData {
         virtual void toString(StringBuilder buf,int indentLevel) = 0 ;
         virtual int get(int offset, int length, BooleanArrayData *data) = 0;
         virtual int put(int offset,int length, BooleanArray from, int fromOffset) = 0;
-        virtual void shareData(epicsBoolean value[],int capacity,int length) = 0;
+        virtual void shareData(bool value[],int capacity,int length) = 0;
         virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) = 0;
         virtual void deserialize(ByteBuffer *pbuffer,DeserializableControl *pflusher) = 0;
     protected:

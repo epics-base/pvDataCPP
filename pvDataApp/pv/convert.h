@@ -13,28 +13,28 @@ namespace epics { namespace pvData {
         Convert();
         ~Convert();
         void getFullName(StringBuilder buf,PVField *pvField);
-        epicsBoolean equals(PVField *a,PVField *b);
+        bool equals(PVField *a,PVField *b);
         void getString(StringBuilder buf,PVField * pvField,int indentLevel);
         void getString(StringBuilder buf,PVField *pvField);
         void fromString(PVScalar *pv, String from);
         int fromString(PVScalarArray *pv, String from);
         int fromStringArray(PVScalarArray *pv, int offset, int length,
-            StringArray from, int fromOffset);
+            String from[], int fromOffset);
         int toStringArray(PVScalarArray *pv, int offset, int length,
-            StringArray to, int toOffset);
-        epicsBoolean isCopyCompatible(FieldConstPtr from, FieldConstPtr to);
+            String to[], int toOffset);
+        bool isCopyCompatible(FieldConstPtr from, FieldConstPtr to);
         void copy(PVField *from,PVField *to);
-        epicsBoolean isCopyScalarCompatible(
+        bool isCopyScalarCompatible(
              ScalarConstPtr from, ScalarConstPtr to);
         void copyScalar(PVScalar *from, PVScalar *to);
-        epicsBoolean isCopyScalarArrayCompatible(ScalarArrayConstPtr from,
+        bool isCopyScalarArrayCompatible(ScalarArrayConstPtr from,
             ScalarArrayConstPtr to);
         int copyScalarArray(PVScalarArray *from, int offset,
             PVScalarArray *to, int toOffset, int length);
-        epicsBoolean isCopyStructureCompatible(
+        bool isCopyStructureCompatible(
             StructureConstPtr from, StructureConstPtr to);
         void copyStructure(PVStructure *from, PVStructure *to);
-        epicsBoolean isCopyStructureArrayCompatible(
+        bool isCopyStructureArrayCompatible(
             StructureArrayConstPtr from, StructureArrayConstPtr to);
         void copyStructureArray(
             PVStructureArray *from, PVStructureArray *to);

@@ -22,9 +22,9 @@ void testBoolean() {
     printf("\ntestBoolean\n");
     PVScalar *pvScalar = getStandardField()->scalarValue(pvBoolean);
     PVBoolean *pvValue = (PVBoolean *)pvScalar;
-    epicsBoolean value = epicsTrue;
+    bool value = epicsTrue;
     pvValue->put(value);
-    epicsBoolean getValue = pvValue->get();
+    bool getValue = pvValue->get();
     printf("put %s get %s\n",
         ((value==epicsFalse) ? "false" : "true"),
         ((getValue==epicsFalse) ? "false" : "true"));
@@ -37,7 +37,7 @@ void testBoolean() {
     buffer.clear();
     field->toString(&buffer);
     printf("%s\n",buffer.c_str());
-    epicsBoolean isImmutable = pvValue->isImmutable();
+    bool isImmutable = pvValue->isImmutable();
     PVStructure *pvParent = pvValue->getParent();
     printf("immutable %s parent %p\n",
         ((isImmutable==epicsFalse) ? "false" : "true"),
@@ -57,7 +57,7 @@ void testBoolean() {
     printf("%s\n",buffer.c_str());
     pvScalar->message(String("this is a test message"),infoMessage);
     PVScalar *other = getStandardField()->scalarValue(pvDouble);
-    epicsBoolean isEqual = pvScalar->equals(other);
+    bool isEqual = pvScalar==other;
     printf("expect false isEqual %s\n",(isEqual ? "true" : "false"));
     delete pvValue;
 }
@@ -77,7 +77,7 @@ void testByte() {
     buffer.clear();
     field->toString(&buffer);
     printf("%s\n",buffer.c_str());
-    epicsBoolean isImmutable = pvValue->isImmutable();
+    bool isImmutable = pvValue->isImmutable();
     PVStructure *pvParent = pvValue->getParent();
     printf("immutable %s parent %p\n",
         ((isImmutable==epicsFalse) ? "false" : "true"),
@@ -97,7 +97,7 @@ void testByte() {
     printf("%s\n",buffer.c_str());
     pvScalar->message(String("this is a test message"),infoMessage);
     PVScalar *other = getStandardField()->scalarValue(pvDouble);
-    epicsBoolean isEqual = pvScalar->equals(other);
+    bool isEqual = pvScalar==other;
     printf("expect false isEqual %s\n",(isEqual ? "true" : "false"));
     delete pvValue;
 }
@@ -117,7 +117,7 @@ void testShort() {
     buffer.clear();
     field->toString(&buffer);
     printf("%s\n",buffer.c_str());
-    epicsBoolean isImmutable = pvValue->isImmutable();
+    bool isImmutable = pvValue->isImmutable();
     PVStructure *pvParent = pvValue->getParent();
     printf("immutable %s parent %p\n",
         ((isImmutable==epicsFalse) ? "false" : "true"),
@@ -137,7 +137,7 @@ void testShort() {
     printf("%s\n",buffer.c_str());
     pvScalar->message(String("this is a test message"),infoMessage);
     PVScalar *other = getStandardField()->scalarValue(pvDouble);
-    epicsBoolean isEqual = pvScalar->equals(other);
+    bool isEqual = pvScalar==other;
     printf("expect false isEqual %s\n",(isEqual ? "true" : "false"));
     delete pvValue;
 }
@@ -157,7 +157,7 @@ void testInt() {
     buffer.clear();
     field->toString(&buffer);
     printf("%s\n",buffer.c_str());
-    epicsBoolean isImmutable = pvValue->isImmutable();
+    bool isImmutable = pvValue->isImmutable();
     PVStructure *pvParent = pvValue->getParent();
     printf("immutable %s parent %p\n",
         ((isImmutable==epicsFalse) ? "false" : "true"),
@@ -177,7 +177,7 @@ void testInt() {
     printf("%s\n",buffer.c_str());
     pvScalar->message(String("this is a test message"),infoMessage);
     PVScalar *other = getStandardField()->scalarValue(pvDouble);
-    epicsBoolean isEqual = pvScalar->equals(other);
+    bool isEqual = pvScalar==other;
     printf("expect false isEqual %s\n",(isEqual ? "true" : "false"));
     delete pvValue;
 }
@@ -197,7 +197,7 @@ void testLong() {
     buffer.clear();
     field->toString(&buffer);
     printf("%s\n",buffer.c_str());
-    epicsBoolean isImmutable = pvValue->isImmutable();
+    bool isImmutable = pvValue->isImmutable();
     PVStructure *pvParent = pvValue->getParent();
     printf("immutable %s parent %p\n",
         ((isImmutable==epicsFalse) ? "false" : "true"),
@@ -217,7 +217,7 @@ void testLong() {
     printf("%s\n",buffer.c_str());
     pvScalar->message(String("this is a test message"),infoMessage);
     PVScalar *other = getStandardField()->scalarValue(pvDouble);
-    epicsBoolean isEqual = pvScalar->equals(other);
+    bool isEqual = pvScalar==other;
     printf("expect false isEqual %s\n",(isEqual ? "true" : "false"));
     delete pvValue;
 }
@@ -237,7 +237,7 @@ void testFloat() {
     buffer.clear();
     field->toString(&buffer);
     printf("%s\n",buffer.c_str());
-    epicsBoolean isImmutable = pvValue->isImmutable();
+    bool isImmutable = pvValue->isImmutable();
     PVStructure *pvParent = pvValue->getParent();
     printf("immutable %s parent %p\n",
         ((isImmutable==epicsFalse) ? "false" : "true"),
@@ -256,7 +256,7 @@ void testFloat() {
     pvValue->toString(&buffer);
     printf("%s\n",buffer.c_str());
     pvScalar->message(String("this is a test message"),infoMessage);
-    epicsBoolean isEqual = pvScalar->equals(pvScalar);
+    bool isEqual = pvScalar==pvScalar;
     printf("expect true isEqual %s\n",(isEqual ? "true" : "false"));
     delete pvValue;
 }
@@ -276,7 +276,7 @@ void testDouble() {
     buffer.clear();
     field->toString(&buffer);
     printf("%s\n",buffer.c_str());
-    epicsBoolean isImmutable = pvValue->isImmutable();
+    bool isImmutable = pvValue->isImmutable();
     PVStructure *pvParent = pvValue->getParent();
     printf("immutable %s parent %p\n",
         ((isImmutable==epicsFalse) ? "false" : "true"),
@@ -295,7 +295,7 @@ void testDouble() {
     pvValue->toString(&buffer);
     printf("%s\n",buffer.c_str());
     pvScalar->message(String("this is a test message"),infoMessage);
-    epicsBoolean isEqual = pvScalar->equals(pvScalar);
+    bool isEqual = pvScalar==pvScalar;
     printf("expect true isEqual %s\n",(isEqual ? "true" : "false"));
     delete pvValue;
 }
@@ -316,7 +316,7 @@ void testString() {
     buffer.clear();
     field->toString(&buffer);
     printf("%s\n",buffer.c_str());
-    epicsBoolean isImmutable = pvValue->isImmutable();
+    bool isImmutable = pvValue->isImmutable();
     PVStructure *pvParent = pvValue->getParent();
     printf("immutable %s parent %p\n",
         ((isImmutable==epicsFalse) ? "false" : "true"),
@@ -335,7 +335,7 @@ void testString() {
     pvValue->toString(&buffer);
     printf("%s\n",buffer.c_str());
     pvScalar->message(String("this is a test message"),infoMessage);
-    epicsBoolean isEqual = pvScalar->equals(pvScalar);
+    bool isEqual = pvScalar==pvScalar;
     printf("expect true isEqual %s\n",(isEqual ? "true" : "false"));
     delete pvValue;
 }

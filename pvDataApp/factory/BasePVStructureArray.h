@@ -93,7 +93,7 @@ namespace epics { namespace pvData {
         throw std::logic_error(notImplemented);
     }
 
-    epicsBoolean PVStructureArray::equals(PVField  *pv) 
+    bool PVStructureArray::operator==(PVField  *pv) 
     {
         throw std::logic_error(notImplemented);
     }

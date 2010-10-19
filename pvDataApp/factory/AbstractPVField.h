@@ -22,7 +22,7 @@ static String notImplemented("not implemented");
         int fieldOffset;
         int nextFieldOffset;
         PVAuxInfo *pvAuxInfo;
-        epicsBoolean immutable;
+        bool immutable;
         Requester *requester;
         PostHandler *postHandler;
     };
@@ -106,7 +106,7 @@ static String notImplemented("not implemented");
          return pImpl->pvAuxInfo;
      }
 
-     epicsBoolean PVField::isImmutable()  {return pImpl->immutable;}
+     bool PVField::isImmutable()  {return pImpl->immutable;}
 
      void PVField::setImmutable() {pImpl->immutable = epicsTrue;}
 

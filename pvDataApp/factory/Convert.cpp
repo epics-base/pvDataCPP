@@ -13,9 +13,11 @@ namespace epics { namespace pvData {
 
 static Convert* convert = 0;
 
+static String logicError("Logic error. Should never get here.");
 static String notImplemented("not implemented");
+static String illegalScalarType("Illegal ScalarType");
 
-static epicsBoolean convertEquals(PVField *a,PVField *b);
+static bool convertEquals(PVField *a,PVField *b);
 static int convertFromByteArray(PVScalarArray *pv, int offset,
     int len,epicsInt8 from[], int fromOffset);
 static int convertToByteArray(PVScalarArray *pv, int offset,
@@ -98,7 +100,7 @@ void Convert::getFullName(StringBuilder buf,PVField * pvField)
     }
 }
 
-epicsBoolean Convert::equals(PVField *a,PVField *b)
+bool Convert::equals(PVField *a,PVField *b)
 {
     return convertEquals(a,b);
 }
@@ -120,7 +122,7 @@ void Convert::fromString(PVScalar *pvScalar, String from)
     switch(scalarType) {
         case pvBoolean: {
                 PVBoolean *pv = (PVBoolean *)pvScalar;
-                epicsBoolean value = 
+                bool value = 
                   ((from.compare("true")==0) ? epicsTrue : epicsFalse);
                 pv->put(value);
                 break;
@@ -176,11 +178,10 @@ void Convert::fromString(PVScalar *pvScalar, String from)
                 value->put(from);
                 break;
             }
-        default:
-             String message("Convert::fromString unknown scalarType ");
-             ScalarTypeFunc::toString(&message,scalarType);
-             throw std::logic_error(message);
     }
+    String message("Convert::fromString unknown scalarType ");
+    ScalarTypeFunc::toString(&message,scalarType);
+    throw std::logic_error(message);
 }
 
 int Convert::fromString(PVScalarArray *pv, String from)
@@ -204,18 +205,18 @@ int Convert::fromString(PVScalarArray *pv, String from)
 }
 
 int Convert::fromStringArray(PVScalarArray *pv, int offset, int length,
-    StringArray from, int fromOffset)
+    String from[], int fromOffset)
 {
     return convertFromStringArray(pv,offset,length,from,fromOffset);
 }
 
 int Convert::toStringArray(PVScalarArray * pv, int offset, int length,
-    StringArray to, int toOffset)
+    String to[], int toOffset)
 {
     return convertToStringArray(pv,offset,length,to,toOffset);
 }
 
-epicsBoolean Convert::isCopyCompatible(FieldConstPtr from, FieldConstPtr to)
+bool Convert::isCopyCompatible(FieldConstPtr from, FieldConstPtr to)
 {
     if(from->getType()!=to->getType()) return epicsFalse;
     switch(from->getType()) {
@@ -257,7 +258,7 @@ void Convert::copy(PVField *from,PVField *to)
     }
 }
 
-epicsBoolean Convert::isCopyScalarCompatible(
+bool Convert::isCopyScalarCompatible(
      ScalarConstPtr fromField, ScalarConstPtr toField)
 {
     ScalarType fromScalarType = fromField->getScalarType();
@@ -273,7 +274,7 @@ epicsBoolean Convert::isCopyScalarCompatible(
 void Convert::copyScalar(PVScalar *from, PVScalar *to)
 {
     if(to->isImmutable()) {
-        if(from->equals(to)) return;
+        if(from==to) return;
         String message("Convert.copyScalar destination is immutable");
         throw std::invalid_argument(message);
     }
@@ -294,7 +295,7 @@ void Convert::copyScalar(PVScalar *from, PVScalar *to)
                 data->toString(&buf);
                 dataTo->put(buf);
             } else {
-                epicsBoolean value = data->get();
+                bool value = data->get();
                 PVBoolean *dataTo = (PVBoolean*)to;
                 dataTo->put(value);
             }
@@ -342,13 +343,12 @@ void Convert::copyScalar(PVScalar *from, PVScalar *to)
             convert->fromString(to,value);
             break;
         }
-    default:
-        String message("Convert.copyScalar arguments are not compatible");
-        throw std::invalid_argument(message);
     }
+    String message("Convert::copyScalar should never get here");
+    throw std::logic_error(message);
 }
 
-epicsBoolean Convert::isCopyScalarArrayCompatible(ScalarArrayConstPtr fromArray,
+bool Convert::isCopyScalarArrayCompatible(ScalarArrayConstPtr fromArray,
     ScalarArrayConstPtr toArray)
 {
     ScalarType fromType = fromArray->getElementType();
@@ -365,7 +365,7 @@ int Convert::copyScalarArray(PVScalarArray *from, int offset,
     PVScalarArray *to, int toOffset, int length)
 {
     if(to->isImmutable()) {
-        if(from->equals(to)) return from->getLength();
+        if(from==to) return from->getLength();
         String message("Convert.copyArray destination is immutable");
         throw std::invalid_argument(message);
     }
@@ -387,7 +387,7 @@ int Convert::copyScalarArray(PVScalarArray *from, int offset,
         PVBooleanArray *pvto = (PVBooleanArray*)to;
         while(length>0) {
             int num = 0;
-            epicsBoolean *data = 0;
+            bool *data = 0;
             int fromOffset = 0;
             BooleanArrayData booleanArrayData = BooleanArrayData();
             num = pvfrom->get(offset,length,&booleanArrayData);
@@ -452,7 +452,7 @@ int Convert::copyScalarArray(PVScalarArray *from, int offset,
     throw std::logic_error(message);
 }
 
-epicsBoolean Convert::isCopyStructureCompatible(
+bool Convert::isCopyStructureCompatible(
     StructureConstPtr fromStruct, StructureConstPtr toStruct)
 {
     FieldConstPtrArray fromFields = fromStruct->getFields();
@@ -488,7 +488,7 @@ epicsBoolean Convert::isCopyStructureCompatible(
 void Convert::copyStructure(PVStructure *from, PVStructure *to)
 {
     if(to->isImmutable()) {
-        if(from->equals(to)) return;
+        if(from==to) return;
         String message("Convert.copyStructure destination is immutable");
         throw std::invalid_argument(message);
     }
@@ -556,7 +556,7 @@ void Convert::copyStructure(PVStructure *from, PVStructure *to)
     }
 }
 
-epicsBoolean Convert::isCopyStructureArrayCompatible(
+bool Convert::isCopyStructureArrayCompatible(
     StructureArrayConstPtr from, StructureArrayConstPtr to)
 {
     return isCopyStructureCompatible(from->getStructure(),to->getStructure());
@@ -566,7 +566,7 @@ void Convert::copyStructureArray(
     PVStructureArray *from, PVStructureArray *to)
 {
     if(to->isImmutable()) {
-        if(from->equals(to)) return;
+        if(from==to) return;
         String message("Convert.copyStructureArray destination is immutable");
         throw std::invalid_argument(message);
     }
@@ -602,134 +602,560 @@ void Convert::copyStructureArray(
 
 epicsInt8 Convert::toByte(PVScalar * pv)
 {
-    throw std::logic_error(notImplemented);
+    ScalarConstPtr scalar = pv->getScalar();
+    ScalarType scalarType = scalar->getScalarType();
+    switch(scalarType) {
+        case pvBoolean:
+           throw std::logic_error(String("boolean can not be converted to byte"));
+        case pvByte: {
+            PVByte *value = (PVByte *)pv;
+            return value->get();
+        }
+        case pvShort: {
+            PVShort *value = (PVShort *)pv;
+            return value->get();
+        }
+        case pvInt: {
+            PVInt *value = (PVInt *)pv;
+            return value->get();
+        }
+        case pvLong: {
+            PVLong *value = (PVLong *)pv;
+            return value->get();
+        }
+        case pvFloat: {
+            PVFloat *value = (PVFloat *)pv;
+            return value->get();
+        }
+        case pvDouble: {
+            PVDouble *value = (PVDouble *)pv;
+            return value->get();
+        }
+        case pvString:
+           throw std::logic_error(String("string can not be converted to byte"));
+    }
+    throw std::logic_error(logicError);
 }
 
 epicsInt16 Convert::toShort(PVScalar * pv)
 {
-    throw std::logic_error(notImplemented);
+    ScalarConstPtr scalar = pv->getScalar();
+    ScalarType scalarType = scalar->getScalarType();
+    switch(scalarType) {
+        case pvBoolean:
+           throw std::logic_error(String("boolean can not be converted to short"));
+        case pvByte: {
+            PVByte *value = (PVByte *)pv;
+            return value->get();
+        }
+        case pvShort: {
+            PVShort *value = (PVShort *)pv;
+            return value->get();
+        }
+        case pvInt: {
+            PVInt *value = (PVInt *)pv;
+            return value->get();
+        }
+        case pvLong: {
+            PVLong *value = (PVLong *)pv;
+            return value->get();
+        }
+        case pvFloat: {
+            PVFloat *value = (PVFloat *)pv;
+            return value->get();
+        }
+        case pvDouble: {
+            PVDouble *value = (PVDouble *)pv;
+            return value->get();
+        }
+        case pvString:
+           throw std::logic_error(String("string can not be converted to short"));
+    }
+    throw std::logic_error(logicError);
 }
 
 epicsInt32 Convert::toInt(PVScalar * pv)
 {
-    throw std::logic_error(notImplemented);
+    ScalarConstPtr scalar = pv->getScalar();
+    ScalarType scalarType = scalar->getScalarType();
+    switch(scalarType) {
+        case pvBoolean:
+           throw std::logic_error(String("boolean can not be converted to int"));
+        case pvByte: {
+            PVByte *value = (PVByte *)pv;
+            return value->get();
+        }
+        case pvShort: {
+            PVShort *value = (PVShort *)pv;
+            return value->get();
+        }
+        case pvInt: {
+            PVInt *value = (PVInt *)pv;
+            return value->get();
+        }
+        case pvLong: {
+            PVLong *value = (PVLong *)pv;
+            return value->get();
+        }
+        case pvFloat: {
+            PVFloat *value = (PVFloat *)pv;
+            return value->get();
+        }
+        case pvDouble: {
+            PVDouble *value = (PVDouble *)pv;
+            return value->get();
+        }
+        case pvString:
+           throw std::logic_error(String("string can not be converted to int"));
+    }
+    throw std::logic_error(logicError);
 }
 
 epicsInt64 Convert::toLong(PVScalar * pv)
 {
-    throw std::logic_error(notImplemented);
+    ScalarConstPtr scalar = pv->getScalar();
+    ScalarType scalarType = scalar->getScalarType();
+    switch(scalarType) {
+        case pvBoolean:
+           throw std::logic_error(String("boolean can not be converted to long"));
+        case pvByte: {
+            PVByte *value = (PVByte *)pv;
+            return value->get();
+        }
+        case pvShort: {
+            PVShort *value = (PVShort *)pv;
+            return value->get();
+        }
+        case pvInt: {
+            PVInt *value = (PVInt *)pv;
+            return value->get();
+        }
+        case pvLong: {
+            PVLong *value = (PVLong *)pv;
+            return value->get();
+        }
+        case pvFloat: {
+            PVFloat *value = (PVFloat *)pv;
+            return value->get();
+        }
+        case pvDouble: {
+            PVDouble *value = (PVDouble *)pv;
+            return value->get();
+        }
+        case pvString:
+           throw std::logic_error(String("string can not be converted to long"));
+    }
+    throw std::logic_error(logicError);
 }
 
 float Convert::toFloat(PVScalar * pv)
 {
-    throw std::logic_error(notImplemented);
+    ScalarConstPtr scalar = pv->getScalar();
+    ScalarType scalarType = scalar->getScalarType();
+    switch(scalarType) {
+        case pvBoolean:
+           throw std::logic_error(String("boolean can not be converted to float"));
+        case pvByte: {
+            PVByte *value = (PVByte *)pv;
+            return value->get();
+        }
+        case pvShort: {
+            PVShort *value = (PVShort *)pv;
+            return value->get();
+        }
+        case pvInt: {
+            PVInt *value = (PVInt *)pv;
+            return value->get();
+        }
+        case pvLong: {
+            PVLong *value = (PVLong *)pv;
+            return value->get();
+        }
+        case pvFloat: {
+            PVFloat *value = (PVFloat *)pv;
+            return value->get();
+        }
+        case pvDouble: {
+            PVDouble *value = (PVDouble *)pv;
+            return value->get();
+        }
+        case pvString:
+           throw std::logic_error(String("string can not be converted to float"));
+    }
+    throw std::logic_error(logicError);
 }
 
 double Convert::toDouble(PVScalar * pv)
 {
-    throw std::logic_error(notImplemented);
+    ScalarConstPtr scalar = pv->getScalar();
+    ScalarType scalarType = scalar->getScalarType();
+    switch(scalarType) {
+        case pvBoolean:
+           throw std::logic_error(String("boolean can not be converted to double"));
+        case pvByte: {
+            PVByte *value = (PVByte *)pv;
+            return value->get();
+        }
+        case pvShort: {
+            PVShort *value = (PVShort *)pv;
+            return value->get();
+        }
+        case pvInt: {
+            PVInt *value = (PVInt *)pv;
+            return value->get();
+        }
+        case pvLong: {
+            PVLong *value = (PVLong *)pv;
+            return value->get();
+        }
+        case pvFloat: {
+            PVFloat *value = (PVFloat *)pv;
+            return value->get();
+        }
+        case pvDouble: {
+            PVDouble *value = (PVDouble *)pv;
+            return value->get();
+        }
+        case pvString:
+           throw std::logic_error(String("string can not be converted to double"));
+    }
+    throw std::logic_error(logicError);
 }
 
 void Convert::fromByte(PVScalar *pv,epicsInt8 from)
 {
-    throw std::logic_error(notImplemented);
+    ScalarConstPtr scalar = pv->getScalar();
+    ScalarType scalarType = scalar->getScalarType();
+    switch(scalarType) {
+        case pvBoolean:
+           throw std::logic_error(String("byte can not be converted to boolean"));
+        case pvByte: {
+            PVByte *value = (PVByte *)pv;
+            value->put(from); return;
+        }
+        case pvShort: {
+            PVShort *value = (PVShort *)pv;
+            value->put(from); return;
+        }
+        case pvInt: {
+            PVInt *value = (PVInt *)pv;
+            value->put(from); return;
+        }
+        case pvLong: {
+            PVLong *value = (PVLong *)pv;
+            value->put(from); return;
+        }
+        case pvFloat: {
+            PVFloat *value = (PVFloat *)pv;
+            value->put(from); return;
+        }
+        case pvDouble: {
+            PVDouble *value = (PVDouble *)pv;
+            value->put(from); return;
+        }
+        case pvString: {
+            PVString *value = (PVString *)pv;
+            char buffer[20];
+            int ival = from;
+            sprintf(buffer,"%d",ival);
+            String xxx(buffer);
+            value->put(xxx);
+            return;
+        }
+    }
+    throw std::logic_error(logicError);
 }
 
 void  Convert::fromShort(PVScalar *pv,epicsInt16 from)
 {
-    throw std::logic_error(notImplemented);
+    ScalarConstPtr scalar = pv->getScalar();
+    ScalarType scalarType = scalar->getScalarType();
+    switch(scalarType) {
+        case pvBoolean:
+           throw std::logic_error(String("short can not be converted to boolean"));
+        case pvByte: {
+            PVByte *value = (PVByte *)pv;
+            value->put(from); return;
+        }
+        case pvShort: {
+            PVShort *value = (PVShort *)pv;
+            value->put(from); return;
+        }
+        case pvInt: {
+            PVInt *value = (PVInt *)pv;
+            value->put(from); return;
+        }
+        case pvLong: {
+            PVLong *value = (PVLong *)pv;
+            value->put(from); return;
+        }
+        case pvFloat: {
+            PVFloat *value = (PVFloat *)pv;
+            value->put(from); return;
+        }
+        case pvDouble: {
+            PVDouble *value = (PVDouble *)pv;
+            value->put(from); return;
+        }
+        case pvString: {
+            PVString *value = (PVString *)pv;
+            char buffer[20];
+            int ival = from;
+            sprintf(buffer,"%d",ival);
+            String xxx(buffer);
+            value->put(xxx);
+            return;
+        }
+    }
+    throw std::logic_error(logicError);
 }
 
 void  Convert::fromInt(PVScalar *pv, epicsInt32 from)
 {
-    throw std::logic_error(notImplemented);
+    ScalarConstPtr scalar = pv->getScalar();
+    ScalarType scalarType = scalar->getScalarType();
+    switch(scalarType) {
+        case pvBoolean:
+           throw std::logic_error(String("int can not be converted to boolean"));
+        case pvByte: {
+            PVByte *value = (PVByte *)pv;
+            value->put(from); return;
+        }
+        case pvShort: {
+            PVShort *value = (PVShort *)pv;
+            value->put(from); return;
+        }
+        case pvInt: {
+            PVInt *value = (PVInt *)pv;
+            value->put(from); return;
+        }
+        case pvLong: {
+            PVLong *value = (PVLong *)pv;
+            value->put(from); return;
+        }
+        case pvFloat: {
+            PVFloat *value = (PVFloat *)pv;
+            value->put(from); return;
+        }
+        case pvDouble: {
+            PVDouble *value = (PVDouble *)pv;
+            value->put(from); return;
+        }
+        case pvString: {
+            PVString *value = (PVString *)pv;
+            char buffer[20];
+            int ival = from;
+            sprintf(buffer,"%d",ival);
+            String xxx(buffer);
+            value->put(xxx);
+            return;
+        }
+    }
+    throw std::logic_error(logicError);
 }
 
 void  Convert::fromLong(PVScalar *pv, epicsInt64 from)
 {
-    throw std::logic_error(notImplemented);
+    ScalarConstPtr scalar = pv->getScalar();
+    ScalarType scalarType = scalar->getScalarType();
+    switch(scalarType) {
+        case pvBoolean:
+           throw std::logic_error(String("long can not be converted to boolean"));
+        case pvByte: {
+            PVByte *value = (PVByte *)pv;
+            value->put(from); return;
+        }
+        case pvShort: {
+            PVShort *value = (PVShort *)pv;
+            value->put(from); return;
+        }
+        case pvInt: {
+            PVInt *value = (PVInt *)pv;
+            value->put(from); return;
+        }
+        case pvLong: {
+            PVLong *value = (PVLong *)pv;
+            value->put(from); return;
+        }
+        case pvFloat: {
+            PVFloat *value = (PVFloat *)pv;
+            value->put(from); return;
+        }
+        case pvDouble: {
+            PVDouble *value = (PVDouble *)pv;
+            value->put(from); return;
+        }
+        case pvString: {
+            PVString *value = (PVString *)pv;
+            char buffer[20];
+            long int ival = from;
+            sprintf(buffer,"%ld",ival);
+            String xxx(buffer);
+            value->put(xxx);
+            return;
+        }
+    }
+    throw std::logic_error(logicError);
 }
 
 void  Convert::fromFloat(PVScalar* pv, float from)
 {
-    throw std::logic_error(notImplemented);
+    ScalarConstPtr scalar = pv->getScalar();
+    ScalarType scalarType = scalar->getScalarType();
+    switch(scalarType) {
+        case pvBoolean:
+           throw std::logic_error(String("float can not be converted to boolean"));
+        case pvByte: {
+            PVByte *value = (PVByte *)pv;
+            value->put(from); return;
+        }
+        case pvShort: {
+            PVShort *value = (PVShort *)pv;
+            value->put(from); return;
+        }
+        case pvInt: {
+            PVInt *value = (PVInt *)pv;
+            value->put(from); return;
+        }
+        case pvLong: {
+            PVLong *value = (PVLong *)pv;
+            value->put(from); return;
+        }
+        case pvFloat: {
+            PVFloat *value = (PVFloat *)pv;
+            value->put(from); return;
+        }
+        case pvDouble: {
+            PVDouble *value = (PVDouble *)pv;
+            value->put(from); return;
+        }
+        case pvString: {
+            PVString *value = (PVString *)pv;
+            char buffer[20];
+            double dval = from;
+            sprintf(buffer,"%e",dval);
+            String xxx(buffer);
+            value->put(xxx);
+            return;
+        }
+    }
+    throw std::logic_error(logicError);
 }
 
 void  Convert::fromDouble(PVScalar *pv, double from)
 {
-    throw std::logic_error(notImplemented);
+    ScalarConstPtr scalar = pv->getScalar();
+    ScalarType scalarType = scalar->getScalarType();
+    switch(scalarType) {
+        case pvBoolean:
+           throw std::logic_error(String("double can not be converted to boolean"));
+        case pvByte: {
+            PVByte *value = (PVByte *)pv;
+            value->put(from); return;
+        }
+        case pvShort: {
+            PVShort *value = (PVShort *)pv;
+            value->put(from); return;
+        }
+        case pvInt: {
+            PVInt *value = (PVInt *)pv;
+            value->put(from); return;
+        }
+        case pvLong: {
+            PVLong *value = (PVLong *)pv;
+            value->put(from); return;
+        }
+        case pvFloat: {
+            PVFloat *value = (PVFloat *)pv;
+            value->put(from); return;
+        }
+        case pvDouble: {
+            PVDouble *value = (PVDouble *)pv;
+            value->put(from); return;
+        }
+        case pvString: {
+            PVString *value = (PVString *)pv;
+            char buffer[20];
+            double dval = from;
+            sprintf(buffer,"%e",dval);
+            String xxx(buffer);
+            value->put(xxx);
+            return;
+        }
+    }
+    throw std::logic_error(logicError);
 }
 
 int Convert::toByteArray(PVScalarArray * pv, int offset, int length,
     epicsInt8 to[], int toOffset)
 {
-    throw std::logic_error(notImplemented);
+    return convertToByteArray(pv, offset, length, to, toOffset);
 }
 
 int Convert::toShortArray(PVScalarArray * pv, int offset, int length,
     epicsInt16 to[], int toOffset)
 {
-    throw std::logic_error(notImplemented);
+    return convertToShortArray(pv, offset, length, to, toOffset);
 }
 
 int Convert::toIntArray(PVScalarArray * pv, int offset, int length,
     epicsInt32 to[], int toOffset)
 {
-    throw std::logic_error(notImplemented);
+    return convertToIntArray(pv, offset, length, to, toOffset);
 }
 
 int Convert::toLongArray(PVScalarArray * pv, int offset, int length,
     epicsInt64 to[], int toOffset)
 {
-    throw std::logic_error(notImplemented);
+    return convertToLongArray(pv, offset, length, to, toOffset);
 }
 
 int Convert::toFloatArray(PVScalarArray * pv, int offset, int length,
     float to[], int toOffset)
 {
-    throw std::logic_error(notImplemented);
+    return convertToFloatArray(pv, offset, length, to, toOffset);
 }
 
 int Convert::toDoubleArray(PVScalarArray * pv, int offset, int length,
     double to[], int toOffset)
 {
-    throw std::logic_error(notImplemented);
+    return convertToDoubleArray(pv, offset, length, to, toOffset);
 }
 
 int Convert::fromByteArray(PVScalarArray *pv, int offset, int length,
     epicsInt8 from[], int fromOffset)
 {
-    throw std::logic_error(notImplemented);
+    return convertFromByteArray(pv, offset, length, from, fromOffset);
 }
 
 int Convert::fromShortArray(PVScalarArray *pv, int offset, int length,
     epicsInt16 from[], int fromOffset)
 {
-    throw std::logic_error(notImplemented);
+    return convertFromShortArray(pv, offset, length, from, fromOffset);
 }
 
 int Convert::fromIntArray(PVScalarArray *pv, int offset, int length,
     epicsInt32 from[], int fromOffset)
 {
-    throw std::logic_error(notImplemented);
+    return convertFromIntArray(pv, offset, length, from, fromOffset);
 }
 
 int Convert::fromLongArray(PVScalarArray *pv, int offset, int length,
     epicsInt64 from[], int fromOffset)
 {
-    throw std::logic_error(notImplemented);
+    return convertFromLongArray(pv, offset, length, from, fromOffset);
 }
 
 int Convert::fromFloatArray(PVScalarArray *pv, int offset, int length,
     float from[], int fromOffset)
 {
-    throw std::logic_error(notImplemented);
+    return convertFromFloatArray(pv, offset, length, from, fromOffset);
 }
 
 int Convert::fromDoubleArray(PVScalarArray *pv, int offset, int length,
     double from[], int fromOffset)
 {
-    throw std::logic_error(notImplemented);
+    return convertFromDoubleArray(pv, offset, length, from, fromOffset);
 }
 
 void Convert::newLine(StringBuilder buffer, int indentLevel)
@@ -738,7 +1164,7 @@ void Convert::newLine(StringBuilder buffer, int indentLevel)
     for(int i=0; i<indentLevel; i++) *buffer += "    ";
 }
 
-static epicsBoolean scalarEquals(PVScalar *a,PVScalar *b)
+static bool scalarEquals(PVScalar *a,PVScalar *b)
 {
     ScalarType ascalarType = a->getScalar()->getScalarType();
     ScalarType bscalarType = b->getScalar()->getScalarType();
@@ -747,8 +1173,8 @@ static epicsBoolean scalarEquals(PVScalar *a,PVScalar *b)
         case pvBoolean: {
             PVBoolean *pa = (PVBoolean *)a;
             PVBoolean *pb = (PVBoolean *)b;
-            epicsBoolean avalue = pa->get();
-            epicsBoolean bvalue = pb->get();
+            bool avalue = pa->get();
+            bool bvalue = pb->get();
             return ((avalue==bvalue) ? epicsTrue : epicsFalse);
         }
         case pvByte: {
@@ -805,22 +1231,45 @@ static epicsBoolean scalarEquals(PVScalar *a,PVScalar *b)
     throw std::logic_error(message);
 }
 
-static epicsBoolean arrayEquals(PVScalarArray *a,PVScalarArray *b)
+static bool arrayEquals(PVScalarArray *a,PVScalarArray *b)
+{
+    if(a==b) return epicsTrue;
+    ScalarType aType = a->getScalarArray()->getElementType();
+    ScalarType bType = b->getScalarArray()->getElementType();
+    if(aType!=bType) return epicsFalse;
+    if(a->getLength()!=b->getLength()) return epicsFalse;
+    int length = a->getLength();
+    switch(aType) {
+        case pvBoolean: {
+            PVBooleanArray *aarray = (PVBooleanArray *)a;
+            PVBooleanArray *barray = (PVBooleanArray *)b;
+            BooleanArrayData adata = BooleanArrayData();
+            BooleanArrayData bdata = BooleanArrayData();
+            aarray->get(0,length,&adata);
+            barray->get(0,length,&bdata);
+            bool *avalue = adata.data;
+            bool *bvalue = bdata.data;
+            for(int i=0; i<length; i++) {
+                if(avalue[i]!=bvalue[i]) return epicsFalse;
+            }
+            return epicsTrue;
+        }
+    }
+    String message("should not get here");
+    throw std::logic_error(message);
+}
+
+static bool structureArrayEquals(PVStructureArray *a,PVStructureArray *b)
 {
     throw std::logic_error(notImplemented);
 }
 
-static epicsBoolean structureArrayEquals(PVStructureArray *a,PVStructureArray *b)
+static bool structureEquals(PVStructure *a,PVStructure *b)
 {
     throw std::logic_error(notImplemented);
 }
 
-static epicsBoolean structureEquals(PVStructure *a,PVStructure *b)
-{
-    throw std::logic_error(notImplemented);
-}
-
-epicsBoolean convertEquals(PVField *a,PVField *b)
+bool convertEquals(PVField *a,PVField *b)
 {
     if(a==b) return epicsTrue;
     Type atype = a->getField()->getType();
@@ -928,7 +1377,7 @@ void convertToString(StringBuilder buffer,PVField * pv,int indentLevel)
     switch(pvScalar->getScalar()->getScalarType()) {
     case pvBoolean: {
             PVBoolean *data = (PVBoolean*)pv;
-            epicsBoolean value = data->get();
+            bool value = data->get();
             if(value) {
                 *buffer += "true";
             } else {
@@ -1006,7 +1455,7 @@ void convertArray(StringBuilder buffer,PVScalarArray * pv,int indentLevel)
                 if(i!=0) *buffer += ",";
                 int num = pvdata->get(i,1,&data);
                 if(num==1) {
-                     epicsBoolean * value = data.data;
+                     bool * value = data.data;
                      if(value[data.offset]) {
                          *buffer += "true";
                      } else {

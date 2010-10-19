@@ -22,24 +22,24 @@ namespace epics { namespace pvData {
     }
 
 
-    epicsBoolean ScalarTypeFunc::isInteger(ScalarType type) {
+    bool ScalarTypeFunc::isInteger(ScalarType type) {
         if(type>=pvByte && type<=pvLong) return epicsTrue;
         return epicsFalse;
     }
 
-    epicsBoolean ScalarTypeFunc::isNumeric(ScalarType type) {
+    bool ScalarTypeFunc::isNumeric(ScalarType type) {
         if(type>=pvByte && type<=pvDouble) return epicsTrue;
         return epicsFalse;
     }
 
-    epicsBoolean ScalarTypeFunc::isPrimitive(ScalarType type) {
+    bool ScalarTypeFunc::isPrimitive(ScalarType type) {
         if(type>=pvBoolean && type<=pvDouble) return epicsTrue;
         return epicsFalse;
     }
 
     ScalarType ScalarTypeFunc::getScalarType(String pvalue) {
         static String unknownString = "error unknown ScalarType";
-        if(pvalue.compare("epicsBooleanean")==0) return pvBoolean;
+        if(pvalue.compare("boolean")==0) return pvBoolean;
         if(pvalue.compare("byte")==0) return pvByte;
         if(pvalue.compare("short")==0) return pvShort;
         if(pvalue.compare("int")==0) return pvInt;

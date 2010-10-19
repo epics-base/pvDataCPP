@@ -145,7 +145,7 @@ namespace epics { namespace pvData {
         throw std::logic_error(notImplemented);
     }
 
-    epicsBoolean PVStructure::putExtendsStructureName(
+    bool PVStructure::putExtendsStructureName(
         String extendsStructureName)
     {
         throw std::logic_error(notImplemented);
@@ -188,7 +188,7 @@ namespace epics { namespace pvData {
         throw std::logic_error(notImplemented);
     }
 
-    epicsBoolean PVStructure::equals(PVField  *pv) 
+    bool PVStructure::operator==(PVField  *pv) 
     {
         throw std::logic_error(notImplemented);
     }

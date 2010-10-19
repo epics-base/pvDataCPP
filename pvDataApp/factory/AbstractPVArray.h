@@ -16,7 +16,7 @@ namespace epics { namespace pvData {
         {}
         int length;
         int capacity;
-        epicsBoolean capacityMutable;
+        bool capacityMutable;
     };
 
     PVArray::PVArray(PVStructure *parent,FieldConstPtr field)
@@ -51,7 +51,7 @@ namespace epics { namespace pvData {
      }
 
 
-     epicsBoolean PVArray::isCapacityMutable() 
+     bool PVArray::isCapacityMutable() 
      {
           if(PVField::isImmutable()) {
               return epicsFalse;
@@ -59,7 +59,7 @@ namespace epics { namespace pvData {
           return pImpl->capacityMutable;
      }
 
-     void PVArray::setCapacityMutable(epicsBoolean isMutable)
+     void PVArray::setCapacityMutable(bool isMutable)
      {
         if(isMutable && PVField::isImmutable()) {
            PVField::message(fieldImmutable,errorMessage);

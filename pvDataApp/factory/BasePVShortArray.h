@@ -33,7 +33,7 @@ namespace epics { namespace pvData {
              SerializableControl *pflusher, int offset, int count) ;
         virtual void toString(StringBuilder buf);
         virtual void toString(StringBuilder buf,int indentLevel);
-        virtual epicsBoolean equals(PVField  *pv) ;
+        virtual bool operator==(PVField  *pv) ;
     private:
         epicsInt16 *value;
     };
@@ -145,7 +145,7 @@ namespace epics { namespace pvData {
         PVField::toString(buf,indentLevel);
     }
 
-    epicsBoolean BasePVShortArray::equals(PVField  *pv) 
+    bool BasePVShortArray::operator==(PVField  *pv) 
     {
         return getConvert()->equals(this,pv);
     }
