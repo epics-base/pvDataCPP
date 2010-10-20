@@ -193,6 +193,11 @@ namespace epics { namespace pvData {
         throw std::logic_error(notImplemented);
     }
 
+    bool PVStructure::operator!=(PVField  *pv) 
+    {
+        throw std::logic_error(notImplemented);
+    }
+
     class BasePVStructure : public PVStructure {
     public:
         BasePVStructure(PVStructure *parent,StructureConstPtr structure);

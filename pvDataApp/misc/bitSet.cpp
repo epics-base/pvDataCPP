@@ -1,3 +1,5 @@
+#include "string.h"
+#include "stdio.h"
 #include "bitSet.h"
 
 namespace epics { namespace pvData {

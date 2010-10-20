@@ -6,7 +6,7 @@
 #include <stddef.h>
 #include <string.h>
 #include <stdio.h>
-#include "BitSet.h"
+#include "bitSet.h"
 
 
 #include <epicsAssert.h>

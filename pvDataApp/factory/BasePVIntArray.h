@@ -34,6 +34,7 @@ namespace epics { namespace pvData {
         virtual void toString(StringBuilder buf);
         virtual void toString(StringBuilder buf,int indentLevel);
         virtual bool operator==(PVField  *pv) ;
+        virtual bool operator!=(PVField  *pv) ;
     private:
         epicsInt32 *value;
     };
@@ -148,6 +149,11 @@ namespace epics { namespace pvData {
     bool BasePVIntArray::operator==(PVField  *pv) 
     {
         return getConvert()->equals(this,pv);
+    }
+
+    bool BasePVIntArray::operator!=(PVField  *pv) 
+    {
+        return !(getConvert()->equals(this,pv));
     }
 }}
 #endif  /* BASEPVINTARRAY_H */

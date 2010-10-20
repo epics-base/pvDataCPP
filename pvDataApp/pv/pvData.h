@@ -81,6 +81,7 @@ namespace epics { namespace pvData {
         virtual void toString(StringBuilder buf) ;
         virtual void toString(StringBuilder buf,int indentLevel) ;
         virtual bool operator==(PVField *pv) = 0;
+        virtual bool operator!=(PVField *pv) = 0;
     protected:
         PVField(PVStructure *parent,FieldConstPtr field);
         void replaceStructure();
@@ -170,6 +171,7 @@ namespace epics { namespace pvData {
         virtual void toString(StringBuilder buf) = 0;
         virtual void toString(StringBuilder buf,int indentLevel) = 0;
         virtual bool operator==(PVField *pv) = 0;
+        virtual bool operator!=(PVField *pv) = 0;
     protected:
         PVStructureArray(PVStructure *parent,
             StructureArrayConstPtr structureArray);
@@ -208,6 +210,7 @@ namespace epics { namespace pvData {
         virtual void toString(StringBuilder buf) ;
         virtual void toString(StringBuilder buf,int indentLevel) ;
         virtual bool operator==(PVField *pv) ;
+        virtual bool operator!=(PVField *pv) ;
         virtual void serialize(
             ByteBuffer *pbuffer,SerializableControl *pflusher) ;
         virtual void deserialize(

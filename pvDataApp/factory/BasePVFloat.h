@@ -27,6 +27,7 @@ namespace epics { namespace pvData {
         virtual void toString(StringBuilder buf);
         virtual void toString(StringBuilder buf,int indentLevel);
         virtual bool operator==(PVField  *pv) ;
+        virtual bool operator!=(PVField  *pv) ;
     private:
         float value;
     };
@@ -64,6 +65,11 @@ namespace epics { namespace pvData {
     bool BasePVFloat::operator==(PVField  *pvField) 
     {
         return getConvert()->equals(this,pvField);
+    }
+
+    bool BasePVFloat::operator!=(PVField  *pvField) 
+    {
+        return !(getConvert()->equals(this,pvField));
     }
 
 }}

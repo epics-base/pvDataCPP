@@ -13,6 +13,8 @@ namespace epics { namespace pvData {
 
 static Convert* convert = 0;
 
+static String trueString("true");
+static String falseString("false");
 static String logicError("Logic error. Should never get here.");
 static String notImplemented("not implemented");
 static String illegalScalarType("Illegal ScalarType");
@@ -387,7 +389,7 @@ int Convert::copyScalarArray(PVScalarArray *from, int offset,
         PVBooleanArray *pvto = (PVBooleanArray*)to;
         while(length>0) {
             int num = 0;
-            bool *data = 0;
+            BooleanArray data = 0;
             int fromOffset = 0;
             BooleanArrayData booleanArrayData = BooleanArrayData();
             num = pvfrom->get(offset,length,&booleanArrayData);
@@ -1247,8 +1249,106 @@ static bool arrayEquals(PVScalarArray *a,PVScalarArray *b)
             BooleanArrayData bdata = BooleanArrayData();
             aarray->get(0,length,&adata);
             barray->get(0,length,&bdata);
-            bool *avalue = adata.data;
-            bool *bvalue = bdata.data;
+            BooleanArray avalue = adata.data;
+            BooleanArray bvalue = bdata.data;
+            for(int i=0; i<length; i++) {
+                if(avalue[i]!=bvalue[i]) return epicsFalse;
+            }
+            return epicsTrue;
+        }
+        case pvByte: {
+            PVByteArray *aarray = (PVByteArray *)a;
+            PVByteArray *barray = (PVByteArray *)b;
+            ByteArrayData adata = ByteArrayData();
+            ByteArrayData bdata = ByteArrayData();
+            aarray->get(0,length,&adata);
+            barray->get(0,length,&bdata);
+            ByteArray avalue = adata.data;
+            ByteArray bvalue = bdata.data;
+            for(int i=0; i<length; i++) {
+                if(avalue[i]!=bvalue[i]) return epicsFalse;
+            }
+            return epicsTrue;
+        }
+        case pvShort: {
+            PVShortArray *aarray = (PVShortArray *)a;
+            PVShortArray *barray = (PVShortArray *)b;
+            ShortArrayData adata = ShortArrayData();
+            ShortArrayData bdata = ShortArrayData();
+            aarray->get(0,length,&adata);
+            barray->get(0,length,&bdata);
+            ShortArray avalue = adata.data;
+            ShortArray bvalue = bdata.data;
+            for(int i=0; i<length; i++) {
+                if(avalue[i]!=bvalue[i]) return epicsFalse;
+            }
+            return epicsTrue;
+        }
+        case pvInt: {
+            PVIntArray *aarray = (PVIntArray *)a;
+            PVIntArray *barray = (PVIntArray *)b;
+            IntArrayData adata = IntArrayData();
+            IntArrayData bdata = IntArrayData();
+            aarray->get(0,length,&adata);
+            barray->get(0,length,&bdata);
+            IntArray avalue = adata.data;
+            IntArray bvalue = bdata.data;
+            for(int i=0; i<length; i++) {
+                if(avalue[i]!=bvalue[i]) return epicsFalse;
+            }
+            return epicsTrue;
+        }
+        case pvLong: {
+            PVLongArray *aarray = (PVLongArray *)a;
+            PVLongArray *barray = (PVLongArray *)b;
+            LongArrayData adata = LongArrayData();
+            LongArrayData bdata = LongArrayData();
+            aarray->get(0,length,&adata);
+            barray->get(0,length,&bdata);
+            LongArray avalue = adata.data;
+            LongArray bvalue = bdata.data;
+            for(int i=0; i<length; i++) {
+                if(avalue[i]!=bvalue[i]) return epicsFalse;
+            }
+            return epicsTrue;
+        }
+        case pvFloat: {
+            PVFloatArray *aarray = (PVFloatArray *)a;
+            PVFloatArray *barray = (PVFloatArray *)b;
+            FloatArrayData adata = FloatArrayData();
+            FloatArrayData bdata = FloatArrayData();
+            aarray->get(0,length,&adata);
+            barray->get(0,length,&bdata);
+            FloatArray avalue = adata.data;
+            FloatArray bvalue = bdata.data;
+            for(int i=0; i<length; i++) {
+                if(avalue[i]!=bvalue[i]) return epicsFalse;
+            }
+            return epicsTrue;
+        }
+        case pvDouble: {
+            PVDoubleArray *aarray = (PVDoubleArray *)a;
+            PVDoubleArray *barray = (PVDoubleArray *)b;
+            DoubleArrayData adata = DoubleArrayData();
+            DoubleArrayData bdata = DoubleArrayData();
+            aarray->get(0,length,&adata);
+            barray->get(0,length,&bdata);
+            DoubleArray avalue = adata.data;
+            DoubleArray bvalue = bdata.data;
+            for(int i=0; i<length; i++) {
+                if(avalue[i]!=bvalue[i]) return epicsFalse;
+            }
+            return epicsTrue;
+        }
+        case pvString: {
+            PVStringArray *aarray = (PVStringArray *)a;
+            PVStringArray *barray = (PVStringArray *)b;
+            StringArrayData adata = StringArrayData();
+            StringArrayData bdata = StringArrayData();
+            aarray->get(0,length,&adata);
+            barray->get(0,length,&bdata);
+            String *avalue = adata.data;
+            String *bvalue = bdata.data;
             for(int i=0; i<length; i++) {
                 if(avalue[i]!=bvalue[i]) return epicsFalse;
             }
@@ -1261,12 +1361,40 @@ static bool arrayEquals(PVScalarArray *a,PVScalarArray *b)
 
 static bool structureArrayEquals(PVStructureArray *a,PVStructureArray *b)
 {
-    throw std::logic_error(notImplemented);
+    StructureConstPtr aStructure = a->getStructureArray()->getStructure();
+    StructureConstPtr bStructure = b->getStructureArray()->getStructure();
+    if(aStructure!=bStructure) return false;
+    if(a->getLength()!=b->getLength()) return false;
+    StructureArrayData aData = StructureArrayData();
+    StructureArrayData bData = StructureArrayData();
+    int length = a->getLength();
+    PVStructurePtrArray aArray = aData.data;
+    PVStructurePtrArray bArray = bData.data;
+    if(aArray==bArray) return true;
+    for(int i=0; i<length; i++) {
+        if(aArray[i]==0) {
+            if(bArray[i]==0) continue;
+            return false;
+        } else {
+            if(bArray[i]==0) return false;
+        }
+        if(aArray[i]!=bArray[i]) return false;
+    }
+    return true;
 }
 
 static bool structureEquals(PVStructure *a,PVStructure *b)
 {
-    throw std::logic_error(notImplemented);
+    StructureConstPtr aStructure = a->getStructure();
+    StructureConstPtr bStructure = a->getStructure();
+    int length = aStructure->getNumberFields();
+    if(length!=bStructure->getNumberFields()) return false;
+    PVFieldPtrArray aFields = a->getPVFields();
+    PVFieldPtrArray bFields = b->getPVFields();
+    for(int i=0; i<length; i++) {
+        if(aFields[i]!=bFields[i]) return false;
+    }
+    return true;
 }
 
 bool convertEquals(PVField *a,PVField *b)
@@ -1292,72 +1420,1629 @@ bool convertEquals(PVField *a,PVField *b)
 
 int convertFromByteArray(PVScalarArray *pv, int offset, int len,epicsInt8 from[], int fromOffset)
 {
-    throw std::logic_error(notImplemented);
+    ScalarType elemType = pv->getScalarArray()->getElementType();
+    int ntransfered = 0;
+    switch (elemType) {
+    case pvBoolean: {
+         String message("convert from byte[] to BooleanArray not legal");
+         throw std::invalid_argument(message);
+    }
+    case pvByte: {
+        PVByteArray *pvdata = (PVByteArray*) pv;
+        while (len > 0) {
+            int n = pvdata->put(offset, len, from, fromOffset);
+            if (n == 0)
+                break;
+            len -= n;
+            offset += n;
+            fromOffset += n;
+            ntransfered += n;
+        }
+        return ntransfered;
+    }
+    case pvShort: {
+        PVShortArray *pvdata = (PVShortArray*) pv;
+        epicsInt16 data[1];
+        while (len > 0) {
+            data[0] = (epicsInt16) from[fromOffset];
+            if (pvdata->put(offset, 1, data, 0) == 0)
+                return ntransfered;
+            --len;
+            ++ntransfered;
+            ++offset;
+            ++fromOffset;
+        }
+        return ntransfered;
+    }
+    case pvInt: {
+        PVIntArray *pvdata = (PVIntArray*) pv;
+        epicsInt32 data[1];
+        while (len > 0) {
+            data[0] = (epicsInt32) from[fromOffset];
+            if (pvdata->put(offset, 1, data, 0) == 0)
+                return ntransfered;
+            --len;
+            ++ntransfered;
+            ++offset;
+            ++fromOffset;
+        }
+        return ntransfered;
+    }
+    case pvLong: {
+        PVLongArray *pvdata = (PVLongArray*) pv;
+        epicsInt64 data[1];
+        while (len > 0) {
+            data[0] = (epicsInt64) from[fromOffset];
+            if (pvdata->put(offset, 1, data, 0) == 0)
+                return ntransfered;
+            --len;
+            ++ntransfered;
+            ++offset;
+            ++fromOffset;
+        }
+        return ntransfered;
+    }
+    case pvFloat: {
+        PVFloatArray *pvdata = (PVFloatArray*) pv;
+        float data[1];
+        while (len > 0) {
+            data[0] = (float) from[fromOffset];
+            if (pvdata->put(offset, 1, data, 0) == 0)
+                return ntransfered;
+            --len;
+            ++ntransfered;
+            ++offset;
+            ++fromOffset;
+        }
+        return ntransfered;
+    }
+    case pvDouble: {
+        PVDoubleArray *pvdata = (PVDoubleArray*) pv;
+        double data[1];
+        while (len > 0) {
+            data[0] = (double) from[fromOffset];
+            if (pvdata->put(offset, 1, data, 0) == 0)
+                return ntransfered;
+            --len;
+            ++ntransfered;
+            ++offset;
+            ++fromOffset;
+        }
+        return ntransfered;
+    }
+    case pvString: {
+         String message("convert from byte[] to StringArray not legal");
+         throw std::invalid_argument(message);
+    }
+    }
+    String message("Convert::convertFromByteArray should never get here");
+    throw std::logic_error(message);
 }
 
 int convertToByteArray(PVScalarArray * pv, int offset, int len,epicsInt8 to[], int toOffset)
 {
-    throw std::logic_error(notImplemented);
+    ScalarType elemType = pv->getScalarArray()->getElementType();
+    int ntransfered = 0;
+    switch (elemType) {
+    case pvBoolean: {
+        String message("convert BooleanArray to byte[]] not legal");
+        throw std::invalid_argument(message);
+    }
+    case pvByte: {
+        PVByteArray *pvdata = (PVByteArray*) pv;
+        ByteArrayData data = ByteArrayData();
+        while (len > 0) {
+            int num = 0;
+            num = pvdata->get(offset,len,&data);
+            if (num <= 0) break;
+            ByteArray dataArray = data.data;
+            int dataOffset = data.offset;
+            for(int i=0;i<num;i++) to[toOffset+i] = dataArray[dataOffset+1];
+            len -= num;
+            offset += num;
+            toOffset += num;
+            ntransfered += num;
+        }
+        return ntransfered;
+    }
+    case pvShort: {
+        PVShortArray *pvdata = (PVShortArray*) pv;
+        ShortArrayData data = ShortArrayData();
+        while (len > 0) {
+            int num = pvdata->get(offset, len, &data);
+            if (num == 0) break;
+            ShortArray dataArray = data.data;
+            int dataOffset = data.offset;
+            for (int i = 0; i < num; i++)
+                to[i + toOffset] = (epicsInt8) dataArray[i + dataOffset];
+            len -= num;
+            offset += num;
+            toOffset += num;
+            ntransfered += num;
+        }
+        return ntransfered;
+    }
+    case pvInt: {
+        PVIntArray *pvdata = (PVIntArray*) pv;
+        IntArrayData data = IntArrayData();
+        while (len > 0) {
+            int num = pvdata->get(offset, len, &data);
+            if (num == 0) break;
+            IntArray dataArray = data.data;
+            int dataOffset = data.offset;
+            for (int i = 0; i < num; i++)
+                to[i + toOffset] = (epicsInt8) dataArray[i + dataOffset];
+            len -= num;
+            offset += num;
+            toOffset += num;
+            ntransfered += num;
+        }
+        return ntransfered;
+    }
+    case pvLong: {
+        PVLongArray *pvdata = (PVLongArray*) pv;
+        LongArrayData data = LongArrayData();
+        while (len > 0) {
+            int num = pvdata->get(offset, len, &data);
+            if (num == 0)
+                break;
+            LongArray dataArray = data.data;
+            int dataOffset = data.offset;
+            for (int i = 0; i < num; i++)
+                to[i + toOffset] = (epicsInt8) dataArray[i + dataOffset];
+            len -= num;
+            offset += num;
+            toOffset += num;
+            ntransfered += num;
+        }
+        return ntransfered;
+    }
+    case pvFloat: {
+        PVFloatArray *pvdata = (PVFloatArray*) pv;
+        FloatArrayData data = FloatArrayData();
+        while (len > 0) {
+            int num = pvdata->get(offset, len, &data);
+            if (num == 0) break;
+            FloatArray dataArray = data.data;
+            int dataOffset = data.offset;
+            for (int i = 0; i < num; i++)
+                to[i + toOffset] = (epicsInt8) dataArray[i + dataOffset];
+            len -= num;
+            offset += num;
+            toOffset += num;
+            ntransfered += num;
+        }
+        return ntransfered;
+    }
+    case pvDouble: {
+        PVDoubleArray *pvdata = (PVDoubleArray*) pv;
+        DoubleArrayData data = DoubleArrayData();
+        while (len > 0) {
+            int num = pvdata->get(offset, len, &data);
+            if (num == 0)
+                break;
+            DoubleArray dataArray = data.data;
+            int dataOffset = data.offset;
+            for (int i = 0; i < num; i++)
+                to[i + toOffset] = (epicsInt8) dataArray[i + dataOffset];
+            len -= num;
+            offset += num;
+            toOffset += num;
+            ntransfered += num;
+        }
+        return ntransfered;
+    }
+    case pvString: {
+        String message("convert StringArray to byte[]] not legal");
+        throw std::invalid_argument(message);
+    }
+    }
+     String message("Convert::convertToByteArray should never get here");
+    throw std::logic_error(message);
 }
 
 int convertFromShortArray(PVScalarArray *pv, int offset, int len,epicsInt16 from[], int fromOffset)
 {
-    throw std::logic_error(notImplemented);
+    ScalarType elemType = pv->getScalarArray()->getElementType();
+    int ntransfered = 0;
+    switch (elemType) {
+    case pvBoolean: {
+         String message("convert from short[] to BooleanArray not legal");
+         throw std::invalid_argument(message);
+    }
+    case pvByte: {
+        PVByteArray *pvdata = (PVByteArray*) pv;
+        epicsInt8 data[1];
+        while (len > 0) {
+            data[0] = (epicsInt8) from[fromOffset];
+            if (pvdata->put(offset, 1, data, 0) == 0)
+                return ntransfered;
+            --len;
+            ++ntransfered;
+            ++offset;
+            ++fromOffset;
+        }
+        return ntransfered;
+    }
+    case pvShort: {
+        PVShortArray *pvdata = (PVShortArray*) pv;
+        while (len > 0) {
+            int n = pvdata->put(offset, len, from, fromOffset);
+            if (n == 0)
+                break;
+            len -= n;
+            offset += n;
+            fromOffset += n;
+            ntransfered += n;
+        }
+        return ntransfered;
+    }
+    case pvInt: {
+        PVIntArray *pvdata = (PVIntArray*) pv;
+        epicsInt32 data[1];
+        while (len > 0) {
+            data[0] = (epicsInt32) from[fromOffset];
+            if (pvdata->put(offset, 1, data, 0) == 0)
+                return ntransfered;
+            --len;
+            ++ntransfered;
+            ++offset;
+            ++fromOffset;
+        }
+        return ntransfered;
+    }
+    case pvLong: {
+        PVLongArray *pvdata = (PVLongArray*) pv;
+        epicsInt64 data[1];
+        while (len > 0) {
+            data[0] = (epicsInt64) from[fromOffset];
+            if (pvdata->put(offset, 1, data, 0) == 0)
+                return ntransfered;
+            --len;
+            ++ntransfered;
+            ++offset;
+            ++fromOffset;
+        }
+        return ntransfered;
+    }
+    case pvFloat: {
+        PVFloatArray *pvdata = (PVFloatArray*) pv;
+        float data[1];
+        while (len > 0) {
+            data[0] = (float) from[fromOffset];
+            if (pvdata->put(offset, 1, data, 0) == 0)
+                return ntransfered;
+            --len;
+            ++ntransfered;
+            ++offset;
+            ++fromOffset;
+        }
+        return ntransfered;
+    }
+    case pvDouble: {
+        PVDoubleArray *pvdata = (PVDoubleArray*) pv;
+        double data[1];
+        while (len > 0) {
+            data[0] = (double) from[fromOffset];
+            if (pvdata->put(offset, 1, data, 0) == 0)
+                return ntransfered;
+            --len;
+            ++ntransfered;
+            ++offset;
+            ++fromOffset;
+        }
+        return ntransfered;
+    }
+    case pvString: {
+         String message("convert from short[] to StringArray not legal");
+         throw std::invalid_argument(message);
+    }
+    }
+    String message("Convert::convertFromShortArray should never get here");
+    throw std::logic_error(message);
 }
 
 int convertToShortArray(PVScalarArray * pv, int offset, int len,epicsInt16 to[], int toOffset)
 {
-    throw std::logic_error(notImplemented);
+    ScalarType elemType = pv->getScalarArray()->getElementType();
+    int ntransfered = 0;
+    switch (elemType) {
+    case pvBoolean: {
+        String message("convert BooleanArray to short[]] not legal");
+        throw std::invalid_argument(message);
+    }
+    case pvByte: {
+        PVByteArray *pvdata = (PVByteArray*) pv;
+        ByteArrayData data = ByteArrayData();
+        while (len > 0) {
+            int num = 0;
+            num = pvdata->get(offset,len,&data);
+            if (num <= 0) break;
+            ByteArray dataArray = data.data;
+            int dataOffset = data.offset;
+            for(int i=0;i<num;i++) to[toOffset+i] = dataArray[dataOffset+1];
+            len -= num;
+            offset += num;
+            toOffset += num;
+            ntransfered += num;
+        }
+        return ntransfered;
+    }
+    case pvShort: {
+        PVShortArray *pvdata = (PVShortArray*) pv;
+        ShortArrayData data = ShortArrayData();
+        while (len > 0) {
+            int num = pvdata->get(offset, len, &data);
+            if (num == 0) break;
+            ShortArray dataArray = data.data;
+            int dataOffset = data.offset;
+            for (int i = 0; i < num; i++)
+                to[i + toOffset] = (epicsInt8) dataArray[i + dataOffset];
+            len -= num;
+            offset += num;
+            toOffset += num;
+            ntransfered += num;
+        }
+        return ntransfered;
+    }
+    case pvInt: {
+        PVIntArray *pvdata = (PVIntArray*) pv;
+        IntArrayData data = IntArrayData();
+        while (len > 0) {
+            int num = pvdata->get(offset, len, &data);
+            if (num == 0) break;
+            IntArray dataArray = data.data;
+            int dataOffset = data.offset;
+            for (int i = 0; i < num; i++)
+                to[i + toOffset] = (epicsInt8) dataArray[i + dataOffset];
+            len -= num;
+            offset += num;
+            toOffset += num;
+            ntransfered += num;
+        }
+        return ntransfered;
+    }
+    case pvLong: {
+        PVLongArray *pvdata = (PVLongArray*) pv;
+        LongArrayData data = LongArrayData();
+        while (len > 0) {
+            int num = pvdata->get(offset, len, &data);
+            if (num == 0)
+                break;
+            LongArray dataArray = data.data;
+            int dataOffset = data.offset;
+            for (int i = 0; i < num; i++)
+                to[i + toOffset] = (epicsInt8) dataArray[i + dataOffset];
+            len -= num;
+            offset += num;
+            toOffset += num;
+            ntransfered += num;
+        }
+        return ntransfered;
+    }
+    case pvFloat: {
+        PVFloatArray *pvdata = (PVFloatArray*) pv;
+        FloatArrayData data = FloatArrayData();
+        while (len > 0) {
+            int num = pvdata->get(offset, len, &data);
+            if (num == 0) break;
+            FloatArray dataArray = data.data;
+            int dataOffset = data.offset;
+            for (int i = 0; i < num; i++)
+                to[i + toOffset] = (epicsInt8) dataArray[i + dataOffset];
+            len -= num;
+            offset += num;
+            toOffset += num;
+            ntransfered += num;
+        }
+        return ntransfered;
+    }
+    case pvDouble: {
+        PVDoubleArray *pvdata = (PVDoubleArray*) pv;
+        DoubleArrayData data = DoubleArrayData();
+        while (len > 0) {
+            int num = pvdata->get(offset, len, &data);
+            if (num == 0)
+                break;
+            DoubleArray dataArray = data.data;
+            int dataOffset = data.offset;
+            for (int i = 0; i < num; i++)
+                to[i + toOffset] = (epicsInt8) dataArray[i + dataOffset];
+            len -= num;
+            offset += num;
+            toOffset += num;
+            ntransfered += num;
+        }
+        return ntransfered;
+    }
+    case pvString: {
+        String message("convert StringArray to short[]] not legal");
+        throw std::invalid_argument(message);
+    }
+    }
+     String message("Convert::convertToShortArray should never get here");
+    throw std::logic_error(message);
 }
 
 int convertFromIntArray(PVScalarArray *pv, int offset, int len,epicsInt32 from[], int fromOffset)
 {
-    throw std::logic_error(notImplemented);
+    ScalarType elemType = pv->getScalarArray()->getElementType();
+    int ntransfered = 0;
+    switch (elemType) {
+    case pvBoolean: {
+         String message("convert from int[] to BooleanArray not legal");
+         throw std::invalid_argument(message);
+    }
+    case pvByte: {
+        PVByteArray *pvdata = (PVByteArray*) pv;
+        epicsInt8 data[1];
+        while (len > 0) {
+            data[0] = (epicsInt8) from[fromOffset];
+            if (pvdata->put(offset, 1, data, 0) == 0)
+                return ntransfered;
+            --len;
+            ++ntransfered;
+            ++offset;
+            ++fromOffset;
+        }
+        return ntransfered;
+    }
+    case pvShort: {
+        PVShortArray *pvdata = (PVShortArray*) pv;
+        epicsInt16 data[1];
+        while (len > 0) {
+            data[0] = (epicsInt16) from[fromOffset];
+            if (pvdata->put(offset, 1, data, 0) == 0)
+                return ntransfered;
+            --len;
+            ++ntransfered;
+            ++offset;
+            ++fromOffset;
+        }
+        return ntransfered;
+    }
+    case pvInt: {
+        PVIntArray *pvdata = (PVIntArray*) pv;
+        while (len > 0) {
+            int n = pvdata->put(offset, len, from, fromOffset);
+            if (n == 0)
+                break;
+            len -= n;
+            offset += n;
+            fromOffset += n;
+            ntransfered += n;
+        }
+        return ntransfered;
+    }
+    case pvLong: {
+        PVLongArray *pvdata = (PVLongArray*) pv;
+        epicsInt64 data[1];
+        while (len > 0) {
+            data[0] = (epicsInt64) from[fromOffset];
+            if (pvdata->put(offset, 1, data, 0) == 0)
+                return ntransfered;
+            --len;
+            ++ntransfered;
+            ++offset;
+            ++fromOffset;
+        }
+        return ntransfered;
+    }
+    case pvFloat: {
+        PVFloatArray *pvdata = (PVFloatArray*) pv;
+        float data[1];
+        while (len > 0) {
+            data[0] = (float) from[fromOffset];
+            if (pvdata->put(offset, 1, data, 0) == 0)
+                return ntransfered;
+            --len;
+            ++ntransfered;
+            ++offset;
+            ++fromOffset;
+        }
+        return ntransfered;
+    }
+    case pvDouble: {
+        PVDoubleArray *pvdata = (PVDoubleArray*) pv;
+        double data[1];
+        while (len > 0) {
+            data[0] = (double) from[fromOffset];
+            if (pvdata->put(offset, 1, data, 0) == 0)
+                return ntransfered;
+            --len;
+            ++ntransfered;
+            ++offset;
+            ++fromOffset;
+        }
+        return ntransfered;
+    }
+    case pvString: {
+         String message("convert from int[] to StringArray not legal");
+         throw std::invalid_argument(message);
+    }
+    }
+    String message("Convert::convertFromIntArray should never get here");
+    throw std::logic_error(message);
 }
 
 int convertToIntArray(PVScalarArray * pv, int offset, int len,epicsInt32 to[], int toOffset)
 {
-    throw std::logic_error(notImplemented);
+    ScalarType elemType = pv->getScalarArray()->getElementType();
+    int ntransfered = 0;
+    switch (elemType) {
+    case pvBoolean: {
+        String message("convert BooleanArray to byte[]] not legal");
+        throw std::invalid_argument(message);
+    }
+    case pvByte: {
+        PVByteArray *pvdata = (PVByteArray*) pv;
+        ByteArrayData data = ByteArrayData();
+        while (len > 0) {
+            int num = 0;
+            num = pvdata->get(offset,len,&data);
+            if (num <= 0) break;
+            ByteArray dataArray = data.data;
+            int dataOffset = data.offset;
+            for(int i=0;i<num;i++) to[toOffset+i] = dataArray[dataOffset+1];
+            len -= num;
+            offset += num;
+            toOffset += num;
+            ntransfered += num;
+        }
+        return ntransfered;
+    }
+    case pvShort: {
+        PVShortArray *pvdata = (PVShortArray*) pv;
+        ShortArrayData data = ShortArrayData();
+        while (len > 0) {
+            int num = pvdata->get(offset, len, &data);
+            if (num == 0) break;
+            ShortArray dataArray = data.data;
+            int dataOffset = data.offset;
+            for (int i = 0; i < num; i++)
+                to[i + toOffset] = (epicsInt8) dataArray[i + dataOffset];
+            len -= num;
+            offset += num;
+            toOffset += num;
+            ntransfered += num;
+        }
+        return ntransfered;
+    }
+    case pvInt: {
+        PVIntArray *pvdata = (PVIntArray*) pv;
+        IntArrayData data = IntArrayData();
+        while (len > 0) {
+            int num = pvdata->get(offset, len, &data);
+            if (num == 0) break;
+            IntArray dataArray = data.data;
+            int dataOffset = data.offset;
+            for (int i = 0; i < num; i++)
+                to[i + toOffset] = (epicsInt8) dataArray[i + dataOffset];
+            len -= num;
+            offset += num;
+            toOffset += num;
+            ntransfered += num;
+        }
+        return ntransfered;
+    }
+    case pvLong: {
+        PVLongArray *pvdata = (PVLongArray*) pv;
+        LongArrayData data = LongArrayData();
+        while (len > 0) {
+            int num = pvdata->get(offset, len, &data);
+            if (num == 0)
+                break;
+            LongArray dataArray = data.data;
+            int dataOffset = data.offset;
+            for (int i = 0; i < num; i++)
+                to[i + toOffset] = (epicsInt8) dataArray[i + dataOffset];
+            len -= num;
+            offset += num;
+            toOffset += num;
+            ntransfered += num;
+        }
+        return ntransfered;
+    }
+    case pvFloat: {
+        PVFloatArray *pvdata = (PVFloatArray*) pv;
+        FloatArrayData data = FloatArrayData();
+        while (len > 0) {
+            int num = pvdata->get(offset, len, &data);
+            if (num == 0) break;
+            FloatArray dataArray = data.data;
+            int dataOffset = data.offset;
+            for (int i = 0; i < num; i++)
+                to[i + toOffset] = (epicsInt8) dataArray[i + dataOffset];
+            len -= num;
+            offset += num;
+            toOffset += num;
+            ntransfered += num;
+        }
+        return ntransfered;
+    }
+    case pvDouble: {
+        PVDoubleArray *pvdata = (PVDoubleArray*) pv;
+        DoubleArrayData data = DoubleArrayData();
+        while (len > 0) {
+            int num = pvdata->get(offset, len, &data);
+            if (num == 0)
+                break;
+            DoubleArray dataArray = data.data;
+            int dataOffset = data.offset;
+            for (int i = 0; i < num; i++)
+                to[i + toOffset] = (epicsInt8) dataArray[i + dataOffset];
+            len -= num;
+            offset += num;
+            toOffset += num;
+            ntransfered += num;
+        }
+        return ntransfered;
+    }
+    case pvString: {
+        String message("convert StringArray to int[]] not legal");
+        throw std::invalid_argument(message);
+    }
+    }
+     String message("Convert::convertToIntArray should never get here");
+    throw std::logic_error(message);
 }
 
 int convertFromLongArray(PVScalarArray *pv, int offset, int len,epicsInt64 from[], int fromOffset)
 {
-    throw std::logic_error(notImplemented);
+    ScalarType elemType = pv->getScalarArray()->getElementType();
+    int ntransfered = 0;
+    switch (elemType) {
+    case pvBoolean: {
+         String message("convert from long[] to BooleanArray not legal");
+         throw std::invalid_argument(message);
+    }
+    case pvByte: {
+        PVByteArray *pvdata = (PVByteArray*) pv;
+        epicsInt8 data[1];
+        while (len > 0) {
+            data[0] = (epicsInt8) from[fromOffset];
+            if (pvdata->put(offset, 1, data, 0) == 0)
+                return ntransfered;
+            --len;
+            ++ntransfered;
+            ++offset;
+            ++fromOffset;
+        }
+        return ntransfered;
+    }
+    case pvShort: {
+        PVShortArray *pvdata = (PVShortArray*) pv;
+        epicsInt16 data[1];
+        while (len > 0) {
+            data[0] = (epicsInt16) from[fromOffset];
+            if (pvdata->put(offset, 1, data, 0) == 0)
+                return ntransfered;
+            --len;
+            ++ntransfered;
+            ++offset;
+            ++fromOffset;
+        }
+        return ntransfered;
+    }
+    case pvInt: {
+        PVIntArray *pvdata = (PVIntArray*) pv;
+        epicsInt32 data[1];
+        while (len > 0) {
+            data[0] = (epicsInt32) from[fromOffset];
+            if (pvdata->put(offset, 1, data, 0) == 0)
+                return ntransfered;
+            --len;
+            ++ntransfered;
+            ++offset;
+            ++fromOffset;
+        }
+        return ntransfered;
+    }
+    case pvLong: {
+        PVLongArray *pvdata = (PVLongArray*) pv;
+        while (len > 0) {
+            int n = pvdata->put(offset, len, from, fromOffset);
+            if (n == 0)
+                break;
+            len -= n;
+            offset += n;
+            fromOffset += n;
+            ntransfered += n;
+        }
+        return ntransfered;
+    }
+    case pvFloat: {
+        PVFloatArray *pvdata = (PVFloatArray*) pv;
+        float data[1];
+        while (len > 0) {
+            data[0] = (float) from[fromOffset];
+            if (pvdata->put(offset, 1, data, 0) == 0)
+                return ntransfered;
+            --len;
+            ++ntransfered;
+            ++offset;
+            ++fromOffset;
+        }
+        return ntransfered;
+    }
+    case pvDouble: {
+        PVDoubleArray *pvdata = (PVDoubleArray*) pv;
+        double data[1];
+        while (len > 0) {
+            data[0] = (double) from[fromOffset];
+            if (pvdata->put(offset, 1, data, 0) == 0)
+                return ntransfered;
+            --len;
+            ++ntransfered;
+            ++offset;
+            ++fromOffset;
+        }
+        return ntransfered;
+    }
+    case pvString: {
+         String message("convert from long[] to StringArray not legal");
+         throw std::invalid_argument(message);
+    }
+    }
+    String message("Convert::convertFromLongArray should never get here");
+    throw std::logic_error(message);
 }
 
 int convertToLongArray(PVScalarArray * pv, int offset, int len,epicsInt64 to[], int toOffset)
 {
-    throw std::logic_error(notImplemented);
+    ScalarType elemType = pv->getScalarArray()->getElementType();
+    int ntransfered = 0;
+    switch (elemType) {
+    case pvBoolean: {
+        String message("convert BooleanArray to long[]] not legal");
+        throw std::invalid_argument(message);
+    }
+    case pvByte: {
+        PVByteArray *pvdata = (PVByteArray*) pv;
+        ByteArrayData data = ByteArrayData();
+        while (len > 0) {
+            int num = 0;
+            num = pvdata->get(offset,len,&data);
+            if (num <= 0) break;
+            ByteArray dataArray = data.data;
+            int dataOffset = data.offset;
+            for(int i=0;i<num;i++) to[toOffset+i] = dataArray[dataOffset+1];
+            len -= num;
+            offset += num;
+            toOffset += num;
+            ntransfered += num;
+        }
+        return ntransfered;
+    }
+    case pvShort: {
+        PVShortArray *pvdata = (PVShortArray*) pv;
+        ShortArrayData data = ShortArrayData();
+        while (len > 0) {
+            int num = pvdata->get(offset, len, &data);
+            if (num == 0) break;
+            ShortArray dataArray = data.data;
+            int dataOffset = data.offset;
+            for (int i = 0; i < num; i++)
+                to[i + toOffset] = (epicsInt8) dataArray[i + dataOffset];
+            len -= num;
+            offset += num;
+            toOffset += num;
+            ntransfered += num;
+        }
+        return ntransfered;
+    }
+    case pvInt: {
+        PVIntArray *pvdata = (PVIntArray*) pv;
+        IntArrayData data = IntArrayData();
+        while (len > 0) {
+            int num = pvdata->get(offset, len, &data);
+            if (num == 0) break;
+            IntArray dataArray = data.data;
+            int dataOffset = data.offset;
+            for (int i = 0; i < num; i++)
+                to[i + toOffset] = (epicsInt8) dataArray[i + dataOffset];
+            len -= num;
+            offset += num;
+            toOffset += num;
+            ntransfered += num;
+        }
+        return ntransfered;
+    }
+    case pvLong: {
+        PVLongArray *pvdata = (PVLongArray*) pv;
+        LongArrayData data = LongArrayData();
+        while (len > 0) {
+            int num = pvdata->get(offset, len, &data);
+            if (num == 0)
+                break;
+            LongArray dataArray = data.data;
+            int dataOffset = data.offset;
+            for (int i = 0; i < num; i++)
+                to[i + toOffset] = (epicsInt8) dataArray[i + dataOffset];
+            len -= num;
+            offset += num;
+            toOffset += num;
+            ntransfered += num;
+        }
+        return ntransfered;
+    }
+    case pvFloat: {
+        PVFloatArray *pvdata = (PVFloatArray*) pv;
+        FloatArrayData data = FloatArrayData();
+        while (len > 0) {
+            int num = pvdata->get(offset, len, &data);
+            if (num == 0) break;
+            FloatArray dataArray = data.data;
+            int dataOffset = data.offset;
+            for (int i = 0; i < num; i++)
+                to[i + toOffset] = (epicsInt8) dataArray[i + dataOffset];
+            len -= num;
+            offset += num;
+            toOffset += num;
+            ntransfered += num;
+        }
+        return ntransfered;
+    }
+    case pvDouble: {
+        PVDoubleArray *pvdata = (PVDoubleArray*) pv;
+        DoubleArrayData data = DoubleArrayData();
+        while (len > 0) {
+            int num = pvdata->get(offset, len, &data);
+            if (num == 0)
+                break;
+            DoubleArray dataArray = data.data;
+            int dataOffset = data.offset;
+            for (int i = 0; i < num; i++)
+                to[i + toOffset] = (epicsInt8) dataArray[i + dataOffset];
+            len -= num;
+            offset += num;
+            toOffset += num;
+            ntransfered += num;
+        }
+        return ntransfered;
+    }
+    case pvString: {
+        String message("convert StringArray to long[]] not legal");
+        throw std::invalid_argument(message);
+    }
+    }
+     String message("Convert::convertToLongArray should never get here");
+    throw std::logic_error(message);
 }
 
 int convertFromFloatArray(PVScalarArray *pv, int offset, int len,float from[], int fromOffset)
 {
-    throw std::logic_error(notImplemented);
+    ScalarType elemType = pv->getScalarArray()->getElementType();
+    int ntransfered = 0;
+    switch (elemType) {
+    case pvBoolean: {
+         String message("convert from float[] to BooleanArray not legal");
+         throw std::invalid_argument(message);
+    }
+    case pvByte: {
+        PVByteArray *pvdata = (PVByteArray*) pv;
+        epicsInt8 data[1];
+        while (len > 0) {
+            data[0] = (epicsInt8) from[fromOffset];
+            if (pvdata->put(offset, 1, data, 0) == 0)
+                return ntransfered;
+            --len;
+            ++ntransfered;
+            ++offset;
+            ++fromOffset;
+        }
+        return ntransfered;
+    }
+    case pvShort: {
+        PVShortArray *pvdata = (PVShortArray*) pv;
+        epicsInt16 data[1];
+        while (len > 0) {
+            data[0] = (epicsInt16) from[fromOffset];
+            if (pvdata->put(offset, 1, data, 0) == 0)
+                return ntransfered;
+            --len;
+            ++ntransfered;
+            ++offset;
+            ++fromOffset;
+        }
+        return ntransfered;
+    }
+    case pvInt: {
+        PVIntArray *pvdata = (PVIntArray*) pv;
+        epicsInt32 data[1];
+        while (len > 0) {
+            data[0] = (epicsInt32) from[fromOffset];
+            if (pvdata->put(offset, 1, data, 0) == 0)
+                return ntransfered;
+            --len;
+            ++ntransfered;
+            ++offset;
+            ++fromOffset;
+        }
+        return ntransfered;
+    }
+    case pvLong: {
+        PVLongArray *pvdata = (PVLongArray*) pv;
+        epicsInt64 data[1];
+        while (len > 0) {
+            data[0] = (epicsInt64) from[fromOffset];
+            if (pvdata->put(offset, 1, data, 0) == 0)
+                return ntransfered;
+            --len;
+            ++ntransfered;
+            ++offset;
+            ++fromOffset;
+        }
+        return ntransfered;
+    }
+    case pvFloat: {
+        PVFloatArray *pvdata = (PVFloatArray*) pv;
+        while (len > 0) {
+            int n = pvdata->put(offset, len, from, fromOffset);
+            if (n == 0)
+                break;
+            len -= n;
+            offset += n;
+            fromOffset += n;
+            ntransfered += n;
+        }
+        return ntransfered;
+    }
+    case pvDouble: {
+        PVDoubleArray *pvdata = (PVDoubleArray*) pv;
+        double data[1];
+        while (len > 0) {
+            data[0] = (double) from[fromOffset];
+            if (pvdata->put(offset, 1, data, 0) == 0)
+                return ntransfered;
+            --len;
+            ++ntransfered;
+            ++offset;
+            ++fromOffset;
+        }
+        return ntransfered;
+    }
+    case pvString: {
+         String message("convert from float[] to StringArray not legal");
+         throw std::invalid_argument(message);
+    }
+    }
+    String message("Convert::convertFromFloatArray should never get here");
+    throw std::logic_error(message);
 }
 
 int convertToFloatArray(PVScalarArray * pv, int offset, int len,float to[], int toOffset)
 {
-    throw std::logic_error(notImplemented);
+    ScalarType elemType = pv->getScalarArray()->getElementType();
+    int ntransfered = 0;
+    switch (elemType) {
+    case pvBoolean: {
+        String message("convert BooleanArray to float[]] not legal");
+        throw std::invalid_argument(message);
+    }
+    case pvByte: {
+        PVByteArray *pvdata = (PVByteArray*) pv;
+        ByteArrayData data = ByteArrayData();
+        while (len > 0) {
+            int num = 0;
+            num = pvdata->get(offset,len,&data);
+            if (num <= 0) break;
+            ByteArray dataArray = data.data;
+            int dataOffset = data.offset;
+            for(int i=0;i<num;i++) to[toOffset+i] = dataArray[dataOffset+1];
+            len -= num;
+            offset += num;
+            toOffset += num;
+            ntransfered += num;
+        }
+        return ntransfered;
+    }
+    case pvShort: {
+        PVShortArray *pvdata = (PVShortArray*) pv;
+        ShortArrayData data = ShortArrayData();
+        while (len > 0) {
+            int num = pvdata->get(offset, len, &data);
+            if (num == 0) break;
+            ShortArray dataArray = data.data;
+            int dataOffset = data.offset;
+            for (int i = 0; i < num; i++)
+                to[i + toOffset] = (epicsInt8) dataArray[i + dataOffset];
+            len -= num;
+            offset += num;
+            toOffset += num;
+            ntransfered += num;
+        }
+        return ntransfered;
+    }
+    case pvInt: {
+        PVIntArray *pvdata = (PVIntArray*) pv;
+        IntArrayData data = IntArrayData();
+        while (len > 0) {
+            int num = pvdata->get(offset, len, &data);
+            if (num == 0) break;
+            IntArray dataArray = data.data;
+            int dataOffset = data.offset;
+            for (int i = 0; i < num; i++)
+                to[i + toOffset] = (epicsInt8) dataArray[i + dataOffset];
+            len -= num;
+            offset += num;
+            toOffset += num;
+            ntransfered += num;
+        }
+        return ntransfered;
+    }
+    case pvLong: {
+        PVLongArray *pvdata = (PVLongArray*) pv;
+        LongArrayData data = LongArrayData();
+        while (len > 0) {
+            int num = pvdata->get(offset, len, &data);
+            if (num == 0)
+                break;
+            LongArray dataArray = data.data;
+            int dataOffset = data.offset;
+            for (int i = 0; i < num; i++)
+                to[i + toOffset] = (epicsInt8) dataArray[i + dataOffset];
+            len -= num;
+            offset += num;
+            toOffset += num;
+            ntransfered += num;
+        }
+        return ntransfered;
+    }
+    case pvFloat: {
+        PVFloatArray *pvdata = (PVFloatArray*) pv;
+        FloatArrayData data = FloatArrayData();
+        while (len > 0) {
+            int num = pvdata->get(offset, len, &data);
+            if (num == 0) break;
+            FloatArray dataArray = data.data;
+            int dataOffset = data.offset;
+            for (int i = 0; i < num; i++)
+                to[i + toOffset] = (epicsInt8) dataArray[i + dataOffset];
+            len -= num;
+            offset += num;
+            toOffset += num;
+            ntransfered += num;
+        }
+        return ntransfered;
+    }
+    case pvDouble: {
+        PVDoubleArray *pvdata = (PVDoubleArray*) pv;
+        DoubleArrayData data = DoubleArrayData();
+        while (len > 0) {
+            int num = pvdata->get(offset, len, &data);
+            if (num == 0)
+                break;
+            DoubleArray dataArray = data.data;
+            int dataOffset = data.offset;
+            for (int i = 0; i < num; i++)
+                to[i + toOffset] = (epicsInt8) dataArray[i + dataOffset];
+            len -= num;
+            offset += num;
+            toOffset += num;
+            ntransfered += num;
+        }
+        return ntransfered;
+    }
+    case pvString: {
+        String message("convert StringArray to float[]] not legal");
+        throw std::invalid_argument(message);
+    }
+    }
+     String message("Convert::convertToFloatArray should never get here");
+    throw std::logic_error(message);
 }
 
 int convertFromDoubleArray(PVScalarArray *pv, int offset, int len,double from[], int fromOffset)
 {
-    throw std::logic_error(notImplemented);
+    ScalarType elemType = pv->getScalarArray()->getElementType();
+    int ntransfered = 0;
+    switch (elemType) {
+    case pvBoolean: {
+         String message("convert from double[] to BooleanArray not legal");
+         throw std::invalid_argument(message);
+    }
+    case pvByte: {
+        PVByteArray *pvdata = (PVByteArray*) pv;
+        epicsInt8 data[1];
+        while (len > 0) {
+            data[0] = (epicsInt8) from[fromOffset];
+            if (pvdata->put(offset, 1, data, 0) == 0)
+                return ntransfered;
+            --len;
+            ++ntransfered;
+            ++offset;
+            ++fromOffset;
+        }
+        return ntransfered;
+    }
+    case pvShort: {
+        PVShortArray *pvdata = (PVShortArray*) pv;
+        epicsInt16 data[1];
+        while (len > 0) {
+            data[0] = (epicsInt16) from[fromOffset];
+            if (pvdata->put(offset, 1, data, 0) == 0)
+                return ntransfered;
+            --len;
+            ++ntransfered;
+            ++offset;
+            ++fromOffset;
+        }
+        return ntransfered;
+    }
+    case pvInt: {
+        PVIntArray *pvdata = (PVIntArray*) pv;
+        epicsInt32 data[1];
+        while (len > 0) {
+            data[0] = (epicsInt32) from[fromOffset];
+            if (pvdata->put(offset, 1, data, 0) == 0)
+                return ntransfered;
+            --len;
+            ++ntransfered;
+            ++offset;
+            ++fromOffset;
+        }
+        return ntransfered;
+    }
+    case pvLong: {
+        PVLongArray *pvdata = (PVLongArray*) pv;
+        epicsInt64 data[1];
+        while (len > 0) {
+            data[0] = (epicsInt64) from[fromOffset];
+            if (pvdata->put(offset, 1, data, 0) == 0)
+                return ntransfered;
+            --len;
+            ++ntransfered;
+            ++offset;
+            ++fromOffset;
+        }
+        return ntransfered;
+    }
+    case pvFloat: {
+        PVFloatArray *pvdata = (PVFloatArray*) pv;
+        float data[1];
+        while (len > 0) {
+            data[0] = (float) from[fromOffset];
+            if (pvdata->put(offset, 1, data, 0) == 0)
+                return ntransfered;
+            --len;
+            ++ntransfered;
+            ++offset;
+            ++fromOffset;
+        }
+        return ntransfered;
+    }
+    case pvDouble: {
+        PVDoubleArray *pvdata = (PVDoubleArray*) pv;
+        while (len > 0) {
+            int n = pvdata->put(offset, len, from, fromOffset);
+            if (n == 0)
+                break;
+            len -= n;
+            offset += n;
+            fromOffset += n;
+            ntransfered += n;
+        }
+        return ntransfered;
+    }
+    case pvString: {
+         String message("convert from double[] to StringArray not legal");
+         throw std::invalid_argument(message);
+    }
+    }
+    String message("Convert::convertFromDoubleArray should never get here");
+    throw std::logic_error(message);
 }
 
 int convertToDoubleArray(PVScalarArray * pv, int offset, int len,double to[], int toOffset)
 {
-    throw std::logic_error(notImplemented);
+    ScalarType elemType = pv->getScalarArray()->getElementType();
+    int ntransfered = 0;
+    switch (elemType) {
+    case pvBoolean: {
+        String message("convert BooleanArray to float[]] not legal");
+        throw std::invalid_argument(message);
+    }
+    case pvByte: {
+        PVByteArray *pvdata = (PVByteArray*) pv;
+        ByteArrayData data = ByteArrayData();
+        while (len > 0) {
+            int num = 0;
+            num = pvdata->get(offset,len,&data);
+            if (num <= 0) break;
+            ByteArray dataArray = data.data;
+            int dataOffset = data.offset;
+            for(int i=0;i<num;i++) to[toOffset+i] = dataArray[dataOffset+1];
+            len -= num;
+            offset += num;
+            toOffset += num;
+            ntransfered += num;
+        }
+        return ntransfered;
+    }
+    case pvShort: {
+        PVShortArray *pvdata = (PVShortArray*) pv;
+        ShortArrayData data = ShortArrayData();
+        while (len > 0) {
+            int num = pvdata->get(offset, len, &data);
+            if (num == 0) break;
+            ShortArray dataArray = data.data;
+            int dataOffset = data.offset;
+            for (int i = 0; i < num; i++)
+                to[i + toOffset] = (epicsInt8) dataArray[i + dataOffset];
+            len -= num;
+            offset += num;
+            toOffset += num;
+            ntransfered += num;
+        }
+        return ntransfered;
+    }
+    case pvInt: {
+        PVIntArray *pvdata = (PVIntArray*) pv;
+        IntArrayData data = IntArrayData();
+        while (len > 0) {
+            int num = pvdata->get(offset, len, &data);
+            if (num == 0) break;
+            IntArray dataArray = data.data;
+            int dataOffset = data.offset;
+            for (int i = 0; i < num; i++)
+                to[i + toOffset] = (epicsInt8) dataArray[i + dataOffset];
+            len -= num;
+            offset += num;
+            toOffset += num;
+            ntransfered += num;
+        }
+        return ntransfered;
+    }
+    case pvLong: {
+        PVLongArray *pvdata = (PVLongArray*) pv;
+        LongArrayData data = LongArrayData();
+        while (len > 0) {
+            int num = pvdata->get(offset, len, &data);
+            if (num == 0)
+                break;
+            LongArray dataArray = data.data;
+            int dataOffset = data.offset;
+            for (int i = 0; i < num; i++)
+                to[i + toOffset] = (epicsInt8) dataArray[i + dataOffset];
+            len -= num;
+            offset += num;
+            toOffset += num;
+            ntransfered += num;
+        }
+        return ntransfered;
+    }
+    case pvFloat: {
+        PVFloatArray *pvdata = (PVFloatArray*) pv;
+        FloatArrayData data = FloatArrayData();
+        while (len > 0) {
+            int num = pvdata->get(offset, len, &data);
+            if (num == 0) break;
+            FloatArray dataArray = data.data;
+            int dataOffset = data.offset;
+            for (int i = 0; i < num; i++)
+                to[i + toOffset] = (epicsInt8) dataArray[i + dataOffset];
+            len -= num;
+            offset += num;
+            toOffset += num;
+            ntransfered += num;
+        }
+        return ntransfered;
+    }
+    case pvDouble: {
+        PVDoubleArray *pvdata = (PVDoubleArray*) pv;
+        DoubleArrayData data = DoubleArrayData();
+        while (len > 0) {
+            int num = pvdata->get(offset, len, &data);
+            if (num == 0)
+                break;
+            DoubleArray dataArray = data.data;
+            int dataOffset = data.offset;
+            for (int i = 0; i < num; i++)
+                to[i + toOffset] = (epicsInt8) dataArray[i + dataOffset];
+            len -= num;
+            offset += num;
+            toOffset += num;
+            ntransfered += num;
+        }
+        return ntransfered;
+    }
+    case pvString: {
+        String message("convert StringArray to double[]] not legal");
+        throw std::invalid_argument(message);
+    }
+    }
+    String message("Convert::convertToDoubleArray should never get here");
+    throw std::logic_error(message);
+}
+
+static String removeWhiteSpace(String string) {
+    return string;
 }
 
 int convertFromStringArray(PVScalarArray *pv, int offset, int len,String from[], int fromOffset)
 {
-    throw std::logic_error(notImplemented);
+    ScalarType elemType = pv->getScalarArray()->getElementType();
+    int ntransfered = 0;
+    switch (elemType) {
+    case pvBoolean: {
+        PVBooleanArray *pvdata = (PVBooleanArray*) pv;
+        bool data[1];
+        while (len > 0) {
+            String fromString = removeWhiteSpace(from[fromOffset]);
+            data[0] = (fromString.compare("true")==0) ? true : false;
+            if (pvdata->put(offset, 1, data, 0) == 0)
+                return ntransfered;
+            --len;
+            ++ntransfered;
+            ++offset;
+            ++fromOffset;
+        }
+        return ntransfered;
+    }
+    case pvByte: {
+        PVByteArray *pvdata = (PVByteArray*) pv;
+        epicsInt8 data[1];
+        while (len > 0) {
+            String fromString = removeWhiteSpace(from[fromOffset]);
+            int ival;
+            sscanf(fromString.c_str(),"%d",&ival);
+            data[0] = ival;
+            if (pvdata->put(offset, 1, data, 0) == 0)
+                return ntransfered;
+            --len;
+            ++ntransfered;
+            ++offset;
+            ++fromOffset;
+        }
+        return ntransfered;
+    }
+    case pvShort: {
+        PVShortArray *pvdata = (PVShortArray*) pv;
+        epicsInt16 data[1];
+        while (len > 0) {
+            String fromString = removeWhiteSpace(from[fromOffset]);
+            int ival;
+            sscanf(fromString.c_str(),"%d",&ival);
+            data[0] = ival;
+            if (pvdata->put(offset, 1, data, 0) == 0)
+                return ntransfered;
+            --len;
+            ++ntransfered;
+            ++offset;
+            ++fromOffset;
+        }
+        return ntransfered;
+    }
+    case pvInt: {
+        PVIntArray *pvdata = (PVIntArray*) pv;
+        epicsInt32 data[1];
+        while (len > 0) {
+            String fromString = removeWhiteSpace(from[fromOffset]);
+            int ival;
+            sscanf(fromString.c_str(),"%d",&ival);
+            data[0] = ival;
+            if (pvdata->put(offset, 1, data, 0) == 0)
+                return ntransfered;
+            --len;
+            ++ntransfered;
+            ++offset;
+            ++fromOffset;
+        }
+        return ntransfered;
+    }
+    case pvLong: {
+        PVLongArray *pvdata = (PVLongArray*) pv;
+        epicsInt64 data[1];
+        while (len > 0) {
+            String fromString = removeWhiteSpace(from[fromOffset]);
+            long int ival;
+            sscanf(fromString.c_str(),"%ld",&ival);
+            data[0] = ival;
+            if (pvdata->put(offset, 1, data, 0) == 0)
+                return ntransfered;
+            --len;
+            ++ntransfered;
+            ++offset;
+            ++fromOffset;
+        }
+        return ntransfered;
+    }
+    case pvFloat: {
+        PVFloatArray *pvdata = (PVFloatArray*) pv;
+        float data[1];
+        while (len > 0) {
+            String fromString = removeWhiteSpace(from[fromOffset]);
+            float fval;
+            sscanf(fromString.c_str(),"%f",&fval);
+            data[0] = fval;
+            if (pvdata->put(offset, 1, data, 0) == 0)
+                return ntransfered;
+            --len;
+            ++ntransfered;
+            ++offset;
+            ++fromOffset;
+        }
+        return ntransfered;
+    }
+    case pvDouble: {
+        PVDoubleArray *pvdata = (PVDoubleArray*) pv;
+        double data[1];
+        while (len > 0) {
+            String fromString = removeWhiteSpace(from[fromOffset]);
+            double fval;
+            sscanf(fromString.c_str(),"%lf",&fval);
+            data[0] = fval;
+            if (pvdata->put(offset, 1, data, 0) == 0)
+                return ntransfered;
+            --len;
+            ++ntransfered;
+            ++offset;
+            ++fromOffset;
+        }
+        return ntransfered;
+    }
+    case pvString:
+        PVStringArray *pvdata = (PVStringArray*) pv;
+        while (len > 0) {
+            int n = pvdata->put(offset, len, from, fromOffset);
+            if (n == 0)
+                break;
+            len -= n;
+            offset += n;
+            fromOffset += n;
+            ntransfered += n;
+        }
+        return ntransfered;
+    }
+    String message("Convert::convertFromStringArray should never get here");
+    throw std::logic_error(message);
 }
 
 int convertToStringArray(PVScalarArray * pv, int offset, int len,String to[], int toOffset)
 {
-    throw std::logic_error(notImplemented);
+    ScalarType elementType = pv->getScalarArray()->getElementType();
+    int ncopy = pv->getLength();
+    if (ncopy > len) ncopy = len;
+    int num = ncopy;
+    switch (elementType) {
+    case pvBoolean: {
+        PVBooleanArray *pvdata = (PVBooleanArray*) pv;
+        BooleanArrayData data = BooleanArrayData();
+        for (int i = 0; i < num; i++) {
+            if (pvdata->get(offset + i, 1, &data) == 1) {
+                BooleanArray dataArray = data.data;
+                bool value = dataArray[data.offset];
+                to[toOffset + i] = value ? trueString : falseString;
+            } else {
+                to[toOffset + i] = "bad pv";
+            }
+        }
+    }
+    break;
+    case pvByte: {
+        PVByteArray *pvdata = (PVByteArray*) pv;
+        ByteArrayData data = ByteArrayData();
+        char cr[30];
+        for (int i = 0; i < num; i++) {
+            if (pvdata->get(offset + i, 1, &data) == 1) {
+                ByteArray dataArray = data.data;
+                int ival = dataArray[data.offset];
+                sprintf(cr,"%d",ival);
+                to[toOffset + i] = String(cr);
+            } else {
+                to[toOffset + i] = "bad pv";
+            }
+        }
+    }
+    break;
+    case pvShort: {
+        PVShortArray *pvdata = (PVShortArray*) pv;
+        ShortArrayData data = ShortArrayData();
+        char cr[30];
+        for (int i = 0; i < num; i++) {
+            if (pvdata->get(offset + i, 1, &data) == 1) {
+                ShortArray dataArray = data.data;
+                int ival = dataArray[data.offset];
+                sprintf(cr,"%d",ival);
+                to[toOffset + i] = String(cr);
+            } else {
+                to[toOffset + i] = "bad pv";
+            }
+        }
+    }
+    break;
+    case pvInt: {
+        PVIntArray *pvdata = (PVIntArray*) pv;
+        IntArrayData data = IntArrayData();
+        char cr[30];
+        for (int i = 0; i < num; i++) {
+            if (pvdata->get(offset + i, 1, &data) == 1) {
+                IntArray dataArray = data.data;
+                int ival = dataArray[data.offset];
+                sprintf(cr,"%d",ival);
+                to[toOffset + i] = String(cr);
+            } else {
+                to[toOffset + i] = "bad pv";
+            }
+        }
+    }
+    break;
+    case pvLong: {
+        PVLongArray *pvdata = (PVLongArray*) pv;
+        LongArrayData data = LongArrayData();
+        char cr[30];
+        for (int i = 0; i < num; i++) {
+            if (pvdata->get(offset + i, 1, &data) == 1) {
+                LongArray dataArray = data.data;
+                long int ival = dataArray[data.offset];
+                sprintf(cr,"%ld",ival);
+                to[toOffset + i] = String(cr);
+            } else {
+                to[toOffset + i] = "bad pv";
+            }
+        }
+    }
+    break;
+    case pvFloat: {
+        PVFloatArray *pvdata = (PVFloatArray*) pv;
+        FloatArrayData data = FloatArrayData();
+        char cr[30];
+        for (int i = 0; i < num; i++) {
+            if (pvdata->get(offset + i, 1, &data) == 1) {
+                FloatArray dataArray = data.data;
+                float fval = dataArray[data.offset];
+                sprintf(cr,"%e",fval);
+                to[toOffset + i] = String(cr);
+            } else {
+                to[toOffset + i] = "bad pv";
+            }
+        }
+    }
+    break;
+    case pvDouble: {
+        PVDoubleArray *pvdata = (PVDoubleArray*) pv;
+        DoubleArrayData data = DoubleArrayData();
+        char cr[30];
+        for (int i = 0; i < num; i++) {
+            if (pvdata->get(offset + i, 1, &data) == 1) {
+                DoubleArray dataArray = data.data;
+                double fval = dataArray[data.offset];
+                sprintf(cr,"%e",fval);
+                to[toOffset + i] = String(cr);
+            } else {
+                to[toOffset + i] = "bad pv";
+            }
+        }
+    }
+    break;
+    case pvString: {
+        PVStringArray *pvdata = (PVStringArray*) pv;
+        while (num > 0) {
+            int numnow = 0;
+            StringArray dataArray = 0;
+            int dataOffset = 0;
+            StringArrayData stringArrayData = StringArrayData();
+            numnow = pvdata->get(offset, num, &stringArrayData);
+            dataArray = stringArrayData.data;
+            dataOffset = stringArrayData.offset;
+            if (numnow <= 0) {
+                for (int i = 0; i < num; i++)
+                    to[toOffset + i] = "bad pv";
+                break;
+            }
+            for(int i=0; i<num; i++) to[toOffset+i] = dataArray[dataOffset+i];
+            num -= numnow;
+            offset += numnow;
+            toOffset += numnow;
+        }
+    }
+    break;
+    default:
+        String message("Convert::convertToStringArray should never get here");
+        throw std::logic_error(message);
+    }
+    return ncopy;
 }
 
 
@@ -1439,7 +3124,23 @@ void convertToString(StringBuilder buffer,PVField * pv,int indentLevel)
 
 void convertStructure(StringBuilder buffer,PVStructure *data,int indentLevel)
 {
-    throw std::logic_error(notImplemented);
+    convert->newLine(buffer, indentLevel);
+    *buffer += "structure {";
+    char buff[30];
+    PVFieldPtrArray fieldsData = data->getPVFields();
+    if (fieldsData != 0) {
+        int length = data->getStructure()->getNumberFields();
+        for(int i=0; i<length; i++) {
+            PVField *fieldField = fieldsData[i];
+            FieldConstPtr fieldnow = fieldField->getField();
+            convert->newLine(buffer, indentLevel + 1);
+            sprintf(buff,"%s = ",fieldnow->getFieldName().c_str());
+            *buffer += buff;
+            convert->getString(buffer,fieldField,indentLevel + 1);
+        }
+    }
+    convert->newLine(buffer, indentLevel);
+    *buffer += "}";
 }
 
 void convertArray(StringBuilder buffer,PVScalarArray * pv,int indentLevel)
@@ -1455,7 +3156,7 @@ void convertArray(StringBuilder buffer,PVScalarArray * pv,int indentLevel)
                 if(i!=0) *buffer += ",";
                 int num = pvdata->get(i,1,&data);
                 if(num==1) {
-                     bool * value = data.data;
+                     BooleanArray  value = data.data;
                      if(value[data.offset]) {
                          *buffer += "true";
                      } else {

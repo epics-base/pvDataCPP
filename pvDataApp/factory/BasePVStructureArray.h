@@ -98,6 +98,11 @@ namespace epics { namespace pvData {
         throw std::logic_error(notImplemented);
     }
 
+    bool PVStructureArray::operator!=(PVField  *pv) 
+    {
+        throw std::logic_error(notImplemented);
+    }
+
     class BasePVStructureArray : public PVStructureArray {
     public:
         BasePVStructureArray(PVStructure *parent,
