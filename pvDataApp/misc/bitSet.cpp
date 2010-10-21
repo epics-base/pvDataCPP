@@ -304,6 +304,11 @@ namespace epics { namespace pvData {
         return true;
     }
 
+    bool BitSet::operator!=(const BitSet &set) const
+    {
+        return !(*this == set);
+    }
+
     void BitSet::toString(StringBuilder buffer) { toString(buffer, 0); }
 
     void BitSet::toString(StringBuilder buffer, int indentLevel) const

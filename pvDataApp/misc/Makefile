@@ -8,7 +8,9 @@ INC += requester.h
 INC += serialize.h
 INC += bitSet.h
 INC += byteBuffer.h
+INC += epicsException.h
 
+LIBSRCS += byteBuffer.cpp
 LIBSRCS += bitSet.cpp
 
 LIBRARY=pvMisc

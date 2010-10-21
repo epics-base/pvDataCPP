@@ -26,6 +26,10 @@ PROD_HOST += testBitSet
 testBitSet_SRCS += testBitSet.cpp
 testBitSet_LIBS += pvMisc Com
 
+PROD_HOST += testByteBuffer
+testByteBuffer_SRCS += testByteBuffer.cpp
+testByteBuffer_LIBS += pvMisc Com
+
 include $(TOP)/configure/RULES
 #----------------------------------------
 #  ADD RULES AFTER THIS LINE
