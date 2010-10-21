@@ -25,7 +25,7 @@ namespace epics { namespace pvData {
         virtual int get(int offset, int length, BooleanArrayData *data) ;
         virtual int put(int offset,int length,BooleanArray from,
            int fromOffset);
-        virtual void shareData(bool value[],int capacity,int length);
+        virtual void shareData(BooleanArray value,int capacity,int length);
         // from Serializable
         virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) ;
         virtual void deserialize(ByteBuffer *pbuffer,DeserializableControl *pflusher);
@@ -108,8 +108,7 @@ namespace epics { namespace pvData {
         return len;      
     }
 
-    void BasePVBooleanArray::shareData(
-        bool shareValue[],int capacity,int length)
+    void BasePVBooleanArray::shareData(BooleanArray shareValue,int capacity,int length)
     {
         delete[] value;
         value = shareValue;

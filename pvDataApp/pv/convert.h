@@ -19,9 +19,9 @@ namespace epics { namespace pvData {
         void fromString(PVScalar *pv, String from);
         int fromString(PVScalarArray *pv, String from);
         int fromStringArray(PVScalarArray *pv, int offset, int length,
-            String from[], int fromOffset);
+            StringArray from, int fromOffset);
         int toStringArray(PVScalarArray *pv, int offset, int length,
-            String to[], int toOffset);
+            StringArray to, int toOffset);
         bool isCopyCompatible(FieldConstPtr from, FieldConstPtr to);
         void copy(PVField *from,PVField *to);
         bool isCopyScalarCompatible(
@@ -51,29 +51,29 @@ namespace epics { namespace pvData {
         void  fromFloat(PVScalar* pv, float from);
         void  fromDouble(PVScalar *pv, double from);
         int toByteArray(PVScalarArray *pv, int offset, int length,
-            epicsInt8 to[], int toOffset);
+            ByteArray to, int toOffset);
         int toShortArray(PVScalarArray *pv, int offset, int length,
-            epicsInt16 to[], int toOffset);
+            ShortArray to, int toOffset);
         int toIntArray(PVScalarArray *pv, int offset, int length,
-            epicsInt32 to[], int toOffset);
+            IntArray to, int toOffset);
         int toLongArray(PVScalarArray *pv, int offset, int length,
-            epicsInt64 to[], int toOffset);
+            LongArray to, int toOffset);
         int toFloatArray(PVScalarArray *pv, int offset, int length,
-            float to[], int toOffset);
+            FloatArray to, int toOffset);
         int toDoubleArray(PVScalarArray *pv, int offset, int length,
-            double to[], int toOffset);
+            DoubleArray to, int toOffset);
         int fromByteArray(PVScalarArray *pv, int offset, int length,
-            epicsInt8 from[], int fromOffset);
+            ByteArray from, int fromOffset);
         int fromShortArray(PVScalarArray *pv, int offset, int length,
-            epicsInt16 from[], int fromOffset);
+            ShortArray from, int fromOffset);
         int fromIntArray(PVScalarArray *pv, int offset, int length,
-            epicsInt32 from[], int fromOffset);
+            IntArray from, int fromOffset);
         int fromLongArray(PVScalarArray *pv, int offset, int length,
-            epicsInt64 from[], int fromOffset);
+            LongArray from, int fromOffset);
         int fromFloatArray(PVScalarArray *pv, int offset, int length,
-            float from[], int fromOffset);
+            FloatArray from, int fromOffset);
         int fromDoubleArray(PVScalarArray *pv, int offset, int length,
-            double from[], int fromOffset);
+            DoubleArray from, int fromOffset);
         void newLine(StringBuilder buf, int indentLevel);
     };
 

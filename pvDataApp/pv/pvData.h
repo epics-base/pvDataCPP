@@ -160,8 +160,7 @@ namespace epics { namespace pvData {
             StructureArrayData *data) = 0;
         virtual int put(int offset,int length,
             PVStructurePtrArray from, int fromOffset) = 0;
-        virtual void shareData(
-            PVStructurePtrArray value,int capacity,int length) = 0;
+        virtual void shareData( PVStructurePtrArray value,int capacity,int length) = 0;
         virtual void serialize(ByteBuffer *pbuffer,
             SerializableControl *pflusher) = 0 ;
         virtual void deserialize(ByteBuffer *buffer,
@@ -330,7 +329,7 @@ namespace epics { namespace pvData {
         virtual void toString(StringBuilder buf,int indentLevel) = 0 ;
         virtual int get(int offset, int length, BooleanArrayData *data) = 0;
         virtual int put(int offset,int length, BooleanArray from, int fromOffset) = 0;
-        virtual void shareData(bool value[],int capacity,int length) = 0;
+        virtual void shareData(BooleanArray value,int capacity,int length) = 0;
         virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) = 0;
         virtual void deserialize(ByteBuffer *pbuffer,DeserializableControl *pflusher) = 0;
     protected:
@@ -353,7 +352,7 @@ namespace epics { namespace pvData {
         virtual void toString(StringBuilder buf,int indentLevel) = 0;
         virtual int get(int offset, int length, ByteArrayData *data) = 0;
         virtual int put(int offset,int length, ByteArray  from, int fromOffset) = 0;
-        virtual void shareData(epicsInt8 value[],int capacity,int length) = 0;
+        virtual void shareData(ByteArray value,int capacity,int length) = 0;
         virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) = 0;
         virtual void deserialize(ByteBuffer *pbuffer,DeserializableControl *pflusher) = 0;
     protected:
@@ -376,7 +375,7 @@ namespace epics { namespace pvData {
         virtual void toString(StringBuilder buf,int indentLevel) = 0;
         virtual int get(int offset, int length, ShortArrayData *data) = 0;
         virtual int put(int offset,int length, ShortArray  from, int fromOffset) = 0;
-        virtual void shareData(epicsInt16 value[],int capacity,int length) = 0;
+        virtual void shareData(ShortArray value,int capacity,int length) = 0;
         virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) = 0;
         virtual void deserialize(ByteBuffer *pbuffer,DeserializableControl *pflusher) = 0;
     protected:
@@ -398,7 +397,7 @@ namespace epics { namespace pvData {
         virtual void toString(StringBuilder buf,int indentLevel) = 0;
         virtual int get(int offset, int length, IntArrayData *data) = 0;
         virtual int put(int offset,int length, IntArray  from, int fromOffset)= 0;
-        virtual void shareData(epicsInt32 value[],int capacity,int length)= 0;
+        virtual void shareData(IntArray value,int capacity,int length)= 0;
         virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) = 0;
         virtual void deserialize(ByteBuffer *pbuffer,DeserializableControl *pflusher)= 0;
     protected:
@@ -421,7 +420,7 @@ namespace epics { namespace pvData {
         virtual void toString(StringBuilder buf,int indentLevel) = 0;
         virtual int get(int offset, int length, LongArrayData *data) = 0;
         virtual int put(int offset,int length, LongArray  from, int fromOffset)= 0;
-        virtual void shareData(epicsInt64 value[],int capacity,int length)= 0;
+        virtual void shareData(LongArray value,int capacity,int length)= 0;
         virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) = 0;
         virtual void deserialize(ByteBuffer *pbuffer,DeserializableControl *pflusher)= 0;
     protected:
@@ -444,7 +443,7 @@ namespace epics { namespace pvData {
         virtual void toString(StringBuilder buf,int indentLevel) = 0;
         virtual int get(int offset, int length, FloatArrayData *data) = 0;
         virtual int put(int offset,int length, FloatArray  from, int fromOffset)= 0;
-        virtual void shareData(float value[],int capacity,int length)= 0;
+        virtual void shareData(FloatArray value,int capacity,int length)= 0;
         virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) = 0;
         virtual void deserialize(ByteBuffer *pbuffer,DeserializableControl *pflusher)= 0;
     protected:
@@ -469,7 +468,7 @@ namespace epics { namespace pvData {
         virtual void toString(StringBuilder buf,int indentLevel) = 0;
         virtual int get(int offset, int length, DoubleArrayData *data) = 0;
         virtual int put(int offset,int length, DoubleArray  from, int fromOffset) = 0;
-        virtual void shareData(double value[],int capacity,int length) = 0;
+        virtual void shareData(DoubleArray value,int capacity,int length) = 0;
         virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) = 0;
         virtual void deserialize(ByteBuffer *pbuffer,DeserializableControl *pflusher) = 0;
     protected:
@@ -492,7 +491,7 @@ namespace epics { namespace pvData {
         virtual void toString(StringBuilder buf,int indentLevel) = 0;
         virtual int get(int offset, int length, StringArrayData *data) = 0;
         virtual int put(int offset,int length, StringArray  from, int fromOffset)= 0;
-        virtual void shareData(String value[],int capacity,int length)= 0;
+        virtual void shareData(StringArray value,int capacity,int length)= 0;
         virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) = 0;
         virtual void deserialize(ByteBuffer *pbuffer,DeserializableControl *pflusher)= 0;
     protected:

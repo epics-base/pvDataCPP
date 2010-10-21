@@ -25,7 +25,7 @@ namespace epics { namespace pvData {
         virtual int get(int offset, int length, ByteArrayData *data) ;
         virtual int put(int offset,int length,ByteArray from,
            int fromOffset);
-        virtual void shareData(epicsInt8 value[],int capacity,int length);
+        virtual void shareData(ByteArray value,int capacity,int length);
         // from Serializable
         virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) ;
         virtual void deserialize(ByteBuffer *pbuffer,DeserializableControl *pflusher);
@@ -108,8 +108,7 @@ namespace epics { namespace pvData {
         return len;      
     }
 
-    void BasePVByteArray::shareData(
-        epicsInt8 shareValue[],int capacity,int length)
+    void BasePVByteArray::shareData(ByteArray shareValue,int capacity,int length)
     {
         delete[] value;
         value = shareValue;
