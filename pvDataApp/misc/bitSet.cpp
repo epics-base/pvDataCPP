@@ -1,3 +1,5 @@
+#include "string.h"
+#include "stdio.h"
 #include "bitSet.h"
 
 namespace epics { namespace pvData {
@@ -300,6 +302,11 @@ namespace epics { namespace pvData {
                 return false;
 
         return true;
+    }
+
+    bool BitSet::operator!=(const BitSet &set) const
+    {
+        return !(*this == set);
     }
 
     void BitSet::toString(StringBuilder buffer) { toString(buffer, 0); }

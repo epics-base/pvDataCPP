@@ -74,3 +74,8 @@ pvDataApp/test/testPVAuxInfo.cpp
 pvDataApp/test/testPVScalar.cpp
 pvDataApp/test/testPVScalarArray.cpp
 pvDataApp/test/testSimpleStructure.cpp
+pvDataApp/misc/epicsException.h
+pvDataApp/misc/byteBuffer.cpp
+pvDataApp/misc/bitSet.cpp
+pvDataApp/test/testByteBuffer.cpp
+pvDataApp/test/testBitSet.cpp

@@ -210,6 +210,8 @@ namespace epics { namespace pvData {
          */
         bool operator==(const BitSet &set) const;
 
+        bool operator!=(const BitSet &set) const;
+
         void toString(StringBuilder buffer);
 
         void toString(StringBuilder buffer, int indentLevel) const;
