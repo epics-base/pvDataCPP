@@ -22,16 +22,16 @@ void testBoolean() {
     printf("\ntestBoolean\n");
     PVScalar *pvScalar = getStandardField()->scalarValue(pvBoolean);
     PVBoolean *pvValue = (PVBoolean *)pvScalar;
-    bool value = epicsTrue;
+    bool value = true;
     pvValue->put(value);
     bool getValue = pvValue->get();
     printf("put %s get %s\n",
-        ((value==epicsFalse) ? "false" : "true"),
-        ((getValue==epicsFalse) ? "false" : "true"));
+        ((value==false) ? "false" : "true"),
+        ((getValue==false) ? "false" : "true"));
     if(value!=getValue) {
         fprintf(stderr,"ERROR getValue put %s get %s\n",
-            ((value==epicsFalse) ? "false" : "true"),
-            ((getValue==epicsFalse) ? "false" : "true"));
+            ((value==false) ? "false" : "true"),
+            ((getValue==false) ? "false" : "true"));
     }
     FieldConstPtr field = pvValue->getField();
     buffer.clear();
@@ -40,7 +40,7 @@ void testBoolean() {
     bool isImmutable = pvValue->isImmutable();
     PVStructure *pvParent = pvValue->getParent();
     printf("immutable %s parent %p\n",
-        ((isImmutable==epicsFalse) ? "false" : "true"),
+        ((isImmutable==false) ? "false" : "true"),
         pvParent);
     int offset = pvValue->getFieldOffset();
     int nextOffset = pvValue->getNextFieldOffset();
@@ -80,7 +80,7 @@ void testByte() {
     bool isImmutable = pvValue->isImmutable();
     PVStructure *pvParent = pvValue->getParent();
     printf("immutable %s parent %p\n",
-        ((isImmutable==epicsFalse) ? "false" : "true"),
+        ((isImmutable==false) ? "false" : "true"),
         pvParent);
     int offset = pvValue->getFieldOffset();
     int nextOffset = pvValue->getNextFieldOffset();
@@ -120,7 +120,7 @@ void testShort() {
     bool isImmutable = pvValue->isImmutable();
     PVStructure *pvParent = pvValue->getParent();
     printf("immutable %s parent %p\n",
-        ((isImmutable==epicsFalse) ? "false" : "true"),
+        ((isImmutable==false) ? "false" : "true"),
         pvParent);
     int offset = pvValue->getFieldOffset();
     int nextOffset = pvValue->getNextFieldOffset();
@@ -160,7 +160,7 @@ void testInt() {
     bool isImmutable = pvValue->isImmutable();
     PVStructure *pvParent = pvValue->getParent();
     printf("immutable %s parent %p\n",
-        ((isImmutable==epicsFalse) ? "false" : "true"),
+        ((isImmutable==false) ? "false" : "true"),
         pvParent);
     int offset = pvValue->getFieldOffset();
     int nextOffset = pvValue->getNextFieldOffset();
@@ -200,7 +200,7 @@ void testLong() {
     bool isImmutable = pvValue->isImmutable();
     PVStructure *pvParent = pvValue->getParent();
     printf("immutable %s parent %p\n",
-        ((isImmutable==epicsFalse) ? "false" : "true"),
+        ((isImmutable==false) ? "false" : "true"),
         pvParent);
     int offset = pvValue->getFieldOffset();
     int nextOffset = pvValue->getNextFieldOffset();
@@ -240,7 +240,7 @@ void testFloat() {
     bool isImmutable = pvValue->isImmutable();
     PVStructure *pvParent = pvValue->getParent();
     printf("immutable %s parent %p\n",
-        ((isImmutable==epicsFalse) ? "false" : "true"),
+        ((isImmutable==false) ? "false" : "true"),
         pvParent);
     int offset = pvValue->getFieldOffset();
     int nextOffset = pvValue->getNextFieldOffset();
@@ -279,7 +279,7 @@ void testDouble() {
     bool isImmutable = pvValue->isImmutable();
     PVStructure *pvParent = pvValue->getParent();
     printf("immutable %s parent %p\n",
-        ((isImmutable==epicsFalse) ? "false" : "true"),
+        ((isImmutable==false) ? "false" : "true"),
         pvParent);
     int offset = pvValue->getFieldOffset();
     int nextOffset = pvValue->getNextFieldOffset();
@@ -319,7 +319,7 @@ void testString() {
     bool isImmutable = pvValue->isImmutable();
     PVStructure *pvParent = pvValue->getParent();
     printf("immutable %s parent %p\n",
-        ((isImmutable==epicsFalse) ? "false" : "true"),
+        ((isImmutable==false) ? "false" : "true"),
         pvParent);
     int offset = pvValue->getFieldOffset();
     int nextOffset = pvValue->getNextFieldOffset();
