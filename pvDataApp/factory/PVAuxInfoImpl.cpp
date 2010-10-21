@@ -47,9 +47,9 @@ namespace epics { namespace pvData {
 
     }
 
-    std::map<String, PVScalar * > *PVAuxInfo::getInfos()
+    PVScalarMap PVAuxInfo::getInfos()
     {
-        return &pImpl->theMap;
+        return pImpl->theMap;
     }
 
     PVScalar * PVAuxInfo::getInfo(String key)

@@ -13,6 +13,7 @@ testPVAuxInfo_LIBS += pvFactory
 PROD_HOST += testPVScalar
 testPVScalar_SRCS += testPVScalar.cpp
 testPVScalar_LIBS += pvFactory
+testPVScalar_LIBS += pvMisc Com
 
 PROD_HOST += testPVScalarArray
 testPVScalarArray_SRCS += testPVScalarArray.cpp

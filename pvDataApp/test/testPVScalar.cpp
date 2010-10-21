@@ -6,6 +6,7 @@
 #include <stddef.h>
 #include <string.h>
 #include <stdio.h>
+#include <epicsAssert.h>
 
 #include "requester.h"
 #include "pvIntrospect.h"

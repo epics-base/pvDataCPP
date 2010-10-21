@@ -68,27 +68,27 @@ namespace epics { namespace pvData {
         throw std::logic_error(notImplemented);
     }
 
-    void PVStructureArray::serialize(ByteBuffer *pbuffer,
-        SerializableControl *pflusher) 
-    {
-        throw std::logic_error(notImplemented);
-    }
-
-    void PVStructureArray::deserialize(ByteBuffer *pbuffer,
-        DeserializableControl *pflusher)
-    {
-        throw std::logic_error(notImplemented);
-    }
-
-    void PVStructureArray::serialize(ByteBuffer *pbuffer,
-            SerializableControl *pflusher, int offset, int count) 
-    {
-        throw std::logic_error(notImplemented);
-    }
-
     void PVStructureArray::toString(StringBuilder buf)  {toString(buf,0);}
 
     void PVStructureArray::toString(StringBuilder buf,int indentLevel) 
+    {
+        throw std::logic_error(notImplemented);
+    }
+
+    void PVStructureArray::serialize(
+        ByteBuffer *pbuffer,SerializableControl *pflusher)
+    {
+        throw std::logic_error(notImplemented);
+    }
+
+    void PVStructureArray::deserialize(
+        ByteBuffer *pbuffer,DeserializableControl *pflusher)
+    {
+        throw std::logic_error(notImplemented);
+    }
+
+    void PVStructureArray::serialize(ByteBuffer *pbuffer,
+            SerializableControl *pflusher, int offset, int count)
     {
         throw std::logic_error(notImplemented);
     }
@@ -106,11 +106,21 @@ namespace epics { namespace pvData {
     class BasePVStructureArray : public PVStructureArray {
     public:
         BasePVStructureArray(PVStructure *parent,
-             StructureArrayConstPtr structureArray)
-        : PVStructureArray(parent,structureArray) {}
-        ~BasePVStructureArray(){}
+             StructureArrayConstPtr structureArray);
+        ~BasePVStructureArray();
+        virtual void setCapacity(int capacity);
     private:
     };
 
+
+    BasePVStructureArray::BasePVStructureArray(
+        PVStructure *parent,StructureArrayConstPtr structureArray)
+        : PVStructureArray(parent,structureArray) {}
+
+    BasePVStructureArray::~BasePVStructureArray() {}
+
+    void BasePVStructureArray::setCapacity(int capacity) {
+        throw std::logic_error(notImplemented);
+    }
 }}
 #endif  /* BASEPVSTRUCTUREARRAY_H */
