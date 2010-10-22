@@ -12,6 +12,7 @@
 namespace epics { namespace pvData { 
 
 static Convert* convert = 0;
+static PVDataCreate* pvDataCreate = 0;
 
 static String trueString("true");
 static String falseString("false");
@@ -592,7 +593,7 @@ void Convert::copyStructureArray(
     	} else {
     	    if(toArray[i]==0) {
     		StructureConstPtr structure = to->getStructureArray()->getStructure();
-    		toArray[i] = getPVDataCreate()->createPVStructure(0,structure);
+    		toArray[i] = pvDataCreate->createPVStructure(0,structure);
     	    }
     	    copyStructure(fromArray[i],toArray[i]);
     	}
@@ -3567,6 +3568,7 @@ Convert * getConvert() {
 
     if(convert==0){
         convert = new ConvertExt();
+        pvDataCreate = getPVDataCreate();
     }
     return convert;
 }

@@ -109,7 +109,6 @@ PVScalar *PVDataCreate::createPVScalar(PVStructure *parent,ScalarConstPtr scalar
 PVScalar *PVDataCreate::createPVScalar(PVStructure *parent,
         String fieldName,ScalarType scalarType)
 {
-     if(fieldCreate==0) fieldCreate = getFieldCreate();
      ScalarConstPtr scalar = fieldCreate->createScalar(fieldName,scalarType);
      return createPVScalar(parent,scalar);
 }
@@ -118,7 +117,6 @@ PVScalar *PVDataCreate::createPVScalar(PVStructure *parent,
 PVScalar *PVDataCreate::createPVScalar(PVStructure *parent,
         String fieldName,PVScalar * scalarToClone)
 {
-     if(convert==0) convert = getConvert();
      PVScalar *pvScalar = createPVScalar(parent,fieldName,
          scalarToClone->getScalar()->getScalarType());
      convert->copyScalar(scalarToClone, pvScalar);
@@ -156,14 +154,14 @@ PVScalarArray *PVDataCreate::createPVScalarArray(PVStructure *parent,
      case pvString:
            return new BasePVStringArray(parent,scalarArray);
      }
-     throw std::logic_error(notImplemented);
+     String  message("PVDataCreate::createPVScalarArray should never get here");
+     throw std::logic_error(message);
      
 }
 
 PVScalarArray *PVDataCreate::createPVScalarArray(PVStructure *parent,
         String fieldName,ScalarType elementType)
 {
-     if(fieldCreate==0) fieldCreate = getFieldCreate();
      return createPVScalarArray(parent,
          fieldCreate->createScalarArray(fieldName, elementType));
 }
@@ -171,7 +169,6 @@ PVScalarArray *PVDataCreate::createPVScalarArray(PVStructure *parent,
 PVScalarArray *PVDataCreate::createPVScalarArray(PVStructure *parent,
         String fieldName,PVScalarArray * arrayToClone)
 {
-     if(convert==0) convert = getConvert();
      PVScalarArray *pvArray = createPVScalarArray(parent,fieldName,
           arrayToClone->getScalarArray()->getElementType());
      convert->copyScalarArray(arrayToClone,0, pvArray,0,arrayToClone->getLength());
@@ -203,7 +200,6 @@ PVStructure *PVDataCreate::createPVStructure(PVStructure *parent,
 PVStructure *PVDataCreate::createPVStructure(PVStructure *parent,
         String fieldName,int numberFields,FieldConstPtrArray fields)
 {
-     if(fieldCreate==0) fieldCreate = getFieldCreate();
      StructureConstPtr structure = fieldCreate->createStructure(
          fieldName,numberFields, fields);
      return new BasePVStructure(parent,structure);
@@ -212,8 +208,6 @@ PVStructure *PVDataCreate::createPVStructure(PVStructure *parent,
 PVStructure *PVDataCreate::createPVStructure(PVStructure *parent,
         String fieldName,PVStructure *structToClone)
 {
-    if(fieldCreate==0) fieldCreate = getFieldCreate();
-    if(convert==0) convert = getConvert();
     FieldConstPtrArray fields = 0;
     int numberFields = 0;
     if(structToClone==0) {
@@ -238,7 +232,11 @@ public:
      static Mutex mutex = Mutex();
      Lock xx(&mutex);
 
-     if(pvDataCreate==0) pvDataCreate = new PVDataCreateExt();
+     if(pvDataCreate==0){
+          pvDataCreate = new PVDataCreateExt();
+          convert = getConvert();
+          fieldCreate = getFieldCreate();
+     }
      return pvDataCreate;
  }
 

@@ -198,6 +198,11 @@ namespace epics { namespace pvData {
         throw std::logic_error(notImplemented);
     }
 
+    void PVStructure::replaceStructure()
+    {
+        throw std::logic_error(notImplemented);
+    }
+
     class BasePVStructure : public PVStructure {
     public:
         BasePVStructure(PVStructure *parent,StructureConstPtr structure);

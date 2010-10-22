@@ -86,7 +86,6 @@ namespace epics { namespace pvData {
         virtual bool operator!=(PVField *pv) = 0;
     protected:
         PVField(PVStructure *parent,FieldConstPtr field);
-        void replaceStructure();
     private:
         class PVFieldPvt *pImpl;
         static void computeOffset(PVField *pvField);
@@ -224,6 +223,8 @@ namespace epics { namespace pvData {
             DeserializableControl*pflusher,BitSet *pbitSet);
     protected:
         PVStructure(PVStructure *parent,StructureConstPtr structure);
+        void replaceStructure();
+        friend class PVField;
     private:
         class PVStructurePvt * pImpl;
     };
