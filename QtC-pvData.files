@@ -79,3 +79,4 @@ pvDataApp/misc/byteBuffer.cpp
 pvDataApp/misc/bitSet.cpp
 pvDataApp/test/testByteBuffer.cpp
 pvDataApp/test/testBitSet.cpp
+pvDataApp/test/testBaseException.cpp
