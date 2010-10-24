@@ -5,6 +5,7 @@
  *      Author: Matej Sekoranja
  */
 
+#include <cstdio>
 #ifndef EPICSEXCEPTION_H_
 #define EPICSEXCEPTION_H_
 

@@ -38,15 +38,17 @@ namespace epics { namespace pvData {
     class PVStructure;
     class PVStructureArray;
 
-    // NOTE this prevents compiler from generating default methods for this and 
-    // derived classes
+
+    typedef std::map<String,PVScalar * > PVScalarMap;
+    typedef PVScalarMap::const_iterator PVScalarMapIter;
+
     class PVAuxInfo : private NoDefaultMethods {
     public:
         PVAuxInfo(PVField *pvField);
         ~PVAuxInfo();
         PVField * getPVField();
         PVScalar * createInfo(String key,ScalarType scalarType);
-        std::map<String, PVScalar * > *getInfos();
+        PVScalarMap getInfos();
         PVScalar * getInfo(String key);
         void toString(StringBuilder buf);
         void toString(StringBuilder buf,int indentLevel);
@@ -84,7 +86,6 @@ namespace epics { namespace pvData {
         virtual bool operator!=(PVField *pv) = 0;
     protected:
         PVField(PVStructure *parent,FieldConstPtr field);
-        void replaceStructure();
     private:
         class PVFieldPvt *pImpl;
         static void computeOffset(PVField *pvField);
@@ -155,22 +156,22 @@ namespace epics { namespace pvData {
     class PVStructureArray : public PVArray {
     public:
         virtual ~PVStructureArray();
-        virtual StructureArrayConstPtr getStructureArray() = 0;
+        virtual StructureArrayConstPtr getStructureArray();
         virtual int get(int offset, int length,
-            StructureArrayData *data) = 0;
+            StructureArrayData *data);
         virtual int put(int offset,int length,
-            PVStructurePtrArray from, int fromOffset) = 0;
-        virtual void shareData( PVStructurePtrArray value,int capacity,int length) = 0;
+            PVStructurePtrArray from, int fromOffset);
+        virtual void shareData( PVStructurePtrArray value,int capacity,int length);
         virtual void serialize(ByteBuffer *pbuffer,
-            SerializableControl *pflusher) = 0 ;
+            SerializableControl *pflusher) ;
         virtual void deserialize(ByteBuffer *buffer,
-            DeserializableControl *pflusher) = 0;
+            DeserializableControl *pflusher);
         virtual void serialize(ByteBuffer *pbuffer,
-            SerializableControl *pflusher, int offset, int count) = 0;
-        virtual void toString(StringBuilder buf) = 0;
-        virtual void toString(StringBuilder buf,int indentLevel) = 0;
-        virtual bool operator==(PVField *pv) = 0;
-        virtual bool operator!=(PVField *pv) = 0;
+            SerializableControl *pflusher, int offset, int count);
+        virtual void toString(StringBuilder buf);
+        virtual void toString(StringBuilder buf,int indentLevel);
+        virtual bool operator==(PVField *pv);
+        virtual bool operator!=(PVField *pv);
     protected:
         PVStructureArray(PVStructure *parent,
             StructureArrayConstPtr structureArray);
@@ -222,6 +223,8 @@ namespace epics { namespace pvData {
             DeserializableControl*pflusher,BitSet *pbitSet);
     protected:
         PVStructure(PVStructure *parent,StructureConstPtr structure);
+        void replaceStructure();
+        friend class PVField;
     private:
         class PVStructurePvt * pImpl;
     };
@@ -521,7 +524,7 @@ namespace epics { namespace pvData {
        PVStructure *createPVStructure(PVStructure *parent,
            StructureConstPtr structure);
        PVStructure *createPVStructure(PVStructure *parent,
-           String fieldName,FieldConstPtrArray fields);
+           String fieldName,int numberFields,FieldConstPtrArray fields);
        PVStructure *createPVStructure(PVStructure *parent,
            String fieldName,PVStructure *structToClone);
     protected:
