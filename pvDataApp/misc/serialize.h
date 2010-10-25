@@ -12,11 +12,13 @@ namespace epics { namespace pvData {
     class SerializableArray;
 
     class SerializableControl {
+    public:
         virtual void flushSerializeBuffer() =0;
         virtual void ensureBuffer(int size) =0;
     };
 
     class DeserializableControl {
+    public:
         virtual void ensureData(int size) =0;
     };
 
