@@ -132,12 +132,12 @@ public:
             {
                 if (*p == '(') {
                     // terminate module
-                    *p = '\0'
+                    *p = '\0';
                     fname = p+1;
                 }
                 else if (*p == '+') {
                     // terminate fname
-                    *p = '\0'
+                    *p = '\0';
                     offset = p+1;
                 }
                 else if (*p == ')' && offset) {

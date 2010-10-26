@@ -117,8 +117,8 @@ void PVField::replacePVField(PVField * newPVField)
 {
    PVStructure *parent = getParent();
    if(parent==0) {
-   String message("PVField::replacePVField no parent");
-   throw std::invalid_argument(message);
+       String message("PVField::replacePVField no parent");
+       throw std::invalid_argument(message);
    }
    PVFieldPtrArray pvFields = parent->getPVFields();
    int index = -1;
@@ -136,7 +136,7 @@ void PVField::replacePVField(PVField * newPVField)
    throw std::logic_error(message);
    }
    pvFields[index] = newPVField;
-   parent->replaceStructure();
+   parent->replaceStructure(parent);
 }
 
 void PVField::renameField(String  newName)
@@ -265,6 +265,24 @@ void PVField::computeOffset(PVField   *  pvField,int offset) {
    pvField->pImpl->fieldOffset = beginOffset;
    pvField->pImpl->nextFieldOffset = nextOffset;
 }
+
+void PVField::replaceStructure(PVStructure *pvStructure)
+{
+        PVFieldPtrArray pvFields = pvStructure->getPVFields();
+        int length = pvStructure->getStructure()->getNumberFields();
+        FieldConstPtrArray newFields = new FieldConstPtr[length];
+        for(int i=0; i<length; i++) {
+            newFields[i] = pvFields[i]->getField();
+        }
+        StructureConstPtr newStructure = getFieldCreate()->createStructure(
+             pImpl->field->getFieldName(),length, newFields);
+        pImpl->field = newStructure;
+        PVStructure *parent = pImpl->parent;
+        if(parent!=0) {
+            parent->replaceStructure(parent);
+        }
+}
+
 
 }}
 #endif  /* ABSTRACTPVFIELD_H */

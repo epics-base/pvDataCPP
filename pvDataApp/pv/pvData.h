@@ -86,6 +86,7 @@ namespace epics { namespace pvData {
         virtual bool operator!=(PVField *pv) = 0;
     protected:
         PVField(PVStructure *parent,FieldConstPtr field);
+        void replaceStructure(PVStructure *pvStructure);
     private:
         class PVFieldPvt *pImpl;
         static void computeOffset(PVField *pvField);
@@ -190,7 +191,7 @@ namespace epics { namespace pvData {
         PVField *getSubField(String fieldName);
         PVField *getSubField(int fieldOffset);
         void appendPVField(PVField *pvField);
-        void appendPVFields(PVFieldPtrArray pvFields);
+        void appendPVFields(int numberFields,PVFieldPtrArray pvFields);
         void removePVField(String fieldName);
         PVBoolean *getBooleanField(String fieldName);
         PVByte *getByteField(String fieldName);
@@ -223,9 +224,8 @@ namespace epics { namespace pvData {
             DeserializableControl*pflusher,BitSet *pbitSet);
     protected:
         PVStructure(PVStructure *parent,StructureConstPtr structure);
-        void replaceStructure();
-        friend class PVField;
     private:
+        void toStringPvt(StringBuilder buf,int indentLevel) ;
         class PVStructurePvt * pImpl;
     };
 

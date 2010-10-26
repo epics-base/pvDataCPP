@@ -3122,7 +3122,6 @@ void convertStructure(StringBuilder buffer,PVStructure *data,int indentLevel)
 {
     convert->newLine(buffer, indentLevel);
     *buffer += "structure {";
-    char buff[30];
     PVFieldPtrArray fieldsData = data->getPVFields();
     if (fieldsData != 0) {
         int length = data->getStructure()->getNumberFields();
@@ -3130,6 +3129,8 @@ void convertStructure(StringBuilder buffer,PVStructure *data,int indentLevel)
             PVField *fieldField = fieldsData[i];
             FieldConstPtr fieldnow = fieldField->getField();
             convert->newLine(buffer, indentLevel + 1);
+            int size = fieldnow->getFieldName().length();
+            char buff[size+2];
             sprintf(buff,"%s = ",fieldnow->getFieldName().c_str());
             *buffer += buff;
             convert->getString(buffer,fieldField,indentLevel + 1);
