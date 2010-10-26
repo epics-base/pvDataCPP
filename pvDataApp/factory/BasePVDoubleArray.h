@@ -51,8 +51,8 @@ namespace epics { namespace pvData {
 
     void BasePVDoubleArray::setCapacity(int capacity)
     {
-        if(PVArray::getCapacity()==capacity) return;
-        if(!PVArray::isCapacityMutable()) {
+        if(getCapacity()==capacity) return;
+        if(!isCapacityMutable()) {
             std::string message("not capacityMutable");
             PVField::message(message, errorMessage);
             return;
@@ -63,7 +63,7 @@ namespace epics { namespace pvData {
         for(int i=0; i<length; i++) newValue[i] = value[i];
         delete[]value;
         value = newValue;
-        PVArray::setCapacityLength(capacity,length);
+        setCapacityLength(capacity,length);
     }
 
     int BasePVDoubleArray::get(int offset, int len, DoubleArrayData *data) 

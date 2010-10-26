@@ -157,27 +157,23 @@ namespace epics { namespace pvData {
     class PVStructureArray : public PVArray {
     public:
         virtual ~PVStructureArray();
-        virtual StructureArrayConstPtr getStructureArray();
+        virtual StructureArrayConstPtr getStructureArray() = 0;
+        virtual void setCapacity(int capacity) = 0;
         virtual int get(int offset, int length,
-            StructureArrayData *data);
+            StructureArrayData *data) = 0;
         virtual int put(int offset,int length,
-            PVStructurePtrArray from, int fromOffset);
-        virtual void shareData( PVStructurePtrArray value,int capacity,int length);
+            PVStructurePtrArray from, int fromOffset) = 0;
+        virtual void shareData( PVStructurePtrArray value,int capacity,int length) = 0;
         virtual void serialize(ByteBuffer *pbuffer,
-            SerializableControl *pflusher) ;
+            SerializableControl *pflusher) = 0 ;
         virtual void deserialize(ByteBuffer *buffer,
-            DeserializableControl *pflusher);
+            DeserializableControl *pflusher) = 0;
         virtual void serialize(ByteBuffer *pbuffer,
-            SerializableControl *pflusher, int offset, int count);
-        virtual void toString(StringBuilder buf);
-        virtual void toString(StringBuilder buf,int indentLevel);
-        virtual bool operator==(PVField *pv);
-        virtual bool operator!=(PVField *pv);
+            SerializableControl *pflusher, int offset, int count) = 0;
     protected:
         PVStructureArray(PVStructure *parent,
             StructureArrayConstPtr structureArray);
     private:
-        class PVStructureArrayPvt *pImpl;
     };
     
     typedef PVField* PVFieldPtr;
@@ -330,6 +326,7 @@ namespace epics { namespace pvData {
         virtual ~PVBooleanArray();
         virtual void toString(StringBuilder buf) = 0 ;
         virtual void toString(StringBuilder buf,int indentLevel) = 0 ;
+        virtual void setCapacity(int capacity) = 0;
         virtual int get(int offset, int length, BooleanArrayData *data) = 0;
         virtual int put(int offset,int length, BooleanArray from, int fromOffset) = 0;
         virtual void shareData(BooleanArray value,int capacity,int length) = 0;
@@ -353,6 +350,7 @@ namespace epics { namespace pvData {
         virtual ~PVByteArray();
         virtual void toString(StringBuilder buf) = 0 ;
         virtual void toString(StringBuilder buf,int indentLevel) = 0;
+        virtual void setCapacity(int capacity) = 0;
         virtual int get(int offset, int length, ByteArrayData *data) = 0;
         virtual int put(int offset,int length, ByteArray  from, int fromOffset) = 0;
         virtual void shareData(ByteArray value,int capacity,int length) = 0;
@@ -376,6 +374,7 @@ namespace epics { namespace pvData {
         virtual ~PVShortArray();
         virtual void toString(StringBuilder buf) = 0;
         virtual void toString(StringBuilder buf,int indentLevel) = 0;
+        virtual void setCapacity(int capacity) = 0;
         virtual int get(int offset, int length, ShortArrayData *data) = 0;
         virtual int put(int offset,int length, ShortArray  from, int fromOffset) = 0;
         virtual void shareData(ShortArray value,int capacity,int length) = 0;
@@ -398,6 +397,7 @@ namespace epics { namespace pvData {
         virtual ~PVIntArray();
         virtual void toString(StringBuilder buf) = 0;
         virtual void toString(StringBuilder buf,int indentLevel) = 0;
+        virtual void setCapacity(int capacity) = 0;
         virtual int get(int offset, int length, IntArrayData *data) = 0;
         virtual int put(int offset,int length, IntArray  from, int fromOffset)= 0;
         virtual void shareData(IntArray value,int capacity,int length)= 0;
@@ -421,6 +421,7 @@ namespace epics { namespace pvData {
         virtual ~PVLongArray();
         virtual void toString(StringBuilder buf) = 0;
         virtual void toString(StringBuilder buf,int indentLevel) = 0;
+        virtual void setCapacity(int capacity) = 0;
         virtual int get(int offset, int length, LongArrayData *data) = 0;
         virtual int put(int offset,int length, LongArray  from, int fromOffset)= 0;
         virtual void shareData(LongArray value,int capacity,int length)= 0;
@@ -444,6 +445,7 @@ namespace epics { namespace pvData {
         virtual ~PVFloatArray();
         virtual void toString(StringBuilder buf) = 0;
         virtual void toString(StringBuilder buf,int indentLevel) = 0;
+        virtual void setCapacity(int capacity) = 0;
         virtual int get(int offset, int length, FloatArrayData *data) = 0;
         virtual int put(int offset,int length, FloatArray  from, int fromOffset)= 0;
         virtual void shareData(FloatArray value,int capacity,int length)= 0;
@@ -469,6 +471,7 @@ namespace epics { namespace pvData {
         virtual ~PVDoubleArray();
         virtual void toString(StringBuilder buf) = 0;
         virtual void toString(StringBuilder buf,int indentLevel) = 0;
+        virtual void setCapacity(int capacity) = 0;
         virtual int get(int offset, int length, DoubleArrayData *data) = 0;
         virtual int put(int offset,int length, DoubleArray  from, int fromOffset) = 0;
         virtual void shareData(DoubleArray value,int capacity,int length) = 0;
@@ -492,6 +495,7 @@ namespace epics { namespace pvData {
         virtual ~PVStringArray();
         virtual void toString(StringBuilder buf) = 0;
         virtual void toString(StringBuilder buf,int indentLevel) = 0;
+        virtual void setCapacity(int capacity) = 0;
         virtual int get(int offset, int length, StringArrayData *data) = 0;
         virtual int put(int offset,int length, StringArray  from, int fromOffset)= 0;
         virtual void shareData(StringArray value,int capacity,int length)= 0;

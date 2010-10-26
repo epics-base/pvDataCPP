@@ -33,7 +33,7 @@ namespace epics { namespace pvData {
     };
 
     BasePVBoolean::BasePVBoolean(PVStructure *parent,ScalarConstPtr scalar)
-    : PVBoolean(parent,scalar),value(epicsFalse)
+    : PVBoolean(parent,scalar),value(false)
     {}
 
     BasePVBoolean::~BasePVBoolean() {}

@@ -12,7 +12,7 @@ namespace epics { namespace pvData {
 
     class PVArrayPvt {
     public:
-        PVArrayPvt() : length(0),capacity(0),capacityMutable(epicsTrue)
+        PVArrayPvt() : length(0),capacity(0),capacityMutable(true)
         {}
         int length;
         int capacity;
@@ -54,7 +54,7 @@ namespace epics { namespace pvData {
      bool PVArray::isCapacityMutable() 
      {
           if(PVField::isImmutable()) {
-              return epicsFalse;
+              return false;
           }
           return pImpl->capacityMutable;
      }
@@ -75,7 +75,7 @@ namespace epics { namespace pvData {
            PVField::message(fieldImmutable,errorMessage);
            return;
         }
-        if(pImpl->capacityMutable==epicsFalse) {
+        if(pImpl->capacityMutable==false) {
            PVField::message(capacityImmutable,errorMessage);
            return;
         }

@@ -30,7 +30,7 @@ PVFieldPvt::PVFieldPvt(PVStructure *parent,FieldConstPtr field)
 : parent(parent),field(field),
  fieldOffset(0), nextFieldOffset(0),
  pvAuxInfo(0),
- immutable(epicsFalse),requester(0),postHandler(0)
+ immutable(false),requester(0),postHandler(0)
 {
    delete pvAuxInfo;
    field->incReferenceCount();
@@ -107,7 +107,7 @@ return pImpl->pvAuxInfo;
 
 bool PVField::isImmutable()  {return pImpl->immutable;}
 
-void PVField::setImmutable() {pImpl->immutable = epicsTrue;}
+void PVField::setImmutable() {pImpl->immutable = true;}
 
 FieldConstPtr PVField::getField()  {return pImpl->field;}
 

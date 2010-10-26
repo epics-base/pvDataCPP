@@ -495,10 +495,9 @@ namespace epics { namespace pvData {
         PVFieldPtrArray bFields = b->getPVFields(); 
         PVFieldPtrArray pvFields = pImpl->pvFields;
         int len = b->getNumberFields();
-        if (len == pImpl->numberFields) {
-            for (int i = 0; i < len; i++) {
-                if (!(pvFields[i]==bFields[i])) return false;
-            }
+        if(len!=pImpl->numberFields) return false;
+        for (int i = 0; i < len; i++) {
+            if (!(pvFields[i]==bFields[i])) return false;
         }
         return true;
     }

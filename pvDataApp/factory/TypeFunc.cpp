@@ -23,18 +23,18 @@ namespace epics { namespace pvData {
 
 
     bool ScalarTypeFunc::isInteger(ScalarType type) {
-        if(type>=pvByte && type<=pvLong) return epicsTrue;
-        return epicsFalse;
+        if(type>=pvByte && type<=pvLong) return true;
+        return false;
     }
 
     bool ScalarTypeFunc::isNumeric(ScalarType type) {
-        if(type>=pvByte && type<=pvDouble) return epicsTrue;
-        return epicsFalse;
+        if(type>=pvByte && type<=pvDouble) return true;
+        return false;
     }
 
     bool ScalarTypeFunc::isPrimitive(ScalarType type) {
-        if(type>=pvBoolean && type<=pvDouble) return epicsTrue;
-        return epicsFalse;
+        if(type>=pvBoolean && type<=pvDouble) return true;
+        return false;
     }
 
     ScalarType ScalarTypeFunc::getScalarType(String pvalue) {

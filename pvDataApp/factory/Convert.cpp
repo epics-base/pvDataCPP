@@ -66,7 +66,7 @@ static std::vector<String> split(String commaSeparatedList);
 static std::vector<String> split(String commaSeparatedList) {
     String::size_type numValues = 1;
     String::size_type index=0;
-    while(epicsTrue) {
+    while(true) {
         String::size_type pos = commaSeparatedList.find(',',index);
         if(pos==String::npos) break;
         numValues++;
@@ -125,7 +125,7 @@ void Convert::fromString(PVScalar *pvScalar, String from)
         case pvBoolean: {
                 PVBoolean *pv = (PVBoolean *)pvScalar;
                 bool value = 
-                  ((from.compare("true")==0) ? epicsTrue : epicsFalse);
+                  ((from.compare("true")==0) ? true : false);
                 pv->put(value);
                 break;
             }
@@ -220,7 +220,7 @@ int Convert::toStringArray(PVScalarArray * pv, int offset, int length,
 
 bool Convert::isCopyCompatible(FieldConstPtr from, FieldConstPtr to)
 {
-    if(from->getType()!=to->getType()) return epicsFalse;
+    if(from->getType()!=to->getType()) return false;
     switch(from->getType()) {
     case scalar: 
         return isCopyScalarCompatible((ScalarConstPtr)from,(ScalarConstPtr)to);
@@ -265,12 +265,12 @@ bool Convert::isCopyScalarCompatible(
 {
     ScalarType fromScalarType = fromField->getScalarType();
     ScalarType toScalarType = toField->getScalarType();
-    if(fromScalarType==toScalarType) return epicsTrue;
+    if(fromScalarType==toScalarType) return true;
     if(ScalarTypeFunc::isNumeric(fromScalarType)
-    && ScalarTypeFunc::isNumeric(toScalarType)) return epicsTrue;
-    if(fromScalarType==pvString) return epicsTrue;
-    if(toScalarType==pvString) return epicsTrue;
-    return epicsFalse;
+    && ScalarTypeFunc::isNumeric(toScalarType)) return true;
+    if(fromScalarType==pvString) return true;
+    if(toScalarType==pvString) return true;
+    return false;
 }
 
 void Convert::copyScalar(PVScalar *from, PVScalar *to)
@@ -355,12 +355,12 @@ bool Convert::isCopyScalarArrayCompatible(ScalarArrayConstPtr fromArray,
 {
     ScalarType fromType = fromArray->getElementType();
     ScalarType toType = toArray->getElementType();
-    if(fromType==toType) return epicsTrue;
+    if(fromType==toType) return true;
     if(ScalarTypeFunc::isNumeric(fromType)
-    && ScalarTypeFunc::isNumeric(toType)) return epicsTrue;
-    if(toType==pvString) return epicsTrue;
-    if(fromType==pvString) return epicsTrue;
-    return epicsFalse;
+    && ScalarTypeFunc::isNumeric(toType)) return true;
+    if(toType==pvString) return true;
+    if(fromType==pvString) return true;
+    return false;
 }
 
 int Convert::copyScalarArray(PVScalarArray *from, int offset,
@@ -460,31 +460,31 @@ bool Convert::isCopyStructureCompatible(
     FieldConstPtrArray fromFields = fromStruct->getFields();
     FieldConstPtrArray toFields = toStruct->getFields();
     int length = fromStruct->getNumberFields();
-    if(length!=toStruct->getNumberFields()) return epicsFalse;
+    if(length!=toStruct->getNumberFields()) return false;
     for(int i=0; i<length; i++) {
         FieldConstPtr from = fromFields[i];
         FieldConstPtr to = toFields[i];
         Type fromType = from->getType();
         Type toType = to->getType();
-        if(fromType!=toType) return epicsFalse;
+        if(fromType!=toType) return false;
         switch(fromType) {
         case scalar:
-            if(!convert->isCopyScalarCompatible((ScalarConstPtr)from,(ScalarConstPtr)to)) return epicsFalse;
+            if(!convert->isCopyScalarCompatible((ScalarConstPtr)from,(ScalarConstPtr)to)) return false;
             break;
         case scalarArray:
             if(!isCopyScalarArrayCompatible((ScalarArrayConstPtr)from,(ScalarArrayConstPtr)to))
-                return epicsFalse;
+                return false;
             break;
         case structure:
             if(!isCopyStructureCompatible((StructureConstPtr)from,(StructureConstPtr)to))
-                return epicsFalse;
+                return false;
             break;
         case structureArray:
             if(!isCopyStructureArrayCompatible((StructureArrayConstPtr)from,
-                (StructureArrayConstPtr)to)) return epicsFalse;
+                (StructureArrayConstPtr)to)) return false;
         }
     }
-    return epicsTrue;
+    return true;
 }
 
 void Convert::copyStructure(PVStructure *from, PVStructure *to)
@@ -1170,63 +1170,63 @@ static bool scalarEquals(PVScalar *a,PVScalar *b)
 {
     ScalarType ascalarType = a->getScalar()->getScalarType();
     ScalarType bscalarType = b->getScalar()->getScalarType();
-    if(ascalarType!=bscalarType) return epicsFalse;
+    if(ascalarType!=bscalarType) return false;
     switch(ascalarType) {
         case pvBoolean: {
             PVBoolean *pa = (PVBoolean *)a;
             PVBoolean *pb = (PVBoolean *)b;
             bool avalue = pa->get();
             bool bvalue = pb->get();
-            return ((avalue==bvalue) ? epicsTrue : epicsFalse);
+            return ((avalue==bvalue) ? true : false);
         }
         case pvByte: {
             PVByte *pa = (PVByte *)a;
             PVByte *pb = (PVByte *)b;
             epicsInt8 avalue = pa->get();
             epicsInt8 bvalue = pb->get();
-            return ((avalue==bvalue) ? epicsTrue : epicsFalse);
+            return ((avalue==bvalue) ? true : false);
         }
         case pvShort: {
             PVShort *pa = (PVShort *)a;
             PVShort *pb = (PVShort *)b;
             epicsInt16 avalue = pa->get();
             epicsInt16 bvalue = pb->get();
-            return ((avalue==bvalue) ? epicsTrue : epicsFalse);
+            return ((avalue==bvalue) ? true : false);
         }
         case pvInt: {
             PVInt *pa = (PVInt *)a;
             PVInt *pb = (PVInt *)b;
             epicsInt32 avalue = pa->get();
             epicsInt32 bvalue = pb->get();
-            return ((avalue==bvalue) ? epicsTrue : epicsFalse);
+            return ((avalue==bvalue) ? true : false);
         }
         case pvLong: {
             PVLong *pa = (PVLong *)a;
             PVLong *pb = (PVLong *)b;
             epicsInt64 avalue = pa->get();
             epicsInt64 bvalue = pb->get();
-            return ((avalue==bvalue) ? epicsTrue : epicsFalse);
+            return ((avalue==bvalue) ? true : false);
         }
         case pvFloat: {
             PVFloat *pa = (PVFloat *)a;
             PVFloat *pb = (PVFloat *)b;
             float avalue = pa->get();
             float bvalue = pb->get();
-            return ((avalue==bvalue) ? epicsTrue : epicsFalse);
+            return ((avalue==bvalue) ? true : false);
         }
         case pvDouble: {
             PVDouble *pa = (PVDouble *)a;
             PVDouble *pb = (PVDouble *)b;
             double avalue = pa->get();
             double bvalue = pb->get();
-            return ((avalue==bvalue) ? epicsTrue : epicsFalse);
+            return ((avalue==bvalue) ? true : false);
         }
         case pvString: {
             PVString *pa = (PVString *)a;
             PVString *pb = (PVString *)b;
             String avalue = pa->get();
             String bvalue = pb->get();
-            return ((avalue==bvalue) ? epicsTrue : epicsFalse);
+            return ((avalue==bvalue) ? true : false);
         }
     }
     String message("should not get here");
@@ -1235,11 +1235,11 @@ static bool scalarEquals(PVScalar *a,PVScalar *b)
 
 static bool arrayEquals(PVScalarArray *a,PVScalarArray *b)
 {
-    if(a==b) return epicsTrue;
+    if(a==b) return true;
     ScalarType aType = a->getScalarArray()->getElementType();
     ScalarType bType = b->getScalarArray()->getElementType();
-    if(aType!=bType) return epicsFalse;
-    if(a->getLength()!=b->getLength()) return epicsFalse;
+    if(aType!=bType) return false;
+    if(a->getLength()!=b->getLength()) return false;
     int length = a->getLength();
     switch(aType) {
         case pvBoolean: {
@@ -1252,9 +1252,9 @@ static bool arrayEquals(PVScalarArray *a,PVScalarArray *b)
             BooleanArray avalue = adata.data;
             BooleanArray bvalue = bdata.data;
             for(int i=0; i<length; i++) {
-                if(avalue[i]!=bvalue[i]) return epicsFalse;
+                if(avalue[i]!=bvalue[i]) return false;
             }
-            return epicsTrue;
+            return true;
         }
         case pvByte: {
             PVByteArray *aarray = (PVByteArray *)a;
@@ -1266,9 +1266,9 @@ static bool arrayEquals(PVScalarArray *a,PVScalarArray *b)
             ByteArray avalue = adata.data;
             ByteArray bvalue = bdata.data;
             for(int i=0; i<length; i++) {
-                if(avalue[i]!=bvalue[i]) return epicsFalse;
+                if(avalue[i]!=bvalue[i]) return false;
             }
-            return epicsTrue;
+            return true;
         }
         case pvShort: {
             PVShortArray *aarray = (PVShortArray *)a;
@@ -1280,9 +1280,9 @@ static bool arrayEquals(PVScalarArray *a,PVScalarArray *b)
             ShortArray avalue = adata.data;
             ShortArray bvalue = bdata.data;
             for(int i=0; i<length; i++) {
-                if(avalue[i]!=bvalue[i]) return epicsFalse;
+                if(avalue[i]!=bvalue[i]) return false;
             }
-            return epicsTrue;
+            return true;
         }
         case pvInt: {
             PVIntArray *aarray = (PVIntArray *)a;
@@ -1294,9 +1294,9 @@ static bool arrayEquals(PVScalarArray *a,PVScalarArray *b)
             IntArray avalue = adata.data;
             IntArray bvalue = bdata.data;
             for(int i=0; i<length; i++) {
-                if(avalue[i]!=bvalue[i]) return epicsFalse;
+                if(avalue[i]!=bvalue[i]) return false;
             }
-            return epicsTrue;
+            return true;
         }
         case pvLong: {
             PVLongArray *aarray = (PVLongArray *)a;
@@ -1308,9 +1308,9 @@ static bool arrayEquals(PVScalarArray *a,PVScalarArray *b)
             LongArray avalue = adata.data;
             LongArray bvalue = bdata.data;
             for(int i=0; i<length; i++) {
-                if(avalue[i]!=bvalue[i]) return epicsFalse;
+                if(avalue[i]!=bvalue[i]) return false;
             }
-            return epicsTrue;
+            return true;
         }
         case pvFloat: {
             PVFloatArray *aarray = (PVFloatArray *)a;
@@ -1322,9 +1322,9 @@ static bool arrayEquals(PVScalarArray *a,PVScalarArray *b)
             FloatArray avalue = adata.data;
             FloatArray bvalue = bdata.data;
             for(int i=0; i<length; i++) {
-                if(avalue[i]!=bvalue[i]) return epicsFalse;
+                if(avalue[i]!=bvalue[i]) return false;
             }
-            return epicsTrue;
+            return true;
         }
         case pvDouble: {
             PVDoubleArray *aarray = (PVDoubleArray *)a;
@@ -1336,9 +1336,9 @@ static bool arrayEquals(PVScalarArray *a,PVScalarArray *b)
             DoubleArray avalue = adata.data;
             DoubleArray bvalue = bdata.data;
             for(int i=0; i<length; i++) {
-                if(avalue[i]!=bvalue[i]) return epicsFalse;
+                if(avalue[i]!=bvalue[i]) return false;
             }
-            return epicsTrue;
+            return true;
         }
         case pvString: {
             PVStringArray *aarray = (PVStringArray *)a;
@@ -1350,9 +1350,9 @@ static bool arrayEquals(PVScalarArray *a,PVScalarArray *b)
             String *avalue = adata.data;
             String *bvalue = bdata.data;
             for(int i=0; i<length; i++) {
-                if(avalue[i]!=bvalue[i]) return epicsFalse;
+                if(avalue[i]!=bvalue[i]) return false;
             }
-            return epicsTrue;
+            return true;
         }
     }
     String message("should not get here");
@@ -1399,10 +1399,12 @@ static bool structureEquals(PVStructure *a,PVStructure *b)
 
 bool convertEquals(PVField *a,PVField *b)
 {
-    if(a==b) return epicsTrue;
+    void * avoid = (void *)a;
+    void * bvoid = (void *)b;
+    if(avoid==bvoid) return true;
     Type atype = a->getField()->getType();
     Type btype = b->getField()->getType();
-    if(atype!=btype) return epicsFalse;
+    if(atype!=btype) return false;
     if(atype==scalar) return scalarEquals((PVScalar *)a,(PVScalar *)b);
     if(atype==scalarArray) {
          return arrayEquals((PVScalarArray *)a,(PVScalarArray *)b);
