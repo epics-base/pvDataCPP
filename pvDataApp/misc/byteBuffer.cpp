@@ -4,7 +4,7 @@
  *  Created on: Oct 18, 2010
  *      Author: Miha Vitorovic
  */
-
+#include <cstring>
 #include "byteBuffer.h"
 #include "epicsException.h"
 
