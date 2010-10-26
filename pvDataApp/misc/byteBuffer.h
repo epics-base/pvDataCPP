@@ -133,8 +133,33 @@ namespace epics {
              */
             double getDouble();
 
+            /**
+             * Relative bulk @em get method. It transfers {@code count} bytes
+             * from the buffer into the {@code dst}.
+             *
+             * @param[out] dst Destination buffer
+             * @param[in] offset Offset in the destination buffer
+             * @param[in] count The number of bytes to copy
+             * @throws EpicsException - Buffer underflow if there are fewer
+             * than count bytes remaining in the buffer.
+             */
+            void get(char* dst, int offset, int count);
+
             //virtual String getString() = 0; // TODO
 
+
+            /**
+             * Relative bulk @em put method. It transfers {@code count} bytes
+             * from the {@code src} into the the buffer.
+             *
+             * @param[in] src Source buffer
+             * @param[in] offset Offset in the source buffer
+             * @param[in] count The number of bytes to copy
+             * @returns Pointer to this ByteBuffer instance.
+             * @throws EpicsException - Buffer overflow if there are not
+             * enough bytes remaining in the buffer.
+             */
+            ByteBuffer* put(const char* src, int offset, int count);
 
             /**
              * Relative boolean write, {@code position} is incremented by
