@@ -2,11 +2,9 @@ TOP=../..
 
 include $(TOP)/configure/CONFIG
 
-INC += pvIntrospect.h
-INC += pvData.h
-INC += convert.h
-INC += standardField.h
-INC += standardPVField.h
+PROD_HOST += testIntrospect
+testIntrospect_SRCS += testIntrospect.cpp
+testIntrospect_LIBS += pvFactory
 
 include $(TOP)/configure/RULES
 #----------------------------------------

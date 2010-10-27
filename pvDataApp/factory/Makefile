@@ -32,6 +32,7 @@ LIBSRCS += FieldCreateFactory.cpp
 LIBSRCS += PVDataCreateFactory.cpp
 LIBSRCS += Convert.cpp
 LIBSRCS += StandardField.cpp
+LIBSRCS += StandardPVField.cpp
 
 LIBRARY=pvFactory
 

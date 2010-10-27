@@ -82,3 +82,4 @@ pvDataApp/test/testBitSet.cpp
 pvDataApp/test/testBaseException.cpp
 pvDataApp/misc/serializeHelper.h
 pvDataApp/misc/serializeHelper.cpp
+pvDataApp/pvTest/testIntrospect.cpp

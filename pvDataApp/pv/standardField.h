@@ -4,7 +4,6 @@
 #ifndef STANDARDFIELD_H
 #define STANDARDFIELD_H
 #include "pvIntrospect.h"
-#include "pvData.h"
 
 namespace epics { namespace pvData { 
 
@@ -12,16 +11,36 @@ namespace epics { namespace pvData {
     public:
         StandardField();
         ~StandardField();
-        PVScalar * scalarValue(ScalarType type);
-        PVScalarArray * scalarArrayValue(ScalarType elementType);
-        PVStructure * scalarValue(ScalarType type,String properties);
-        PVStructure * scalarArrayValue(ScalarType elementType,
-            String properties);
-        PVStructure * enumeratedValue(StringArray choices);
-        PVStructure * enumeratedValue(StringArray choices,
-            String properties);
-        PVStructure * alarm();
-        PVStructure * timeStamp();
+        ScalarConstPtr scalar(String fieldName,ScalarType type);
+        StructureConstPtr scalar(String fieldName,ScalarType type,String properties);
+        ScalarArrayConstPtr scalarArray(String fieldName,ScalarType elementType);
+        StructureConstPtr scalarArray(String fieldName,ScalarType elementType, String properties);
+        StructureArrayConstPtr structureArray(String fieldName,StructureConstPtr structure);
+        StructureConstPtr structureArray(String fieldName,StructureConstPtr structure,String properties);
+        StructureConstPtr structure(String fieldName,int numFields,FieldConstPtrArray fields);
+        StructureConstPtr enumerated(String fieldName,StringArray choices);
+        StructureConstPtr enumerated(String fieldName,StringArray choices, String properties);
+        ScalarConstPtr scalarValue(ScalarType type);
+        StructureConstPtr scalarValue(ScalarType type,String properties);
+        ScalarArrayConstPtr scalarArrayValue(ScalarType elementType);
+        StructureConstPtr scalarArrayValue(ScalarType elementType, String properties);
+        StructureArrayConstPtr structureArrayValue(StructureConstPtr structure);
+        StructureConstPtr structureArrayValue(StructureConstPtr structure,String properties);
+        StructureConstPtr structureValue(int numFields,FieldConstPtrArray fields);
+        StructureConstPtr enumeratedValue(StringArray choices);
+        StructureConstPtr enumeratedValue(StringArray choices, String properties);
+        StructureConstPtr alarm();
+        StructureConstPtr timeStamp();
+        StructureConstPtr display();
+        StructureConstPtr control();
+        StructureConstPtr booleanAlarm();
+        StructureConstPtr byteAlarm();
+        StructureConstPtr shortAlarm();
+        StructureConstPtr intAlarm();
+        StructureConstPtr longAlarm();
+        StructureConstPtr floatAlarm();
+        StructureConstPtr doubleAlarm();
+        StructureConstPtr enumeratedAlarm();
     };
 
     extern StandardField * getStandardField();

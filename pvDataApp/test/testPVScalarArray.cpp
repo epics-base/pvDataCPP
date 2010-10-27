@@ -11,6 +11,7 @@
 #include "pvIntrospect.h"
 #include "pvData.h"
 #include "standardField.h"
+#include "standardPVField.h"
 
 using namespace epics::pvData;
 
@@ -21,7 +22,7 @@ static String buffer("");
 void testBooleanArray() {
     printf("\ntestBooleanArray\n");
     PVScalarArray *pvScalarArray =
-        getStandardField()->scalarArrayValue(pvBoolean);
+        getStandardPVField()->scalarArrayValue(pvBoolean);
     PVBooleanArray *pvValue = (PVBooleanArray *)pvScalarArray;
     int length = 5;
     bool *value = new bool[length];
@@ -51,7 +52,7 @@ void testBooleanArray() {
 void testByteArray() {
     printf("\ntestByteArray\n");
     PVScalarArray *pvScalarArray =
-        getStandardField()->scalarArrayValue(pvByte);
+        getStandardPVField()->scalarArrayValue(pvByte);
     PVByteArray *pvValue = (PVByteArray *)pvScalarArray;
     int length = 5;
     epicsInt8 *value = new epicsInt8[length];
@@ -79,7 +80,7 @@ void testByteArray() {
 void testShortArray() {
     printf("\ntestShortArray\n");
     PVScalarArray *pvScalarArray =
-        getStandardField()->scalarArrayValue(pvShort);
+        getStandardPVField()->scalarArrayValue(pvShort);
     PVShortArray *pvValue = (PVShortArray *)pvScalarArray;
     int length = 5;
     epicsInt16 *value = new epicsInt16[length];
@@ -107,7 +108,7 @@ void testShortArray() {
 void testIntArray() {
     printf("\ntestIntArray\n");
     PVScalarArray *pvScalarArray =
-        getStandardField()->scalarArrayValue(pvInt);
+        getStandardPVField()->scalarArrayValue(pvInt);
     PVIntArray *pvValue = (PVIntArray *)pvScalarArray;
     int length = 5;
     epicsInt32 *value = new epicsInt32[length];
@@ -136,7 +137,7 @@ void testIntArray() {
 void testLongArray() {
     printf("\ntestLongArray\n");
     PVScalarArray *pvScalarArray =
-        getStandardField()->scalarArrayValue(pvLong);
+        getStandardPVField()->scalarArrayValue(pvLong);
     PVLongArray *pvValue = (PVLongArray *)pvScalarArray;
     int length = 5;
     epicsInt64 *value = new epicsInt64[length];
@@ -165,7 +166,7 @@ void testLongArray() {
 void testFloatArray() {
     printf("\ntestFloatArray\n");
     PVScalarArray *pvScalarArray =
-        getStandardField()->scalarArrayValue(pvFloat);
+        getStandardPVField()->scalarArrayValue(pvFloat);
     PVFloatArray *pvValue = (PVFloatArray *)pvScalarArray;
     int length = 5;
     float *value = new float[length];
@@ -194,7 +195,7 @@ void testFloatArray() {
 void testDoubleArray() {
     printf("\ntestDoubleArray\n");
     PVScalarArray *pvScalarArray =
-        getStandardField()->scalarArrayValue(pvDouble);
+        getStandardPVField()->scalarArrayValue(pvDouble);
     PVDoubleArray *pvValue = (PVDoubleArray *)pvScalarArray;
     int length = 5;
     double *value = new double[length];
@@ -223,7 +224,7 @@ void testDoubleArray() {
 void testStringArray() {
     printf("\ntestStringArray\n");
     PVScalarArray *pvScalarArray =
-        getStandardField()->scalarArrayValue(pvString);
+        getStandardPVField()->scalarArrayValue(pvString);
     PVStringArray *pvValue = (PVStringArray *)pvScalarArray;
     int length = 5;
     String *value = new String[length];
