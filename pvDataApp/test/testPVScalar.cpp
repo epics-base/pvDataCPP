@@ -22,7 +22,7 @@ static String buffer("");
 
 void testBoolean() {
     printf("\ntestBoolean\n");
-    PVScalar *pvScalar = getStandardPVField()->scalarValue(pvBoolean);
+    PVScalar *pvScalar = getStandardPVField()->scalarValue(0,pvBoolean);
     PVBoolean *pvValue = (PVBoolean *)pvScalar;
     bool value = true;
     pvValue->put(value);
@@ -58,7 +58,7 @@ void testBoolean() {
     pvValue->toString(&buffer);
     printf("%s\n",buffer.c_str());
     pvScalar->message(String("this is a test message"),infoMessage);
-    PVScalar *other = getStandardPVField()->scalarValue(pvDouble);
+    PVScalar *other = getStandardPVField()->scalarValue(0,pvDouble);
     bool isEqual = pvScalar==other;
     printf("expect false isEqual %s\n",(isEqual ? "true" : "false"));
     delete pvValue;
@@ -66,7 +66,7 @@ void testBoolean() {
 
 void testByte() {
     printf("\ntestByte\n");
-    PVScalar *pvScalar = getStandardPVField()->scalarValue(pvByte);
+    PVScalar *pvScalar = getStandardPVField()->scalarValue(0,pvByte);
     PVByte *pvValue = (PVByte *)pvScalar;
     epicsInt8 value = 2;
     pvValue->put(value);
@@ -98,7 +98,7 @@ void testByte() {
     pvValue->toString(&buffer);
     printf("%s\n",buffer.c_str());
     pvScalar->message(String("this is a test message"),infoMessage);
-    PVScalar *other = getStandardPVField()->scalarValue(pvDouble);
+    PVScalar *other = getStandardPVField()->scalarValue(0,pvDouble);
     bool isEqual = pvScalar==other;
     printf("expect false isEqual %s\n",(isEqual ? "true" : "false"));
     delete pvValue;
@@ -106,7 +106,7 @@ void testByte() {
 
 void testShort() {
     printf("\ntestShort\n");
-    PVScalar *pvScalar = getStandardPVField()->scalarValue(pvShort);
+    PVScalar *pvScalar = getStandardPVField()->scalarValue(0,pvShort);
     PVShort *pvValue = (PVShort *)pvScalar;
     epicsInt16 value = 2;
     pvValue->put(value);
@@ -138,7 +138,7 @@ void testShort() {
     pvValue->toString(&buffer);
     printf("%s\n",buffer.c_str());
     pvScalar->message(String("this is a test message"),infoMessage);
-    PVScalar *other = getStandardPVField()->scalarValue(pvDouble);
+    PVScalar *other = getStandardPVField()->scalarValue(0,pvDouble);
     bool isEqual = pvScalar==other;
     printf("expect false isEqual %s\n",(isEqual ? "true" : "false"));
     delete pvValue;
@@ -146,7 +146,7 @@ void testShort() {
 
 void testInt() {
     printf("\ntestInt\n");
-    PVScalar *pvScalar = getStandardPVField()->scalarValue(pvInt);
+    PVScalar *pvScalar = getStandardPVField()->scalarValue(0,pvInt);
     PVInt *pvValue = (PVInt *)pvScalar;
     epicsInt32 value = 2;
     pvValue->put(value);
@@ -178,7 +178,7 @@ void testInt() {
     pvValue->toString(&buffer);
     printf("%s\n",buffer.c_str());
     pvScalar->message(String("this is a test message"),infoMessage);
-    PVScalar *other = getStandardPVField()->scalarValue(pvDouble);
+    PVScalar *other = getStandardPVField()->scalarValue(0,pvDouble);
     bool isEqual = pvScalar==other;
     printf("expect false isEqual %s\n",(isEqual ? "true" : "false"));
     delete pvValue;
@@ -186,7 +186,7 @@ void testInt() {
 
 void testLong() {
     printf("\ntestLong\n");
-    PVScalar *pvScalar = getStandardPVField()->scalarValue(pvLong);
+    PVScalar *pvScalar = getStandardPVField()->scalarValue(0,pvLong);
     PVLong *pvValue = (PVLong *)pvScalar;
     epicsInt64 value = 2;
     pvValue->put(value);
@@ -218,7 +218,7 @@ void testLong() {
     pvValue->toString(&buffer);
     printf("%s\n",buffer.c_str());
     pvScalar->message(String("this is a test message"),infoMessage);
-    PVScalar *other = getStandardPVField()->scalarValue(pvDouble);
+    PVScalar *other = getStandardPVField()->scalarValue(0,pvDouble);
     bool isEqual = pvScalar==other;
     printf("expect false isEqual %s\n",(isEqual ? "true" : "false"));
     delete pvValue;
@@ -226,7 +226,7 @@ void testLong() {
 
 void testFloat() {
     printf("\ntestFloat\n");
-    PVScalar *pvScalar = getStandardPVField()->scalarValue(pvFloat);
+    PVScalar *pvScalar = getStandardPVField()->scalarValue(0,pvFloat);
     PVFloat *pvValue = (PVFloat *)pvScalar;
     float value = 2;
     pvValue->put(value);
@@ -265,7 +265,7 @@ void testFloat() {
 
 void testDouble() {
     printf("\ntestDouble\n");
-    PVScalar *pvScalar = getStandardPVField()->scalarValue(pvDouble);
+    PVScalar *pvScalar = getStandardPVField()->scalarValue(0,pvDouble);
     PVDouble *pvValue = (PVDouble *)pvScalar;
     double value = 2;
     pvValue->put(value);
@@ -304,7 +304,7 @@ void testDouble() {
 
 void testString() {
     printf("\ntestString\n");
-    PVScalar *pvScalar = getStandardPVField()->scalarValue(pvString);
+    PVScalar *pvScalar = getStandardPVField()->scalarValue(0,pvString);
     PVString *pvValue = (PVString *)pvScalar;
     String value = "testString";
     pvValue->put(value);

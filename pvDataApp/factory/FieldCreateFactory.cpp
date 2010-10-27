@@ -143,11 +143,14 @@ namespace epics { namespace pvData {
     };
 
     BaseStructure::BaseStructure (String fieldName,
-        int numberFields, FieldConstPtrArray fields)
+        int numberFields, FieldConstPtrArray infields)
     : BaseField(fieldName,structure),
           numberFields(numberFields),
-          fields(fields)
+          fields(new FieldConstPtr[numberFields])
     {
+        for(int i=0; i<numberFields; i++) {
+            fields[i] = infields[i];
+        }
         for(int i=0; i<numberFields; i++) {
             String name = fields[i]->getFieldName();
             // look for duplicates
@@ -165,11 +168,13 @@ namespace epics { namespace pvData {
         }
     }
     BaseStructure::~BaseStructure() {
-        if(debugLevel==highDebug) printf("~BaseStructure %s\n",BaseField::getFieldName().c_str());
+        if(debugLevel==highDebug)
+            printf("~BaseStructure %s\n",BaseField::getFieldName().c_str());
         for(int i=0; i<numberFields; i++) {
             FieldConstPtr pfield = fields[i];
             pfield->decReferenceCount();
         }
+        delete[] fields;
     }
 
     FieldConstPtr  BaseStructure::getField(String fieldName) const {

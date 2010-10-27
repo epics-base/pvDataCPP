@@ -455,7 +455,7 @@ namespace epics { namespace pvData {
     void PVStructure::toString(StringBuilder buf,int indentLevel) 
     {
         *buf += "structure ";
-         toStringPvt(buf,0);
+         toStringPvt(buf,indentLevel);
     }
 
     void PVStructure::serialize(

@@ -12,39 +12,47 @@ namespace epics { namespace pvData {
     public:
         StandardPVField();
         ~StandardPVField();
-        PVScalar * scalar(String fieldName,ScalarType type);
-        PVStructure * scalar(String fieldName,ScalarType type,String properties);
-        PVScalarArray * scalarArray(String fieldName,ScalarType elementType);
-        PVStructure * scalarArray(String fieldName,ScalarType elementType, String properties);
-        PVStructureArray * structureArray(String fieldName,StructureConstPtr structure);
-        PVStructure * structureArray(String fieldName,StructureConstPtr structure,String properties);
-        PVStructure *structure(String fieldName,PVStructure *pvStructure);
-        PVStructure *structure(String fieldName,PVStructure *pvStructure,String properties);
-        PVStructure * enumerated(String fieldName,StringArray choices);
-        PVStructure * enumerated(String fieldName,StringArray choices, String properties);
-        PVScalar * scalarValue(ScalarType type);
-        PVStructure * scalarValue(ScalarType type,String properties);
-        PVScalarArray * scalarArrayValue(ScalarType elementType);
-        PVStructure * scalarArrayValue(ScalarType elementType, String properties);
-        PVStructureArray * structureArrayValue(StructureConstPtr structure);
-        PVStructure * structureArrayValue(StructureConstPtr structure,String properties);
-        PVStructure *structureValue(PVStructure *pvStructure);
-        PVStructure *structureValue(PVStructure *pvStructure,String properties);
-        PVStructure * enumeratedValue(StringArray choices);
-        PVStructure * enumeratedValue(StringArray choices, String properties);
-        PVStructure * alarm();
-        PVStructure * timeStamp();
-        PVStructure * display();
-        PVStructure * control();
-        PVStructure * booleanAlarm();
-        PVStructure * byteAlarm();
-        PVStructure * shortAlarm();
-        PVStructure * intAlarm();
-        PVStructure * longAlarm();
-        PVStructure * floatAlarm();
-        PVStructure * doubleAlarm();
-        PVStructure * enumeratedAlarm();
-        PVStructure * powerSupply();
+        PVScalar * scalar(PVStructure *parent,String fieldName,ScalarType type);
+        PVStructure * scalar(PVStructure *parent,
+            String fieldName,ScalarType type,String properties);
+        PVScalarArray * scalarArray(PVStructure *parent,
+            String fieldName,ScalarType elementType);
+        PVStructure * scalarArray(PVStructure *parent,
+            String fieldName,ScalarType elementType, String properties);
+        PVStructureArray * structureArray(PVStructure *parent,
+            String fieldName,StructureConstPtr structure);
+        PVStructure * structureArray(PVStructure *parent,
+            String fieldName,StructureConstPtr structure,String properties);
+        PVStructure * enumerated(PVStructure *parent,
+            String fieldName,StringArray choices);
+        PVStructure * enumerated(PVStructure *parent,
+            String fieldName,StringArray choices, String properties);
+        PVScalar * scalarValue(PVStructure *parent,ScalarType type);
+        PVStructure * scalarValue(PVStructure *parent,
+            ScalarType type,String properties);
+        PVScalarArray * scalarArrayValue(PVStructure *parent,ScalarType elementType);
+        PVStructure * scalarArrayValue(PVStructure *parent,
+            ScalarType elementType, String properties);
+        PVStructureArray * structureArrayValue(PVStructure *parent,
+            StructureConstPtr structure);
+        PVStructure * structureArrayValue(PVStructure *parent,
+            StructureConstPtr structure,String properties);
+        PVStructure * enumeratedValue(PVStructure *parent,StringArray choices);
+        PVStructure * enumeratedValue(PVStructure *parent,
+            StringArray choices, String properties);
+        PVStructure * alarm(PVStructure *parent);
+        PVStructure * timeStamp(PVStructure *parent);
+        PVStructure * display(PVStructure *parent);
+        PVStructure * control(PVStructure *parent);
+        PVStructure * booleanAlarm(PVStructure *parent);
+        PVStructure * byteAlarm(PVStructure *parent);
+        PVStructure * shortAlarm(PVStructure *parent);
+        PVStructure * intAlarm(PVStructure *parent);
+        PVStructure * longAlarm(PVStructure *parent);
+        PVStructure * floatAlarm(PVStructure *parent);
+        PVStructure * doubleAlarm(PVStructure *parent);
+        PVStructure * enumeratedAlarm(PVStructure *parent);
+        PVStructure * powerSupply(PVStructure *parent);
     };
 
     extern StandardPVField * getStandardPVField();

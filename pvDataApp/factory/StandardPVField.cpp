@@ -13,184 +13,233 @@ namespace epics { namespace pvData {
 static String notImplemented("not implemented");
 static FieldCreate* fieldCreate = 0;
 static PVDataCreate* pvDataCreate = 0;
+static StandardField *standardField = 0;
+static StandardPVField *standardPVField = 0;
 
 StandardPVField::StandardPVField(){}
 
 StandardPVField::~StandardPVField(){}
 
 
-PVScalar * StandardPVField::scalar(String fieldName,ScalarType type)
+PVScalar * StandardPVField::scalar(PVStructure *parent,
+    String fieldName,ScalarType type)
 {
-    throw std::logic_error(notImplemented);
+    ScalarConstPtr field = standardField->scalar(fieldName,type);
+    return pvDataCreate->createPVScalar(parent,field);
 }
 
-PVStructure * StandardPVField::scalar(String fieldName,ScalarType type,String properties)
+PVStructure * StandardPVField::scalar(PVStructure *parent,
+    String fieldName,ScalarType type,String properties)
 {
-    throw std::logic_error(notImplemented);
+    StructureConstPtr field = standardField->scalar(fieldName,type,properties);
+    return pvDataCreate->createPVStructure(parent,field);
 }
 
-PVScalarArray * StandardPVField::scalarArray(String fieldName,ScalarType elementType)
+PVScalarArray * StandardPVField::scalarArray(PVStructure *parent,
+    String fieldName,ScalarType elementType)
 {
-    throw std::logic_error(notImplemented);
+    ScalarArrayConstPtr field = standardField->scalarArray(
+        fieldName,elementType);
+    return pvDataCreate->createPVScalarArray(parent,field);
 }
 
-PVStructure * StandardPVField::scalarArray(String fieldName,ScalarType elementType, String properties)
+PVStructure * StandardPVField::scalarArray(PVStructure *parent,
+    String fieldName,ScalarType elementType, String properties)
 {
-    throw std::logic_error(notImplemented);
+    StructureConstPtr field = standardField->scalarArray(
+        fieldName,elementType,properties);
+    return pvDataCreate->createPVStructure(parent,field);
 }
 
-PVStructureArray * StandardPVField::structureArray(String fieldName,StructureConstPtr structure)
+PVStructureArray * StandardPVField::structureArray(PVStructure *parent,
+    String fieldName,StructureConstPtr structure)
 {
-    throw std::logic_error(notImplemented);
+    StructureArrayConstPtr field = standardField->structureArray(
+        fieldName,structure);
+    return pvDataCreate->createPVStructureArray(parent,field);
 }
 
-PVStructure * StandardPVField::structureArray(String fieldName,StructureConstPtr structure,String properties)
+PVStructure * StandardPVField::structureArray(PVStructure *parent,
+    String fieldName,StructureConstPtr structure,String properties)
 {
-    throw std::logic_error(notImplemented);
+    StructureConstPtr field = standardField->structureArray(
+        fieldName,structure,properties);
+    return pvDataCreate->createPVStructure(parent,field);
 }
 
-PVStructure *StandardPVField::structure(String fieldName,PVStructure *pvStructure)
+PVStructure * StandardPVField::enumerated(PVStructure *parent,
+    String fieldName,StringArray choices)
 {
-    throw std::logic_error(notImplemented);
+    StructureConstPtr field = standardField->enumerated(
+        fieldName,choices);
+    return pvDataCreate->createPVStructure(parent,field);
 }
 
-PVStructure *StandardPVField::structure(String fieldName,PVStructure *pvStructure,String properties)
+PVStructure * StandardPVField::enumerated(PVStructure *parent,
+    String fieldName,StringArray choices, String properties)
 {
-    throw std::logic_error(notImplemented);
+    StructureConstPtr field = standardField->enumerated(
+        fieldName,choices,properties);
+    return pvDataCreate->createPVStructure(parent,field);
 }
 
-PVStructure * StandardPVField::enumerated(String fieldName,StringArray choices)
+PVScalar * StandardPVField::scalarValue(PVStructure *parent,
+    ScalarType scalarType)
 {
-    throw std::logic_error(notImplemented);
+    ScalarConstPtr field = standardField->scalarValue(scalarType);
+    return pvDataCreate->createPVScalar(parent,field);
 }
 
-PVStructure * StandardPVField::enumerated(String fieldName,StringArray choices, String properties)
+PVStructure * StandardPVField::scalarValue(PVStructure *parent,
+    ScalarType type,String properties)
 {
-    throw std::logic_error(notImplemented);
+    StructureConstPtr field = standardField->scalarValue(type,properties);
+    return pvDataCreate->createPVStructure(parent,field);
 }
 
-PVScalar * StandardPVField::scalarValue(ScalarType scalarType)
+PVScalarArray * StandardPVField::scalarArrayValue(PVStructure *parent,
+    ScalarType elementType)
 {
-    ScalarConstPtr scalar = fieldCreate->createScalar(
-       String("value"),scalarType);
-    return getPVDataCreate()->createPVScalar(0,scalar);
-}
-
-PVStructure * StandardPVField::scalarValue(ScalarType type,String properties)
-{
-    throw std::logic_error(notImplemented);
-}
-
-PVScalarArray * StandardPVField::scalarArrayValue(ScalarType elementType)
-{
-    ScalarArrayConstPtr scalarArray = fieldCreate->createScalarArray(
-       String("value"),elementType);
+    ScalarArrayConstPtr scalarArray =
+        standardField->scalarArrayValue(elementType);
     return pvDataCreate->createPVScalarArray(0,scalarArray);
 }
 
-PVStructure * StandardPVField::scalarArrayValue(ScalarType elementType, String properties)
+PVStructure * StandardPVField::scalarArrayValue(PVStructure *parent,
+    ScalarType elementType, String properties)
 {
-    throw std::logic_error(notImplemented);
+    StructureConstPtr field = standardField->scalarArrayValue(
+        elementType,properties);
+    return pvDataCreate->createPVStructure(parent,field);
 }
 
-PVStructureArray * StandardPVField::structureArrayValue(StructureConstPtr structure)
+PVStructureArray * StandardPVField::structureArrayValue(PVStructure *parent,
+    StructureConstPtr structure)
 {
-    throw std::logic_error(notImplemented);
+    StructureArrayConstPtr field = standardField->structureArrayValue(
+        structure);
+    return pvDataCreate->createPVStructureArray(parent,field);
 }
 
-PVStructure * StandardPVField::structureArrayValue(StructureConstPtr structure,String properties)
+PVStructure * StandardPVField::structureArrayValue(PVStructure *parent,
+    StructureConstPtr structure,String properties)
 {
-    throw std::logic_error(notImplemented);
+    StructureConstPtr field = standardField->structureArrayValue(
+        structure,properties);
+    return pvDataCreate->createPVStructure(parent,field);
 }
 
-PVStructure *StandardPVField::structureValue(PVStructure *pvStructure)
+PVStructure * StandardPVField::enumeratedValue(PVStructure *parent,
+    StringArray choices)
 {
-    throw std::logic_error(notImplemented);
+    StructureConstPtr field = standardField->enumeratedValue( choices);
+    return pvDataCreate->createPVStructure(parent,field);
 }
 
-PVStructure *StandardPVField::structureValue(PVStructure *pvStructure,String properties)
+PVStructure * StandardPVField::enumeratedValue(PVStructure *parent,
+    StringArray choices, String properties)
 {
-    throw std::logic_error(notImplemented);
+    StructureConstPtr field = standardField->enumeratedValue(
+        choices,properties);
+    return pvDataCreate->createPVStructure(parent,field);
 }
 
-PVStructure * StandardPVField::enumeratedValue(StringArray choices)
+PVStructure * StandardPVField::alarm(PVStructure *parent)
 {
-    throw std::logic_error(notImplemented);
+    StructureConstPtr field = standardField->alarm();
+    return pvDataCreate->createPVStructure(parent,field);
 }
 
-PVStructure * StandardPVField::enumeratedValue(StringArray choices, String properties)
+PVStructure * StandardPVField::timeStamp(PVStructure *parent)
 {
-    throw std::logic_error(notImplemented);
+    StructureConstPtr field = standardField->timeStamp();
+    return pvDataCreate->createPVStructure(parent,field);
 }
 
-PVStructure * StandardPVField::alarm()
+PVStructure * StandardPVField::display(PVStructure *parent)
 {
-    throw std::logic_error(notImplemented);
+    StructureConstPtr field = standardField->display();
+    return pvDataCreate->createPVStructure(parent,field);
 }
 
-PVStructure * StandardPVField::timeStamp()
+PVStructure * StandardPVField::control(PVStructure *parent)
 {
-    throw std::logic_error(notImplemented);
+    StructureConstPtr field = standardField->control();
+    return pvDataCreate->createPVStructure(parent,field);
 }
 
-PVStructure * StandardPVField::display()
+PVStructure * StandardPVField::booleanAlarm(PVStructure *parent)
 {
-    throw std::logic_error(notImplemented);
+    StructureConstPtr field = standardField->booleanAlarm();
+    return pvDataCreate->createPVStructure(parent,field);
 }
 
-PVStructure * StandardPVField::control()
+PVStructure * StandardPVField::byteAlarm(PVStructure *parent)
 {
-    throw std::logic_error(notImplemented);
+    StructureConstPtr field = standardField->byteAlarm();
+    return pvDataCreate->createPVStructure(parent,field);
 }
 
-PVStructure * StandardPVField::booleanAlarm()
+PVStructure * StandardPVField::shortAlarm(PVStructure *parent)
 {
-    throw std::logic_error(notImplemented);
+    StructureConstPtr field = standardField->shortAlarm();
+    return pvDataCreate->createPVStructure(parent,field);
 }
 
-PVStructure * StandardPVField::byteAlarm()
+PVStructure * StandardPVField::intAlarm(PVStructure *parent)
 {
-    throw std::logic_error(notImplemented);
+    StructureConstPtr field = standardField->intAlarm();
+    return pvDataCreate->createPVStructure(parent,field);
 }
 
-PVStructure * StandardPVField::shortAlarm()
+PVStructure * StandardPVField::longAlarm(PVStructure *parent)
 {
-    throw std::logic_error(notImplemented);
+    StructureConstPtr field = standardField->longAlarm();
+    return pvDataCreate->createPVStructure(parent,field);
 }
 
-PVStructure * StandardPVField::intAlarm()
+PVStructure * StandardPVField::floatAlarm(PVStructure *parent)
 {
-    throw std::logic_error(notImplemented);
+    StructureConstPtr field = standardField->floatAlarm();
+    return pvDataCreate->createPVStructure(parent,field);
 }
 
-PVStructure * StandardPVField::longAlarm()
+PVStructure * StandardPVField::doubleAlarm(PVStructure *parent)
 {
-    throw std::logic_error(notImplemented);
+    StructureConstPtr field = standardField->doubleAlarm();
+    return pvDataCreate->createPVStructure(parent,field);
 }
 
-PVStructure * StandardPVField::floatAlarm()
+PVStructure * StandardPVField::enumeratedAlarm(PVStructure *parent)
 {
-    throw std::logic_error(notImplemented);
+    StructureConstPtr field = standardField->enumeratedAlarm();
+    return pvDataCreate->createPVStructure(parent,field);
 }
 
-PVStructure * StandardPVField::doubleAlarm()
+PVStructure * StandardPVField::powerSupply(PVStructure *parent)
 {
-    throw std::logic_error(notImplemented);
+    StructureConstPtr alarmField = standardField->alarm();
+    StructureConstPtr timeStampField = standardField->timeStamp();
+    StructureConstPtr voltageField = standardField->scalar(
+        String("voltage"),pvDouble,String("alarm"));
+    StructureConstPtr powerField = standardField->scalar(
+        String("power"),pvDouble,String("alarm"));
+    StructureConstPtr currentField = standardField->scalar(
+        String("current"),pvDouble,String("alarm"));
+    FieldConstPtr fields[3];
+    fields[0] = voltageField;
+    fields[1] = powerField;
+    fields[2] = currentField;
+    StructureConstPtr valueField = standardField->structureValue( 3,fields);
+    fields[0] = alarmField;
+    fields[1] = timeStampField;
+    fields[2] = valueField;
+    StructureConstPtr structureField = standardField->structureValue(3,fields);
+    return pvDataCreate->createPVStructure(parent,structureField);
 }
 
-PVStructure * StandardPVField::enumeratedAlarm()
-{
-    throw std::logic_error(notImplemented);
-}
-
-PVStructure * StandardPVField::powerSupply()
-{
-    throw std::logic_error(notImplemented);
-}
 
 
-
-static StandardPVField* instance = 0;
 
 
 class StandardPVFieldExt : public StandardPVField {
@@ -202,12 +251,13 @@ StandardPVField * getStandardPVField() {
     static Mutex mutex = Mutex();
     Lock xx(&mutex);
 
-    if(instance==0) {
-        instance = new StandardPVFieldExt();
+    if(standardPVField==0) {
         fieldCreate = getFieldCreate();
         pvDataCreate = getPVDataCreate();
+        standardField = getStandardField();
+        standardPVField = new StandardPVFieldExt();
     }
-    return instance;
+    return standardPVField;
 }
 
 }}
