@@ -1,0 +1,79 @@
+
+testScalar
+boolean boolean
+byte byte
+short short
+int int
+long long
+float float
+double double
+string string
+
+testScalarArray
+booleanArray boolean
+byteArray byte
+shortArray short
+intArray int
+longArray long
+floatArray float
+doubleArray double
+stringArray string
+
+testSimpleStructure
+structure value
+    double value
+    structure alarm
+        int severity
+        string message
+    structure timeStamp
+        long secondsPastEpoch
+        int nanoSeconds
+    structure display
+        string description
+        string format
+        string units
+        structure limit
+            double low
+            double high
+    structure control
+        structure limit
+            double low
+            double high
+        double minStep
+    structure valueAlarm
+        boolean active
+        double lowAlarmLimit
+        double lowWarningLimit
+        double highWarningLimit
+        double highAlarmLimit
+        int lowAlarmSeverity
+        int lowWarningSeverity
+        int highWarningSeverity
+        int highAlarmSeverity
+        double hystersis
+
+testStructureArray
+structure value
+     structureArray  value
+        structure powerSupply
+            structure voltage
+                double value
+                structure alarm
+                    int severity
+                    string message
+            structure power
+                double value
+                structure alarm
+                    int severity
+                    string message
+            structure current
+                double value
+                structure alarm
+                    int severity
+                    string message
+    structure alarm
+        int severity
+        string message
+    structure timeStamp
+        long secondsPastEpoch
+        int nanoSeconds

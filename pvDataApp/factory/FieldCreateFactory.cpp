@@ -54,11 +54,8 @@ namespace epics { namespace pvData {
     }
  
     void BaseField::toString(StringBuilder buffer,int indentLevel) const{
-        newLine(buffer,indentLevel);
-        *buffer += "field ";
+        *buffer += " ";
         *buffer += fieldName.c_str();
-        *buffer += " type ";
-        TypeFunc::toString(buffer,type);
     }
 
     Scalar::~Scalar(){}
@@ -85,9 +82,8 @@ namespace epics { namespace pvData {
 
 
     void BaseScalar::toString(StringBuilder buffer,int indentLevel) const{
-        BaseField::toString(buffer,indentLevel);
-        *buffer +=  " scalarType ";
         ScalarTypeFunc::toString(buffer,scalarType);
+        BaseField::toString(buffer,indentLevel);
     }
 
     ScalarArray::~ScalarArray(){}
@@ -115,9 +111,11 @@ namespace epics { namespace pvData {
 
 
     void BaseScalarArray::toString(StringBuilder buffer,int indentLevel) const{
+        String temp = String();
+        ScalarTypeFunc::toString(&temp,elementType);
+        temp += "Array";
+        *buffer += temp;
         BaseField::toString(buffer,indentLevel);
-        *buffer +=  " elementType ";
-        ScalarTypeFunc::toString(buffer,elementType);
     }
 
     Structure::~Structure(){}
@@ -196,14 +194,14 @@ namespace epics { namespace pvData {
     }
 
     void BaseStructure::toString(StringBuilder buffer,int indentLevel) const{
+        *buffer += "structure";
         BaseField::toString(buffer,indentLevel);
-        *buffer += " {";
+        newLine(buffer,indentLevel+1);
         for(int i=0; i<numberFields; i++) {
             FieldConstPtr pfield = fields[i];
             pfield->toString(buffer,indentLevel+1);
+            if(i<numberFields-1) newLine(buffer,indentLevel+1);
         }
-        newLine(buffer,indentLevel);
-        *buffer +=  "}";
     }
 
     StructureArray::~StructureArray(){}
@@ -239,8 +237,9 @@ namespace epics { namespace pvData {
 
 
     void BaseStructureArray::toString(StringBuilder buffer,int indentLevel) const {
+        *buffer +=  " structureArray ";
         BaseField::toString(buffer,indentLevel);
-        *buffer +=  " structure ";
+        newLine(buffer,indentLevel + 1);
         pstructure->toString(buffer,indentLevel + 1);
     }
 

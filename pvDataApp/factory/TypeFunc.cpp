@@ -52,14 +52,14 @@ namespace epics { namespace pvData {
     void ScalarTypeFunc::toString(StringBuilder buf,const ScalarType scalarType) {
         static String unknownString = "logic error unknown ScalarType";
         switch(scalarType) {
-        case pvBoolean : *buf += "pvBoolean"; return;
-        case pvByte : *buf += "pvByte"; return;;
-        case pvShort : *buf += "pvShort"; return;
-        case pvInt : *buf += "pvInt"; return;
-        case pvLong : *buf += "pvLong"; return;
-        case pvFloat : *buf += "pvFloat"; return;
-        case pvDouble : *buf += "pvDouble"; return;
-        case pvString : *buf += "pvString"; return;
+        case pvBoolean : *buf += "boolean"; return;
+        case pvByte : *buf += "byte"; return;;
+        case pvShort : *buf += "short"; return;
+        case pvInt : *buf += "int"; return;
+        case pvLong : *buf += "long"; return;
+        case pvFloat : *buf += "float"; return;
+        case pvDouble : *buf += "double"; return;
+        case pvString : *buf += "string"; return;
         }
         throw std::invalid_argument(unknownString);
     }

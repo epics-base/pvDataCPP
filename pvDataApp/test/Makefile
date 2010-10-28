@@ -2,14 +2,6 @@ TOP=../..
 
 include $(TOP)/configure/CONFIG
 
-PROD_HOST += testIntrospect
-testIntrospect_SRCS += testIntrospect.cpp
-testIntrospect_LIBS += pvFactory
-
-PROD_HOST += testIntrospectScalar
-testIntrospectScalar_SRCS += testIntrospectScalar.cpp
-testIntrospectScalar_LIBS += pvFactory
-
 PROD_HOST += testPVAuxInfo
 testPVAuxInfo_SRCS += testPVAuxInfo.cpp
 testPVAuxInfo_LIBS += pvFactory

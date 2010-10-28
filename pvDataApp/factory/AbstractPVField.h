@@ -53,56 +53,56 @@ PVField::~PVField()
 
 String PVField::getRequesterName() 
 {
-static String none("none");
-if(pImpl->requester!=0) return pImpl->requester->getRequesterName();
-return none;
+    static String none("none");
+    if(pImpl->requester!=0) return pImpl->requester->getRequesterName();
+    return none;
 }
 
 void PVField::message(String message,MessageType messageType)  
 {
-if(pImpl->requester) {
-    pImpl->requester->message(message,messageType);
-} else {
-    printf("%s %s %s\n",
-        messageTypeName[messageType].c_str(),
-        pImpl->field->getFieldName().c_str(),
-        message.c_str());
-}
+    if(pImpl->requester) {
+        pImpl->requester->message(message,messageType);
+    } else {
+        printf("%s %s %s\n",
+            messageTypeName[messageType].c_str(),
+            pImpl->field->getFieldName().c_str(),
+            message.c_str());
+    }
 }
 void PVField::setRequester(Requester *prequester)
 {
-static String requesterPresent =
-    "Logic Error. requester is already present";
-if(pImpl->requester==0) {
-    pImpl->requester = prequester;
-    return;
-}
-throw std::logic_error(requesterPresent);
+    static String requesterPresent =
+        "Logic Error. requester is already present";
+    if(pImpl->requester==0) {
+        pImpl->requester = prequester;
+        return;
+    }
+    throw std::logic_error(requesterPresent);
 }
 
 int PVField::getFieldOffset() 
 {
-if(pImpl->nextFieldOffset==0) computeOffset(this);
-return pImpl->fieldOffset;
+    if(pImpl->nextFieldOffset==0) computeOffset(this);
+    return pImpl->fieldOffset;
 }
 
 int PVField::getNextFieldOffset() 
 {
-if(pImpl->nextFieldOffset==0) computeOffset(this);
-return pImpl->nextFieldOffset;
+    if(pImpl->nextFieldOffset==0) computeOffset(this);
+    return pImpl->nextFieldOffset;
 }
 
 int PVField::getNumberFields() 
 {
-if(pImpl->nextFieldOffset==0) computeOffset(this);
-return (pImpl->nextFieldOffset - pImpl->fieldOffset);
+    if(pImpl->nextFieldOffset==0) computeOffset(this);
+    return (pImpl->nextFieldOffset - pImpl->fieldOffset);
 }
 
 PVAuxInfo * PVField::getPVAuxInfo(){
-if(pImpl->pvAuxInfo==0) {
-    pImpl->pvAuxInfo = new PVAuxInfo(this);
-}
-return pImpl->pvAuxInfo;
+    if(pImpl->pvAuxInfo==0) {
+        pImpl->pvAuxInfo = new PVAuxInfo(this);
+    }
+    return pImpl->pvAuxInfo;
 }
 
 bool PVField::isImmutable()  {return pImpl->immutable;}
@@ -198,44 +198,37 @@ void PVField::toString(StringBuilder buf,int indentLevel)
 }
 
 void PVField::computeOffset(PVField   *  pvField) {
-	PVStructure *pvTop = pvField->getParent();
-   Type type = pvField->getField()->getType();
-   if(type!=structure) {
-   pvField->pImpl->nextFieldOffset = 1;
-   return;
-   }
-	if(pvTop==0) {
-		pvTop = (PVStructure *)pvField;
-	} else {
-		while(pvTop->getParent()!=0) {
-           pvTop = pvTop->getParent();
-       }
-	}
-   int offset = 0;
-   int nextOffset = 1;
-   PVFieldPtrArray pvFields = pvTop->getPVFields();
-   for(int i=0; i < pvTop->getStructure()->getNumberFields(); i++) {
-   offset = nextOffset;
-   PVField *pvField = pvFields[i];
-   FieldConstPtr field = pvField->getField();
-   switch(field->getType()) {
-   case scalar:
-   case scalarArray:
-   case structureArray:{
-       nextOffset++;
-       pvField->pImpl->fieldOffset = offset;
-       pvField->pImpl->nextFieldOffset = nextOffset;
-       break;
-   }
-   case structure: {
-       pvField->computeOffset(pvField,offset);
-       nextOffset = pvField->getNextFieldOffset();
-   }
-   }
-   }
-   PVField *top = (PVField *)pvTop;
-   top->pImpl->fieldOffset = 0;
-   top->pImpl->nextFieldOffset = nextOffset;
+    PVStructure *pvTop = pvField->getParent();
+    if(pvTop==0) {
+        pvTop = (PVStructure *)pvField;
+    } else {
+        while(pvTop->getParent()!=0) pvTop = pvTop->getParent();
+    }
+    int offset = 0;
+    int nextOffset = 1;
+    PVFieldPtrArray pvFields = pvTop->getPVFields();
+    for(int i=0; i < pvTop->getStructure()->getNumberFields(); i++) {
+        offset = nextOffset;
+        PVField *pvField = pvFields[i];
+        FieldConstPtr field = pvField->getField();
+        switch(field->getType()) {
+        case scalar:
+        case scalarArray:
+        case structureArray:{
+            nextOffset++;
+            pvField->pImpl->fieldOffset = offset;
+            pvField->pImpl->nextFieldOffset = nextOffset;
+            break;
+        }
+        case structure: {
+            pvField->computeOffset(pvField,offset);
+            nextOffset = pvField->getNextFieldOffset();
+        }
+        }
+    }
+    PVField *top = (PVField *)pvTop;
+    top->pImpl->fieldOffset = 0;
+    top->pImpl->nextFieldOffset = nextOffset;
 }
 
 void PVField::computeOffset(PVField   *  pvField,int offset) {
