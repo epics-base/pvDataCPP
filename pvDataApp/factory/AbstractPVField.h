@@ -151,7 +151,8 @@ void PVField::renameField(String  newName)
         }
         case scalarArray: {
             ScalarArrayConstPtr array = (ScalarArrayConstPtr)pImpl->field;
-            array = fieldCreate->createScalarArray(newName, array->getElementType());
+            array = fieldCreate->createScalarArray(
+                newName, array->getElementType());
             pImpl->field = array;
             break;
         }
@@ -159,7 +160,8 @@ void PVField::renameField(String  newName)
             StructureConstPtr structure = (StructureConstPtr)pImpl->field;
             FieldConstPtrArray origFields = structure->getFields();
             int numberFields = structure->getNumberFields();
-            structure = fieldCreate->createStructure(newName,numberFields,origFields);
+            structure = fieldCreate->createStructure(
+                newName,numberFields,origFields);
             pImpl->field = structure;
             break;
         }
@@ -183,7 +185,8 @@ void PVField::setPostHandler(PostHandler *postHandler)
 {
     if(pImpl->postHandler!=0) {
         if(postHandler==pImpl->postHandler) return;
-        String message("PVField::setPostHandler a postHandler is already registered");
+        String message(
+            "PVField::setPostHandler a postHandler is already registered");
         throw std::logic_error(message);
     }
     pImpl->postHandler = postHandler;
@@ -200,6 +203,11 @@ void PVField::toString(StringBuilder buf,int indentLevel)
 void PVField::computeOffset(PVField   *  pvField) {
     PVStructure *pvTop = pvField->getParent();
     if(pvTop==0) {
+        if(pvField->getField()->getType()!=structure) {
+           pvField->pImpl->fieldOffset = 0;
+           pvField->pImpl->nextFieldOffset = 1;
+           return;
+        }
         pvTop = (PVStructure *)pvField;
     } else {
         while(pvTop->getParent()!=0) pvTop = pvTop->getParent();
@@ -237,23 +245,23 @@ void PVField::computeOffset(PVField   *  pvField,int offset) {
    PVStructure *pvStructure = (PVStructure *)pvField;
    PVFieldPtrArray pvFields = pvStructure->getPVFields();
    for(int i=0; i < pvStructure->getStructure()->getNumberFields(); i++) {
-   offset = nextOffset;
-   PVField *pvSubField = pvFields[i];
-   FieldConstPtr field = pvSubField->getField();
-   switch(field->getType()) {
-   case scalar:
-   case scalarArray:
-   case structureArray: {
-       nextOffset++;
-       pvSubField->pImpl->fieldOffset = offset;
-       pvSubField->pImpl->nextFieldOffset = nextOffset;
-       break;
-   }
-   case structure: {
-       pvSubField->computeOffset(pvSubField,offset);
-       nextOffset = pvSubField->getNextFieldOffset();
-   }
-   }
+       offset = nextOffset;
+       PVField *pvSubField = pvFields[i];
+       FieldConstPtr field = pvSubField->getField();
+       switch(field->getType()) {
+           case scalar:
+           case scalarArray:
+           case structureArray: {
+               nextOffset++;
+               pvSubField->pImpl->fieldOffset = offset;
+               pvSubField->pImpl->nextFieldOffset = nextOffset;
+               break;
+           }
+           case structure: {
+               pvSubField->computeOffset(pvSubField,offset);
+               nextOffset = pvSubField->getNextFieldOffset();
+           }
+       }
    }
    pvField->pImpl->fieldOffset = beginOffset;
    pvField->pImpl->nextFieldOffset = nextOffset;
