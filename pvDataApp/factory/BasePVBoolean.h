@@ -9,6 +9,7 @@
 #include "convert.h"
 #include "factory.h"
 #include "AbstractPVField.h"
+#include "byteBuffer.h"
 
 namespace epics { namespace pvData {
 
@@ -21,13 +22,13 @@ namespace epics { namespace pvData {
         virtual bool get();
         virtual void put(bool val);
         virtual void serialize(ByteBuffer *pbuffer,
-            SerializableControl *pflusher) ;
+            SerializableControl *pflusher);
         virtual void deserialize(ByteBuffer *pbuffer,
             DeserializableControl *pflusher);
         virtual void toString(StringBuilder buf);
         virtual void toString(StringBuilder buf,int indentLevel);
-        virtual bool operator==(PVField  *pv) ;
-        virtual bool operator!=(PVField  *pv) ;
+        virtual bool operator==(PVField& pv) ;
+        virtual bool operator!=(PVField& pv) ;
     private:
         bool value;
     };
@@ -43,33 +44,34 @@ namespace epics { namespace pvData {
     void BasePVBoolean::put(bool val){value = val;}
 
     void BasePVBoolean::serialize(ByteBuffer *pbuffer,
-        SerializableControl *pflusher) 
-    {
-        throw std::logic_error(notImplemented);
+        SerializableControl *pflusher) {
+        pflusher->ensureBuffer(1);
+        pbuffer->putBoolean(value);
     }
 
     void BasePVBoolean::deserialize(ByteBuffer *pbuffer,
         DeserializableControl *pflusher)
     {
-        throw std::logic_error(notImplemented);
+        pflusher->ensureData(1);
+        value = pbuffer->getBoolean();
     }
 
     void BasePVBoolean::toString(StringBuilder buf) {toString(buf,0);}
 
-    void BasePVBoolean::toString(StringBuilder buf,int indentLevel) 
+    void BasePVBoolean::toString(StringBuilder buf,int indentLevel)
     {
         getConvert()->getString(buf,this,indentLevel);
         PVField::toString(buf,indentLevel);
     }
 
-    bool BasePVBoolean::operator==(PVField  *pvField) 
+    bool BasePVBoolean::operator==(PVField& pvField)
     {
-        return getConvert()->equals(this,pvField);
+        return getConvert()->equals(this, &pvField);
     }
 
-    bool BasePVBoolean::operator!=(PVField  *pvField) 
+    bool BasePVBoolean::operator!=(PVField& pvField)
     {
-        return !(getConvert()->equals(this,pvField));
+        return !(getConvert()->equals(this, &pvField));
     }
 
 }}

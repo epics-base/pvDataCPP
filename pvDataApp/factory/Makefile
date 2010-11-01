@@ -37,6 +37,7 @@ LIBSRCS += StandardPVField.cpp
 LIBRARY=pvFactory
 
 pvFactory_LIBS += Com
+pvFactory_LIBS += pvMisc
 
 include $(TOP)/configure/RULES
 #----------------------------------------

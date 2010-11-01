@@ -101,17 +101,17 @@ namespace epics {
             return val;
         }
 
-        ByteBuffer* ByteBuffer::put(const char* src, int offset, int count) {
-            if(count>getRemaining()) throw EpicsException("buffer overflow");
-            strncpy(&_buffer[_position], &src[offset], count);
-            _position += count;
-            return this;
+        void ByteBuffer::get(char* dst, int offset, int count) {
+            if(count>getRemaining()) throw EpicsException("buffer underflow");
+            for(int i = 0; i<count; i++)
+                dst[offset+i] = _buffer[_position++];
         }
 
-        void ByteBuffer::get(char*dst, int offset, int count) {
-            if(count>getRemaining()) throw EpicsException("buffer underflow");
-            strncpy(&dst[offset], &_buffer[_position], count);
-            _position += count;
+        ByteBuffer* ByteBuffer::put(const char* src, int offset, int count) {
+            if(count>getRemaining()) throw EpicsException("buffer overflow");
+            for(int i = 0; i<count; i++)
+                _buffer[_position++] = src[offset+i];
+            return this;
         }
 
         ByteBuffer* ByteBuffer::putBoolean(bool value) {

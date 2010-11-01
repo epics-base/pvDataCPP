@@ -7,6 +7,7 @@
 #include <cstdio>
 #include "pvData.h"
 #include "factory.h"
+#include "serializeHelper.h"
 
 namespace epics { namespace pvData {
 
@@ -30,8 +31,8 @@ namespace epics { namespace pvData {
             PVStructurePtrArray from, int fromOffset);
         virtual void toString(StringBuilder buf) ;
         virtual void toString(StringBuilder buf,int indentLevel) ;
-        virtual bool operator==(PVField *pv);
-        virtual bool operator!=(PVField *pv);
+        virtual bool operator==(PVField &pv);
+        virtual bool operator!=(PVField &pv);
         virtual void shareData( PVStructurePtrArray value,int capacity,int length);
         virtual void serialize(ByteBuffer *pbuffer,
             SerializableControl *pflusher);
@@ -72,21 +73,21 @@ namespace epics { namespace pvData {
         int limit = length;
         if(length>capacity) limit = capacity;
         for(int i=0; i<limit; i++) newValue[i] = value[i];
-        for(int i=limit; i<capacity; i++) newValue[i] = 0; 
+        for(int i=limit; i<capacity; i++) newValue[i] = 0;
         if(length>capacity) length = capacity;
         delete[] value;
         value = newValue;
         setCapacityLength(capacity,length);
     }
-    
 
-    StructureArrayConstPtr BasePVStructureArray::getStructureArray() 
+
+    StructureArrayConstPtr BasePVStructureArray::getStructureArray()
     {
         return structureArray;
     }
 
     int BasePVStructureArray::get(
-        int offset, int len, StructureArrayData *data) 
+        int offset, int len, StructureArrayData *data)
     {
         int n = len;
         int length = getLength();
@@ -135,7 +136,7 @@ namespace epics { namespace pvData {
         	value[i+offset] = frompv;
         }
         postPut();
-        return len;      
+        return len;
     }
 
     void BasePVStructureArray::shareData(
@@ -148,38 +149,79 @@ namespace epics { namespace pvData {
 
     void BasePVStructureArray::toString(StringBuilder buf)  {toString(buf,0);}
 
-    void BasePVStructureArray::toString(StringBuilder buf,int indentLevel) 
+    void BasePVStructureArray::toString(StringBuilder buf,int indentLevel)
     {
        getConvert()->getString(buf,this,indentLevel);
        PVField::toString(buf,indentLevel);
     }
 
-    void BasePVStructureArray::serialize(
-        ByteBuffer *pbuffer,SerializableControl *pflusher)
-    {
-        throw std::logic_error(notImplemented);
+    void BasePVStructureArray::serialize(ByteBuffer *pbuffer,
+            SerializableControl *pflusher) {
+        serialize(pbuffer, pflusher, 0, getLength());
     }
 
-    void BasePVStructureArray::deserialize(
-        ByteBuffer *pbuffer,DeserializableControl *pflusher)
-    {
-        throw std::logic_error(notImplemented);
+    void BasePVStructureArray::deserialize(ByteBuffer *pbuffer,
+            DeserializableControl *pcontrol) {
+        int size = SerializeHelper::readSize(pbuffer, pcontrol);
+        if(size>=0) {
+            // prepare array, if necessary
+            if(size>getCapacity()) setCapacity(size);
+            for(int i = 0; i<size; i++) {
+                pcontrol->ensureData(1);
+                epicsInt8 temp = pbuffer->getByte();
+                if(temp==0) {
+                    value[i] = NULL;
+                }
+                else {
+                    if(value[i]==NULL) {
+                        value[i] = getPVDataCreate()->createPVStructure(
+                                NULL, structureArray->getStructure());
+                    }
+                    value[i]->deserialize(pbuffer, pcontrol);
+                }
+            }
+            setLength(size);
+            postPut();
+        }
     }
 
     void BasePVStructureArray::serialize(ByteBuffer *pbuffer,
-            SerializableControl *pflusher, int offset, int count)
-    {
-        throw std::logic_error(notImplemented);
+            SerializableControl *pflusher, int offset, int count) {
+        // cache
+        int length = getLength();
+
+        // check bounds
+        if(offset<0)
+            offset = 0;
+        else if(offset>length) offset = length;
+        if(count<0) count = length;
+
+        int maxCount = length-offset;
+        if(count>maxCount) count = maxCount;
+
+        // write
+        SerializeHelper::writeSize(count, pbuffer, pflusher);
+        for(int i = 0; i<count; i++) {
+            if(pbuffer->getRemaining()<1) pflusher->flushSerializeBuffer();
+            PVStructure* pvStructure = value[i+offset];
+            if(pvStructure==NULL) {
+                pbuffer->putByte(0);
+            }
+            else {
+                pbuffer->putByte(1);
+                pvStructure->serialize(pbuffer, pflusher);
+            }
+        }
     }
 
-    bool BasePVStructureArray::operator==(PVField  *pvField) 
+    bool BasePVStructureArray::operator==(PVField &pvField)
     {
-        return getConvert()->equals(this,pvField);
+        return getConvert()->equals(this,&pvField);
     }
 
-    bool BasePVStructureArray::operator!=(PVField  *pvField) 
+    bool BasePVStructureArray::operator!=(PVField &pvField)
     {
-        return !(getConvert()->equals(this,pvField));
+        return !(getConvert()->equals(this,&pvField));
     }
 
 }}

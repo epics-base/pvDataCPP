@@ -5,10 +5,14 @@
 #include <cstdlib>
 #include <string>
 #include <cstdio>
+#include <algorithm>
 #include <epicsTypes.h>
 #include "pvData.h"
 #include "factory.h"
 #include "AbstractPVScalarArray.h"
+#include "serializeHelper.h"
+
+using std::min;
 
 namespace epics { namespace pvData {
 
@@ -33,8 +37,8 @@ namespace epics { namespace pvData {
              SerializableControl *pflusher, int offset, int count) ;
         virtual void toString(StringBuilder buf);
         virtual void toString(StringBuilder buf,int indentLevel);
-        virtual bool operator==(PVField  *pv) ;
-        virtual bool operator!=(PVField  *pv) ;
+        virtual bool operator==(PVField& pv) ;
+        virtual bool operator!=(PVField& pv) ;
     private:
         bool *value;
     };
@@ -42,7 +46,7 @@ namespace epics { namespace pvData {
     BasePVBooleanArray::BasePVBooleanArray(PVStructure *parent,
         ScalarArrayConstPtr scalarArray)
     : PVBooleanArray(parent,scalarArray),value(new bool[0])
-    { } 
+    { }
 
     BasePVBooleanArray::~BasePVBooleanArray()
     {
@@ -59,14 +63,14 @@ namespace epics { namespace pvData {
         }
         int length = PVArray::getLength();
         if(length>capacity) length = capacity;
-        bool *newValue = new bool[capacity]; 
+        bool *newValue = new bool[capacity];
         for(int i=0; i<length; i++) newValue[i] = value[i];
         delete[]value;
         value = newValue;
         PVArray::setCapacityLength(capacity,length);
     }
 
-    int BasePVBooleanArray::get(int offset, int len, BooleanArrayData *data) 
+    int BasePVBooleanArray::get(int offset, int len, BooleanArrayData *data)
     {
         int n = len;
         int length = PVArray::getLength();
@@ -105,7 +109,7 @@ namespace epics { namespace pvData {
         }
         PVArray::setLength(length);
         PVField::postPut();
-        return len;      
+        return len;
     }
 
     void BasePVBooleanArray::shareData(BooleanArray shareValue,int capacity,int length)
@@ -116,21 +120,61 @@ namespace epics { namespace pvData {
     }
 
     void BasePVBooleanArray::serialize(ByteBuffer *pbuffer,
-         SerializableControl *pflusher) 
-    {
-        throw std::logic_error(notImplemented);
+                SerializableControl *pflusher) {
+        serialize(pbuffer, pflusher, 0, getLength());
     }
 
     void BasePVBooleanArray::deserialize(ByteBuffer *pbuffer,
-         DeserializableControl *pflusher)
-    {
-        throw std::logic_error(notImplemented);
+            DeserializableControl *pcontrol) {
+        int size = SerializeHelper::readSize(pbuffer, pcontrol);
+        if(size>=0) {
+            // prepare array, if necessary
+            if(size>getCapacity()) setCapacity(size);
+            // retrieve value from the buffer
+            int i = 0;
+            while(true) {
+                int maxIndex = min(size-i, pbuffer->getRemaining())+i;
+                for(; i<maxIndex; i++)
+                    value[i] = pbuffer->getBoolean();
+                if(i<size)
+                    pcontrol->ensureData(1); // // TODO is there a better way to ensureData?
+                else
+                    break;
+            }
+            // set new length
+            setLength(size);
+            postPut();
+        }
+        // TODO null arrays (size == -1) not supported
     }
 
     void BasePVBooleanArray::serialize(ByteBuffer *pbuffer,
-         SerializableControl *pflusher, int offset, int count) 
-    {
-        throw std::logic_error(notImplemented);
+            SerializableControl *pflusher, int offset, int count) {
+        // cache
+        int length = getLength();
+
+        // check bounds
+        if(offset<0)
+            offset = 0;
+        else if(offset>length) offset = length;
+        if(count<0) count = length;
+
+        int maxCount = length-offset;
+        if(count>maxCount) count = maxCount;
+
+        // write
+        SerializeHelper::writeSize(count, pbuffer, pflusher);
+        int end = offset+count;
+        int i = offset;
+        while(true) {
+            int maxIndex = min(end-i, pbuffer->getRemaining())+i;
+            for(; i<maxIndex; i++)
+                pbuffer->putBoolean(value[i]);
+            if(i<end)
+                pflusher->flushSerializeBuffer();
+            else
+                break;
+        }
     }
 
     void BasePVBooleanArray::toString(StringBuilder buf)
@@ -145,14 +189,14 @@ namespace epics { namespace pvData {
         PVField::toString(buf,indentLevel);
     }
 
-    bool BasePVBooleanArray::operator==(PVField  *pv) 
+    bool BasePVBooleanArray::operator==(PVField& pv)
     {
-        return getConvert()->equals(this,pv);
+        return getConvert()->equals(this, &pv);
     }
 
-    bool BasePVBooleanArray::operator!=(PVField  *pv) 
+    bool BasePVBooleanArray::operator!=(PVField& pv)
     {
-        return !(getConvert()->equals(this,pv));
+        return !(getConvert()->equals(this, &pv));
     }
 }}
 #endif  /* BASEPVBOOLEANARRAY_H */
