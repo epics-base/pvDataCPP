@@ -1,4 +1,4 @@
-/* testSimpleStructure.cpp */
+/* testIntrospect.cpp */
 /* Author:  Marty Kraimer Date: 2010.09 */
 
 #include <cstddef>
@@ -11,31 +11,36 @@
 
 #include "requester.h"
 #include "pvIntrospect.h"
+#include "pvData.h"
 #include "standardField.h"
 
 using namespace epics::pvData;
 
 static FieldCreate * fieldCreate = 0;
+static PVDataCreate * pvDataCreate = 0;
 static StandardField *standardField = 0;
 static String builder("");
 
 static void testScalarCommon(FILE * fd,String fieldName,ScalarType stype,
     bool isInteger,bool isNumeric,bool isPrimitive)
 {
-    ScalarConstPtr boolean = standardField->scalar(fieldName,stype);
-    Type type = boolean->getType();
+    ScalarConstPtr pscalar = standardField->scalar(fieldName,stype);
+    Type type = pscalar->getType();
     assert(type==scalar);
     builder.clear();
     TypeFunc::toString(&builder,type);
     assert(builder.compare("scalar")==0);
-    ScalarType scalarType = boolean->getScalarType();
+    ScalarType scalarType = pscalar->getScalarType();
     assert(scalarType==stype);
     assert(ScalarTypeFunc::isInteger(scalarType)==isInteger);
     assert(ScalarTypeFunc::isNumeric(scalarType)==isNumeric);
     assert(ScalarTypeFunc::isPrimitive(scalarType)==isPrimitive);
     builder.clear();
-    boolean->toString(&builder);
+    pscalar->toString(&builder);
     fprintf(fd,"%s\n",builder.c_str());
+    // create tempory PVField so that memory can be released
+    PVField *pvField = pvDataCreate->createPVField(0,pscalar);
+    delete pvField;
 }
 
 static void testScalar(FILE * fd) {
@@ -53,20 +58,23 @@ static void testScalar(FILE * fd) {
 static void testScalarArrayCommon(FILE * fd,String fieldName,ScalarType stype,
     bool isInteger,bool isNumeric,bool isPrimitive)
 {
-    ScalarArrayConstPtr boolean = standardField->scalarArray(fieldName,stype);
-    Type type = boolean->getType();
+    ScalarArrayConstPtr pscalar = standardField->scalarArray(fieldName,stype);
+    Type type = pscalar->getType();
     assert(type==scalarArray);
     builder.clear();
     TypeFunc::toString(&builder,type);
     assert(builder.compare("scalarArray")==0);
-    ScalarType scalarType = boolean->getElementType();
+    ScalarType scalarType = pscalar->getElementType();
     assert(scalarType==stype);
     assert(ScalarTypeFunc::isInteger(scalarType)==isInteger);
     assert(ScalarTypeFunc::isNumeric(scalarType)==isNumeric);
     assert(ScalarTypeFunc::isPrimitive(scalarType)==isPrimitive);
     builder.clear();
-    boolean->toString(&builder);
+    pscalar->toString(&builder);
     fprintf(fd,"%s\n",builder.c_str());
+    // create tempory PVField so that memory can be released
+    PVField *pvField = pvDataCreate->createPVField(0,pscalar);
+    delete pvField;
 }
 
 static void testScalarArray(FILE * fd) {
@@ -88,6 +96,9 @@ static void testSimpleStructure(FILE * fd) {
     builder.clear();
     ptop->toString(&builder);
     fprintf(fd,"%s\n",builder.c_str());
+    // create tempory PVField so that memory can be released
+    PVField *pvField = pvDataCreate->createPVField(0,ptop);
+    delete pvField;
 }
 
 static StructureConstPtr createPowerSupply() {
@@ -111,10 +122,14 @@ static void testStructureArray(FILE * fd) {
     builder.clear();
     top->toString(&builder);
     fprintf(fd,"%s\n",builder.c_str());
+    // create tempory PVField so that memory can be released
+    PVField *pvField = pvDataCreate->createPVField(0,top);
+    delete pvField;
 }
 
 int main(int argc,char *argv[])
 {
+    int initialTotalReferences,finalTotalReferences;
     char *fileName = 0;
     if(argc>1) fileName = argv[1];
     FILE * fd = stdout;
@@ -122,11 +137,36 @@ int main(int argc,char *argv[])
         fd = fopen(fileName,"w+");
     }
     fieldCreate = getFieldCreate();
+    pvDataCreate = getPVDataCreate();
     standardField = getStandardField();
+    initialTotalReferences = Field::getTotalReferenceCount();
     testScalar(fd);
+    finalTotalReferences = Field::getTotalReferenceCount();
+    assert(initialTotalReferences==finalTotalReferences);
+    initialTotalReferences = Field::getTotalReferenceCount();
     testScalarArray(fd);
+    finalTotalReferences = Field::getTotalReferenceCount();
+    assert(initialTotalReferences==finalTotalReferences);
+    initialTotalReferences = Field::getTotalReferenceCount();
     testSimpleStructure(fd);
+    finalTotalReferences = Field::getTotalReferenceCount();
+    assert(initialTotalReferences==finalTotalReferences);
+    initialTotalReferences = Field::getTotalReferenceCount();
     testStructureArray(fd);
+    finalTotalReferences = Field::getTotalReferenceCount();
+    assert(initialTotalReferences==finalTotalReferences);
+    initialTotalReferences = Field::getTotalReferenceCount();
+    long long totalConstruct = Field::getTotalConstruct();
+    long long totalDestruct = Field::getTotalDestruct();
+    int totalReference = Field::getTotalReferenceCount();
+    fprintf(fd,"Field:   totalConstruct %lli totalDestruct %lli totalReferenceCount %i\n",
+        totalConstruct,totalDestruct,totalReference);
+    assert(totalConstruct==(totalDestruct+totalReference));
+    totalConstruct = PVField::getTotalConstruct();
+    totalDestruct = PVField::getTotalDestruct();
+    fprintf(fd,"PVField: totalConstruct %lli totalDestruct %lli\n",
+        totalConstruct,totalDestruct);
+    assert(totalConstruct==totalDestruct);
     return(0);
 }
 

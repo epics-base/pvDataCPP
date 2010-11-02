@@ -16,133 +16,132 @@ namespace epics { namespace pvData {
         for(int i=0; i<indentLevel; i++) *buffer += "    ";
     }
 
-    Field::~Field(){}
-
-    class BaseField : public Field {
-    public:
-       BaseField(String fieldName,Type type);
-       virtual ~BaseField();
-       virtual void decReferenceCount() const;
-       virtual void incReferenceCount() const {referenceCount++;}
-       virtual int getReferenceCount() const {return referenceCount;}
-       virtual String getFieldName() const {return fieldName;}
-       virtual Type getType() const {return type;}
-       virtual void toString(StringBuilder buf) const {return toString(buf,0);}
-       virtual void toString(StringBuilder buf,int indentLevel) const;
-    private:
+    class FieldPvt {
+    public :
+       FieldPvt(String fieldName,Type type);
        String fieldName;
        Type type;
        mutable volatile int referenceCount;
     };
 
-    BaseField::BaseField(String fieldName,Type type)
-       :fieldName(fieldName),type(type), referenceCount(0){}
+    FieldPvt::FieldPvt(String fieldName,Type type)
+    : fieldName(fieldName),type(type),referenceCount(0) { }
 
-    BaseField::~BaseField() {
-        // note that c++ automatically calls destructor for fieldName
-        if(debugLevel==highDebug) printf("~BaseField %s\n",fieldName.c_str());
+    static volatile int totalReferenceCount = 0;
+    static volatile int64 totalConstruct = 0;
+    static volatile int64 totalDestruct = 0;
+    static Mutex *globalMutex;
+
+    int Field::getTotalReferenceCount()
+    {
+        Lock xx(globalMutex);
+        return totalReferenceCount;
     }
 
-    void BaseField::decReferenceCount() const {
-         if(referenceCount<=0) {
+    int64 Field::getTotalConstruct()
+    {
+        Lock xx(globalMutex);
+        return totalConstruct;
+    }
+
+    int64 Field::getTotalDestruct()
+    {
+        Lock xx(globalMutex);
+        return totalDestruct;
+    }
+
+    Field::Field(String fieldName,Type type)
+       : pImpl(new FieldPvt(fieldName,type))
+    {
+        Lock xx(globalMutex);
+        totalConstruct++;
+    }
+
+    Field::~Field() {
+        Lock xx(globalMutex);
+        totalDestruct++;
+        // note that compiler automatically calls destructor for fieldName
+        delete pImpl;
+        if(debugLevel==highDebug) printf("~Field %s\n",pImpl->fieldName.c_str());
+    }
+
+    int Field::getReferenceCount() const {
+        Lock xx(globalMutex);
+        return pImpl->referenceCount;
+    }
+    String Field::getFieldName() const {return pImpl->fieldName;}
+    Type Field::getType() const {return pImpl->type;}
+
+    void Field::incReferenceCount() const {
+        Lock xx(globalMutex);
+        pImpl->referenceCount++;
+        totalReferenceCount++;
+    }
+
+    void Field::decReferenceCount() const {
+        Lock xx(globalMutex);
+         if(pImpl->referenceCount<=0) {
               String message("logicError field ");
-              message += fieldName;
+              message += pImpl->fieldName;
               throw std::logic_error(message);
          }
-         referenceCount--;
-         if(referenceCount==0) delete this;
+         pImpl->referenceCount--;
+        totalReferenceCount--;
+         if(pImpl->referenceCount==0) delete this;
     }
+
  
-    void BaseField::toString(StringBuilder buffer,int indentLevel) const{
+    void Field::toString(StringBuilder buffer,int indentLevel) const{
         *buffer += " ";
-        *buffer += fieldName.c_str();
+        *buffer += pImpl->fieldName.c_str();
     }
+
+    Scalar::Scalar(String fieldName,ScalarType scalarType)
+           : Field(fieldName,scalar),scalarType(scalarType){}
 
     Scalar::~Scalar(){}
 
-    class BaseScalar: private BaseField,public Scalar {
-    public:
-        BaseScalar(String fieldName,ScalarType scalarType);
-        virtual ~BaseScalar();
-        virtual void incReferenceCount() const {BaseField::incReferenceCount();}
-        virtual void decReferenceCount() const {BaseField::decReferenceCount();}
-        virtual int getReferenceCount() const {return BaseField::getReferenceCount();}
-        virtual String getFieldName() const{ return BaseField::getFieldName(); }
-        virtual Type getType() const{return BaseField::getType();}
-        virtual ScalarType getScalarType() const { return scalarType;}
-        virtual void toString(StringBuilder buf) const {toString(buf,0);}
-        virtual void toString(StringBuilder buf,int indentLevel) const;
-    private:
-        ScalarType scalarType;
-    };
-
-    BaseScalar::BaseScalar(String fieldName,ScalarType scalarType)
-           : BaseField(fieldName,scalar),scalarType(scalarType){}
-    BaseScalar::~BaseScalar() {}
-
-
-    void BaseScalar::toString(StringBuilder buffer,int indentLevel) const{
+    void Scalar::toString(StringBuilder buffer,int indentLevel) const{
         ScalarTypeFunc::toString(buffer,scalarType);
-        BaseField::toString(buffer,indentLevel);
+        Field::toString(buffer,indentLevel);
     }
 
-    ScalarArray::~ScalarArray(){}
 
-    class BaseScalarArray: private BaseField,public ScalarArray {
-    public:
-        BaseScalarArray(String fieldName,ScalarType elementType);
-        virtual ~BaseScalarArray();
-        virtual void incReferenceCount() const {BaseField::incReferenceCount();}
-        virtual void decReferenceCount() const {BaseField::decReferenceCount();}
-        virtual int getReferenceCount() const {return BaseField::getReferenceCount();}
-        virtual String getFieldName() const{ return BaseField::getFieldName(); }
-        virtual Type getType() const{return BaseField::getType();}
-        virtual ScalarType getElementType() const { return elementType;}
-        virtual void toString(StringBuilder buf) const {toString(buf,0);}
-        virtual void toString(StringBuilder buf,int indentLevel) const;
-    private:
-        ScalarType elementType;
-    };
-
-    BaseScalarArray::BaseScalarArray
+    ScalarArray::ScalarArray
            (String fieldName,ScalarType elementType)
-           : BaseField(fieldName,scalarArray),elementType(elementType){}
-    BaseScalarArray::~BaseScalarArray() {}
+           : Field(fieldName,scalarArray),elementType(elementType){}
+    ScalarArray::~ScalarArray() {}
 
-
-    void BaseScalarArray::toString(StringBuilder buffer,int indentLevel) const{
+    void ScalarArray::toString(StringBuilder buffer,int indentLevel) const{
         String temp = String();
         ScalarTypeFunc::toString(&temp,elementType);
         temp += "Array";
         *buffer += temp;
-        BaseField::toString(buffer,indentLevel);
+        Field::toString(buffer,indentLevel);
     }
 
-    Structure::~Structure(){}
+    StructureArray::StructureArray(String fieldName,StructureConstPtr structure)
+    : Field(fieldName,structureArray),pstructure(structure)
+    {
+        pstructure->incReferenceCount();
+    }
 
-    class BaseStructure: private BaseField,public Structure {
-    public:
-        BaseStructure(String fieldName, int numberFields,FieldConstPtrArray fields);
-        virtual ~BaseStructure();
-        virtual void incReferenceCount() const {BaseField::incReferenceCount();}
-        virtual void decReferenceCount() const {BaseField::decReferenceCount();}
-        virtual int getReferenceCount() const {return BaseField::getReferenceCount();}
-        virtual String getFieldName() const{ return BaseField::getFieldName(); }
-        virtual Type getType() const{return BaseField::getType();}
-        virtual int const getNumberFields() const {return numberFields;}
-        virtual FieldConstPtr getField(String fieldName) const;
-        virtual int getFieldIndex(String fieldName) const;
-        virtual FieldConstPtrArray getFields() const { return fields;}
-        virtual void toString(StringBuilder buf) const {toString(buf,0);}
-        virtual void toString(StringBuilder buf,int indentLevel) const;
-    private:
-        int numberFields;
-        FieldConstPtrArray  fields;
-    };
+    StructureArray::~StructureArray() {
+        if(debugLevel==highDebug) printf("~StructureArray\n");
+        pstructure->decReferenceCount();
+    }
 
-    BaseStructure::BaseStructure (String fieldName,
+    void StructureArray::toString(StringBuilder buffer,int indentLevel) const {
+        *buffer +=  " structureArray ";
+        Field::toString(buffer,indentLevel);
+        newLine(buffer,indentLevel + 1);
+        pstructure->toString(buffer,indentLevel + 1);
+    }
+
+
+    Structure::Structure (String fieldName,
         int numberFields, FieldConstPtrArray infields)
-    : BaseField(fieldName,structure),
+    : Field(fieldName,structure),
           numberFields(numberFields),
           fields(new FieldConstPtr[numberFields])
     {
@@ -165,9 +164,10 @@ namespace epics { namespace pvData {
             fields[i]->incReferenceCount();
         }
     }
-    BaseStructure::~BaseStructure() {
+
+    Structure::~Structure() {
         if(debugLevel==highDebug)
-            printf("~BaseStructure %s\n",BaseField::getFieldName().c_str());
+            printf("~Structure %s\n",Field::getFieldName().c_str());
         for(int i=0; i<numberFields; i++) {
             FieldConstPtr pfield = fields[i];
             pfield->decReferenceCount();
@@ -175,7 +175,7 @@ namespace epics { namespace pvData {
         delete[] fields;
     }
 
-    FieldConstPtr  BaseStructure::getField(String fieldName) const {
+    FieldConstPtr  Structure::getField(String fieldName) const {
         for(int i=0; i<numberFields; i++) {
             FieldConstPtr pfield = fields[i];
             int result = fieldName.compare(pfield->getFieldName());
@@ -184,7 +184,7 @@ namespace epics { namespace pvData {
         return 0;
     }
 
-    int BaseStructure::getFieldIndex(String fieldName) const {
+    int Structure::getFieldIndex(String fieldName) const {
         for(int i=0; i<numberFields; i++) {
             FieldConstPtr pfield = fields[i];
             int result = fieldName.compare(pfield->getFieldName());
@@ -193,9 +193,9 @@ namespace epics { namespace pvData {
         return -1;
     }
 
-    void BaseStructure::toString(StringBuilder buffer,int indentLevel) const{
+    void Structure::toString(StringBuilder buffer,int indentLevel) const{
         *buffer += "structure";
-        BaseField::toString(buffer,indentLevel);
+        Field::toString(buffer,indentLevel);
         newLine(buffer,indentLevel+1);
         for(int i=0; i<numberFields; i++) {
             FieldConstPtr pfield = fields[i];
@@ -204,73 +204,33 @@ namespace epics { namespace pvData {
         }
     }
 
-    StructureArray::~StructureArray(){}
-
-    class BaseStructureArray: private BaseField,public StructureArray {
-    public:
-        BaseStructureArray(String fieldName,StructureConstPtr structure);
-        virtual ~BaseStructureArray();
-        virtual void incReferenceCount() const {BaseField::incReferenceCount();}
-        virtual void decReferenceCount() const {BaseField::decReferenceCount();}
-        virtual int getReferenceCount() const {return BaseField::getReferenceCount();}
-        virtual String getFieldName() const{
-            return BaseField::getFieldName();
-         }
-        virtual Type getType() const{return BaseField::getType();}
-        virtual StructureConstPtr  getStructure() const { return pstructure; }
-        virtual void toString(StringBuilder buf) const {toString(buf,0);}
-        virtual void toString(StringBuilder buf,int indentLevel) const;
-    private:
-        StructureConstPtr pstructure;
-    };
-
-    BaseStructureArray::BaseStructureArray(String fieldName,StructureConstPtr structure)
-    : BaseField(fieldName,structureArray),pstructure(structure)
-    {
-        pstructure->incReferenceCount();
-    }
-
-    BaseStructureArray::~BaseStructureArray() {
-        if(debugLevel==highDebug) printf("~BaseStructureArray\n");
-        pstructure->decReferenceCount();
-    }
-
-
-    void BaseStructureArray::toString(StringBuilder buffer,int indentLevel) const {
-        *buffer +=  " structureArray ";
-        BaseField::toString(buffer,indentLevel);
-        newLine(buffer,indentLevel + 1);
-        pstructure->toString(buffer,indentLevel + 1);
-    }
-
-  FieldCreate::FieldCreate(){};
 
    ScalarConstPtr  FieldCreate::createScalar(String fieldName,
        ScalarType scalarType) const
    {
-         BaseScalar *baseScalar = new BaseScalar(fieldName,scalarType);
-         return baseScalar;
+         Scalar *scalar = new Scalar(fieldName,scalarType);
+         return scalar;
    }
  
    ScalarArrayConstPtr FieldCreate::createScalarArray(
        String fieldName,ScalarType elementType) const
    {
-         BaseScalarArray *baseScalarArray = new BaseScalarArray(fieldName,elementType);
-         return baseScalarArray;
+         ScalarArray *scalarArray = new ScalarArray(fieldName,elementType);
+         return scalarArray;
    }
    StructureConstPtr FieldCreate::createStructure (
        String fieldName,int numberFields,
        FieldConstPtr fields[]) const
    {
-         BaseStructure *baseStructure = new BaseStructure(
+         Structure *structure = new Structure(
              fieldName,numberFields,fields);
-         return baseStructure;
+         return structure;
    }
    StructureArrayConstPtr FieldCreate::createStructureArray(
        String fieldName,StructureConstPtr structure) const
    {
-        BaseStructureArray *baseStructureArray = new BaseStructureArray(fieldName,structure);
-        return baseStructureArray;
+        StructureArray *structureArray = new StructureArray(fieldName,structure);
+        return structureArray;
    }
 
    FieldConstPtr FieldCreate::create(String fieldName,
@@ -300,20 +260,19 @@ namespace epics { namespace pvData {
        throw std::logic_error(message);
    }
 
-   static FieldCreate* instance = 0;
+   static FieldCreate* fieldCreate = 0;
 
-
-   class FieldCreateExt : public FieldCreate {
-   public:
-       FieldCreateExt(): FieldCreate(){};
-   };
+   FieldCreate::FieldCreate()
+   {
+        globalMutex = new Mutex();
+   }
 
    FieldCreate * getFieldCreate() {
        static Mutex mutex = Mutex();
        Lock xx(&mutex);
 
-       if(instance==0) instance = new FieldCreateExt();
-       return instance;
+       if(fieldCreate==0) fieldCreate = new FieldCreate();
+       return fieldCreate;
    }
 
 }}

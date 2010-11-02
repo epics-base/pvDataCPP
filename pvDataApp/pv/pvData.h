@@ -65,6 +65,8 @@ namespace epics { namespace pvData {
     class PVField : public Requester, public Serializable ,private NoDefaultMethods{
     public:
         virtual ~PVField();
+        static int64 getTotalConstruct();
+        static int64 getTotalDestruct();
         String getRequesterName() ;
         virtual void message(String message,MessageType messageType) ;
         virtual void setRequester(Requester *prequester);
@@ -91,6 +93,8 @@ namespace epics { namespace pvData {
         class PVFieldPvt *pImpl;
         static void computeOffset(PVField *pvField);
         static void computeOffset(PVField *pvField,int offset);
+        static void init();
+        friend class PVDataCreate;
     };
 
     class PVScalar : public PVField {
@@ -239,8 +243,8 @@ namespace epics { namespace pvData {
     class PVByte : public PVScalar {
     public:
         virtual ~PVByte();
-        virtual epicsInt8 get() = 0;
-        virtual void put(epicsInt8 value) = 0;
+        virtual int8 get() = 0;
+        virtual void put(int8 value) = 0;
     protected:
         PVByte(PVStructure *parent,ScalarConstPtr scalar)
         : PVScalar(parent,scalar) {}
@@ -250,8 +254,8 @@ namespace epics { namespace pvData {
     class PVShort : public PVScalar {
     public:
         virtual ~PVShort();
-        virtual epicsInt16 get() = 0;
-        virtual void put(epicsInt16 value) = 0;
+        virtual int16 get() = 0;
+        virtual void put(int16 value) = 0;
     protected:
         PVShort(PVStructure *parent,ScalarConstPtr scalar)
         : PVScalar(parent,scalar) {}
@@ -261,8 +265,8 @@ namespace epics { namespace pvData {
     class PVInt : public PVScalar{
     public:
         virtual ~PVInt();
-        virtual epicsInt32 get() = 0;
-        virtual void put(epicsInt32 value) = 0;
+        virtual int32 get() = 0;
+        virtual void put(int32 value) = 0;
     protected:
         PVInt(PVStructure *parent,ScalarConstPtr scalar)
         : PVScalar(parent,scalar) {}
@@ -272,8 +276,8 @@ namespace epics { namespace pvData {
     class PVLong : public PVScalar {
     public:
         virtual ~PVLong();
-        virtual epicsInt64 get() = 0;
-        virtual void put(epicsInt64 value) = 0;
+        virtual int64 get() = 0;
+        virtual void put(int64 value) = 0;
     protected:
         PVLong(PVStructure *parent,ScalarConstPtr scalar)
         : PVScalar(parent,scalar) {}
@@ -338,7 +342,7 @@ namespace epics { namespace pvData {
     };
 
 
-    typedef epicsInt8 * ByteArray;
+    typedef int8 * ByteArray;
     class ByteArrayData {
     public:
         ByteArray data;
@@ -362,7 +366,7 @@ namespace epics { namespace pvData {
     };
 
 
-    typedef epicsInt16 * ShortArray;
+    typedef int16 * ShortArray;
     class ShortArrayData {
     public:
         ShortArray data;
@@ -385,7 +389,7 @@ namespace epics { namespace pvData {
     private:
     };
 
-    typedef epicsInt32 * IntArray;
+    typedef int32 * IntArray;
     class IntArrayData {
     public:
         IntArray data;
@@ -409,7 +413,7 @@ namespace epics { namespace pvData {
     };
 
 
-    typedef epicsInt64 * LongArray;
+    typedef int64 * LongArray;
     class LongArrayData {
     public:
         LongArray data;
@@ -533,6 +537,7 @@ namespace epics { namespace pvData {
            String fieldName,PVStructure *structToClone);
     protected:
        PVDataCreate();
+       friend PVDataCreate * getPVDataCreate();
     };
 
     extern PVDataCreate * getPVDataCreate();

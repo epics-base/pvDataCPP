@@ -5,7 +5,6 @@
 #include <cstdlib>
 #include <string>
 #include <cstdio>
-#include <epicsTypes.h>
 #include "pvData.h"
 #include "factory.h"
 #include "AbstractPVScalarArray.h"
@@ -36,12 +35,12 @@ namespace epics { namespace pvData {
         virtual bool operator==(PVField  *pv) ;
         virtual bool operator!=(PVField  *pv) ;
     private:
-        epicsInt8 *value;
+        int8 *value;
     };
 
     BasePVByteArray::BasePVByteArray(PVStructure *parent,
         ScalarArrayConstPtr scalarArray)
-    : PVByteArray(parent,scalarArray),value(new epicsInt8[0])
+    : PVByteArray(parent,scalarArray),value(new int8[0])
     { } 
 
     BasePVByteArray::~BasePVByteArray()
@@ -59,7 +58,7 @@ namespace epics { namespace pvData {
         }
         int length = PVArray::getLength();
         if(length>capacity) length = capacity;
-        epicsInt8 *newValue = new epicsInt8[capacity]; 
+        int8 *newValue = new int8[capacity]; 
         for(int i=0; i<length; i++) newValue[i] = value[i];
         delete[]value;
         value = newValue;

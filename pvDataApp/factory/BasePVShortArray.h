@@ -5,7 +5,6 @@
 #include <cstdlib>
 #include <string>
 #include <cstdio>
-#include <epicsTypes.h>
 #include "pvData.h"
 #include "factory.h"
 #include "AbstractPVScalarArray.h"
@@ -25,7 +24,7 @@ namespace epics { namespace pvData {
         virtual int get(int offset, int length, ShortArrayData *data) ;
         virtual int put(int offset,int length,ShortArray from,
            int fromOffset);
-        virtual void shareData(epicsInt16 value[],int capacity,int length);
+        virtual void shareData(int16 value[],int capacity,int length);
         // from Serializable
         virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) ;
         virtual void deserialize(ByteBuffer *pbuffer,DeserializableControl *pflusher);
@@ -36,12 +35,12 @@ namespace epics { namespace pvData {
         virtual bool operator==(PVField  *pv) ;
         virtual bool operator!=(PVField  *pv) ;
     private:
-        epicsInt16 *value;
+        int16 *value;
     };
 
     BasePVShortArray::BasePVShortArray(PVStructure *parent,
         ScalarArrayConstPtr scalarArray)
-    : PVShortArray(parent,scalarArray),value(new epicsInt16[0])
+    : PVShortArray(parent,scalarArray),value(new int16[0])
     { } 
 
     BasePVShortArray::~BasePVShortArray()
@@ -59,7 +58,7 @@ namespace epics { namespace pvData {
         }
         int length = PVArray::getLength();
         if(length>capacity) length = capacity;
-        epicsInt16 *newValue = new epicsInt16[capacity]; 
+        int16 *newValue = new int16[capacity]; 
         for(int i=0; i<length; i++) newValue[i] = value[i];
         delete[]value;
         value = newValue;
@@ -109,7 +108,7 @@ namespace epics { namespace pvData {
     }
 
     void BasePVShortArray::shareData(
-        epicsInt16 shareValue[],int capacity,int length)
+        int16 shareValue[],int capacity,int length)
     {
         delete[] value;
         value = shareValue;

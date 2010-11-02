@@ -26,7 +26,7 @@ void testBooleanArray() {
     PVBooleanArray *pvValue = (PVBooleanArray *)pvScalarArray;
     int length = 5;
     bool *value = new bool[length];
-    for(int i=0; i<length; i++) value[i] = epicsTrue;
+    for(int i=0; i<length; i++) value[i] = true;
     pvValue->put(0,length,value,0);
     BooleanArrayData data = BooleanArrayData();
     pvValue->get(0,length,&data);
@@ -34,8 +34,8 @@ void testBooleanArray() {
     printf("(orig,get):");
     for(int i=0; i< length; i++) {
         printf("(%s,%s) ",
-            ((value[i]==epicsTrue) ? "true" : "false"),
-            ((getValue[i]==epicsTrue) ? "true" : "false"));
+            ((value[i]==true) ? "true" : "false"),
+            ((getValue[i]==true) ? "true" : "false"));
     }
     printf("\n");
     FieldConstPtr field = pvValue->getField();
@@ -55,12 +55,12 @@ void testByteArray() {
         getStandardPVField()->scalarArrayValue(0,pvByte);
     PVByteArray *pvValue = (PVByteArray *)pvScalarArray;
     int length = 5;
-    epicsInt8 *value = new epicsInt8[length];
+    int8 *value = new int8[length];
     for(int i=0; i<length; i++) value[i] = i;
     pvValue->put(0,length,value,0);
     ByteArrayData data = ByteArrayData();
     pvValue->get(0,length,&data);
-    epicsInt8 * getValue = data.data;
+    int8 * getValue = data.data;
     printf("(orig,get):");
     for(int i=0; i< length; i++) {
         printf("(%d,%d) ",(int)value[i],(int)getValue[i]);
@@ -83,12 +83,12 @@ void testShortArray() {
         getStandardPVField()->scalarArrayValue(0,pvShort);
     PVShortArray *pvValue = (PVShortArray *)pvScalarArray;
     int length = 5;
-    epicsInt16 *value = new epicsInt16[length];
+    int16 *value = new int16[length];
     for(int i=0; i<length; i++) value[i] = i;
     pvValue->put(0,length,value,0);
     ShortArrayData data = ShortArrayData();
     pvValue->get(0,length,&data);
-    epicsInt16 * getValue = data.data;
+    int16 * getValue = data.data;
     printf("(orig,get):");
     for(int i=0; i< length; i++) {
         printf("(%d,%d) ",(int)value[i],(int)getValue[i]);
@@ -111,12 +111,12 @@ void testIntArray() {
         getStandardPVField()->scalarArrayValue(0,pvInt);
     PVIntArray *pvValue = (PVIntArray *)pvScalarArray;
     int length = 5;
-    epicsInt32 *value = new epicsInt32[length];
+    int32 *value = new int32[length];
     for(int i=0; i<length; i++) value[i] = i;
     pvValue->put(0,length,value,0);
     IntArrayData data = IntArrayData();
     pvValue->get(0,length,&data);
-    epicsInt32 * getValue = data.data;
+    int32 * getValue = data.data;
     printf("(orig,get):");
     for(int i=0; i< length; i++) {
         printf("(%d,%d) ",value[i],getValue[i]);
@@ -140,12 +140,12 @@ void testLongArray() {
         getStandardPVField()->scalarArrayValue(0,pvLong);
     PVLongArray *pvValue = (PVLongArray *)pvScalarArray;
     int length = 5;
-    epicsInt64 *value = new epicsInt64[length];
+    int64 *value = new int64[length];
     for(int i=0; i<length; i++) value[i] = i;
     pvValue->put(0,length,value,0);
     LongArrayData data = LongArrayData();
     pvValue->get(0,length,&data);
-    epicsInt64 * getValue = data.data;
+    int64 * getValue = data.data;
     printf("(orig,get):");
     for(int i=0; i< length; i++) {
         printf("(%ld,%ld) ",(long int)value[i],(long int)getValue[i]);

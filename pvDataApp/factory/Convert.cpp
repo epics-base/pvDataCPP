@@ -3,7 +3,6 @@
 #include <string>
 #include <vector>
 #include <stdexcept>
-#include <epicsTypes.h>
 #include "lock.h"
 #include "pvIntrospect.h"
 #include "pvData.h"
@@ -21,21 +20,21 @@ static String illegalScalarType("Illegal ScalarType");
 
 static bool convertEquals(PVField *a,PVField *b);
 static int convertFromByteArray(PVScalarArray *pv, int offset,
-    int len,epicsInt8 from[], int fromOffset);
+    int len,int8 from[], int fromOffset);
 static int convertToByteArray(PVScalarArray *pv, int offset,
-    int len,epicsInt8 to[], int toOffset);
+    int len,int8 to[], int toOffset);
 static int convertFromShortArray(PVScalarArray *pv, int offset,
-    int len,epicsInt16 from[], int fromOffset);
+    int len,int16 from[], int fromOffset);
 static int convertToShortArray(PVScalarArray *pv, int offset,
-    int len,epicsInt16 to[], int toOffset);
+    int len,int16 to[], int toOffset);
 static int convertFromIntArray(PVScalarArray *pv, int offset,
-    int len,epicsInt32 from[], int fromOffset);
+    int len,int32 from[], int fromOffset);
 static int convertToIntArray(PVScalarArray *pv, int offset,
-    int len,epicsInt32 to[], int toOffset);
+    int len,int32 to[], int toOffset);
 static int convertFromLongArray(PVScalarArray *pv, int offset,
-    int len,epicsInt64 from[], int fromOffset);
+    int len,int64 from[], int fromOffset);
 static int convertToLongArray(PVScalarArray * pv, int offset,
-    int len,epicsInt64 to[], int toOffset);
+    int len,int64 to[], int toOffset);
 static int convertFromFloatArray(PVScalarArray *pv, int offset,
     int len,float from[], int fromOffset);
 static int convertToFloatArray(PVScalarArray * pv, int offset,
@@ -133,7 +132,7 @@ void Convert::fromString(PVScalar *pvScalar, String from)
                 PVByte *pv = (PVByte*)pvScalar;
                 int ival;
                 sscanf(from.c_str(),"%d",&ival);
-                epicsInt8 value = ival;
+                int8 value = ival;
                 pv->put(value);
                 break;
             }
@@ -141,7 +140,7 @@ void Convert::fromString(PVScalar *pvScalar, String from)
                 PVShort *pv = (PVShort*)pvScalar;
                 int ival;
                 sscanf(from.c_str(),"%d",&ival);
-                epicsInt16 value = ival;
+                int16 value = ival;
                 pv->put(value);
                 break;
             }
@@ -149,15 +148,15 @@ void Convert::fromString(PVScalar *pvScalar, String from)
                 PVInt *pv = (PVInt*)pvScalar;
                 int ival;
                 sscanf(from.c_str(),"%d",&ival);
-                epicsInt32 value = ival;
+                int32 value = ival;
                 pv->put(value);
                 break;
             }
         case pvLong : {
                 PVLong *pv = (PVLong*)pvScalar;
-                epicsInt64 ival;
+                int64 ival;
                 sscanf(from.c_str(),"%lld",&ival);
-                epicsInt64 value = ival;
+                int64 value = ival;
                 pv->put(value);
                 break;
             }
@@ -305,7 +304,7 @@ void Convert::copyScalar(PVScalar *from, PVScalar *to)
         }
     case pvByte : {
             PVByte *data = (PVByte*)from;
-            epicsInt8 value = data->get();
+            int8 value = data->get();
             convert->fromByte(to,value);
             break;
         }
@@ -602,7 +601,7 @@ void Convert::copyStructureArray(
     to->postPut();
 }
 
-epicsInt8 Convert::toByte(PVScalar * pv)
+int8 Convert::toByte(PVScalar * pv)
 {
     ScalarConstPtr scalar = pv->getScalar();
     ScalarType scalarType = scalar->getScalarType();
@@ -639,7 +638,7 @@ epicsInt8 Convert::toByte(PVScalar * pv)
     throw std::logic_error(logicError);
 }
 
-epicsInt16 Convert::toShort(PVScalar * pv)
+int16 Convert::toShort(PVScalar * pv)
 {
     ScalarConstPtr scalar = pv->getScalar();
     ScalarType scalarType = scalar->getScalarType();
@@ -676,7 +675,7 @@ epicsInt16 Convert::toShort(PVScalar * pv)
     throw std::logic_error(logicError);
 }
 
-epicsInt32 Convert::toInt(PVScalar * pv)
+int32 Convert::toInt(PVScalar * pv)
 {
     ScalarConstPtr scalar = pv->getScalar();
     ScalarType scalarType = scalar->getScalarType();
@@ -713,7 +712,7 @@ epicsInt32 Convert::toInt(PVScalar * pv)
     throw std::logic_error(logicError);
 }
 
-epicsInt64 Convert::toLong(PVScalar * pv)
+int64 Convert::toLong(PVScalar * pv)
 {
     ScalarConstPtr scalar = pv->getScalar();
     ScalarType scalarType = scalar->getScalarType();
@@ -824,7 +823,7 @@ double Convert::toDouble(PVScalar * pv)
     throw std::logic_error(logicError);
 }
 
-void Convert::fromByte(PVScalar *pv,epicsInt8 from)
+void Convert::fromByte(PVScalar *pv,int8 from)
 {
     ScalarConstPtr scalar = pv->getScalar();
     ScalarType scalarType = scalar->getScalarType();
@@ -868,7 +867,7 @@ void Convert::fromByte(PVScalar *pv,epicsInt8 from)
     throw std::logic_error(logicError);
 }
 
-void  Convert::fromShort(PVScalar *pv,epicsInt16 from)
+void  Convert::fromShort(PVScalar *pv,int16 from)
 {
     ScalarConstPtr scalar = pv->getScalar();
     ScalarType scalarType = scalar->getScalarType();
@@ -912,7 +911,7 @@ void  Convert::fromShort(PVScalar *pv,epicsInt16 from)
     throw std::logic_error(logicError);
 }
 
-void  Convert::fromInt(PVScalar *pv, epicsInt32 from)
+void  Convert::fromInt(PVScalar *pv, int32 from)
 {
     ScalarConstPtr scalar = pv->getScalar();
     ScalarType scalarType = scalar->getScalarType();
@@ -956,7 +955,7 @@ void  Convert::fromInt(PVScalar *pv, epicsInt32 from)
     throw std::logic_error(logicError);
 }
 
-void  Convert::fromLong(PVScalar *pv, epicsInt64 from)
+void  Convert::fromLong(PVScalar *pv, int64 from)
 {
     ScalarConstPtr scalar = pv->getScalar();
     ScalarType scalarType = scalar->getScalarType();
@@ -990,7 +989,7 @@ void  Convert::fromLong(PVScalar *pv, epicsInt64 from)
         case pvString: {
             PVString *value = (PVString *)pv;
             char buffer[20];
-            epicsInt64 ival = from;
+            int64 ival = from;
             sprintf(buffer,"%lld",ival);
             String xxx(buffer);
             value->put(xxx);
@@ -1089,25 +1088,25 @@ void  Convert::fromDouble(PVScalar *pv, double from)
 }
 
 int Convert::toByteArray(PVScalarArray * pv, int offset, int length,
-    epicsInt8 to[], int toOffset)
+    int8 to[], int toOffset)
 {
     return convertToByteArray(pv, offset, length, to, toOffset);
 }
 
 int Convert::toShortArray(PVScalarArray * pv, int offset, int length,
-    epicsInt16 to[], int toOffset)
+    int16 to[], int toOffset)
 {
     return convertToShortArray(pv, offset, length, to, toOffset);
 }
 
 int Convert::toIntArray(PVScalarArray * pv, int offset, int length,
-    epicsInt32 to[], int toOffset)
+    int32 to[], int toOffset)
 {
     return convertToIntArray(pv, offset, length, to, toOffset);
 }
 
 int Convert::toLongArray(PVScalarArray * pv, int offset, int length,
-    epicsInt64 to[], int toOffset)
+    int64 to[], int toOffset)
 {
     return convertToLongArray(pv, offset, length, to, toOffset);
 }
@@ -1125,25 +1124,25 @@ int Convert::toDoubleArray(PVScalarArray * pv, int offset, int length,
 }
 
 int Convert::fromByteArray(PVScalarArray *pv, int offset, int length,
-    epicsInt8 from[], int fromOffset)
+    int8 from[], int fromOffset)
 {
     return convertFromByteArray(pv, offset, length, from, fromOffset);
 }
 
 int Convert::fromShortArray(PVScalarArray *pv, int offset, int length,
-    epicsInt16 from[], int fromOffset)
+    int16 from[], int fromOffset)
 {
     return convertFromShortArray(pv, offset, length, from, fromOffset);
 }
 
 int Convert::fromIntArray(PVScalarArray *pv, int offset, int length,
-    epicsInt32 from[], int fromOffset)
+    int32 from[], int fromOffset)
 {
     return convertFromIntArray(pv, offset, length, from, fromOffset);
 }
 
 int Convert::fromLongArray(PVScalarArray *pv, int offset, int length,
-    epicsInt64 from[], int fromOffset)
+    int64 from[], int fromOffset)
 {
     return convertFromLongArray(pv, offset, length, from, fromOffset);
 }
@@ -1182,29 +1181,29 @@ static bool scalarEquals(PVScalar *a,PVScalar *b)
         case pvByte: {
             PVByte *pa = (PVByte *)a;
             PVByte *pb = (PVByte *)b;
-            epicsInt8 avalue = pa->get();
-            epicsInt8 bvalue = pb->get();
+            int8 avalue = pa->get();
+            int8 bvalue = pb->get();
             return ((avalue==bvalue) ? true : false);
         }
         case pvShort: {
             PVShort *pa = (PVShort *)a;
             PVShort *pb = (PVShort *)b;
-            epicsInt16 avalue = pa->get();
-            epicsInt16 bvalue = pb->get();
+            int16 avalue = pa->get();
+            int16 bvalue = pb->get();
             return ((avalue==bvalue) ? true : false);
         }
         case pvInt: {
             PVInt *pa = (PVInt *)a;
             PVInt *pb = (PVInt *)b;
-            epicsInt32 avalue = pa->get();
-            epicsInt32 bvalue = pb->get();
+            int32 avalue = pa->get();
+            int32 bvalue = pb->get();
             return ((avalue==bvalue) ? true : false);
         }
         case pvLong: {
             PVLong *pa = (PVLong *)a;
             PVLong *pb = (PVLong *)b;
-            epicsInt64 avalue = pa->get();
-            epicsInt64 bvalue = pb->get();
+            int64 avalue = pa->get();
+            int64 bvalue = pb->get();
             return ((avalue==bvalue) ? true : false);
         }
         case pvFloat: {
@@ -1420,7 +1419,7 @@ bool convertEquals(PVField *a,PVField *b)
     throw std::logic_error(message);
 }
 
-int convertFromByteArray(PVScalarArray *pv, int offset, int len,epicsInt8 from[], int fromOffset)
+int convertFromByteArray(PVScalarArray *pv, int offset, int len,int8 from[], int fromOffset)
 {
     ScalarType elemType = pv->getScalarArray()->getElementType();
     int ntransfered = 0;
@@ -1444,9 +1443,9 @@ int convertFromByteArray(PVScalarArray *pv, int offset, int len,epicsInt8 from[]
     }
     case pvShort: {
         PVShortArray *pvdata = (PVShortArray*) pv;
-        epicsInt16 data[1];
+        int16 data[1];
         while (len > 0) {
-            data[0] = (epicsInt16) from[fromOffset];
+            data[0] = (int16) from[fromOffset];
             if (pvdata->put(offset, 1, data, 0) == 0)
                 return ntransfered;
             --len;
@@ -1458,9 +1457,9 @@ int convertFromByteArray(PVScalarArray *pv, int offset, int len,epicsInt8 from[]
     }
     case pvInt: {
         PVIntArray *pvdata = (PVIntArray*) pv;
-        epicsInt32 data[1];
+        int32 data[1];
         while (len > 0) {
-            data[0] = (epicsInt32) from[fromOffset];
+            data[0] = (int32) from[fromOffset];
             if (pvdata->put(offset, 1, data, 0) == 0)
                 return ntransfered;
             --len;
@@ -1472,9 +1471,9 @@ int convertFromByteArray(PVScalarArray *pv, int offset, int len,epicsInt8 from[]
     }
     case pvLong: {
         PVLongArray *pvdata = (PVLongArray*) pv;
-        epicsInt64 data[1];
+        int64 data[1];
         while (len > 0) {
-            data[0] = (epicsInt64) from[fromOffset];
+            data[0] = (int64) from[fromOffset];
             if (pvdata->put(offset, 1, data, 0) == 0)
                 return ntransfered;
             --len;
@@ -1521,7 +1520,7 @@ int convertFromByteArray(PVScalarArray *pv, int offset, int len,epicsInt8 from[]
     throw std::logic_error(message);
 }
 
-int convertToByteArray(PVScalarArray * pv, int offset, int len,epicsInt8 to[], int toOffset)
+int convertToByteArray(PVScalarArray * pv, int offset, int len,int8 to[], int toOffset)
 {
     ScalarType elemType = pv->getScalarArray()->getElementType();
     int ntransfered = 0;
@@ -1556,7 +1555,7 @@ int convertToByteArray(PVScalarArray * pv, int offset, int len,epicsInt8 to[], i
             ShortArray dataArray = data.data;
             int dataOffset = data.offset;
             for (int i = 0; i < num; i++)
-                to[i + toOffset] = (epicsInt8) dataArray[i + dataOffset];
+                to[i + toOffset] = (int8) dataArray[i + dataOffset];
             len -= num;
             offset += num;
             toOffset += num;
@@ -1573,7 +1572,7 @@ int convertToByteArray(PVScalarArray * pv, int offset, int len,epicsInt8 to[], i
             IntArray dataArray = data.data;
             int dataOffset = data.offset;
             for (int i = 0; i < num; i++)
-                to[i + toOffset] = (epicsInt8) dataArray[i + dataOffset];
+                to[i + toOffset] = (int8) dataArray[i + dataOffset];
             len -= num;
             offset += num;
             toOffset += num;
@@ -1591,7 +1590,7 @@ int convertToByteArray(PVScalarArray * pv, int offset, int len,epicsInt8 to[], i
             LongArray dataArray = data.data;
             int dataOffset = data.offset;
             for (int i = 0; i < num; i++)
-                to[i + toOffset] = (epicsInt8) dataArray[i + dataOffset];
+                to[i + toOffset] = (int8) dataArray[i + dataOffset];
             len -= num;
             offset += num;
             toOffset += num;
@@ -1608,7 +1607,7 @@ int convertToByteArray(PVScalarArray * pv, int offset, int len,epicsInt8 to[], i
             FloatArray dataArray = data.data;
             int dataOffset = data.offset;
             for (int i = 0; i < num; i++)
-                to[i + toOffset] = (epicsInt8) dataArray[i + dataOffset];
+                to[i + toOffset] = (int8) dataArray[i + dataOffset];
             len -= num;
             offset += num;
             toOffset += num;
@@ -1626,7 +1625,7 @@ int convertToByteArray(PVScalarArray * pv, int offset, int len,epicsInt8 to[], i
             DoubleArray dataArray = data.data;
             int dataOffset = data.offset;
             for (int i = 0; i < num; i++)
-                to[i + toOffset] = (epicsInt8) dataArray[i + dataOffset];
+                to[i + toOffset] = (int8) dataArray[i + dataOffset];
             len -= num;
             offset += num;
             toOffset += num;
@@ -1643,7 +1642,7 @@ int convertToByteArray(PVScalarArray * pv, int offset, int len,epicsInt8 to[], i
     throw std::logic_error(message);
 }
 
-int convertFromShortArray(PVScalarArray *pv, int offset, int len,epicsInt16 from[], int fromOffset)
+int convertFromShortArray(PVScalarArray *pv, int offset, int len,int16 from[], int fromOffset)
 {
     ScalarType elemType = pv->getScalarArray()->getElementType();
     int ntransfered = 0;
@@ -1654,9 +1653,9 @@ int convertFromShortArray(PVScalarArray *pv, int offset, int len,epicsInt16 from
     }
     case pvByte: {
         PVByteArray *pvdata = (PVByteArray*) pv;
-        epicsInt8 data[1];
+        int8 data[1];
         while (len > 0) {
-            data[0] = (epicsInt8) from[fromOffset];
+            data[0] = (int8) from[fromOffset];
             if (pvdata->put(offset, 1, data, 0) == 0)
                 return ntransfered;
             --len;
@@ -1681,9 +1680,9 @@ int convertFromShortArray(PVScalarArray *pv, int offset, int len,epicsInt16 from
     }
     case pvInt: {
         PVIntArray *pvdata = (PVIntArray*) pv;
-        epicsInt32 data[1];
+        int32 data[1];
         while (len > 0) {
-            data[0] = (epicsInt32) from[fromOffset];
+            data[0] = (int32) from[fromOffset];
             if (pvdata->put(offset, 1, data, 0) == 0)
                 return ntransfered;
             --len;
@@ -1695,9 +1694,9 @@ int convertFromShortArray(PVScalarArray *pv, int offset, int len,epicsInt16 from
     }
     case pvLong: {
         PVLongArray *pvdata = (PVLongArray*) pv;
-        epicsInt64 data[1];
+        int64 data[1];
         while (len > 0) {
-            data[0] = (epicsInt64) from[fromOffset];
+            data[0] = (int64) from[fromOffset];
             if (pvdata->put(offset, 1, data, 0) == 0)
                 return ntransfered;
             --len;
@@ -1744,7 +1743,7 @@ int convertFromShortArray(PVScalarArray *pv, int offset, int len,epicsInt16 from
     throw std::logic_error(message);
 }
 
-int convertToShortArray(PVScalarArray * pv, int offset, int len,epicsInt16 to[], int toOffset)
+int convertToShortArray(PVScalarArray * pv, int offset, int len,int16 to[], int toOffset)
 {
     ScalarType elemType = pv->getScalarArray()->getElementType();
     int ntransfered = 0;
@@ -1779,7 +1778,7 @@ int convertToShortArray(PVScalarArray * pv, int offset, int len,epicsInt16 to[],
             ShortArray dataArray = data.data;
             int dataOffset = data.offset;
             for (int i = 0; i < num; i++)
-                to[i + toOffset] = (epicsInt8) dataArray[i + dataOffset];
+                to[i + toOffset] = (int8) dataArray[i + dataOffset];
             len -= num;
             offset += num;
             toOffset += num;
@@ -1796,7 +1795,7 @@ int convertToShortArray(PVScalarArray * pv, int offset, int len,epicsInt16 to[],
             IntArray dataArray = data.data;
             int dataOffset = data.offset;
             for (int i = 0; i < num; i++)
-                to[i + toOffset] = (epicsInt8) dataArray[i + dataOffset];
+                to[i + toOffset] = (int8) dataArray[i + dataOffset];
             len -= num;
             offset += num;
             toOffset += num;
@@ -1814,7 +1813,7 @@ int convertToShortArray(PVScalarArray * pv, int offset, int len,epicsInt16 to[],
             LongArray dataArray = data.data;
             int dataOffset = data.offset;
             for (int i = 0; i < num; i++)
-                to[i + toOffset] = (epicsInt8) dataArray[i + dataOffset];
+                to[i + toOffset] = (int8) dataArray[i + dataOffset];
             len -= num;
             offset += num;
             toOffset += num;
@@ -1831,7 +1830,7 @@ int convertToShortArray(PVScalarArray * pv, int offset, int len,epicsInt16 to[],
             FloatArray dataArray = data.data;
             int dataOffset = data.offset;
             for (int i = 0; i < num; i++)
-                to[i + toOffset] = (epicsInt8) dataArray[i + dataOffset];
+                to[i + toOffset] = (int8) dataArray[i + dataOffset];
             len -= num;
             offset += num;
             toOffset += num;
@@ -1849,7 +1848,7 @@ int convertToShortArray(PVScalarArray * pv, int offset, int len,epicsInt16 to[],
             DoubleArray dataArray = data.data;
             int dataOffset = data.offset;
             for (int i = 0; i < num; i++)
-                to[i + toOffset] = (epicsInt8) dataArray[i + dataOffset];
+                to[i + toOffset] = (int8) dataArray[i + dataOffset];
             len -= num;
             offset += num;
             toOffset += num;
@@ -1866,7 +1865,7 @@ int convertToShortArray(PVScalarArray * pv, int offset, int len,epicsInt16 to[],
     throw std::logic_error(message);
 }
 
-int convertFromIntArray(PVScalarArray *pv, int offset, int len,epicsInt32 from[], int fromOffset)
+int convertFromIntArray(PVScalarArray *pv, int offset, int len,int32 from[], int fromOffset)
 {
     ScalarType elemType = pv->getScalarArray()->getElementType();
     int ntransfered = 0;
@@ -1877,9 +1876,9 @@ int convertFromIntArray(PVScalarArray *pv, int offset, int len,epicsInt32 from[]
     }
     case pvByte: {
         PVByteArray *pvdata = (PVByteArray*) pv;
-        epicsInt8 data[1];
+        int8 data[1];
         while (len > 0) {
-            data[0] = (epicsInt8) from[fromOffset];
+            data[0] = (int8) from[fromOffset];
             if (pvdata->put(offset, 1, data, 0) == 0)
                 return ntransfered;
             --len;
@@ -1891,9 +1890,9 @@ int convertFromIntArray(PVScalarArray *pv, int offset, int len,epicsInt32 from[]
     }
     case pvShort: {
         PVShortArray *pvdata = (PVShortArray*) pv;
-        epicsInt16 data[1];
+        int16 data[1];
         while (len > 0) {
-            data[0] = (epicsInt16) from[fromOffset];
+            data[0] = (int16) from[fromOffset];
             if (pvdata->put(offset, 1, data, 0) == 0)
                 return ntransfered;
             --len;
@@ -1918,9 +1917,9 @@ int convertFromIntArray(PVScalarArray *pv, int offset, int len,epicsInt32 from[]
     }
     case pvLong: {
         PVLongArray *pvdata = (PVLongArray*) pv;
-        epicsInt64 data[1];
+        int64 data[1];
         while (len > 0) {
-            data[0] = (epicsInt64) from[fromOffset];
+            data[0] = (int64) from[fromOffset];
             if (pvdata->put(offset, 1, data, 0) == 0)
                 return ntransfered;
             --len;
@@ -1967,7 +1966,7 @@ int convertFromIntArray(PVScalarArray *pv, int offset, int len,epicsInt32 from[]
     throw std::logic_error(message);
 }
 
-int convertToIntArray(PVScalarArray * pv, int offset, int len,epicsInt32 to[], int toOffset)
+int convertToIntArray(PVScalarArray * pv, int offset, int len,int32 to[], int toOffset)
 {
     ScalarType elemType = pv->getScalarArray()->getElementType();
     int ntransfered = 0;
@@ -2002,7 +2001,7 @@ int convertToIntArray(PVScalarArray * pv, int offset, int len,epicsInt32 to[], i
             ShortArray dataArray = data.data;
             int dataOffset = data.offset;
             for (int i = 0; i < num; i++)
-                to[i + toOffset] = (epicsInt8) dataArray[i + dataOffset];
+                to[i + toOffset] = (int8) dataArray[i + dataOffset];
             len -= num;
             offset += num;
             toOffset += num;
@@ -2019,7 +2018,7 @@ int convertToIntArray(PVScalarArray * pv, int offset, int len,epicsInt32 to[], i
             IntArray dataArray = data.data;
             int dataOffset = data.offset;
             for (int i = 0; i < num; i++)
-                to[i + toOffset] = (epicsInt8) dataArray[i + dataOffset];
+                to[i + toOffset] = (int8) dataArray[i + dataOffset];
             len -= num;
             offset += num;
             toOffset += num;
@@ -2037,7 +2036,7 @@ int convertToIntArray(PVScalarArray * pv, int offset, int len,epicsInt32 to[], i
             LongArray dataArray = data.data;
             int dataOffset = data.offset;
             for (int i = 0; i < num; i++)
-                to[i + toOffset] = (epicsInt8) dataArray[i + dataOffset];
+                to[i + toOffset] = (int8) dataArray[i + dataOffset];
             len -= num;
             offset += num;
             toOffset += num;
@@ -2054,7 +2053,7 @@ int convertToIntArray(PVScalarArray * pv, int offset, int len,epicsInt32 to[], i
             FloatArray dataArray = data.data;
             int dataOffset = data.offset;
             for (int i = 0; i < num; i++)
-                to[i + toOffset] = (epicsInt8) dataArray[i + dataOffset];
+                to[i + toOffset] = (int8) dataArray[i + dataOffset];
             len -= num;
             offset += num;
             toOffset += num;
@@ -2072,7 +2071,7 @@ int convertToIntArray(PVScalarArray * pv, int offset, int len,epicsInt32 to[], i
             DoubleArray dataArray = data.data;
             int dataOffset = data.offset;
             for (int i = 0; i < num; i++)
-                to[i + toOffset] = (epicsInt8) dataArray[i + dataOffset];
+                to[i + toOffset] = (int8) dataArray[i + dataOffset];
             len -= num;
             offset += num;
             toOffset += num;
@@ -2089,7 +2088,7 @@ int convertToIntArray(PVScalarArray * pv, int offset, int len,epicsInt32 to[], i
     throw std::logic_error(message);
 }
 
-int convertFromLongArray(PVScalarArray *pv, int offset, int len,epicsInt64 from[], int fromOffset)
+int convertFromLongArray(PVScalarArray *pv, int offset, int len,int64 from[], int fromOffset)
 {
     ScalarType elemType = pv->getScalarArray()->getElementType();
     int ntransfered = 0;
@@ -2100,9 +2099,9 @@ int convertFromLongArray(PVScalarArray *pv, int offset, int len,epicsInt64 from[
     }
     case pvByte: {
         PVByteArray *pvdata = (PVByteArray*) pv;
-        epicsInt8 data[1];
+        int8 data[1];
         while (len > 0) {
-            data[0] = (epicsInt8) from[fromOffset];
+            data[0] = (int8) from[fromOffset];
             if (pvdata->put(offset, 1, data, 0) == 0)
                 return ntransfered;
             --len;
@@ -2114,9 +2113,9 @@ int convertFromLongArray(PVScalarArray *pv, int offset, int len,epicsInt64 from[
     }
     case pvShort: {
         PVShortArray *pvdata = (PVShortArray*) pv;
-        epicsInt16 data[1];
+        int16 data[1];
         while (len > 0) {
-            data[0] = (epicsInt16) from[fromOffset];
+            data[0] = (int16) from[fromOffset];
             if (pvdata->put(offset, 1, data, 0) == 0)
                 return ntransfered;
             --len;
@@ -2128,9 +2127,9 @@ int convertFromLongArray(PVScalarArray *pv, int offset, int len,epicsInt64 from[
     }
     case pvInt: {
         PVIntArray *pvdata = (PVIntArray*) pv;
-        epicsInt32 data[1];
+        int32 data[1];
         while (len > 0) {
-            data[0] = (epicsInt32) from[fromOffset];
+            data[0] = (int32) from[fromOffset];
             if (pvdata->put(offset, 1, data, 0) == 0)
                 return ntransfered;
             --len;
@@ -2190,7 +2189,7 @@ int convertFromLongArray(PVScalarArray *pv, int offset, int len,epicsInt64 from[
     throw std::logic_error(message);
 }
 
-int convertToLongArray(PVScalarArray * pv, int offset, int len,epicsInt64 to[], int toOffset)
+int convertToLongArray(PVScalarArray * pv, int offset, int len,int64 to[], int toOffset)
 {
     ScalarType elemType = pv->getScalarArray()->getElementType();
     int ntransfered = 0;
@@ -2225,7 +2224,7 @@ int convertToLongArray(PVScalarArray * pv, int offset, int len,epicsInt64 to[], 
             ShortArray dataArray = data.data;
             int dataOffset = data.offset;
             for (int i = 0; i < num; i++)
-                to[i + toOffset] = (epicsInt8) dataArray[i + dataOffset];
+                to[i + toOffset] = (int8) dataArray[i + dataOffset];
             len -= num;
             offset += num;
             toOffset += num;
@@ -2242,7 +2241,7 @@ int convertToLongArray(PVScalarArray * pv, int offset, int len,epicsInt64 to[], 
             IntArray dataArray = data.data;
             int dataOffset = data.offset;
             for (int i = 0; i < num; i++)
-                to[i + toOffset] = (epicsInt8) dataArray[i + dataOffset];
+                to[i + toOffset] = (int8) dataArray[i + dataOffset];
             len -= num;
             offset += num;
             toOffset += num;
@@ -2260,7 +2259,7 @@ int convertToLongArray(PVScalarArray * pv, int offset, int len,epicsInt64 to[], 
             LongArray dataArray = data.data;
             int dataOffset = data.offset;
             for (int i = 0; i < num; i++)
-                to[i + toOffset] = (epicsInt8) dataArray[i + dataOffset];
+                to[i + toOffset] = (int8) dataArray[i + dataOffset];
             len -= num;
             offset += num;
             toOffset += num;
@@ -2277,7 +2276,7 @@ int convertToLongArray(PVScalarArray * pv, int offset, int len,epicsInt64 to[], 
             FloatArray dataArray = data.data;
             int dataOffset = data.offset;
             for (int i = 0; i < num; i++)
-                to[i + toOffset] = (epicsInt8) dataArray[i + dataOffset];
+                to[i + toOffset] = (int8) dataArray[i + dataOffset];
             len -= num;
             offset += num;
             toOffset += num;
@@ -2295,7 +2294,7 @@ int convertToLongArray(PVScalarArray * pv, int offset, int len,epicsInt64 to[], 
             DoubleArray dataArray = data.data;
             int dataOffset = data.offset;
             for (int i = 0; i < num; i++)
-                to[i + toOffset] = (epicsInt8) dataArray[i + dataOffset];
+                to[i + toOffset] = (int8) dataArray[i + dataOffset];
             len -= num;
             offset += num;
             toOffset += num;
@@ -2323,9 +2322,9 @@ int convertFromFloatArray(PVScalarArray *pv, int offset, int len,float from[], i
     }
     case pvByte: {
         PVByteArray *pvdata = (PVByteArray*) pv;
-        epicsInt8 data[1];
+        int8 data[1];
         while (len > 0) {
-            data[0] = (epicsInt8) from[fromOffset];
+            data[0] = (int8) from[fromOffset];
             if (pvdata->put(offset, 1, data, 0) == 0)
                 return ntransfered;
             --len;
@@ -2337,9 +2336,9 @@ int convertFromFloatArray(PVScalarArray *pv, int offset, int len,float from[], i
     }
     case pvShort: {
         PVShortArray *pvdata = (PVShortArray*) pv;
-        epicsInt16 data[1];
+        int16 data[1];
         while (len > 0) {
-            data[0] = (epicsInt16) from[fromOffset];
+            data[0] = (int16) from[fromOffset];
             if (pvdata->put(offset, 1, data, 0) == 0)
                 return ntransfered;
             --len;
@@ -2351,9 +2350,9 @@ int convertFromFloatArray(PVScalarArray *pv, int offset, int len,float from[], i
     }
     case pvInt: {
         PVIntArray *pvdata = (PVIntArray*) pv;
-        epicsInt32 data[1];
+        int32 data[1];
         while (len > 0) {
-            data[0] = (epicsInt32) from[fromOffset];
+            data[0] = (int32) from[fromOffset];
             if (pvdata->put(offset, 1, data, 0) == 0)
                 return ntransfered;
             --len;
@@ -2365,9 +2364,9 @@ int convertFromFloatArray(PVScalarArray *pv, int offset, int len,float from[], i
     }
     case pvLong: {
         PVLongArray *pvdata = (PVLongArray*) pv;
-        epicsInt64 data[1];
+        int64 data[1];
         while (len > 0) {
-            data[0] = (epicsInt64) from[fromOffset];
+            data[0] = (int64) from[fromOffset];
             if (pvdata->put(offset, 1, data, 0) == 0)
                 return ntransfered;
             --len;
@@ -2448,7 +2447,7 @@ int convertToFloatArray(PVScalarArray * pv, int offset, int len,float to[], int 
             ShortArray dataArray = data.data;
             int dataOffset = data.offset;
             for (int i = 0; i < num; i++)
-                to[i + toOffset] = (epicsInt8) dataArray[i + dataOffset];
+                to[i + toOffset] = (int8) dataArray[i + dataOffset];
             len -= num;
             offset += num;
             toOffset += num;
@@ -2465,7 +2464,7 @@ int convertToFloatArray(PVScalarArray * pv, int offset, int len,float to[], int 
             IntArray dataArray = data.data;
             int dataOffset = data.offset;
             for (int i = 0; i < num; i++)
-                to[i + toOffset] = (epicsInt8) dataArray[i + dataOffset];
+                to[i + toOffset] = (int8) dataArray[i + dataOffset];
             len -= num;
             offset += num;
             toOffset += num;
@@ -2483,7 +2482,7 @@ int convertToFloatArray(PVScalarArray * pv, int offset, int len,float to[], int 
             LongArray dataArray = data.data;
             int dataOffset = data.offset;
             for (int i = 0; i < num; i++)
-                to[i + toOffset] = (epicsInt8) dataArray[i + dataOffset];
+                to[i + toOffset] = (int8) dataArray[i + dataOffset];
             len -= num;
             offset += num;
             toOffset += num;
@@ -2500,7 +2499,7 @@ int convertToFloatArray(PVScalarArray * pv, int offset, int len,float to[], int 
             FloatArray dataArray = data.data;
             int dataOffset = data.offset;
             for (int i = 0; i < num; i++)
-                to[i + toOffset] = (epicsInt8) dataArray[i + dataOffset];
+                to[i + toOffset] = (int8) dataArray[i + dataOffset];
             len -= num;
             offset += num;
             toOffset += num;
@@ -2518,7 +2517,7 @@ int convertToFloatArray(PVScalarArray * pv, int offset, int len,float to[], int 
             DoubleArray dataArray = data.data;
             int dataOffset = data.offset;
             for (int i = 0; i < num; i++)
-                to[i + toOffset] = (epicsInt8) dataArray[i + dataOffset];
+                to[i + toOffset] = (int8) dataArray[i + dataOffset];
             len -= num;
             offset += num;
             toOffset += num;
@@ -2546,9 +2545,9 @@ int convertFromDoubleArray(PVScalarArray *pv, int offset, int len,double from[],
     }
     case pvByte: {
         PVByteArray *pvdata = (PVByteArray*) pv;
-        epicsInt8 data[1];
+        int8 data[1];
         while (len > 0) {
-            data[0] = (epicsInt8) from[fromOffset];
+            data[0] = (int8) from[fromOffset];
             if (pvdata->put(offset, 1, data, 0) == 0)
                 return ntransfered;
             --len;
@@ -2560,9 +2559,9 @@ int convertFromDoubleArray(PVScalarArray *pv, int offset, int len,double from[],
     }
     case pvShort: {
         PVShortArray *pvdata = (PVShortArray*) pv;
-        epicsInt16 data[1];
+        int16 data[1];
         while (len > 0) {
-            data[0] = (epicsInt16) from[fromOffset];
+            data[0] = (int16) from[fromOffset];
             if (pvdata->put(offset, 1, data, 0) == 0)
                 return ntransfered;
             --len;
@@ -2574,9 +2573,9 @@ int convertFromDoubleArray(PVScalarArray *pv, int offset, int len,double from[],
     }
     case pvInt: {
         PVIntArray *pvdata = (PVIntArray*) pv;
-        epicsInt32 data[1];
+        int32 data[1];
         while (len > 0) {
-            data[0] = (epicsInt32) from[fromOffset];
+            data[0] = (int32) from[fromOffset];
             if (pvdata->put(offset, 1, data, 0) == 0)
                 return ntransfered;
             --len;
@@ -2588,9 +2587,9 @@ int convertFromDoubleArray(PVScalarArray *pv, int offset, int len,double from[],
     }
     case pvLong: {
         PVLongArray *pvdata = (PVLongArray*) pv;
-        epicsInt64 data[1];
+        int64 data[1];
         while (len > 0) {
-            data[0] = (epicsInt64) from[fromOffset];
+            data[0] = (int64) from[fromOffset];
             if (pvdata->put(offset, 1, data, 0) == 0)
                 return ntransfered;
             --len;
@@ -2671,7 +2670,7 @@ int convertToDoubleArray(PVScalarArray * pv, int offset, int len,double to[], in
             ShortArray dataArray = data.data;
             int dataOffset = data.offset;
             for (int i = 0; i < num; i++)
-                to[i + toOffset] = (epicsInt8) dataArray[i + dataOffset];
+                to[i + toOffset] = (int8) dataArray[i + dataOffset];
             len -= num;
             offset += num;
             toOffset += num;
@@ -2688,7 +2687,7 @@ int convertToDoubleArray(PVScalarArray * pv, int offset, int len,double to[], in
             IntArray dataArray = data.data;
             int dataOffset = data.offset;
             for (int i = 0; i < num; i++)
-                to[i + toOffset] = (epicsInt8) dataArray[i + dataOffset];
+                to[i + toOffset] = (int8) dataArray[i + dataOffset];
             len -= num;
             offset += num;
             toOffset += num;
@@ -2706,7 +2705,7 @@ int convertToDoubleArray(PVScalarArray * pv, int offset, int len,double to[], in
             LongArray dataArray = data.data;
             int dataOffset = data.offset;
             for (int i = 0; i < num; i++)
-                to[i + toOffset] = (epicsInt8) dataArray[i + dataOffset];
+                to[i + toOffset] = (int8) dataArray[i + dataOffset];
             len -= num;
             offset += num;
             toOffset += num;
@@ -2723,7 +2722,7 @@ int convertToDoubleArray(PVScalarArray * pv, int offset, int len,double to[], in
             FloatArray dataArray = data.data;
             int dataOffset = data.offset;
             for (int i = 0; i < num; i++)
-                to[i + toOffset] = (epicsInt8) dataArray[i + dataOffset];
+                to[i + toOffset] = (int8) dataArray[i + dataOffset];
             len -= num;
             offset += num;
             toOffset += num;
@@ -2741,7 +2740,7 @@ int convertToDoubleArray(PVScalarArray * pv, int offset, int len,double to[], in
             DoubleArray dataArray = data.data;
             int dataOffset = data.offset;
             for (int i = 0; i < num; i++)
-                to[i + toOffset] = (epicsInt8) dataArray[i + dataOffset];
+                to[i + toOffset] = (int8) dataArray[i + dataOffset];
             len -= num;
             offset += num;
             toOffset += num;
@@ -2780,7 +2779,7 @@ int convertFromStringArray(PVScalarArray *pv, int offset, int len,String from[],
     }
     case pvByte: {
         PVByteArray *pvdata = (PVByteArray*) pv;
-        epicsInt8 data[1];
+        int8 data[1];
         while (len > 0) {
             String fromString = from[fromOffset];
             int ival;
@@ -2797,7 +2796,7 @@ int convertFromStringArray(PVScalarArray *pv, int offset, int len,String from[],
     }
     case pvShort: {
         PVShortArray *pvdata = (PVShortArray*) pv;
-        epicsInt16 data[1];
+        int16 data[1];
         while (len > 0) {
             String fromString = from[fromOffset];
             int ival;
@@ -2814,7 +2813,7 @@ int convertFromStringArray(PVScalarArray *pv, int offset, int len,String from[],
     }
     case pvInt: {
         PVIntArray *pvdata = (PVIntArray*) pv;
-        epicsInt32 data[1];
+        int32 data[1];
         while (len > 0) {
             String fromString = from[fromOffset];
             int ival;
@@ -2831,10 +2830,10 @@ int convertFromStringArray(PVScalarArray *pv, int offset, int len,String from[],
     }
     case pvLong: {
         PVLongArray *pvdata = (PVLongArray*) pv;
-        epicsInt64 data[1];
+        int64 data[1];
         while (len > 0) {
             String fromString = from[fromOffset];
-            epicsInt64 ival;
+            int64 ival;
             sscanf(fromString.c_str(),"%lld",&ival);
             data[0] = ival;
             if (pvdata->put(offset, 1, data, 0) == 0)
@@ -2973,7 +2972,7 @@ int convertToStringArray(PVScalarArray * pv, int offset, int len,String to[], in
         for (int i = 0; i < num; i++) {
             if (pvdata->get(offset + i, 1, &data) == 1) {
                 LongArray dataArray = data.data;
-                epicsInt64 ival = dataArray[data.offset];
+                int64 ival = dataArray[data.offset];
                 sprintf(cr,"%lld",ival);
                 to[toOffset + i] = String(cr);
             } else {
@@ -3092,7 +3091,7 @@ void convertToString(StringBuilder buffer,PVField * pv,int indentLevel)
     case pvLong: {
             PVLong *data = (PVLong*)pv;
             char xxx[30];
-            sprintf(xxx,"%lld",(epicsInt64)data->get());
+            sprintf(xxx,"%lld",(int64)data->get());
             *buffer += xxx;
         }
         return;
@@ -3233,7 +3232,7 @@ void convertArray(StringBuilder buffer,PVScalarArray * pv,int indentLevel)
                 if(i!=0) *buffer += ',';
                 int num = pvdata->get(i,1,&data);
                 if(num==1) {
-                     epicsInt64 val = data.data[data.offset];
+                     int64 val = data.data[data.offset];
                      char buf[16];
                      sprintf(buf,"%lld",val);
                      *buffer += buf;

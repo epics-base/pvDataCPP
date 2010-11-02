@@ -7,6 +7,8 @@
 #include <string>
 #include <cstdio>
 
+#include <epicsAssert.h>
+
 #include "requester.h"
 #include "pvIntrospect.h"
 #include "pvData.h"
@@ -23,21 +25,41 @@ static String buffer("");
 
 
 void testSimpleStructure(FILE * fd) {
+    int initialTotalReferences,finalTotalReferences;
     fprintf(fd,"\ntestSimpleStructure\n");
     String properties("alarm,timeStamp,display,control,valueAlarm");
+    initialTotalReferences = Field::getTotalReferenceCount();
     PVStructure *ptop = standardPVField->scalar(
         0,String(""),pvDouble,properties);
     buffer.clear();
     ptop->toString(&buffer);
     fprintf(fd,"%s\n",buffer.c_str());
+    finalTotalReferences = Field::getTotalReferenceCount();
+    printf("before delete initialTotalReferences %d finalTotalReferences %d\n",
+        initialTotalReferences,finalTotalReferences);
+    delete ptop;
+    finalTotalReferences = Field::getTotalReferenceCount();
+    printf("after initialTotalReferences %d finalTotalReferences %d\n",
+        initialTotalReferences,finalTotalReferences);
+    assert(initialTotalReferences==finalTotalReferences);
 }
 
 void testPowerSupply(FILE * fd) {
+    int initialTotalReferences,finalTotalReferences;
     fprintf(fd,"\ntestPowerSupply\n");
+    initialTotalReferences = Field::getTotalReferenceCount();
     PVStructure *ptop = standardPVField->powerSupply(0);
     buffer.clear();
     ptop->toString(&buffer);
     fprintf(fd,"%s\n",buffer.c_str());
+    finalTotalReferences = Field::getTotalReferenceCount();
+    printf("before delete initialTotalReferences %d finalTotalReferences %d\n",
+        initialTotalReferences,finalTotalReferences);
+    delete ptop;
+    finalTotalReferences = Field::getTotalReferenceCount();
+    printf("after initialTotalReferences %d finalTotalReferences %d\n",
+        initialTotalReferences,finalTotalReferences);
+    assert(initialTotalReferences==finalTotalReferences);
 }
 
 int main(int argc,char *argv[])
@@ -54,6 +76,17 @@ int main(int argc,char *argv[])
     standardPVField = getStandardPVField();
     testSimpleStructure(fd);
     testPowerSupply(fd);
+    long long totalConstruct = Field::getTotalConstruct();
+    long long totalDestruct = Field::getTotalDestruct();
+    int totalReference = Field::getTotalReferenceCount();
+    printf("Field:   totalConstruct %lli totalDestruct %lli totalReferenceCount %i\n",
+        totalConstruct,totalDestruct,totalReference);
+    assert(totalConstruct==(totalDestruct+totalReference));
+    totalConstruct = PVField::getTotalConstruct();
+    totalDestruct = PVField::getTotalDestruct();
+    printf("PVField: totalConstruct %lli totalDestruct %lli\n",
+        totalConstruct,totalDestruct);
+    assert(totalConstruct==totalDestruct);
     return(0);
 }
 

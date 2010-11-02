@@ -18,8 +18,8 @@ namespace epics { namespace pvData {
     public:
         BasePVLong(PVStructure *parent,ScalarConstPtr scalar);
         virtual ~BasePVLong();
-        virtual epicsInt64 get();
-        virtual void put(epicsInt64 val);
+        virtual int64 get();
+        virtual void put(int64 val);
         virtual void serialize(ByteBuffer *pbuffer,
             SerializableControl *pflusher) ;
         virtual void deserialize(ByteBuffer *pbuffer,
@@ -29,7 +29,7 @@ namespace epics { namespace pvData {
         virtual bool operator==(PVField  *pv) ;
         virtual bool operator!=(PVField  *pv) ;
     private:
-        epicsInt64 value;
+        int64 value;
     };
 
     BasePVLong::BasePVLong(PVStructure *parent,ScalarConstPtr scalar)
@@ -38,9 +38,9 @@ namespace epics { namespace pvData {
 
     BasePVLong::~BasePVLong() {}
 
-    epicsInt64 BasePVLong::get() { return value;}
+    int64 BasePVLong::get() { return value;}
 
-    void BasePVLong::put(epicsInt64 val){value = val;}
+    void BasePVLong::put(int64 val){value = val;}
 
     void BasePVLong::serialize(ByteBuffer *pbuffer,
         SerializableControl *pflusher) 

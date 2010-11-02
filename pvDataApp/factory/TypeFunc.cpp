@@ -3,7 +3,6 @@
 #include <cstdlib>
 #include <string>
 #include <cstdio>
-#include <epicsTypes.h>
 
 #include "pvIntrospect.h"
 

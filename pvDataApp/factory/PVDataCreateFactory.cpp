@@ -38,7 +38,9 @@ static Convert* convert = 0;
 static FieldCreate * fieldCreate = 0;
 static PVDataCreate* pvDataCreate = 0;
 
-PVDataCreate::PVDataCreate(){}
+PVDataCreate::PVDataCreate(){
+    PVField::init();
+}
 
 PVField *PVDataCreate::createPVField(PVStructure *parent,
         FieldConstPtr field)
@@ -222,18 +224,12 @@ PVStructure *PVDataCreate::createPVStructure(PVStructure *parent,
     return pvStructure;
 }
 
-
-class PVDataCreateExt : public PVDataCreate {
-public:
-    PVDataCreateExt(): PVDataCreate(){}
-};
-
  PVDataCreate * getPVDataCreate() {
      static Mutex mutex = Mutex();
      Lock xx(&mutex);
 
      if(pvDataCreate==0){
-          pvDataCreate = new PVDataCreateExt();
+          pvDataCreate = new PVDataCreate();
           convert = getConvert();
           fieldCreate = getFieldCreate();
      }

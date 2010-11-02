@@ -38,16 +38,16 @@ namespace epics { namespace pvData {
             StructureArrayConstPtr from, StructureArrayConstPtr to);
         void copyStructureArray(
             PVStructureArray *from, PVStructureArray *to);
-        epicsInt8 toByte(PVScalar *pv);
-        epicsInt16 toShort(PVScalar *pv);
-        epicsInt32 toInt(PVScalar *pv);
-        epicsInt64 toLong(PVScalar *pv);
+        int8 toByte(PVScalar *pv);
+        int16 toShort(PVScalar *pv);
+        int32 toInt(PVScalar *pv);
+        int64 toLong(PVScalar *pv);
         float toFloat(PVScalar *pv);
         double toDouble(PVScalar *pv);
-        void fromByte(PVScalar *pv,epicsInt8 from);
-        void  fromShort(PVScalar *pv,epicsInt16 from);
-        void  fromInt(PVScalar *pv, epicsInt32 from);
-        void  fromLong(PVScalar *pv, epicsInt64 from);
+        void fromByte(PVScalar *pv,int8 from);
+        void  fromShort(PVScalar *pv,int16 from);
+        void  fromInt(PVScalar *pv, int32 from);
+        void  fromLong(PVScalar *pv, int64 from);
         void  fromFloat(PVScalar* pv, float from);
         void  fromDouble(PVScalar *pv, double from);
         int toByteArray(PVScalarArray *pv, int offset, int length,

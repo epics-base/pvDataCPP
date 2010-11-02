@@ -42,12 +42,39 @@ PVFieldPvt::~PVFieldPvt()
 }
 
 
+static volatile int64 totalConstruct = 0;
+static volatile int64 totalDestruct = 0;
+static Mutex *globalMutex = 0;
+
+void PVField::init()
+{
+    globalMutex = new Mutex();
+}
+
+int64 PVField::getTotalConstruct()
+{
+    Lock xx(globalMutex);
+    return totalConstruct;
+}
+
+int64 PVField::getTotalDestruct()
+{
+    Lock xx(globalMutex);
+    return totalDestruct;
+}
+
+
 PVField::PVField(PVStructure *parent,FieldConstPtr field)
 : pImpl(new PVFieldPvt(parent,field))
-{}
+{
+    Lock xx(globalMutex);
+    totalConstruct++;
+}
 
 PVField::~PVField()
 {
+    Lock xx(globalMutex);
+    totalDestruct++;
    delete pImpl;
 }
 

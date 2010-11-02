@@ -68,7 +68,7 @@ void testByte() {
     printf("\ntestByte\n");
     PVScalar *pvScalar = getStandardPVField()->scalarValue(0,pvByte);
     PVByte *pvValue = (PVByte *)pvScalar;
-    epicsInt8 value = 2;
+    int8 value = 2;
     pvValue->put(value);
     int getValue = pvValue->get();
     printf("put %d get %d\n",value,getValue);
@@ -108,7 +108,7 @@ void testShort() {
     printf("\ntestShort\n");
     PVScalar *pvScalar = getStandardPVField()->scalarValue(0,pvShort);
     PVShort *pvValue = (PVShort *)pvScalar;
-    epicsInt16 value = 2;
+    int16 value = 2;
     pvValue->put(value);
     int getValue = pvValue->get();
     printf("put %d get %d\n",value,getValue);
@@ -148,7 +148,7 @@ void testInt() {
     printf("\ntestInt\n");
     PVScalar *pvScalar = getStandardPVField()->scalarValue(0,pvInt);
     PVInt *pvValue = (PVInt *)pvScalar;
-    epicsInt32 value = 2;
+    int32 value = 2;
     pvValue->put(value);
     int getValue = pvValue->get();
     printf("put %d get %d\n",value,getValue);
@@ -188,9 +188,9 @@ void testLong() {
     printf("\ntestLong\n");
     PVScalar *pvScalar = getStandardPVField()->scalarValue(0,pvLong);
     PVLong *pvValue = (PVLong *)pvScalar;
-    epicsInt64 value = 2;
+    int64 value = 2;
     pvValue->put(value);
-    epicsInt64 getValue = pvValue->get();
+    int64 getValue = pvValue->get();
     printf("put %ld get %ld\n",(long int)value,(long int)getValue);
     if(value!=getValue) {
         fprintf(stderr,"ERROR getValue put %ld get %ld\n",(long int)value,(long int)getValue);

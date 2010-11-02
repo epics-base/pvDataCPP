@@ -178,22 +178,6 @@ static void createEnumeratedAlarm() {
     enumeratedAlarmField = fieldCreate->createStructure(String("valueAlarm"),numFields,fields);
 }
 
-static void createPreAllocated() {
-    createAlarm();
-    createTimeStamp();
-    createDisplay();
-    createControl();
-    createBooleanAlarm();
-    createByteAlarm();
-    createShortAlarm();
-    createIntAlarm();
-    createLongAlarm();
-    createFloatAlarm();
-    createDoubleAlarm();
-    createEnumeratedAlarm();
-}
-
-
 static StructureConstPtr createProperties(String fieldName,FieldConstPtr field,String properties) {
     bool gotAlarm = false;
     bool gotTimeStamp = false;
@@ -264,10 +248,6 @@ static StructureConstPtr createProperties(String fieldName,FieldConstPtr field,S
     return fieldCreate->createStructure(fieldName,numFields,fields);
 }
 
-
-StandardField::StandardField(){}
-
-StandardField::~StandardField(){}
 
 ScalarConstPtr StandardField::scalar(String fieldName,ScalarType type)
 {
@@ -452,21 +432,47 @@ StructureConstPtr StandardField::enumeratedAlarm()
     return enumeratedAlarmField;
 }
 
+void StandardField::init()
+{
+    createAlarm();
+    alarmField->incReferenceCount();
+    createTimeStamp();
+    timeStampField->incReferenceCount();
+    createDisplay();
+    displayField->incReferenceCount();
+    createControl();
+    controlField->incReferenceCount();
+    createBooleanAlarm();
+    booleanAlarmField->incReferenceCount();
+    createByteAlarm();
+    byteAlarmField->incReferenceCount();
+    createShortAlarm();
+    shortAlarmField->incReferenceCount();
+    createIntAlarm();
+    intAlarmField->incReferenceCount();
+    createLongAlarm();
+    longAlarmField->incReferenceCount();
+    createFloatAlarm();
+    floatAlarmField->incReferenceCount();
+    createDoubleAlarm();
+    doubleAlarmField->incReferenceCount();
+    createEnumeratedAlarm();
+    enumeratedAlarmField->incReferenceCount();
+}
 
 
-class StandardFieldExt : public StandardField {
-public:
-    StandardFieldExt(): StandardField(){};
-};
+StandardField::StandardField(){init();}
+
+StandardField::~StandardField(){}
+
 
 StandardField * getStandardField() {
     static Mutex mutex = Mutex();
     Lock xx(&mutex);
 
     if(standardField==0) {
-        standardField = new StandardFieldExt();
+        standardField = new StandardField();
         fieldCreate = getFieldCreate();
-        createPreAllocated();
     }
     return standardField;
 }

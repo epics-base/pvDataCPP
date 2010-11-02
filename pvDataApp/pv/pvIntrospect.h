@@ -1,11 +1,16 @@
 /* pvIntrospect.h */
 #include <string>
 #include <stdexcept>
-#include <epicsTypes.h>
 #ifndef PVINTROSPECT_H
 #define PVINTROSPECT_H
 #include "noDefaultMethods.h"
 namespace epics { namespace pvData { 
+
+    typedef signed char int8;
+    typedef short       int16;
+    typedef int         int32;
+    typedef long long   int64;
+
     class Field;
     class Scalar;
     class ScalarArray;
@@ -58,48 +63,73 @@ namespace epics { namespace pvData {
     class Field : private NoDefaultMethods {
     public:
        virtual ~Field();
-       virtual int getReferenceCount() const = 0;
-       virtual String getFieldName() const = 0;
-       virtual Type getType() const = 0;
-       virtual void toString(StringBuilder buf) const = 0;
-       virtual void toString(StringBuilder buf,int indentLevel) const = 0;
+       Field(String fieldName,Type type);
+       static int getTotalReferenceCount();
+       static int64 getTotalConstruct();
+       static int64 getTotalDestruct();
+       int getReferenceCount() const;
+       String getFieldName() const;
+       Type getType() const;
+       virtual void toString(StringBuilder buf) const{toString(buf,0);}
+       virtual void toString(StringBuilder buf,int indentLevel) const;
     private:
-       virtual void incReferenceCount() const = 0;
-       virtual void decReferenceCount() const = 0;
-       friend class BaseStructure;
-       friend class BaseStructureArray;
+       class FieldPvt *pImpl;
+       void incReferenceCount() const;
+       void decReferenceCount() const;
+       friend class StructureArray;
+       friend class Structure;
        friend class PVFieldPvt;
+       friend class StandardField;
     };
 
 
     class Scalar : public Field{
     public:
+       Scalar(String fieldName,ScalarType scalarType);
        virtual ~Scalar();
-       virtual ScalarType getScalarType() const = 0;
+       ScalarType getScalarType() const {return scalarType;}
+       virtual void toString(StringBuilder buf) const{toString(buf,0);}
+       virtual void toString(StringBuilder buf,int indentLevel) const;
+    private:
+       ScalarType scalarType;
     };
 
     class ScalarArray : public Field{
     public:
+       ScalarArray(String fieldName,ScalarType scalarType);
        virtual ~ScalarArray();
-       virtual ScalarType  getElementType() const = 0;
-    };
-
-
-    class Structure : public Field {
-    public:
-       virtual ~Structure();
-       virtual int const getNumberFields() const = 0;
-       virtual FieldConstPtr getField(String fieldName) const = 0;
-       virtual int getFieldIndex(String fieldName) const = 0;
-       virtual FieldConstPtrArray getFields() const = 0;
+       ScalarType  getElementType() const {return elementType;}
+       virtual void toString(StringBuilder buf) const{toString(buf,0);}
+       virtual void toString(StringBuilder buf,int indentLevel) const;
+    private:
+       ScalarType elementType;
     };
 
     class StructureArray : public Field{
     public:
+       StructureArray(String fieldName,StructureConstPtr structure);
        virtual ~StructureArray();
-       virtual StructureConstPtr  getStructure() const = 0;
+       StructureConstPtr  getStructure() const {return pstructure;}
+       virtual void toString(StringBuilder buf) const{toString(buf,0);}
+       virtual void toString(StringBuilder buf,int indentLevel) const;
+    private:
+        StructureConstPtr pstructure;
     };
 
+    class Structure : public Field {
+    public:
+       Structure(String fieldName, int numberFields,FieldConstPtrArray fields);
+       virtual ~Structure();
+       int getNumberFields() const {return numberFields;}
+       FieldConstPtr getField(String fieldName) const;
+       int getFieldIndex(String fieldName) const;
+       FieldConstPtrArray getFields() const {return fields;}
+       virtual void toString(StringBuilder buf) const{toString(buf,0);}
+       virtual void toString(StringBuilder buf,int indentLevel) const;
+    private:
+        int numberFields;
+        FieldConstPtrArray  fields;
+    };
 
     class FieldCreate {
     public:
@@ -111,8 +141,9 @@ namespace epics { namespace pvData {
            int numberFields,FieldConstPtrArray fields) const;
        StructureArrayConstPtr createStructureArray(String fieldName,
            StructureConstPtr structure) const;
-    protected:
+    private:
        FieldCreate();
+       friend FieldCreate * getFieldCreate();
     };
 
     extern FieldCreate * getFieldCreate();
