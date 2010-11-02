@@ -9,6 +9,7 @@
 #include "convert.h"
 #include "factory.h"
 #include "AbstractPVField.h"
+#include "byteBuffer.h"
 
 namespace epics { namespace pvData {
 
@@ -26,14 +27,14 @@ namespace epics { namespace pvData {
             DeserializableControl *pflusher);
         virtual void toString(StringBuilder buf);
         virtual void toString(StringBuilder buf,int indentLevel);
-        virtual bool operator==(PVField  *pv) ;
-        virtual bool operator!=(PVField  *pv) ;
+        virtual bool operator==(PVField& pv) ;
+        virtual bool operator!=(PVField& pv) ;
     private:
         int32 value;
     };
 
     BasePVInt::BasePVInt(PVStructure *parent,ScalarConstPtr scalar)
-    : PVInt(parent,scalar),value(0.0)
+    : PVInt(parent,scalar),value(0)
     {}
 
     BasePVInt::~BasePVInt() {}
@@ -43,33 +44,33 @@ namespace epics { namespace pvData {
     void BasePVInt::put(int32 val){value = val;}
 
     void BasePVInt::serialize(ByteBuffer *pbuffer,
-        SerializableControl *pflusher) 
-    {
-        throw std::logic_error(notImplemented);
+        SerializableControl *pflusher) {
+        pflusher->ensureBuffer(sizeof(int32));
+        pbuffer->putInt(value);
     }
 
     void BasePVInt::deserialize(ByteBuffer *pbuffer,
-        DeserializableControl *pflusher)
-    {
-        throw std::logic_error(notImplemented);
+        DeserializableControl *pflusher) {
+        pflusher->ensureData(sizeof(int32));
+        value = pbuffer->getInt();
     }
 
     void BasePVInt::toString(StringBuilder buf) {toString(buf,0);}
 
-    void BasePVInt::toString(StringBuilder buf,int indentLevel) 
+    void BasePVInt::toString(StringBuilder buf,int indentLevel)
     {
         getConvert()->getString(buf,this,indentLevel);
         PVField::toString(buf,indentLevel);
     }
 
-    bool BasePVInt::operator==(PVField  *pvField) 
+    bool BasePVInt::operator==(PVField& pvField)
     {
-        return getConvert()->equals(this,pvField);
+        return getConvert()->equals(this, &pvField);
     }
 
-    bool BasePVInt::operator!=(PVField  *pvField) 
+    bool BasePVInt::operator!=(PVField& pvField)
     {
-        return !(getConvert()->equals(this,pvField));
+        return !(getConvert()->equals(this, &pvField));
     }
 
 }}

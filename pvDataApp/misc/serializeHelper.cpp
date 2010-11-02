@@ -6,7 +6,7 @@
  */
 
 #include <algorithm>
-#include <epicsTypes.h>
+#include <pvTypes.h>
 
 #include "epicsException.h"
 #include "byteBuffer.h"
@@ -20,7 +20,7 @@ namespace epics {
 
         void SerializeHelper::writeSize(int s, ByteBuffer* buffer,
                 SerializableControl* flusher) {
-            flusher->ensureBuffer(sizeof(epicsInt64)+1);
+            flusher->ensureBuffer(sizeof(int64)+1);
             SerializeHelper::writeSize(s, buffer);
         }
 
@@ -36,12 +36,12 @@ namespace epics {
         int SerializeHelper::readSize(ByteBuffer* buffer,
                 DeserializableControl* control) {
             control->ensureData(1);
-            epicsInt8 b = buffer->getByte();
+            int8 b = buffer->getByte();
             if(b==-1)
                 return -1;
             else if(b==-2) {
-                control->ensureData(sizeof(epicsInt32));
-                epicsInt32 s = buffer->getInt();
+                control->ensureData(sizeof(int32));
+                int32 s = buffer->getInt();
                 if(s<0) throw EpicsException("negative array size");
                 return s;
             }

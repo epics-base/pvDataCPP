@@ -84,8 +84,8 @@ namespace epics { namespace pvData {
         void setPostHandler(PostHandler *postHandler);
         virtual void toString(StringBuilder buf) ;
         virtual void toString(StringBuilder buf,int indentLevel) ;
-        virtual bool operator==(PVField *pv) = 0;
-        virtual bool operator!=(PVField *pv) = 0;
+        virtual bool operator==(PVField &pv) = 0;
+        virtual bool operator!=(PVField &pv) = 0;
     protected:
         PVField(PVStructure *parent,FieldConstPtr field);
         void replaceStructure(PVStructure *pvStructure);
@@ -210,8 +210,8 @@ namespace epics { namespace pvData {
             String extendsStructureName);
         virtual void toString(StringBuilder buf) ;
         virtual void toString(StringBuilder buf,int indentLevel) ;
-        virtual bool operator==(PVField *pv) ;
-        virtual bool operator!=(PVField *pv) ;
+        virtual bool operator==(PVField &pv) ;
+        virtual bool operator!=(PVField &pv) ;
         virtual void serialize(
             ByteBuffer *pbuffer,SerializableControl *pflusher) ;
         virtual void deserialize(

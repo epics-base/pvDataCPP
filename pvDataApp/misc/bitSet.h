@@ -2,13 +2,13 @@
 #ifndef BITSET_H
 #define BITSET_H
 #include <stdexcept>
-#include <epicsTypes.h>
+#include <pvTypes.h>
 //#include "byteBuffer.h"
 //#include "serialize.h"
 namespace epics { namespace pvData { 
 
         // TODO !!!
-        typedef unsigned long long epicsUInt64;
+        typedef unsigned long long uint64;
         typedef std::string * StringBuilder;
 
     /**
@@ -49,7 +49,7 @@ namespace epics { namespace pvData {
          *
          * @param  nbits the initial size of the bit set
          */
-        BitSet(epicsUInt32 nbits);
+        BitSet(uint32 nbits);
 
         /**
          * Destructor.
@@ -62,21 +62,21 @@ namespace epics { namespace pvData {
          *
          * @param  bitIndex the index of the bit to flip
          */
-        void flip(epicsUInt32 bitIndex);
+        void flip(uint32 bitIndex);
 
         /**
          * Sets the bit at the specified index to {@code true}.
          *
          * @param  bitIndex a bit index
          */
-        void set(epicsUInt32 bitIndex);
+        void set(uint32 bitIndex);
 
         /**
          * Sets the bit specified by the index to {@code false}.
          *
          * @param  bitIndex the index of the bit to be cleared
          */
-        void clear(epicsUInt32 bitIndex);
+        void clear(uint32 bitIndex);
 
         /**
          * Sets the bit at the specified index to the specified value.
@@ -84,7 +84,7 @@ namespace epics { namespace pvData {
          * @param  bitIndex a bit index
          * @param  value a boolean value to set
          */
-        void set(epicsUInt32 bitIndex, bool value);
+        void set(uint32 bitIndex, bool value);
 
         /**
          * Returns the value of the bit with the specified index. The value
@@ -95,7 +95,7 @@ namespace epics { namespace pvData {
          * @param  bitIndex   the bit index
          * @return the value of the bit with the specified index
          */
-        bool get(epicsUInt32 bitIndex) const;
+        bool get(uint32 bitIndex) const;
 
         /**
          * Sets all of the bits in this BitSet to {@code false}.
@@ -119,7 +119,7 @@ namespace epics { namespace pvData {
          * @return the index of the next set bit, or {@code -1} if there
          *         is no such bit
          */
-        epicsInt32 nextSetBit(epicsUInt32 fromIndex) const;
+        int32 nextSetBit(uint32 fromIndex) const;
 
         /**
          * Returns the index of the first bit that is set to {@code false}
@@ -128,7 +128,7 @@ namespace epics { namespace pvData {
          * @param  fromIndex the index to start checking from (inclusive)
          * @return the index of the next clear bit
          */
-        epicsInt32 nextClearBit(epicsUInt32 fromIndex) const;
+        int32 nextClearBit(uint32 fromIndex) const;
 
         /**
          * Returns true if this {@code BitSet} contains no bits that are set
@@ -143,7 +143,7 @@ namespace epics { namespace pvData {
          *
          * @return the number of bits set to {@code true} in this {@code BitSet}
          */
-        epicsUInt32 cardinality() const;
+        uint32 cardinality() const;
 
         /**
          * Performs a logical <b>AND</b> of this target bit set with the
@@ -223,21 +223,21 @@ namespace epics { namespace pvData {
          * a long, which consists of 64 bits, requiring 6 address bits.
          * The choice of word size is determined purely by performance concerns.
          */
-        static const epicsUInt32 ADDRESS_BITS_PER_WORD = 6;
-        static const epicsUInt32 BITS_PER_WORD = 1 << ADDRESS_BITS_PER_WORD;
-        static const epicsUInt32 BIT_INDEX_MASK = BITS_PER_WORD - 1;
+        static const uint32 ADDRESS_BITS_PER_WORD = 6;
+        static const uint32 BITS_PER_WORD = 1 << ADDRESS_BITS_PER_WORD;
+        static const uint32 BIT_INDEX_MASK = BITS_PER_WORD - 1;
 
         /** Used to shift left or right for a partial word mask */
-        static const epicsUInt64 WORD_MASK = ~((epicsUInt64)0);
+        static const uint64 WORD_MASK = ~((uint64)0);
 
         /** The internal field corresponding to the serialField "bits". */
-        epicsUInt64* words;
+        uint64* words;
 
         /** The internal field corresponding to the size of words[] array. */
-        epicsUInt32 wordsLength;
+        uint32 wordsLength;
 
         /** The number of words in the logical size of this BitSet. */
-        epicsUInt32 wordsInUse;
+        uint32 wordsInUse;
 
 
     private:
@@ -245,14 +245,14 @@ namespace epics { namespace pvData {
         /**
          * Given a bit index, return word index containing it.
          */
-        static inline epicsUInt32 wordIndex(epicsUInt32 bitIndex) {
+        static inline uint32 wordIndex(uint32 bitIndex) {
             return bitIndex >> ADDRESS_BITS_PER_WORD;
         }
 
         /**
          * Creates a new word array.
          */
-        void initWords(epicsUInt32 nbits);
+        void initWords(uint32 nbits);
 
         /**
          * Sets the field wordsInUse to the logical size in words of the bit set.
@@ -265,7 +265,7 @@ namespace epics { namespace pvData {
          * Ensures that the BitSet can hold enough words.
          * @param wordsRequired the minimum acceptable number of words.
          */
-        void ensureCapacity(epicsUInt32 wordsRequired);
+        void ensureCapacity(uint32 wordsRequired);
 
         /**
          * Ensures that the BitSet can accommodate a given wordIndex,
@@ -274,7 +274,7 @@ namespace epics { namespace pvData {
          * possibly using recalculateWordsInUse().
          * @param wordIndex the index to be accommodated.
          */
-        void expandTo(epicsUInt32 wordIndex);
+        void expandTo(uint32 wordIndex);
 
         /**
          * Returns the number of zero bits following the lowest-order ("rightmost")
@@ -288,7 +288,7 @@ namespace epics { namespace pvData {
          *     specified <tt>long</tt> value, or 64 if the value is equal
          *     to zero.
          */
-        static epicsUInt32 numberOfTrailingZeros(epicsUInt64 i);
+        static uint32 numberOfTrailingZeros(uint64 i);
 
         /**
          * Returns the number of one-bits in the two's complement binary
@@ -298,7 +298,7 @@ namespace epics { namespace pvData {
          * @return the number of one-bits in the two's complement binary
          *     representation of the specified <tt>long</tt> value.
          */
-         static epicsUInt32 bitCount(epicsUInt64 i);
+         static uint32 bitCount(uint64 i);
 
     };
 

@@ -4,12 +4,8 @@
 #ifndef PVINTROSPECT_H
 #define PVINTROSPECT_H
 #include "noDefaultMethods.h"
+#include "pvTypes.h"
 namespace epics { namespace pvData { 
-
-    typedef signed char int8;
-    typedef short       int16;
-    typedef int         int32;
-    typedef long long   int64;
 
     class Field;
     class Scalar;

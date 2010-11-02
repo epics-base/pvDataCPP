@@ -8,6 +8,9 @@
 #include "pvData.h"
 #include "factory.h"
 #include "AbstractPVScalarArray.h"
+#include "serializeHelper.h"
+
+using std::min;
 
 namespace epics { namespace pvData {
 
@@ -32,8 +35,8 @@ namespace epics { namespace pvData {
              SerializableControl *pflusher, int offset, int count) ;
         virtual void toString(StringBuilder buf);
         virtual void toString(StringBuilder buf,int indentLevel);
-        virtual bool operator==(PVField  *pv) ;
-        virtual bool operator!=(PVField  *pv) ;
+        virtual bool operator==(PVField& pv) ;
+        virtual bool operator!=(PVField& pv) ;
     private:
         int8 *value;
     };
@@ -65,7 +68,7 @@ namespace epics { namespace pvData {
         PVArray::setCapacityLength(capacity,length);
     }
 
-    int BasePVByteArray::get(int offset, int len, ByteArrayData *data) 
+    int BasePVByteArray::get(int offset, int len, ByteArrayData *data)
     {
         int n = len;
         int length = PVArray::getLength();
@@ -104,7 +107,7 @@ namespace epics { namespace pvData {
         }
         PVArray::setLength(length);
         PVField::postPut();
-        return len;      
+        return len;
     }
 
     void BasePVByteArray::shareData(ByteArray shareValue,int capacity,int length)
@@ -115,21 +118,61 @@ namespace epics { namespace pvData {
     }
 
     void BasePVByteArray::serialize(ByteBuffer *pbuffer,
-         SerializableControl *pflusher) 
-    {
-        throw std::logic_error(notImplemented);
+                SerializableControl *pflusher) {
+        serialize(pbuffer, pflusher, 0, getLength());
     }
 
     void BasePVByteArray::deserialize(ByteBuffer *pbuffer,
-         DeserializableControl *pflusher)
-    {
-        throw std::logic_error(notImplemented);
+            DeserializableControl *pcontrol) {
+        int size = SerializeHelper::readSize(pbuffer, pcontrol);
+        if(size>=0) {
+            // prepare array, if necessary
+            if(size>getCapacity()) setCapacity(size);
+            // retrieve value from the buffer
+            int i = 0;
+            while(true) {
+                int toRead = min(size-i, pbuffer->getRemaining());
+                pbuffer->get((char *)value, i, toRead);
+                i += toRead;
+                if(i<size)
+                    pcontrol->ensureData(1); // TODO: is there a better way to ensureData?
+                else
+                    break;
+            }
+            // set new length
+            setLength(size);
+            postPut();
+        }
+        // TODO null arrays (size == -1) not supported
     }
 
     void BasePVByteArray::serialize(ByteBuffer *pbuffer,
-         SerializableControl *pflusher, int offset, int count) 
-    {
-        throw std::logic_error(notImplemented);
+            SerializableControl *pflusher, int offset, int count) {
+        // cache
+        int length = getLength();
+
+        // check bounds
+        if(offset<0)
+            offset = 0;
+        else if(offset>length) offset = length;
+        if(count<0) count = length;
+
+        int maxCount = length-offset;
+        if(count>maxCount) count = maxCount;
+
+        // write
+        SerializeHelper::writeSize(count, pbuffer, pflusher);
+        int end = offset+count;
+        int i = offset;
+        while(true) {
+            int maxIndex = min(end-i, pbuffer->getRemaining())+i;
+            for(; i<maxIndex; i++)
+                pbuffer->putByte(value[i]);
+            if(i<end)
+                pflusher->flushSerializeBuffer();
+            else
+                break;
+        }
     }
 
     void BasePVByteArray::toString(StringBuilder buf)
@@ -144,14 +187,14 @@ namespace epics { namespace pvData {
         PVField::toString(buf,indentLevel);
     }
 
-    bool BasePVByteArray::operator==(PVField  *pv) 
+    bool BasePVByteArray::operator==(PVField& pv)
     {
-        return getConvert()->equals(this,pv);
+        return getConvert()->equals(this, &pv);
     }
 
-    bool BasePVByteArray::operator!=(PVField  *pv) 
+    bool BasePVByteArray::operator!=(PVField& pv)
     {
-        return !(getConvert()->equals(this,pv));
+        return !(getConvert()->equals(this, &pv));
     }
 }}
 #endif  /* BASEPVBYTEARRAY_H */

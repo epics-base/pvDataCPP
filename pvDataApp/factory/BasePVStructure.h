@@ -30,7 +30,7 @@ namespace epics { namespace pvData {
         for(int i=0; i<numberFields; i++) {
             delete pvFields[i];
         }
-        delete[] pvFields;
+        if (pvFields) delete[] pvFields;
     }
 
     static PVField *findSubField(String fieldName,PVStructure *pvStructure);
@@ -452,59 +452,115 @@ namespace epics { namespace pvData {
          toStringPvt(buf,0);
     }
 
-    void PVStructure::toString(StringBuilder buf,int indentLevel) 
+    void PVStructure::toString(StringBuilder buf,int indentLevel)
     {
         *buf += "structure ";
          toStringPvt(buf,indentLevel);
     }
 
-    void PVStructure::serialize(
-        ByteBuffer *pbuffer,SerializableControl *pflusher) 
-    {
-        throw std::logic_error(notImplemented);
-    }
-
-    void PVStructure::deserialize(
-        ByteBuffer *pbuffer,DeserializableControl *pflusher)
-    {
-        throw std::logic_error(notImplemented);
-    }
-
     void PVStructure::serialize(ByteBuffer *pbuffer,
-            SerializableControl *pflusher, int offset, int count) 
-    {
-        throw std::logic_error(notImplemented);
-    }
-
-    void PVStructure::serialize(ByteBuffer *pbuffer,
-            SerializableControl *pflusher,BitSet *pbitSet) 
-    {
-        throw std::logic_error(notImplemented);
+            SerializableControl *pflusher) {
+        for(int i = 0; i<pImpl->numberFields; i++)
+            pImpl->pvFields[i]->serialize(pbuffer, pflusher);
     }
 
     void PVStructure::deserialize(ByteBuffer *pbuffer,
-            DeserializableControl*pflusher,BitSet *pbitSet)
-    {
+            DeserializableControl *pcontrol) {
+        for(int i = 0; i<pImpl->numberFields; i++)
+            pImpl->pvFields[i]->deserialize(pbuffer, pcontrol);
+
+    }
+
+    void PVStructure::serialize(ByteBuffer *pbuffer,
+            SerializableControl *pflusher, int offset, int count) {
         throw std::logic_error(notImplemented);
     }
 
-    bool PVStructure::operator==(PVField  *obj) 
+    void PVStructure::serialize(ByteBuffer *pbuffer,
+            SerializableControl *pflusher, BitSet *pbitSet) {
+        int offset = getFieldOffset();
+        int numberFields = getNumberFields();
+        int next = pbitSet->nextSetBit(offset);
+
+        // no more changes or no changes in this structure
+        if(next<0||next>=offset+numberFields) return;
+
+        // entire structure
+        if(offset==next) {
+            serialize(pbuffer, pflusher);
+            return;
+        }
+
+        for(int i = 0; i<pImpl->numberFields; i++) {
+            PVField* pvField = pImpl->pvFields[i];
+            offset = pvField->getFieldOffset();
+            numberFields = pvField->getNumberFields();
+            next = pbitSet->nextSetBit(offset);
+            // no more changes
+            if(next<0) return;
+            //  no change in this pvField
+            if(next>=offset+numberFields) continue;
+
+            // serialize field or fields
+            if(numberFields==1)
+                pvField->serialize(pbuffer, pflusher);
+            else
+                ((PVStructure*)pvField)->serialize(pbuffer, pflusher,
+                        pbitSet);
+        }
+    }
+
+    void PVStructure::deserialize(ByteBuffer *pbuffer,
+            DeserializableControl *pcontrol, BitSet *pbitSet) {
+        int offset = getFieldOffset();
+        int numberFields = getNumberFields();
+        int next = pbitSet->nextSetBit(offset);
+
+        // no more changes or no changes in this structure
+        if(next<0||next>=offset+numberFields) return;
+
+        // entire structure
+        if(offset==next) {
+            deserialize(pbuffer, pcontrol);
+            return;
+        }
+
+        for(int i = 0; i<pImpl->numberFields; i++) {
+            PVField* pvField = pImpl->pvFields[i];
+            offset = pvField->getFieldOffset();
+            numberFields = pvField->getNumberFields();
+            next = pbitSet->nextSetBit(offset);
+            // no more changes
+            if(next<0) return;
+            //  no change in this pvField
+            if(next>=offset+numberFields) continue;
+
+            // deserialize field or fields
+            if(numberFields==1)
+                pvField->deserialize(pbuffer, pcontrol);
+            else
+                ((PVStructure*)pvField)->deserialize(pbuffer, pcontrol,
+                        pbitSet);
+        }
+    }
+
+
+    bool PVStructure::operator==(PVField &obj)
     {
-        PVStructure *b = dynamic_cast<PVStructure *>(obj);
-        if(b==0) return false;
-        PVFieldPtrArray bFields = b->getPVFields(); 
+        PVStructure &b = dynamic_cast<PVStructure &>(obj);
+        PVFieldPtrArray bFields = b.pImpl->pvFields;
         PVFieldPtrArray pvFields = pImpl->pvFields;
-        int len = b->getNumberFields();
+        int len = b.pImpl->numberFields;
         if(len!=pImpl->numberFields) return false;
         for (int i = 0; i < len; i++) {
-            if (!(pvFields[i]==bFields[i])) return false;
+            if (!(*pvFields[i]==*bFields[i])) return false;
         }
         return true;
     }
 
-    bool PVStructure::operator!=(PVField  *pv) 
+    bool PVStructure::operator!=(PVField  &pv)
     {
-        return !(this==pv);
+        return !(*this==pv);
     }
 
     static PVField *findSubField(String fieldName,PVStructure *pvStructure) {

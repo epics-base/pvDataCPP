@@ -9,6 +9,7 @@
 #include "convert.h"
 #include "factory.h"
 #include "AbstractPVField.h"
+#include "byteBuffer.h"
 
 namespace epics { namespace pvData {
 
@@ -26,8 +27,8 @@ namespace epics { namespace pvData {
             DeserializableControl *pflusher);
         virtual void toString(StringBuilder buf);
         virtual void toString(StringBuilder buf,int indentLevel);
-        virtual bool operator==(PVField  *pv) ;
-        virtual bool operator!=(PVField  *pv) ;
+        virtual bool operator==(PVField& pv) ;
+        virtual bool operator!=(PVField& pv) ;
     private:
         float value;
     };
@@ -43,33 +44,33 @@ namespace epics { namespace pvData {
     void BasePVFloat::put(float val){value = val;}
 
     void BasePVFloat::serialize(ByteBuffer *pbuffer,
-        SerializableControl *pflusher) 
-    {
-        throw std::logic_error(notImplemented);
+        SerializableControl *pflusher) {
+        pflusher->ensureBuffer(sizeof(float));
+        pbuffer->putFloat(value);
     }
 
     void BasePVFloat::deserialize(ByteBuffer *pbuffer,
-        DeserializableControl *pflusher)
-    {
-        throw std::logic_error(notImplemented);
+        DeserializableControl *pflusher) {
+        pflusher->ensureData(sizeof(float));
+        value = pbuffer->getFloat();
     }
 
     void BasePVFloat::toString(StringBuilder buf) {toString(buf,0);}
 
-    void BasePVFloat::toString(StringBuilder buf,int indentLevel) 
+    void BasePVFloat::toString(StringBuilder buf,int indentLevel)
     {
         getConvert()->getString(buf,this,indentLevel);
         PVField::toString(buf,indentLevel);
     }
 
-    bool BasePVFloat::operator==(PVField  *pvField) 
+    bool BasePVFloat::operator==(PVField& pvField)
     {
-        return getConvert()->equals(this,pvField);
+        return getConvert()->equals(this, &pvField);
     }
 
-    bool BasePVFloat::operator!=(PVField  *pvField) 
+    bool BasePVFloat::operator!=(PVField& pvField)
     {
-        return !(getConvert()->equals(this,pvField));
+        return !(getConvert()->equals(this, &pvField));
     }
 
 }}

@@ -9,6 +9,7 @@
 #include "convert.h"
 #include "factory.h"
 #include "AbstractPVField.h"
+#include "byteBuffer.h"
 
 namespace epics { namespace pvData {
 
@@ -26,14 +27,14 @@ namespace epics { namespace pvData {
             DeserializableControl *pflusher);
         virtual void toString(StringBuilder buf);
         virtual void toString(StringBuilder buf,int indentLevel);
-        virtual bool operator==(PVField  *pv) ;
-        virtual bool operator!=(PVField  *pv) ;
+        virtual bool operator==(PVField& pv) ;
+        virtual bool operator!=(PVField& pv) ;
     private:
         int64 value;
     };
 
     BasePVLong::BasePVLong(PVStructure *parent,ScalarConstPtr scalar)
-    : PVLong(parent,scalar),value(0.0)
+    : PVLong(parent,scalar),value(0)
     {}
 
     BasePVLong::~BasePVLong() {}
@@ -43,33 +44,33 @@ namespace epics { namespace pvData {
     void BasePVLong::put(int64 val){value = val;}
 
     void BasePVLong::serialize(ByteBuffer *pbuffer,
-        SerializableControl *pflusher) 
-    {
-        throw std::logic_error(notImplemented);
+        SerializableControl *pflusher) {
+        pflusher->ensureBuffer(sizeof(int64));
+        pbuffer->putLong(value);
     }
 
     void BasePVLong::deserialize(ByteBuffer *pbuffer,
-        DeserializableControl *pflusher)
-    {
-        throw std::logic_error(notImplemented);
+        DeserializableControl *pflusher) {
+        pflusher->ensureData(sizeof(int64));
+        value = pbuffer->getLong();
     }
 
     void BasePVLong::toString(StringBuilder buf) {toString(buf,0);}
 
-    void BasePVLong::toString(StringBuilder buf,int indentLevel) 
+    void BasePVLong::toString(StringBuilder buf,int indentLevel)
     {
         getConvert()->getString(buf,this,indentLevel);
         PVField::toString(buf,indentLevel);
     }
 
-    bool BasePVLong::operator==(PVField  *pvField) 
+    bool BasePVLong::operator==(PVField& pvField)
     {
-        return getConvert()->equals(this,pvField);
+        return getConvert()->equals(this, &pvField);
     }
 
-    bool BasePVLong::operator!=(PVField  *pvField) 
+    bool BasePVLong::operator!=(PVField& pvField)
     {
-        return !(getConvert()->equals(this,pvField));
+        return !(getConvert()->equals(this, &pvField));
     }
 
 }}

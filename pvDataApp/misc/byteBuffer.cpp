@@ -54,34 +54,34 @@ namespace epics {
                 throw EpicsException("buffer underflow");
         }
 
-        epicsInt8 ByteBuffer::getByte() {
+        int8 ByteBuffer::getByte() {
             if(_position<_limit)
-                return (epicsInt8)_buffer[_position++];
+                return (int8)_buffer[_position++];
             else
                 throw EpicsException("buffer underflow");
         }
 
-        epicsInt16 ByteBuffer::getShort() {
-            if(_limit-_position<(int)sizeof(epicsInt16))
+        int16 ByteBuffer::getShort() {
+            if(_limit-_position<(int)sizeof(int16))
                 throw EpicsException("buffer underflow");
-            epicsInt16 val;
-            getWithEndianness((char*)&val, sizeof(epicsInt16)); // store short into val
+            int16 val;
+            getWithEndianness((char*)&val, sizeof(int16)); // store short into val
             return val;
         }
 
-        epicsInt32 ByteBuffer::getInt() {
-            if(_limit-_position<(int)sizeof(epicsInt32))
+        int32 ByteBuffer::getInt() {
+            if(_limit-_position<(int)sizeof(int32))
                 throw EpicsException("buffer underflow");
-            epicsInt32 val;
-            getWithEndianness((char*)&val, sizeof(epicsInt32)); // store int into val
+            int32 val;
+            getWithEndianness((char*)&val, sizeof(int32)); // store int into val
             return val;
         }
 
-        epicsInt64 ByteBuffer::getLong() {
-            if(_limit-_position<(int)sizeof(epicsInt64))
+        int64 ByteBuffer::getLong() {
+            if(_limit-_position<(int)sizeof(int64))
                 throw EpicsException("buffer underflow");
-            epicsInt64 val;
-            getWithEndianness((char*)&val, sizeof(epicsInt64)); // store long into val
+            int64 val;
+            getWithEndianness((char*)&val, sizeof(int64)); // store long into val
             return val;
         }
 
@@ -101,17 +101,17 @@ namespace epics {
             return val;
         }
 
-        ByteBuffer* ByteBuffer::put(const char* src, int offset, int count) {
-            if(count>getRemaining()) throw EpicsException("buffer overflow");
-            strncpy(&_buffer[_position], &src[offset], count);
-            _position += count;
-            return this;
+        void ByteBuffer::get(char* dst, int offset, int count) {
+            if(count>getRemaining()) throw EpicsException("buffer underflow");
+            for(int i = 0; i<count; i++)
+                dst[offset+i] = _buffer[_position++];
         }
 
-        void ByteBuffer::get(char*dst, int offset, int count) {
-            if(count>getRemaining()) throw EpicsException("buffer underflow");
-            strncpy(&dst[offset], &_buffer[_position], count);
-            _position += count;
+        ByteBuffer* ByteBuffer::put(const char* src, int offset, int count) {
+            if(count>getRemaining()) throw EpicsException("buffer overflow");
+            for(int i = 0; i<count; i++)
+                _buffer[_position++] = src[offset+i];
+            return this;
         }
 
         ByteBuffer* ByteBuffer::putBoolean(bool value) {
@@ -122,7 +122,7 @@ namespace epics {
             return this;
         }
 
-        ByteBuffer* ByteBuffer::putByte(epicsInt8 value) {
+        ByteBuffer* ByteBuffer::putByte(int8 value) {
             if(_position<_limit)
                 _buffer[_position++] = (char)value;
             else
@@ -130,24 +130,24 @@ namespace epics {
             return this;
         }
 
-        ByteBuffer* ByteBuffer::putShort(epicsInt16 value) {
-            if(_limit-_position<(int)sizeof(epicsInt16))
+        ByteBuffer* ByteBuffer::putShort(int16 value) {
+            if(_limit-_position<(int)sizeof(int16))
                 throw EpicsException("buffer overflow");
-            putWithEndianness((char*)&value, sizeof(epicsInt16)); // store short into buffer
+            putWithEndianness((char*)&value, sizeof(int16)); // store short into buffer
             return this;
         }
 
-        ByteBuffer* ByteBuffer::putInt(epicsInt32 value) {
-            if(_limit-_position<(int)sizeof(epicsInt32))
+        ByteBuffer* ByteBuffer::putInt(int32 value) {
+            if(_limit-_position<(int)sizeof(int32))
                 throw EpicsException("buffer overflow");
-            putWithEndianness((char*)&value, sizeof(epicsInt32)); // store int into buffer
+            putWithEndianness((char*)&value, sizeof(int32)); // store int into buffer
             return this;
         }
 
-        ByteBuffer* ByteBuffer::putLong(epicsInt64 value) {
-            if(_limit-_position<(int)sizeof(epicsInt64))
+        ByteBuffer* ByteBuffer::putLong(int64 value) {
+            if(_limit-_position<(int)sizeof(int64))
                 throw EpicsException("buffer overflow");
-            putWithEndianness((char*)&value, sizeof(epicsInt64)); // store long into buffer
+            putWithEndianness((char*)&value, sizeof(int64)); // store long into buffer
             return this;
         }
 

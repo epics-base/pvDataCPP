@@ -3,14 +3,12 @@
 #define BYTEBUFFER_H
 
 #include <string>
-#include <epicsTypes.h>
+#include <pvTypes.h>
 #include <epicsEndian.h>
 
 namespace epics {
     namespace pvData {
 
-        // not sure why I have to define epicsInt64
-        typedef long long epicsInt64;
 
         /** @brief A buffer of bytes.
           *
@@ -81,7 +79,7 @@ namespace epics {
              * @throws EpicsException - Buffer underflow if there are no bytes
              * remaining in the buffer.
              */
-            epicsInt8 getByte();
+            int8 getByte();
 
             /**
              * Relative Int16 read, {@code position} is incremented by
@@ -91,7 +89,7 @@ namespace epics {
              * @throws EpicsException - Buffer underflow if there are less than
              * 2 bytes remaining in the buffer.
              */
-            epicsInt16 getShort();
+            int16 getShort();
 
             /**
              * Relative Int32 read, {@code position} is incremented by
@@ -101,7 +99,7 @@ namespace epics {
              * @throws EpicsException - Buffer underflow if there are less than
              * 4 bytes remaining in the buffer.
              */
-            epicsInt32 getInt();
+            int32 getInt();
 
             /**
              * Relative Int64 read, {@code position} is incremented by
@@ -111,7 +109,7 @@ namespace epics {
              * @throws EpicsException - Buffer underflow if there are less than
              * 8 bytes remaining in the buffer.
              */
-            epicsInt64 getLong();
+            int64 getLong();
 
             /**
              * Relative float read, {@code position} is incremented by
@@ -180,7 +178,7 @@ namespace epics {
              * @throws EpicsException - Buffer overflow if there are no
              * bytes remaining in the buffer.
              */
-            ByteBuffer* putByte(epicsInt8 value);
+            ByteBuffer* putByte(int8 value);
 
             /**
              * Relative Int16 write, {@code position} is incremented by
@@ -190,7 +188,7 @@ namespace epics {
              * @throws EpicsException - Buffer overflow if there are less than
              * 2 bytes remaining in the buffer.
              */
-            ByteBuffer* putShort(epicsInt16 value);
+            ByteBuffer* putShort(int16 value);
 
             /**
              * Relative Int32 write, {@code position} is incremented by
@@ -200,7 +198,7 @@ namespace epics {
              * @throws EpicsException - Buffer overflow if there are less than
              * 4 bytes remaining in the buffer.
              */
-            ByteBuffer* putInt(epicsInt32 value);
+            ByteBuffer* putInt(int32 value);
 
             /**
              * Relative Int64 write, {@code position} is incremented by
@@ -210,7 +208,7 @@ namespace epics {
              * @throws EpicsException - Buffer overflow if there are less than
              * 8 bytes remaining in the buffer.
              */
-            ByteBuffer* putLong(epicsInt64 value);
+            ByteBuffer* putLong(int64 value);
 
             /**
              * Relative float write, {@code position} is incremented by
