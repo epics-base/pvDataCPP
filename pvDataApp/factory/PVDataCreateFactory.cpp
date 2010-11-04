@@ -40,6 +40,7 @@ static PVDataCreate* pvDataCreate = 0;
 
 PVDataCreate::PVDataCreate(){
     PVField::init();
+    PVAuxInfo::init();
 }
 
 PVField *PVDataCreate::createPVField(PVStructure *parent,

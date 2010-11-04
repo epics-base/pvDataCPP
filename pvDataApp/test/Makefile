@@ -2,10 +2,6 @@ TOP=../..
 
 include $(TOP)/configure/CONFIG
 
-PROD_HOST += testPVAuxInfo
-testPVAuxInfo_SRCS += testPVAuxInfo.cpp
-testPVAuxInfo_LIBS += pvFactory
-
 PROD_HOST += testBitSet
 testBitSet_SRCS += testBitSet.cpp
 testBitSet_LIBS += pvMisc Com

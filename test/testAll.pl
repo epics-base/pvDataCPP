@@ -5,3 +5,4 @@ system ("./testPVType.pl");
 system ("./testIntrospect.pl");
 system ("./testPVData.pl");
 system ("./testPVStructureArray.pl");
+system ("./testPVAuxInfo.pl");

@@ -46,6 +46,8 @@ namespace epics { namespace pvData {
     public:
         PVAuxInfo(PVField *pvField);
         ~PVAuxInfo();
+        static int64 getTotalConstruct();
+        static int64 getTotalDestruct();
         PVField * getPVField();
         PVScalar * createInfo(String key,ScalarType scalarType);
         PVScalarMap getInfos();
@@ -55,6 +57,7 @@ namespace epics { namespace pvData {
     private:
         static void init();
         class PVAuxInfoPvt *pImpl;
+        friend class PVDataCreate;
     };
 
     class PostHandler {

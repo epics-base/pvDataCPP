@@ -32,12 +32,12 @@ PVFieldPvt::PVFieldPvt(PVStructure *parent,FieldConstPtr field)
  pvAuxInfo(0),
  immutable(false),requester(0),postHandler(0)
 {
-   delete pvAuxInfo;
    field->incReferenceCount();
 }
 
 PVFieldPvt::~PVFieldPvt()
 {
+   if(pvAuxInfo!=0) delete pvAuxInfo;
    field->decReferenceCount();
 }
 

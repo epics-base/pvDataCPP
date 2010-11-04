@@ -6,6 +6,10 @@ PROD_HOST += testPVType
 testPVType_SRCS += testPVType.cpp
 testPVType_LIBS += pvFactory Com
 
+PROD_HOST += testPVAuxInfo
+testPVAuxInfo_SRCS += testPVAuxInfo.cpp
+testPVAuxInfo_LIBS += pvFactory Com
+
 PROD_HOST += testIntrospect
 testIntrospect_SRCS += testIntrospect.cpp
 testIntrospect_LIBS += pvFactory Com

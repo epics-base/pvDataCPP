@@ -1,0 +1,39 @@
+
+testPVAuxInfo
+structure value
+    double value 0
+    structure alarm
+        int severity 0
+        string message 
+    structure timeStamp
+        long secondsPastEpoch 0
+        int nanoSeconds 0
+    structure display
+        string description 
+        string format 
+        string units 
+        structure limit
+            double low 0
+            double high 0
+        auxInfo
+            key(factory) string factory factoryName
+            key(junk) double junk 3
+value offset 0 next 15 number 15
+value offset 1 next 2 number 1
+alarm offset 2 next 5 number 3
+severity offset 3 next 4 number 1
+message offset 4 next 5 number 1
+timeStamp offset 5 next 8 number 3
+secondsPastEpoch offset 6 next 7 number 1
+nanoSeconds offset 7 next 8 number 1
+display offset 8 next 15 number 7
+description offset 9 next 10 number 1
+format offset 10 next 11 number 1
+units offset 11 next 12 number 1
+limit offset 12 next 15 number 3
+low offset 13 next 14 number 1
+high offset 14 next 15 number 1
+Field: initialTotalReferences 93 finalTotalReferences 93
+Field:   totalConstruct 111 totalDestruct 18 totalReferenceCount 93
+PVField: totalConstruct 17 totalDestruct 17
+PVAuxInfo: totalConstruct 1 totalDestruct 1
