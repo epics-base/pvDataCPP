@@ -59,7 +59,7 @@ PVStructureArray * StandardPVField::structureArray(PVStructure *parent,
     return pvDataCreate->createPVStructureArray(parent,field);
 }
 
-PVStructure * StandardPVField::structureArray(PVStructure *parent,
+PVStructure* StandardPVField::structureArray(PVStructure *parent,
     String fieldName,StructureConstPtr structure,String properties)
 {
     StructureConstPtr field = standardField->structureArray(

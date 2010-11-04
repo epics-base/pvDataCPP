@@ -156,8 +156,8 @@ int main(int argc,char *argv[])
     finalTotalReferences = Field::getTotalReferenceCount();
     assert(initialTotalReferences==finalTotalReferences);
     initialTotalReferences = Field::getTotalReferenceCount();
-    long long totalConstruct = Field::getTotalConstruct();
-    long long totalDestruct = Field::getTotalDestruct();
+    int64 totalConstruct = Field::getTotalConstruct();
+    int64 totalDestruct = Field::getTotalDestruct();
     int totalReference = Field::getTotalReferenceCount();
     fprintf(fd,"Field:   totalConstruct %lli totalDestruct %lli totalReferenceCount %i\n",
         totalConstruct,totalDestruct,totalReference);

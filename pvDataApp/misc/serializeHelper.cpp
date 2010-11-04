@@ -6,7 +6,7 @@
  */
 
 #include <algorithm>
-#include <pvTypes.h>
+#include <pvType.h>
 
 #include "epicsException.h"
 #include "byteBuffer.h"

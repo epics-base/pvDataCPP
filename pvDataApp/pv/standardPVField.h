@@ -21,7 +21,7 @@ namespace epics { namespace pvData {
             String fieldName,ScalarType elementType, String properties);
         PVStructureArray * structureArray(PVStructure *parent,
             String fieldName,StructureConstPtr structure);
-        PVStructure * structureArray(PVStructure *parent,
+        PVStructure* structureArray(PVStructure *parent,
             String fieldName,StructureConstPtr structure,String properties);
         PVStructure * enumerated(PVStructure *parent,
             String fieldName,StringArray choices);

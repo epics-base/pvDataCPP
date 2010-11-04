@@ -2,7 +2,7 @@
 #ifndef BITSET_H
 #define BITSET_H
 #include <stdexcept>
-#include <pvTypes.h>
+#include <pvType.h>
 //#include "byteBuffer.h"
 //#include "serialize.h"
 namespace epics { namespace pvData { 

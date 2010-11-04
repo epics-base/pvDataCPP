@@ -4,7 +4,7 @@
 #ifndef PVINTROSPECT_H
 #define PVINTROSPECT_H
 #include "noDefaultMethods.h"
-#include "pvTypes.h"
+#include "pvType.h"
 namespace epics { namespace pvData { 
 
     class Field;
@@ -76,6 +76,7 @@ namespace epics { namespace pvData {
        friend class Structure;
        friend class PVFieldPvt;
        friend class StandardField;
+       friend class BasePVStructureArray;
     };
 
 

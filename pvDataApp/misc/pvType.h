@@ -1,6 +1,6 @@
-/* pvTypes.h */
-#ifndef PVTYPES_H
-#define PVTYPES_H
+/* pvType.h */
+#ifndef PVTYPE_H
+#define PVTYPE_H
 
 namespace epics { namespace pvData { 
 
@@ -12,7 +12,7 @@ namespace epics { namespace pvData {
     typedef unsigned long long uint64;
 
 }}
-#endif  /* PVTYPES_H */
+#endif  /* PVTYPE_H */
 
 
 

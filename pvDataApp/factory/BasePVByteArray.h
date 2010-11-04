@@ -33,8 +33,6 @@ namespace epics { namespace pvData {
         virtual void deserialize(ByteBuffer *pbuffer,DeserializableControl *pflusher);
         virtual void serialize(ByteBuffer *pbuffer,
              SerializableControl *pflusher, int offset, int count) ;
-        virtual void toString(StringBuilder buf);
-        virtual void toString(StringBuilder buf,int indentLevel);
         virtual bool operator==(PVField& pv) ;
         virtual bool operator!=(PVField& pv) ;
     private:
@@ -173,18 +171,6 @@ namespace epics { namespace pvData {
             else
                 break;
         }
-    }
-
-    void BasePVByteArray::toString(StringBuilder buf)
-    {
-        toString(buf,1);
-    }
-
-    void BasePVByteArray::toString(StringBuilder buf,int indentLevel)
-    {
-        getConvert()->getString(buf,this,indentLevel);
-
-        PVField::toString(buf,indentLevel);
     }
 
     bool BasePVByteArray::operator==(PVField& pv)

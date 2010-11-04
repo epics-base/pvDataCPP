@@ -29,8 +29,6 @@ namespace epics { namespace pvData {
             StructureArrayData *data);
         virtual int put(int offset,int length,
             PVStructurePtrArray from, int fromOffset);
-        virtual void toString(StringBuilder buf) ;
-        virtual void toString(StringBuilder buf,int indentLevel) ;
         virtual bool operator==(PVField &pv);
         virtual bool operator!=(PVField &pv);
         virtual void shareData( PVStructurePtrArray value,int capacity,int length);
@@ -53,11 +51,18 @@ namespace epics { namespace pvData {
       structureArray(structureArray),
       structureArrayData(new StructureArrayData()),
       value(new PVStructurePtr[0])
-     {}
+     {
+        structureArray->incReferenceCount();
+     }
 
     BasePVStructureArray::~BasePVStructureArray()
     {
+        structureArray->decReferenceCount();
         delete structureArrayData;
+        int length = getLength();
+        for(int i=0; i<length; i++) {
+           if(value[i]!=0) delete value[i];
+        }
         delete[] value;
     }
 
@@ -115,6 +120,7 @@ namespace epics { namespace pvData {
             int newlength = offset + len;
             if(newlength>capacity) {
                 setCapacity(newlength);
+                capacity = getCapacity();
                 newlength = capacity;
                 len = newlength - offset;
                 if(len<=0) return 0;
@@ -145,14 +151,6 @@ namespace epics { namespace pvData {
         this->value = value;
         setCapacity(capacity);
         setLength(length);
-    }
-
-    void BasePVStructureArray::toString(StringBuilder buf)  {toString(buf,0);}
-
-    void BasePVStructureArray::toString(StringBuilder buf,int indentLevel)
-    {
-       getConvert()->getString(buf,this,indentLevel);
-       PVField::toString(buf,indentLevel);
     }
 
     void BasePVStructureArray::serialize(ByteBuffer *pbuffer,

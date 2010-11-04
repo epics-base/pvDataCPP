@@ -2,7 +2,7 @@ TOP=../..
 
 include $(TOP)/configure/CONFIG
 
-INC += pvTypes.h
+INC += pvType.h
 INC += noDefaultMethods.h
 INC += lock.h
 INC += requester.h

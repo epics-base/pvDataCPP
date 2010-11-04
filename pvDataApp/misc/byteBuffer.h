@@ -3,7 +3,7 @@
 #define BYTEBUFFER_H
 
 #include <string>
-#include <pvTypes.h>
+#include <pvType.h>
 #include <epicsEndian.h>
 
 namespace epics {

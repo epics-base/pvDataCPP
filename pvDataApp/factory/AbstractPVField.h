@@ -223,6 +223,7 @@ void PVField::toString(StringBuilder buf)  {toString(buf,0);}
 
 void PVField::toString(StringBuilder buf,int indentLevel) 
 {
+   getConvert()->getString(buf,this,indentLevel);
    if(pImpl->pvAuxInfo==0) return;
    pImpl->pvAuxInfo->toString(buf,indentLevel);
 }

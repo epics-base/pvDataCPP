@@ -25,8 +25,6 @@ namespace epics { namespace pvData {
             SerializableControl *pflusher);
         virtual void deserialize(ByteBuffer *pbuffer,
             DeserializableControl *pflusher);
-        virtual void toString(StringBuilder buf);
-        virtual void toString(StringBuilder buf,int indentLevel);
         virtual bool operator==(PVField& pv) ;
         virtual bool operator!=(PVField& pv) ;
     private:
@@ -54,14 +52,6 @@ namespace epics { namespace pvData {
     {
         pflusher->ensureData(1);
         value = pbuffer->getBoolean();
-    }
-
-    void BasePVBoolean::toString(StringBuilder buf) {toString(buf,0);}
-
-    void BasePVBoolean::toString(StringBuilder buf,int indentLevel)
-    {
-        getConvert()->getString(buf,this,indentLevel);
-        PVField::toString(buf,indentLevel);
     }
 
     bool BasePVBoolean::operator==(PVField& pvField)

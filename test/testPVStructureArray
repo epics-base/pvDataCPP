@@ -1,0 +1,60 @@
+structure powerSupply
+    structureArray value 
+    [
+        structure powerSupply
+            structure voltage
+                double value 0
+                structure alarm
+                    int severity 0
+                    string message 
+            structure power
+                double value 0
+                structure alarm
+                    int severity 0
+                    string message 
+            structure current
+                double value 0
+                structure alarm
+                    int severity 0
+                    string message ,
+        structure powerSupply
+            structure voltage
+                double value 0
+                structure alarm
+                    int severity 0
+                    string message 
+            structure power
+                double value 0
+                structure alarm
+                    int severity 0
+                    string message 
+            structure current
+                double value 0
+                structure alarm
+                    int severity 0
+                    string message ,
+        structure powerSupply
+            structure voltage
+                double value 0
+                structure alarm
+                    int severity 0
+                    string message 
+            structure power
+                double value 0
+                structure alarm
+                    int severity 0
+                    string message 
+            structure current
+                double value 0
+                structure alarm
+                    int severity 0
+                    string message 
+    ]
+    structure alarm
+        int severity 0
+        string message 
+    structure timeStamp
+        long secondsPastEpoch 0
+        int nanoSeconds 0
+Field:   totalConstruct 153 totalDestruct 60 totalReferenceCount 93
+PVField: totalConstruct 56 totalDestruct 56

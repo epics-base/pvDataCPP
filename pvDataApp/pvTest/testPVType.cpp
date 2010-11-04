@@ -10,7 +10,7 @@
 #include <epicsAssert.h>
 
 #include "requester.h"
-#include "pvTypes.h"
+#include "pvType.h"
 
 using namespace epics::pvData;
 

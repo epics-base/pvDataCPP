@@ -101,8 +101,6 @@ namespace epics { namespace pvData {
     public:
         virtual ~PVScalar();
         ScalarConstPtr getScalar() ;
-        virtual void toString(StringBuilder buf) = 0;
-        virtual void toString(StringBuilder buf,int indentLevel) = 0;
     protected:
         PVScalar(PVStructure *parent,ScalarConstPtr scalar);
     };
@@ -122,8 +120,6 @@ namespace epics { namespace pvData {
             DeserializableControl *pflusher) = 0;
         virtual void serialize(ByteBuffer *pbuffer,
             SerializableControl *pflusher, int offset, int count) = 0;
-        virtual void toString(StringBuilder buf) = 0;
-        virtual void toString(StringBuilder buf,int indentLevel) = 0;
     protected:
         PVArray(PVStructure *parent,FieldConstPtr field);
         void setCapacityLength(int capacity,int length);
@@ -143,8 +139,6 @@ namespace epics { namespace pvData {
             DeserializableControl *pflusher) = 0;
         virtual void serialize(ByteBuffer *pbuffer,
             SerializableControl *pflusher, int offset, int count) = 0;
-        virtual void toString(StringBuilder buf) = 0;
-        virtual void toString(StringBuilder buf,int indentLevel) = 0;
     protected:
         PVScalarArray(PVStructure *parent,ScalarArrayConstPtr scalarArray);
     private:
@@ -208,8 +202,6 @@ namespace epics { namespace pvData {
         String getExtendsStructureName();
         bool putExtendsStructureName(
             String extendsStructureName);
-        virtual void toString(StringBuilder buf) ;
-        virtual void toString(StringBuilder buf,int indentLevel) ;
         virtual bool operator==(PVField &pv) ;
         virtual bool operator!=(PVField &pv) ;
         virtual void serialize(
@@ -225,7 +217,6 @@ namespace epics { namespace pvData {
     protected:
         PVStructure(PVStructure *parent,StructureConstPtr structure);
     private:
-        void toStringPvt(StringBuilder buf,int indentLevel) ;
         class PVStructurePvt * pImpl;
     };
 
@@ -328,8 +319,6 @@ namespace epics { namespace pvData {
     class PVBooleanArray : public PVScalarArray {
     public:
         virtual ~PVBooleanArray();
-        virtual void toString(StringBuilder buf) = 0 ;
-        virtual void toString(StringBuilder buf,int indentLevel) = 0 ;
         virtual void setCapacity(int capacity) = 0;
         virtual int get(int offset, int length, BooleanArrayData *data) = 0;
         virtual int put(int offset,int length, BooleanArray from, int fromOffset) = 0;
@@ -352,8 +341,6 @@ namespace epics { namespace pvData {
     class PVByteArray : public PVScalarArray {
     public:
         virtual ~PVByteArray();
-        virtual void toString(StringBuilder buf) = 0 ;
-        virtual void toString(StringBuilder buf,int indentLevel) = 0;
         virtual void setCapacity(int capacity) = 0;
         virtual int get(int offset, int length, ByteArrayData *data) = 0;
         virtual int put(int offset,int length, ByteArray  from, int fromOffset) = 0;
@@ -376,8 +363,6 @@ namespace epics { namespace pvData {
     class PVShortArray : public PVScalarArray {
     public:
         virtual ~PVShortArray();
-        virtual void toString(StringBuilder buf) = 0;
-        virtual void toString(StringBuilder buf,int indentLevel) = 0;
         virtual void setCapacity(int capacity) = 0;
         virtual int get(int offset, int length, ShortArrayData *data) = 0;
         virtual int put(int offset,int length, ShortArray  from, int fromOffset) = 0;
@@ -399,8 +384,6 @@ namespace epics { namespace pvData {
     class PVIntArray : public PVScalarArray {
     public:
         virtual ~PVIntArray();
-        virtual void toString(StringBuilder buf) = 0;
-        virtual void toString(StringBuilder buf,int indentLevel) = 0;
         virtual void setCapacity(int capacity) = 0;
         virtual int get(int offset, int length, IntArrayData *data) = 0;
         virtual int put(int offset,int length, IntArray  from, int fromOffset)= 0;
@@ -423,8 +406,6 @@ namespace epics { namespace pvData {
     class PVLongArray : public PVScalarArray {
     public:
         virtual ~PVLongArray();
-        virtual void toString(StringBuilder buf) = 0;
-        virtual void toString(StringBuilder buf,int indentLevel) = 0;
         virtual void setCapacity(int capacity) = 0;
         virtual int get(int offset, int length, LongArrayData *data) = 0;
         virtual int put(int offset,int length, LongArray  from, int fromOffset)= 0;
@@ -447,8 +428,6 @@ namespace epics { namespace pvData {
     class PVFloatArray : public PVScalarArray {
     public:
         virtual ~PVFloatArray();
-        virtual void toString(StringBuilder buf) = 0;
-        virtual void toString(StringBuilder buf,int indentLevel) = 0;
         virtual void setCapacity(int capacity) = 0;
         virtual int get(int offset, int length, FloatArrayData *data) = 0;
         virtual int put(int offset,int length, FloatArray  from, int fromOffset)= 0;
@@ -473,8 +452,6 @@ namespace epics { namespace pvData {
     class PVDoubleArray : public PVScalarArray {
     public:
         virtual ~PVDoubleArray();
-        virtual void toString(StringBuilder buf) = 0;
-        virtual void toString(StringBuilder buf,int indentLevel) = 0;
         virtual void setCapacity(int capacity) = 0;
         virtual int get(int offset, int length, DoubleArrayData *data) = 0;
         virtual int put(int offset,int length, DoubleArray  from, int fromOffset) = 0;
@@ -497,8 +474,6 @@ namespace epics { namespace pvData {
     class PVStringArray : public PVScalarArray {
     public:
         virtual ~PVStringArray();
-        virtual void toString(StringBuilder buf) = 0;
-        virtual void toString(StringBuilder buf,int indentLevel) = 0;
         virtual void setCapacity(int capacity) = 0;
         virtual int get(int offset, int length, StringArrayData *data) = 0;
         virtual int put(int offset,int length, StringArray  from, int fromOffset)= 0;

@@ -423,41 +423,6 @@ namespace epics { namespace pvData {
         return true;
     }
 
-    void PVStructure::toStringPvt(StringBuilder builder,int indentLevel) {
-        Convert *convert = getConvert();
-        PVField::toString(builder,indentLevel);
-        if(pImpl->extendsStructureName.length()>0) {
-            *builder += " extends ";
-            *builder += pImpl->extendsStructureName;
-        }
-        convert->newLine(builder,indentLevel);
-        *builder += "{";
-        int nFields = pImpl->numberFields;
-        PVFieldPtrArray pvFields = pImpl->pvFields;
-        for(int i=0; i < nFields; i++) {
-            PVField *pvField = pvFields[i];
-            convert->newLine(builder,indentLevel + 1);
-            FieldConstPtr field = pvField->getField();
-            *builder += field->getFieldName() + " = ";
-            pvField->toString(builder,indentLevel+1);
-        }
-        convert->newLine(builder,indentLevel);
-        *builder += "}";
-    }
-
-    void PVStructure::toString(StringBuilder buf)
-    {
-        *buf += "structure ";
-        *buf += getField()->getFieldName();
-         toStringPvt(buf,0);
-    }
-
-    void PVStructure::toString(StringBuilder buf,int indentLevel)
-    {
-        *buf += "structure ";
-         toStringPvt(buf,indentLevel);
-    }
-
     void PVStructure::serialize(ByteBuffer *pbuffer,
             SerializableControl *pflusher) {
         for(int i = 0; i<pImpl->numberFields; i++)

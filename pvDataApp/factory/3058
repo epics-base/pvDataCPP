@@ -3055,12 +3055,12 @@ void convertToString(StringBuilder buffer,PVField * pv,int indentLevel)
     if(type==structureArray) {
     	return convertStructureArray(buffer,(PVStructureArray*)pv,indentLevel);
     }
-    PVScalar *pvScalar = (PVScalar*)pv;
     ScalarConstPtr pscalar = pvScalar->getScalar();
     ScalarType scalarType = pscalar->getScalarType();
-    ScalarTypeFunc::toString(buffer,scalarType);
+    ScalarTypeFunction::toString(buffer,scalarType);
     *buffer += " ";
-    *buffer += pscalar->getFieldName();
+    *buffer += scalar->getFieldName();
+    PVScalar *pvScalar = (PVScalar*)pv;
     *buffer += " ";
     switch(scalarType) {
     case pvBoolean: {
@@ -3127,28 +3127,30 @@ void convertToString(StringBuilder buffer,PVField * pv,int indentLevel)
 
 void convertStructure(StringBuilder buffer,PVStructure *data,int indentLevel)
 {
-    *buffer += "structure ";
-    *buffer += data->getField()->getFieldName();
-    convert->newLine(buffer, indentLevel+1);
+    convert->newLine(buffer, indentLevel);
+    *buffer += "structure {";
     PVFieldPtrArray fieldsData = data->getPVFields();
     if (fieldsData != 0) {
         int length = data->getStructure()->getNumberFields();
         for(int i=0; i<length; i++) {
             PVField *fieldField = fieldsData[i];
-            fieldField->toString(buffer,indentLevel + 1);
-            if(i<length-1) convert->newLine(buffer, indentLevel+1);
+            FieldConstPtr fieldnow = fieldField->getField();
+            convert->newLine(buffer, indentLevel + 1);
+            int size = fieldnow->getFieldName().length();
+            char buff[size+2];
+            sprintf(buff,"%s = ",fieldnow->getFieldName().c_str());
+            *buffer += buff;
+            convert->getString(buffer,fieldField,indentLevel + 1);
         }
     }
+    convert->newLine(buffer, indentLevel);
+    *buffer += "}";
 }
 
 void convertArray(StringBuilder buffer,PVScalarArray * pv,int indentLevel)
 {
     ScalarArrayConstPtr array = pv->getScalarArray();
     ScalarType type = array->getElementType();
-    ScalarTypeFunc::toString(buffer,type);
-    *buffer += "Array ";
-    *buffer += array->getFieldName();
-    *buffer += " ";
     switch(type) {
     case pvBoolean: {
             PVBooleanArray *pvdata = (PVBooleanArray*)pv;
@@ -3317,17 +3319,9 @@ void convertArray(StringBuilder buffer,PVScalarArray * pv,int indentLevel)
 void convertStructureArray(StringBuilder buffer,
     PVStructureArray * pvdata,int indentLevel)
 {
-    *buffer += "structureArray ";
-    *buffer += pvdata->getField()->getFieldName();
-    *buffer += " ";
     StructureArrayData data = StructureArrayData();
     int length = pvdata->getLength();
     pvdata->get(0, length, &data);
-    if(length<=0) {
-        *buffer += " []";
-        return;
-    }
-    convert->newLine(buffer, indentLevel);
     *buffer += "[";
     for (int i = 0; i < length; i++) {
         if (i != 0) {
