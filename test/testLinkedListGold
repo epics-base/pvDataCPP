@@ -1,0 +1,20 @@
+basic addTail 0 1 2 3 4 4 3 2 1 0
+basic addHead 0 1 2 3 4
+basic addTail insertAfter 0 1 2 3 4
+basic addTail insertBefore 0 1 2 3 4
+
+Queue test
+queue 0 1 2 3 4
+
+Stack test
+stack 4 3 2 1 0
+
+testList
+list 0 1 2 3 4
+
+Random insert/remove test
+stack 4 3 2 1 0
+
+Ordered Queue test
+list 0 1 2 3 4
+totalConstructList 8 totalDestructList 8 totalConstructListNode 4038 totalDestructListNode 4038

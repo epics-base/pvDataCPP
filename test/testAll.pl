@@ -6,3 +6,4 @@ system ("./testIntrospect.pl");
 system ("./testPVData.pl");
 system ("./testPVStructureArray.pl");
 system ("./testPVAuxInfo.pl");
+system ("./testLinkedList.pl");

@@ -38,9 +38,20 @@ namespace epics { namespace pvData {
     class PVStructure;
     class PVStructureArray;
 
-
     typedef std::map<String,PVScalar * > PVScalarMap;
     typedef PVScalarMap::const_iterator PVScalarMapIter;
+    typedef PVStructure * PVStructurePtr;
+    typedef PVStructurePtr* PVStructurePtrArray;
+    typedef PVField* PVFieldPtr;
+    typedef PVFieldPtr * PVFieldPtrArray;
+    typedef bool * BooleanArray;
+    typedef int8 * ByteArray;
+    typedef int16 * ShortArray;
+    typedef int32 * IntArray;
+    typedef int64 * LongArray;
+    typedef float * FloatArray;
+    typedef double * DoubleArray;
+    typedef String * StringArray;
 
     class PVAuxInfo : private NoDefaultMethods {
     public:
@@ -147,8 +158,6 @@ namespace epics { namespace pvData {
     private:
     };
 
-    typedef PVStructure * PVStructurePtr;
-    typedef PVStructurePtr* PVStructurePtrArray;
     class StructureArrayData {
     public:
         PVStructurePtrArray data;
@@ -177,8 +186,6 @@ namespace epics { namespace pvData {
     private:
     };
     
-    typedef PVField* PVFieldPtr;
-    typedef PVFieldPtr * PVFieldPtrArray;
 
     class PVStructure : public PVField,public BitSetSerializable {
     public:
@@ -311,8 +318,6 @@ namespace epics { namespace pvData {
     private:
     };
 
-
-    typedef bool * BooleanArray;
     class BooleanArrayData {
     public:
         BooleanArray data;
@@ -334,7 +339,6 @@ namespace epics { namespace pvData {
     };
 
 
-    typedef int8 * ByteArray;
     class ByteArrayData {
     public:
         ByteArray data;
@@ -355,8 +359,6 @@ namespace epics { namespace pvData {
     private:
     };
 
-
-    typedef int16 * ShortArray;
     class ShortArrayData {
     public:
         ShortArray data;
@@ -377,7 +379,6 @@ namespace epics { namespace pvData {
     private:
     };
 
-    typedef int32 * IntArray;
     class IntArrayData {
     public:
         IntArray data;
@@ -398,8 +399,6 @@ namespace epics { namespace pvData {
     private:
     };
 
-
-    typedef int64 * LongArray;
     class LongArrayData {
     public:
         LongArray data;
@@ -421,7 +420,6 @@ namespace epics { namespace pvData {
     };
 
 
-    typedef float * FloatArray;
     class FloatArrayData {
     public:
         FloatArray data;
@@ -443,7 +441,6 @@ namespace epics { namespace pvData {
     };
 
 
-    typedef double * DoubleArray;
     class DoubleArrayData {
     public:
         DoubleArrayData(){}
@@ -467,10 +464,9 @@ namespace epics { namespace pvData {
     };
 
 
-    typedef String * StringPtrArray;
     class StringArrayData {
     public:
-        StringPtrArray data;
+        StringArray data;
         int offset;
     };
 

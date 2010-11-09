@@ -4,6 +4,8 @@ include $(TOP)/configure/CONFIG
 
 INC += pvType.h
 INC += noDefaultMethods.h
+INC += linkedListVoid.h
+INC += linkedList.h
 INC += lock.h
 INC += requester.h
 INC += serialize.h
@@ -15,6 +17,7 @@ INC += serializeHelper.h
 LIBSRCS += byteBuffer.cpp
 LIBSRCS += bitSet.cpp
 LIBSRCS += serializeHelper.cpp
+LIBSRCS += linkedListVoid.cpp
 
 LIBRARY=pvMisc
 

@@ -3292,7 +3292,7 @@ void convertArray(StringBuilder buffer,PVScalarArray * pv,int indentLevel)
     	for(int i=0; i < pvdata->getLength(); i++) {
     		if(i!=0) *buffer += ",";
     		int num = pvdata->get(i,1,&data);
-    		StringPtrArray value = data.data;
+    		StringArray value = data.data;
                 if(num==1) {
                     if(value[data.offset].length()>0) {
                          *buffer += value[data.offset].c_str();
