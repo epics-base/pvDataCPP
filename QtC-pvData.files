@@ -77,9 +77,9 @@ pvDataApp/test/testSimpleStructure.cpp
 pvDataApp/misc/epicsException.h
 pvDataApp/misc/byteBuffer.cpp
 pvDataApp/misc/bitSet.cpp
-pvDataApp/test/testByteBuffer.cpp
-pvDataApp/test/testBitSet.cpp
-pvDataApp/test/testBaseException.cpp
+pvDataApp/miscTest/testByteBuffer.cpp
+pvDataApp/miscTest/testBitSet.cpp
+pvDataApp/miscTest/testBaseException.cpp
 pvDataApp/misc/serializeHelper.h
 pvDataApp/misc/serializeHelper.cpp
 pvDataApp/pvTest/testIntrospect.cpp
