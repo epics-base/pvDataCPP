@@ -1,7 +1,6 @@
 /* linkedList.h */
 #ifndef LINKEDLIST_H
 #define LINKEDLIST_H
-#include "pvIntrospect.h"
 #include "linkedListVoid.h"
 namespace epics { namespace pvData { 
 

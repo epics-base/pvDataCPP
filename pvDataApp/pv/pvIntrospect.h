@@ -13,10 +13,6 @@ namespace epics { namespace pvData {
     class Structure;
     class StructureArray;
 
-    typedef std::string String;
-    typedef std::string * StringBuilder;
-    typedef String* StringArray;
-
     typedef Field const * FieldConstPtr;
     typedef FieldConstPtr * FieldConstPtrArray;
     typedef Scalar const * ScalarConstPtr;

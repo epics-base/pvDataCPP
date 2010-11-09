@@ -1,8 +1,8 @@
 /* linkedListVoid.h */
+
+#include "pvType.h"
 #ifndef LINKEDLISTVOID_H
 #define LINKEDLISTVOID_H
-#include "pvIntrospect.h"
-#include "noDefaultMethods.h"
 namespace epics { namespace pvData { 
 
 class LinkedListVoid;

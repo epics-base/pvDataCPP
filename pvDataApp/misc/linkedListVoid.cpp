@@ -4,10 +4,10 @@
 #include <cstddef>
 #include <string>
 #include <cstdio>
+#include <stdexcept>
 
 #include "lock.h"
 #include "pvType.h"
-#include "pvIntrospect.h"
 #include "linkedListVoid.h"
 
 namespace epics { namespace pvData { 
