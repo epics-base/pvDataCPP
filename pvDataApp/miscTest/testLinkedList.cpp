@@ -270,7 +270,7 @@ static void testOrderedQueue(FILE * fd ) {
     for(int i=0; i<numNodes; i++) delete basics[i];
 }
 
-static void testTime() {
+static void testTime(FILE *auxFd) {
     epicsTimeStamp  startTime;
     epicsTimeStamp  endTime;
     int numNodes = 1000;
@@ -280,7 +280,7 @@ static void testTime() {
     for(int i=0; i<numNodes; i++) {
         basics[i] = new Basic(i);
     }
-    printf("\nTime test\n");
+    fprintf(auxFd,"\nTime test\n");
     int ntimes = 1000;
     epicsTimeGetCurrent(&startTime);
     for(int i=0; i<ntimes; i++) {
@@ -291,19 +291,19 @@ static void testTime() {
     epicsTimeGetCurrent(&endTime);
     double diff = epicsTimeDiffInSeconds(&endTime,&startTime);
     diff *= 1000.0;
-    printf("diff %f milliSeconds\n",diff);
+    fprintf(auxFd,"diff %f milliSeconds\n",diff);
     diff = diff/1000.0; // convert from milliseconds to seconds
     diff = diff/ntimes; // seconds per outer loop
     diff = diff*1e6; // converty to microseconds
-    printf("time per iteration %f microseconds\n",diff);
+    fprintf(auxFd,"time per iteration %f microseconds\n",diff);
     diff = diff/(numNodes*2); // convert to per addTail/removeHead
-    printf("time per addTail/removeHead %f microseconds\n",diff);
+    fprintf(auxFd,"time per addTail/removeHead %f microseconds\n",diff);
     assert(basicList->isEmpty());
     delete basicList;
     for(int i=0; i<numNodes; i++) delete basics[i];
 }
 
-static void testTimeLocked() {
+static void testTimeLocked(FILE *auxFd) {
     epicsTimeStamp  startTime;
     epicsTimeStamp  endTime;
     Mutex *mutex = new Mutex();
@@ -314,7 +314,7 @@ static void testTimeLocked() {
     for(int i=0; i<numNodes; i++) {
         basics[i] = new Basic(i);
     }
-    printf("\nTime test locked\n");
+    fprintf(auxFd,"\nTime test locked\n");
     int ntimes = 1000;
     epicsTimeGetCurrent(&startTime);
     for(int i=0; i<ntimes; i++) {
@@ -335,20 +335,20 @@ static void testTimeLocked() {
     epicsTimeGetCurrent(&endTime);
     double diff = epicsTimeDiffInSeconds(&endTime,&startTime);
     diff *= 1000.0;
-    printf("diff %f milliSeconds\n",diff);
+    fprintf(auxFd,"diff %f milliSeconds\n",diff);
     diff = diff/1000.0; // convert from milliseconds to seconds
     diff = diff/ntimes; // seconds per outer loop
     diff = diff*1e6; // converty to microseconds
-    printf("time per iteration %f microseconds\n",diff);
+    fprintf(auxFd,"time per iteration %f microseconds\n",diff);
     diff = diff/(numNodes*2); // convert to per addTail/removeHead
-    printf("time per addTail/removeHead %f microseconds\n",diff);
+    fprintf(auxFd,"time per addTail/removeHead %f microseconds\n",diff);
     assert(basicList->isEmpty());
     delete basicList;
     for(int i=0; i<numNodes; i++) delete basics[i];
 }
 
 typedef std::list<Basic *> stdList;
-static void testArrayListTime() {
+static void testArrayListTime(FILE *auxFd) {
     epicsTimeStamp  startTime;
     epicsTimeStamp  endTime;
     int numNodes = 1000;
@@ -358,7 +358,7 @@ static void testArrayListTime() {
     for(int i=0; i<numNodes; i++) {
         basics[i] = new Basic(i);
     }
-    printf("\nTime ArrayList test\n");
+    fprintf(auxFd,"\nTime ArrayList test\n");
     int ntimes = 1000;
     epicsTimeGetCurrent(&startTime);
     for(int i=0; i<ntimes; i++) {
@@ -371,17 +371,17 @@ static void testArrayListTime() {
     epicsTimeGetCurrent(&endTime);
     double diff = epicsTimeDiffInSeconds(&endTime,&startTime);
     diff *= 1000.0;
-    printf("diff %f milliSeconds\n",diff);
+    fprintf(auxFd,"diff %f milliSeconds\n",diff);
     diff = diff/1000.0; // convert from milliseconds to seconds
     diff = diff/ntimes; // seconds per outer loop
     diff = diff*1e6; // converty to microseconds
-    printf("time per iteration %f microseconds\n",diff);
+    fprintf(auxFd,"time per iteration %f microseconds\n",diff);
     diff = diff/(numNodes*2); // convert to per addTail/removeHead
-    printf("time per addTail/removeHead %f microseconds\n",diff);
+    fprintf(auxFd,"time per addTail/removeHead %f microseconds\n",diff);
     for(int i=0; i<numNodes; i++) delete basics[i];
 }
 
-static void testArrayListTimeLocked() {
+static void testArrayListTimeLocked(FILE *auxFd) {
     epicsTimeStamp  startTime;
     epicsTimeStamp  endTime;
     int numNodes = 1000;
@@ -392,7 +392,7 @@ static void testArrayListTimeLocked() {
     for(int i=0; i<numNodes; i++) {
         basics[i] = new Basic(i);
     }
-    printf("\nTime ArrayList test locked\n");
+    fprintf(auxFd,"\nTime ArrayList test locked\n");
     int ntimes = 1000;
     epicsTimeGetCurrent(&startTime);
     for(int i=0; i<ntimes; i++) {
@@ -409,13 +409,13 @@ static void testArrayListTimeLocked() {
     epicsTimeGetCurrent(&endTime);
     double diff = epicsTimeDiffInSeconds(&endTime,&startTime);
     diff *= 1000.0;
-    printf("diff %f milliSeconds\n",diff);
+    fprintf(auxFd,"diff %f milliSeconds\n",diff);
     diff = diff/1000.0; // convert from milliseconds to seconds
     diff = diff/ntimes; // seconds per outer loop
     diff = diff*1e6; // converty to microseconds
-    printf("time per iteration %f microseconds\n",diff);
+    fprintf(auxFd,"time per iteration %f microseconds\n",diff);
     diff = diff/(numNodes*2); // convert to per addTail/removeHead
-    printf("time per addTail/removeHead %f microseconds\n",diff);
+    fprintf(auxFd,"time per addTail/removeHead %f microseconds\n",diff);
     for(int i=0; i<numNodes; i++) delete basics[i];
 }
 
@@ -426,16 +426,22 @@ int main(int argc, char *argv[]) {
     if(fileName!=0 && fileName[0]!=0) {
         fd = fopen(fileName,"w+");
     }
+    char *auxFileName = 0;
+    if(argc>2) auxFileName = argv[2];
+    FILE *auxFd = stdout;
+    if(auxFileName!=0 && auxFileName[0]!=0) {
+        auxFd = fopen(auxFileName,"w+");
+    }
     testBasic(fd);
     testQueue(fd);
     testStack(fd);
     testList(fd);
     testRandomInsertRemove(fd);
     testOrderedQueue(fd);
-    testTime();
-    testTimeLocked();
-    testArrayListTime();
-    testArrayListTimeLocked();
+    testTime(auxFd);
+    testTimeLocked(auxFd);
+    testArrayListTime(auxFd);
+    testArrayListTimeLocked(auxFd);
     int totalConstructList = LinkedListVoid::getTotalConstruct();
     int totalDestructList = LinkedListVoid::getTotalDestruct();
     int totalConstructListNode = LinkedListVoidNode::getTotalConstruct();

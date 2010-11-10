@@ -1,6 +1,6 @@
 eval 'exec perl -S $0 ${1+"$@"}'  # -*- Mode: perl -*-
     if $running_under_some_shell; # testPVStructureArray.pl
-$EPICS_HOST_ARCH = "linux-x86";
+use Env;
 system ("rm testPVStructureArray");
 system ("rm testPVStructureArrayDiff");
 system ("../bin/${EPICS_HOST_ARCH}/testPVStructureArray testPVStructureArray");

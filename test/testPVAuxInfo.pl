@@ -1,6 +1,6 @@
 eval 'exec perl -S $0 ${1+"$@"}'  # -*- Mode: perl -*-
     if $running_under_some_shell; # testPVAuxInfo.pl
-$EPICS_HOST_ARCH = "linux-x86";
+use Env;
 system ("rm testPVAuxInfo");
 system ("rm testPVAuxInfoDiff");
 system ("../bin/${EPICS_HOST_ARCH}/testPVAuxInfo testPVAuxInfo");
