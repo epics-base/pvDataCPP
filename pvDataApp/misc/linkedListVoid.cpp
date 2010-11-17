@@ -19,76 +19,28 @@ static volatile int64 totalListDestruct = 0;
 static Mutex *globalMutex = 0;
 static String alreadyOnList("already on list");
 
-class CDCallbackLinkedListNode : public ConstructDestructCallback {
-public:
-    CDCallbackLinkedListNode();
-    virtual String getConstructName();
-    virtual int64 getTotalConstruct();
-    virtual int64 getTotalDestruct();
-    virtual int64 getTotalReferenceCount();
-private:
-    String name;
-};
-
-CDCallbackLinkedListNode::CDCallbackLinkedListNode()
-: name("linkedListNode")
-{ 
-    getShowConstructDestruct()->registerCallback(this);
-}
-
-String CDCallbackLinkedListNode::getConstructName() {return name;}
-
-int64 CDCallbackLinkedListNode::getTotalConstruct()
+static int64 getTotalNodeConstruct()
 {
     Lock xx(globalMutex);
     return totalNodeConstruct;
 }
 
-int64 CDCallbackLinkedListNode::getTotalDestruct()
+static int64 getTotalNodeDestruct()
 {
     Lock xx(globalMutex);
     return totalNodeDestruct;
 }
 
-int64 CDCallbackLinkedListNode::getTotalReferenceCount()
-{
-    return 0;
-}
-
-class CDCallbackLinkedList : public ConstructDestructCallback {
-public:
-    CDCallbackLinkedList();
-    virtual String getConstructName();
-    virtual int64 getTotalConstruct();
-    virtual int64 getTotalDestruct();
-    virtual int64 getTotalReferenceCount();
-private:
-    String name;
-};
-
-CDCallbackLinkedList::CDCallbackLinkedList()
-: name("linkedList")
-{ 
-    getShowConstructDestruct()->registerCallback(this);
-}
-
-String CDCallbackLinkedList::getConstructName() {return name;}
-
-int64 CDCallbackLinkedList::getTotalConstruct()
+static int64 getTotalListConstruct()
 {
     Lock xx(globalMutex);
-    return totalNodeConstruct;
+    return totalListConstruct;
 }
 
-int64 CDCallbackLinkedList::getTotalDestruct()
+static int64 getTotalListDestruct()
 {
     Lock xx(globalMutex);
-    return totalNodeDestruct;
-}
-
-int64 CDCallbackLinkedList::getTotalReferenceCount()
-{
-    return 0;
+    return totalListDestruct;
 }
 
 static ConstructDestructCallback *pCDCallbackLinkedListNode;
@@ -100,8 +52,13 @@ static void initPvt()
      Lock xx(&mutex);
      if(globalMutex==0) {
         globalMutex = new Mutex();
-        pCDCallbackLinkedListNode = new CDCallbackLinkedListNode();
-        pCDCallbackLinkedList = new CDCallbackLinkedList();
+        pCDCallbackLinkedListNode = new ConstructDestructCallback(
+            "linkedListNode",
+            getTotalNodeConstruct,getTotalNodeDestruct,0);
+        
+        pCDCallbackLinkedList = new ConstructDestructCallback(
+            "linkedList",
+            getTotalListConstruct,getTotalListDestruct,0);
      }
 }
 

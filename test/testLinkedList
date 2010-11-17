@@ -18,4 +18,4 @@ stack 4 3 2 1 0
 Ordered Queue test
 list 0 1 2 3 4
 linkedListNode: totalConstruct 4041 totalDestruct 4038
-linkedList: totalConstruct 4041 totalDestruct 4038
+linkedList: totalConstruct 9 totalDestruct 8

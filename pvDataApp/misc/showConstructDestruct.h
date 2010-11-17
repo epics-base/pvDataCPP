@@ -12,12 +12,25 @@
 
 namespace epics { namespace pvData { 
 
-class ConstructDestructCallback {
+typedef int64 (*getTotal)();
+
+class ConstructDestructCallback : private NoDefaultMethods {
 public:
-    virtual String getConstructName() = 0;
-    virtual int64 getTotalConstruct() = 0;
-    virtual int64 getTotalDestruct() = 0;
-    virtual int64 getTotalReferenceCount() = 0;
+    ConstructDestructCallback(
+        String name,
+        getTotal construct,
+        getTotal destruct,
+        getTotal reference);
+    String getConstructName();
+    int64 getTotalConstruct();
+    int64 getTotalDestruct();
+    int64 getTotalReferenceCount();
+private:
+    ~ConstructDestructCallback();
+    String name;
+    getTotal construct;
+    getTotal destruct;
+    getTotal reference;
 };
 
 class ShowConstructDestruct : private NoDefaultMethods {

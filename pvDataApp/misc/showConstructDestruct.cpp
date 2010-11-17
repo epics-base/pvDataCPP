@@ -19,6 +19,40 @@ typedef LinkedListNode<ConstructDestructCallback> ListNode;
 typedef LinkedList<ConstructDestructCallback> List;
 static List *list;
 
+ConstructDestructCallback::ConstructDestructCallback(
+    String name,
+    getTotal construct,
+    getTotal destruct,
+    getTotal reference)
+: name(name), construct(construct), destruct(destruct) ,reference(reference)
+{
+    getShowConstructDestruct()->registerCallback(this);
+}
+
+ConstructDestructCallback::~ConstructDestructCallback() {}
+
+String ConstructDestructCallback::getConstructName()
+{
+    return name;
+}
+
+int64 ConstructDestructCallback::getTotalConstruct()
+{
+    return construct();
+}
+
+int64 ConstructDestructCallback:: getTotalDestruct()
+{
+    return destruct();
+}
+
+int64 ConstructDestructCallback::getTotalReferenceCount()
+{
+    if(reference==0) return 0;
+    return reference();
+}
+
+
 ShowConstructDestruct::ShowConstructDestruct() {}
 
 void ShowConstructDestruct::constuctDestructTotals(FILE *fd)

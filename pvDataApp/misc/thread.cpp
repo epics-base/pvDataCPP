@@ -47,40 +47,16 @@ static void addThread(Thread *thread);
 static void removeThread(Thread *thread);
 static ThreadList *list;
 
-class ConstructDestructCallbackThread : public ConstructDestructCallback {
-public:
-    ConstructDestructCallbackThread();
-    virtual String getConstructName();
-    virtual int64 getTotalConstruct();
-    virtual int64 getTotalDestruct();
-    virtual int64 getTotalReferenceCount();
-private:
-    String name;
-};
-
-ConstructDestructCallbackThread::ConstructDestructCallbackThread()
-: name("thread")
-{
-    getShowConstructDestruct()->registerCallback(this);
-}
-
-String ConstructDestructCallbackThread::getConstructName() {return name;}
-
-int64 ConstructDestructCallbackThread::getTotalConstruct()
+static int64 getTotalConstruct()
 {
     Lock xx(globalMutex);
     return totalConstruct;
 }
 
-int64 ConstructDestructCallbackThread::getTotalDestruct()
+static int64 getTotalDestruct()
 {
     Lock xx(globalMutex);
     return totalDestruct;
-}
-
-int64 ConstructDestructCallbackThread::getTotalReferenceCount()
-{
-    return 0;
 }
 
 static ConstructDestructCallback *pConstructDestructCallback;
@@ -92,7 +68,9 @@ static void init()
      if(globalMutex==0) {
         globalMutex = new Mutex();
         list = new ThreadList();
-        pConstructDestructCallback = new ConstructDestructCallbackThread();
+        pConstructDestructCallback = new ConstructDestructCallback(
+            String("thread"),
+            getTotalConstruct,getTotalDestruct,0);
      }
 }
 

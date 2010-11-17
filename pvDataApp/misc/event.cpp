@@ -22,40 +22,17 @@ static volatile int64 totalDestruct = 0;
 static Mutex *globalMutex = 0;
 static String alreadyOn("already on list");
 
-class ConstructDestructCallbackEvent : public ConstructDestructCallback {
-public:
-    ConstructDestructCallbackEvent();
-    virtual String getConstructName();
-    virtual int64 getTotalConstruct();
-    virtual int64 getTotalDestruct();
-    virtual int64 getTotalReferenceCount();
-private:
-    String name;
-};
 
-ConstructDestructCallbackEvent::ConstructDestructCallbackEvent()
-: name("event")
-{
-    getShowConstructDestruct()->registerCallback(this);
-}
-
-String ConstructDestructCallbackEvent::getConstructName() {return name;}
-
-int64 ConstructDestructCallbackEvent::getTotalConstruct()
+static int64 getTotalConstruct()
 {
     Lock xx(globalMutex);
     return totalConstruct;
 }
 
-int64 ConstructDestructCallbackEvent::getTotalDestruct()
+static int64 getTotalDestruct()
 {
     Lock xx(globalMutex);
     return totalDestruct;
-}
-
-int64 ConstructDestructCallbackEvent::getTotalReferenceCount()
-{
-    return 0;
 }
 
 static ConstructDestructCallback *pConstructDestructCallback;
@@ -66,7 +43,9 @@ static void init()
      Lock xx(&mutex);
      if(globalMutex==0) {
         globalMutex = new Mutex();
-        pConstructDestructCallback = new ConstructDestructCallbackEvent();
+        pConstructDestructCallback = new ConstructDestructCallback(
+            String("event"),
+            getTotalConstruct,getTotalDestruct,0);
      }
 }
 

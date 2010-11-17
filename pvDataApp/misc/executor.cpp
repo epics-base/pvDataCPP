@@ -19,42 +19,17 @@ static volatile int64 totalConstruct = 0;
 static volatile int64 totalDestruct = 0;
 static Mutex *globalMutex = 0;
 
-class ConstructDestructCallbackExecutor : public ConstructDestructCallback {
-public:
-    ConstructDestructCallbackExecutor();
-    virtual String getConstructName();
-    virtual int64 getTotalConstruct();
-    virtual int64 getTotalDestruct();
-    virtual int64 getTotalReferenceCount();
-private:
-    String name;
-};
-
-ConstructDestructCallbackExecutor::ConstructDestructCallbackExecutor()
-: name("executor")
-{
-    getShowConstructDestruct()->registerCallback(this);
-}
-
-String ConstructDestructCallbackExecutor::getConstructName() {return name;}
-
-int64 ConstructDestructCallbackExecutor::getTotalConstruct()
+static int64 getTotalConstruct()
 {
     Lock xx(globalMutex);
     return totalConstruct;
 }
 
-int64 ConstructDestructCallbackExecutor::getTotalDestruct()
+static int64 getTotalDestruct()
 {
     Lock xx(globalMutex);
     return totalDestruct;
 }
-int64 ConstructDestructCallbackExecutor::getTotalReferenceCount()
-
-{
-    return 0;
-}
-
 
 static ConstructDestructCallback *pConstructDestructCallback;
 
@@ -63,7 +38,9 @@ static void init() {
     Lock xx(&mutex);
     if(globalMutex==0) {
         globalMutex = new Mutex();
-        pConstructDestructCallback = new ConstructDestructCallbackExecutor();
+        pConstructDestructCallback = new ConstructDestructCallback(
+            String("executor"),
+            getTotalConstruct,getTotalDestruct,0);
     }
 }
 

@@ -23,11 +23,11 @@ INC += timeFunction.h
 LIBSRCS += byteBuffer.cpp
 LIBSRCS += bitSet.cpp
 LIBSRCS += serializeHelper.cpp
+LIBSRCS += showConstructDestruct.cpp
 LIBSRCS += linkedListVoid.cpp
 LIBSRCS += event.cpp
 LIBSRCS += thread.cpp
 LIBSRCS += executor.cpp
-LIBSRCS += showConstructDestruct.cpp
 LIBSRCS += timeStamp.cpp
 LIBSRCS += timeFunction.cpp
 

@@ -15,36 +15,16 @@ static volatile int64 totalConstruct = 0;
 static volatile int64 totalDestruct = 0;
 static Mutex *globalMutex = 0;
 
-class CDCallbackPVAuxInfo : public ConstructDestructCallback {
-public:
-    CDCallbackPVAuxInfo();
-    virtual String getConstructName();
-    virtual int64 getTotalConstruct();
-    virtual int64 getTotalDestruct();
-    virtual int64 getTotalReferenceCount();
-private:
-    String name;
-};
-
-CDCallbackPVAuxInfo::CDCallbackPVAuxInfo()
-: name("pvAuxInfo")
-{
-    getShowConstructDestruct()->registerCallback(this);
-}
-String CDCallbackPVAuxInfo::getConstructName() {return name;}
-int64 CDCallbackPVAuxInfo::getTotalConstruct()
+static int64 getTotalConstruct()
 {
     Lock xx(globalMutex);
     return totalConstruct;
 }
-int64 CDCallbackPVAuxInfo::getTotalDestruct()
+
+static int64 getTotalDestruct()
 {
     Lock xx(globalMutex);
     return totalDestruct;
-}
-int64 CDCallbackPVAuxInfo::getTotalReferenceCount()
-{
-    return 0;
 }
 
 static ConstructDestructCallback *pConstructDestructCallback;
@@ -55,7 +35,9 @@ static void init()
     Lock xx(&mutex);
     if(globalMutex==0) {
         globalMutex = new Mutex();
-        pConstructDestructCallback = new CDCallbackPVAuxInfo();
+        pConstructDestructCallback = new ConstructDestructCallback(
+            String("pvAuxInfo"),
+            getTotalConstruct,getTotalDestruct,0);
     }
 }
 
