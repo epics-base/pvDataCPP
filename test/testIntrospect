@@ -77,5 +77,5 @@ structure value
     structure timeStamp
         long secondsPastEpoch
         int nanoSeconds
-Field:   totalConstruct 156 totalDestruct 63 totalReferenceCount 93
-PVField: totalConstruct 55 totalDestruct 55
+field: totalConstruct 156 totalDestruct 63 totalReference 93
+pvField: totalConstruct 55 totalDestruct 55

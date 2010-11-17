@@ -38,10 +38,7 @@ static Convert* convert = 0;
 static FieldCreate * fieldCreate = 0;
 static PVDataCreate* pvDataCreate = 0;
 
-PVDataCreate::PVDataCreate(){
-    PVField::init();
-    PVAuxInfo::init();
-}
+PVDataCreate::PVDataCreate(){ }
 
 PVField *PVDataCreate::createPVField(PVStructure *parent,
         FieldConstPtr field)

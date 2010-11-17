@@ -12,6 +12,58 @@ namespace epics { namespace pvData {
 
 static String notImplemented("not implemented");
 
+static volatile int64 totalConstruct = 0;
+static volatile int64 totalDestruct = 0;
+static Mutex *globalMutex = 0;
+
+class CDCallbackPVField : public ConstructDestructCallback {
+public:
+    CDCallbackPVField();
+    virtual String getConstructName();
+    virtual int64 getTotalConstruct();
+    virtual int64 getTotalDestruct();
+    virtual int64 getTotalReferenceCount();
+private:
+    String name;
+};
+
+CDCallbackPVField::CDCallbackPVField()
+: name("pvField")
+{
+    getShowConstructDestruct()->registerCallback(this);
+}
+
+String CDCallbackPVField::getConstructName() {return name;}
+
+int64 CDCallbackPVField::getTotalConstruct()
+{
+    Lock xx(globalMutex);
+    return totalConstruct;
+}
+
+int64 CDCallbackPVField::getTotalDestruct()
+{
+    Lock xx(globalMutex);
+    return totalDestruct;
+}
+
+int64 CDCallbackPVField::getTotalReferenceCount()
+{
+    return 0;
+}
+
+static ConstructDestructCallback *pConstructDestructCallback;
+
+static void init()
+{
+    static Mutex mutex = Mutex();
+    Lock xx(&mutex);
+    if(globalMutex==0) {
+        globalMutex = new Mutex();
+        pConstructDestructCallback = new CDCallbackPVField();
+    }
+}
+
 class PVFieldPvt {
 public:
    PVFieldPvt(PVStructure *parent,FieldConstPtr field);
@@ -42,31 +94,11 @@ PVFieldPvt::~PVFieldPvt()
 }
 
 
-static volatile int64 totalConstruct = 0;
-static volatile int64 totalDestruct = 0;
-static Mutex *globalMutex = 0;
-
-void PVField::init()
-{
-    globalMutex = new Mutex();
-}
-
-int64 PVField::getTotalConstruct()
-{
-    Lock xx(globalMutex);
-    return totalConstruct;
-}
-
-int64 PVField::getTotalDestruct()
-{
-    Lock xx(globalMutex);
-    return totalDestruct;
-}
-
 
 PVField::PVField(PVStructure *parent,FieldConstPtr field)
 : pImpl(new PVFieldPvt(parent,field))
 {
+    init();
     Lock xx(globalMutex);
     totalConstruct++;
 }
@@ -77,6 +109,13 @@ PVField::~PVField()
     totalDestruct++;
    delete pImpl;
 }
+
+ConstructDestructCallback *PVField::getConstructDestructCallback()
+{
+    init();
+    return pConstructDestructCallback;
+}
+
 
 String PVField::getRequesterName() 
 {

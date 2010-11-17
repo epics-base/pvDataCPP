@@ -6,6 +6,10 @@ PROD_HOST += testLinkedList
 testLinkedList_SRCS += testLinkedList.cpp
 testLinkedList_LIBS += pvMisc Com
 
+PROD_HOST += testThread
+testThread_SRCS += testThread.cpp
+testThread_LIBS += pvMisc Com
+
 PROD_HOST += testBitSet
 testBitSet_SRCS += testBitSet.cpp
 testBitSet_LIBS += pvMisc Com

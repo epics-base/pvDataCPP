@@ -19,41 +19,97 @@ static volatile int64 totalListDestruct = 0;
 static Mutex *globalMutex = 0;
 static String alreadyOnList("already on list");
 
-int64 LinkedListVoidNode::getTotalConstruct()
+class CDCallbackLinkedListNode : public ConstructDestructCallback {
+public:
+    CDCallbackLinkedListNode();
+    virtual String getConstructName();
+    virtual int64 getTotalConstruct();
+    virtual int64 getTotalDestruct();
+    virtual int64 getTotalReferenceCount();
+private:
+    String name;
+};
+
+CDCallbackLinkedListNode::CDCallbackLinkedListNode()
+: name("linkedListNode")
+{ 
+    getShowConstructDestruct()->registerCallback(this);
+}
+
+String CDCallbackLinkedListNode::getConstructName() {return name;}
+
+int64 CDCallbackLinkedListNode::getTotalConstruct()
 {
     Lock xx(globalMutex);
     return totalNodeConstruct;
 }
 
-int64 LinkedListVoidNode::getTotalDestruct()
+int64 CDCallbackLinkedListNode::getTotalDestruct()
 {
     Lock xx(globalMutex);
     return totalNodeDestruct;
 }
 
-int64 LinkedListVoid::getTotalConstruct()
+int64 CDCallbackLinkedListNode::getTotalReferenceCount()
 {
-    Lock xx(globalMutex);
-    return totalListConstruct;
+    return 0;
 }
 
-int64 LinkedListVoid::getTotalDestruct()
-{
-    Lock xx(globalMutex);
-    return totalListDestruct;
+class CDCallbackLinkedList : public ConstructDestructCallback {
+public:
+    CDCallbackLinkedList();
+    virtual String getConstructName();
+    virtual int64 getTotalConstruct();
+    virtual int64 getTotalDestruct();
+    virtual int64 getTotalReferenceCount();
+private:
+    String name;
+};
+
+CDCallbackLinkedList::CDCallbackLinkedList()
+: name("linkedList")
+{ 
+    getShowConstructDestruct()->registerCallback(this);
 }
 
+String CDCallbackLinkedList::getConstructName() {return name;}
 
-void LinkedListVoid::init() {
+int64 CDCallbackLinkedList::getTotalConstruct()
+{
+    Lock xx(globalMutex);
+    return totalNodeConstruct;
+}
+
+int64 CDCallbackLinkedList::getTotalDestruct()
+{
+    Lock xx(globalMutex);
+    return totalNodeDestruct;
+}
+
+int64 CDCallbackLinkedList::getTotalReferenceCount()
+{
+    return 0;
+}
+
+static ConstructDestructCallback *pCDCallbackLinkedListNode;
+static ConstructDestructCallback *pCDCallbackLinkedList;
+
+static void initPvt()
+{
      static Mutex mutex = Mutex();
-      Lock xx(&mutex);
-     if(globalMutex==0) globalMutex = new Mutex();
+     Lock xx(&mutex);
+     if(globalMutex==0) {
+        globalMutex = new Mutex();
+        pCDCallbackLinkedListNode = new CDCallbackLinkedListNode();
+        pCDCallbackLinkedList = new CDCallbackLinkedList();
+     }
 }
+
 
 LinkedListVoidNode::LinkedListVoidNode(void *object)
 : object(object),before(0),after(0)
 {
-    LinkedListVoid::init();
+    initPvt();
     Lock xx(globalMutex);
     totalNodeConstruct++;
 }
@@ -61,15 +117,22 @@ LinkedListVoidNode::LinkedListVoidNode(void *object)
 LinkedListVoidNode::LinkedListVoidNode(bool isHead)
 : object(this),before(this),after(this)
 {
-    LinkedListVoid::init();
+    initPvt();
     Lock xx(globalMutex);
     totalNodeConstruct++;
 }
+
 
 LinkedListVoidNode::~LinkedListVoidNode()
 {
     Lock xx(globalMutex);
     totalNodeDestruct++;
+}
+
+ConstructDestructCallback *LinkedListVoidNode::getConstructDestructCallback()
+{
+    initPvt();
+    return pCDCallbackLinkedListNode;
 }
 
 void *LinkedListVoidNode::getObject() {
@@ -85,7 +148,7 @@ bool LinkedListVoidNode::isOnList()
 LinkedListVoid::LinkedListVoid()
 : head(new LinkedListVoidNode(true)),length(0)
 {
-    LinkedListVoid::init();
+    initPvt();
     Lock xx(globalMutex);
     totalListConstruct++;
 }
@@ -95,6 +158,12 @@ LinkedListVoid::~LinkedListVoid()
     Lock xx(globalMutex);
     delete head;
     totalListDestruct++;
+}
+
+ConstructDestructCallback *LinkedListVoid::getConstructDestructCallback()
+{
+    initPvt();
+    return pCDCallbackLinkedList;
 }
 
 int LinkedListVoid::getLength()

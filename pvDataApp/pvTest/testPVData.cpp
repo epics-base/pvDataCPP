@@ -15,6 +15,7 @@
 #include "convert.h"
 #include "standardField.h"
 #include "standardPVField.h"
+#include "showConstructDestruct.h"
 
 using namespace epics::pvData;
 
@@ -247,7 +248,6 @@ static void testScalarArray(FILE * fd) {
 
 int main(int argc,char *argv[])
 {
-    int initialTotalReferences,finalTotalReferences;
     char *fileName = 0;
     if(argc>1) fileName = argv[1];
     FILE * fd = stdout;
@@ -259,25 +259,9 @@ int main(int argc,char *argv[])
     standardField = getStandardField();
     standardPVField = getStandardPVField();
     convert = getConvert();
-    initialTotalReferences = Field::getTotalReferenceCount();
     testPVScalar(fd);
-    finalTotalReferences = Field::getTotalReferenceCount();
-    assert(initialTotalReferences==finalTotalReferences);
-    initialTotalReferences = Field::getTotalReferenceCount();
     testScalarArray(fd);
-    finalTotalReferences = Field::getTotalReferenceCount();
-    assert(initialTotalReferences==finalTotalReferences);
-    int64 totalConstruct = Field::getTotalConstruct();
-    int64 totalDestruct = Field::getTotalDestruct();
-    int totalReference = Field::getTotalReferenceCount();
-    fprintf(fd,"Field:   totalConstruct %lli totalDestruct %lli totalReferenceCount %i\n",
-        totalConstruct,totalDestruct,totalReference);
-    assert(totalConstruct==(totalDestruct+totalReference));
-    totalConstruct = PVField::getTotalConstruct();
-    totalDestruct = PVField::getTotalDestruct();
-    fprintf(fd,"PVField: totalConstruct %lli totalDestruct %lli\n",
-        totalConstruct,totalDestruct);
-    assert(totalConstruct==totalDestruct);
+    getShowConstructDestruct()->constuctDestructTotals(fd);
     return(0);
 }
 

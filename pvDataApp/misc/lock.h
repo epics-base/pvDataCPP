@@ -11,12 +11,12 @@ namespace epics { namespace pvData {
 
     class Mutex  {
     public:
-        Mutex() : lockPtr(new epicsMutex()){}
-        ~Mutex() { delete lockPtr;};
-        void lock(){lockPtr->lock();}\
-        void unlock(){lockPtr->unlock();}
+        Mutex() : id(epicsMutexMustCreate()){}
+        ~Mutex() { epicsMutexDestroy(id) ;};
+        void lock(){epicsMutexMustLock(id);}\
+        void unlock(){epicsMutexUnlock(id);}
     private:
-        epicsMutex *lockPtr;
+        epicsMutexId id;
     };
 
 

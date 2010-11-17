@@ -54,7 +54,7 @@ namespace epics { namespace pvData {
         StructureConstPtr doubleAlarm();
         StructureConstPtr enumeratedAlarm();
     private:
-        void init();
+        static void init();
     };
 
     extern StandardField * getStandardField();

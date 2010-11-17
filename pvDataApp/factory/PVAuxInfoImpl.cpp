@@ -11,6 +11,56 @@
 
 namespace epics { namespace pvData {
 
+static volatile int64 totalConstruct = 0;
+static volatile int64 totalDestruct = 0;
+static Mutex *globalMutex = 0;
+
+class CDCallbackPVAuxInfo : public ConstructDestructCallback {
+public:
+    CDCallbackPVAuxInfo();
+    virtual String getConstructName();
+    virtual int64 getTotalConstruct();
+    virtual int64 getTotalDestruct();
+    virtual int64 getTotalReferenceCount();
+private:
+    String name;
+};
+
+CDCallbackPVAuxInfo::CDCallbackPVAuxInfo()
+: name("pvAuxInfo")
+{
+    getShowConstructDestruct()->registerCallback(this);
+}
+String CDCallbackPVAuxInfo::getConstructName() {return name;}
+int64 CDCallbackPVAuxInfo::getTotalConstruct()
+{
+    Lock xx(globalMutex);
+    return totalConstruct;
+}
+int64 CDCallbackPVAuxInfo::getTotalDestruct()
+{
+    Lock xx(globalMutex);
+    return totalDestruct;
+}
+int64 CDCallbackPVAuxInfo::getTotalReferenceCount()
+{
+    return 0;
+}
+
+static ConstructDestructCallback *pConstructDestructCallback;
+
+static void init()
+{
+    static Mutex mutex = Mutex();
+    Lock xx(&mutex);
+    if(globalMutex==0) {
+        globalMutex = new Mutex();
+        pConstructDestructCallback = new CDCallbackPVAuxInfo();
+    }
+}
+
+typedef std::map<String,PVScalar * >::const_iterator map_iterator;
+
 class PVAuxInfoPvt {
 public:
     PVAuxInfoPvt(PVField *pvField)
@@ -21,33 +71,10 @@ public:
     std::map<String, PVScalar * > theMap;
 };
 
-static volatile int64 totalConstruct = 0;
-static volatile int64 totalDestruct = 0;
-static Mutex *globalMutex = 0;
-
-typedef std::map<String,PVScalar * >::const_iterator map_iterator;
-
-void PVAuxInfo::init()
-{
-    globalMutex = new Mutex();
-}
-
-int64 PVAuxInfo::getTotalConstruct()
-{
-    Lock xx(globalMutex);
-    return totalConstruct;
-}
-
-int64 PVAuxInfo::getTotalDestruct()
-{
-    Lock xx(globalMutex);
-    return totalDestruct;
-}
-
-
 PVAuxInfo::PVAuxInfo(PVField *pvField)
 : pImpl(new PVAuxInfoPvt(pvField))
 {
+    init();
     Lock xx(globalMutex);
     totalConstruct++;
 }
@@ -68,6 +95,11 @@ PVField * PVAuxInfo::getPVField() {
     return pImpl->pvField;
 }
 
+ConstructDestructCallback *PVAuxInfo::getConstructDestructCallback()
+{
+    init();
+    return pConstructDestructCallback;
+}
 
 PVScalar * PVAuxInfo::createInfo(String key,ScalarType scalarType)
 {

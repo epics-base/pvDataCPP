@@ -1,9 +1,9 @@
 /*
- *  * testLinkedList.cpp
- *   *
- *    *  Created on: 2010.11
- *     *      Author: Marty Kraimer
- *      */
+ * testLinkedList.cpp
+ *
+ *  Created on: 2010.11
+ *      Author: Marty Kraimer
+ */
 
 #include <cstddef>
 #include <cstdlib>
@@ -12,13 +12,12 @@
 #include <cstdio>
 #include <list>
 
-#include <epicsTime.h>
 #include <epicsAssert.h>
 
 #include "lock.h"
+#include "timeStamp.h"
 #include "linkedList.h"
-#include "pvIntrospect.h"
-#include "pvData.h"
+#include "showConstructDestruct.h"
 
 
 using namespace epics::pvData;
@@ -271,8 +270,8 @@ static void testOrderedQueue(FILE * fd ) {
 }
 
 static void testTime(FILE *auxFd) {
-    epicsTimeStamp  startTime;
-    epicsTimeStamp  endTime;
+    TimeStamp startTime(0,0);
+    TimeStamp endTime(0,0);
     int numNodes = 1000;
 
     LinkedList<Basic> *basicList = new BasicList();
@@ -282,15 +281,15 @@ static void testTime(FILE *auxFd) {
     }
     fprintf(auxFd,"\nTime test\n");
     int ntimes = 1000;
-    epicsTimeGetCurrent(&startTime);
+    startTime.getCurrent();
     for(int i=0; i<ntimes; i++) {
         for(int j=0;j<numNodes;j++) basicList->addTail(basics[j]->node);
         BasicListNode *basicNode = basicList->removeHead();
         while(basicNode!=0) basicNode = basicList->removeHead();
     }
-    epicsTimeGetCurrent(&endTime);
-    double diff = epicsTimeDiffInSeconds(&endTime,&startTime);
-    diff *= 1000.0;
+    endTime.getCurrent();
+    double diff = TimeStamp::diffInSeconds(&endTime,&startTime);
+    diff /= 1000.0;
     fprintf(auxFd,"diff %f milliSeconds\n",diff);
     diff = diff/1000.0; // convert from milliseconds to seconds
     diff = diff/ntimes; // seconds per outer loop
@@ -304,8 +303,8 @@ static void testTime(FILE *auxFd) {
 }
 
 static void testTimeLocked(FILE *auxFd) {
-    epicsTimeStamp  startTime;
-    epicsTimeStamp  endTime;
+    TimeStamp startTime(0,0);
+    TimeStamp endTime(0,0);
     Mutex *mutex = new Mutex();
     int numNodes = 1000;
 
@@ -316,7 +315,7 @@ static void testTimeLocked(FILE *auxFd) {
     }
     fprintf(auxFd,"\nTime test locked\n");
     int ntimes = 1000;
-    epicsTimeGetCurrent(&startTime);
+    startTime.getCurrent();
     for(int i=0; i<ntimes; i++) {
         for(int j=0;j<numNodes;j++) {
             Lock xx(mutex);
@@ -332,8 +331,8 @@ static void testTimeLocked(FILE *auxFd) {
            basicNode = basicList->removeHead();
         }
     }
-    epicsTimeGetCurrent(&endTime);
-    double diff = epicsTimeDiffInSeconds(&endTime,&startTime);
+    endTime.getCurrent();
+    double diff = TimeStamp::diffInSeconds(&endTime,&startTime);
     diff *= 1000.0;
     fprintf(auxFd,"diff %f milliSeconds\n",diff);
     diff = diff/1000.0; // convert from milliseconds to seconds
@@ -349,8 +348,8 @@ static void testTimeLocked(FILE *auxFd) {
 
 typedef std::list<Basic *> stdList;
 static void testArrayListTime(FILE *auxFd) {
-    epicsTimeStamp  startTime;
-    epicsTimeStamp  endTime;
+    TimeStamp startTime(0,0);
+    TimeStamp endTime(0,0);
     int numNodes = 1000;
 
     stdList basicList;
@@ -360,7 +359,7 @@ static void testArrayListTime(FILE *auxFd) {
     }
     fprintf(auxFd,"\nTime ArrayList test\n");
     int ntimes = 1000;
-    epicsTimeGetCurrent(&startTime);
+    startTime.getCurrent();
     for(int i=0; i<ntimes; i++) {
         for(int j=0;j<numNodes;j++) basicList.push_back(basics[j]);
         while(basicList.size()>0) {
@@ -368,8 +367,8 @@ static void testArrayListTime(FILE *auxFd) {
             basicList.pop_front();
         }
     }
-    epicsTimeGetCurrent(&endTime);
-    double diff = epicsTimeDiffInSeconds(&endTime,&startTime);
+    endTime.getCurrent();
+    double diff = TimeStamp::diffInSeconds(&endTime,&startTime);
     diff *= 1000.0;
     fprintf(auxFd,"diff %f milliSeconds\n",diff);
     diff = diff/1000.0; // convert from milliseconds to seconds
@@ -382,8 +381,8 @@ static void testArrayListTime(FILE *auxFd) {
 }
 
 static void testArrayListTimeLocked(FILE *auxFd) {
-    epicsTimeStamp  startTime;
-    epicsTimeStamp  endTime;
+    TimeStamp startTime(0,0);
+    TimeStamp endTime(0,0);
     int numNodes = 1000;
     Mutex *mutex = new Mutex();
 
@@ -394,7 +393,7 @@ static void testArrayListTimeLocked(FILE *auxFd) {
     }
     fprintf(auxFd,"\nTime ArrayList test locked\n");
     int ntimes = 1000;
-    epicsTimeGetCurrent(&startTime);
+    startTime.getCurrent();
     for(int i=0; i<ntimes; i++) {
         for(int j=0;j<numNodes;j++) {
             Lock xx(mutex);
@@ -406,8 +405,8 @@ static void testArrayListTimeLocked(FILE *auxFd) {
             basicList.pop_front();
         }
     }
-    epicsTimeGetCurrent(&endTime);
-    double diff = epicsTimeDiffInSeconds(&endTime,&startTime);
+    endTime.getCurrent();
+    double diff = TimeStamp::diffInSeconds(&endTime,&startTime);
     diff *= 1000.0;
     fprintf(auxFd,"diff %f milliSeconds\n",diff);
     diff = diff/1000.0; // convert from milliseconds to seconds
@@ -442,16 +441,7 @@ int main(int argc, char *argv[]) {
     testTimeLocked(auxFd);
     testArrayListTime(auxFd);
     testArrayListTimeLocked(auxFd);
-    int totalConstructList = LinkedListVoid::getTotalConstruct();
-    int totalDestructList = LinkedListVoid::getTotalDestruct();
-    int totalConstructListNode = LinkedListVoidNode::getTotalConstruct();
-    int totalDestructListNode = LinkedListVoidNode::getTotalDestruct();
-    fprintf(fd,"totalConstructList %d totalDestructList %d",
-        totalConstructList,totalDestructList);
-    fprintf(fd," totalConstructListNode %d totalDestructListNode %d\n",
-        totalConstructListNode,totalDestructListNode);
-    assert(totalConstructList==totalDestructList);
-    assert(totalConstructListNode==totalDestructListNode);
+    getShowConstructDestruct()->constuctDestructTotals(fd);
     return (0);
 }
  

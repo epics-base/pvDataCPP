@@ -10,9 +10,11 @@
 #include <epicsAssert.h>
 
 #include "requester.h"
+#include "executor.h"
 #include "pvIntrospect.h"
 #include "pvData.h"
 #include "standardField.h"
+#include "showConstructDestruct.h"
 
 using namespace epics::pvData;
 
@@ -129,7 +131,6 @@ static void testStructureArray(FILE * fd) {
 
 int main(int argc,char *argv[])
 {
-    int initialTotalReferences,finalTotalReferences;
     char *fileName = 0;
     if(argc>1) fileName = argv[1];
     FILE * fd = stdout;
@@ -139,34 +140,11 @@ int main(int argc,char *argv[])
     fieldCreate = getFieldCreate();
     pvDataCreate = getPVDataCreate();
     standardField = getStandardField();
-    initialTotalReferences = Field::getTotalReferenceCount();
     testScalar(fd);
-    finalTotalReferences = Field::getTotalReferenceCount();
-    assert(initialTotalReferences==finalTotalReferences);
-    initialTotalReferences = Field::getTotalReferenceCount();
     testScalarArray(fd);
-    finalTotalReferences = Field::getTotalReferenceCount();
-    assert(initialTotalReferences==finalTotalReferences);
-    initialTotalReferences = Field::getTotalReferenceCount();
     testSimpleStructure(fd);
-    finalTotalReferences = Field::getTotalReferenceCount();
-    assert(initialTotalReferences==finalTotalReferences);
-    initialTotalReferences = Field::getTotalReferenceCount();
     testStructureArray(fd);
-    finalTotalReferences = Field::getTotalReferenceCount();
-    assert(initialTotalReferences==finalTotalReferences);
-    initialTotalReferences = Field::getTotalReferenceCount();
-    int64 totalConstruct = Field::getTotalConstruct();
-    int64 totalDestruct = Field::getTotalDestruct();
-    int totalReference = Field::getTotalReferenceCount();
-    fprintf(fd,"Field:   totalConstruct %lli totalDestruct %lli totalReferenceCount %i\n",
-        totalConstruct,totalDestruct,totalReference);
-    assert(totalConstruct==(totalDestruct+totalReference));
-    totalConstruct = PVField::getTotalConstruct();
-    totalDestruct = PVField::getTotalDestruct();
-    fprintf(fd,"PVField: totalConstruct %lli totalDestruct %lli\n",
-        totalConstruct,totalDestruct);
-    assert(totalConstruct==totalDestruct);
+    getShowConstructDestruct()->constuctDestructTotals(fd);
     return(0);
 }
 

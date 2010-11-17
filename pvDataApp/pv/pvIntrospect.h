@@ -5,6 +5,7 @@
 #define PVINTROSPECT_H
 #include "noDefaultMethods.h"
 #include "pvType.h"
+#include "showConstructDestruct.h"
 namespace epics { namespace pvData { 
 
     class Field;
@@ -52,13 +53,11 @@ namespace epics { namespace pvData {
         static void toString(StringBuilder buf,ScalarType scalarType);
     };
 
-    class Field : private NoDefaultMethods {
+    class Field :  private NoDefaultMethods {
     public:
        virtual ~Field();
        Field(String fieldName,Type type);
-       static int getTotalReferenceCount();
-       static int64 getTotalConstruct();
-       static int64 getTotalDestruct();
+       static ConstructDestructCallback *getConstructDestructCallback();
        int getReferenceCount() const;
        String getFieldName() const;
        Type getType() const;
@@ -124,7 +123,7 @@ namespace epics { namespace pvData {
         FieldConstPtrArray  fields;
     };
 
-    class FieldCreate {
+    class FieldCreate : NoDefaultMethods {
     public:
        FieldConstPtr  create(String fieldName,FieldConstPtr  field) const;
        ScalarConstPtr  createScalar(String fieldName,ScalarType scalarType) const;

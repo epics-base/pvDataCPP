@@ -33,7 +33,6 @@ units offset 11 next 12 number 1
 limit offset 12 next 15 number 3
 low offset 13 next 14 number 1
 high offset 14 next 15 number 1
-Field: initialTotalReferences 93 finalTotalReferences 93
-Field:   totalConstruct 111 totalDestruct 18 totalReferenceCount 93
-PVField: totalConstruct 17 totalDestruct 17
-PVAuxInfo: totalConstruct 1 totalDestruct 1
+field: totalConstruct 111 totalDestruct 18 totalReference 93
+pvField: totalConstruct 17 totalDestruct 17
+pvAuxInfo: totalConstruct 1 totalDestruct 1

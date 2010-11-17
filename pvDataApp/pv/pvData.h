@@ -9,6 +9,7 @@
 #include "requester.h"
 #include "byteBuffer.h"
 #include "serialize.h"
+#include "showConstructDestruct.h"
 namespace epics { namespace pvData { 
 
     class PVAuxInfo;
@@ -57,8 +58,7 @@ namespace epics { namespace pvData {
     public:
         PVAuxInfo(PVField *pvField);
         ~PVAuxInfo();
-        static int64 getTotalConstruct();
-        static int64 getTotalDestruct();
+        static ConstructDestructCallback *getConstructDestructCallback();
         PVField * getPVField();
         PVScalar * createInfo(String key,ScalarType scalarType);
         PVScalarMap getInfos();
@@ -66,7 +66,6 @@ namespace epics { namespace pvData {
         void toString(StringBuilder buf);
         void toString(StringBuilder buf,int indentLevel);
     private:
-        static void init();
         class PVAuxInfoPvt *pImpl;
         friend class PVDataCreate;
     };
@@ -76,11 +75,14 @@ namespace epics { namespace pvData {
         virtual void postPut() = 0;
     };
 
-    class PVField : public Requester, public Serializable ,private NoDefaultMethods{
+    class PVField
+    : public Requester,
+      public Serializable,
+      private NoDefaultMethods
+    {
     public:
         virtual ~PVField();
-        static int64 getTotalConstruct();
-        static int64 getTotalDestruct();
+        static ConstructDestructCallback *getConstructDestructCallback();
         String getRequesterName() ;
         virtual void message(String message,MessageType messageType) ;
         virtual void setRequester(Requester *prequester);
@@ -107,7 +109,6 @@ namespace epics { namespace pvData {
         class PVFieldPvt *pImpl;
         static void computeOffset(PVField *pvField);
         static void computeOffset(PVField *pvField,int offset);
-        static void init();
         friend class PVDataCreate;
     };
 

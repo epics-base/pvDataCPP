@@ -56,5 +56,5 @@ structure powerSupply
     structure timeStamp
         long secondsPastEpoch 0
         int nanoSeconds 0
-Field:   totalConstruct 153 totalDestruct 60 totalReferenceCount 93
-PVField: totalConstruct 56 totalDestruct 56
+field: totalConstruct 153 totalDestruct 60 totalReference 93
+pvField: totalConstruct 56 totalDestruct 56

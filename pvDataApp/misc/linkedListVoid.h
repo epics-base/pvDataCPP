@@ -1,6 +1,7 @@
 /* linkedListVoid.h */
 
 #include "pvType.h"
+#include "showConstructDestruct.h"
 #ifndef LINKEDLISTVOID_H
 #define LINKEDLISTVOID_H
 namespace epics { namespace pvData { 
@@ -11,8 +12,7 @@ class LinkedListVoidNode;
 class LinkedListVoidNode {
 public:
     ~LinkedListVoidNode();
-    static int64 getTotalConstruct();
-    static int64 getTotalDestruct();
+    static ConstructDestructCallback *getConstructDestructCallback();
     void *getObject();
     bool isOnList();
 protected:
@@ -31,8 +31,7 @@ private:
 class LinkedListVoid {
 public:
     ~LinkedListVoid();
-    static int64 getTotalConstruct();
-    static int64 getTotalDestruct();
+    static ConstructDestructCallback *getConstructDestructCallback();
     int getLength();
     void addTail(LinkedListVoidNode *listNode);
     void addHead(LinkedListVoidNode *listNode);
@@ -53,7 +52,6 @@ public:
 protected:
     LinkedListVoid();
 private:
-    static void init();
     friend class LinkedListVoidNode;
     LinkedListVoidNode *head;
     int length;

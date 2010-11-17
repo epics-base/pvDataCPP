@@ -1,4 +1,4 @@
-/* testIntrospect.cpp */
+/* testPVType.cpp */
 /* Author:  Marty Kraimer Date: 2010.09 */
 
 #include <cstddef>

@@ -13,11 +13,23 @@ INC += bitSet.h
 INC += byteBuffer.h
 INC += epicsException.h
 INC += serializeHelper.h
+INC += event.h
+INC += thread.h
+INC += executor.h
+INC += showConstructDestruct.h
+INC += timeStamp.h
+INC += timeFunction.h
 
 LIBSRCS += byteBuffer.cpp
 LIBSRCS += bitSet.cpp
 LIBSRCS += serializeHelper.cpp
 LIBSRCS += linkedListVoid.cpp
+LIBSRCS += event.cpp
+LIBSRCS += thread.cpp
+LIBSRCS += executor.cpp
+LIBSRCS += showConstructDestruct.cpp
+LIBSRCS += timeStamp.cpp
+LIBSRCS += timeFunction.cpp
 
 LIBRARY=pvMisc
 

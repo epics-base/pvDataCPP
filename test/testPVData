@@ -281,5 +281,5 @@ structure string
     structure timeStamp
         long secondsPastEpoch 0
         int nanoSeconds 0
-Field:   totalConstruct 388 totalDestruct 295 totalReferenceCount 93
-PVField: totalConstruct 279 totalDestruct 279
+field: totalConstruct 388 totalDestruct 295 totalReference 93
+pvField: totalConstruct 279 totalDestruct 279
