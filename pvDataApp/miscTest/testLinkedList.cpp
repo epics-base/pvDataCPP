@@ -294,7 +294,7 @@ static void testTime(FILE *auxFd) {
     }
     endTime.getCurrent();
     double diff = TimeStamp::diff(endTime,startTime);
-    diff /= 1000.0;
+    diff *= 1000.0;
     fprintf(auxFd,"diff %f milliSeconds\n",diff);
     diff = diff/1000.0; // convert from milliseconds to seconds
     diff = diff/ntimes; // seconds per outer loop
