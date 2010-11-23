@@ -1,4 +1,9 @@
 /* timeFunction.cpp */
+/**
+ * Copyright - See the COPYRIGHT that is included with this distribution.
+ * EPICS pvDataCPP is distributed subject to a Software License Agreement found
+ * in file LICENSE that is included with this distribution.
+ */
 #include "noDefaultMethods.h"
 #include "pvType.h"
 #include "timeStamp.h"
@@ -27,15 +32,15 @@ TimeFunction::~TimeFunction() {}
 
 double TimeFunction::timeCall()
 {
-    TimeStamp startTime(0,0);
-    TimeStamp endTime(0,0);
+    TimeStamp startTime;
+    TimeStamp endTime;
     double perCall = 0.0;
     long ntimes = 1;
     while(true) {
         startTime.getCurrent();
         for(long i=0; i<ntimes; i++) requester->function();
         endTime.getCurrent();
-        double diff = TimeStamp::diffInSeconds(&endTime,&startTime);
+        double diff = TimeStamp::diff(endTime,startTime);
         if(diff>=1.0) {
             perCall = diff/(double)ntimes;
             break;

@@ -1,4 +1,9 @@
 /*BasePVShortArray.h*/
+/**
+ * Copyright - See the COPYRIGHT that is included with this distribution.
+ * EPICS pvDataCPP is distributed subject to a Software License Agreement found
+ * in file LICENSE that is included with this distribution.
+ */
 #ifndef BASEPVSHORTARRAY_H
 #define BASEPVSHORTARRAY_H
 #include <cstddef>

@@ -1,3 +1,8 @@
+/**
+ * Copyright - See the COPYRIGHT that is included with this distribution.
+ * EPICS pvDataCPP is distributed subject to a Software License Agreement found
+ * in file LICENSE that is included with this distribution.
+ */
 /*
  * testLinkedList.cpp
  *
@@ -270,8 +275,8 @@ static void testOrderedQueue(FILE * fd ) {
 }
 
 static void testTime(FILE *auxFd) {
-    TimeStamp startTime(0,0);
-    TimeStamp endTime(0,0);
+    TimeStamp startTime;
+    TimeStamp endTime;
     int numNodes = 1000;
 
     LinkedList<Basic> *basicList = new BasicList();
@@ -288,7 +293,7 @@ static void testTime(FILE *auxFd) {
         while(basicNode!=0) basicNode = basicList->removeHead();
     }
     endTime.getCurrent();
-    double diff = TimeStamp::diffInSeconds(&endTime,&startTime);
+    double diff = TimeStamp::diff(endTime,startTime);
     diff /= 1000.0;
     fprintf(auxFd,"diff %f milliSeconds\n",diff);
     diff = diff/1000.0; // convert from milliseconds to seconds
@@ -303,8 +308,8 @@ static void testTime(FILE *auxFd) {
 }
 
 static void testTimeLocked(FILE *auxFd) {
-    TimeStamp startTime(0,0);
-    TimeStamp endTime(0,0);
+    TimeStamp startTime;
+    TimeStamp endTime;
     Mutex *mutex = new Mutex();
     int numNodes = 1000;
 
@@ -332,7 +337,7 @@ static void testTimeLocked(FILE *auxFd) {
         }
     }
     endTime.getCurrent();
-    double diff = TimeStamp::diffInSeconds(&endTime,&startTime);
+    double diff = TimeStamp::diff(endTime,startTime);
     diff *= 1000.0;
     fprintf(auxFd,"diff %f milliSeconds\n",diff);
     diff = diff/1000.0; // convert from milliseconds to seconds
@@ -348,8 +353,8 @@ static void testTimeLocked(FILE *auxFd) {
 
 typedef std::list<Basic *> stdList;
 static void testArrayListTime(FILE *auxFd) {
-    TimeStamp startTime(0,0);
-    TimeStamp endTime(0,0);
+    TimeStamp startTime;
+    TimeStamp endTime;
     int numNodes = 1000;
 
     stdList basicList;
@@ -368,7 +373,7 @@ static void testArrayListTime(FILE *auxFd) {
         }
     }
     endTime.getCurrent();
-    double diff = TimeStamp::diffInSeconds(&endTime,&startTime);
+    double diff = TimeStamp::diff(endTime,startTime);
     diff *= 1000.0;
     fprintf(auxFd,"diff %f milliSeconds\n",diff);
     diff = diff/1000.0; // convert from milliseconds to seconds
@@ -381,8 +386,8 @@ static void testArrayListTime(FILE *auxFd) {
 }
 
 static void testArrayListTimeLocked(FILE *auxFd) {
-    TimeStamp startTime(0,0);
-    TimeStamp endTime(0,0);
+    TimeStamp startTime;
+    TimeStamp endTime;
     int numNodes = 1000;
     Mutex *mutex = new Mutex();
 
@@ -406,7 +411,7 @@ static void testArrayListTimeLocked(FILE *auxFd) {
         }
     }
     endTime.getCurrent();
-    double diff = TimeStamp::diffInSeconds(&endTime,&startTime);
+    double diff = TimeStamp::diff(endTime,startTime);
     diff *= 1000.0;
     fprintf(auxFd,"diff %f milliSeconds\n",diff);
     diff = diff/1000.0; // convert from milliseconds to seconds

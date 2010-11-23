@@ -5,16 +5,16 @@ time per iteration 0.000025 microseconds
 time per addTail/removeHead 0.000000 microseconds
 
 Time test locked
-diff 183.634382 milliSeconds
-time per iteration 183.634382 microseconds
-time per addTail/removeHead 0.091817 microseconds
+diff 186.459567 milliSeconds
+time per iteration 186.459567 microseconds
+time per addTail/removeHead 0.093230 microseconds
 
 Time ArrayList test
-diff 647.257745 milliSeconds
-time per iteration 647.257745 microseconds
-time per addTail/removeHead 0.323629 microseconds
+diff 652.028489 milliSeconds
+time per iteration 652.028489 microseconds
+time per addTail/removeHead 0.326014 microseconds
 
 Time ArrayList test locked
-diff 810.656009 milliSeconds
-time per iteration 810.656009 microseconds
-time per addTail/removeHead 0.405328 microseconds
+diff 799.889631 milliSeconds
+time per iteration 799.889631 microseconds
+time per addTail/removeHead 0.399945 microseconds

@@ -1,4 +1,15 @@
 /* timeStamp.cpp */
+/**
+ * Copyright - See the COPYRIGHT that is included with this distribution.
+ * EPICS pvDataCPP is distributed subject to a Software License Agreement found
+ * in file LICENSE that is included with this distribution.
+ */
+#include <cstddef>
+#include <cstdlib>
+#include <cstddef>
+#include <string>
+#include <cstdio>
+
 #include <epicsTime.h>
 #include "noDefaultMethods.h"
 #include "pvType.h"
@@ -6,40 +17,126 @@
 
 namespace epics { namespace pvData { 
 
-static uint64 TS_EPOCH_SEC_PAST_1970=7305*86400;
+int32 milliSecPerSec = 1000;
+int32 microSecPerSec = milliSecPerSec*milliSecPerSec;
+int32 nanoSecPerSec = milliSecPerSec*microSecPerSec;
+int64 posixEpochAtEpicsEpoch = POSIX_TIME_AT_EPICS_EPOCH;
 
-TimeStamp::TimeStamp(uint64 secondsPastEpoch,uint32 nanoSeconds)
+TimeStamp::TimeStamp(int64 secondsPastEpoch,int32 nanoSeconds)
 : secondsPastEpoch(secondsPastEpoch),nanoSeconds(nanoSeconds)
 {}
 
-TimeStamp::~TimeStamp() {}
-
-int64 TimeStamp::getEpicsSecondsPastEpoch()
-{
-    return secondsPastEpoch - TS_EPOCH_SEC_PAST_1970;
-}
-
-void TimeStamp::put(uint64 seconds,uint32 nano)
-{
-    secondsPastEpoch = seconds;
-    nanoSeconds = nano;    
-}
 
 void TimeStamp::getCurrent()
 {
     epicsTimeStamp epicsTime;
     epicsTimeGetCurrent(&epicsTime);
     secondsPastEpoch = epicsTime.secPastEpoch;
-    secondsPastEpoch += TS_EPOCH_SEC_PAST_1970;
+    secondsPastEpoch += posixEpochAtEpicsEpoch;
     nanoSeconds = epicsTime.nsec;
 }
 
-double TimeStamp::diffInSeconds(TimeStamp *left,TimeStamp *right)
+double TimeStamp::toSeconds() const
 {
-    double diff = left->secondsPastEpoch - right->secondsPastEpoch;
-    int64 nano =left->nanoSeconds - right->nanoSeconds;
-    diff += ((double)nano)/1e9;
-    return diff;
+    double value = secondsPastEpoch;
+    double nano = nanoSeconds;
+    value += nano/1e9;
+    return value;
+}
+
+int64 TimeStamp::diffInt(TimeStamp const & left,TimeStamp  const&right )
+{
+    int64 sl = left.secondsPastEpoch;
+    int32 nl = left.nanoSeconds;
+    int64 sr = right.secondsPastEpoch;
+    int32 nr = right.nanoSeconds;
+    int64 sdiff = sl - sr;
+    sdiff *= nanoSecPerSec;
+    sdiff += nl - nr;
+    return sdiff;
+}
+
+bool TimeStamp::operator==(TimeStamp const &right) const
+{
+    int64 sdiff = diffInt(*this,right);
+    if(sdiff==0) return true;
+    return false;
+}
+
+bool TimeStamp::operator!=(TimeStamp const &right) const
+{
+    int64 sdiff = diffInt(*this,right);
+    if(sdiff!=0) return true;
+    return false;
+}
+
+bool TimeStamp::operator<=(TimeStamp const &right) const
+{
+    int64 sdiff = diffInt(*this,right);
+    if(sdiff<=0) return true;
+    return false;
+}
+
+bool TimeStamp::operator< (TimeStamp const &right) const
+{
+    int64 sdiff = diffInt(*this,right);
+    if(sdiff<0) return true;
+    return false;
+}
+
+bool TimeStamp::operator>=(TimeStamp const &right) const
+{
+    int64 sdiff = diffInt(*this,right);
+    if(sdiff>=0) return true;
+    return false;
+}
+
+bool TimeStamp::operator>(TimeStamp const &right) const
+{
+    int64 sdiff = diffInt(*this,right);
+    if(sdiff>0) return true;
+    return false;
+}
+
+double TimeStamp::diff(TimeStamp const & a,TimeStamp const & b)
+{
+    double result = a.secondsPastEpoch - b.secondsPastEpoch;
+    result += (a.nanoSeconds - b.nanoSeconds)/1e9;
+    return result;
+}
+
+
+TimeStamp & TimeStamp::operator+=(int64 seconds)
+{
+    secondsPastEpoch += seconds;
+    return *this;
+}
+
+TimeStamp & TimeStamp::operator-=(int64 seconds)
+{
+    secondsPastEpoch -= seconds;
+    return *this;
+}
+
+TimeStamp & TimeStamp::operator+=(double seconds)
+{
+    int64 secs = seconds;
+    int64 nano = (seconds - secs)*1e9;
+    nanoSeconds += nano;
+    if(nanoSeconds>nanoSecPerSec) {
+        nanoSeconds -= nanoSecPerSec;
+        secondsPastEpoch += 1;
+    } else if(nanoSeconds<-nanoSecPerSec) {
+        nanoSeconds += -nanoSecPerSec;
+        secondsPastEpoch -= 1;
+    }
+    secondsPastEpoch += secs;
+    return *this;
+}
+
+TimeStamp & TimeStamp::operator-=(double seconds)
+{
+   return operator+=(-seconds);
 }
 
 int64 TimeStamp::getMilliseconds()

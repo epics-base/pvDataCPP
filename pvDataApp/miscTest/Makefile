@@ -2,6 +2,10 @@ TOP=../..
 
 include $(TOP)/configure/CONFIG
 
+PROD_HOST += testTimeStamp
+testTimeStamp_SRCS += testTimeStamp.cpp
+testTimeStamp_LIBS += pvMisc Com
+
 PROD_HOST += testLinkedList
 testLinkedList_SRCS += testLinkedList.cpp
 testLinkedList_LIBS += pvMisc Com
@@ -9,6 +13,10 @@ testLinkedList_LIBS += pvMisc Com
 PROD_HOST += testThread
 testThread_SRCS += testThread.cpp
 testThread_LIBS += pvMisc Com
+
+PROD_HOST += testTimer
+testTimer_SRCS += testTimer.cpp
+testTimer_LIBS += pvMisc Com
 
 PROD_HOST += testBitSet
 testBitSet_SRCS += testBitSet.cpp

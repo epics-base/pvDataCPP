@@ -3,11 +3,13 @@ TOP=../..
 include $(TOP)/configure/CONFIG
 
 INC += enumerated.h
+INC += pvTimeStamp.h
 
-LIBSRCS += enumerated.cpp
-enumerated_LIBS += pvFactory pvMisc Com
+#LIBSRCS += enumerated.cpp 
+#LIBSRCS += pvTimeStamp.cpp
+#enumerated_LIBS += pvFactory pvMisc Com
 
-LIBRARY=pvProperty
+#LIBRARY=pvProperty
 
 
 include $(TOP)/configure/RULES

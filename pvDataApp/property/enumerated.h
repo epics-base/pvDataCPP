@@ -1,28 +1,37 @@
 /* enumerated.h */
+/**
+ * Copyright - See the COPYRIGHT that is included with this distribution.
+ * EPICS pvDataCPP is distributed subject to a Software License Agreement found
+ * in file LICENSE that is included with this distribution.
+ */
 #include <string>
-#include <stdexcept>
+#include "pvTypes.h"
+#include "pvData.h"
 #ifndef ENUMERATED_H
 #define ENUMERATED_H
-#include "pvIntrospect.h"
-#include "pvData.h"
 #include "noDefaultMethods.h"
 namespace epics { namespace pvData { 
 
-class Enumerated : private NoDefaultMethods {
+class Enumerated ;
 public:
-    static Enumerated* create(PVField *pvField);
+    //default constructors and destructor are OK
+    //This class should not be extended
+    
+    //returns (false,true) if pvField(isNot, is valid enumerated structure
+    bool attach(PVField *pvField);
     ~Enumerated();
-    PVInt *getIndex() { return pvIndex;}
+    // each of the following throws logic_error is not attached to PVField
+    void putIndex(int32 index);
+    int32 getIndex();
     String getChoice();
-    PVStringArray *getChoices() { return pvChoices;}
-    PVStructure *getPV() { return pvStructure;}
+    bool choicesMutable();
+    StringArray getChoices();
+    int32 getNumberChoices();
+    // also throws logic_error of immutable
+    void putChoices(StringArray choices,int32 numberChoices);
 private:
-    Enumerated(PVStructure *pvStructure,
-        PVInt *pvIndex,PVStringArray *pvChoices);
-    PVStructure *pvStructure;
     PVInt *pvIndex;
     PVStringArray *pvChoices;
-    StringArrayData stringArrayData;
 };
     
 }}

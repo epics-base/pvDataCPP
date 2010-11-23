@@ -1,4 +1,10 @@
 /*AbstractPVArray.h*/
+/**
+ * Copyright - See the COPYRIGHT that is included with this distribution.
+ * EPICS pvDataCPP is distributed subject to a Software License Agreement found
+ * in file LICENSE that is included with this distribution.
+ */
+
 #ifndef ABSTRACTPVARRAY_H
 #define ABSTRACTPVARRAY_H
 #include <cstddef>

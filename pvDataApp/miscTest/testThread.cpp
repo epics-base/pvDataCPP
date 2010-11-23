@@ -1,3 +1,8 @@
+/**
+ * Copyright - See the COPYRIGHT that is included with this distribution.
+ * EPICS pvDataCPP is distributed subject to a Software License Agreement found
+ * in file LICENSE that is included with this distribution.
+ */
 /*
  * testThread.cpp
  *
@@ -60,7 +65,7 @@ void Basic::command()
 
 
 static void testBasic(FILE *fd) {
-    Executor *executor = new Executor(String("basic"),middlePriority);
+    Executor *executor = Executor::create(String("basic"),middlePriority);
     Basic *basic = new Basic(executor);
     basic->run();
     delete basic; 
@@ -84,7 +89,7 @@ private:
 };
 
 static void testThreadContext(FILE *fd,FILE *auxFd) {
-    Executor *executor = new Executor(String("basic"),middlePriority);
+    Executor *executor = Executor::create(String("basic"),middlePriority);
     Basic *basic = new Basic(executor);
     MyFunc myFunc(basic);
     TimeFunction timeFunction(&myFunc);

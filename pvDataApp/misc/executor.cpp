@@ -1,4 +1,9 @@
-/* executor.h */
+/* executor.cpp */
+/**
+ * Copyright - See the COPYRIGHT that is included with this distribution.
+ * EPICS pvDataCPP is distributed subject to a Software License Agreement found
+ * in file LICENSE that is included with this distribution.
+ */
 #include <cstddef>
 #include <cstdlib>
 #include <cstddef>
@@ -186,6 +191,10 @@ Executor::~Executor() {
     totalDestruct++;
 }
 
+Executor *Executor::create(String threadName,ThreadPriority priority)
+{
+    return new Executor(threadName,priority);
+}
 
 ExecutorNode * Executor::createNode(Command*command)
 {return pImpl->createNode(command);}
