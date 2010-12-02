@@ -1,0 +1,3358 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
+  <title>EPICS pvDataCPP</title>
+</head>
+
+<body>
+<h1 style="text-align: center">EPICS pvDataCPP<br />
+Overview<br />
+2010.12.02</h1>
+
+<p>TODO</p>
+<ul>
+  <li>rename epicsException to exception</li>
+  <li>Implement pvMisc: BitSetUtil MessageQueue, MultiChoice,Status, and
+  Queue</li>
+  <li>Implement property</li>
+</ul>
+CONTENTS 
+<hr />
+
+<h2 style="text-align: center">Introduction</h2>
+<hr />
+
+<p>This product is available via the <a href="#LicenseAgreement">open source
+license</a> described at the end of this document.</p>
+
+<p>PVData is one of a set of related projects. It describes and implements
+the data that the other projects support. Thus it is not useful by itself but
+understanding pvData is required in order to understand the other projects.
+The reader should also become familar with projects pvAccess and javaIOC,
+which are located via the same sourceforge site as this project. Project
+PVAccess provides network support for transporting pvData. Project javaIOC
+provides a memory resident "smart" database of pvData data.</p>
+
+<p>This document describes the C++ implementation of pvData, which was first
+implemented in Java. A C++ implementation of pvAccess is being developed in
+parallel with pvDataCPP. In the future a C++ implementation of javaIOC will
+be developed and the name javaIOV will become pvIOC.</p>
+
+<p>pvData (Process Variable Data) defines and implements an efficent way to
+store, access, and transmit memory resident structured data.</p>
+<dl>
+  <dt>definition</dt>
+    <dd>The header files pvIntrospect.h and pvData.h provide the C++
+      description of pvData.</dd>
+  <dt>implementation</dt>
+    <dd>Ditrectory factory provides a complete C++ definition for pvData. It
+      also proivides abstract and base classes that allow specialized
+      implementations of the data classes.</dd>
+  <dt>efficient</dt>
+    <dd>Small memory footprint, low cpu overhead, and concise code base.</dd>
+  <dt>data storage</dt>
+    <dd>pvData defines separate introspection and data interfaces. The
+      introspection interfaces provide access to immutable objects, which
+      allows introspection instances to be freely shared. The introspection
+      interface for a process variable can be accessed without requiring
+      access to the data.</dd>
+  <dt>data access</dt>
+    <dd>Client code can access pvData via the introspection and data
+      interfaces. For "well known" data, e.g. timeStamp, specialized
+      interfaces can be provided without requiring any changes to the core
+      software.</dd>
+  <dt>data transfer</dt>
+    <dd>The separation of introspection and data interfaces allows for
+      efficient network data transfer. At connection time introspection
+      information can be passed from server to client. Each side can create a
+      data instance. The data is transferred between these instances. The
+      data in the network buffers does not have to be self describing since
+      each side has the introspection information.</dd>
+  <dt>memory resident</dt>
+    <dd>pvData only defines memory resident data.</dd>
+  <dt>structured data</dt>
+    <dd>pvData has four types: scalar, scalar array, structure, and structure
+      array. A scalar can be one of the following: boolean, byte, short, int,
+      long, float, double, string. A scalar array is a one dimensional array
+      with the element type being a scalar. A structure is an ordered set of
+      fields where each field has a name and type. A structure array is a one
+      dimensional array of structures where each element has the same
+      introspection interface. Since a field can have type structure complex
+      structures are supported. No other types are needed since structures
+      can be defined that simulate types.</dd>
+</dl>
+
+<p>The javaIOC implements a Process Variable (PV) Database, which is a memory
+resident database holding pvData, has the following features:</p>
+<ul>
+  <li>A database has records.</li>
+  <li>Each record has a unique record name.</li>
+  <li>A record has a top level PVStructure, which is a structured set of data
+    as defined by this project.</li>
+  <li>A PVStructure has an array of PVFields.</li>
+  <li>A PVField contains data of one of the following types: 
+    <ul>
+      <li>scalar : boolean, byte, short, int, long, float, double, string,
+        structure</li>
+      <li>array: a 1-dim array with the elementType being any scalar
+      type.</li>
+      <li>structure: a subStructure with each field being any of the
+        supported types.</li>
+    </ul>
+  </li>
+</ul>
+
+<p>pvData was initially created to support the javaIOC and was part of the
+javaIOC project. It is now a separate project that is used by the javaIOC. In
+addition to the javaIOC, pvData is intended for use by 1) channel access
+clients, 2) Interface between client and network, 3) Interface between
+network and channel access server, 4) Interface between server and IOC
+database. Since it is an interface to data, it could also be used by other
+systems, e.g. TANGO, TINE, etc. A high level Physics application can hold
+data as pvData. By starting a channel access server, the data can made
+available to network clients.</p>
+
+<p>pvData contains everything required to support Channel Access and Channel
+Access clients and servers. </p>
+
+<p>This project has many concepts that are similar to EPICS (Experimental
+Physics and Industrial Control System). This C++ implementation uses the
+EPICS build system and also EPICS libCom. The directory structure for this
+project is a standard EPICS application. The following source directories
+appear under pvDataApp:</p>
+<dl>
+  <dt>misc</dt>
+    <dd>Support for pvData. This support is described in a major section
+      below.</dd>
+  <dt>pv</dt>
+    <dd>The C++ introspection and data descriptions for pvData.</dd>
+  <dt>factory</dt>
+    <dd>The C++ definitions for pvData.</dd>
+  <dt>property</dt>
+    <dd>Support code for "standard" pvData structures, e.g. timeStamp and
+      alarm.</dd>
+</dl>
+<hr />
+
+<h2 style="text-align: center">Namespace, Typedefs, and Memory Management</h2>
+<hr />
+
+<h3 style="text-align: center">Namespace</h3>
+
+<p>All include and definition files in project pvDataCPP appear in namespace:
+</p>
+<pre>namespace epics { namespace pvData {
+     // ...
+}}</pre>
+
+<h3 style="text-align: center">typedefs</h3>
+
+<p>Directory misc has an include file pvTypes.h:</p>
+<pre>typedef signed char int8;
+typedef short       int16;
+typedef int         int32;
+typedef long long   int64;
+typedef unsigned int uint32;
+typedef unsigned long long uint64;
+
+typedef std::string String;
+typedef std::string * StringBuilder;
+typedef String* StringArray;</pre>
+
+<p>The integer typedefs provide the definitions for various sizes of integer
+values. The relationship between these definitions and the ScalarType
+description is:</p>
+<dl>
+  <dt style="font-family: courier;">pvBoolean</dt>
+    <dd>bool</dd>
+  <dt style="font-family: courier;">pvByte</dt>
+    <dd>int8</dd>
+  <dt style="font-family: courier;">pvShort</dt>
+    <dd>int16</dd>
+  <dt style="font-family: courier;">pvInt</dt>
+    <dd>int32</dd>
+  <dt style="font-family: courier;">pvLong</dt>
+    <dd>int64</dd>
+  <dt style="font-family: courier;">pvString</dt>
+    <dd>String</dd>
+</dl>
+
+<p>It is hoped that all modern C++ compilers will properly handle the integer
+typedefs but if not than there is a good chance that it can be supported by
+changes to pvInterspect.h.</p>
+
+<p>std::string is used to implement pvString. This works because std::string
+implement COW (Copy On Write) semantics. Thus once created a String can be
+treated like an immutable object, which is what pvData require.</p>
+
+<p>The remaining definitions are:</p>
+<dl>
+  <dt style="font-family: courier;">StringBuilder</dt>
+    <dd>This acts like the java StringBuilder when is is passed as an
+      argument to a function.</dd>
+  <dt style="font-family: courier;">StringArray</dt>
+    <dd>This is an array with each element being a String.</dd>
+</dl>
+
+<p>File pvInterspect.h, which is described in the next section has the
+typedefs: </p>
+<pre>typedef Field const * FieldConstPtr;
+typedef FieldConstPtr * FieldConstPtrArray;
+typedef Scalar const * ScalarConstPtr;
+typedef ScalarArray const * ScalarArrayConstPtr;
+typedef Structure const * StructureConstPtr;
+typedef StructureArray const * StructureArrayConstPtr;</pre>
+
+<p>These are definitions for introspection objects. All introspecton objects
+are immutable and always accessed via pointers.</p>
+
+<p>File pvData.h, which is also described in the next section has the
+typedefs: </p>
+<pre>typedef std::map&lt;String,PVScalar * &gt; PVScalarMap;
+typedef PVScalarMap::const_iterator PVScalarMapIter;
+typedef PVStructure * PVStructurePtr;
+typedef PVStructurePtr* PVStructurePtrArray;
+typedef PVField* PVFieldPtr;
+typedef PVFieldPtr * PVFieldPtrArray;
+typedef bool * BooleanArray;
+typedef int8 * ByteArray;
+typedef int16 * ShortArray;
+typedef int32 * IntArray;
+typedef int64 * LongArray;
+typedef float * FloatArray;
+typedef double * DoubleArray;
+typedef String * StringArray;</pre>
+
+<p>where</p>
+<dl>
+  <dt style="font-family: courier;">PVScalarMap and PVScalarMapIter</dt>
+    <dd>A map and iterator that maps field names to PVScalars.</dd>
+  <dt style="font-family: courier;">PVStructurePtr</dt>
+    <dd>A pointer to a PVStructure.</dd>
+  <dt style="font-family: courier;">PVStructurePtrArray</dt>
+    <dd>A pointer to PVStructurePtr[], e. g. an array of pointers to a
+      PVStructure.</dd>
+  <dt style="font-family: courier;">PVFieldPtr</dt>
+    <dd>A pointer to a PVField</dd>
+  <dt style="font-family: courier;">PVFieldPtrArray</dt>
+    <dd>A pointer to a PVFieldPtr[], e. g. an array of pointers to a
+    PVField.</dd>
+  <dt style="font-family: courier;">BooleanArray, ByteArray, ...,
+  StringArray</dt>
+    <dd>An array of the specified type NOT a pointer to the type.</dd>
+</dl>
+
+<h3 style="text-align: center">Memory Managemment</h3>
+
+<h4>NoDefaultMethods</h4>
+
+<p>Any class that does not allow the compiler to generate default methods can
+privately extend the following class which is defined in file
+noDefaultMethods.h:</p>
+<pre>class NoDefaultMethods {
+protected:
+    // allow by derived objects
+    NoDefaultMethods(){};
+    ~NoDefaultMethods(){}
+private:
+    // do not implment
+    NoDefaultMethods(const NoDefaultMethods&amp;);
+    NoDefaultMethods &amp; operator=(const NoDefaultMethods &amp;);
+};</pre>
+
+<h3>PVData introspection objects</h3>
+
+<p>Introspection objects are meant to be shared. The constructors and
+destructors are all private so that an introspection object can only be
+created via a call to one of the FieldCreate methods described below. The
+introspection implementation, together with AbstractPVField keeps reference
+counts and automatically deletes objects when the reference count goes to 0.
+Code that uses introspection objects always accesses introspection objects
+via pointers never via references or direct access to the object. When a
+PVData data object is destroyed then pointers to the introspection objects
+associated with the data object are no longer valid.</p>
+
+<h3>PVData data objects</h3>
+
+<p>All PVData data objects must publically extend AbstractPVField, which does
+not allow default methods but does have a virtual destructor. It is expected
+that each data object is "owned" by some entity. For example a pvIOC (not
+implemented) database will own all records and thus all PVData data objects
+in the database. It is the ONLY entity that will create and destroy the data
+objects. All other code only receives pointers to the data objects. Before a
+record is deleted any code that is connected to a record is notified before
+the record is deleted. After deletion all pointers to data in the record are
+invalid. Similarly pvAccess creates and destroys PVData objects and notifies
+clients before destroying PVData data objects.</p>
+
+<h3>Other code in this project</h3>
+
+<p>If a class is pure data, e. g. TimeStamp, then it acts list like a
+primitive object.</p>
+
+<p>Other clases privately extend NoDefaultClasses and are not normally meant
+to be extended. Thus they can only be created via "new" and must be destroyed
+via "delete". These classes normally implement the static method:</p>
+<pre>    static ConstructDestructCallback *getConstructDestructCallback();</pre>
+
+<p>This provides access to how many objects have been constructed and
+destructed. This can be used to monitor memory usage.</p>
+<pre></pre>
+<pre> </pre>
+<hr />
+
+<h2 style="text-align: center">Miscellanous Classes</h2>
+<hr />
+
+<h3 style="text-align: center">Overview</h3>
+
+<p>This package provides utility code:</p>
+<dl>
+  <dt style="font-family: courier;">bitSet.h</dt>
+    <dd>An implementation of BitSet that can be serialized.</dd>
+  <dt style="font-family: courier;">byteBuffer.h</dt>
+    <dd>Used to serialize objects.</dd>
+  <dt style="font-family: courier;">event.h</dt>
+    <dd>Signal and wait for an event.</dd>
+  <dt style="font-family: courier;">exception.h</dt>
+    <dd>Exception with stack trace.</dd>
+  <dt style="font-family: courier;">executor.h</dt>
+    <dd>Provides a thread for executing commands.</dd>
+  <dt style="font-family: courier;">linkedList.h</dt>
+    <dd>A double linked list facility that requires the user to allocate a
+      node. It is more efficient that std::list and does not require the
+      implementation to allocate storage for the nodes.</dd>
+  <dt style="font-family: courier;">lock.h</dt>
+    <dd>Support for locking and unlocking.</dd>
+  <dt style="font-family: courier;">messageQueue.h</dt>
+    <dd>Support for queuing messages to give to requesters.</dd>
+  <dt style="font-family: courier;">noDefaultMethods.h</dt>
+    <dd>When privately extended prevents compiler from implementing default
+      methods.</dd>
+  <dt style="font-family: courier;">pvType.h</dt>
+    <dd>Provides architecture independent definitions for integers and
+    String.</dd>
+  <dt style="font-family: courier;">requester.h</dt>
+    <dd>Allows messages to be sent to a requester.</dd>
+  <dt style="font-family: courier;">serialize.h</dt>
+    <dd>Support for serializing objects.</dd>
+  <dt style="font-family: courier;">showConstructDestruct.h</dt>
+    <dd>Provides support monitoring memory usage for objects of a class.</dd>
+  <dt style="font-family: courier;">status.h</dt>
+    <dd>A way to pass status information to a client.</dd>
+  <dt style="font-family: courier;">thread.h</dt>
+    <dd>Provides thread support.</dd>
+  <dt style="font-family: courier;">timeFunction.h</dt>
+    <dd>Time how long a function call requires.</dd>
+  <dt style="font-family: courier;">timer.h</dt>
+    <dd>An implementation of Timer that does not require an object to be
+      created for each timer request.</dd>
+  <dt style="font-family: courier;">timeStamp.h</dt>
+    <dd>Usefull methods for a timeStamp.</dd>
+  <dt style="font-family: courier;">queue.h</dt>
+    <dd>A queue implementation that allows the latest queue element to
+      continue to be used when no free element is available.</dd>
+</dl>
+
+<h3 style="text-align: center;">BitSet</h3>
+
+<p>This is adapted from the java.util.BitSet. bitSet.h is:</p>
+<pre>class BitSet /*: public Serializable*/ {
+public:
+    BitSet();
+    BitSet(uint32 nbits);
+    virtual ~BitSet();
+    void flip(uint32 bitIndex);
+    void set(uint32 bitIndex);
+    void clear(uint32 bitIndex);
+    void set(uint32 bitIndex, bool value);
+    bool get(uint32 bitIndex) const;
+    void clear();
+    int32 nextSetBit(uint32 fromIndex) const;
+    int32 nextClearBit(uint32 fromIndex) const;
+    bool isEmpty() const;
+    uint32 cardinality() const;
+    BitSet&amp; operator&amp;=(const BitSet&amp; set);
+    BitSet&amp; operator|=(const BitSet&amp; set);
+    BitSet&amp; operator^=(const BitSet&amp; set);
+    BitSet&amp; operator-=(const BitSet&amp; set);
+    BitSet&amp; operator=(const BitSet &amp;set);
+    void or_and(const BitSet&amp; set1, const BitSet&amp; set2);
+    bool operator==(const BitSet &amp;set) const;
+    bool operator!=(const BitSet &amp;set) const;
+    void toString(StringBuilder buffer);
+    void toString(StringBuilder buffer, int indentLevel) const;
+private:
+};</pre>
+
+<p>where</p>
+<dl>
+  <dt style="font-family: courier;">BitSet()</dt>
+    <dd>Creates a bitSet of initial size 64 bits. All bits initially
+    false.</dd>
+  <dt style="font-family: courier;">BitSet(uint32 nbits)</dt>
+    <dd>Creates a bitSet with the initial of the specified number of bits.
+      All bits initially false.</dd>
+  <dt style="font-family: courier;">~BitSet()</dt>
+    <dd>Destructor.</dd>
+  <dt style="font-family: courier;">flip(uint32 bitIndex)</dt>
+    <dd>Flip the specified bit.</dd>
+  <dt style="font-family: courier;">set(uint32 bitIndex)</dt>
+    <dd>Set the specified bit true.</dd>
+  <dt style="font-family: courier;">clear(uint32 bitIndex)</dt>
+    <dd>Set the specified bit false.</dd>
+  <dt style="font-family: courier;">set(uint32 bitIndex, bool value)</dt>
+    <dd>Set the specified bit to value.</dd>
+  <dt style="font-family: courier;">get(uint32 bitIndex)</dt>
+    <dd>Return the state of the specified bit.</dd>
+  <dt style="font-family: courier;">clear()</dt>
+    <dd>Set all bits to false.</dd>
+  <dt style="font-family: courier;">nextSetBit(uint32 fromIndex)</dt>
+    <dd>Get the index of the next true bit beginning with the specified
+    bit.</dd>
+  <dt style="font-family: courier;">nextClearBit(uint32 fromIndex)</dt>
+    <dd>Get the index of the next false bit beginning with the specified
+    bit.</dd>
+  <dt style="font-family: courier;">isEmpty()</dt>
+    <dd>Return (false,true) if (at least one bit true, all bits are
+    false)</dd>
+  <dt style="font-family: courier;">cardinality()</dt>
+    <dd>Return the number of true bits.</dd>
+  <dt style="font-family: courier;">operator&amp;=(const BitSet&amp; set)</dt>
+    <dd>Performs a logical and of this target bit set with the argument bit
+      set. This bit set is modified so that each bit in it has the value true
+      if and only if it both initially had the value true and the
+      corresponding bit in the bit set argument also had the value.</dd>
+  <dt style="font-family: courier;">operator|=(const BitSet&amp; set)</dt>
+    <dd>Performs a logical or of this target bit set with the argument bit
+      set.</dd>
+  <dt style="font-family: courier;">operator^=(const BitSet&amp; set)</dt>
+    <dd>Performs a logical exclusive or of this target bit set with the
+      argument bit set.</dd>
+  <dt style="font-family: courier;">operator-=(const BitSet&amp; set)</dt>
+    <dd><p>Clears all of the bits in this bitSet whose corresponding bit is
+      set in the specified bitSet.</p>
+    </dd>
+  <dt style="font-family: courier;">operator=(const BitSet &amp;set)</dt>
+    <dd>Assignment operator.</dd>
+  <dt style="font-family: courier;">or_and(const BitSet&amp; set1, const
+  BitSet&amp; set2)</dt>
+    <dd>Perform AND operation on set1 and set2, and then OR this bitSet with
+      the result.</dd>
+  <dt style="font-family: courier;">operator==(const BitSet &amp;set)</dt>
+    <dd>Does this bitSet have the same values as the argument.</dd>
+  <dt style="font-family: courier;">operator!=(const BitSet &amp;set)</dt>
+    <dd>Is this bitSet different than the argument.</dd>
+  <dt style="font-family: courier;">toString(StringBuilder buffer)</dt>
+    <dd>Show the current values of the bitSet.</dd>
+  <dt style="font-family: courier;">toString(StringBuilder buffer, int
+  indentLevel)</dt>
+    <dd>Show the current values of the bitSet.</dd>
+</dl>
+
+<h3 style="text-align: center;">ByteBuffer</h3>
+
+<p>A ByteBuffer is used to serialize and deserialize primitive data. File
+byteBuffer.h is:</p>
+<pre>class ByteBuffer {
+public:
+    ByteBuffer(int size = 32, int byteOrder = EPICS_BYTE_ORDER);
+    ~ByteBuffer();
+    ByteBuffer* clear();
+    ByteBuffer* flip();
+    ByteBuffer* rewind();
+    bool getBoolean();
+    int8 getByte();
+    int16 getShort();
+    int32 getInt();
+    int64 getLong();
+    float getFloat();
+    double getDouble();
+    void get(char* dst, int offset, int count);
+    ByteBuffer* put(const char* src, int offset, int count);
+    ByteBuffer* putBoolean(bool value);
+    ByteBuffer* putByte(int8 value);
+    ByteBuffer* putShort(int16 value);
+    ByteBuffer* putInt(int32 value);
+    ByteBuffer* putLong(int64 value);
+    ByteBuffer* putFloat(float value);
+    ByteBuffer* putDouble(double value);
+    inline int getSize() const;
+    inline int getArrayOffset() const;
+    inline int getPosition() const;
+    inline int getLimit() const;
+    inline int getRemaining() const;
+    inline int getByteOrder() const;
+    inline const char* getArray() const;
+    // TODO must define arrays
+private:
+};</pre>
+
+<p>x</p>
+
+<h3 style="text-align: center;">Event</h3>
+
+<p>This class provides coordinates activity between threads. One thread can
+wait for the event and the other signals the event.</p>
+<pre>class Event : private NoDefaultMethods {
+public:
+    Event(bool full);
+    ~Event();
+    static ConstructDestructCallback *getConstructDestructCallback();
+    void signal();
+    bool wait (); /* blocks until full */
+    bool wait ( double timeOut ); /* false if empty at time out */
+    bool tryWait (); /* false if empty */
+private:
+    epicsEventId id;
+};</pre>
+
+<p>where</p>
+<dl>
+  <dt style="font-family: courier;">Event</dt>
+    <dd>The constructor. The initial value can be full or empty. The normal
+      first state is empty.</dd>
+  <dt style="font-family: courier;">getConstructDestructCallback</dt>
+    <dd>Provides access to number of events that have been created and
+      destroyed.</dd>
+  <dt style="font-family: courier;">signal</dt>
+    <dd>The event becomes full. The current or next wait will complete.</dd>
+  <dt style="font-family: courier;">wait</dt>
+    <dd>Wait until event is full or until timeout. The return value is
+      (false,true) if the wait completed because event (was not, was) full. A
+      false value normally means that that a timeout occured. It is also
+      returned if an error occurs or because the event is being deleted.</dd>
+  <dt style="font-family: courier;">tryWait</dt>
+    <dd>returns (false,true) if the event is (empty,full)</dd>
+</dl>
+
+<h3 style="text-align: center;">Exception</h3>
+
+<p>File epicsException.h describes:</p>
+<pre>class BaseException : public std::exception {
+public:
+    BaseException(const char* message, const char* file,
+        int line, std::exception* cause = 0);
+    virtual ~BaseException();
+    virtual const char* what();
+    void toString(std::string&amp; str, unsigned int depth = 0);
+    static inline void getStackTrace(
+         std::string* trace, unsigned int skip_frames = 0, unsigned int max_frames = 63)
+private:
+     // ...
+}</pre>
+
+<p>x</p>
+
+<h3 style="text-align: center;">Executor</h3>
+
+<p>An Executor is a thread that can execute commands. The user can request
+that a single command be executed.</p>
+<pre>class ExecutorNode;
+
+class Command {
+public:
+    virtual void command() = 0;
+};
+
+class Executor : private NoDefaultMethods {
+public:
+    Executor(String threadName,ThreadPriority priority);
+    ~Executor();
+    static ConstructDestructCallback *getConstructDestructCallback();
+    ExecutorNode * createNode(Command *command);
+    void execute(ExecutorNode *node);
+private:
+    class ExecutorPvt *pImpl;
+};</pre>
+
+<p>Command is a class that must be implemented by the code that calls
+execute. It contains the single virtual method command, which is the command
+to execute.</p>
+
+<p>Executor has the methods:</p>
+<dl>
+  <dt style="font-family: courier;">Executor</dt>
+    <dd>The constructor. A thread name and priority must be specified.</dd>
+  <dt style="font-family: courier;">~Executor</dt>
+    <dd>The destructor. If any commands remain in the execute list they are
+      not called. All ExecutorNodes that have been created are deleted.</dd>
+  <dt style="font-family: courier;">getConstructDestructCallback</dt>
+    <dd>Provides access to the number of executors that been created and
+      destroyed.</dd>
+  <dt style="font-family: courier;">createNode</dt>
+    <dd>Create a ExecutorNode that can be passed to execute.</dd>
+  <dt style="font-family: courier;">execute</dt>
+    <dd>Request that command be executed. If it is already on the run list
+      nothing is done.</dd>
+</dl>
+
+<h3 style="text-align: center;">Linked List</h3>
+
+<p>LinkedList implements a double linked list that requires a user to
+allocate the nodes. It is more efficent that std::list. linkedList.h is
+template that is both a complete description and definition. It uses
+linkedListVoid for method definitions. linkedListVoid is not\ meant for use
+except via linkedList. Note, however, that linkedListVoid does have both a
+node and a list static method getConstructDestructCallback, which allows
+access to how many nodes and lists have been created and destroyed. </p>
+
+<p>A node can only be on one list at a time but can be put, at different
+times, on different lists as long as they all hold the same type of objects.
+An exception is thrown if an attempt is made to put a node on a list if the
+node is already on a list. </p>
+<pre>template &lt;typename T&gt;
+class LinkedList;
+
+template &lt;typename T&gt;
+class LinkedListNode : private LinkedListVoidNode {
+public:
+    LinkedListNode(T *object);
+    ~LinkedListNode();
+    T *getObject();
+    bool isOnList();
+};
+template &lt;typename T&gt;
+class LinkedList : private LinkedListVoid {
+public:
+    LinkedList();
+    ~LinkedList();
+    int getLength();
+    void addTail(LinkedListNode&lt;T&gt; *node);
+    void addHead(LinkedListNode&lt;T&gt; *node);
+    void insertAfter(LinkedListNode&lt;T&gt; *node,
+        LinkedListNode&lt;T&gt; *addNode);
+    void insertBefore(LinkedListNode&lt;T&gt; *node,
+        LinkedListNode&lt;T&gt; *addNode);
+    LinkedListNode&lt;T&gt; *removeTail();
+    LinkedListNode&lt;T&gt; *removeHead();
+    void remove(LinkedListNode&lt;T&gt; *listNode);
+    void remove(T *object);
+    LinkedListNode&lt;T&gt; *getHead();
+    LinkedListNode&lt;T&gt; *getTail();
+    LinkedListNode&lt;T&gt; *getNext(LinkedListNode&lt;T&gt; *node);
+    LinkedListNode&lt;T&gt; *getPrev(LinkedListNode&lt;T&gt; *node;
+    bool isEmpty();
+    bool contains(T *object);
+};</pre>
+
+<p>LinkedListNode has the methods:</p>
+<dl>
+  <dt style="font-family: courier;">LinkedListNode</dt>
+    <dd>The constructor. The object must be specified.</dd>
+  <dt style="font-family: courier;">~LinkedListNode</dt>
+    <dd>The destructor.</dd>
+  <dt style="font-family: courier;">getObject</dt>
+    <dd>Returns the nobject.</dd>
+  <dt style="font-family: courier;">isOnList</dt>
+    <dd>returns (false,true) if the node (is not, is) on a list.</dd>
+</dl>
+
+<p>LinkedList has the methods:</p>
+<dl>
+  <dt style="font-family: courier;">LinkedList</dt>
+    <dd>The constructor.</dd>
+  <dt style="font-family: courier;">~LinkedList</dt>
+    <dd>The destructor.</dd>
+  <dt style="font-family: courier;">getLength</dt>
+    <dd>Get the numbet of nodes currently on the list.</dd>
+  <dt style="font-family: courier;">addTail</dt>
+    <dd>Add a node to the end of the list. An exception is thrown if the node
+      is already on a list.</dd>
+  <dt style="font-family: courier;">addHead</dt>
+    <dd>Add a node to the beginning of the list. An exception is thrown if
+      the node is already on a list.</dd>
+  <dt style="font-family: courier;">insertAfter</dt>
+    <dd>Insert addNode after node. An exception is thrown if the addNode is
+      already on a list or if node is not on this list..</dd>
+  <dt style="font-family: courier;">insertBefore</dt>
+    <dd>Insert addNode before node. An exception is thrown if the addNode is
+      already on a list or if node is not on this list.</dd>
+  <dt style="font-family: courier;">removeTail</dt>
+    <dd>Remove and return the last node. Null is returned if the list is
+      empty.</dd>
+  <dt style="font-family: courier;">removeHead</dt>
+    <dd>Remove and return the first node. Null is returned if the list is
+      empty.</dd>
+  <dt style="font-family: courier;">remove</dt>
+    <dd>Remove the specified node or object. An exception is thrown if the
+      node is not on a list.</dd>
+  <dt style="font-family: courier;">getHead</dt>
+    <dd>Get the first list node. Null is returned if the list is empty.</dd>
+  <dt style="font-family: courier;">getTail</dt>
+    <dd>Get the last list node. Null is returned if the list is empty.</dd>
+  <dt style="font-family: courier;">getNext</dt>
+    <dd>Get the node after node. An exception is thrown if node is not on
+      this list. Null is returned if the is node is the last node on the
+    list.</dd>
+  <dt style="font-family: courier;">getPrev</dt>
+    <dd>Get the node before node. An exception is thrown if node is not on
+      this list. Null is returned if the is node is the first node on the
+      list.</dd>
+  <dt style="font-family: courier;">isEmpty</dt>
+    <dd>Is the list empty.</dd>
+  <dt style="font-family: courier;">contains</dt>
+    <dd>Does the list contain the specified object.</dd>
+</dl>
+
+<h3 style="text-align: center;">Lock and Mutex</h3>
+
+<p>lock.h contains:</p>
+<pre>class Mutex  {
+public:
+    Mutex();
+    ~Mutex();
+    void lock();
+    void unlock();
+private:
+};
+
+
+class Lock : private NoDefaultMethods {
+public:
+    explicit Lock(Mutex *pm);
+    ~Lock();
+private:
+};</pre>
+
+<p>This is a complete description and definition of lock and mutex. These
+make it easy to have a lock that is as easy to use as Java synchronize. To
+protect some object just create a Mutex for the object and then in any method
+to be synchronized just have code like:</p>
+<pre>class SomeClass {
+private
+    Mutex mutex;
+...
+public
+    SomeClass() : mutex(Mutex()) {}
+...
+    void method()
+    {
+        Lock xx(&amp;mutex);
+        ...
+    }</pre>
+
+<p>The method will take the lock when xx is created and release the lock when
+the current code block completes.</p>
+
+<p>Another example of Lock is initialization code that must initialize only
+once. This can be implemented as follows:</p>
+<pre>    static void init(void) {
+        static Mutex mutex = Mutex();
+        Lock xx(&amp;mutex);
+        if(alreadyInitialized) return;
+        // initialization
+    }</pre>
+
+<h3 style="text-align: center;">Message Queue</h3>
+
+<h4>Definitions</h4>
+<pre>NOT IMPLEMENTED</pre>
+
+<h4>MessageQueue</h4>
+
+<p>This is for use by code that wants to handle messages without blocking
+higher priority threads.</p>
+
+<p>A messageNode is a class with two public data members:</p>
+<dl>
+  <dt style="font-family: courier;">message</dt>
+    <dd>The message.</dd>
+  <dt style="font-family: courier;">messageType</dt>
+    <dd>The message type.</dd>
+</dl>
+
+<p>A messageQueue is an interface with methods:</p>
+<dl>
+  <dt style="font-family: courier;">put</dt>
+    <dd>Put a new message into the queue. False is returned if the queue was
+      full and true otherwise.</dd>
+  <dt style="font-family: courier;">isEmpty</dt>
+    <dd>Is the queue empty?</dd>
+  <dt style="font-family: courier;">isFull</dt>
+    <dd>Is the queue full?</dd>
+  <dt style="font-family: courier;">replaceFirst</dt>
+    <dd>Replace the oldest member in the queue.</dd>
+  <dt style="font-family: courier;">replaceLast</dt>
+    <dd>Replace the newest member in the queue.</dd>
+  <dt style="font-family: courier;">getClearOverrun</dt>
+    <dd>Get the number of times replaceFirst or replaceLast have been called
+      since the last call to getClearOverrun. The internal counter is reset
+      to 0.</dd>
+</dl>
+
+<p>MessageQueueFactory provides the public method:</p>
+<dl>
+  <dt style="font-family: courier;">create</dt>
+    <dd>Create a MessageQueue and return the interface.</dd>
+</dl>
+
+<p>An example is:</p>
+<pre>    private ExecutorNode executorNode;
+    ...
+      executorNode = executor.createNode(this);
+    ...
+
+    public void message(final String message, MessageType messageType) {
+        boolean execute = false;
+        synchronized(messageQueue) {
+            if(messageQueue.isEmpty()) execute = true;
+            if(messageQueue.isFull()) {
+                messageQueue.replaceLast(message, messageType);
+            } else {
+                messageQueue.put(message, messageType);
+            }
+        }
+        if(syncExec) {
+            iocExecutor.execute(executorNode);
+        }
+    }
+    ...
+    public run() { // handle messages
+        while(true) {
+            String message = null;
+            int numOverrun = 0;
+            synchronized(messageQueue) {
+                MessageNode messageNode = messageQueue.get();
+                numOverrun = messageQueue.getClearOverrun();
+                if(messageNode==null &amp;&amp; numOverrun==0) break;
+                message = messageNode.message;
+            }
+            if(numOverrun&gt;0) {
+                System.out.printf(String.format("%n%d missed messages&amp;n", numOverrun));
+            }
+            if(message!=null) {
+               System.out.printf(String.format("%s%n",message));
+            }
+        }
+    }</pre>
+
+<h3 style="text-align: center;">NoDefaultMethods</h3>
+
+<p>If a class privately extends this class then the compiler can not create
+any of the following: default constructor, default copy constructror, or
+default assignment contructor.</p>
+<pre>/* This is based on Item 6 of
+ * Effective C++, Third Edition, Scott Meyers
+ */
+    class NoDefaultMethods {
+    protected:
+    // allow by derived objects
+    NoDefaultMethods(){};
+    ~NoDefaultMethods(){}
+    private:
+    // do not implment
+    NoDefaultMethods(const NoDefaultMethods&amp;);
+    NoDefaultMethods &amp; operator=(const NoDefaultMethods &amp;);
+    };</pre>
+
+<h3 style="text-align: center;">pvType</h3>
+
+<p>This provides typedefs for integers and String.</p>
+<pre>typedef signed char int8;
+typedef short       int16;
+typedef int         int32;
+typedef long long   int64;
+typedef unsigned int uint32;
+typedef unsigned long long uint64;
+
+typedef std::string String;
+typedef std::string * StringBuilder;
+typedef String* StringArray;</pre>
+
+<p>where</p>
+<dl>
+  <dt style="font-family: courier;">int8,...,int64</dt>
+    <dd>Hopefully all modern C++ compilers will support these definitions. If
+      not then only pvType.h will require changes rather than user code.</dd>
+  <dt style="font-family: courier;">String</dt>
+    <dd>Since std::string implements copy on write semantics, it can be used
+      for support for immutable strings. This is what pvData supports. </dd>
+  <dt style="font-family: courier;">StringBuilder</dt>
+    <dd>Acts like the Java StringBuilder class.</dd>
+  <dt style="font-family: courier;">StringArray</dt>
+    <dd>An array of Strings.</dd>
+</dl>
+
+<h3 style="text-align: center;">Requester</h3>
+
+<p>A PVField extends Requester. Requester is present so that when database
+errors are found there is someplace to send a message.</p>
+<pre>enum MessageType {
+   infoMessage,warningMessage,errorMessage,fatalErrorMessage
+};
+
+extern StringArray messageTypeName;
+
+class Requester {
+public:
+    virtual String getRequesterName() = 0;
+    virtual void message(String message,MessageType messageType) = 0;
+};</pre>
+
+<p>where</p>
+<dl>
+  <dt style="font-family: courier;"></dt>
+  <dt style="font-family: courier;">MessageType</dt>
+    <dd>Type of message.</dd>
+  <dt style="font-family: courier;">messageTypeName</dt>
+    <dd>An array of strings of the message type names, i.e.
+      String("info"),String("warning"),String("error"),String("fatalError").</dd>
+  <dt style="font-family: courier;">getRequesterName</dt>
+    <dd>Returns the requester name.</dd>
+  <dt style="font-family: courier;">message</dt>
+    <dd>Gives a message to the requester.</dd>
+</dl>
+
+<h3 style="text-align: center">Serialize</h3>
+
+<p>This is a helper class for serialization, which is required for sending
+and receiving pvData over the nerwork.</p>
+<pre>class SerializeHelper : public NoDefaultMethods {
+public:
+    static void writeSize(int s, ByteBuffer* buffer,
+        SerializableControl* flusher);
+    static int readSize(ByteBuffer* buffer,
+        DeserializableControl* control);
+    static void serializeString(const String&amp; value,
+        ByteBuffer* buffer,SerializableControl* flusher);
+    static void serializeSubstring(const String&amp; value, int offset,
+        int count, ByteBuffer* buffer,
+        SerializableControl* flusher);
+    static String deserializeString(ByteBuffer* buffer,
+        DeserializableControl* control);
+private:
+};
+
+class SerializableControl {
+public:
+    virtual void flushSerializeBuffer() =0;
+    virtual void ensureBuffer(int size) =0;
+};
+class DeserializableControl {
+
+public:
+    virtual void ensureData(int size) =0;
+};
+class Serializable {
+public:
+    virtual void serialize(ByteBuffer *buffer,
+        SerializableControl *flusher) = 0;
+    virtual void deserialize(ByteBuffer *buffer,
+        DeserializableControl *flusher) = 0;
+};
+class BitSetSerializable {
+public:
+    virtual void serialize(ByteBuffer *buffer,
+        SerializableControl *flusher,BitSet *bitSet) = 0;
+    virtual void deserialize(ByteBuffer *buffer,
+        DeserializableControl *flusher,BitSet *bitSet) = 0;
+};
+class SerializableArray : public Serializable {
+public:
+    virtual void serialize(ByteBuffer *buffer,
+         SerializableControl *flusher, int offset, int count) = 0;
+};</pre>
+
+<p>where</p>
+<dl>
+  <dt style="font-family: courier;">writeSize</dt>
+    <dd>Serialize the size.</dd>
+  <dt style="font-family: courier;">readSize</dt>
+    <dd>Deserialize the size.</dd>
+  <dt style="font-family: courier;">serializeString</dt>
+    <dd>Serialize a String.</dd>
+  <dt style="font-family: courier;">serializeSubstring</dt>
+    <dd>Serialize a substring.</dd>
+  <dt style="font-family: courier;">deserializeString</dt>
+    <dd>Deserialize a string.</dd>
+</dl>
+
+<p>The following interfaces are called by pvAccess for transporting data over
+the network. The abstract and base classes ensure that these methods are
+properly implemented. </p>
+<pre>x</pre>
+
+<p>x</p>
+
+<h3 style="text-align: center;">Show Constructors and Destructors</h3>
+
+<p>This is a facility that allows a class to report how many objects of that
+class have been created and destroyed. This can help find memory leaks.</p>
+<pre>typedef int64 (*getTotal)();
+
+class ConstructDestructCallback : private NoDefaultMethods {
+public:
+    ConstructDestructCallback(
+        String name,
+        getTotal construct,
+        getTotal destruct,
+        getTotal reference);
+    String getConstructName();
+    int64 getTotalConstruct();
+    int64 getTotalDestruct();
+    int64 getTotalReferenceCount();
+private:
+    ~ConstructDestructCallback();
+    String name;
+    getTotal construct;
+    getTotal destruct;
+    getTotal reference;
+};
+
+class ShowConstructDestruct : private NoDefaultMethods {
+public:
+    static void constuctDestructTotals(FILE *fd);
+    static void registerCallback(ConstructDestructCallback *callback);
+private:
+    ShowConstructDestruct();
+    friend ShowConstructDestruct* getShowConstructDestruct();
+};
+
+extern ShowConstructDestruct* getShowConstructDestruct();</pre>
+
+<p>ConstructDestructCallback is implemented by a class that keeps track of
+how many instances of the class has been created and how many destroyed. The
+clas must implement this class and register it with ShowConstructDestruct. To
+see an example of how this is implemented look at misc/thread.cpp.</p>
+
+<p>Classes that implement this class also include a static method that makes
+ConstructDestructCallback available to code that wants look at the memory
+usage of a particular class.</p>
+
+<p>ShowConstructDestruct is the class that reports the memory uasge of all
+registered classes. It can be called as folows:</p>
+<pre>   getShowConstructDestruct()-&gt;constuctDestructTotals(fd);</pre>
+
+<h3 style="text-align: center">Status</h3>
+
+<p>Status provides a way to pass status back to client code. It is new and
+not currently used by pvData but may be in the future. It is used by code
+that uses pvData.</p>
+<pre>NOT IMPLEMENTED</pre>
+
+<p>The Status methods are:</p>
+<dl>
+  <dt style="font-family: courier;">StatusType</dt>
+    <dd>An enum for the status type.</dd>
+  <dt style="font-family: courier;">getType</dt>
+    <dd>Get the statusType.</dd>
+  <dt style="font-family: courier;">getMessage</dt>
+    <dd>Get a message explaining the error.</dd>
+  <dt style="font-family: courier;">getStackDump</dt>
+    <dd>Get a stack dump.</dd>
+</dl>
+
+<p>The StatusCreate methods are:</p>
+<dl>
+  <dt style="font-family: courier;">getStatusOK</dt>
+    <dd>Get a singleton that returns StatusType.OK and a null message and
+      stackDump.</dd>
+  <dt style="font-family: courier;">createStatus</dt>
+    <dd>Create a new Status.</dd>
+  <dt style="font-family: courier;">deserializeStatus</dt>
+    <dd>Use this method instead of Status.deserialize(), since this allows OK
+      status optimization.</dd>
+</dl>
+
+<h3 style="text-align: center;">Thread</h3>
+
+<h4>ThreadPriority</h4>
+<pre>enum ThreadPriority {
+    lowestPriority,
+    lowerPriority,
+    lowPriority,
+    middlePriority,
+    highPriority,
+    higherPriority,
+    highestPriority
+};
+
+class ThreadPriorityFunc {
+public:
+    static unsigned int const * const getEpicsPriorities();
+    static int getEpicsPriority(ThreadPriority threadPriority);
+};</pre>
+
+<h4>Thread</h4>
+<pre>class Runnable {
+public:
+    virtual void run() = 0;
+};
+
+class Thread;
+
+class Thread :  private NoDefaultMethods {
+public:
+    Thread(String name,ThreadPriority priority,Runnable *runnableReady);
+    ~Thread();
+    static ConstructDestructCallback *getConstructDestructCallback();
+    String getName();
+    ThreadPriority getPriority();
+    static void showThreads(StringBuilder buf);
+    static void sleep(double seconds);
+private:
+};</pre>
+
+<p>Runnable must be implement by code that wants to be run via a thread. It
+has one virtual method: run. Run is the code that is run as a thread. When
+run compeletes it can not be restarted. If code wants to delete a thread then
+it MUST arrange that the run returns before the thread can be deleted. An
+exception is thrown if run remains active when delete is called. </p>
+
+<p>Thread has the methods:</p>
+<dl>
+  <dt style="font-family: courier;">Thread</dt>
+    <dd>The constructor. A thread name and priority must be specified. The
+      run methods of runnable is executed. When the run methods returns the
+      thread will no longer be active but the client code must still delete
+      the thread.</dd>
+  <dt style="font-family: courier;">~Thread</dt>
+    <dd>The destructor. This is called as the result of: 
+      <pre>    delete pthread;</pre>
+    </dd>
+  <dt style="font-family: courier;">getConstructDestructCallback</dt>
+    <dd>Provides access to the number of threads that been created and
+      destroyed.</dd>
+  <dt style="font-family: courier;">getName</dt>
+    <dd>Get the thread name.</dd>
+  <dt style="font-family: courier;">getPriority</dt>
+    <dd>Get the thread priority.</dd>
+  <dt style="font-family: courier;">showThreads</dt>
+    <dd>Get a String that has the name and priority of all currently
+      allocated threads.</dd>
+  <dt style="font-family: courier;">sleep</dt>
+    <dd>Make the current thread sleep for the specified number of
+    seconds.</dd>
+</dl>
+
+<h3 style="text-align: center;">Time Function Call</h3>
+
+<p>TimeFunction is a facility that measures the average number of seconds a
+function call requires. When timeCall is called, it calls function in a loop.
+It starts with a loop of one iteration. If the total elapsed time is less
+then .1 seconds it increases the number of iterrations by a factor of 10. It
+keeps repeating until the elapsed time is greater than .1 seconds. It returns
+the average number of seconds per call.</p>
+<pre>class TimeFunctionRequester {
+public:
+    virtual void function() = 0;
+};
+
+class TimeFunction : private NoDefaultMethods {
+public:
+    TimeFunction(TimeFunctionRequester *requester);
+    ~TimeFunction();
+    double timeCall();
+private:
+    TimeFunctionRequester *requester;
+};</pre>
+
+<p>TimeFunctionRequester must be implemented by code that wants to time how
+long a function takes. It has the single method:</p>
+<dl>
+  <dt style="font-family: courier;">function</dt>
+    <dd>This is the function.</dd>
+</dl>
+
+<p>TimeFunction has the methods:</p>
+<dl>
+  <dt style="font-family: courier;">TimeFunction</dt>
+    <dd>Constructor.</dd>
+  <dt style="font-family: courier;">~TimeFunction</dt>
+    <dd>Destructor.</dd>
+  <dt style="font-family: courier;">timeCall</dt>
+    <dd>Time how long it takes to execute the function. It starts by calling
+      the function one time. If it takes &lt; 1 seconds to doubles the number
+      of times to call the function. It repeats this until it takes at least
+      one second to call it ntimes.</dd>
+</dl>
+
+<h3 style="text-align: center;">Timer</h3>
+
+<p>This provides a general purpose timer. It allows a user callback to be
+called after a delay or periodically. </p>
+<pre>class TimerCallback {
+public:
+    virtual void callback() = 0;
+    virtual void timerStopped() = 0;
+};
+
+class TimerNode : private NoDefaultMethods {
+public:
+    TimerNode(TimerCallback *timerCallback);
+    ~TimerNode();
+    static ConstructDestructCallback *getConstructDestructCallback();
+    void cancel();
+    bool isScheduled();
+private:
+};
+
+class Timer : private NoDefaultMethods {
+public:
+    Timer(String threadName, ThreadPriority priority);
+    ~Timer();
+    static ConstructDestructCallback *getConstructDestructCallback();
+    void scheduleAfterDelay(TimerNode *timerNode,double delay);
+    void schedulePeriodic(TimerNode *timerNode,double delay,double period);
+private:
+};</pre>
+
+<p>TimerCallback must be implemented by the user. It has the following
+methods: </p>
+<dl>
+  <dt style="font-family: courier;">callback</dt>
+    <dd>This is called when a timer expires. This is called with no locks
+      held. When called a delay timer is no longer on the queue but a
+      periodioc timer is on a queue. Thus the callback for a delay timer can
+      issue a new schedule request but a periodic timer must not. Note the
+      explaination of TimerNode.cancel below.</dd>
+  <dt style="font-family: courier;">timerStopped</dt>
+    <dd>Timer.stop was called when a timer request was queued. or if the
+      timer is stopped and a schedule request is made.</dd>
+</dl>
+
+<p>In order to schedule a callback client code must allocate a TimerNode It
+can be used to schedule multiple callbacks. It has the methods:</p>
+<dl>
+  <dt style="font-family: courier;">TimerNode</dt>
+    <dd>The constructor. User code must create a TimeNode in order to call a
+      schedule method.</dd>
+  <dt style="font-family: courier;">~TimerNode</dt>
+    <dd>The destructor. This is called as a result of the client calling: 
+      <pre>    delete timerNode;</pre>
+    </dd>
+  <dt style="font-family: courier;">getConstructDestructCallback</dt>
+    <dd>Provides access to the number of timerNodes that been created and
+      destroyed.</dd>
+  <dt style="font-family: courier;">cancel</dt>
+    <dd>This is called to cancel a timer request. If a callback has been
+      dequeued but the callback not called when cancel is called then a
+      callback may still happen. New schedule requests can be made after a
+      cancel request has been made.</dd>
+  <dt style="font-family: courier;">isScheduled</dt>
+    <dd>Is the timerNode scheduled to be called.</dd>
+</dl>
+
+<p>Timer has the methods:</p>
+<dl>
+  <dt style="font-family: courier;">Timer</dt>
+    <dd>The consttructor.</dd>
+  <dt style="font-family: courier;">~Timer</dt>
+    <dd>The destructor. The queue is emptied and TimerCallback.timerStopped
+      is called for each element of the queue.</dd>
+  <dt style="font-family: courier;">getConstructDestructCallback</dt>
+    <dd>Provides access to the number of timers that been created and
+      destroyed.</dd>
+  <dt style="font-family: courier;">scheduleAfterDelay</dt>
+    <dd>A request to schedule a callback after a delay specified in
+    seconds.</dd>
+  <dt style="font-family: courier;">schedulePeriodic</dt>
+    <dd>Schedule a periodic callback.</dd>
+</dl>
+
+<h3 style="text-align: center;">TimeStamp</h3>
+
+<p>TimeStamp is a class for accessing a timeStamp that consists of the number
+of seconds since the epoch and the number of nanoseconds within the current
+second. The epoch is the posix epoch which is Jan 1, 1970 at 00:00:00
+Universal Time Coordinated.</p>
+
+<p>The seconds since the epoch is kept as an int64 and the nano seconds is
+kept as in int32.</p>
+
+<p>The implementation of some of the methods (getCurrent, fromTime_t, and
+toTime_t) use epicsTime from EPICS base and will thus have a problem when the
+epics secPastEpoch overflows, which will happen in about 2126.</p>
+
+<p>The TimeStamp class provides arithmetic operations on time stamps. The
+result is always kept in normalized form, which means that the nano second
+portion is 0&le;=nano&lt;nanoSecPerSec. Note that it is OK to have timeStamps
+for times previous to the epoch.</p>
+
+<p>TimeStamp acts like a primitive. It can be allocated on the stack and the
+compiler is free to generate default methods, i.e. copy constructor,
+assignment constructor, and destructor.</p>
+
+<p>One use for TimeStamp is to time how long a section of code takes to
+execute. This is done as follows:</p>
+<pre>    TimeStamp startTime;
+    TimeStamp endTime;
+    ...
+    startTime.getCurrent();
+    // code to measure time
+    endTime.getCurrent();
+    double time = TimeStamp::diff(endTime,startTime);</pre>
+
+<p>TimeStamp is described as:</p>
+<pre>extern int32 milliSecPerSec;
+extern int32 microSecPerSec;
+extern int32 nanoSecPerSec;
+extern int64 posixEpochAtEpicsEpoch;
+
+class TimeStamp {
+public:
+    TimeStamp();
+    TimeStamp(int64 secondsPastEpoch,int32 nanoSeconds = 0);
+    //default constructors and destructor are OK
+    //This class should not be extended
+    void normalize();
+    void fromTime_t(const time_t &amp;);
+    void toTime_t(time_t &amp;) const;
+    int64 getSecondsPastEpoch() const;
+    int64 getEpicsSecondsPastEpoch() const;
+    int32 getNanoSeconds() const;
+    void put(int64 secondsPastEpoch,int32 nanoSeconds = 0);
+    void put(int64 milliseconds);
+    void getCurrent();
+    double toSeconds() const ;
+    bool operator==(TimeStamp const &amp;) const;
+    bool operator!=(TimeStamp const &amp;) const;
+    bool operator&lt;=(TimeStamp const &amp;) const;
+    bool operator&lt; (TimeStamp const &amp;) const;
+    bool operator&gt;=(TimeStamp const &amp;) const;
+    bool operator&gt; (TimeStamp const &amp;) const;
+    static double diff(TimeStamp const &amp; a,TimeStamp const &amp; b);
+    TimeStamp &amp; operator+=(int64 seconds);
+    TimeStamp &amp; operator-=(int64 seconds);
+    TimeStamp &amp; operator+=(double seconds);
+    TimeStamp &amp; operator-=(double seconds);
+    int64 getMilliseconds(); //milliseconds since epoch
+private:
+};</pre>
+
+<p>TimeStamp has the methods:</p>
+<dl>
+  <dt style="font-family: courier;">Timer</dt>
+    <dd>The default constructor sets both seconds and nano seconds to 0. The
+      other constructor shown above will call normalize.</dd>
+  <dt style="font-family: courier;">normalize</dt>
+    <dd>Adjust seconds and nano seconds so that
+    0&lt;=nano&lt;nanoSecPerSec</dd>
+  <dt style="font-family: courier;">fromTime_t</dt>
+    <dd>Set the timeStamp value from "time_t", which is defined
+      &lt;ctime&gt;, i.e. by the standard C++ library and also as part of
+      standard C. </dd>
+  <dt style="font-family: courier;">toTime_t</dt>
+    <dd>Convert the timeStamp to "time_t". From time_t, using that standard
+      C++ library &lt;ctime&gt; it is easy to get a "struct tm" that has the
+      the time broken into parts. For example: 
+      <pre>    TimeStamp current;
+    current.getCurrent();
+    time_t tt;
+    current.toTime_t(tt);
+    struct tm ctm;
+    memcpy(&amp;ctm,localtime(&amp;tt),sizeof(struct tm));
+    fprintf(auxfd,
+        "%4.4d.%2.2d.%2.2d %2.2d:%2.2d:%2.2d %d nanoSeconds isDst %s\n",
+        ctm.tm_year+1900,ctm.tm_mon + 1,ctm.tm_mday,
+        ctm.tm_hour,ctm.tm_min,ctm.tm_sec,
+        current.getNanoSeconds(),
+        (ctm.tm_isdst==0) ? "false" : "true");</pre>
+      <p>prints something like:</p>
+      <pre>2010.12.01 07:39:48 807264972 nanoSeconds isDst false</pre>
+    </dd>
+  <dt style="font-family: courier;">getSecondsPastEpoch</dt>
+    <dd>Gets the number of seconds since Jan 1 1970 UTC.</dd>
+  <dt style="font-family: courier;">getEpicsSecondsPastEpoch</dt>
+    <dd>Gets the number of seconds since Jan 1 1990 UTC.</dd>
+  <dt style="font-family: courier;">getNanoSeconds</dt>
+    <dd>Get the number of nano seconds. This is always
+      0&lt;=value&lt;nanoSecPerSec</dd>
+  <dt style="font-family: courier;">put</dt>
+    <dd>Set the timeStamp value. The result will always be normalized.</dd>
+  <dt style="font-family: courier;">getCurrent</dt>
+    <dd>Get the current time.</dd>
+  <dt style="font-family: courier;">toSeconds</dt>
+    <dd>Get the value as a double. It is the number of seconds since the
+      epoch.</dd>
+  <dt style="font-family: courier;">operator==</dt>
+    <dd>Compare equal.</dd>
+  <dt style="font-family: courier;">operator!=</dt>
+    <dd>Compare not equal.</dd>
+  <dt style="font-family: courier;">operator&lt;=</dt>
+    <dd>Is value &lt;= arg.</dd>
+  <dt style="font-family: courier;">operator&lt;</dt>
+    <dd>Is value &lt; arg.</dd>
+  <dt style="font-family: courier;">operator&gt;=</dt>
+    <dd>Is value &gt;= arg.</dd>
+  <dt style="font-family: courier;">operator&gt;</dt>
+    <dd>Is value &gt; arg.</dd>
+  <dt style="font-family: courier;">diff</dt>
+    <dd>The result is (a-b) in seconds.</dd>
+  <dt style="font-family: courier;">operator+=</dt>
+    <dd>Add the argument to the timeStamp. The argument can be an integer or
+      a double. The result will be normalized.</dd>
+  <dt style="font-family: courier;">operator-=</dt>
+    <dd>Subtract the argument from the timeStamp. The argument can be an
+      integer or a double. The result will be normalized.</dd>
+  <dt style="font-family: courier;">getMilliseconds</dt>
+    <dd>Get the timeStamp as number of milliseconds since the epoch.</dd>
+</dl>
+
+<h3 style="text-align: center;">Queue</h3>
+
+<p>This provides a queue which has an immutable capacity, which is specified
+when the queue is created. When the queue is full the user code is expected
+to keep using the current el;ement until a new free element becomes avalable.
+This is used by pvData.monitor.</p>
+<pre>NOT IMPLEMENTED</pre>
+
+<p>A queueCreate instance is created via a call like the following:</p>
+<pre> QueueCreate&lt;MyObject&gt; queueCreate = new QueueCreate&lt;MyObject&gt;();</pre>
+
+<p>Once a queueCreate is available a queue instance is created via code like
+the following:</p>
+<pre>Queue&lt;MyObject&gt; queue create(MyObject[] myObjects) {
+    QueueElement&lt;MyObject&gt;[] queueElements = new QueueElement[length];
+    for(int i=0; i&lt;length; i++) {
+        QueueElement&lt;MonitorElement&gt; queueElement =
+                 queueCreate.createQueueElement(myObjects[i);
+        queueElements[i] = queueElement;
+    }
+    return queueCreate.create(queueElements);
+}</pre>
+
+<p>The queue methods are:</p>
+<dl>
+  <dt style="font-family: courier;">clear</dt>
+    <dd>Make the queue empty.</dd>
+  <dt style="font-family: courier;">getNumberFree</dt>
+    <dd>Get the number of fee elements in the queue.</dd>
+  <dt style="font-family: courier;">capacity</dt>
+    <dd>Get the capacity, i.e. the maximun number of elements the queue can
+      hold.</dd>
+  <dt style="font-family: courier;">getFree</dt>
+    <dd>Get the next free element. Null is returned if no free elements are
+      available. If a non null value is returned then the element belongs to
+      the caller until setUsed is called.</dd>
+  <dt style="font-family: courier;">setUsed</dt>
+    <dd>Set a queue element used. This <span
+      style="font-weight:bold;">must</span> be the element returned by the
+      last call to getFree. </dd>
+  <dt style="font-family: courier;">getUsed</dt>
+    <dd>Get the next used element of null if no more used elements are
+      available.</dd>
+  <dt style="font-family: courier;">releaseUsed</dt>
+    <dd>Set a queue element free. This must be the element returned by the
+      last call to getUsed. </dd>
+</dl>
+
+<p>A producer calls getFree and setUsed via code like the following:</p>
+<pre>   MyObject getFree() {
+       QueueElement&lt;MyObject&gt; queueElement = queue.getFree();
+       if(queueElement==null) return null;
+       return queueElement.getObject();
+  }</pre>
+
+<p>A consumer calls getUsed and releaseUsed via code like the following:</p>
+<pre>     while(true) {
+         QueueElement&lt;MyObject&gt; queueElement = queue.getUsed();
+         if(queueElement==null) break;
+         MyObject myObject = queueElement.getObject();
+         // do something with myObject
+         queue.releaseUsed(queueElement);
+     }</pre>
+<hr />
+
+<h2 style="text-align: center">PV - User Description</h2>
+<hr />
+
+<h3 style="text-align: center">Overview</h3>
+
+<p>Directory pvDataApp/pv has header files that completely describe pvData.
+The implementation is provided in directory pvDataApp/factory. Test programs
+appears on pvDataApp/pvTest.</p>
+
+<p>A PVStructure is a field that contains an array of subfields. Each field
+has code for accessing the field. The interface for each field is PVField or
+an interface that extends PVField. Each field also has an introspection
+interface, which is Field or an extension of Field. This section describes
+the complete set of data and introspection interfaces for pvData.</p>
+
+<p>A class FieldCreate creates introspection objects. A class PVDataCreate
+createsdata objects. A class Convert provides a rich set of methods for
+converting and copying data between fields.</p>
+
+<p>Directory pvDataApp/pv has the following header files:</p>
+<dl>
+  <dt style="font-family: courier;">pvIntrospect.h</dt>
+    <dd>A cpmplete description of the introspection interfaces.</dd>
+  <dt style="font-family: courier;">pvData.h</dt>
+    <dd>A complete description of the data interfaces.</dd>
+  <dt style="font-family: courier;">convert.h</dt>
+    <dd>The facility that converts between data fields.</dd>
+  <dt style="font-family: courier;">standardField.h</dt>
+    <dd>Provides access to introspection interfaces for standard field like
+      timeStamp, alarm, etc.</dd>
+  <dt style="font-family: courier;">standardPVField.h</dt>
+    <dd>Cteates data interfaces for standard data fields like timeStamp,
+      alarm, etc.</dd>
+</dl>
+
+<h3 style="text-align: center">Process Variable Reflection</h3>
+
+<p>This subsection describes pvIntrospect.h</p>
+
+<p>Given a pvname, which consists of a record name and field name, it is
+possible to introspect the field without requiring access to data. The
+reflection and data interfaces are separate because the data may not be
+available. For example when a client connects to a PV, the client library can
+obtain the reflection information without obtaining any data. Only when a
+client issues an I/O request will data be available. This separation is
+especially important for arrays and structures so that a client can discover
+the type without requiring that a large array or structure be transported
+over the network.</p>
+
+<h4>Type</h4>
+
+<p>The types are defined by the Java definitions:</p>
+<pre>enum Type {
+    scalar,
+    scalarArray,
+    structure,
+    structureArray;
+};
+class TypeFunc {
+public:
+    static void toString(StringBuilder buf,const Type type);
+};
+
+
+enum ScalarType {
+    pvBoolean,
+    pvByte, pvShort, pvInt, pvLong,
+    pvFloat,pvDouble,
+    pvString;
+};
+class ScalarTypeFunc {
+public:
+    static bool isInteger(ScalarType type);
+    static bool isNumeric(ScalarType type);
+    static bool isPrimitive(ScalarType type);
+    static ScalarType getScalarType(String value);
+    static void toString(StringBuilder buf,ScalarType scalarType);
+};</pre>
+
+<p><span style="font-family: courier;">Type</span> is one of the
+following:</p>
+<dl>
+  <dt style="font-family: courier;">scalar</dt>
+    <dd>A scalar of one of the scalar types.</dd>
+  <dt style="font-family: courier;">scalarArray</dt>
+    <dd>An array where every element has the same scalar type.</dd>
+  <dt style="font-family: courier;">structure</dt>
+    <dd>A structure where each field can have a dfferent type.</dd>
+  <dt style="font-family: courier;">structureArray</dt>
+    <dd>An array where each element is a structure. Each element has the same
+      structure introspection interface.</dd>
+</dl>
+
+<p><span style="font-family: courier;">ScalarType</span> is one of the
+following:</p>
+<dl>
+  <dt style="font-family: courier;">pvBoolean</dt>
+    <dd>Has the value false or true.</dd>
+  <dt style="font-family: courier;">pvByte</dt>
+    <dd>A signed 8 bit integer.</dd>
+  <dt style="font-family: courier;">pvShort</dt>
+    <dd>A signed 16 bit integer.</dd>
+  <dt style="font-family: courier;">pvInt</dt>
+    <dd>A signed 32 bit integer.</dd>
+  <dt style="font-family: courier;">pvLong</dt>
+    <dd>A signed 64 bit integer.</dd>
+  <dt style="font-family: courier;">pvFloat</dt>
+    <dd>A IEEE float.</dd>
+  <dt style="font-family: courier;">pvDouble</dt>
+    <dd>A IEEE double,</dd>
+  <dt style="font-family: courier;">pvString</dt>
+    <dd>An immutable string.</dd>
+</dl>
+
+<p><span style="font-family: courier;">TypeFunction</span> is a set of
+convenience methods for <span style="font-family: courier;">Type</span></p>
+<dl>
+  <dt style="font-family: courier;">toString</dt>
+    <dd>Convert the type to a string.</dd>
+</dl>
+
+<p><span style="font-family: courier;">ScalarTypeFunction</span> is a set of
+convenience methods for <span
+style="font-family: courier;">ScalarType</span></p>
+<dl>
+  <dt style="font-family: courier;">isInteger</dt>
+    <dd>Is the scalarType an integer type, i.e. one of pvByte,...pvlong.</dd>
+  <dt style="font-family: courier;">isNumeric</dt>
+    <dd>Is the scalarType numeric, i.e. pvByte,...,pvDouble.</dd>
+  <dt style="font-family: courier;">isPrimitive</dt>
+    <dd>Is the scvalarType primitive, i.e. not pvString</dd>
+  <dt style="font-family: courier;">getScalarType</dt>
+    <dd>Given a string of the form String("boolean"),...,String("string")
+      return the scalarType.</dd>
+  <dt style="font-family: courier;">toString</dt>
+    <dd>Convert the scalar type to a string.</dd>
+</dl>
+
+<h4>Reflection</h4>
+
+<p>This section defines the complete set of Java PV reflection interfaces.</p>
+<pre>    
+class Field :  private NoDefaultMethods {
+public:
+   virtual ~Field();
+   Field(String fieldName,Type type);
+   static ConstructDestructCallback *getConstructDestructCallback();
+   int getReferenceCount() const;
+   String getFieldName() const;
+   Type getType() const;
+   virtual void toString(StringBuilder buf) const{toString(buf,0);}
+   virtual void toString(StringBuilder buf,int indentLevel) const;
+private:
+};
+
+class Scalar : public Field{
+public:
+   Scalar(String fieldName,ScalarType scalarType);
+   virtual ~Scalar();
+   ScalarType getScalarType() const {return scalarType;}
+   virtual void toString(StringBuilder buf) const{toString(buf,0);}
+   virtual void toString(StringBuilder buf,int indentLevel) const;
+private:
+};
+class ScalarArray : public Field{
+public:
+   ScalarArray(String fieldName,ScalarType scalarType);
+   virtual ~ScalarArray();
+   ScalarType  getElementType() const {return elementType;}
+   virtual void toString(StringBuilder buf) const{toString(buf,0);}
+   virtual void toString(StringBuilder buf,int indentLevel) const;
+private:
+};
+
+class StructureArray : public Field{
+public:
+   StructureArray(String fieldName,StructureConstPtr structure);
+   virtual ~StructureArray();
+   StructureConstPtr  getStructure() const {return pstructure;}
+   virtual void toString(StringBuilder buf) const{toString(buf,0);}
+   virtual void toString(StringBuilder buf,int indentLevel) const;
+private:
+};
+
+class Structure : public Field {
+public:
+   Structure(String fieldName, int numberFields,FieldConstPtrArray fields);
+   virtual ~Structure();
+   int getNumberFields() const {return numberFields;}
+   FieldConstPtr getField(String fieldName) const;
+   int getFieldIndex(String fieldName) const;
+   FieldConstPtrArray getFields() const {return fields;}
+   virtual void toString(StringBuilder buf) const{toString(buf,0);}
+   virtual void toString(StringBuilder buf,int indentLevel) const;
+private:
+};
+
+class FieldCreate : NoDefaultMethods {
+public:
+   FieldConstPtr  create(String fieldName,FieldConstPtr  field) const;
+   ScalarConstPtr  createScalar(String fieldName,ScalarType scalarType) const;
+   ScalarArrayConstPtr createScalarArray(String fieldName,
+       ScalarType elementType) const;
+   StructureConstPtr createStructure (String fieldName,
+       int numberFields,FieldConstPtrArray fields) const;
+   StructureArrayConstPtr createStructureArray(String fieldName,
+       StructureConstPtr structure) const;
+private:
+};
+
+extern FieldCreate * getFieldCreate();</pre>
+
+<p>The above definitions support the following:</p>
+<dl>
+  <dt style="font-family: courier;">Field</dt>
+    <dd>A field: 
+      <dl>
+        <dt>Has a name.</dt>
+        <dt>Has a Type.</dt>
+        <dt>Can be converted to a string.</dt>
+      </dl>
+    </dd>
+  <dt style="font-family: courier;">Scalar</dt>
+    <dd>A scalar has a scalarType</dd>
+  <dt style="font-family: courier;">ScalarArray</dt>
+    <dd>The element type is a scalarType</dd>
+  <dt style="font-family: courier;">StructureArray</dt>
+    <dd>The field holds PVStructure[]. Each element has the same Structure
+      interspection interface. A client can only get/put entire PVStructure
+      elements NOT subfields of array elements.</dd>
+  <dt style="font-family: courier;">Structure</dt>
+    <dd>Has fields that can be any of the supported types.</dd>
+  <dt style="font-family: courier;">FieldCreate</dt>
+    <dd>This is an interface that provides methods to create introspection
+      interfaces. A factory is provides to create FieldCreate.</dd>
+  <dt style="font-family: courier;">getFieldCreate</dt>
+    <dd>Gets a pointer to the single instance of FieldCreate.</dd>
+</dl>
+
+<h3 style="text-align: center">Standard Fields</h3>
+
+<p>The file standardField.h has a class description for getting Field objects
+for standard fields. For each type of standard object two methods are
+defined: one with no properties and with properties. The property field is a
+comma separated string of property names of the following: alarm, timeStamp,
+display, control, and valueAlarm. An example is "alarm,timeStamp,valueAlarm".
+The method with properties creates a structure with fields named fieldName
+and each of the property names. Each property field is a structure defining
+the property. The details about each property is given in the section named
+"Property". For example the call:</p>
+<pre>    StructureConstPtr example = standardField-&gt;scalar(
+        String("value"),
+        pvDouble,
+        String("value,alarm,timeStamp"));</pre>
+
+<p>Will result in a Field definition that has the form:</p>
+<pre>structure example
+    double value
+    structure alarm
+        structure severity
+            int index
+            string[] choices
+       structure timeStamp
+            long secondsPastEpoch
+            int  nanoSeconds</pre>
+
+<p>In addition there are methods that create each of the property structures,
+i.e. the methods named: alarm, .... enumeratedAlarm."</p>
+
+<p>pvIntrospect.h contains:</p>
+<pre>class StandardField : private NoDefaultMethods {
+public:
+    StandardField();
+    ~StandardField();
+    ScalarConstPtr scalar(String fieldName,ScalarType type);
+    StructureConstPtr scalar(String fieldName,
+        ScalarType type,String properties);
+    ScalarArrayConstPtr scalarArray(String fieldName,
+        ScalarType elementType);
+    StructureConstPtr scalarArray(String fieldName,
+        ScalarType elementType, String properties);
+    StructureArrayConstPtr structureArray(String fieldName,
+        StructureConstPtr structure);
+    StructureConstPtr structureArray(String fieldName,
+        StructureConstPtr structure,String properties);
+    StructureConstPtr structure(String fieldName,
+        int numFields,FieldConstPtrArray fields);
+    StructureConstPtr enumerated(String fieldName,
+        StringArray choices);
+    StructureConstPtr enumerated(String fieldName,
+        StringArray choices, String properties);
+    ScalarConstPtr scalarValue(ScalarType type);
+    StructureConstPtr scalarValue(ScalarType type,String properties);
+    ScalarArrayConstPtr scalarArrayValue(ScalarType elementType);
+    StructureConstPtr scalarArrayValue(ScalarType elementType,
+        String properties);
+    StructureArrayConstPtr structureArrayValue(StructureConstPtr structure);
+    StructureConstPtr structureArrayValue(StructureConstPtr structure,
+        String properties);
+    StructureConstPtr structureValue(
+        int numFields,FieldConstPtrArray fields);
+    StructureConstPtr enumeratedValue(StringArray choices);
+    StructureConstPtr enumeratedValue(StringArray choices,
+         String properties);
+    StructureConstPtr alarm();
+    StructureConstPtr timeStamp();
+    StructureConstPtr display();
+    StructureConstPtr control();
+    StructureConstPtr booleanAlarm();
+    StructureConstPtr byteAlarm();
+    StructureConstPtr shortAlarm();
+    StructureConstPtr intAlarm();
+    StructureConstPtr longAlarm();
+    StructureConstPtr floatAlarm();
+    StructureConstPtr doubleAlarm();
+    StructureConstPtr enumeratedAlarm();
+private:
+    static void init();
+};
+
+extern StandardField * getStandardField();</pre>
+
+<p>Where</p>
+<dl>
+  <dt style="font-family: courier;">scalar</dt>
+    <dd>Create a scalar with the specified scalar type and name. If
+      properties are specified then a structure will be created with the
+      first element being a scalar with the specified scalar type and name
+      value. The other fields in the structure will be the corresponding
+      property structures.</dd>
+  <dt style="font-family: courier;">scalarArray</dt>
+    <dd>Create a scalarArray with each element having the specified scalar
+      type and name. If properties are specified then a structure will be
+      created with the first element being a scalarArray with name value. The
+      other fields in the structure will be the corresponding property
+      structures.</dd>
+  <dt style="font-family: courier;">structureArray</dt>
+    <dd>Create a structureArray with the specified structure interface and
+      name. If properties are specified then a structure will be created with
+      the first element being a structureArray with the specified structure
+      interface and name value. The other fields in the structure will be the
+      corresponding property structures.</dd>
+  <dt style="font-family: courier;">structure</dt>
+    <dd>Create a structure with the specified name and fields specified by
+      numFields and fields. If properties are specified then a structure will
+      be created with the first element being a structure with the name value
+      and fields specified by numFields and fields. The other fields in the
+      structure will be the corresponding property structures.</dd>
+  <dt style="font-family: courier;">enumerated</dt>
+    <dd>Create a structure with the specified name and fields for an
+      enumerated structure. If properties are specified then a structure will
+      be created with the first element being a structure with the name value
+      and fields for an enumerated structure. The other fields in the
+      structure will be the corresponding property structures.</dd>
+  <dt style="font-family: courier;">scalarValue</dt>
+  <dt style="font-family: courier;">scalarArrayValue</dt>
+  <dt style="font-family: courier;">structureArrayValue</dt>
+  <dt style="font-family: courier;">structureValue</dt>
+  <dt style="font-family: courier;">enumeratedValue</dt>
+    <dd>These are all like the version without the "Value" suffix except that
+      the field name will always be "value"</dd>
+  <dt style="font-family: courier;">alarm</dt>
+  <dt style="font-family: courier;">timeStamp</dt>
+  <dt style="font-family: courier;">display</dt>
+  <dt style="font-family: courier;">control</dt>
+  <dt style="font-family: courier;">booleanAlarm</dt>
+  <dt style="font-family: courier;">byteAlarm</dt>
+  <dt style="font-family: courier;">shortAlarm</dt>
+  <dt style="font-family: courier;">intAlarm</dt>
+  <dt style="font-family: courier;">longAlarm</dt>
+  <dt style="font-family: courier;">floatAlarm</dt>
+  <dt style="font-family: courier;">doubleAlarm</dt>
+  <dt style="font-family: courier;">enumeratedAlarm</dt>
+    <dd>The above provide introspection interfaces fot standard properties.
+      See the section on Properties for a description of how these are
+      defined.</dd>
+</dl>
+
+<h3 style="text-align: center">PVField - Data Interfaces</h3>
+
+<p>This section defines the Java Interfaces for accessing the data within a
+PV record.</p>
+
+<h4>PVField</h4>
+
+<p>PVField is the base interface for accessing data. A data structure
+consists of a top level PVStructure. Every field of every structure of every
+top level structure has a PVField associated with it.</p>
+<pre>class PostHandler {
+public:
+    virtual void postPut() = 0;
+};
+
+
+class PVField
+: public Requester,
+  public Serializable,
+  private NoDefaultMethods
+{
+public:
+    virtual ~PVField();
+    static ConstructDestructCallback *getConstructDestructCallback();
+    virtual void setRequester(Requester *prequester);
+    int getFieldOffset() ;
+    int getNextFieldOffset() ;
+    int getNumberFields() ;
+    PVAuxInfo * getPVAuxInfo();
+    bool isImmutable() ;
+    void setImmutable();
+    FieldConstPtr getField() ;
+    PVStructure * getParent() ;
+    void replacePVField(PVField * newPVField);
+    void renameField(String  newName);
+    void postPut() ;
+    void setPostHandler(PostHandler *postHandler);
+    virtual void toString(StringBuilder buf) ;
+    virtual void toString(StringBuilder buf,int indentLevel) ;
+    virtual bool operator==(PVField &amp;pv) = 0;
+    virtual bool operator!=(PVField &amp;pv) = 0;
+protected:
+    PVField(PVStructure *parent,FieldConstPtr field);
+    void replaceStructure(PVStructure *pvStructure);
+private:
+};</pre>
+
+<p><span style="font-family: courier;">PostHandler</span> is a class that
+must bed implemented by any code that calls setPostHandler. It's single
+virtual method. <span style="font-family: courier;">postPut</span> is called
+whenever <span style="font-family: courier;">PVField::postPut</span> is
+called.</p>
+
+<p><span style="font-family: courier;">Requester,Serializable, and
+NoDefaultMethods</span> were described in a previous section.</p>
+
+<p>The public methods for <span style="font-family: courier;">PVField</span>
+are:</p>
+<dl>
+  <dt style="font-family: courier;">~PVField</dt>
+    <dd>destructor which must be called by whatever created the PVfield via a
+      call to one of the methods of <span
+      style="font-family: courier;">PVDataCreate</span> </dd>
+  <dt style="font-family: courier;">getConstructDestructCallback</dt>
+    <dd>Provides access to the number of timers that been created and
+      destroyed.</dd>
+  <dt style="font-family: courier;">setRequester</dt>
+    <dd>Sets a requester to be called when message or getRequesterName are
+      called.</dd>
+  <dt style="font-family: courier;">getFieldOffset</dt>
+    <dd>Get offset of the PVField field within top level structure. Every
+      field within the PVStructure has a unique offset. The top level
+      structure has an offset of 0. The first field within the structure has
+      offset equal to 1. The other offsets are determined by recursively
+      traversing each structure of the tree. </dd>
+  <dt style="font-family: courier;">getNextFieldOffset</dt>
+    <dd>Get the next offset. If the field is a scalar or array field then
+      this is just offset + 1. If the field is a structure it is the offset
+      of the next field after this structure. Thus (nextOffset - offset) is
+      always equal to the total number of fields within the field. </dd>
+  <dt style="font-family: courier;">getNumberFields</dt>
+    <dd>Get the total number of fields in this field. This is nextFieldOffset
+      - fieldOffset. </dd>
+  <dt style="font-family: courier;">getPVAuxInfo</dt>
+    <dd>Get the PVAuxInfo for this field. PVAuxInfo is described below.</dd>
+  <dt style="font-family: courier;">isImmutable</dt>
+    <dd>Is the field immutable?</dd>
+  <dt style="font-family: courier;">setImmutable</dt>
+    <dd>Make the field immutable. Once a field is immutable it can never be
+      changed since there is no method to again make it mutable. This is an
+      important design decision since it allows immutable array fields to
+      share the internal primitive data array.</dd>
+  <dt style="font-family: courier;">getField</dt>
+    <dd>Get the reflection interface for the data.</dd>
+  <dt style="font-family: courier;">getParent</dt>
+    <dd>Get the interface for the parent or null if this is the top level
+      PVStructure.</dd>
+  <dt style="font-family: courier;">replacePVField</dt>
+    <dd>Replace this PVField. This is called by support code that wants to
+      replace the default implementation of a data field with it's own
+      implementation.</dd>
+  <dt style="font-family: courier;">renameField</dt>
+    <dd>Rename the field name.</dd>
+  <dt style="font-family: courier;">postPut</dt>
+    <dd>If this field is a field of a record pvRecordField.postPut() is
+      called. If not a field of a record nothing happens.</dd>
+  <dt style="font-family: courier;">toString</dt>
+    <dd>Converts the field data to a string. This is mostly for debugging
+      purposes.</dd>
+</dl>
+
+<h4>PVAuxInfo</h4>
+
+<p>AuxInfo (Auxillary Information) is information about a field that is
+application specific. It will not be available outside the application that
+implements the database. In particular it will not be made available to
+Channel Access. It is used by the database itself to override the default
+implementation of fields. The JavaIOC uses it for attaching support code.
+Database Configuration and other tools can use it for configuration
+information. Each Field and each PVField can have have an arbitrary number of
+auxInfos. An auxInfo is a (key,PVScalar) pair where key is a string.</p>
+<pre>class PVAuxInfo : private NoDefaultMethods {
+public:
+    PVAuxInfo(PVField *pvField);
+    ~PVAuxInfo();
+    static ConstructDestructCallback *getConstructDestructCallback();
+    PVField * getPVField();
+    PVScalar * createInfo(String key,ScalarType scalarType);
+    PVScalarMap getInfos();
+    PVScalar * getInfo(String key);
+    void toString(StringBuilder buf);
+    void toString(StringBuilder buf,int indentLevel);
+private:
+};</pre>
+
+<p>where</p>
+<dl>
+  <dt style="font-family: courier;">getPVField</dt>
+    <dd>Get the PVField to which this PVAuxInfo is attached.</dd>
+  <dt style="font-family: courier;">createInfo</dt>
+    <dd>Create a new PVScalar of type scalarType.</dd>
+  <dt style="font-family: courier;">getInfos</dt>
+    <dd>Get a map of all the auxInfos.</dd>
+  <dt style="font-family: courier;">getInfo</dt>
+    <dd>Get the PVScalar with the specified key.</dd>
+  <dt style="font-family: courier;">toString</dt>
+    <dd>Print all the auxInfos</dd>
+</dl>
+
+<h4>PVScalar and extensions</h4>
+<pre>class PVScalar : public PVField {
+public:
+    virtual ~PVScalar();
+    ScalarConstPtr getScalar() ;
+protected:
+    PVScalar(PVStructure *parent,ScalarConstPtr scalar);
+};</pre>
+
+<h5>Primitive PVField types</h5>
+
+<p>The interfaces for primitive data types are:</p>
+<pre>class PVBoolean : public PVScalar {
+public:
+    virtual ~PVBoolean();
+    virtual bool get() = 0;
+    virtual void put(bool value) = 0;
+protected:
+    PVBoolean(PVStructure *parent,ScalarConstPtr scalar)
+    : PVScalar(parent,scalar) {}
+private:
+};
+
+class PVByte : public PVScalar {
+public:
+    virtual ~PVByte();
+    virtual int8 get() = 0;
+    virtual void put(int8 value) = 0;
+protected:
+    PVByte(PVStructure *parent,ScalarConstPtr scalar)
+    : PVScalar(parent,scalar) {}
+private:
+};
+
+class PVShort : public PVScalar {
+public:
+    virtual ~PVShort();
+    virtual int16 get() = 0;
+    virtual void put(int16 value) = 0;
+protected:
+    PVShort(PVStructure *parent,ScalarConstPtr scalar)
+    : PVScalar(parent,scalar) {}
+private:
+};
+class PVInt : public PVScalar{
+public:
+    virtual ~PVInt();
+    virtual int32 get() = 0;
+    virtual void put(int32 value) = 0;
+protected:
+    PVInt(PVStructure *parent,ScalarConstPtr scalar)
+    : PVScalar(parent,scalar) {}
+private:
+};
+
+class PVLong : public PVScalar {
+public:
+    virtual ~PVLong();
+    virtual int64 get() = 0;
+    virtual void put(int64 value) = 0;
+protected:
+    PVLong(PVStructure *parent,ScalarConstPtr scalar)
+    : PVScalar(parent,scalar) {}
+private:
+};
+
+class PVFloat : public PVScalar {
+public:
+    virtual ~PVFloat();
+    virtual float get() = 0;
+    virtual void put(float value) = 0;
+protected:
+    PVFloat(PVStructure *parent,ScalarConstPtr scalar)
+    : PVScalar(parent,scalar) {}
+private:
+};
+class PVDouble : public PVScalar {
+public:
+    virtual ~PVDouble();
+    virtual double get() = 0;
+    virtual void put(double value) = 0;
+protected:
+    PVDouble(PVStructure *parent,ScalarConstPtr scalar)
+    : PVScalar(parent,scalar) {}
+private:
+};
+
+class PVString : public PVScalar {
+public:
+    virtual ~PVString();
+    virtual String get() = 0;
+    virtual void put(String value) = 0;
+protected:
+    PVString(PVStructure *parent,ScalarConstPtr scalar)
+    : PVScalar(parent,scalar) {}
+private:
+};</pre>
+
+<h4>PVArray and Extensions</h4>
+
+<p><span style="font-family: courier">PVArray</span> is the base interface
+for all the other PV Array interfaces. It extends PVField and provides the
+additional methods:</p>
+<pre>class PVArray : public PVField, public SerializableArray {
+public:
+    virtual ~PVArray();
+    int getLength() ;
+    void setLength(int length);
+    int getCapacity() ;
+    bool isCapacityMutable() ;
+    void setCapacityMutable(bool isMutable);
+    virtual void setCapacity(int capacity) = 0;
+    virtual void serialize(ByteBuffer *pbuffer,
+        SerializableControl *pflusher) = 0;
+    virtual void deserialize(ByteBuffer *pbuffer,
+        DeserializableControl *pflusher) = 0;
+    virtual void serialize(ByteBuffer *pbuffer,
+        SerializableControl *pflusher, int offset, int count) = 0;
+protected:
+    PVArray(PVStructure *parent,FieldConstPtr field);
+    void setCapacityLength(int capacity,int length);
+private:
+    class PVArrayPvt * pImpl;
+};</pre>
+<dl>
+  <dt style="font-family: courier;">getLength</dt>
+    <dd>Get the current length. This is less that or equal to the
+    capacity.</dd>
+  <dt style="font-family: courier;">setLength</dt>
+    <dd>Set the length. If the PVField is not mutable then an exception is
+      thrown. If this is greater than the capacity setCapacity is called.</dd>
+  <dt style="font-family: courier;">getCapacity</dt>
+    <dd>Get the capacity, i.e. this is the sized of the underlying data
+    array.</dd>
+  <dt style="font-family: courier;">setCapacity</dt>
+    <dd>Set the capacity. The semantics are implementation dependent but
+      typical semantics are as follows: If the capacity is not mutable an
+      exception is thrown. A new data array is created and data is copied
+      from the old array to the new array. </dd>
+  <dt style="font-family: courier;">isCapacityMutable</dt>
+    <dd>Is the capacity mutable</dd>
+  <dt style="font-family: courier;">setCapacityMutable</dt>
+    <dd>Specify if the capacity can be changed.</dd>
+</dl>
+
+<h5>PVArray Extensions</h5>
+
+<p>The interface for each array type has get and put methods which have the
+same arguments except for the data type. For example PVDoubleArray is:</p>
+<pre>class DoubleArrayData {
+public:
+    DoubleArrayData(){}
+    ~DoubleArrayData(){};
+    DoubleArray data;
+    int offset;
+};
+
+class PVDoubleArray : public PVScalarArray {
+public:
+    virtual ~PVDoubleArray();
+    virtual void setCapacity(int capacity) = 0;
+    virtual int get(int offset, int length, DoubleArrayData *data) = 0;
+    virtual int put(int offset,int length, DoubleArray  from, int fromOffset) = 0;
+    virtual void shareData(DoubleArray value,int capacity,int length) = 0;
+    virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) = 0;
+    virtual void deserialize(ByteBuffer *pbuffer,DeserializableControl *pflusher) = 0;
+protected:
+    PVDoubleArray(PVStructure *parent,ScalarArrayConstPtr scalar);
+private:
+};</pre>
+
+<p>Get "exposes" it's internal array by setting data.data and data.offset.
+The caller is responsible for copying the array elements. This violates the
+principle that objects should not expose their internal data but is done for
+efficency. For example it makes it possible to copy between arrays with
+identical element types via a call to System.arraycopy without requiring an
+intermediate array.</p>
+
+<p>Both get and put return the number of elements actually transfered. The
+arguments are:</p>
+<dl>
+  <dt style="font-family: courier;">offset</dt>
+    <dd>The offset in the PV array.</dd>
+  <dt style="font-family: courier;">len</dt>
+    <dd>The maximum number of elements to transfer. The number actually
+      transfered will be less than or equal to this value.</dd>
+  <dt style="font-family: courier;">data</dt>
+    <dd>Get sets data.data to it's internal array and data.offset to the
+      offset into the array. The caller is responsible for the actual data
+      transfer.</dd>
+  <dt style="font-family: courier;">from</dt>
+    <dd>The array from which the data is taken. This array is supplied by the
+      caller</dd>
+  <dt style="font-family: courier;">fromOffset</dt>
+    <dd>The offset in <span style="font-family: courier;">from</span></dd>
+</dl>
+
+<p>The caller must be prepared to make multiple calls to retrieve or put an
+entire array. A caller should accept or put partial arrays. For example the
+following reads an entire array:</p>
+<pre>    void doubleArray getArray(PVDoubleArray *pv,doubleArray to,int lenArray)
+    {
+        int len = pv-&gt;getLength();
+        if(lenArray&lt;len) len = lenArray;
+        DoubleArrayData data;
+        int offset = 0;
+        while(offset &lt; len) {
+            int num = pv-&gt;get(offset,(len-offset),&amp;data);
+            double *from = &amp;data.data[data.offset];
+            double *to = &amp;to[offset]
+            int numbytes = num*sizeof(double);
+            memcopy(from,to,numBytes);
+            offset += num;
+        }
+    } </pre>
+
+<p>shareData results in the PVArray using the primitive array that is passed
+to this method. This is most useful for immutable arrays. In this case the
+caller must set the PVArray to be immutable. In the PVArray is not immutable
+then it is the applications responsibility to coordinate access to the array.
+Again this violates the principle that objects should not expose their
+internal data but is important for immutable arrays. For example pvData and
+the javaIOC define many enumerated structures where an enumerated structure
+has three fields: index, choice, and choices. Choices is a PVStringArray that
+holds the enumerated choices. Index is a PVInt that is the index of the
+currently selected choice and choice is a PVString which is the currently
+selected choice. For many enumerated structures the choices is immutable.
+Allowing the choices internal String[] to be shared between all the instances
+of an enumerated structure saves on storage. An example is alarmSeverity.
+Another reason for allowing shared data is so that an application which
+processes an array can be separated into multiple modules that directly
+access the internal data array of a PVArray. This can be required for
+minimizing CPU overhead. In this case it is the applications responsibility
+to coordinate access to the array.</p>
+
+<h5>Complete set of PVArray Extensions</h5>
+<pre>class PVScalarArray : public PVArray {
+public:
+    virtual ~PVScalarArray();
+    ScalarArrayConstPtr getScalarArray() ;
+    virtual void setCapacity(int capacity) = 0;
+    virtual void serialize(ByteBuffer *pbuffer,
+        SerializableControl *pflusher) = 0;
+    virtual void deserialize(ByteBuffer *pbuffer,
+        DeserializableControl *pflusher) = 0;
+    virtual void serialize(ByteBuffer *pbuffer,
+        SerializableControl *pflusher, int offset, int count) = 0;
+protected:
+    PVScalarrray(PVStructure *parent,ScalarArrayConstPtr scalarArray);
+private:
+};
+
+class BooleanArrayData {
+public:
+    BooleanArray data;
+    int offset;
+};
+
+class PVBooleanArray : public PVScalarArray {
+public:
+    virtual ~PVBooleanArray();
+    virtual void setCapacity(int capacity) = 0;
+    virtual int get(int offset, int length, BooleanArrayData *data) = 0;
+    virtual int put(int offset,int length, BooleanArray from, int fromOffset) = 0;
+    virtual void shareData(BooleanArray value,int capacity,int length) = 0;
+    virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) = 0;
+    virtual void deserialize(ByteBuffer *pbuffer,DeserializableControl *pflusher) = 0;
+protected:
+    PVBooleanArrayclass ByteArrayData {
+public:
+    ByteArray data;
+    int offset;
+};
+
+class PVByteArray : public PVScalarArray {
+public:
+    virtual ~PVByteArray();
+    virtual void setCapacity(int capacity) = 0;
+    virtual int get(int offset, int length, ByteArrayData *data) = 0;
+    virtual int put(int offset,int length, ByteArray  from, int fromOffset) = 0;
+    virtual void shareData(ByteArray value,int capacity,int length) = 0;
+    virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) = 0;
+    virtual void deserialize(ByteBuffer *pbuffer,DeserializableControl *pflusher) = 0;
+protected:
+    PVByteArray(PVStructure *parent,ScalarArrayConstPtr scalar);
+private:
+};
+
+class ShortArrayData {
+public:
+    ShortArray data;
+    int offset;
+};
+
+class PVShortArray : public PVScalarArray {
+public:
+    virtual ~PVShortArray();
+    virtual void setCapacity(int capacity) = 0;
+    virtual int get(int offset, int length, ShortArrayData *data) = 0;
+    virtual int put(int offset,int length, ShortArray  from, int fromOffset) = 0;
+    virtual void shareData(ShortArray value,int capacity,int length) = 0;
+    virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) = 0;
+    virtual void deserialize(ByteBuffer *pbuffer,DeserializableControl *pflusher) = 0;
+protected:
+    PVShortArray(PVStructure *parent,ScalarArrayConstPtr scalar);
+private:
+};
+
+
+class IntArrayData {
+public:
+    IntArray data;
+    int offset;
+};
+
+class PVIntArray : public PVScalarArray {
+public:
+    virtual ~PVIntArray();
+    virtual void setCapacity(int capacity) = 0;
+    virtual int get(int offset, int length, IntArrayData *data) = 0;
+    virtual int put(int offset,int length, IntArray  from, int fromOffset)= 0;
+    virtual void shareData(IntArray value,int capacity,int length)= 0;
+    virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) = 0;
+    virtual void deserialize(ByteBuffer *pbuffer,DeserializableControl *pflusher)= 0;
+protected:
+    PVIntArray(PVStructure *parent,ScalarArrayConstPtr scalar);
+private:
+};
+
+class LongArrayData {
+public:
+    LongArray data;
+    int offset;
+};
+
+class PVLongArray : public PVScalarArray {
+public:
+    virtual ~PVLongArray();
+    virtual void setCapacity(int capacity) = 0;
+    virtual int get(int offset, int length, LongArrayData *data) = 0;
+    virtual int put(int offset,int length, LongArray  from, int fromOffset)= 0;
+    virtual void shareData(LongArray value,int capacity,int length)= 0;
+    virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) = 0;
+    virtual void deserialize(ByteBuffer *pbuffer,DeserializableControl *pflusher)= 0;
+protected:
+    PVLongArray(PVStructure *parent,ScalarArrayConstPtr scalar);
+private:
+};
+
+class FloatArrayData {
+public:
+    FloatArray data;
+    int offset;
+};
+
+class PVFloatArray : public PVScalarArray {
+public:
+    virtual ~PVFloatArray();
+    virtual void setCapacity(int capacity) = 0;
+    virtual int get(int offset, int length, FloatArrayData *data) = 0;
+    virtual int put(int offset,int length, FloatArray  from, int fromOffset)= 0;
+    virtual void shareData(FloatArray value,int capacity,int length)= 0;
+    virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) = 0;
+    virtual void deserialize(ByteBuffer *pbuffer,DeserializableControl *pflusher)= 0;
+protected:
+    PVFloatArray(PVStructure *parent,ScalarArrayConstPtr scalar);
+private:
+};
+
+
+class DoubleArrayData {
+public:
+    DoubleArrayData(){}
+    ~DoubleArrayData(){};
+    DoubleArray data;
+    int offset;
+};
+
+class PVDoubleArray : public PVScalarArray {
+public:
+    virtual ~PVDoubleArray();
+    virtual void setCapacity(int capacity) = 0;
+    virtual int get(int offset, int length, DoubleArrayData *data) = 0;
+    virtual int put(int offset,int length, DoubleArray  from, int fromOffset) = 0;
+    virtual void shareData(DoubleArray value,int capacity,int length) = 0;
+    virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) = 0;
+    virtual void deserialize(ByteBuffer *pbuffer,DeserializableControl *pflusher) = 0;
+protected:
+    PVDoubleArray(PVStructure *parent,ScalarArrayConstPtr scalar);
+private:
+};
+
+class StringArrayData {
+public:
+    StringArray data;
+    int offset;
+};
+
+class PVStringArray : public PVScalarArray {
+public:
+    virtual ~PVStringArray();
+    virtual void setCapacity(int capacity) = 0;
+    virtual int get(int offset, int length, StringArrayData *data) = 0;
+    virtual int put(int offset,int length, StringArray  from, int fromOffset)= 0;
+    virtual void shareData(StringArray value,int capacity,int length)= 0;
+    virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) = 0;
+    virtual void deserialize(ByteBuffer *pbuffer,DeserializableControl *pflusher)= 0;
+protected:
+    PVStringArray(PVStructure *parent,ScalarArrayConstPtr scalar);
+private:
+};</pre>
+
+<p>Notes about PVStructureArray: A client can only access the data in the
+elements of the array via the get and put methods, i.e. it is not possible to
+access subfields indirectly. PVStructureArray.getNumberFields() returns 1,
+i.e. the field looks like a leaf field.</p>
+
+<h4>PVStructure</h4>
+
+<p>The interface for a structure is:</p>
+<pre>class PVStructure : public PVField,public BitSetSerializable {
+public:
+    virtual ~PVStructure();
+    StructureConstPtr getStructure();
+    PVFieldPtrArray getPVFields();
+    PVField *getSubField(String fieldName);
+    PVField *getSubField(int fieldOffset);
+    void appendPVField(PVField *pvField);
+    void appendPVFields(int numberFields,PVFieldPtrArray pvFields);
+    void removePVField(String fieldName);
+    PVBoolean *getBooleanField(String fieldName);
+    PVByte *getByteField(String fieldName);
+    PVShort *getShortField(String fieldName);
+    PVInt *getIntField(String fieldName);
+    PVLong *getLongField(String fieldName);
+    PVFloat *getFloatField(String fieldName);
+    PVDouble *getDoubleField(String fieldName);
+    PVString *getStringField(String fieldName);
+    PVStructure *getStructureField(String fieldName);
+    PVScalarArray *getScalarArrayField(
+        String fieldName,ScalarType elementType);
+    PVStructureArray *getStructureArrayField(String fieldName);
+    String getExtendsStructureName();
+    bool putExtendsStructureName(
+        String extendsStructureName);
+    virtual bool operator==(PVField &amp;pv) ;
+    virtual bool operator!=(PVField &amp;pv) ;
+    virtual void serialize(
+        ByteBuffer *pbuffer,SerializableControl *pflusher) ;
+    virtual void deserialize(
+        ByteBuffer *pbuffer,DeserializableControl *pflusher);
+    virtual void serialize(ByteBuffer *pbuffer,
+        SerializableControl *pflusher, int offset, int count) ;
+    virtual void serialize(ByteBuffer *pbuffer,
+        SerializableControl *pflusher,BitSet *pbitSet) ;
+    virtual void deserialize(ByteBuffer *pbuffer,
+        DeserializableControl*pflusher,BitSet *pbitSet);
+protected:
+    PVStructure(PVStructure *parent,StructureConstPtr structure);
+private:
+    class PVStructurePvt * pImpl;
+};</pre>
+
+<p>where</p>
+<dl>
+  <dt style="font-family: courier;">getStructure</dt>
+    <dd>Get the introspection interface for the structure.</dd>
+  <dt style="font-family: courier;">getPVFields</dt>
+    <dd>Returns the array of subfields. The set of subfields must all have
+      different field names.</dd>
+  <dt style="font-family: courier;">getSubField(String fieldName)</dt>
+    <dd>Get a subField of a field. For a PVStructure a non-null result is
+      returned if fieldName is a field of the PVStructure. The fieldName can
+      be of the form name.name...</dd>
+  <dt style="font-family: courier;">getSubField(int fieldOffset)</dt>
+    <dd>Get the field located a fieldOffset, where fieldOffset is relative to
+      the top level structure. This returns null if the specified field is
+      not located within this PVStructure.</dd>
+  <dt style="font-family: courier;">appendPVField</dt>
+    <dd>Append pvField to the end of this PVStructure. This should NOT be
+      called if any code is attached to any of the fields in the top level
+      structure.</dd>
+  <dt style="font-family: courier;">appendPVFields</dt>
+    <dd>Append an array of pvFields to the end of this structure. Note that
+      if the original number of fields is 0 than pvFields replaces the
+      original. Thus the caller must NOT reuse pvFields after calling this
+      method. This should NOT be called if any code is attached to any of the
+      fields in the top level structure</dd>
+  <dt style="font-family: courier;">removePVField</dt>
+    <dd>Remove the specified field from this structure. This should NOT be
+      called if any code is attached to any of the fields in the top level
+      structure.</dd>
+  <dt style="font-family: courier;">getBooleanField</dt>
+    <dd>Look for fieldName. If found and it has the correct type return the
+      interface. This and the following methods are convenience methods that
+      allow a user to get the interface to a subfield without requiring
+      introspection. fieldName can be of the form name.name...</dd>
+  <dt style="font-family: courier;">getByteField</dt>
+    <dd>Look for fieldName. If found and it has the correct type return the
+      interface.</dd>
+  <dt style="font-family: courier;">getShortField</dt>
+    <dd>Look for fieldName. If found and it has the correct type return the
+      interface.</dd>
+  <dt style="font-family: courier;">getIntField</dt>
+    <dd>Look for fieldName. If found and it has the correct type return the
+      interface.</dd>
+  <dt style="font-family: courier;">getLongField</dt>
+    <dd>Look for fieldName. If found and it has the correct type return the
+      interface.</dd>
+  <dt style="font-family: courier;">getFloatField</dt>
+    <dd>Look for fieldName. If found and it has the correct type return the
+      interface.</dd>
+  <dt style="font-family: courier;">getDoubleField</dt>
+    <dd>Look for fieldName. If found and it has the correct type return the
+      interface.</dd>
+  <dt style="font-family: courier;">getStringField</dt>
+    <dd>Look for fieldName. If found and it has the correct type return the
+      interface.</dd>
+  <dt style="font-family: courier;">getScalarArrayField</dt>
+    <dd>Look for fieldName. If found and it has the correct type return the
+      interface.</dd>
+  <dt style="font-family: courier;">getStructureArrayField</dt>
+    <dd>Look for fieldName. If found and it has the correct type return the
+      interface.</dd>
+  <dt style="font-family: courier;">getExtendsStructureName</dt>
+    <dd>Get the name of structure that this structure extends.</dd>
+  <dt style="font-family: courier;">putExtendsStructureName</dt>
+    <dd>Specify the structure that this structure extends.</dd>
+</dl>
+
+<h4>PVStructureArray</h4>
+
+<p>The interface for an array of structures is:</p>
+<pre>class StructureArrayData {
+public:
+    PVStructurePtrArray data;
+    int offset;
+};
+
+class PVStructureArray : public PVArray {
+public:
+    virtual ~PVStructureArray();
+    virtual StructureArrayConstPtr getStructureArray() = 0;
+    virtual void setCapacity(int capacity) = 0;
+    virtual int get(int offset, int length,
+        StructureArrayData *data) = 0;
+    virtual int put(int offset,int length,
+        PVStructurePtrArray from, int fromOffset) = 0;
+    virtual void shareData( PVStructurePtrArray value,int capacity,int length) = 0;
+    virtual void serialize(ByteBuffer *pbuffer,
+        SerializableControl *pflusher) = 0 ;
+    virtual void deserialize(ByteBuffer *buffer,
+        DeserializableControl *pflusher) = 0;
+    virtual void serialize(ByteBuffer *pbuffer,
+        SerializableControl *pflusher, int offset, int count) = 0;
+protected:
+    PVStructureArray(PVStructure *parent,
+        StructureArrayConstPtr structureArray);
+private:
+};</pre>
+
+<p>where</p>
+
+<h4>PVDataCreate</h4>
+
+<p>PVDataCreate is an interface that provides methods that create PVField
+interfaces. A factory is provided that creates PVDataCreate.</p>
+<pre>class PVDataCreate {
+public:
+   PVField *createPVField(PVStructure *parent,
+       FieldConstPtr field);
+   PVField *createPVField(PVStructure *parent,
+       String fieldName,PVField * fieldToClone);
+   PVScalar *createPVScalar(PVStructure *parent,ScalarConstPtr scalar);
+   PVScalar *createPVScalar(PVStructure *parent,
+       String fieldName,ScalarType scalarType);
+   PVScalar *createPVScalar(PVStructure *parent,
+       String fieldName,PVScalar * scalarToClone);
+   PVScalarArray *createPVScalarArray(PVStructure *parent,
+       ScalarArrayConstPtr scalarArray);
+   PVScalarArray *createPVScalarArray(PVStructure *parent,
+       String fieldName,ScalarType elementType);
+   PVScalarArray *createPVScalarArray(PVStructure *parent,
+       String fieldName,PVScalarArray * scalarArrayToClone);
+   PVStructureArray *createPVStructureArray(PVStructure *parent,
+       StructureArrayConstPtr structureArray);
+   PVStructure *createPVStructure(PVStructure *parent,
+       StructureConstPtr structure);
+   PVStructure *createPVStructure(PVStructure *parent,
+       String fieldName,int numberFields,FieldConstPtrArray fields);
+   PVStructure *createPVStructure(PVStructure *parent,
+       String fieldName,PVStructure *structToClone);
+protected:
+   PVDataCreate();
+   friend PVDataCreate * getPVDataCreate();
+};
+
+extern PVDataCreate * getPVDataCreate();</pre>
+
+<p>where </p>
+<dl>
+  <dt style="font-family: courier;">createPVField</dt>
+    <dd>The PVField is created reusing the Field interface. Two methods are
+      provided. Each calls the corresponding createPVScalar, createPVArray,
+      or createPVStructure depending in the type os the last argument.</dd>
+  <dt style="font-family: courier;">createPVScalar</dt>
+    <dd>Creates an instance of a PVScalar. Three versions are supplied. The
+      first is passed an introspection interface. The second provides the
+      field name and the scalarType. The last provides a field name and a
+      PVScalar to clone. The newly created PVScalar will have the same
+      auxInfos as the original.</dd>
+  <dt style="font-family: courier;">createPVScalarArray</dt>
+    <dd>Create an instance of a PVArray. Three versions are supplied. The
+      first is passed an introspection interface. The second provides the
+      field name and the elementType. The last provides a field name and a
+      PVArray to clone. The newly created PVArray will have the same auxInfos
+      as the original.</dd>
+  <dt style="font-family: courier;">createPVStructureArray</dt>
+    <dd>Create a PVStructureArray. It must be passed a structureToClone. This
+      will become the Structure interface for ALL elements of the
+      PVStructureArray. It MUST be used to create any new array elements.</dd>
+  <dt style="font-family: courier;">createPVStructure</dt>
+    <dd>Create an instance of a PVStructure. Four methods are provided. The
+      first method uses a previously created structure introspection
+      interface. The second uses a Field array to initialize the sub-fields.
+      The third initializes the subfields by cloning the fields contained in
+      structToClone. The newly created sub-fields will have the same values
+      and auxInfos as the original. If structToClone is null then the new
+      structure is initialized to have 0 sub-fields.</dd>
+  <dt style="font-family: courier;">flattenPVStructure</dt>
+    <dd>Create an array of PVFields for the fields in the PVStructure. The
+      order is according to fieldOffset.</dd>
+</dl>
+
+<h3 style="text-align: center">Standard Data Fields</h3>
+
+<p>A class StandardPVField has methods for creating standard data fields.
+Like class StandardField it has two forms of the methods which create a
+field, one without properties and one with properties. Again the properties
+is some combination of alarm, timeStamp, control, display, and valueAlarm.
+And just like StandardField there are methods to create thye standard
+properties. The meythods are:</p>
+<pre>class StandardPVField : private NoDefaultMethods {
+public:
+    StandardPVField();
+    ~StandardPVField();
+    PVScalar * scalar(PVStructure *parent,String fieldName,ScalarType type);
+    PVStructure * scalar(PVStructure *parent,
+        String fieldName,ScalarType type,String properties);
+    PVScalarArray * scalarArray(PVStructure *parent,
+        String fieldName,ScalarType elementType);
+    PVStructure * scalarArray(PVStructure *parent,
+        String fieldName,ScalarType elementType, String properties);
+    PVStructureArray * structureArray(PVStructure *parent,
+        String fieldName,StructureConstPtr structure);
+    PVStructure* structureArray(PVStructure *parent,
+        String fieldName,StructureConstPtr structure,String properties);
+    PVStructure * enumerated(PVStructure *parent,
+        String fieldName,StringArray choices);
+    PVStructure * enumerated(PVStructure *parent,
+        String fieldName,StringArray choices, String properties);
+    PVScalar * scalarValue(PVStructure *parent,ScalarType type);
+    PVStructure * scalarValue(PVStructure *parent,
+        ScalarType type,String properties);
+    PVScalarArray * scalarArrayValue(PVStructure *parent,ScalarType elementType);
+    PVStructure * scalarArrayValue(PVStructure *parent,
+        ScalarType elementType, String properties);
+    PVStructureArray * structureArrayValue(PVStructure *parent,
+        StructureConstPtr structure);
+    PVStructure * structureArrayValue(PVStructure *parent,
+        StructureConstPtr structure,String properties);
+    PVStructure * enumeratedValue(PVStructure *parent,StringArray choices);
+    PVStructure * enumeratedValue(PVStructure *parent,
+        StringArray choices, String properties);
+    PVStructure * alarm(PVStructure *parent);
+    PVStructure * timeStamp(PVStructure *parent);
+    PVStructure * display(PVStructure *parent);
+    PVStructure * control(PVStructure *parent);
+    PVStructure * booleanAlarm(PVStructure *parent);
+    PVStructure * byteAlarm(PVStructure *parent);
+    PVStructure * shortAlarm(PVStructure *parent);
+    PVStructure * intAlarm(PVStructure *parent);
+    PVStructure * longAlarm(PVStructure *parent);
+    PVStructure * floatAlarm(PVStructure *parent);
+    PVStructure * doubleAlarm(PVStructure *parent);
+    PVStructure * enumeratedAlarm(PVStructure *parent);
+    PVStructure * powerSupply(PVStructure *parent);
+};</pre>
+
+<h3 style="text-align: center">Convert</h3>
+
+<p>NOTE about copying immutable array fields. If an entire immutable array
+field is copied to another array that has the same elementType, both offsets
+are 0, and the length is the length of the source array, then the shareData
+method of the target array is called and the target array is set immutable.
+Thus the source and target share the same primitive array.</p>
+
+<p>This section describes the supported conversions between data types.</p>
+<ul>
+  <li>All supported types can be converted to a string. If you ask for a 100
+    megabyte array to be converted to a string expect a lot of output.</li>
+  <li>Conversion from a string to a scalar type.</li>
+  <li>Conversion from an array of strings to an array of scalar types.</li>
+  <li>Copy between the following types of scalar PVs 
+    <ul>
+      <li>Numeric type to another numeric type</li>
+      <li>Both have the same type.</li>
+      <li>Either is a string</li>
+    </ul>
+  </li>
+  <li>Copy between PVArrays that satisfy one of the following. 
+    <ul>
+      <li>Numeric to numeric</li>
+      <li>Both have the same type.</li>
+      <li>Either is a string.</li>
+    </ul>
+  </li>
+  <li>Conversions between numeric scalar types.</li>
+  <li>Conversions between arrays of numeric type.</li>
+  <li>Conversion between compatible structures.</li>
+  <li>A utility method the returns the full field name of a field</li>
+</ul>
+<pre>class Convert : NoDefaultMethods {
+public:
+    Convert();
+    ~Convert();
+    void getFullName(StringBuilder buf,PVField *pvField);
+    bool equals(PVField *a,PVField *b);
+    void getString(StringBuilder buf,PVField * pvField,int indentLevel);
+    void getString(StringBuilder buf,PVField *pvField);
+    void fromString(PVScalar *pv, String from);
+    int fromString(PVScalarArray *pv, String from);
+    int fromStringArray(PVScalarArray *pv, int offset, int length,
+        StringArray from, int fromOffset);
+    int toStringArray(PVScalarArray *pv, int offset, int length,
+        StringArray to, int toOffset);
+    bool isCopyCompatible(FieldConstPtr from, FieldConstPtr to);
+    void copy(PVField *from,PVField *to);
+    bool isCopyScalarCompatible(
+         ScalarConstPtr from, ScalarConstPtr to);
+    void copyScalar(PVScalar *from, PVScalar *to);
+    bool isCopyScalarArrayCompatible(ScalarArrayConstPtr from,
+        ScalarArrayConstPtr to);
+    int copyScalarArray(PVScalarArray *from, int offset,
+        PVScalarArray *to, int toOffset, int length);
+    bool isCopyStructureCompatible(
+        StructureConstPtr from, StructureConstPtr to);
+    void copyStructure(PVStructure *from, PVStructure *to);
+    bool isCopyStructureArrayCompatible(
+        StructureArrayConstPtr from, StructureArrayConstPtr to);
+    void copyStructureArray(
+        PVStructureArray *from, PVStructureArray *to);
+    int8 toByte(PVScalar *pv);
+    int16 toShort(PVScalar *pv);
+    int32 toInt(PVScalar *pv);
+    int64 toLong(PVScalar *pv);
+    float toFloat(PVScalar *pv);
+    double toDouble(PVScalar *pv);
+    void fromByte(PVScalar *pv,int8 from);
+    void  fromShort(PVScalar *pv,int16 from);
+    void  fromInt(PVScalar *pv, int32 from);
+    void  fromLong(PVScalar *pv, int64 from);
+    void  fromFloat(PVScalar* pv, float from);
+    void  fromDouble(PVScalar *pv, double from);
+    int toByteArray(PVScalarArray *pv, int offset, int length,
+        ByteArray to, int toOffset);
+    int toShortArray(PVScalarArray *pv, int offset, int length,
+        ShortArray to, int toOffset);
+    int toIntArray(PVScalarArray *pv, int offset, int length,
+        IntArray to, int toOffset);
+    int toLongArray(PVScalarArray *pv, int offset, int length,
+        LongArray to, int toOffset);
+    int toFloatArray(PVScalarArray *pv, int offset, int length,
+        FloatArray to, int toOffset);
+    int toDoubleArray(PVScalarArray *pv, int offset, int length,
+        DoubleArray to, int toOffset);
+    int fromByteArray(PVScalarArray *pv, int offset, int length,
+        ByteArray from, int fromOffset);
+    int fromShortArray(PVScalarArray *pv, int offset, int length,
+        ShortArray from, int fromOffset);
+    int fromIntArray(PVScalarArray *pv, int offset, int length,
+        IntArray from, int fromOffset);
+    int fromLongArray(PVScalarArray *pv, int offset, int length,
+        LongArray from, int fromOffset);
+    int fromFloatArray(PVScalarArray *pv, int offset, int length,
+        FloatArray from, int fromOffset);
+    int fromDoubleArray(PVScalarArray *pv, int offset, int length,
+        DoubleArray from, int fromOffset);
+    void newLine(StringBuilder buf, int indentLevel);
+};
+
+extern Convert * getConvert();</pre>
+
+<p>The array methods all return the number of elements copied or converted.
+This can be less than <span style="font-family: courier;">len</span> if the
+PVField array contains less than len elements.</p>
+
+<p><span style="font-family: courier;">newLine</span> is a convenience method
+for code that implements <span style="font-family: courier;">toString</span>
+It generates a newline and inserts blanks at the beginning of the newline.</p>
+<hr />
+
+<h2 style="text-align: center">Examples</h2>
+<hr />
+
+<h3>Accessing PVData</h3>
+
+<p>Assume that code wants to print two fields from a PVStructure:</p>
+<dl>
+  <dt style="font-family: courier;">value</dt>
+    <dd>Must be a PVDouble.</dd>
+  <dt style="font-family: courier;">timeStamp</dt>
+    <dd>Just look for field with this name.</dd>
+</dl>
+
+<p>The following code uses introspection to get the desired information.</p>
+<pre>void getValueAndTimeStamp(PVStructure pvStructure,Stringbuffer buf) {
+   PVField *valuePV = pvStructure-&gt;getSubField(String("value"));
+   if(valuePV==0) {
+       buf += "value field not found";
+       return;
+   }
+   buf += "value ";
+   valuePV-&gt;toString(buf);
+   PVField *timeStampPV = pvStructure-&gt;getSubField(String("timeStamp"));
+   if(timeStampPV==0) {
+       buf += "timeStamp field not found";
+       return;
+   }
+   buf += " timeStamp ";
+   timeStampPV-&gt;toString(buf);
+}</pre>
+
+<h3>Creating PVData</h3>
+
+<p>Example of creating a scalar field.</p>
+<pre>    PVDataCreate *pvDataCreate = getPVDataCreate();
+    PVDouble pvValue = pvDataCreate.createPVScalar(
+      0,
+      String("value"),
+      pvDouble);</pre>
+
+<p>Create an alarm structure the hard way</p>
+<pre>    FieldCreate *fieldCreate = getFieldCreate();
+    PVDataCreate *pvDataCreate = getPVDataCreate();
+    FieldConstPtrArray fields = new FieldConstPtr[2];
+    fields[0] = fieldCreate-&gt;createScalar(String("severity"),pvInt);
+    fields[1] = fieldCreate-&gt;createScalar(String("message"),pvString);
+    StructureConstPtralarmField = fieldCreate-&gt;createStructure(String("alarm"),2,fields);</pre>
+
+<p>Create an alarm structure the easy way.</p>
+<pre>    StandardPVField *standardPVField = getStandardPVField();
+    PVStructure *pvAlarm = standardPVField-&gt;alarm(0);</pre>
+
+<p>Create a PVStructure with field name example that has a double value field
+and a timeStamp and alarm. Do it the easy way.</p>
+<pre>    StandardPVField *standardPVField = getStandardPVField();
+    PVStructure *pvStructure = standardPVField-&gt;scalar(
+        0, //parent is null
+        String("example"),
+        String("timeStamp,alarm"))</pre>
+<hr />
+
+<h2 style="text-align: center">pvMisc</h2>
+<hr />
+
+<h3>BitSetUtil</h3>
+
+<p>The following is also provided:</p>
+<pre>NOT DONE</pre>
+
+<p>This provides functions that operate of a BitSet for a PVStructure. It
+currently has only one method:</p>
+<dl>
+  <dt style="font-family: courier;"><span
+  style="font-family: Courier">compress</span></dt>
+    <dd>Compress the bits in a BitSet related to a structure.<br />
+      For each structure: 
+      <ol>
+        <li>If the bit for the structure is set then the bit for all
+          subfields of the structure are cleared. </li>
+        <li>If the bit for the structure is not set but all immediate
+          subfields have their bit set then the bit for the structure is set
+          and the bits for all subfields are cleared. </li>
+      </ol>
+      Note that this is a recursive algorithm. That is if every immediate
+      subfield has it's offset bit set then the bits for ALL fields that
+      reside in the structure will be cleared.</dd>
+    <dd>Channel Access can call this before sending data. It can then pass
+      entire structures if the structure offset bit is set. </dd>
+</dl>
+
+<h3 style="text-align: center;">MultiChoice</h3>
+
+<p>MultiChoice defines an array of strings and a bit set that selects an
+arbitrary set of the choices.</p>
+<pre>NOT DONE</pre>
+
+<p>where</p>
+<dl>
+  <dt style="font-family: courier;">getBitMask</dt>
+    <dd>Returns the bitMask.</dd>
+  <dt style="font-family: courier;">getChoices</dt>
+    <dd>Returns the complete set of choices..</dd>
+  <dt style="font-family: courier;">getSelectedChoices</dt>
+    <dd>Returns the interface for getting the selected choices..</dd>
+  <dt style="font-family: courier;">setBit</dt>
+    <dd>Select the choice for specified bit..</dd>
+  <dt style="font-family: courier;">clear</dt>
+    <dd>Clear the bitMask, i.e. no choices are selected..</dd>
+  <dt style="font-family: courier;">registerChoice</dt>
+    <dd>Register a new choice. If thed choice already exists then it''s index
+      is returned. If not it is appended to the choices.</dd>
+</dl>
+<hr />
+
+<h2 style="text-align: center">Property</h2>
+<hr />
+
+<h3 style="text-align: center">Definition of Property</h3>
+
+<p>NOTE: The use of property is discouraged. But the Interfaces for standard
+properties are encouraged.</p>
+
+<p>Only fields named "value" have properties. A record can have multiple
+value fields, which can appear in the top level structure of a record or in a
+substructure. All other fields in the structure containing a value field are
+considered properties of the value field. The fieldname is also the property
+name. The value field can have any type, i.e. scalar, scalarArray, or
+structure. Typical property fields are timeStamp, alarm, display, control,
+and history.</p>
+
+<p>The timeStamp is a special case. If it appears anywhere in the structure
+hieraracy above a value field it is a property of the value field.</p>
+
+<p>For example the following record has a single value field. The value field
+has propertys alarm, timeStamp, and display.</p>
+<pre>&lt;record name = "counterOutput" &gt;
+    &lt;structure name = "alarm" extends = "alarm" /&gt;
+    &lt;structure name = "timeStamp" extends = "timeStamp" /&gt;
+    &lt;scalar name = "value" scalarType = "double" /&gt;
+    &lt;structure name = "display" extends = "display" &gt;
+        &lt;scalar name = "description"&gt;Sample Description&lt;/scalar&gt;
+        &lt;scalar name = "format"&gt;%f&lt;/scalar&gt;
+        &lt;scalar name = "units"&gt;volts&lt;/scalar&gt;
+        &lt;structure name = "limit"&gt;
+            &lt;scalar name ="low"&gt;0.0&lt;/scalar&gt;
+            &lt;scalar name ="high"&gt;10.0&lt;/scalar&gt;
+        &lt;/structure&gt;
+    &lt;/structure&gt;
+&lt;/record&gt;</pre>
+
+<p>The following example has three value fields each with properties alarm
+and timeStamp. Voltage, Current, and Power each have a different alarms but
+all share the timeStamp.</p>
+<pre>&lt;record name = "psSimple"&gt;
+    &lt;structure name = "alarm" extends = "alarm" /&gt;
+    &lt;structure name = "timeStamp" extends = "timeStamp" /&gt;
+    &lt;structure name = "voltage"&gt;
+        &lt;scalar name = "value" scalarType = "double" /&gt;
+        &lt;structure name = "alarm" extends = "alarm" /&gt;
+    &lt;/structure&gt;
+    &lt;structure name = "current"&gt;
+        &lt;scalar name = "value" scalarType = "double" /&gt;
+        &lt;structure name = "alarm" extends = "alarm" /&gt;
+    &lt;/structure&gt;
+    &lt;structure name = "power"&gt;
+        &lt;scalar name = "value" scalarType = "double" /&gt;
+        &lt;structure name = "alarm" extends = "alarm" /&gt;
+    &lt;/structure&gt;
+&lt;/record&gt;</pre>
+
+<h3 style="text-align: center">Standard Properties</h3>
+
+<p>The following field names have special meaning, i.e. support properties
+for general purpose clients.</p>
+<dl>
+  <dt style="font-family: courier;">value</dt>
+    <dd>This is normally defined since most general purpose clients access
+      this field. All other fields in the structure support or describe the
+      value field. The type can any supported type but is usually one of the
+      following: 
+      <dl>
+        <dt style="font-family: courier;">scalar</dt>
+          <dd>One of boolean, byte, short, int, long, float, double, or
+          string</dd>
+        <dt style="font-family: courier;">scalarArray</dt>
+          <dd>An array with the elementType being a scalar type</dd>
+        <dt style="font-family: courier;">enumerated structure</dt>
+          <dd>A structure that includes fields named index, choice, and
+            choices. index is an int that selects a choice. choice is the
+            currently selected choice. choices is an array of strings that
+            defines the complete set of choices.</dd>
+        <dt style="font-family: courier;">other</dt>
+          <dd>Other structure or array types can also be defined if clients
+            and support code agree on the meaning. Some examples are: 1) A
+            structure defining a 2D matrix, 2) A structure defining an image,
+            3) A structure that simulates a remote method, ...</dd>
+      </dl>
+    </dd>
+  <dt style="font-family: courier;">timeStamp</dt>
+    <dd>The timeStamp. The type MUST be a timeStamp structure. Also if the
+      PVData structure does not have a timeStamp then a search up the parent
+      tree is made to find a timeStamp.</dd>
+  <dt style="font-family: courier;">alarm</dt>
+    <dd>The alarm. The type MUST be an alarm structure. </dd>
+  <dt style="font-family: courier;">display</dt>
+    <dd>A display structure as described below. It provides display
+      characteristics for the value field.</dd>
+  <dt style="font-family: courier;">control</dt>
+    <dd>A control structure as described below. It provides control
+      characteristics for the value field.</dd>
+  <dt style="font-family: courier;">history</dt>
+    <dd>Provides a history buffer for the value field. Note that currently
+      PVData does not define history suppoprt.</dd>
+  <dt style="font-family: courier;">other</dt>
+    <dd>Other standard properties can be defined.</dd>
+</dl>
+
+<p>In addition a structure can have additional fields that support the value
+field but are not recognized by most general purpose client tools. Typical
+examples are:</p>
+<dl>
+  <dt style="font-family: courier;">input</dt>
+    <dd>A field with support that changes the value field. This can be
+      anything. It can be a channel access link. It can obtain a value from
+      hardware. Etc.</dd>
+  <dt style="font-family: courier;">valueAlarm</dt>
+    <dd>A field with support that looks for alarm conditions based on the
+      value.</dd>
+  <dt style="font-family: courier;">output</dt>
+    <dd>A field with support that reads the current value and sends it
+      somewhere else. This can be anything. It can be a channel access link.
+      It can write a value to hardware. Etc.</dd>
+</dl>
+
+<p>The model allows for device records. A device record has fields that are
+structures that support the PVData data model. For example a powerSupport
+record can have fields power, voltage, current that each support the PVData
+data model. </p>
+
+<h3 style="text-align: center">PVProperty</h3>
+
+<p>Interface and factory for finding a field within a structure.</p>
+<pre>NOT DONE</pre>
+<ul>
+  <li>findProperty<br />
+    Find a field that is a subfield or property of this PVField. The
+    fieldName is of the form name.name... The pvField must be named value or
+    it does not have properties. </li>
+  <li>findPropertyViaParent<br />
+    Find a property by searching up the parent tree. The property name is
+    expected to match the name of a field. The return value is the interface
+    to the first field found that is not a null structure or null if not
+    found. </li>
+  <li>getPropertyNames<br />
+    Get a String array that holds the names of the properties for this field.
+  </li>
+  <li>getPVProperty<br />
+    Get the single instance of PVProperty. </li>
+</ul>
+
+<h3 style="text-align: center;">Enumeration</h3>
+
+<p>Enumerated is a convenience interface for a structure that happens to be
+an enumerated structure, which is a structure that has fields index and
+choices. Index is an integer and choices is an array of strings. Both index
+selects one of the choices.</p>
+<pre>class Enumerated ;
+public:
+    //default constructors and destructor are OK
+    //This class should not be extended
+
+    //returns (false,true) if pvField(isNot, is valid enumerated structure
+    bool attach(PVField *pvField);
+    ~Enumerated();
+    // each of the following throws logic_error is not attached to PVField
+    void putIndex(int32 index);
+    int32 getIndex();
+    String getChoice();
+    bool choicesMutable();
+    StringArray getChoices();
+    int32 getNumberChoices();
+    // also throws logic_error of immutable
+    void putChoices(StringArray choices,int32 numberChoices);
+private:
+    PVInt *pvIndex;
+    PVStringArray *pvChoices;
+};</pre>
+
+<p>where</p>
+<dl>
+  <dt style="font-family: courier;">getIndex</dt>
+    <dd>Returns the interface for field index.</dd>
+  <dt style="font-family: courier;">getChoice</dt>
+    <dd>Returns the choice for the current index.</dd>
+  <dt style="font-family: courier;">getChoices</dt>
+    <dd>Returns the interface for field choices.</dd>
+  <dt style="font-family: courier;">getPV</dt>
+    <dd>Returns the interface for the PVStructure for the enumerated
+      structure.</dd>
+  <dt style="font-family: courier;">replacePVField</dt>
+    <dd>Replace the PVField implementation. The new implementation implements
+      interface Enumerated and also replaces the implementations of fields
+      index, choice, and choices. The new implementation updates index when
+      choice is changed and choice when index is changed. If choices is
+      changed the index is set to 0.</dd>
+  <dt style="font-family: courier;">getEnumerated</dt>
+    <dd>If the field is an enumerated structure and replacePVField was called
+      for the field then interface Enumerated is returned.</dd>
+</dl>
+
+<h3 style="text-align: center">Standard Properties</h3>
+
+<p>This section has structure definitions that support standard properties.
+These definitions are defined in project javaIOC.</p>
+
+<h4>TimeStamp</h4>
+<pre>&lt;structure name = "timeStamp"&gt;
+  &lt;scalar name = "secondsPastEpoch" scalarType = "long" /&gt;
+  &lt;scalar name = "nanoSeconds" scalarType = "int" /&gt;
+&lt;/structure&gt;</pre>
+
+<h4>Alarm</h4>
+<pre>&lt;structure name = "alarmSeverity" extends = "enumerated" &gt;
+  &lt;array name = "choices"  immutable = "true" &gt;none,minor,major,invalid&lt;/array&gt;
+&lt;/structure&gt;
+
+&lt;structure name = "alarm"&gt;
+  &lt;structure name = "severity" extends = "alarmSeverity" /&gt;
+  &lt;scalar name = "message" scalarType = "string" /&gt;
+&lt;/structure&gt;</pre>
+
+<h4>Limits</h4>
+<pre>&lt;structure name = "byteLimit"&gt;
+    &lt;scalar name = "low" scalarType = "byte" /&gt;
+    &lt;scalar name = "high" scalarType = "byte" /&gt;
+&lt;/structure&gt;
+
+&lt;structure name = "shortLimit"&gt;
+    &lt;scalar name = "low" scalarType = "short" /&gt;
+    &lt;scalar name = "high" scalarType = "short" /&gt;
+&lt;/structure&gt;
+
+&lt;structure name = "intLimit"&gt;
+    &lt;scalar name = "low" scalarType = "int" /&gt;
+    &lt;scalar name = "high" scalarType = "int" /&gt;
+&lt;/structure&gt;
+
+&lt;structure name = "longLimit"&gt;
+    &lt;scalar name = "low" scalarType = "long" /&gt;
+    &lt;scalar name = "high" scalarType = "long" /&gt;
+&lt;/structure&gt;
+
+&lt;structure name = "floatLimit"&gt;
+    &lt;scalar name = "low" scalarType = "float" /&gt;
+    &lt;scalar name = "high" scalarType = "float" /&gt;
+&lt;/structure&gt;
+
+&lt;structure name = "doubleLimit"&gt;
+    &lt;scalar name = "low" scalarType = "double" /&gt;
+    &lt;scalar name = "high" scalarType = "double" /&gt;
+&lt;/structure&gt;</pre>
+
+<h4>Display</h4>
+<pre>&lt;structure name = "display"&gt;
+    &lt;scalar name = "description" scalarType = "string" /&gt;
+    &lt;scalar name = "format" scalarType = "string" /&gt;
+    &lt;scalar name = "units" scalarType = "string" /&gt;
+    &lt;structure name = "limit" extends = "doubleLimit" /&gt;
+&lt;/structure&gt;</pre>
+
+<h4>Control</h4>
+<pre>&lt;structure name = "control"&gt;
+    &lt;structure name = "limit" extends = "doubleLimit" /&gt;
+    &lt;scalar name = "minStep" scalarType = "double" /&gt;
+&lt;/structure&gt;</pre>
+
+<h3 style="text-align: center">Interfaces for Standard Properties</h3>
+
+<h4>PVTimeStamp</h4>
+
+<p>The following priovides convient access to a timeStamp structure.</p>
+<pre>class PVTimeStamp {
+public:
+    //default constructors and destructor are OK
+    //This class should not be extended
+
+    //returns (false,true) if pvField(isNot, is valid timeStamp structure
+    bool attach(PVField *pvField);
+    // throws logic_error is not attached to PVField
+    TimeStamp &amp;get();
+    // throws logic_error is not attached to PVField
+    void put (TimeStamp &amp;timeStamp);
+private:
+    PVLong* pvSecs;
+    PVInt* pvNano;
+};</pre>
+
+<h4>Alarm</h4>
+
+<p>The following provides convient access to the fields of an alarm
+structure.</p>
+<pre>NOT DONE</pre>
+
+<h4>Limits</h4>
+
+<h4>Display</h4>
+
+<h4>Control</h4>
+<hr />
+
+<h2 style="text-align: center">PVData Abstract and Base Classes</h2>
+<hr />
+
+<h3 style="text-align: center">Overview</h3>
+
+<p>This package provides classes that implement everything defined in package
+org.epics.pvData.pv</p>
+
+<h3 style="text-align: center">Factory</h3>
+
+<p>FieldCreateFactory automatically creates a single instance of FieldCreate
+and provides a method to get the interface.</p>
+
+<p>PVDataCreateFactory automatically creates a single instance of
+PVDataCreate and provides a method to get the interface.</p>
+
+<p>PVAuxInfoImpl implements auxInfo.</p>
+
+<p>ConvertFactory automatically creates a single instance of Convert and
+provides a method to get the interface.</p>
+
+<h3 style="text-align: center">Abstract Classes for PVField</h3>
+
+<h4>AbstractPVField</h4>
+
+<p>This is an abstract base class for implementing PVField interfaces. It
+MUST be the base class for any class that extends PVField. </p>
+
+<h4>AbstractPVScalar</h4>
+
+<p>This is an abstract base class for implementing scalar data fields. It
+MUST be the base class for any class that implements a scalar data field. </p>
+
+<h4>AbstractPVArray</h4>
+
+<p>This is an abstract base class for implementing array data fields. It MUST
+be the base class for any class implements array data fields. </p>
+
+<h4>AbstractPVScalarArray</h4>
+
+<p>This is an abstract base class for implementing scalar array data fields.
+It MUST be the base class for any class implements scalar array data fields.
+</p>
+
+<h3 style="text-align: center">BasePVStructure</h3>
+
+<p>BasePVStructure is a base class for any code that implements PVStructure.
+Any code that implements PVStructure MUST extend this class.</p>
+
+<h3 style="text-align: center">Base Classes For PVScalar</h3>
+
+<p>For each scalar type there is a base class that implements it. The
+complete list is:</p>
+<dl>
+  <dt style="font-family: courier;">BasePVBoolean</dt>
+  <dt style="font-family: courier;">BasePVByte</dt>
+  <dt style="font-family: courier;">BasePVShort</dt>
+  <dt style="font-family: courier;">BasePVInt</dt>
+  <dt style="font-family: courier;">BasePVLong</dt>
+  <dt style="font-family: courier;">BasePVFloat</dt>
+  <dt style="font-family: courier;">BasePVDouble</dt>
+  <dt style="font-family: courier;">BasePVString</dt>
+</dl>
+
+<h3 style="text-align: center">Base Classes for PVArray</h3>
+
+<p>For each scalar array type there is a base class that implements it. The
+complete list is:</p>
+<dl>
+  <dt style="font-family: courier;">BasePVBooleanArray</dt>
+  <dt style="font-family: courier;">BasePVByteArray</dt>
+  <dt style="font-family: courier;">BasePVShortArray</dt>
+  <dt style="font-family: courier;">BasePVIntArray</dt>
+  <dt style="font-family: courier;">BasePVLongArray</dt>
+  <dt style="font-family: courier;">BasePVFloatArray</dt>
+  <dt style="font-family: courier;">BasePVDoubleArray</dt>
+  <dt style="font-family: courier;">BasePVStringArray</dt>
+  <dt style="font-family: courier;">BasePVStructureArray</dt>
+</dl>
+<hr />
+
+<h2 style="text-align: center">License Agreement</h2>
+<hr />
+<pre>Copyright (c) 2008 Martin R. Kraimer
+Copyright (c) 2007 Control System Laboratory,
+    (COSYLAB) Ljubljana Slovenia
+Copyright (c) 2010 Brookhaven National Laboratory
+
+
+Permission is hereby granted, free of charge, to any person
+obtaining a copy of this software and associated documentation
+files (the "Software"), to deal in the Software without
+restriction, including without limitation the rights to use,
+copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the
+Software is furnished to do so, subject to the following
+conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+OTHER DEALINGS IN THE SOFTWARE.
+
+________________________________________________________________________
+
+This software is in part copyrighted by Brookhaven National Laboratory(BNL)
+
+In no event shall BNL be liable to any party for direct, indirect,
+special, incidental, or consequential damages arising out of the use of
+this software, its documentation, or any derivatives thereof, even if
+BNL has been advised of the possibility of such damage.
+
+BNL specifically disclaims any warranties, including, but not limited
+to, the implied warranties of merchantability, fitness for a particular
+purpose, and non-infringement.  This software is provided on an "as is"
+basis, and BNL has no obligation to provide maintenance, support,
+updates, enhancements, or modifications.
+
+________________________________________________________________________
+
+This software is in part copyrighted by the BERLINER SPEICHERRING
+GESELLSCHAFT FUER SYNCHROTRONSTRAHLUNG M.B.H. (BESSY), BERLIN, GERMANY.
+
+In no event shall BESSY be liable to any party for direct, indirect,
+special, incidental, or consequential damages arising out of the use of
+this software, its documentation, or any derivatives thereof, even if
+BESSY has been advised of the possibility of such damage.
+
+BESSY specifically disclaims any warranties, including, but not limited
+to, the implied warranties of merchantability, fitness for a particular
+purpose, and non-infringement.  This software is provided on an "as is"
+basis, and BESSY has no obligation to provide maintenance, support,
+updates, enhancements, or modifications.
+
+________________________________________________________________________
+
+This software is in part copyrighted by the Deutsches Elektronen-Synchroton,
+    Member of the Helmholtz Association, (DESY), HAMBURG, GERMANY.
+
+In no event shall DESY be liable to any party for direct, indirect,
+special, incidental, or consequential damages arising out of the use of
+this software, its documentation, or any derivatives thereof, even if
+DESY has been advised of the possibility of such damage.
+
+DESY specifically disclaims any warranties, including, but not limited
+to, the implied warranties of merchantability, fitness for a particular
+purpose, and non-infringement.  This software is provided on an "as is"
+basis, and DESY has no obligation to provide maintenance, support,
+updates, enhancements, or modifications.
+________________________________________________________________________</pre>
+</body>
+</html>

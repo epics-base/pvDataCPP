@@ -81,14 +81,13 @@ ConstructDestructCallback *Executor::getConstructDestructCallback()
     return pConstructDestructCallback;
 }
 
-class ExecutorPvt : public RunnableReady {
+class ExecutorPvt : public Runnable{
 public:
     ExecutorPvt(String threadName,ThreadPriority priority);
     ~ExecutorPvt();
     ExecutorNode * createNode(Command *command);
     void execute(ExecutorNode *node);
-    void destroy();
-    virtual void run(ThreadReady *threadReady);
+    virtual void run();
 private:
     ExecutorList *executorList; 
     ExecutorList *runList; 
@@ -102,37 +101,39 @@ private:
 ExecutorPvt::ExecutorPvt(String threadName,ThreadPriority priority)
 :  executorList(new ExecutorList()),
    runList(new ExecutorList()),
-   moreWork(new Event(eventEmpty)),
-   stopped(new Event(eventEmpty)),
+   moreWork(new Event(false)),
+   stopped(new Event(false)),
    mutex(Mutex()),
    alive(true),
    thread(new Thread(threadName,priority,this))
-{
-   thread->start();
-}
+{} 
 
 ExecutorPvt::~ExecutorPvt()
 {
+    {
+        Lock xx(&mutex);
+        alive = false;
+    }
+    moreWork->signal();
+    {
+        Lock xx(&mutex);
+        stopped->wait();
+    }
     ExecutorListNode *node;
     while((node=executorList->removeHead())!=0) {
         delete node->getObject();
     }
+    delete thread;
     delete stopped;
     delete moreWork;
     delete runList;
     delete executorList;
-    delete thread;
 }
 
-void ExecutorPvt::run(ThreadReady *threadReady)
+void ExecutorPvt::run()
 {
-    bool firstTime = true;
     while(alive) {
         ExecutorListNode * executorListNode = 0;
-        if(firstTime) {
-            firstTime = false;
-            threadReady->ready();
-        }
         while(alive && runList->isEmpty()) {
             moreWork->wait();
         }
@@ -164,20 +165,6 @@ void ExecutorPvt::execute(ExecutorNode *node)
     if(isEmpty) moreWork->signal();
 }
 
-void ExecutorPvt::destroy()
-{
-    {
-        Lock xx(&mutex);
-        alive = false;
-    }
-    moreWork->signal();
-    {
-        Lock xx(&mutex);
-        stopped->wait();
-    }
-    delete this;
-}
-
 Executor::Executor(String threadName,ThreadPriority priority)
 : pImpl(new ExecutorPvt(threadName,priority))
 {
@@ -187,23 +174,14 @@ Executor::Executor(String threadName,ThreadPriority priority)
 }
 
 Executor::~Executor() {
+    delete pImpl;
     Lock xx(globalMutex);
     totalDestruct++;
-}
-
-Executor *Executor::create(String threadName,ThreadPriority priority)
-{
-    return new Executor(threadName,priority);
 }
 
 ExecutorNode * Executor::createNode(Command*command)
 {return pImpl->createNode(command);}
 
 void Executor::execute(ExecutorNode *node) {pImpl->execute(node);}
-void Executor::destroy() {
-    pImpl->destroy();
-    delete this;
-}
-
 
 }}

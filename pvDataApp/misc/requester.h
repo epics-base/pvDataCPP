@@ -7,24 +7,22 @@
 #include <string>
 #ifndef REQUESTER_H
 #define REQUESTER_H
-#include "pvIntrospect.h"
+#include "pvType.h"
 namespace epics { namespace pvData { 
 
-    class Requester;
-    
-    enum MessageType {
-       infoMessage,warningMessage,errorMessage,fatalErrorMessage
-    };
+class Requester;
 
-    static std::string messageTypeName[] = {
-       "info","warning","error","fatalError"
-    };
-    
-    class Requester {
-    public:
-        virtual String getRequesterName() = 0;
-        virtual void message(String message,MessageType messageType) = 0;
-    };
+enum MessageType {
+   infoMessage,warningMessage,errorMessage,fatalErrorMessage
+};
+
+extern StringArray messageTypeName;
+
+class Requester {
+public:
+    virtual String getRequesterName() = 0;
+    virtual void message(String message,MessageType messageType) = 0;
+};
 
 }}
 #endif  /* REQUESTER_H */

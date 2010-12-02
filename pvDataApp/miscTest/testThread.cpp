@@ -43,7 +43,7 @@ private:
 Basic::Basic(Executor *executor)
 : executor(executor),
   executorNode(executor->createNode(this)),
-  wait(new Event(eventEmpty))
+  wait(new Event())
 {
 }
 
@@ -55,7 +55,7 @@ void Basic::run()
 {
     executor->execute(executorNode);
     bool result = wait->wait();
-    if(result==false) printf("basic::run wait returned true\n");
+    if(result==false) printf("basic::run wait returned false\n");
 }
 
 void Basic::command()
@@ -65,14 +65,14 @@ void Basic::command()
 
 
 static void testBasic(FILE *fd) {
-    Executor *executor = Executor::create(String("basic"),middlePriority);
+    Executor *executor = new Executor(String("basic"),middlePriority);
     Basic *basic = new Basic(executor);
     basic->run();
     delete basic; 
     String buf("");
     Thread::showThreads(&buf);
     fprintf(fd,"threads\n%s\n",buf.c_str());
-    executor->destroy();
+    delete executor;
 }
 
 class MyFunc : public TimeFunctionRequester {
@@ -89,7 +89,7 @@ private:
 };
 
 static void testThreadContext(FILE *fd,FILE *auxFd) {
-    Executor *executor = Executor::create(String("basic"),middlePriority);
+    Executor *executor = new Executor(String("basic"),middlePriority);
     Basic *basic = new Basic(executor);
     MyFunc myFunc(basic);
     TimeFunction timeFunction(&myFunc);
@@ -97,7 +97,7 @@ static void testThreadContext(FILE *fd,FILE *auxFd) {
     perCall *= 1e6;
     fprintf(auxFd,"time per call %f microseconds\n",perCall);
     delete basic;
-    executor->destroy();
+    delete executor;
 }
 
 int main(int argc, char *argv[]) {

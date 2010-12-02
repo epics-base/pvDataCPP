@@ -23,6 +23,7 @@ INC += timer.h
 
 LIBSRCS += byteBuffer.cpp
 LIBSRCS += bitSet.cpp
+LIBSRCS += requester.cpp
 LIBSRCS += serializeHelper.cpp
 LIBSRCS += showConstructDestruct.cpp
 LIBSRCS += linkedListVoid.cpp

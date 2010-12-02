@@ -6,6 +6,7 @@
  */
 #ifndef TIMESTAMP_H
 #define TIMESTAMP_H
+#include <ctime>
 #include "epicsTime.h"
 #include "pvType.h"
 
@@ -20,10 +21,12 @@ class TimeStamp {
 public:
     TimeStamp() 
     :secondsPastEpoch(0),nanoSeconds(0) {}
+    TimeStamp(int64 secondsPastEpoch,int32 nanoSeconds = 0);
     //default constructors and destructor are OK
     //This class should not be extended
-    TimeStamp(int64 secondsPastEpoch,int32 nanoSeconds = 0);
-    TimeStamp(epicsTimeStamp &epics);
+    void normalize();
+    void fromTime_t(const time_t &);
+    void toTime_t(time_t &) const;
     int64 getSecondsPastEpoch() const {return secondsPastEpoch;}
     int64 getEpicsSecondsPastEpoch() const {
         return secondsPastEpoch - posixEpochAtEpicsEpoch;
@@ -32,7 +35,9 @@ public:
     void put(int64 secondsPastEpoch,int32 nanoSeconds = 0) {
         this->secondsPastEpoch = secondsPastEpoch;
         this->nanoSeconds = nanoSeconds;
+        normalize();
     }
+    void put(int64 milliseconds);
     void getCurrent();
     double toSeconds() const ;
     bool operator==(TimeStamp const &) const;
@@ -46,10 +51,7 @@ public:
     TimeStamp & operator-=(int64 seconds);
     TimeStamp & operator+=(double seconds);
     TimeStamp & operator-=(double seconds);
-    // milliseconds since epoch
-    int64 getMilliseconds();
-    void put(int64 milliseconds);
-    
+    int64 getMilliseconds(); // milliseconds since epoch
 private:
     static int64 diffInt(TimeStamp const &left,TimeStamp const  &right );
     int64 secondsPastEpoch;

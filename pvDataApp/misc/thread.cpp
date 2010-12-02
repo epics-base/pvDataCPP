@@ -9,6 +9,7 @@
 #include <cstddef>
 #include <string>
 #include <cstdio>
+#include <stdexcept>
 
 #include <epicsThread.h>
 #include <epicsEvent.h>
@@ -48,9 +49,7 @@ typedef LinkedList<ThreadListElement> ThreadList;
 static volatile int64 totalConstruct = 0;
 static volatile int64 totalDestruct = 0;
 static Mutex *globalMutex = 0;
-static void addThread(Thread *thread);
-static void removeThread(Thread *thread);
-static ThreadList *list;
+static ThreadList *threadList;
 
 static int64 getTotalConstruct()
 {
@@ -72,7 +71,7 @@ static void init()
      Lock xx(&mutex);
      if(globalMutex==0) {
         globalMutex = new Mutex();
-        list = new ThreadList();
+        threadList = new ThreadList();
         pConstructDestructCallback = new ConstructDestructCallback(
             String("thread"),
             getTotalConstruct,getTotalDestruct,0);
@@ -96,38 +95,37 @@ int ThreadPriorityFunc::getEpicsPriority(ThreadPriority threadPriority) {
 extern  "C" void myFunc ( void * pPvt );
 
 
-class Runnable : public ThreadReady {
+class ThreadPvt {
 public:
-    Runnable(Thread *thread,String name,
-        ThreadPriority priority, RunnableReady *runnable);
-    virtual ~Runnable();
-    Thread *start();
+    ThreadPvt(Thread *thread,String name,
+        ThreadPriority priority, Runnable*runnable);
+    virtual ~ThreadPvt();
     void ready();
 public: // only used within this source module
     Thread *thread;
     String name;
     ThreadPriority priority;
-    RunnableReady *runnable;
-    Event waitStart;
+    Runnable *runnable;
     bool isReady;
+    ThreadListElement *threadListElement;
+    Event *waitDone;
     epicsThreadId id;
 };
 
 extern "C" void myFunc ( void * pPvt )
 {
-    Runnable *runnable = (Runnable *)pPvt;
-    runnable->waitStart.signal();
-    addThread(runnable->thread);
-    runnable->runnable->run(runnable);
-    removeThread(runnable->thread);
+    ThreadPvt *threadPvt = (ThreadPvt *)pPvt;
+    threadPvt->runnable->run();
+    threadPvt->waitDone->signal();
 }
 
-Runnable::Runnable(Thread *thread,String name,
-    ThreadPriority priority, RunnableReady *runnable)
+ThreadPvt::ThreadPvt(Thread *thread,String name,
+    ThreadPriority priority, Runnable *runnable)
 : thread(thread),name(name),priority(priority),
   runnable(runnable),
-  waitStart(eventEmpty),
   isReady(false),
+  threadListElement(new ThreadListElement(thread)),
+  waitDone(new Event()),
   id(epicsThreadCreate(
         name.c_str(),
         epicsPriority[priority],
@@ -136,32 +134,35 @@ Runnable::Runnable(Thread *thread,String name,
 {
     init();
     Lock xx(globalMutex);
+    threadList->addTail(threadListElement->node);
     totalConstruct++;
 }
 
-Runnable::~Runnable()
+ThreadPvt::~ThreadPvt()
 {
+    bool result = waitDone->wait(2.0);
+    if(!result) {
+        throw std::logic_error(String("delete thread but run did not return"));
+        String message("destroy thread ");
+        message += thread->getName();
+        message += " but run did not return";
+        throw std::logic_error(message);
+    }
+    if(!threadListElement->node->isOnList()) {
+        String message("destroy thread ");
+        message += thread->getName();
+        message += " is not on threadlist";
+        throw std::logic_error(message);
+    }
+    threadList->remove(threadListElement->node);
+    delete waitDone;
+    delete threadListElement;
     Lock xx(globalMutex);
     totalDestruct++;
 }
 
-
-Thread * Runnable::start()
-{
-    if(!waitStart.wait(10.0)) {
-        fprintf(stderr,"thread %s did not call ready\n",thread->getName().c_str());
-    }
-    return thread;
-}
-
-
-void Runnable::ready()
-{
-    waitStart.signal();
-}
-
-Thread::Thread(String name,ThreadPriority priority,RunnableReady *runnableReady)
-: pImpl(new Runnable(this,name,priority,runnableReady))
+Thread::Thread(String name,ThreadPriority priority,Runnable *runnable)
+: pImpl(new ThreadPvt(this,name,priority,runnable))
 {
 }
 
@@ -175,12 +176,6 @@ ConstructDestructCallback *Thread::getConstructDestructCallback()
     init();
     return pConstructDestructCallback;
 }
-
-void Thread::start()
-{
-    pImpl->start();
-}
-
 
 void Thread::sleep(double seconds)
 {
@@ -201,38 +196,15 @@ void Thread::showThreads(StringBuilder buf)
 {
     init();
     Lock xx(globalMutex);
-    ThreadListNode *node = list->getHead();    
+    ThreadListNode *node = threadList->getHead();    
     while(node!=0) {
         Thread *thread = node->getObject()->thread;
         *buf += thread->getName();
         *buf += " ";
         *buf += threadPriorityNames[thread->getPriority()];
         *buf += "\n";
-        node = list->getNext(node);
+        node = threadList->getNext(node);
     }
-}
-
-void addThread(Thread *thread)
-{
-    Lock xx(globalMutex);
-    ThreadListElement *element = new ThreadListElement(thread);
-    list->addTail(element->node);
-}
-
-void removeThread(Thread *thread)
-{
-    Lock xx(globalMutex);
-    ThreadListNode *node = list->getHead();
-    while(node!=0) {
-        if(node->getObject()->thread==thread) {
-             list->remove(node);
-             delete node;
-             return;
-        }
-        node = list->getNext(node);
-    }
-    fprintf(stderr,"removeThread but thread %s did not in list\n",
-        thread->getName().c_str());
 }
 
 }}

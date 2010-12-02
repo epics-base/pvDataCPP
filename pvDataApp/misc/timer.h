@@ -27,28 +27,24 @@ public:
 
 class TimerNode : private NoDefaultMethods {
 public:
+    TimerNode(TimerCallback *timerCallback);
+    ~TimerNode();
     static ConstructDestructCallback *getConstructDestructCallback();
-    static TimerNode *create(TimerCallback *timerCallback);
-    void destroy();
     void cancel();
     bool isScheduled();
 private:
-    TimerNode(TimerCallback *timerCallback);
-    ~TimerNode();
     class TimerNodePvt *pImpl;
     friend class Timer;
 };
 
 class Timer : private NoDefaultMethods {
 public:
+    Timer(String threadName, ThreadPriority priority);
+    ~Timer();
     static ConstructDestructCallback *getConstructDestructCallback();
-    static Timer * create(String threadName, ThreadPriority priority);
-    void destroy();
     void scheduleAfterDelay(TimerNode *timerNode,double delay);
     void schedulePeriodic(TimerNode *timerNode,double delay,double period);
 private:
-    Timer(String threadName, ThreadPriority priority);
-    ~Timer();
     class TimerPvt *pImpl;
     friend class TimerNode;
 };

@@ -9,6 +9,7 @@
 #include <stddef.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdexcept>
 
 #include "noDefaultMethods.h"
 #include "lock.h"
@@ -62,6 +63,7 @@ ShowConstructDestruct::ShowConstructDestruct() {}
 
 void ShowConstructDestruct::constuctDestructTotals(FILE *fd)
 {
+    getShowConstructDestruct(); // make it initialize
     Lock xx(globalMutex);
     ListNode *node = list->getHead();
     while(node!=0) {
@@ -80,8 +82,33 @@ void ShowConstructDestruct::constuctDestructTotals(FILE *fd)
 
 void ShowConstructDestruct::registerCallback(ConstructDestructCallback *callback)
 {
+    static ConstructDestructCallback *listCallback = 0;
+    static ConstructDestructCallback *listNodeCallback = 0;
    Lock xx(globalMutex);
-   ListNode *listNode = new ListNode(callback);
+   ListNode *listNode = 0;
+   if(list==0) {
+       if(callback->getConstructName().compare("linkedListNode")==0) {
+           listNodeCallback = callback;
+       } else if(callback->getConstructName().compare("linkedList")==0) {
+           listCallback = callback;
+       } else {
+           throw std::logic_error(String("ShowConstructDestruct::registerCallback"));
+       }
+       return;
+   }
+   if(listCallback!=0) {
+       if(listNodeCallback==0) {
+           throw std::logic_error(String(
+               "ShowConstructDestruct::registerCallback expected listNodeCallback!=0"));
+       }
+       listNode = new ListNode(listNodeCallback);
+       list->addTail(listNode);
+       listNode = new ListNode(listCallback);
+       list->addTail(listNode);
+       listCallback = 0;
+       listNodeCallback = 0;
+   }
+   listNode = new ListNode(callback);
    list->addTail(listNode);
 }
 
@@ -91,9 +118,9 @@ ShowConstructDestruct * getShowConstructDestruct()
     Lock xx(&mutex);
     if(pShowConstructDestruct==0) {
         globalMutex = new Mutex();
-        list = new List();
         pShowConstructDestruct = new ShowConstructDestruct();
-    }
+        list = new List();
+    } 
     return pShowConstructDestruct;
 }
 

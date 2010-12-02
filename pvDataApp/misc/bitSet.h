@@ -12,10 +12,6 @@
 //#include "serialize.h"
 namespace epics { namespace pvData { 
 
-        // TODO !!!
-        typedef unsigned long long uint64;
-        typedef std::string * StringBuilder;
-
     /**
      * This class implements a vector of bits that grows as needed. Each
      * component of the bit set has a {@code bool} value. The

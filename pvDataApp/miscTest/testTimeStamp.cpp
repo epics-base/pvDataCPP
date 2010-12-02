@@ -14,7 +14,9 @@
 #include <cstdlib>
 #include <cstddef>
 #include <string>
+#include <cstring>
 #include <cstdio>
+#include <ctime>
 #include <list>
 
 #include <epicsAssert.h>
@@ -32,6 +34,30 @@ void testTimeStamp(FILE *fd,FILE *auxfd)
         current.getSecondsPastEpoch(),
         current.getNanoSeconds(),
         current.getMilliseconds());
+    time_t tt;
+    current.toTime_t(tt);
+    struct tm ctm;
+    memcpy(&ctm,localtime(&tt),sizeof(struct tm));
+    fprintf(auxfd,
+        "%4.4d.%2.2d.%2.2d %2.2d:%2.2d:%2.2d %d nanoSeconds isDst %s\n",
+        ctm.tm_year+1900,ctm.tm_mon + 1,ctm.tm_mday,
+        ctm.tm_hour,ctm.tm_min,ctm.tm_sec,
+        current.getNanoSeconds(),
+        (ctm.tm_isdst==0) ? "false" : "true");
+    tt = time(&tt);
+    current.fromTime_t(tt);
+    fprintf(auxfd,"fromTime_t\ncurrent %lli %i milliSec %lli\n",
+        current.getSecondsPastEpoch(),
+        current.getNanoSeconds(),
+        current.getMilliseconds());
+    current.toTime_t(tt);
+    memcpy(&ctm,localtime(&tt),sizeof(struct tm));
+    fprintf(auxfd,
+        "%4.4d.%2.2d.%2.2d %2.2d:%2.2d:%2.2d %d nanoSeconds isDst %s\n",
+        ctm.tm_year+1900,ctm.tm_mon + 1,ctm.tm_mday,
+        ctm.tm_hour,ctm.tm_min,ctm.tm_sec,
+        current.getNanoSeconds(),
+        (ctm.tm_isdst==0) ? "false" : "true");
     TimeStamp right;
     TimeStamp left;
     right.put(current.getSecondsPastEpoch(),current.getNanoSeconds());

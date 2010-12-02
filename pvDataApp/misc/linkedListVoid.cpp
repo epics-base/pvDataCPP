@@ -69,7 +69,7 @@ static void initPvt()
 
 
 LinkedListVoidNode::LinkedListVoidNode(void *object)
-: object(object),before(0),after(0)
+: object(object),before(0),after(0),linkedListVoid(0)
 {
     initPvt();
     Lock xx(globalMutex);
@@ -138,6 +138,7 @@ void LinkedListVoid::addTail(LinkedListVoidNode *node)
     if(node->before!=0 || node->after!=0) {
         throw std::logic_error(alreadyOnList);
     }
+    node->linkedListVoid = this;
     node->before = head->before;
     node->after = head;
     head->before->after = node;
@@ -150,6 +151,7 @@ void LinkedListVoid::addHead(LinkedListVoidNode *node)
     if(node->before!=0 || node->after!=0) {
         throw std::logic_error(alreadyOnList);
     }
+    node->linkedListVoid = this;
     node->after = head->after;
     node->before = head;
     head->after->before = node;
@@ -168,6 +170,10 @@ void LinkedListVoid::insertAfter(LinkedListVoidNode *node,
     if(newNode->before!=0 || newNode->after!=0) {
         throw std::logic_error(alreadyOnList);
     }
+    if(node->linkedListVoid!=this) {
+        throw std::logic_error(String("node not on this list"));
+    }
+    newNode->linkedListVoid = this;
     newNode->after = existingNode->after;
     newNode->before = existingNode;
     existingNode->after->before = newNode;
@@ -186,6 +192,10 @@ void LinkedListVoid::insertBefore(LinkedListVoidNode *node,
     if(newNode->before!=0 || newNode->after!=0) {
         throw std::logic_error(alreadyOnList);
     }
+    if(node->linkedListVoid!=this) {
+        throw std::logic_error(String("node not on this list"));
+    }
+    newNode->linkedListVoid = this;
     newNode->after = existingNode;
     newNode->before = existingNode->before;
     existingNode->before->after = newNode;
@@ -209,12 +219,15 @@ LinkedListVoidNode *LinkedListVoid::removeHead()
     return node;
 }
 
-void LinkedListVoid::remove(LinkedListVoidNode *listNode)
+void LinkedListVoid::remove(LinkedListVoidNode *node)
 {
-    LinkedListVoidNode *node = listNode;
     if(node->before==0 || node->after==0) {
-        throw std::logic_error(String("listNode not on list"));
+        throw std::logic_error(String("node not on list"));
     }
+    if(node->linkedListVoid!=this) {
+        throw std::logic_error(String("node not on this list"));
+    }
+    node->linkedListVoid = 0;
     LinkedListVoidNode *prev = node->before;
     LinkedListVoidNode *next = node->after;
     node->after = node->before = 0;
@@ -233,6 +246,7 @@ void LinkedListVoid::remove(void * object)
         }
         node = getNext(node);
     }
+    throw std::logic_error(String("object not on this list"));
 }
 
 LinkedListVoidNode *LinkedListVoid::getHead()
@@ -249,12 +263,18 @@ LinkedListVoidNode *LinkedListVoid::getTail()
 
 LinkedListVoidNode *LinkedListVoid::getNext(LinkedListVoidNode *listNode)
 {
+    if(listNode->linkedListVoid!=this) {
+        throw std::logic_error(String("node not on this list"));
+    }
     if(listNode->after==head) return 0;
     return listNode->after;
 }
 
 LinkedListVoidNode *LinkedListVoid::getPrev(LinkedListVoidNode *listNode)
 {
+    if(listNode->linkedListVoid!=this) {
+        throw std::logic_error(String("node not on this list"));
+    }
     if(listNode->before==head) return 0;
     return listNode->before;
 }

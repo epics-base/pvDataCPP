@@ -87,14 +87,14 @@ ConstructDestructCallback * Timer::getConstructDestructCallback()
 
 class TimerNodePvt;
 
-typedef LinkedListNode<TimerNodePvt> ListNode;
-typedef LinkedList<TimerNodePvt> List;
+typedef LinkedListNode<TimerNodePvt> TimerListNode;
+typedef LinkedList<TimerNodePvt> TimerList;
 
 class TimerNodePvt {
 public:
     TimerNode *timerNode;
     TimerCallback *callback;
-    ListNode *listNode;
+    TimerListNode *timerListNode;
     TimeStamp timeToRun;
     TimerPvt *timerPvt;
     double period;
@@ -104,65 +104,63 @@ public:
 
 TimerNodePvt::TimerNodePvt(TimerNode *timerNode,TimerCallback *callback)
 : timerNode(timerNode),callback(callback),
-  listNode(new ListNode(this)),timeToRun(TimeStamp()),
+  timerListNode(new TimerListNode(this)),timeToRun(TimeStamp()),
   timerPvt(0), period(0.0)
 {}
 
 TimerNodePvt::~TimerNodePvt()
 {
-    delete listNode;
+    delete timerListNode;
 }
 
-struct TimerPvt : public RunnableReady {
+struct TimerPvt : public Runnable{
 public:
     TimerPvt(String threadName,ThreadPriority priority);
     ~TimerPvt();
-    virtual void run(ThreadReady *threadReady);
+    virtual void run();
 public: // only used by this source module
-    List *list;
+    TimerList *timerList;
     Mutex mutex;
     Event *waitForWork;
     Event *waitForDone;
-    Thread *thread;
     volatile bool alive;
+    Thread *thread;
 };
 
 TimerPvt::TimerPvt(String threadName,ThreadPriority priority)
-: list(new List()),
+: timerList(new TimerList()),
   mutex(Mutex()),
-  waitForWork(new Event(eventEmpty)),
-  waitForDone(new Event(eventEmpty)),
-  thread(new Thread(threadName,priority,this)),
-  alive(true)
-{
-    thread->start();
-}
+  waitForWork(new Event(false)),
+  waitForDone(new Event(false)),
+  alive(true),
+  thread(new Thread(threadName,priority,this))
+{}
 
 TimerPvt::~TimerPvt()
 {
     delete thread;
     delete waitForDone;
     delete waitForWork;
-    delete list;
+    delete timerList;
 }
 
 static void addElement(TimerPvt *timer,TimerNodePvt *node)
 {
-    List *list = timer->list;
-    ListNode *nextNode = list->getHead();
+    TimerList *timerList = timer->timerList;
+    TimerListNode *nextNode = timerList->getHead();
     if(nextNode==0) {
-        list->addTail(node->listNode);
+        timerList->addTail(node->timerListNode);
         return;
     }
     while(true) {
-        TimerNodePvt *listNode = nextNode->getObject();
-        if((node->timeToRun)<(listNode->timeToRun)) {
-            list->insertBefore(listNode->listNode,node->listNode);
+        TimerNodePvt *timerListNode = nextNode->getObject();
+        if((node->timeToRun)<(timerListNode->timeToRun)) {
+            timerList->insertBefore(timerListNode->timerListNode,node->timerListNode);
             return;
         } 
-        nextNode = list->getNext(listNode->listNode);
+        nextNode = timerList->getNext(timerListNode->timerListNode);
         if(nextNode==0) {
-            list->addTail(node->listNode);
+            timerList->addTail(node->timerListNode);
             return;
         }
     }
@@ -177,22 +175,13 @@ TimerNode::TimerNode(TimerCallback *callback)
     totalNodeConstruct++;
 }
 
-TimerNode *TimerNode::create(TimerCallback *callback)
-{
-    return new TimerNode(callback);
-}
 
 TimerNode::~TimerNode()
 {
+    cancel();
     delete pImpl;
     Lock xx(globalMutex);
     totalNodeDestruct++;
-}
-
-void TimerNode::destroy()
-{
-   cancel();
-   delete this;
 }
 
 void TimerNode::cancel()
@@ -201,7 +190,7 @@ void TimerNode::cancel()
     if(timerPvt==0) return;
     Lock xx(&timerPvt->mutex);
     if(pImpl->timerPvt==0) return;
-    pImpl->timerPvt->list->remove(pImpl);
+    pImpl->timerPvt->timerList->remove(pImpl);
     pImpl->timerPvt = 0;
 }
 
@@ -210,13 +199,12 @@ bool TimerNode::isScheduled()
     TimerPvt *pvt = pImpl->timerPvt;
     if(pvt==0) return false;
     Lock xx(&pvt->mutex);
-    return pImpl->listNode->isOnList();
+    return pImpl->timerListNode->isOnList();
 }
 
 
-void TimerPvt::run(ThreadReady *threadReady)
+void TimerPvt::run()
 {
-    threadReady->ready();
     TimeStamp currentTime;
     while(alive) {
          currentTime.getCurrent();
@@ -225,25 +213,25 @@ void TimerPvt::run(ThreadReady *threadReady)
          TimerNodePvt *nodeToCall = 0;
          {
              Lock xx(&mutex);
-             ListNode *listNode = list->getHead();
-             if(listNode!=0) {
-                 TimerNodePvt *timerNodePvt = listNode->getObject();
+             TimerListNode *timerListNode = timerList->getHead();
+             if(timerListNode!=0) {
+                 TimerNodePvt *timerNodePvt = timerListNode->getObject();
                  timeToRun = &timerNodePvt->timeToRun;
                  double diff = TimeStamp::diff(
                      *timeToRun,currentTime);
                  if(diff<=0.0) {
                      nodeToCall = timerNodePvt;
-                     list->removeHead();
+                     timerList->removeHead();
                      period = timerNodePvt->period;
-                     if(period>0) {
+                     if(period>0.0) {
                          timerNodePvt->timeToRun += period;
                          addElement(this,timerNodePvt);
                      } else {
                          timerNodePvt->timerPvt = 0;
                      }
-                     listNode = list->getHead();
-                     if(listNode!=0) {
-                         timerNodePvt = listNode->getObject();
+                     timerListNode = timerList->getHead();
+                     if(timerListNode!=0) {
+                         timerNodePvt = timerListNode->getObject();
                          timeToRun = &timerNodePvt->timeToRun;
                      } else {
                         timeToRun = 0;
@@ -273,31 +261,21 @@ Timer::Timer(String threadName, ThreadPriority priority)
     totalTimerConstruct++;
 }
 
-Timer * Timer::create(String threadName, ThreadPriority priority)
-{
-    return new Timer(threadName,priority);
-}
-
 Timer::~Timer() {
-    delete pImpl;
-    Lock xx(globalMutex);
-    totalTimerDestruct++;
-}
-
-void Timer::destroy()
-{
     {
          Lock xx(&pImpl->mutex);
          pImpl->alive = false;
-         pImpl->waitForWork->signal();
-         pImpl->waitForDone->wait();
     }
-    List *list = pImpl->list;
-    ListNode *node = 0;
-    while((node = list->removeHead())!=0) {
+    pImpl->waitForWork->signal();
+    pImpl->waitForDone->wait();
+    TimerList *timerList = pImpl->timerList;
+    TimerListNode *node = 0;
+    while((node = timerList->removeHead())!=0) {
         node->getObject()->callback->timerStopped();
     }
-    delete this;
+    delete pImpl;
+    Lock xx(globalMutex);
+    totalTimerDestruct++;
 }
 
 void Timer::scheduleAfterDelay(TimerNode *timerNode,double delay)
@@ -307,7 +285,7 @@ void Timer::scheduleAfterDelay(TimerNode *timerNode,double delay)
 void Timer::schedulePeriodic(TimerNode *timerNode,double delay,double period)
 {
     TimerNodePvt *timerNodePvt = timerNode->pImpl;
-    if(timerNodePvt->listNode->isOnList()) {
+    if(timerNodePvt->timerListNode->isOnList()) {
         throw std::logic_error(String("already queued"));
     }
     if(!pImpl->alive) {
@@ -323,7 +301,7 @@ void Timer::schedulePeriodic(TimerNode *timerNode,double delay,double period)
         Lock xx(&pImpl->mutex);
         timerNodePvt->timerPvt = pImpl;
         addElement(pImpl,timerNodePvt);
-        TimerNodePvt *first = pImpl->list->getHead()->getObject();
+        TimerNodePvt *first = pImpl->timerList->getHead()->getObject();
         if(first==timerNodePvt) isFirst = true;
     }
     if(isFirst) pImpl->waitForWork->signal();

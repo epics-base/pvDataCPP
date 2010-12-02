@@ -14,25 +14,25 @@
 
 namespace epics { namespace pvData { 
 
-    class Mutex  {
-    public:
-        Mutex() : id(epicsMutexMustCreate()){}
-        ~Mutex() { epicsMutexDestroy(id) ;};
-        void lock(){epicsMutexMustLock(id);}\
-        void unlock(){epicsMutexUnlock(id);}
-    private:
-        epicsMutexId id;
-    };
+class Mutex  {
+public:
+    Mutex() : id(epicsMutexMustCreate()){}
+    ~Mutex() { epicsMutexDestroy(id) ;}
+    void lock(){epicsMutexMustLock(id);}
+    void unlock(){epicsMutexUnlock(id);}
+private:
+    epicsMutexId id;
+};
 
 
-    class Lock : private NoDefaultMethods {
-    public:
-        explicit Lock(Mutex *pm)
-        : mutexPtr(pm)
-        {mutexPtr->lock();}
-        ~Lock(){mutexPtr->unlock();}
-    private:
-        Mutex *mutexPtr;
-    };
+class Lock : private NoDefaultMethods {
+public:
+    explicit Lock(Mutex *pm)
+    : mutexPtr(pm)
+    {mutexPtr->lock();}
+    ~Lock(){mutexPtr->unlock();}
+private:
+    Mutex *mutexPtr;
+};
 }}
 #endif  /* LOCK_H */

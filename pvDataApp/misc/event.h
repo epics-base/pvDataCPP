@@ -16,22 +16,10 @@
 
 namespace epics { namespace pvData { 
 
-enum EventWaitStatus {
-    eventWaitOK,
-    eventWaitTimeout,
-    eventWaitError
-};
-
-enum EventInitialState {
-    eventEmpty,
-    eventFull
-};
-    
-
 class Event : private NoDefaultMethods {
 public:
+    explicit Event(bool = false);
     ~Event();
-    Event(EventInitialState initial);
     static ConstructDestructCallback *getConstructDestructCallback();
     void signal();
     bool wait (); /* blocks until full */

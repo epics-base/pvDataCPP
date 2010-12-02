@@ -352,7 +352,7 @@ static void testTimeLocked(FILE *auxFd) {
 }
 
 typedef std::list<Basic *> stdList;
-static void testArrayListTime(FILE *auxFd) {
+static void testStdListTime(FILE *auxFd) {
     TimeStamp startTime;
     TimeStamp endTime;
     int numNodes = 1000;
@@ -362,7 +362,7 @@ static void testArrayListTime(FILE *auxFd) {
     for(int i=0; i<numNodes; i++) {
         basics[i] = new Basic(i);
     }
-    fprintf(auxFd,"\nTime ArrayList test\n");
+    fprintf(auxFd,"\nTime std::list test\n");
     int ntimes = 1000;
     startTime.getCurrent();
     for(int i=0; i<ntimes; i++) {
@@ -385,7 +385,7 @@ static void testArrayListTime(FILE *auxFd) {
     for(int i=0; i<numNodes; i++) delete basics[i];
 }
 
-static void testArrayListTimeLocked(FILE *auxFd) {
+static void testStdListTimeLocked(FILE *auxFd) {
     TimeStamp startTime;
     TimeStamp endTime;
     int numNodes = 1000;
@@ -396,7 +396,7 @@ static void testArrayListTimeLocked(FILE *auxFd) {
     for(int i=0; i<numNodes; i++) {
         basics[i] = new Basic(i);
     }
-    fprintf(auxFd,"\nTime ArrayList test locked\n");
+    fprintf(auxFd,"\nTime std::list test locked\n");
     int ntimes = 1000;
     startTime.getCurrent();
     for(int i=0; i<ntimes; i++) {
@@ -444,8 +444,8 @@ int main(int argc, char *argv[]) {
     testOrderedQueue(fd);
     testTime(auxFd);
     testTimeLocked(auxFd);
-    testArrayListTime(auxFd);
-    testArrayListTimeLocked(auxFd);
+    testStdListTime(auxFd);
+    testStdListTimeLocked(auxFd);
     getShowConstructDestruct()->constuctDestructTotals(fd);
     return (0);
 }

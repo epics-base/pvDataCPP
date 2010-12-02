@@ -33,12 +33,12 @@ class MyCallback : public TimerCallback {
 public:
     MyCallback(String name,FILE *fd,FILE *auxfd,Event *wait)
     : name(name),fd(fd),auxfd(auxfd),wait(wait),
-      timerNode(TimerNode::create(this)),timeStamp(TimeStamp())
+      timerNode(new TimerNode(this)),timeStamp(TimeStamp())
     {
     }
     ~MyCallback()
     {
-        timerNode->destroy();
+        delete timerNode;
     }
     virtual void callback()
     {
@@ -64,9 +64,9 @@ static void testBasic(FILE *fd, FILE *auxfd)
 {
     String one("one");
     String two("two");
-    Event *eventOne = new Event(eventEmpty);
-    Event *eventTwo = new Event(eventEmpty);
-    Timer *timer = Timer::create(String("timer"),middlePriority);
+    Event *eventOne = new Event();
+    Event *eventTwo = new Event();
+    Timer *timer = new Timer(String("timer"),middlePriority);
     MyCallback *callbackOne = new MyCallback(
         one,fd,auxfd,eventOne);
     MyCallback *callbackTwo = new MyCallback(
@@ -83,11 +83,11 @@ static void testBasic(FILE *fd, FILE *auxfd)
     diff = TimeStamp::diff(
         callbackTwo->getTimeStamp(),currentTimeStamp);
     fprintf(auxfd,"two requested %f  diff %f seconds\n",twoDelay,diff);
-    timer->destroy();
-    delete callbackOne;
+    delete timer;
     delete callbackTwo;
-    delete eventOne;
+    delete callbackOne;
     delete eventTwo;
+    delete eventOne;
 }
 
 int main(int argc, char *argv[]) {

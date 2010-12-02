@@ -24,14 +24,12 @@ public:
 
 class Executor : private NoDefaultMethods {
 public:
-    static ConstructDestructCallback *getConstructDestructCallback();
-    static Executor *create(String threadName,ThreadPriority priority);
-    ExecutorNode * createNode(Command *command);
-    void execute(ExecutorNode *node);
-    void destroy();
-private:
     Executor(String threadName,ThreadPriority priority);
     ~Executor();
+    static ConstructDestructCallback *getConstructDestructCallback();
+    ExecutorNode * createNode(Command *command);
+    void execute(ExecutorNode *node);
+private:
     class ExecutorPvt *pImpl;
 };
 

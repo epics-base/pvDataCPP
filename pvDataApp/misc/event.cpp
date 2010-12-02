@@ -9,6 +9,7 @@
 #include <cstddef>
 #include <string>
 #include <cstdio>
+#include <stdexcept>
 
 #include <memory>
 #include <vector>
@@ -56,13 +57,17 @@ static void init()
 
 Event::~Event() {
     epicsEventDestroy(id);
+    id = 0;
+    Lock xx(globalMutex);
     totalDestruct++;
 }
 
-Event::Event(EventInitialState initial)
-: id(epicsEventCreate((initial==eventEmpty)?epicsEventEmpty : epicsEventFull))
+
+Event::Event(bool full)
+: id(epicsEventCreate(full?epicsEventFull : epicsEventEmpty))
 {
     init();
+    Lock xx(globalMutex);
     totalConstruct++;
 }
 
@@ -74,23 +79,27 @@ ConstructDestructCallback *Event::getConstructDestructCallback()
 
 void Event::signal()
 {
+    if(id==0) throw std::logic_error(String("event was deleted"));
     epicsEventSignal(id);
 }
 
 bool Event::wait ()
 {
+    if(id==0) throw std::logic_error(String("event was deleted"));
     epicsEventWaitStatus status = epicsEventWait(id);
     return status==epicsEventWaitOK ? true : false;
 }
 
 bool Event::wait ( double timeOut )
 {
+    if(id==0) throw std::logic_error(String("event was deleted"));
     epicsEventWaitStatus status = epicsEventWaitWithTimeout(id,timeOut);
     return status==epicsEventWaitOK ? true : false;
 }
 
 bool Event::tryWait ()
 {
+    if(id==0) throw std::logic_error(String("event was deleted"));
     epicsEventWaitStatus status = epicsEventTryWait(id);
     return status==epicsEventWaitOK ? true : false;
 }

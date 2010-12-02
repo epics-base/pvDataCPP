@@ -8,6 +8,7 @@
 #define THREAD_H
 #include "noDefaultMethods.h"
 #include "pvType.h"
+#include "showConstructDestruct.h"
 
 namespace epics { namespace pvData { 
 
@@ -27,32 +28,25 @@ public:
     static int getEpicsPriority(ThreadPriority threadPriority);
 };
 
-
-class ThreadReady {
+class Runnable{
 public:
-    virtual void ready() = 0;
-};
-
-class RunnableReady {
-public:
-    virtual void run(ThreadReady *threadReady) = 0;
+    virtual void run() = 0;
 };
 
 class Thread;
 
 class Thread :  private NoDefaultMethods {
 public:
-    Thread(String name,ThreadPriority priority,RunnableReady *runnableReady);
+    Thread(String name,ThreadPriority priority,Runnable *runnable);
     ~Thread();
     static ConstructDestructCallback *getConstructDestructCallback();
-    void start();
     String getName();
     ThreadPriority getPriority();
     static void showThreads(StringBuilder buf);
     static void sleep(double seconds);
 private:
-    class Runnable *pImpl;
-    friend class Runnable;
+    class ThreadPvt *pImpl;
+    friend class ThreadPvt;
 };
 
 }}

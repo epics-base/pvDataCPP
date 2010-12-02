@@ -40,8 +40,8 @@ private:
 
 class ShowConstructDestruct : private NoDefaultMethods {
 public:
-    static void constuctDestructTotals(FILE *fd);
-    static void registerCallback(ConstructDestructCallback *callback);
+    void constuctDestructTotals(FILE *fd);
+    void registerCallback(ConstructDestructCallback *callback);
 private:
     ShowConstructDestruct();
     friend ShowConstructDestruct* getShowConstructDestruct();

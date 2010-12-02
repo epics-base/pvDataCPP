@@ -28,6 +28,7 @@ private:
     void *object;
     LinkedListVoidNode *before;
     LinkedListVoidNode *after;
+    LinkedListVoid *linkedListVoid;
     // do not implement the following
     LinkedListVoidNode(const LinkedListVoidNode&);
     LinkedListVoidNode & operator=(const LinkedListVoidNode&);

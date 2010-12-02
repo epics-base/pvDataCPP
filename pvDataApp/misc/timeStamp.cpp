@@ -24,8 +24,44 @@ int64 posixEpochAtEpicsEpoch = POSIX_TIME_AT_EPICS_EPOCH;
 
 TimeStamp::TimeStamp(int64 secondsPastEpoch,int32 nanoSeconds)
 : secondsPastEpoch(secondsPastEpoch),nanoSeconds(nanoSeconds)
-{}
+{
+    normalize();
+}
 
+void TimeStamp::normalize()
+{
+    if(nanoSeconds>=0 && nanoSeconds<nanoSecPerSec) return;
+    while(nanoSeconds>=nanoSecPerSec) {
+        nanoSeconds -= nanoSecPerSec;
+        secondsPastEpoch++;
+    }
+    while(nanoSeconds<0) {
+        nanoSeconds += nanoSecPerSec;
+        secondsPastEpoch--;
+    }
+}
+
+void TimeStamp::fromTime_t(const time_t & tt)
+{
+    epicsTimeStamp epicsTime;
+    epicsTimeFromTime_t(&epicsTime,tt);
+    secondsPastEpoch = epicsTime.secPastEpoch + posixEpochAtEpicsEpoch;
+    nanoSeconds = epicsTime.nsec;
+}
+
+void TimeStamp::toTime_t(time_t  &tt) const
+{
+    epicsTimeStamp epicsTime;
+    epicsTime.secPastEpoch = secondsPastEpoch-posixEpochAtEpicsEpoch;
+    epicsTime.nsec = nanoSeconds;
+    epicsTimeToTime_t(&tt,&epicsTime);
+}
+
+void TimeStamp::put(int64 milliseconds)
+{
+    secondsPastEpoch = milliseconds/1000;
+    nanoSeconds = (milliseconds%1000)*1000000;
+}
 
 void TimeStamp::getCurrent()
 {
@@ -143,13 +179,5 @@ int64 TimeStamp::getMilliseconds()
 {
     return secondsPastEpoch*1000 + nanoSeconds/1000000;
 }
-
-void TimeStamp::put(int64 milliseconds)
-{
-    secondsPastEpoch = milliseconds/1000;
-    nanoSeconds = (milliseconds%1000)*1000000;
-}
-
-  
 
 }}
