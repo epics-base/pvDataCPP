@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS pvDataCPP<br />
 Overview<br />
-2010.12.02</h1>
+2010.12.03</h1>
 
 <p>TODO</p>
 <ul>
@@ -137,1325 +137,159 @@ appear under pvDataApp:</p>
 </dl>
 <hr />
 
-<h2 style="text-align: center">Namespace, Typedefs, and Memory Management</h2>
+<h2 style="text-align: center">PVData Meta Language</h2>
 <hr />
 
-<h3 style="text-align: center">Namespace</h3>
+<p>This section describes a meta language for describing pvData. Currently
+there are no plans for any software, e.g. a parser, for the meta language. It
+is only meant for documentation.</p>
 
-<p>All include and definition files in project pvDataCPP appear in namespace:
-</p>
-<pre>namespace epics { namespace pvData {
-     // ...
-}}</pre>
+<h3>Definition</h3>
 
-<h3 style="text-align: center">typedefs</h3>
+<p>PVData supports structured data. All data appears as a top level
+structure. A structure has an ordered set of fields where each field has a
+<span style="font-family: courier;">fieldDef</span> defined as follows:</p>
+<pre>type fieldName = value // comment</pre>
 
-<p>Directory misc has an include file pvTypes.h:</p>
-<pre>typedef signed char int8;
-typedef short       int16;
-typedef int         int32;
-typedef long long   int64;
-typedef unsigned int uint32;
-typedef unsigned long long uint64;
+<p>where <span style="font-family: courier;">= value</span> is optional and
+<span style="font-family: courier;">//</span> indicates the the rest of the
+line is a comment. </p>
 
-typedef std::string String;
-typedef std::string * StringBuilder;
-typedef String* StringArray;</pre>
-
-<p>The integer typedefs provide the definitions for various sizes of integer
-values. The relationship between these definitions and the ScalarType
-description is:</p>
+<p>type is one of the following:</p>
 <dl>
-  <dt style="font-family: courier;">pvBoolean</dt>
-    <dd>bool</dd>
-  <dt style="font-family: courier;">pvByte</dt>
-    <dd>int8</dd>
-  <dt style="font-family: courier;">pvShort</dt>
-    <dd>int16</dd>
-  <dt style="font-family: courier;">pvInt</dt>
-    <dd>int32</dd>
-  <dt style="font-family: courier;">pvLong</dt>
-    <dd>int64</dd>
-  <dt style="font-family: courier;">pvString</dt>
-    <dd>String</dd>
-</dl>
-
-<p>It is hoped that all modern C++ compilers will properly handle the integer
-typedefs but if not than there is a good chance that it can be supported by
-changes to pvInterspect.h.</p>
-
-<p>std::string is used to implement pvString. This works because std::string
-implement COW (Copy On Write) semantics. Thus once created a String can be
-treated like an immutable object, which is what pvData require.</p>
-
-<p>The remaining definitions are:</p>
-<dl>
-  <dt style="font-family: courier;">StringBuilder</dt>
-    <dd>This acts like the java StringBuilder when is is passed as an
-      argument to a function.</dd>
-  <dt style="font-family: courier;">StringArray</dt>
-    <dd>This is an array with each element being a String.</dd>
-</dl>
-
-<p>File pvInterspect.h, which is described in the next section has the
-typedefs: </p>
-<pre>typedef Field const * FieldConstPtr;
-typedef FieldConstPtr * FieldConstPtrArray;
-typedef Scalar const * ScalarConstPtr;
-typedef ScalarArray const * ScalarArrayConstPtr;
-typedef Structure const * StructureConstPtr;
-typedef StructureArray const * StructureArrayConstPtr;</pre>
-
-<p>These are definitions for introspection objects. All introspecton objects
-are immutable and always accessed via pointers.</p>
-
-<p>File pvData.h, which is also described in the next section has the
-typedefs: </p>
-<pre>typedef std::map&lt;String,PVScalar * &gt; PVScalarMap;
-typedef PVScalarMap::const_iterator PVScalarMapIter;
-typedef PVStructure * PVStructurePtr;
-typedef PVStructurePtr* PVStructurePtrArray;
-typedef PVField* PVFieldPtr;
-typedef PVFieldPtr * PVFieldPtrArray;
-typedef bool * BooleanArray;
-typedef int8 * ByteArray;
-typedef int16 * ShortArray;
-typedef int32 * IntArray;
-typedef int64 * LongArray;
-typedef float * FloatArray;
-typedef double * DoubleArray;
-typedef String * StringArray;</pre>
-
-<p>where</p>
-<dl>
-  <dt style="font-family: courier;">PVScalarMap and PVScalarMapIter</dt>
-    <dd>A map and iterator that maps field names to PVScalars.</dd>
-  <dt style="font-family: courier;">PVStructurePtr</dt>
-    <dd>A pointer to a PVStructure.</dd>
-  <dt style="font-family: courier;">PVStructurePtrArray</dt>
-    <dd>A pointer to PVStructurePtr[], e. g. an array of pointers to a
-      PVStructure.</dd>
-  <dt style="font-family: courier;">PVFieldPtr</dt>
-    <dd>A pointer to a PVField</dd>
-  <dt style="font-family: courier;">PVFieldPtrArray</dt>
-    <dd>A pointer to a PVFieldPtr[], e. g. an array of pointers to a
-    PVField.</dd>
-  <dt style="font-family: courier;">BooleanArray, ByteArray, ...,
-  StringArray</dt>
-    <dd>An array of the specified type NOT a pointer to the type.</dd>
-</dl>
-
-<h3 style="text-align: center">Memory Managemment</h3>
-
-<h4>NoDefaultMethods</h4>
-
-<p>Any class that does not allow the compiler to generate default methods can
-privately extend the following class which is defined in file
-noDefaultMethods.h:</p>
-<pre>class NoDefaultMethods {
-protected:
-    // allow by derived objects
-    NoDefaultMethods(){};
-    ~NoDefaultMethods(){}
-private:
-    // do not implment
-    NoDefaultMethods(const NoDefaultMethods&amp;);
-    NoDefaultMethods &amp; operator=(const NoDefaultMethods &amp;);
-};</pre>
-
-<h3>PVData introspection objects</h3>
-
-<p>Introspection objects are meant to be shared. The constructors and
-destructors are all private so that an introspection object can only be
-created via a call to one of the FieldCreate methods described below. The
-introspection implementation, together with AbstractPVField keeps reference
-counts and automatically deletes objects when the reference count goes to 0.
-Code that uses introspection objects always accesses introspection objects
-via pointers never via references or direct access to the object. When a
-PVData data object is destroyed then pointers to the introspection objects
-associated with the data object are no longer valid.</p>
-
-<h3>PVData data objects</h3>
-
-<p>All PVData data objects must publically extend AbstractPVField, which does
-not allow default methods but does have a virtual destructor. It is expected
-that each data object is "owned" by some entity. For example a pvIOC (not
-implemented) database will own all records and thus all PVData data objects
-in the database. It is the ONLY entity that will create and destroy the data
-objects. All other code only receives pointers to the data objects. Before a
-record is deleted any code that is connected to a record is notified before
-the record is deleted. After deletion all pointers to data in the record are
-invalid. Similarly pvAccess creates and destroys PVData objects and notifies
-clients before destroying PVData data objects.</p>
-
-<h3>Other code in this project</h3>
-
-<p>If a class is pure data, e. g. TimeStamp, then it acts list like a
-primitive object.</p>
-
-<p>Other clases privately extend NoDefaultClasses and are not normally meant
-to be extended. Thus they can only be created via "new" and must be destroyed
-via "delete". These classes normally implement the static method:</p>
-<pre>    static ConstructDestructCallback *getConstructDestructCallback();</pre>
-
-<p>This provides access to how many objects have been constructed and
-destructed. This can be used to monitor memory usage.</p>
-<pre></pre>
-<pre> </pre>
-<hr />
-
-<h2 style="text-align: center">Miscellanous Classes</h2>
-<hr />
-
-<h3 style="text-align: center">Overview</h3>
-
-<p>This package provides utility code:</p>
-<dl>
-  <dt style="font-family: courier;">bitSet.h</dt>
-    <dd>An implementation of BitSet that can be serialized.</dd>
-  <dt style="font-family: courier;">byteBuffer.h</dt>
-    <dd>Used to serialize objects.</dd>
-  <dt style="font-family: courier;">event.h</dt>
-    <dd>Signal and wait for an event.</dd>
-  <dt style="font-family: courier;">exception.h</dt>
-    <dd>Exception with stack trace.</dd>
-  <dt style="font-family: courier;">executor.h</dt>
-    <dd>Provides a thread for executing commands.</dd>
-  <dt style="font-family: courier;">linkedList.h</dt>
-    <dd>A double linked list facility that requires the user to allocate a
-      node. It is more efficient that std::list and does not require the
-      implementation to allocate storage for the nodes.</dd>
-  <dt style="font-family: courier;">lock.h</dt>
-    <dd>Support for locking and unlocking.</dd>
-  <dt style="font-family: courier;">messageQueue.h</dt>
-    <dd>Support for queuing messages to give to requesters.</dd>
-  <dt style="font-family: courier;">noDefaultMethods.h</dt>
-    <dd>When privately extended prevents compiler from implementing default
-      methods.</dd>
-  <dt style="font-family: courier;">pvType.h</dt>
-    <dd>Provides architecture independent definitions for integers and
-    String.</dd>
-  <dt style="font-family: courier;">requester.h</dt>
-    <dd>Allows messages to be sent to a requester.</dd>
-  <dt style="font-family: courier;">serialize.h</dt>
-    <dd>Support for serializing objects.</dd>
-  <dt style="font-family: courier;">showConstructDestruct.h</dt>
-    <dd>Provides support monitoring memory usage for objects of a class.</dd>
-  <dt style="font-family: courier;">status.h</dt>
-    <dd>A way to pass status information to a client.</dd>
-  <dt style="font-family: courier;">thread.h</dt>
-    <dd>Provides thread support.</dd>
-  <dt style="font-family: courier;">timeFunction.h</dt>
-    <dd>Time how long a function call requires.</dd>
-  <dt style="font-family: courier;">timer.h</dt>
-    <dd>An implementation of Timer that does not require an object to be
-      created for each timer request.</dd>
-  <dt style="font-family: courier;">timeStamp.h</dt>
-    <dd>Usefull methods for a timeStamp.</dd>
-  <dt style="font-family: courier;">queue.h</dt>
-    <dd>A queue implementation that allows the latest queue element to
-      continue to be used when no free element is available.</dd>
-</dl>
-
-<h3 style="text-align: center;">BitSet</h3>
-
-<p>This is adapted from the java.util.BitSet. bitSet.h is:</p>
-<pre>class BitSet /*: public Serializable*/ {
-public:
-    BitSet();
-    BitSet(uint32 nbits);
-    virtual ~BitSet();
-    void flip(uint32 bitIndex);
-    void set(uint32 bitIndex);
-    void clear(uint32 bitIndex);
-    void set(uint32 bitIndex, bool value);
-    bool get(uint32 bitIndex) const;
-    void clear();
-    int32 nextSetBit(uint32 fromIndex) const;
-    int32 nextClearBit(uint32 fromIndex) const;
-    bool isEmpty() const;
-    uint32 cardinality() const;
-    BitSet&amp; operator&amp;=(const BitSet&amp; set);
-    BitSet&amp; operator|=(const BitSet&amp; set);
-    BitSet&amp; operator^=(const BitSet&amp; set);
-    BitSet&amp; operator-=(const BitSet&amp; set);
-    BitSet&amp; operator=(const BitSet &amp;set);
-    void or_and(const BitSet&amp; set1, const BitSet&amp; set2);
-    bool operator==(const BitSet &amp;set) const;
-    bool operator!=(const BitSet &amp;set) const;
-    void toString(StringBuilder buffer);
-    void toString(StringBuilder buffer, int indentLevel) const;
-private:
-};</pre>
-
-<p>where</p>
-<dl>
-  <dt style="font-family: courier;">BitSet()</dt>
-    <dd>Creates a bitSet of initial size 64 bits. All bits initially
-    false.</dd>
-  <dt style="font-family: courier;">BitSet(uint32 nbits)</dt>
-    <dd>Creates a bitSet with the initial of the specified number of bits.
-      All bits initially false.</dd>
-  <dt style="font-family: courier;">~BitSet()</dt>
-    <dd>Destructor.</dd>
-  <dt style="font-family: courier;">flip(uint32 bitIndex)</dt>
-    <dd>Flip the specified bit.</dd>
-  <dt style="font-family: courier;">set(uint32 bitIndex)</dt>
-    <dd>Set the specified bit true.</dd>
-  <dt style="font-family: courier;">clear(uint32 bitIndex)</dt>
-    <dd>Set the specified bit false.</dd>
-  <dt style="font-family: courier;">set(uint32 bitIndex, bool value)</dt>
-    <dd>Set the specified bit to value.</dd>
-  <dt style="font-family: courier;">get(uint32 bitIndex)</dt>
-    <dd>Return the state of the specified bit.</dd>
-  <dt style="font-family: courier;">clear()</dt>
-    <dd>Set all bits to false.</dd>
-  <dt style="font-family: courier;">nextSetBit(uint32 fromIndex)</dt>
-    <dd>Get the index of the next true bit beginning with the specified
-    bit.</dd>
-  <dt style="font-family: courier;">nextClearBit(uint32 fromIndex)</dt>
-    <dd>Get the index of the next false bit beginning with the specified
-    bit.</dd>
-  <dt style="font-family: courier;">isEmpty()</dt>
-    <dd>Return (false,true) if (at least one bit true, all bits are
-    false)</dd>
-  <dt style="font-family: courier;">cardinality()</dt>
-    <dd>Return the number of true bits.</dd>
-  <dt style="font-family: courier;">operator&amp;=(const BitSet&amp; set)</dt>
-    <dd>Performs a logical and of this target bit set with the argument bit
-      set. This bit set is modified so that each bit in it has the value true
-      if and only if it both initially had the value true and the
-      corresponding bit in the bit set argument also had the value.</dd>
-  <dt style="font-family: courier;">operator|=(const BitSet&amp; set)</dt>
-    <dd>Performs a logical or of this target bit set with the argument bit
-      set.</dd>
-  <dt style="font-family: courier;">operator^=(const BitSet&amp; set)</dt>
-    <dd>Performs a logical exclusive or of this target bit set with the
-      argument bit set.</dd>
-  <dt style="font-family: courier;">operator-=(const BitSet&amp; set)</dt>
-    <dd><p>Clears all of the bits in this bitSet whose corresponding bit is
-      set in the specified bitSet.</p>
+  <dt>scalar</dt>
+    <dd>A scalar field can be any of the following: 
+      <dl>
+        <dt style="font-family: courier;">boolean</dt>
+          <dd>Has the value<span style="font-family: courier;">true</span> or
+            <span style="font-family: courier;">false</span></dd>
+        <dt style="font-family: courier;">byte</dt>
+          <dd>An 8 bit signed integer.</dd>
+        <dt style="font-family: courier;">short</dt>
+          <dd>An 16 bit signed integer.</dd>
+        <dt style="font-family: courier;">int</dt>
+          <dd>An 32 bit signed integer.</dd>
+        <dt style="font-family: courier;">long</dt>
+          <dd>An 64 bit signed integer.</dd>
+        <dt style="font-family: courier;">float</dt>
+          <dd>A IEEE float.</dd>
+        <dt style="font-family: courier;">double</dt>
+          <dd>A IEEE double.</dd>
+        <dt style="font-family: courier;">string</dt>
+          <dd>An immutable string.</dd>
+      </dl>
     </dd>
-  <dt style="font-family: courier;">operator=(const BitSet &amp;set)</dt>
-    <dd>Assignment operator.</dd>
-  <dt style="font-family: courier;">or_and(const BitSet&amp; set1, const
-  BitSet&amp; set2)</dt>
-    <dd>Perform AND operation on set1 and set2, and then OR this bitSet with
-      the result.</dd>
-  <dt style="font-family: courier;">operator==(const BitSet &amp;set)</dt>
-    <dd>Does this bitSet have the same values as the argument.</dd>
-  <dt style="font-family: courier;">operator!=(const BitSet &amp;set)</dt>
-    <dd>Is this bitSet different than the argument.</dd>
-  <dt style="font-family: courier;">toString(StringBuilder buffer)</dt>
-    <dd>Show the current values of the bitSet.</dd>
-  <dt style="font-family: courier;">toString(StringBuilder buffer, int
-  indentLevel)</dt>
-    <dd>Show the current values of the bitSet.</dd>
-</dl>
-
-<h3 style="text-align: center;">ByteBuffer</h3>
-
-<p>A ByteBuffer is used to serialize and deserialize primitive data. File
-byteBuffer.h is:</p>
-<pre>class ByteBuffer {
-public:
-    ByteBuffer(int size = 32, int byteOrder = EPICS_BYTE_ORDER);
-    ~ByteBuffer();
-    ByteBuffer* clear();
-    ByteBuffer* flip();
-    ByteBuffer* rewind();
-    bool getBoolean();
-    int8 getByte();
-    int16 getShort();
-    int32 getInt();
-    int64 getLong();
-    float getFloat();
-    double getDouble();
-    void get(char* dst, int offset, int count);
-    ByteBuffer* put(const char* src, int offset, int count);
-    ByteBuffer* putBoolean(bool value);
-    ByteBuffer* putByte(int8 value);
-    ByteBuffer* putShort(int16 value);
-    ByteBuffer* putInt(int32 value);
-    ByteBuffer* putLong(int64 value);
-    ByteBuffer* putFloat(float value);
-    ByteBuffer* putDouble(double value);
-    inline int getSize() const;
-    inline int getArrayOffset() const;
-    inline int getPosition() const;
-    inline int getLimit() const;
-    inline int getRemaining() const;
-    inline int getByteOrder() const;
-    inline const char* getArray() const;
-    // TODO must define arrays
-private:
-};</pre>
-
-<p>x</p>
-
-<h3 style="text-align: center;">Event</h3>
-
-<p>This class provides coordinates activity between threads. One thread can
-wait for the event and the other signals the event.</p>
-<pre>class Event : private NoDefaultMethods {
-public:
-    Event(bool full);
-    ~Event();
-    static ConstructDestructCallback *getConstructDestructCallback();
-    void signal();
-    bool wait (); /* blocks until full */
-    bool wait ( double timeOut ); /* false if empty at time out */
-    bool tryWait (); /* false if empty */
-private:
-    epicsEventId id;
-};</pre>
-
-<p>where</p>
-<dl>
-  <dt style="font-family: courier;">Event</dt>
-    <dd>The constructor. The initial value can be full or empty. The normal
-      first state is empty.</dd>
-  <dt style="font-family: courier;">getConstructDestructCallback</dt>
-    <dd>Provides access to number of events that have been created and
-      destroyed.</dd>
-  <dt style="font-family: courier;">signal</dt>
-    <dd>The event becomes full. The current or next wait will complete.</dd>
-  <dt style="font-family: courier;">wait</dt>
-    <dd>Wait until event is full or until timeout. The return value is
-      (false,true) if the wait completed because event (was not, was) full. A
-      false value normally means that that a timeout occured. It is also
-      returned if an error occurs or because the event is being deleted.</dd>
-  <dt style="font-family: courier;">tryWait</dt>
-    <dd>returns (false,true) if the event is (empty,full)</dd>
-</dl>
-
-<h3 style="text-align: center;">Exception</h3>
-
-<p>File epicsException.h describes:</p>
-<pre>class BaseException : public std::exception {
-public:
-    BaseException(const char* message, const char* file,
-        int line, std::exception* cause = 0);
-    virtual ~BaseException();
-    virtual const char* what();
-    void toString(std::string&amp; str, unsigned int depth = 0);
-    static inline void getStackTrace(
-         std::string* trace, unsigned int skip_frames = 0, unsigned int max_frames = 63)
-private:
-     // ...
-}</pre>
-
-<p>x</p>
-
-<h3 style="text-align: center;">Executor</h3>
-
-<p>An Executor is a thread that can execute commands. The user can request
-that a single command be executed.</p>
-<pre>class ExecutorNode;
-
-class Command {
-public:
-    virtual void command() = 0;
-};
-
-class Executor : private NoDefaultMethods {
-public:
-    Executor(String threadName,ThreadPriority priority);
-    ~Executor();
-    static ConstructDestructCallback *getConstructDestructCallback();
-    ExecutorNode * createNode(Command *command);
-    void execute(ExecutorNode *node);
-private:
-    class ExecutorPvt *pImpl;
-};</pre>
-
-<p>Command is a class that must be implemented by the code that calls
-execute. It contains the single virtual method command, which is the command
-to execute.</p>
-
-<p>Executor has the methods:</p>
-<dl>
-  <dt style="font-family: courier;">Executor</dt>
-    <dd>The constructor. A thread name and priority must be specified.</dd>
-  <dt style="font-family: courier;">~Executor</dt>
-    <dd>The destructor. If any commands remain in the execute list they are
-      not called. All ExecutorNodes that have been created are deleted.</dd>
-  <dt style="font-family: courier;">getConstructDestructCallback</dt>
-    <dd>Provides access to the number of executors that been created and
-      destroyed.</dd>
-  <dt style="font-family: courier;">createNode</dt>
-    <dd>Create a ExecutorNode that can be passed to execute.</dd>
-  <dt style="font-family: courier;">execute</dt>
-    <dd>Request that command be executed. If it is already on the run list
-      nothing is done.</dd>
-</dl>
-
-<h3 style="text-align: center;">Linked List</h3>
-
-<p>LinkedList implements a double linked list that requires a user to
-allocate the nodes. It is more efficent that std::list. linkedList.h is
-template that is both a complete description and definition. It uses
-linkedListVoid for method definitions. linkedListVoid is not\ meant for use
-except via linkedList. Note, however, that linkedListVoid does have both a
-node and a list static method getConstructDestructCallback, which allows
-access to how many nodes and lists have been created and destroyed. </p>
-
-<p>A node can only be on one list at a time but can be put, at different
-times, on different lists as long as they all hold the same type of objects.
-An exception is thrown if an attempt is made to put a node on a list if the
-node is already on a list. </p>
-<pre>template &lt;typename T&gt;
-class LinkedList;
-
-template &lt;typename T&gt;
-class LinkedListNode : private LinkedListVoidNode {
-public:
-    LinkedListNode(T *object);
-    ~LinkedListNode();
-    T *getObject();
-    bool isOnList();
-};
-template &lt;typename T&gt;
-class LinkedList : private LinkedListVoid {
-public:
-    LinkedList();
-    ~LinkedList();
-    int getLength();
-    void addTail(LinkedListNode&lt;T&gt; *node);
-    void addHead(LinkedListNode&lt;T&gt; *node);
-    void insertAfter(LinkedListNode&lt;T&gt; *node,
-        LinkedListNode&lt;T&gt; *addNode);
-    void insertBefore(LinkedListNode&lt;T&gt; *node,
-        LinkedListNode&lt;T&gt; *addNode);
-    LinkedListNode&lt;T&gt; *removeTail();
-    LinkedListNode&lt;T&gt; *removeHead();
-    void remove(LinkedListNode&lt;T&gt; *listNode);
-    void remove(T *object);
-    LinkedListNode&lt;T&gt; *getHead();
-    LinkedListNode&lt;T&gt; *getTail();
-    LinkedListNode&lt;T&gt; *getNext(LinkedListNode&lt;T&gt; *node);
-    LinkedListNode&lt;T&gt; *getPrev(LinkedListNode&lt;T&gt; *node;
-    bool isEmpty();
-    bool contains(T *object);
-};</pre>
-
-<p>LinkedListNode has the methods:</p>
-<dl>
-  <dt style="font-family: courier;">LinkedListNode</dt>
-    <dd>The constructor. The object must be specified.</dd>
-  <dt style="font-family: courier;">~LinkedListNode</dt>
-    <dd>The destructor.</dd>
-  <dt style="font-family: courier;">getObject</dt>
-    <dd>Returns the nobject.</dd>
-  <dt style="font-family: courier;">isOnList</dt>
-    <dd>returns (false,true) if the node (is not, is) on a list.</dd>
-</dl>
-
-<p>LinkedList has the methods:</p>
-<dl>
-  <dt style="font-family: courier;">LinkedList</dt>
-    <dd>The constructor.</dd>
-  <dt style="font-family: courier;">~LinkedList</dt>
-    <dd>The destructor.</dd>
-  <dt style="font-family: courier;">getLength</dt>
-    <dd>Get the numbet of nodes currently on the list.</dd>
-  <dt style="font-family: courier;">addTail</dt>
-    <dd>Add a node to the end of the list. An exception is thrown if the node
-      is already on a list.</dd>
-  <dt style="font-family: courier;">addHead</dt>
-    <dd>Add a node to the beginning of the list. An exception is thrown if
-      the node is already on a list.</dd>
-  <dt style="font-family: courier;">insertAfter</dt>
-    <dd>Insert addNode after node. An exception is thrown if the addNode is
-      already on a list or if node is not on this list..</dd>
-  <dt style="font-family: courier;">insertBefore</dt>
-    <dd>Insert addNode before node. An exception is thrown if the addNode is
-      already on a list or if node is not on this list.</dd>
-  <dt style="font-family: courier;">removeTail</dt>
-    <dd>Remove and return the last node. Null is returned if the list is
-      empty.</dd>
-  <dt style="font-family: courier;">removeHead</dt>
-    <dd>Remove and return the first node. Null is returned if the list is
-      empty.</dd>
-  <dt style="font-family: courier;">remove</dt>
-    <dd>Remove the specified node or object. An exception is thrown if the
-      node is not on a list.</dd>
-  <dt style="font-family: courier;">getHead</dt>
-    <dd>Get the first list node. Null is returned if the list is empty.</dd>
-  <dt style="font-family: courier;">getTail</dt>
-    <dd>Get the last list node. Null is returned if the list is empty.</dd>
-  <dt style="font-family: courier;">getNext</dt>
-    <dd>Get the node after node. An exception is thrown if node is not on
-      this list. Null is returned if the is node is the last node on the
-    list.</dd>
-  <dt style="font-family: courier;">getPrev</dt>
-    <dd>Get the node before node. An exception is thrown if node is not on
-      this list. Null is returned if the is node is the first node on the
-      list.</dd>
-  <dt style="font-family: courier;">isEmpty</dt>
-    <dd>Is the list empty.</dd>
-  <dt style="font-family: courier;">contains</dt>
-    <dd>Does the list contain the specified object.</dd>
-</dl>
-
-<h3 style="text-align: center;">Lock and Mutex</h3>
-
-<p>lock.h contains:</p>
-<pre>class Mutex  {
-public:
-    Mutex();
-    ~Mutex();
-    void lock();
-    void unlock();
-private:
-};
-
-
-class Lock : private NoDefaultMethods {
-public:
-    explicit Lock(Mutex *pm);
-    ~Lock();
-private:
-};</pre>
-
-<p>This is a complete description and definition of lock and mutex. These
-make it easy to have a lock that is as easy to use as Java synchronize. To
-protect some object just create a Mutex for the object and then in any method
-to be synchronized just have code like:</p>
-<pre>class SomeClass {
-private
-    Mutex mutex;
-...
-public
-    SomeClass() : mutex(Mutex()) {}
-...
-    void method()
-    {
-        Lock xx(&amp;mutex);
-        ...
-    }</pre>
-
-<p>The method will take the lock when xx is created and release the lock when
-the current code block completes.</p>
-
-<p>Another example of Lock is initialization code that must initialize only
-once. This can be implemented as follows:</p>
-<pre>    static void init(void) {
-        static Mutex mutex = Mutex();
-        Lock xx(&amp;mutex);
-        if(alreadyInitialized) return;
-        // initialization
-    }</pre>
-
-<h3 style="text-align: center;">Message Queue</h3>
-
-<h4>Definitions</h4>
-<pre>NOT IMPLEMENTED</pre>
-
-<h4>MessageQueue</h4>
-
-<p>This is for use by code that wants to handle messages without blocking
-higher priority threads.</p>
-
-<p>A messageNode is a class with two public data members:</p>
-<dl>
-  <dt style="font-family: courier;">message</dt>
-    <dd>The message.</dd>
-  <dt style="font-family: courier;">messageType</dt>
-    <dd>The message type.</dd>
-</dl>
-
-<p>A messageQueue is an interface with methods:</p>
-<dl>
-  <dt style="font-family: courier;">put</dt>
-    <dd>Put a new message into the queue. False is returned if the queue was
-      full and true otherwise.</dd>
-  <dt style="font-family: courier;">isEmpty</dt>
-    <dd>Is the queue empty?</dd>
-  <dt style="font-family: courier;">isFull</dt>
-    <dd>Is the queue full?</dd>
-  <dt style="font-family: courier;">replaceFirst</dt>
-    <dd>Replace the oldest member in the queue.</dd>
-  <dt style="font-family: courier;">replaceLast</dt>
-    <dd>Replace the newest member in the queue.</dd>
-  <dt style="font-family: courier;">getClearOverrun</dt>
-    <dd>Get the number of times replaceFirst or replaceLast have been called
-      since the last call to getClearOverrun. The internal counter is reset
-      to 0.</dd>
-</dl>
-
-<p>MessageQueueFactory provides the public method:</p>
-<dl>
-  <dt style="font-family: courier;">create</dt>
-    <dd>Create a MessageQueue and return the interface.</dd>
-</dl>
-
-<p>An example is:</p>
-<pre>    private ExecutorNode executorNode;
-    ...
-      executorNode = executor.createNode(this);
-    ...
-
-    public void message(final String message, MessageType messageType) {
-        boolean execute = false;
-        synchronized(messageQueue) {
-            if(messageQueue.isEmpty()) execute = true;
-            if(messageQueue.isFull()) {
-                messageQueue.replaceLast(message, messageType);
-            } else {
-                messageQueue.put(message, messageType);
-            }
-        }
-        if(syncExec) {
-            iocExecutor.execute(executorNode);
-        }
-    }
-    ...
-    public run() { // handle messages
-        while(true) {
-            String message = null;
-            int numOverrun = 0;
-            synchronized(messageQueue) {
-                MessageNode messageNode = messageQueue.get();
-                numOverrun = messageQueue.getClearOverrun();
-                if(messageNode==null &amp;&amp; numOverrun==0) break;
-                message = messageNode.message;
-            }
-            if(numOverrun&gt;0) {
-                System.out.printf(String.format("%n%d missed messages&amp;n", numOverrun));
-            }
-            if(message!=null) {
-               System.out.printf(String.format("%s%n",message));
-            }
-        }
-    }</pre>
-
-<h3 style="text-align: center;">NoDefaultMethods</h3>
-
-<p>If a class privately extends this class then the compiler can not create
-any of the following: default constructor, default copy constructror, or
-default assignment contructor.</p>
-<pre>/* This is based on Item 6 of
- * Effective C++, Third Edition, Scott Meyers
- */
-    class NoDefaultMethods {
-    protected:
-    // allow by derived objects
-    NoDefaultMethods(){};
-    ~NoDefaultMethods(){}
-    private:
-    // do not implment
-    NoDefaultMethods(const NoDefaultMethods&amp;);
-    NoDefaultMethods &amp; operator=(const NoDefaultMethods &amp;);
-    };</pre>
-
-<h3 style="text-align: center;">pvType</h3>
-
-<p>This provides typedefs for integers and String.</p>
-<pre>typedef signed char int8;
-typedef short       int16;
-typedef int         int32;
-typedef long long   int64;
-typedef unsigned int uint32;
-typedef unsigned long long uint64;
-
-typedef std::string String;
-typedef std::string * StringBuilder;
-typedef String* StringArray;</pre>
-
-<p>where</p>
-<dl>
-  <dt style="font-family: courier;">int8,...,int64</dt>
-    <dd>Hopefully all modern C++ compilers will support these definitions. If
-      not then only pvType.h will require changes rather than user code.</dd>
-  <dt style="font-family: courier;">String</dt>
-    <dd>Since std::string implements copy on write semantics, it can be used
-      for support for immutable strings. This is what pvData supports. </dd>
-  <dt style="font-family: courier;">StringBuilder</dt>
-    <dd>Acts like the Java StringBuilder class.</dd>
-  <dt style="font-family: courier;">StringArray</dt>
-    <dd>An array of Strings.</dd>
-</dl>
-
-<h3 style="text-align: center;">Requester</h3>
-
-<p>A PVField extends Requester. Requester is present so that when database
-errors are found there is someplace to send a message.</p>
-<pre>enum MessageType {
-   infoMessage,warningMessage,errorMessage,fatalErrorMessage
-};
-
-extern StringArray messageTypeName;
-
-class Requester {
-public:
-    virtual String getRequesterName() = 0;
-    virtual void message(String message,MessageType messageType) = 0;
-};</pre>
-
-<p>where</p>
-<dl>
-  <dt style="font-family: courier;"></dt>
-  <dt style="font-family: courier;">MessageType</dt>
-    <dd>Type of message.</dd>
-  <dt style="font-family: courier;">messageTypeName</dt>
-    <dd>An array of strings of the message type names, i.e.
-      String("info"),String("warning"),String("error"),String("fatalError").</dd>
-  <dt style="font-family: courier;">getRequesterName</dt>
-    <dd>Returns the requester name.</dd>
-  <dt style="font-family: courier;">message</dt>
-    <dd>Gives a message to the requester.</dd>
-</dl>
-
-<h3 style="text-align: center">Serialize</h3>
-
-<p>This is a helper class for serialization, which is required for sending
-and receiving pvData over the nerwork.</p>
-<pre>class SerializeHelper : public NoDefaultMethods {
-public:
-    static void writeSize(int s, ByteBuffer* buffer,
-        SerializableControl* flusher);
-    static int readSize(ByteBuffer* buffer,
-        DeserializableControl* control);
-    static void serializeString(const String&amp; value,
-        ByteBuffer* buffer,SerializableControl* flusher);
-    static void serializeSubstring(const String&amp; value, int offset,
-        int count, ByteBuffer* buffer,
-        SerializableControl* flusher);
-    static String deserializeString(ByteBuffer* buffer,
-        DeserializableControl* control);
-private:
-};
-
-class SerializableControl {
-public:
-    virtual void flushSerializeBuffer() =0;
-    virtual void ensureBuffer(int size) =0;
-};
-class DeserializableControl {
-
-public:
-    virtual void ensureData(int size) =0;
-};
-class Serializable {
-public:
-    virtual void serialize(ByteBuffer *buffer,
-        SerializableControl *flusher) = 0;
-    virtual void deserialize(ByteBuffer *buffer,
-        DeserializableControl *flusher) = 0;
-};
-class BitSetSerializable {
-public:
-    virtual void serialize(ByteBuffer *buffer,
-        SerializableControl *flusher,BitSet *bitSet) = 0;
-    virtual void deserialize(ByteBuffer *buffer,
-        DeserializableControl *flusher,BitSet *bitSet) = 0;
-};
-class SerializableArray : public Serializable {
-public:
-    virtual void serialize(ByteBuffer *buffer,
-         SerializableControl *flusher, int offset, int count) = 0;
-};</pre>
-
-<p>where</p>
-<dl>
-  <dt style="font-family: courier;">writeSize</dt>
-    <dd>Serialize the size.</dd>
-  <dt style="font-family: courier;">readSize</dt>
-    <dd>Deserialize the size.</dd>
-  <dt style="font-family: courier;">serializeString</dt>
-    <dd>Serialize a String.</dd>
-  <dt style="font-family: courier;">serializeSubstring</dt>
-    <dd>Serialize a substring.</dd>
-  <dt style="font-family: courier;">deserializeString</dt>
-    <dd>Deserialize a string.</dd>
-</dl>
-
-<p>The following interfaces are called by pvAccess for transporting data over
-the network. The abstract and base classes ensure that these methods are
-properly implemented. </p>
-<pre>x</pre>
-
-<p>x</p>
-
-<h3 style="text-align: center;">Show Constructors and Destructors</h3>
-
-<p>This is a facility that allows a class to report how many objects of that
-class have been created and destroyed. This can help find memory leaks.</p>
-<pre>typedef int64 (*getTotal)();
-
-class ConstructDestructCallback : private NoDefaultMethods {
-public:
-    ConstructDestructCallback(
-        String name,
-        getTotal construct,
-        getTotal destruct,
-        getTotal reference);
-    String getConstructName();
-    int64 getTotalConstruct();
-    int64 getTotalDestruct();
-    int64 getTotalReferenceCount();
-private:
-    ~ConstructDestructCallback();
-    String name;
-    getTotal construct;
-    getTotal destruct;
-    getTotal reference;
-};
-
-class ShowConstructDestruct : private NoDefaultMethods {
-public:
-    static void constuctDestructTotals(FILE *fd);
-    static void registerCallback(ConstructDestructCallback *callback);
-private:
-    ShowConstructDestruct();
-    friend ShowConstructDestruct* getShowConstructDestruct();
-};
-
-extern ShowConstructDestruct* getShowConstructDestruct();</pre>
-
-<p>ConstructDestructCallback is implemented by a class that keeps track of
-how many instances of the class has been created and how many destroyed. The
-clas must implement this class and register it with ShowConstructDestruct. To
-see an example of how this is implemented look at misc/thread.cpp.</p>
-
-<p>Classes that implement this class also include a static method that makes
-ConstructDestructCallback available to code that wants look at the memory
-usage of a particular class.</p>
-
-<p>ShowConstructDestruct is the class that reports the memory uasge of all
-registered classes. It can be called as folows:</p>
-<pre>   getShowConstructDestruct()-&gt;constuctDestructTotals(fd);</pre>
-
-<h3 style="text-align: center">Status</h3>
-
-<p>Status provides a way to pass status back to client code. It is new and
-not currently used by pvData but may be in the future. It is used by code
-that uses pvData.</p>
-<pre>NOT IMPLEMENTED</pre>
-
-<p>The Status methods are:</p>
-<dl>
-  <dt style="font-family: courier;">StatusType</dt>
-    <dd>An enum for the status type.</dd>
-  <dt style="font-family: courier;">getType</dt>
-    <dd>Get the statusType.</dd>
-  <dt style="font-family: courier;">getMessage</dt>
-    <dd>Get a message explaining the error.</dd>
-  <dt style="font-family: courier;">getStackDump</dt>
-    <dd>Get a stack dump.</dd>
-</dl>
-
-<p>The StatusCreate methods are:</p>
-<dl>
-  <dt style="font-family: courier;">getStatusOK</dt>
-    <dd>Get a singleton that returns StatusType.OK and a null message and
-      stackDump.</dd>
-  <dt style="font-family: courier;">createStatus</dt>
-    <dd>Create a new Status.</dd>
-  <dt style="font-family: courier;">deserializeStatus</dt>
-    <dd>Use this method instead of Status.deserialize(), since this allows OK
-      status optimization.</dd>
-</dl>
-
-<h3 style="text-align: center;">Thread</h3>
-
-<h4>ThreadPriority</h4>
-<pre>enum ThreadPriority {
-    lowestPriority,
-    lowerPriority,
-    lowPriority,
-    middlePriority,
-    highPriority,
-    higherPriority,
-    highestPriority
-};
-
-class ThreadPriorityFunc {
-public:
-    static unsigned int const * const getEpicsPriorities();
-    static int getEpicsPriority(ThreadPriority threadPriority);
-};</pre>
-
-<h4>Thread</h4>
-<pre>class Runnable {
-public:
-    virtual void run() = 0;
-};
-
-class Thread;
-
-class Thread :  private NoDefaultMethods {
-public:
-    Thread(String name,ThreadPriority priority,Runnable *runnableReady);
-    ~Thread();
-    static ConstructDestructCallback *getConstructDestructCallback();
-    String getName();
-    ThreadPriority getPriority();
-    static void showThreads(StringBuilder buf);
-    static void sleep(double seconds);
-private:
-};</pre>
-
-<p>Runnable must be implement by code that wants to be run via a thread. It
-has one virtual method: run. Run is the code that is run as a thread. When
-run compeletes it can not be restarted. If code wants to delete a thread then
-it MUST arrange that the run returns before the thread can be deleted. An
-exception is thrown if run remains active when delete is called. </p>
-
-<p>Thread has the methods:</p>
-<dl>
-  <dt style="font-family: courier;">Thread</dt>
-    <dd>The constructor. A thread name and priority must be specified. The
-      run methods of runnable is executed. When the run methods returns the
-      thread will no longer be active but the client code must still delete
-      the thread.</dd>
-  <dt style="font-family: courier;">~Thread</dt>
-    <dd>The destructor. This is called as the result of: 
-      <pre>    delete pthread;</pre>
+  <dt>scalarArray</dt>
+    <dd>A scalarArray field is an array of any of the scalar types. 
+      <dl>
+        <dt style="font-family: courier;">boolean[]</dt>
+        <dt style="font-family: courier;">byte[]</dt>
+        <dt style="font-family: courier;">short[]</dt>
+        <dt style="font-family: courier;">int[]</dt>
+        <dt style="font-family: courier;">long[]</dt>
+        <dt style="font-family: courier;">float[]</dt>
+        <dt style="font-family: courier;">double[]</dt>
+        <dt style="font-family: courier;">string[]</dt>
+      </dl>
     </dd>
-  <dt style="font-family: courier;">getConstructDestructCallback</dt>
-    <dd>Provides access to the number of threads that been created and
-      destroyed.</dd>
-  <dt style="font-family: courier;">getName</dt>
-    <dd>Get the thread name.</dd>
-  <dt style="font-family: courier;">getPriority</dt>
-    <dd>Get the thread priority.</dd>
-  <dt style="font-family: courier;">showThreads</dt>
-    <dd>Get a String that has the name and priority of all currently
-      allocated threads.</dd>
-  <dt style="font-family: courier;">sleep</dt>
-    <dd>Make the current thread sleep for the specified number of
-    seconds.</dd>
+  <dt>structure</dt>
+    <dd>A structure field has the definition: 
+      <pre>     structure fieldName
+         fieldDef
+         ...
+      </pre>
+      or 
+      <pre>     structureName fieldName = {values}
+      </pre>
+      For <span style="font-family: courier;">structure fieldName</span> each
+      <span style="font-family: courier;">fieldDef</span> must have a unique
+      <span style="font-family: courier;">fieldName</span> within the <span
+      style="font-family: courier;">structure</span> For <span
+      style="font-family: courier;">structureName fieldName</span> the <span
+      style="font-family: courier;">structureName</span> must be the <span
+      style="font-family: courier;">fieldName</span> of a previously defined
+      top level <span style="font-family: courier;">structure</span> </dd>
+  <dt>structureArray</dt>
+    <dd>A structureArray field has the definition: 
+      <pre>     structure[] structureName fieldName = {values}
+      </pre>
+      where <span style="font-family: courier;">structureName</span> must be
+      <span style="font-family: courier;">fieldName</span> of a previously
+      defined top level <span style="font-family: courier;">structure</span>
+      Thus a structure array is an array where each element is a structure
+      but all elements have the same introspection interface. </dd>
 </dl>
 
-<h3 style="text-align: center;">Time Function Call</h3>
-
-<p>TimeFunction is a facility that measures the average number of seconds a
-function call requires. When timeCall is called, it calls function in a loop.
-It starts with a loop of one iteration. If the total elapsed time is less
-then .1 seconds it increases the number of iterrations by a factor of 10. It
-keeps repeating until the elapsed time is greater than .1 seconds. It returns
-the average number of seconds per call.</p>
-<pre>class TimeFunctionRequester {
-public:
-    virtual void function() = 0;
-};
-
-class TimeFunction : private NoDefaultMethods {
-public:
-    TimeFunction(TimeFunctionRequester *requester);
-    ~TimeFunction();
-    double timeCall();
-private:
-    TimeFunctionRequester *requester;
-};</pre>
-
-<p>TimeFunctionRequester must be implemented by code that wants to time how
-long a function takes. It has the single method:</p>
+<p>Each field can optionally have data values assigned to it. The definition
+of the data values depends on the type. For scalars the data value is
+whatever is valid for the type. </p>
 <dl>
-  <dt style="font-family: courier;">function</dt>
-    <dd>This is the function.</dd>
+  <dt style="font-family: courier;">boolean</dt>
+    <dd>The value must be <span style="font-family: courier;">true</span> or
+      <span style="font-family: courier;">false</span> </dd>
+  <dt style="font-family: courier;">byte,...long</dt>
+    <dd>Any valid integer or hex value, e.g. <span
+      style="font-family: courier;">3 0xff</span> are valid values</dd>
+  <dt style="font-family: courier;">float,double</dt>
+    <dd>Any valid integer or real e.g. <span style="font-family: courier;">3
+      3.0 3e0</span> are valid values</dd>
+  <dt style="font-family: courier;">string</dt>
+    <dd>The value can be an alphanumeric value or any set of characters
+      enclosed in <span style="font-family: courier;">""</span> Within quotes
+      a quote is expressed as <span style="font-family: courier;">\"</span>
+      Examples are <span style="font-family: courier;">aValue "a value" "a\"
+      xxx"</span> are valid values. </dd>
 </dl>
 
-<p>TimeFunction has the methods:</p>
-<dl>
-  <dt style="font-family: courier;">TimeFunction</dt>
-    <dd>Constructor.</dd>
-  <dt style="font-family: courier;">~TimeFunction</dt>
-    <dd>Destructor.</dd>
-  <dt style="font-family: courier;">timeCall</dt>
-    <dd>Time how long it takes to execute the function. It starts by calling
-      the function one time. If it takes &lt; 1 seconds to doubles the number
-      of times to call the function. It repeats this until it takes at least
-      one second to call it ntimes.</dd>
-</dl>
+<p>For arrays the syntax is:</p>
+<pre>      = [value,...,value]</pre>
 
-<h3 style="text-align: center;">Timer</h3>
+<p>where each <span style="font-family: courier;">value</span> is a valid
+scalar data value depending on the type. Thus it is a comma separated set of
+values enclosed in <span style="font-family: courier;">[]</span> White space
+is permitted surrounding each comma.</p>
 
-<p>This provides a general purpose timer. It allows a user callback to be
-called after a delay or periodically. </p>
-<pre>class TimerCallback {
-public:
-    virtual void callback() = 0;
-    virtual void timerStopped() = 0;
-};
+<p>For a structure the syntax is:</p>
+<pre>   { fieldValue,...,fieldValue }</pre>
 
-class TimerNode : private NoDefaultMethods {
-public:
-    TimerNode(TimerCallback *timerCallback);
-    ~TimerNode();
-    static ConstructDestructCallback *getConstructDestructCallback();
-    void cancel();
-    bool isScheduled();
-private:
-};
+<p>where each <span style="font-family: courier;">fieldValue</span>Y is a
+valid field value depending on the type. Thus it is a comma separated set of
+values enclosed in <span style="font-family: courier;">{}</span> White space
+is permitted surrounding each comma.</p>
 
-class Timer : private NoDefaultMethods {
-public:
-    Timer(String threadName, ThreadPriority priority);
-    ~Timer();
-    static ConstructDestructCallback *getConstructDestructCallback();
-    void scheduleAfterDelay(TimerNode *timerNode,double delay);
-    void schedulePeriodic(TimerNode *timerNode,double delay,double period);
-private:
-};</pre>
+<p>A structureArray was the form:</p>
+<pre>    [ {structureValue},...,{structureValue}]</pre>
 
-<p>TimerCallback must be implemented by the user. It has the following
-methods: </p>
-<dl>
-  <dt style="font-family: courier;">callback</dt>
-    <dd>This is called when a timer expires. This is called with no locks
-      held. When called a delay timer is no longer on the queue but a
-      periodioc timer is on a queue. Thus the callback for a delay timer can
-      issue a new schedule request but a periodic timer must not. Note the
-      explaination of TimerNode.cancel below.</dd>
-  <dt style="font-family: courier;">timerStopped</dt>
-    <dd>Timer.stop was called when a timer request was queued. or if the
-      timer is stopped and a schedule request is made.</dd>
-</dl>
+<h3>Example</h3>
 
-<p>In order to schedule a callback client code must allocate a TimerNode It
-can be used to schedule multiple callbacks. It has the methods:</p>
-<dl>
-  <dt style="font-family: courier;">TimerNode</dt>
-    <dd>The constructor. User code must create a TimeNode in order to call a
-      schedule method.</dd>
-  <dt style="font-family: courier;">~TimerNode</dt>
-    <dd>The destructor. This is called as a result of the client calling: 
-      <pre>    delete timerNode;</pre>
-    </dd>
-  <dt style="font-family: courier;">getConstructDestructCallback</dt>
-    <dd>Provides access to the number of timerNodes that been created and
-      destroyed.</dd>
-  <dt style="font-family: courier;">cancel</dt>
-    <dd>This is called to cancel a timer request. If a callback has been
-      dequeued but the callback not called when cancel is called then a
-      callback may still happen. New schedule requests can be made after a
-      cancel request has been made.</dd>
-  <dt style="font-family: courier;">isScheduled</dt>
-    <dd>Is the timerNode scheduled to be called.</dd>
-</dl>
+<p>Define the following top level structure:</p>
+<pre>structure timeStamp
+    long secondsPastEpoch
+    int nanoSeconds </pre>
 
-<p>Timer has the methods:</p>
-<dl>
-  <dt style="font-family: courier;">Timer</dt>
-    <dd>The consttructor.</dd>
-  <dt style="font-family: courier;">~Timer</dt>
-    <dd>The destructor. The queue is emptied and TimerCallback.timerStopped
-      is called for each element of the queue.</dd>
-  <dt style="font-family: courier;">getConstructDestructCallback</dt>
-    <dd>Provides access to the number of timers that been created and
-      destroyed.</dd>
-  <dt style="font-family: courier;">scheduleAfterDelay</dt>
-    <dd>A request to schedule a callback after a delay specified in
-    seconds.</dd>
-  <dt style="font-family: courier;">schedulePeriodic</dt>
-    <dd>Schedule a periodic callback.</dd>
-</dl>
+<p>Then the following can be defined</p>
+<pre>structure scalarDoubleExample
+    double value = 1.0
+    timeStamp timeStamp
 
-<h3 style="text-align: center;">TimeStamp</h3>
+scalar arrayDoubleExample
+    double[] value = {1.0,2.0}
+    timeStamp timeStamp
 
-<p>TimeStamp is a class for accessing a timeStamp that consists of the number
-of seconds since the epoch and the number of nanoseconds within the current
-second. The epoch is the posix epoch which is Jan 1, 1970 at 00:00:00
-Universal Time Coordinated.</p>
+structure point
+    double x
+    double y
 
-<p>The seconds since the epoch is kept as an int64 and the nano seconds is
-kept as in int32.</p>
+structure lineExample
+    point begin = {0,0}
+    point end   = {10,10}
 
-<p>The implementation of some of the methods (getCurrent, fromTime_t, and
-toTime_t) use epicsTime from EPICS base and will thus have a problem when the
-epics secPastEpoch overflows, which will happen in about 2126.</p>
-
-<p>The TimeStamp class provides arithmetic operations on time stamps. The
-result is always kept in normalized form, which means that the nano second
-portion is 0&le;=nano&lt;nanoSecPerSec. Note that it is OK to have timeStamps
-for times previous to the epoch.</p>
-
-<p>TimeStamp acts like a primitive. It can be allocated on the stack and the
-compiler is free to generate default methods, i.e. copy constructor,
-assignment constructor, and destructor.</p>
-
-<p>One use for TimeStamp is to time how long a section of code takes to
-execute. This is done as follows:</p>
-<pre>    TimeStamp startTime;
-    TimeStamp endTime;
-    ...
-    startTime.getCurrent();
-    // code to measure time
-    endTime.getCurrent();
-    double time = TimeStamp::diff(endTime,startTime);</pre>
-
-<p>TimeStamp is described as:</p>
-<pre>extern int32 milliSecPerSec;
-extern int32 microSecPerSec;
-extern int32 nanoSecPerSec;
-extern int64 posixEpochAtEpicsEpoch;
-
-class TimeStamp {
-public:
-    TimeStamp();
-    TimeStamp(int64 secondsPastEpoch,int32 nanoSeconds = 0);
-    //default constructors and destructor are OK
-    //This class should not be extended
-    void normalize();
-    void fromTime_t(const time_t &amp;);
-    void toTime_t(time_t &amp;) const;
-    int64 getSecondsPastEpoch() const;
-    int64 getEpicsSecondsPastEpoch() const;
-    int32 getNanoSeconds() const;
-    void put(int64 secondsPastEpoch,int32 nanoSeconds = 0);
-    void put(int64 milliseconds);
-    void getCurrent();
-    double toSeconds() const ;
-    bool operator==(TimeStamp const &amp;) const;
-    bool operator!=(TimeStamp const &amp;) const;
-    bool operator&lt;=(TimeStamp const &amp;) const;
-    bool operator&lt; (TimeStamp const &amp;) const;
-    bool operator&gt;=(TimeStamp const &amp;) const;
-    bool operator&gt; (TimeStamp const &amp;) const;
-    static double diff(TimeStamp const &amp; a,TimeStamp const &amp; b);
-    TimeStamp &amp; operator+=(int64 seconds);
-    TimeStamp &amp; operator-=(int64 seconds);
-    TimeStamp &amp; operator+=(double seconds);
-    TimeStamp &amp; operator-=(double seconds);
-    int64 getMilliseconds(); //milliseconds since epoch
-private:
-};</pre>
-
-<p>TimeStamp has the methods:</p>
-<dl>
-  <dt style="font-family: courier;">Timer</dt>
-    <dd>The default constructor sets both seconds and nano seconds to 0. The
-      other constructor shown above will call normalize.</dd>
-  <dt style="font-family: courier;">normalize</dt>
-    <dd>Adjust seconds and nano seconds so that
-    0&lt;=nano&lt;nanoSecPerSec</dd>
-  <dt style="font-family: courier;">fromTime_t</dt>
-    <dd>Set the timeStamp value from "time_t", which is defined
-      &lt;ctime&gt;, i.e. by the standard C++ library and also as part of
-      standard C. </dd>
-  <dt style="font-family: courier;">toTime_t</dt>
-    <dd>Convert the timeStamp to "time_t". From time_t, using that standard
-      C++ library &lt;ctime&gt; it is easy to get a "struct tm" that has the
-      the time broken into parts. For example: 
-      <pre>    TimeStamp current;
-    current.getCurrent();
-    time_t tt;
-    current.toTime_t(tt);
-    struct tm ctm;
-    memcpy(&amp;ctm,localtime(&amp;tt),sizeof(struct tm));
-    fprintf(auxfd,
-        "%4.4d.%2.2d.%2.2d %2.2d:%2.2d:%2.2d %d nanoSeconds isDst %s\n",
-        ctm.tm_year+1900,ctm.tm_mon + 1,ctm.tm_mday,
-        ctm.tm_hour,ctm.tm_min,ctm.tm_sec,
-        current.getNanoSeconds(),
-        (ctm.tm_isdst==0) ? "false" : "true");</pre>
-      <p>prints something like:</p>
-      <pre>2010.12.01 07:39:48 807264972 nanoSeconds isDst false</pre>
-    </dd>
-  <dt style="font-family: courier;">getSecondsPastEpoch</dt>
-    <dd>Gets the number of seconds since Jan 1 1970 UTC.</dd>
-  <dt style="font-family: courier;">getEpicsSecondsPastEpoch</dt>
-    <dd>Gets the number of seconds since Jan 1 1990 UTC.</dd>
-  <dt style="font-family: courier;">getNanoSeconds</dt>
-    <dd>Get the number of nano seconds. This is always
-      0&lt;=value&lt;nanoSecPerSec</dd>
-  <dt style="font-family: courier;">put</dt>
-    <dd>Set the timeStamp value. The result will always be normalized.</dd>
-  <dt style="font-family: courier;">getCurrent</dt>
-    <dd>Get the current time.</dd>
-  <dt style="font-family: courier;">toSeconds</dt>
-    <dd>Get the value as a double. It is the number of seconds since the
-      epoch.</dd>
-  <dt style="font-family: courier;">operator==</dt>
-    <dd>Compare equal.</dd>
-  <dt style="font-family: courier;">operator!=</dt>
-    <dd>Compare not equal.</dd>
-  <dt style="font-family: courier;">operator&lt;=</dt>
-    <dd>Is value &lt;= arg.</dd>
-  <dt style="font-family: courier;">operator&lt;</dt>
-    <dd>Is value &lt; arg.</dd>
-  <dt style="font-family: courier;">operator&gt;=</dt>
-    <dd>Is value &gt;= arg.</dd>
-  <dt style="font-family: courier;">operator&gt;</dt>
-    <dd>Is value &gt; arg.</dd>
-  <dt style="font-family: courier;">diff</dt>
-    <dd>The result is (a-b) in seconds.</dd>
-  <dt style="font-family: courier;">operator+=</dt>
-    <dd>Add the argument to the timeStamp. The argument can be an integer or
-      a double. The result will be normalized.</dd>
-  <dt style="font-family: courier;">operator-=</dt>
-    <dd>Subtract the argument from the timeStamp. The argument can be an
-      integer or a double. The result will be normalized.</dd>
-  <dt style="font-family: courier;">getMilliseconds</dt>
-    <dd>Get the timeStamp as number of milliseconds since the epoch.</dd>
-</dl>
-
-<h3 style="text-align: center;">Queue</h3>
-
-<p>This provides a queue which has an immutable capacity, which is specified
-when the queue is created. When the queue is full the user code is expected
-to keep using the current el;ement until a new free element becomes avalable.
-This is used by pvData.monitor.</p>
-<pre>NOT IMPLEMENTED</pre>
-
-<p>A queueCreate instance is created via a call like the following:</p>
-<pre> QueueCreate&lt;MyObject&gt; queueCreate = new QueueCreate&lt;MyObject&gt;();</pre>
-
-<p>Once a queueCreate is available a queue instance is created via code like
-the following:</p>
-<pre>Queue&lt;MyObject&gt; queue create(MyObject[] myObjects) {
-    QueueElement&lt;MyObject&gt;[] queueElements = new QueueElement[length];
-    for(int i=0; i&lt;length; i++) {
-        QueueElement&lt;MonitorElement&gt; queueElement =
-                 queueCreate.createQueueElement(myObjects[i);
-        queueElements[i] = queueElement;
-    }
-    return queueCreate.create(queueElements);
-}</pre>
-
-<p>The queue methods are:</p>
-<dl>
-  <dt style="font-family: courier;">clear</dt>
-    <dd>Make the queue empty.</dd>
-  <dt style="font-family: courier;">getNumberFree</dt>
-    <dd>Get the number of fee elements in the queue.</dd>
-  <dt style="font-family: courier;">capacity</dt>
-    <dd>Get the capacity, i.e. the maximun number of elements the queue can
-      hold.</dd>
-  <dt style="font-family: courier;">getFree</dt>
-    <dd>Get the next free element. Null is returned if no free elements are
-      available. If a non null value is returned then the element belongs to
-      the caller until setUsed is called.</dd>
-  <dt style="font-family: courier;">setUsed</dt>
-    <dd>Set a queue element used. This <span
-      style="font-weight:bold;">must</span> be the element returned by the
-      last call to getFree. </dd>
-  <dt style="font-family: courier;">getUsed</dt>
-    <dd>Get the next used element of null if no more used elements are
-      available.</dd>
-  <dt style="font-family: courier;">releaseUsed</dt>
-    <dd>Set a queue element free. This must be the element returned by the
-      last call to getUsed. </dd>
-</dl>
-
-<p>A producer calls getFree and setUsed via code like the following:</p>
-<pre>   MyObject getFree() {
-       QueueElement&lt;MyObject&gt; queueElement = queue.getFree();
-       if(queueElement==null) return null;
-       return queueElement.getObject();
-  }</pre>
-
-<p>A consumer calls getUsed and releaseUsed via code like the following:</p>
-<pre>     while(true) {
-         QueueElement&lt;MyObject&gt; queueElement = queue.getUsed();
-         if(queueElement==null) break;
-         MyObject myObject = queueElement.getObject();
-         // do something with myObject
-         queue.releaseUsed(queueElement);
-     }</pre>
+structure structureArrayExample
+    stucture[] point points = 
+    [
+        {0,0},
+        {10,10}
+    ]</pre>
 <hr />
 
 <h2 style="text-align: center">PV - User Description</h2>
@@ -2787,6 +1621,171 @@ for code that implements <span style="font-family: courier;">toString</span>
 It generates a newline and inserts blanks at the beginning of the newline.</p>
 <hr />
 
+<h2 style="text-align: center">Namespace, Typedefs, and Memory Management</h2>
+<hr />
+
+<h3 style="text-align: center">Namespace</h3>
+
+<p>All include and definition files in project pvDataCPP appear in namespace:
+</p>
+<pre>namespace epics { namespace pvData {
+     // ...
+}}</pre>
+
+<h3 style="text-align: center">typedefs</h3>
+
+<p>Directory misc has an include file pvTypes.h:</p>
+<pre>typedef signed char int8;
+typedef short       int16;
+typedef int         int32;
+typedef long long   int64;
+typedef unsigned int uint32;
+typedef unsigned long long uint64;
+
+typedef std::string String;
+typedef std::string * StringBuilder;
+typedef String* StringArray;</pre>
+
+<p>The integer typedefs provide the definitions for various sizes of integer
+values. The relationship between these definitions and the ScalarType
+description is:</p>
+<dl>
+  <dt style="font-family: courier;">pvBoolean</dt>
+    <dd>bool</dd>
+  <dt style="font-family: courier;">pvByte</dt>
+    <dd>int8</dd>
+  <dt style="font-family: courier;">pvShort</dt>
+    <dd>int16</dd>
+  <dt style="font-family: courier;">pvInt</dt>
+    <dd>int32</dd>
+  <dt style="font-family: courier;">pvLong</dt>
+    <dd>int64</dd>
+  <dt style="font-family: courier;">pvString</dt>
+    <dd>String</dd>
+</dl>
+
+<p>It is hoped that all modern C++ compilers will properly handle the integer
+typedefs but if not than there is a good chance that it can be supported by
+changes to pvInterspect.h.</p>
+
+<p>std::string is used to implement pvString. This works because std::string
+implement COW (Copy On Write) semantics. Thus once created a String can be
+treated like an immutable object, which is what pvData require.</p>
+
+<p>The remaining definitions are:</p>
+<dl>
+  <dt style="font-family: courier;">StringBuilder</dt>
+    <dd>This acts like the java StringBuilder when is is passed as an
+      argument to a function.</dd>
+  <dt style="font-family: courier;">StringArray</dt>
+    <dd>This is an array with each element being a String.</dd>
+</dl>
+
+<p>File pvInterspect.h, which is described in the next section has the
+typedefs: </p>
+<pre>typedef Field const * FieldConstPtr;
+typedef FieldConstPtr * FieldConstPtrArray;
+typedef Scalar const * ScalarConstPtr;
+typedef ScalarArray const * ScalarArrayConstPtr;
+typedef Structure const * StructureConstPtr;
+typedef StructureArray const * StructureArrayConstPtr;</pre>
+
+<p>These are definitions for introspection objects. All introspecton objects
+are immutable and always accessed via pointers.</p>
+
+<p>File pvData.h, which is also described in the next section has the
+typedefs: </p>
+<pre>typedef std::map&lt;String,PVScalar * &gt; PVScalarMap;
+typedef PVScalarMap::const_iterator PVScalarMapIter;
+typedef PVStructure * PVStructurePtr;
+typedef PVStructurePtr* PVStructurePtrArray;
+typedef PVField* PVFieldPtr;
+typedef PVFieldPtr * PVFieldPtrArray;
+typedef bool * BooleanArray;
+typedef int8 * ByteArray;
+typedef int16 * ShortArray;
+typedef int32 * IntArray;
+typedef int64 * LongArray;
+typedef float * FloatArray;
+typedef double * DoubleArray;
+typedef String * StringArray;</pre>
+
+<p>where</p>
+<dl>
+  <dt style="font-family: courier;">PVScalarMap and PVScalarMapIter</dt>
+    <dd>A map and iterator that maps field names to PVScalars.</dd>
+  <dt style="font-family: courier;">PVStructurePtr</dt>
+    <dd>A pointer to a PVStructure.</dd>
+  <dt style="font-family: courier;">PVStructurePtrArray</dt>
+    <dd>A pointer to PVStructurePtr[], e. g. an array of pointers to a
+      PVStructure.</dd>
+  <dt style="font-family: courier;">PVFieldPtr</dt>
+    <dd>A pointer to a PVField</dd>
+  <dt style="font-family: courier;">PVFieldPtrArray</dt>
+    <dd>A pointer to a PVFieldPtr[], e. g. an array of pointers to a
+    PVField.</dd>
+  <dt style="font-family: courier;">BooleanArray, ByteArray, ...,
+  StringArray</dt>
+    <dd>An array of the specified type NOT a pointer to the type.</dd>
+</dl>
+
+<h3 style="text-align: center">Memory Managemment</h3>
+
+<h4>NoDefaultMethods</h4>
+
+<p>Any class that does not allow the compiler to generate default methods can
+privately extend the following class which is defined in file
+noDefaultMethods.h:</p>
+<pre>class NoDefaultMethods {
+protected:
+    // allow by derived objects
+    NoDefaultMethods(){};
+    ~NoDefaultMethods(){}
+private:
+    // do not implment
+    NoDefaultMethods(const NoDefaultMethods&amp;);
+    NoDefaultMethods &amp; operator=(const NoDefaultMethods &amp;);
+};</pre>
+
+<h3>PVData introspection objects</h3>
+
+<p>Introspection objects are meant to be shared. The constructors and
+destructors are all private so that an introspection object can only be
+created via a call to one of the FieldCreate methods described below. The
+introspection implementation, together with AbstractPVField keeps reference
+counts and automatically deletes objects when the reference count goes to 0.
+Code that uses introspection objects always accesses introspection objects
+via pointers never via references or direct access to the object. When a
+PVData data object is destroyed then pointers to the introspection objects
+associated with the data object are no longer valid.</p>
+
+<h3>PVData data objects</h3>
+
+<p>All PVData data objects must publically extend AbstractPVField, which does
+not allow default methods but does have a virtual destructor. It is expected
+that each data object is "owned" by some entity. For example a pvIOC (not
+implemented) database will own all records and thus all PVData data objects
+in the database. It is the ONLY entity that will create and destroy the data
+objects. All other code only receives pointers to the data objects. Before a
+record is deleted any code that is connected to a record is notified before
+the record is deleted. After deletion all pointers to data in the record are
+invalid. Similarly pvAccess creates and destroys PVData objects and notifies
+clients before destroying PVData data objects.</p>
+
+<h3>Other code in this project</h3>
+
+<p>If a class is pure data, e. g. TimeStamp, then it acts list like a
+primitive object.</p>
+
+<p>Other clases privately extend NoDefaultClasses and are not normally meant
+to be extended. Thus they can only be created via "new" and must be destroyed
+via "delete". These classes normally implement the static method:</p>
+<pre>    static ConstructDestructCallback *getConstructDestructCallback();</pre>
+
+<p>This provides access to how many objects have been constructed and
+destructed. This can be used to monitor memory usage.</p>
+<hr />
+
 <h2 style="text-align: center">Examples</h2>
 <hr />
 
@@ -2846,59 +1845,6 @@ and a timeStamp and alarm. Do it the easy way.</p>
         0, //parent is null
         String("example"),
         String("timeStamp,alarm"))</pre>
-<hr />
-
-<h2 style="text-align: center">pvMisc</h2>
-<hr />
-
-<h3>BitSetUtil</h3>
-
-<p>The following is also provided:</p>
-<pre>NOT DONE</pre>
-
-<p>This provides functions that operate of a BitSet for a PVStructure. It
-currently has only one method:</p>
-<dl>
-  <dt style="font-family: courier;"><span
-  style="font-family: Courier">compress</span></dt>
-    <dd>Compress the bits in a BitSet related to a structure.<br />
-      For each structure: 
-      <ol>
-        <li>If the bit for the structure is set then the bit for all
-          subfields of the structure are cleared. </li>
-        <li>If the bit for the structure is not set but all immediate
-          subfields have their bit set then the bit for the structure is set
-          and the bits for all subfields are cleared. </li>
-      </ol>
-      Note that this is a recursive algorithm. That is if every immediate
-      subfield has it's offset bit set then the bits for ALL fields that
-      reside in the structure will be cleared.</dd>
-    <dd>Channel Access can call this before sending data. It can then pass
-      entire structures if the structure offset bit is set. </dd>
-</dl>
-
-<h3 style="text-align: center;">MultiChoice</h3>
-
-<p>MultiChoice defines an array of strings and a bit set that selects an
-arbitrary set of the choices.</p>
-<pre>NOT DONE</pre>
-
-<p>where</p>
-<dl>
-  <dt style="font-family: courier;">getBitMask</dt>
-    <dd>Returns the bitMask.</dd>
-  <dt style="font-family: courier;">getChoices</dt>
-    <dd>Returns the complete set of choices..</dd>
-  <dt style="font-family: courier;">getSelectedChoices</dt>
-    <dd>Returns the interface for getting the selected choices..</dd>
-  <dt style="font-family: courier;">setBit</dt>
-    <dd>Select the choice for specified bit..</dd>
-  <dt style="font-family: courier;">clear</dt>
-    <dd>Clear the bitMask, i.e. no choices are selected..</dd>
-  <dt style="font-family: courier;">registerChoice</dt>
-    <dd>Register a new choice. If thed choice already exists then it''s index
-      is returned. If not it is appended to the choices.</dd>
-</dl>
 <hr />
 
 <h2 style="text-align: center">Property</h2>
@@ -3275,6 +2221,1213 @@ complete list is:</p>
   <dt style="font-family: courier;">BasePVDoubleArray</dt>
   <dt style="font-family: courier;">BasePVStringArray</dt>
   <dt style="font-family: courier;">BasePVStructureArray</dt>
+</dl>
+<hr />
+
+<h2 style="text-align: center">Miscellanous Classes</h2>
+<hr />
+
+<h3 style="text-align: center">Overview</h3>
+
+<p>This package provides utility code:</p>
+<dl>
+  <dt style="font-family: courier;">bitSet.h</dt>
+    <dd>An implementation of BitSet that can be serialized.</dd>
+  <dt style="font-family: courier;">byteBuffer.h</dt>
+    <dd>Used to serialize objects.</dd>
+  <dt style="font-family: courier;">event.h</dt>
+    <dd>Signal and wait for an event.</dd>
+  <dt style="font-family: courier;">exception.h</dt>
+    <dd>Exception with stack trace.</dd>
+  <dt style="font-family: courier;">executor.h</dt>
+    <dd>Provides a thread for executing commands.</dd>
+  <dt style="font-family: courier;">linkedList.h</dt>
+    <dd>A double linked list facility that requires the user to allocate a
+      node. It is more efficient that std::list and does not require the
+      implementation to allocate storage for the nodes.</dd>
+  <dt style="font-family: courier;">lock.h</dt>
+    <dd>Support for locking and unlocking.</dd>
+  <dt style="font-family: courier;">messageQueue.h</dt>
+    <dd>Support for queuing messages to give to requesters.</dd>
+  <dt style="font-family: courier;">noDefaultMethods.h</dt>
+    <dd>When privately extended prevents compiler from implementing default
+      methods.</dd>
+  <dt style="font-family: courier;">pvType.h</dt>
+    <dd>Provides architecture independent definitions for integers and
+    String.</dd>
+  <dt style="font-family: courier;">requester.h</dt>
+    <dd>Allows messages to be sent to a requester.</dd>
+  <dt style="font-family: courier;">serialize.h</dt>
+    <dd>Support for serializing objects.</dd>
+  <dt style="font-family: courier;">showConstructDestruct.h</dt>
+    <dd>Provides support monitoring memory usage for objects of a class.</dd>
+  <dt style="font-family: courier;">status.h</dt>
+    <dd>A way to pass status information to a client.</dd>
+  <dt style="font-family: courier;">thread.h</dt>
+    <dd>Provides thread support.</dd>
+  <dt style="font-family: courier;">timeFunction.h</dt>
+    <dd>Time how long a function call requires.</dd>
+  <dt style="font-family: courier;">timer.h</dt>
+    <dd>An implementation of Timer that does not require an object to be
+      created for each timer request.</dd>
+  <dt style="font-family: courier;">timeStamp.h</dt>
+    <dd>Usefull methods for a timeStamp.</dd>
+  <dt style="font-family: courier;">queue.h</dt>
+    <dd>A queue implementation that allows the latest queue element to
+      continue to be used when no free element is available.</dd>
+</dl>
+
+<h3 style="text-align: center;">BitSet</h3>
+
+<p>This is adapted from the java.util.BitSet. bitSet.h is:</p>
+<pre>class BitSet /*: public Serializable*/ {
+public:
+    BitSet();
+    BitSet(uint32 nbits);
+    virtual ~BitSet();
+    void flip(uint32 bitIndex);
+    void set(uint32 bitIndex);
+    void clear(uint32 bitIndex);
+    void set(uint32 bitIndex, bool value);
+    bool get(uint32 bitIndex) const;
+    void clear();
+    int32 nextSetBit(uint32 fromIndex) const;
+    int32 nextClearBit(uint32 fromIndex) const;
+    bool isEmpty() const;
+    uint32 cardinality() const;
+    BitSet&amp; operator&amp;=(const BitSet&amp; set);
+    BitSet&amp; operator|=(const BitSet&amp; set);
+    BitSet&amp; operator^=(const BitSet&amp; set);
+    BitSet&amp; operator-=(const BitSet&amp; set);
+    BitSet&amp; operator=(const BitSet &amp;set);
+    void or_and(const BitSet&amp; set1, const BitSet&amp; set2);
+    bool operator==(const BitSet &amp;set) const;
+    bool operator!=(const BitSet &amp;set) const;
+    void toString(StringBuilder buffer);
+    void toString(StringBuilder buffer, int indentLevel) const;
+private:
+};</pre>
+
+<p>where</p>
+<dl>
+  <dt style="font-family: courier;">BitSet()</dt>
+    <dd>Creates a bitSet of initial size 64 bits. All bits initially
+    false.</dd>
+  <dt style="font-family: courier;">BitSet(uint32 nbits)</dt>
+    <dd>Creates a bitSet with the initial of the specified number of bits.
+      All bits initially false.</dd>
+  <dt style="font-family: courier;">~BitSet()</dt>
+    <dd>Destructor.</dd>
+  <dt style="font-family: courier;">flip(uint32 bitIndex)</dt>
+    <dd>Flip the specified bit.</dd>
+  <dt style="font-family: courier;">set(uint32 bitIndex)</dt>
+    <dd>Set the specified bit true.</dd>
+  <dt style="font-family: courier;">clear(uint32 bitIndex)</dt>
+    <dd>Set the specified bit false.</dd>
+  <dt style="font-family: courier;">set(uint32 bitIndex, bool value)</dt>
+    <dd>Set the specified bit to value.</dd>
+  <dt style="font-family: courier;">get(uint32 bitIndex)</dt>
+    <dd>Return the state of the specified bit.</dd>
+  <dt style="font-family: courier;">clear()</dt>
+    <dd>Set all bits to false.</dd>
+  <dt style="font-family: courier;">nextSetBit(uint32 fromIndex)</dt>
+    <dd>Get the index of the next true bit beginning with the specified
+    bit.</dd>
+  <dt style="font-family: courier;">nextClearBit(uint32 fromIndex)</dt>
+    <dd>Get the index of the next false bit beginning with the specified
+    bit.</dd>
+  <dt style="font-family: courier;">isEmpty()</dt>
+    <dd>Return (false,true) if (at least one bit true, all bits are
+    false)</dd>
+  <dt style="font-family: courier;">cardinality()</dt>
+    <dd>Return the number of true bits.</dd>
+  <dt style="font-family: courier;">operator&amp;=(const BitSet&amp; set)</dt>
+    <dd>Performs a logical and of this target bit set with the argument bit
+      set. This bit set is modified so that each bit in it has the value true
+      if and only if it both initially had the value true and the
+      corresponding bit in the bit set argument also had the value.</dd>
+  <dt style="font-family: courier;">operator|=(const BitSet&amp; set)</dt>
+    <dd>Performs a logical or of this target bit set with the argument bit
+      set.</dd>
+  <dt style="font-family: courier;">operator^=(const BitSet&amp; set)</dt>
+    <dd>Performs a logical exclusive or of this target bit set with the
+      argument bit set.</dd>
+  <dt style="font-family: courier;">operator-=(const BitSet&amp; set)</dt>
+    <dd><p>Clears all of the bits in this bitSet whose corresponding bit is
+      set in the specified bitSet.</p>
+    </dd>
+  <dt style="font-family: courier;">operator=(const BitSet &amp;set)</dt>
+    <dd>Assignment operator.</dd>
+  <dt style="font-family: courier;">or_and(const BitSet&amp; set1, const
+  BitSet&amp; set2)</dt>
+    <dd>Perform AND operation on set1 and set2, and then OR this bitSet with
+      the result.</dd>
+  <dt style="font-family: courier;">operator==(const BitSet &amp;set)</dt>
+    <dd>Does this bitSet have the same values as the argument.</dd>
+  <dt style="font-family: courier;">operator!=(const BitSet &amp;set)</dt>
+    <dd>Is this bitSet different than the argument.</dd>
+  <dt style="font-family: courier;">toString(StringBuilder buffer)</dt>
+    <dd>Show the current values of the bitSet.</dd>
+  <dt style="font-family: courier;">toString(StringBuilder buffer, int
+  indentLevel)</dt>
+    <dd>Show the current values of the bitSet.</dd>
+</dl>
+
+<h3 style="text-align: center;">ByteBuffer</h3>
+
+<p>A ByteBuffer is used to serialize and deserialize primitive data. File
+byteBuffer.h is:</p>
+<pre>class ByteBuffer {
+public:
+    ByteBuffer(int size = 32, int byteOrder = EPICS_BYTE_ORDER);
+    ~ByteBuffer();
+    ByteBuffer* clear();
+    ByteBuffer* flip();
+    ByteBuffer* rewind();
+    bool getBoolean();
+    int8 getByte();
+    int16 getShort();
+    int32 getInt();
+    int64 getLong();
+    float getFloat();
+    double getDouble();
+    void get(char* dst, int offset, int count);
+    ByteBuffer* put(const char* src, int offset, int count);
+    ByteBuffer* putBoolean(bool value);
+    ByteBuffer* putByte(int8 value);
+    ByteBuffer* putShort(int16 value);
+    ByteBuffer* putInt(int32 value);
+    ByteBuffer* putLong(int64 value);
+    ByteBuffer* putFloat(float value);
+    ByteBuffer* putDouble(double value);
+    inline int getSize() const;
+    inline int getArrayOffset() const;
+    inline int getPosition() const;
+    inline int getLimit() const;
+    inline int getRemaining() const;
+    inline int getByteOrder() const;
+    inline const char* getArray() const;
+    // TODO must define arrays
+private:
+};</pre>
+
+<p>x</p>
+
+<h3 style="text-align: center;">Event</h3>
+
+<p>This class provides coordinates activity between threads. One thread can
+wait for the event and the other signals the event.</p>
+<pre>class Event : private NoDefaultMethods {
+public:
+    Event(bool full);
+    ~Event();
+    static ConstructDestructCallback *getConstructDestructCallback();
+    void signal();
+    bool wait (); /* blocks until full */
+    bool wait ( double timeOut ); /* false if empty at time out */
+    bool tryWait (); /* false if empty */
+private:
+    epicsEventId id;
+};</pre>
+
+<p>where</p>
+<dl>
+  <dt style="font-family: courier;">Event</dt>
+    <dd>The constructor. The initial value can be full or empty. The normal
+      first state is empty.</dd>
+  <dt style="font-family: courier;">getConstructDestructCallback</dt>
+    <dd>Provides access to number of events that have been created and
+      destroyed.</dd>
+  <dt style="font-family: courier;">signal</dt>
+    <dd>The event becomes full. The current or next wait will complete.</dd>
+  <dt style="font-family: courier;">wait</dt>
+    <dd>Wait until event is full or until timeout. The return value is
+      (false,true) if the wait completed because event (was not, was) full. A
+      false value normally means that that a timeout occured. It is also
+      returned if an error occurs or because the event is being deleted.</dd>
+  <dt style="font-family: courier;">tryWait</dt>
+    <dd>returns (false,true) if the event is (empty,full)</dd>
+</dl>
+
+<h3 style="text-align: center;">Exception</h3>
+
+<p>File epicsException.h describes:</p>
+<pre>class BaseException : public std::exception {
+public:
+    BaseException(const char* message, const char* file,
+        int line, std::exception* cause = 0);
+    virtual ~BaseException();
+    virtual const char* what();
+    void toString(std::string&amp; str, unsigned int depth = 0);
+    static inline void getStackTrace(
+         std::string* trace, unsigned int skip_frames = 0, unsigned int max_frames = 63)
+private:
+     // ...
+}</pre>
+
+<p>x</p>
+
+<h3 style="text-align: center;">Executor</h3>
+
+<p>An Executor is a thread that can execute commands. The user can request
+that a single command be executed.</p>
+<pre>class ExecutorNode;
+
+class Command {
+public:
+    virtual void command() = 0;
+};
+
+class Executor : private NoDefaultMethods {
+public:
+    Executor(String threadName,ThreadPriority priority);
+    ~Executor();
+    static ConstructDestructCallback *getConstructDestructCallback();
+    ExecutorNode * createNode(Command *command);
+    void execute(ExecutorNode *node);
+private:
+    class ExecutorPvt *pImpl;
+};</pre>
+
+<p>Command is a class that must be implemented by the code that calls
+execute. It contains the single virtual method command, which is the command
+to execute.</p>
+
+<p>Executor has the methods:</p>
+<dl>
+  <dt style="font-family: courier;">Executor</dt>
+    <dd>The constructor. A thread name and priority must be specified.</dd>
+  <dt style="font-family: courier;">~Executor</dt>
+    <dd>The destructor. If any commands remain in the execute list they are
+      not called. All ExecutorNodes that have been created are deleted.</dd>
+  <dt style="font-family: courier;">getConstructDestructCallback</dt>
+    <dd>Provides access to the number of executors that been created and
+      destroyed.</dd>
+  <dt style="font-family: courier;">createNode</dt>
+    <dd>Create a ExecutorNode that can be passed to execute.</dd>
+  <dt style="font-family: courier;">execute</dt>
+    <dd>Request that command be executed. If it is already on the run list
+      nothing is done.</dd>
+</dl>
+
+<h3 style="text-align: center;">Linked List</h3>
+
+<p>LinkedList implements a double linked list that requires a user to
+allocate the nodes. It is more efficent that std::list. linkedList.h is
+template that is both a complete description and definition. It uses
+linkedListVoid for method definitions. linkedListVoid is not\ meant for use
+except via linkedList. Note, however, that linkedListVoid does have both a
+node and a list static method getConstructDestructCallback, which allows
+access to how many nodes and lists have been created and destroyed. </p>
+
+<p>A node can only be on one list at a time but can be put, at different
+times, on different lists as long as they all hold the same type of objects.
+An exception is thrown if an attempt is made to put a node on a list if the
+node is already on a list. </p>
+<pre>template &lt;typename T&gt;
+class LinkedList;
+
+template &lt;typename T&gt;
+class LinkedListNode : private LinkedListVoidNode {
+public:
+    LinkedListNode(T *object);
+    ~LinkedListNode();
+    T *getObject();
+    bool isOnList();
+};
+template &lt;typename T&gt;
+class LinkedList : private LinkedListVoid {
+public:
+    LinkedList();
+    ~LinkedList();
+    int getLength();
+    void addTail(LinkedListNode&lt;T&gt; *node);
+    void addHead(LinkedListNode&lt;T&gt; *node);
+    void insertAfter(LinkedListNode&lt;T&gt; *node,
+        LinkedListNode&lt;T&gt; *addNode);
+    void insertBefore(LinkedListNode&lt;T&gt; *node,
+        LinkedListNode&lt;T&gt; *addNode);
+    LinkedListNode&lt;T&gt; *removeTail();
+    LinkedListNode&lt;T&gt; *removeHead();
+    void remove(LinkedListNode&lt;T&gt; *listNode);
+    void remove(T *object);
+    LinkedListNode&lt;T&gt; *getHead();
+    LinkedListNode&lt;T&gt; *getTail();
+    LinkedListNode&lt;T&gt; *getNext(LinkedListNode&lt;T&gt; *node);
+    LinkedListNode&lt;T&gt; *getPrev(LinkedListNode&lt;T&gt; *node;
+    bool isEmpty();
+    bool contains(T *object);
+};</pre>
+
+<p>LinkedListNode has the methods:</p>
+<dl>
+  <dt style="font-family: courier;">LinkedListNode</dt>
+    <dd>The constructor. The object must be specified.</dd>
+  <dt style="font-family: courier;">~LinkedListNode</dt>
+    <dd>The destructor.</dd>
+  <dt style="font-family: courier;">getObject</dt>
+    <dd>Returns the nobject.</dd>
+  <dt style="font-family: courier;">isOnList</dt>
+    <dd>returns (false,true) if the node (is not, is) on a list.</dd>
+</dl>
+
+<p>LinkedList has the methods:</p>
+<dl>
+  <dt style="font-family: courier;">LinkedList</dt>
+    <dd>The constructor.</dd>
+  <dt style="font-family: courier;">~LinkedList</dt>
+    <dd>The destructor.</dd>
+  <dt style="font-family: courier;">getLength</dt>
+    <dd>Get the numbet of nodes currently on the list.</dd>
+  <dt style="font-family: courier;">addTail</dt>
+    <dd>Add a node to the end of the list. An exception is thrown if the node
+      is already on a list.</dd>
+  <dt style="font-family: courier;">addHead</dt>
+    <dd>Add a node to the beginning of the list. An exception is thrown if
+      the node is already on a list.</dd>
+  <dt style="font-family: courier;">insertAfter</dt>
+    <dd>Insert addNode after node. An exception is thrown if the addNode is
+      already on a list or if node is not on this list..</dd>
+  <dt style="font-family: courier;">insertBefore</dt>
+    <dd>Insert addNode before node. An exception is thrown if the addNode is
+      already on a list or if node is not on this list.</dd>
+  <dt style="font-family: courier;">removeTail</dt>
+    <dd>Remove and return the last node. Null is returned if the list is
+      empty.</dd>
+  <dt style="font-family: courier;">removeHead</dt>
+    <dd>Remove and return the first node. Null is returned if the list is
+      empty.</dd>
+  <dt style="font-family: courier;">remove</dt>
+    <dd>Remove the specified node or object. An exception is thrown if the
+      node is not on a list.</dd>
+  <dt style="font-family: courier;">getHead</dt>
+    <dd>Get the first list node. Null is returned if the list is empty.</dd>
+  <dt style="font-family: courier;">getTail</dt>
+    <dd>Get the last list node. Null is returned if the list is empty.</dd>
+  <dt style="font-family: courier;">getNext</dt>
+    <dd>Get the node after node. An exception is thrown if node is not on
+      this list. Null is returned if the is node is the last node on the
+    list.</dd>
+  <dt style="font-family: courier;">getPrev</dt>
+    <dd>Get the node before node. An exception is thrown if node is not on
+      this list. Null is returned if the is node is the first node on the
+      list.</dd>
+  <dt style="font-family: courier;">isEmpty</dt>
+    <dd>Is the list empty.</dd>
+  <dt style="font-family: courier;">contains</dt>
+    <dd>Does the list contain the specified object.</dd>
+</dl>
+
+<h3 style="text-align: center;">Lock and Mutex</h3>
+
+<p>lock.h contains:</p>
+<pre>class Mutex  {
+public:
+    Mutex();
+    ~Mutex();
+    void lock();
+    void unlock();
+private:
+};
+
+
+class Lock : private NoDefaultMethods {
+public:
+    explicit Lock(Mutex *pm);
+    ~Lock();
+private:
+};</pre>
+
+<p>This is a complete description and definition of lock and mutex. These
+make it easy to have a lock that is as easy to use as Java synchronize. To
+protect some object just create a Mutex for the object and then in any method
+to be synchronized just have code like:</p>
+<pre>class SomeClass {
+private
+    Mutex mutex;
+...
+public
+    SomeClass() : mutex(Mutex()) {}
+...
+    void method()
+    {
+        Lock xx(&amp;mutex);
+        ...
+    }</pre>
+
+<p>The method will take the lock when xx is created and release the lock when
+the current code block completes.</p>
+
+<p>Another example of Lock is initialization code that must initialize only
+once. This can be implemented as follows:</p>
+<pre>    static void init(void) {
+        static Mutex mutex = Mutex();
+        Lock xx(&amp;mutex);
+        if(alreadyInitialized) return;
+        // initialization
+    }</pre>
+
+<h3 style="text-align: center;">Message Queue</h3>
+
+<h4>Definitions</h4>
+<pre>NOT IMPLEMENTED</pre>
+
+<h4>MessageQueue</h4>
+
+<p>This is for use by code that wants to handle messages without blocking
+higher priority threads.</p>
+
+<p>A messageNode is a class with two public data members:</p>
+<dl>
+  <dt style="font-family: courier;">message</dt>
+    <dd>The message.</dd>
+  <dt style="font-family: courier;">messageType</dt>
+    <dd>The message type.</dd>
+</dl>
+
+<p>A messageQueue is an interface with methods:</p>
+<dl>
+  <dt style="font-family: courier;">put</dt>
+    <dd>Put a new message into the queue. False is returned if the queue was
+      full and true otherwise.</dd>
+  <dt style="font-family: courier;">isEmpty</dt>
+    <dd>Is the queue empty?</dd>
+  <dt style="font-family: courier;">isFull</dt>
+    <dd>Is the queue full?</dd>
+  <dt style="font-family: courier;">replaceFirst</dt>
+    <dd>Replace the oldest member in the queue.</dd>
+  <dt style="font-family: courier;">replaceLast</dt>
+    <dd>Replace the newest member in the queue.</dd>
+  <dt style="font-family: courier;">getClearOverrun</dt>
+    <dd>Get the number of times replaceFirst or replaceLast have been called
+      since the last call to getClearOverrun. The internal counter is reset
+      to 0.</dd>
+</dl>
+
+<p>MessageQueueFactory provides the public method:</p>
+<dl>
+  <dt style="font-family: courier;">create</dt>
+    <dd>Create a MessageQueue and return the interface.</dd>
+</dl>
+
+<p>An example is:</p>
+<pre>    private ExecutorNode executorNode;
+    ...
+      executorNode = executor.createNode(this);
+    ...
+
+    public void message(final String message, MessageType messageType) {
+        boolean execute = false;
+        synchronized(messageQueue) {
+            if(messageQueue.isEmpty()) execute = true;
+            if(messageQueue.isFull()) {
+                messageQueue.replaceLast(message, messageType);
+            } else {
+                messageQueue.put(message, messageType);
+            }
+        }
+        if(syncExec) {
+            iocExecutor.execute(executorNode);
+        }
+    }
+    ...
+    public run() { // handle messages
+        while(true) {
+            String message = null;
+            int numOverrun = 0;
+            synchronized(messageQueue) {
+                MessageNode messageNode = messageQueue.get();
+                numOverrun = messageQueue.getClearOverrun();
+                if(messageNode==null &amp;&amp; numOverrun==0) break;
+                message = messageNode.message;
+            }
+            if(numOverrun&gt;0) {
+                System.out.printf(String.format("%n%d missed messages&amp;n", numOverrun));
+            }
+            if(message!=null) {
+               System.out.printf(String.format("%s%n",message));
+            }
+        }
+    }</pre>
+
+<h3 style="text-align: center;">NoDefaultMethods</h3>
+
+<p>If a class privately extends this class then the compiler can not create
+any of the following: default constructor, default copy constructror, or
+default assignment contructor.</p>
+<pre>/* This is based on Item 6 of
+ * Effective C++, Third Edition, Scott Meyers
+ */
+    class NoDefaultMethods {
+    protected:
+    // allow by derived objects
+    NoDefaultMethods(){};
+    ~NoDefaultMethods(){}
+    private:
+    // do not implment
+    NoDefaultMethods(const NoDefaultMethods&amp;);
+    NoDefaultMethods &amp; operator=(const NoDefaultMethods &amp;);
+    };</pre>
+
+<h3 style="text-align: center;">pvType</h3>
+
+<p>This provides typedefs for integers and String.</p>
+<pre>typedef signed char int8;
+typedef short       int16;
+typedef int         int32;
+typedef long long   int64;
+typedef unsigned int uint32;
+typedef unsigned long long uint64;
+
+typedef std::string String;
+typedef std::string * StringBuilder;
+typedef String* StringArray;</pre>
+
+<p>where</p>
+<dl>
+  <dt style="font-family: courier;">int8,...,int64</dt>
+    <dd>Hopefully all modern C++ compilers will support these definitions. If
+      not then only pvType.h will require changes rather than user code.</dd>
+  <dt style="font-family: courier;">String</dt>
+    <dd>Since std::string implements copy on write semantics, it can be used
+      for support for immutable strings. This is what pvData supports. </dd>
+  <dt style="font-family: courier;">StringBuilder</dt>
+    <dd>Acts like the Java StringBuilder class.</dd>
+  <dt style="font-family: courier;">StringArray</dt>
+    <dd>An array of Strings.</dd>
+</dl>
+
+<h3 style="text-align: center;">Requester</h3>
+
+<p>A PVField extends Requester. Requester is present so that when database
+errors are found there is someplace to send a message.</p>
+<pre>enum MessageType {
+   infoMessage,warningMessage,errorMessage,fatalErrorMessage
+};
+
+extern StringArray messageTypeName;
+
+class Requester {
+public:
+    virtual String getRequesterName() = 0;
+    virtual void message(String message,MessageType messageType) = 0;
+};</pre>
+
+<p>where</p>
+<dl>
+  <dt style="font-family: courier;"></dt>
+  <dt style="font-family: courier;">MessageType</dt>
+    <dd>Type of message.</dd>
+  <dt style="font-family: courier;">messageTypeName</dt>
+    <dd>An array of strings of the message type names, i.e.
+      String("info"),String("warning"),String("error"),String("fatalError").</dd>
+  <dt style="font-family: courier;">getRequesterName</dt>
+    <dd>Returns the requester name.</dd>
+  <dt style="font-family: courier;">message</dt>
+    <dd>Gives a message to the requester.</dd>
+</dl>
+
+<h3 style="text-align: center">Serialize</h3>
+
+<p>This is a helper class for serialization, which is required for sending
+and receiving pvData over the nerwork.</p>
+<pre>class SerializeHelper : public NoDefaultMethods {
+public:
+    static void writeSize(int s, ByteBuffer* buffer,
+        SerializableControl* flusher);
+    static int readSize(ByteBuffer* buffer,
+        DeserializableControl* control);
+    static void serializeString(const String&amp; value,
+        ByteBuffer* buffer,SerializableControl* flusher);
+    static void serializeSubstring(const String&amp; value, int offset,
+        int count, ByteBuffer* buffer,
+        SerializableControl* flusher);
+    static String deserializeString(ByteBuffer* buffer,
+        DeserializableControl* control);
+private:
+};
+
+class SerializableControl {
+public:
+    virtual void flushSerializeBuffer() =0;
+    virtual void ensureBuffer(int size) =0;
+};
+class DeserializableControl {
+
+public:
+    virtual void ensureData(int size) =0;
+};
+class Serializable {
+public:
+    virtual void serialize(ByteBuffer *buffer,
+        SerializableControl *flusher) = 0;
+    virtual void deserialize(ByteBuffer *buffer,
+        DeserializableControl *flusher) = 0;
+};
+class BitSetSerializable {
+public:
+    virtual void serialize(ByteBuffer *buffer,
+        SerializableControl *flusher,BitSet *bitSet) = 0;
+    virtual void deserialize(ByteBuffer *buffer,
+        DeserializableControl *flusher,BitSet *bitSet) = 0;
+};
+class SerializableArray : public Serializable {
+public:
+    virtual void serialize(ByteBuffer *buffer,
+         SerializableControl *flusher, int offset, int count) = 0;
+};</pre>
+
+<p>where</p>
+<dl>
+  <dt style="font-family: courier;">writeSize</dt>
+    <dd>Serialize the size.</dd>
+  <dt style="font-family: courier;">readSize</dt>
+    <dd>Deserialize the size.</dd>
+  <dt style="font-family: courier;">serializeString</dt>
+    <dd>Serialize a String.</dd>
+  <dt style="font-family: courier;">serializeSubstring</dt>
+    <dd>Serialize a substring.</dd>
+  <dt style="font-family: courier;">deserializeString</dt>
+    <dd>Deserialize a string.</dd>
+</dl>
+
+<p>The following interfaces are called by pvAccess for transporting data over
+the network. The abstract and base classes ensure that these methods are
+properly implemented. </p>
+<pre>x</pre>
+
+<p>x</p>
+
+<h3 style="text-align: center;">Show Constructors and Destructors</h3>
+
+<p>This is a facility that allows a class to report how many objects of that
+class have been created and destroyed. This can help find memory leaks.</p>
+<pre>typedef int64 (*getTotal)();
+
+class ConstructDestructCallback : private NoDefaultMethods {
+public:
+    ConstructDestructCallback(
+        String name,
+        getTotal construct,
+        getTotal destruct,
+        getTotal reference);
+    String getConstructName();
+    int64 getTotalConstruct();
+    int64 getTotalDestruct();
+    int64 getTotalReferenceCount();
+private:
+    ~ConstructDestructCallback();
+    String name;
+    getTotal construct;
+    getTotal destruct;
+    getTotal reference;
+};
+
+class ShowConstructDestruct : private NoDefaultMethods {
+public:
+    static void constuctDestructTotals(FILE *fd);
+    static void registerCallback(ConstructDestructCallback *callback);
+private:
+    ShowConstructDestruct();
+    friend ShowConstructDestruct* getShowConstructDestruct();
+};
+
+extern ShowConstructDestruct* getShowConstructDestruct();</pre>
+
+<p>ConstructDestructCallback is implemented by a class that keeps track of
+how many instances of the class has been created and how many destroyed. The
+clas must implement this class and register it with ShowConstructDestruct. To
+see an example of how this is implemented look at misc/thread.cpp.</p>
+
+<p>Classes that implement this class also include a static method that makes
+ConstructDestructCallback available to code that wants look at the memory
+usage of a particular class.</p>
+
+<p>ShowConstructDestruct is the class that reports the memory uasge of all
+registered classes. It can be called as folows:</p>
+<pre>   getShowConstructDestruct()-&gt;constuctDestructTotals(fd);</pre>
+
+<h3 style="text-align: center">Status</h3>
+
+<p>Status provides a way to pass status back to client code. It is new and
+not currently used by pvData but may be in the future. It is used by code
+that uses pvData.</p>
+<pre>NOT IMPLEMENTED</pre>
+
+<p>The Status methods are:</p>
+<dl>
+  <dt style="font-family: courier;">StatusType</dt>
+    <dd>An enum for the status type.</dd>
+  <dt style="font-family: courier;">getType</dt>
+    <dd>Get the statusType.</dd>
+  <dt style="font-family: courier;">getMessage</dt>
+    <dd>Get a message explaining the error.</dd>
+  <dt style="font-family: courier;">getStackDump</dt>
+    <dd>Get a stack dump.</dd>
+</dl>
+
+<p>The StatusCreate methods are:</p>
+<dl>
+  <dt style="font-family: courier;">getStatusOK</dt>
+    <dd>Get a singleton that returns StatusType.OK and a null message and
+      stackDump.</dd>
+  <dt style="font-family: courier;">createStatus</dt>
+    <dd>Create a new Status.</dd>
+  <dt style="font-family: courier;">deserializeStatus</dt>
+    <dd>Use this method instead of Status.deserialize(), since this allows OK
+      status optimization.</dd>
+</dl>
+
+<h3 style="text-align: center;">Thread</h3>
+
+<h4>ThreadPriority</h4>
+<pre>enum ThreadPriority {
+    lowestPriority,
+    lowerPriority,
+    lowPriority,
+    middlePriority,
+    highPriority,
+    higherPriority,
+    highestPriority
+};
+
+class ThreadPriorityFunc {
+public:
+    static unsigned int const * const getEpicsPriorities();
+    static int getEpicsPriority(ThreadPriority threadPriority);
+};</pre>
+
+<h4>Thread</h4>
+<pre>class Runnable {
+public:
+    virtual void run() = 0;
+};
+
+class Thread;
+
+class Thread :  private NoDefaultMethods {
+public:
+    Thread(String name,ThreadPriority priority,Runnable *runnableReady);
+    ~Thread();
+    static ConstructDestructCallback *getConstructDestructCallback();
+    String getName();
+    ThreadPriority getPriority();
+    static void showThreads(StringBuilder buf);
+    static void sleep(double seconds);
+private:
+};</pre>
+
+<p>Runnable must be implement by code that wants to be run via a thread. It
+has one virtual method: run. Run is the code that is run as a thread. When
+run compeletes it can not be restarted. If code wants to delete a thread then
+it MUST arrange that the run returns before the thread can be deleted. An
+exception is thrown if run remains active when delete is called. </p>
+
+<p>Thread has the methods:</p>
+<dl>
+  <dt style="font-family: courier;">Thread</dt>
+    <dd>The constructor. A thread name and priority must be specified. The
+      run methods of runnable is executed. When the run methods returns the
+      thread will no longer be active but the client code must still delete
+      the thread.</dd>
+  <dt style="font-family: courier;">~Thread</dt>
+    <dd>The destructor. This is called as the result of: 
+      <pre>    delete pthread;</pre>
+    </dd>
+  <dt style="font-family: courier;">getConstructDestructCallback</dt>
+    <dd>Provides access to the number of threads that been created and
+      destroyed.</dd>
+  <dt style="font-family: courier;">getName</dt>
+    <dd>Get the thread name.</dd>
+  <dt style="font-family: courier;">getPriority</dt>
+    <dd>Get the thread priority.</dd>
+  <dt style="font-family: courier;">showThreads</dt>
+    <dd>Get a String that has the name and priority of all currently
+      allocated threads.</dd>
+  <dt style="font-family: courier;">sleep</dt>
+    <dd>Make the current thread sleep for the specified number of
+    seconds.</dd>
+</dl>
+
+<h3 style="text-align: center;">Time Function Call</h3>
+
+<p>TimeFunction is a facility that measures the average number of seconds a
+function call requires. When timeCall is called, it calls function in a loop.
+It starts with a loop of one iteration. If the total elapsed time is less
+then .1 seconds it increases the number of iterrations by a factor of 10. It
+keeps repeating until the elapsed time is greater than .1 seconds. It returns
+the average number of seconds per call.</p>
+<pre>class TimeFunctionRequester {
+public:
+    virtual void function() = 0;
+};
+
+class TimeFunction : private NoDefaultMethods {
+public:
+    TimeFunction(TimeFunctionRequester *requester);
+    ~TimeFunction();
+    double timeCall();
+private:
+    TimeFunctionRequester *requester;
+};</pre>
+
+<p>TimeFunctionRequester must be implemented by code that wants to time how
+long a function takes. It has the single method:</p>
+<dl>
+  <dt style="font-family: courier;">function</dt>
+    <dd>This is the function.</dd>
+</dl>
+
+<p>TimeFunction has the methods:</p>
+<dl>
+  <dt style="font-family: courier;">TimeFunction</dt>
+    <dd>Constructor.</dd>
+  <dt style="font-family: courier;">~TimeFunction</dt>
+    <dd>Destructor.</dd>
+  <dt style="font-family: courier;">timeCall</dt>
+    <dd>Time how long it takes to execute the function. It starts by calling
+      the function one time. If it takes &lt; 1 seconds to doubles the number
+      of times to call the function. It repeats this until it takes at least
+      one second to call it ntimes.</dd>
+</dl>
+
+<h3 style="text-align: center;">Timer</h3>
+
+<p>This provides a general purpose timer. It allows a user callback to be
+called after a delay or periodically. </p>
+<pre>class TimerCallback {
+public:
+    virtual void callback() = 0;
+    virtual void timerStopped() = 0;
+};
+
+class TimerNode : private NoDefaultMethods {
+public:
+    TimerNode(TimerCallback *timerCallback);
+    ~TimerNode();
+    static ConstructDestructCallback *getConstructDestructCallback();
+    void cancel();
+    bool isScheduled();
+private:
+};
+
+class Timer : private NoDefaultMethods {
+public:
+    Timer(String threadName, ThreadPriority priority);
+    ~Timer();
+    static ConstructDestructCallback *getConstructDestructCallback();
+    void scheduleAfterDelay(TimerNode *timerNode,double delay);
+    void schedulePeriodic(TimerNode *timerNode,double delay,double period);
+private:
+};</pre>
+
+<p>TimerCallback must be implemented by the user. It has the following
+methods: </p>
+<dl>
+  <dt style="font-family: courier;">callback</dt>
+    <dd>This is called when a timer expires. This is called with no locks
+      held. When called a delay timer is no longer on the queue but a
+      periodioc timer is on a queue. Thus the callback for a delay timer can
+      issue a new schedule request but a periodic timer must not. Note the
+      explaination of TimerNode.cancel below.</dd>
+  <dt style="font-family: courier;">timerStopped</dt>
+    <dd>Timer.stop was called when a timer request was queued. or if the
+      timer is stopped and a schedule request is made.</dd>
+</dl>
+
+<p>In order to schedule a callback client code must allocate a TimerNode It
+can be used to schedule multiple callbacks. It has the methods:</p>
+<dl>
+  <dt style="font-family: courier;">TimerNode</dt>
+    <dd>The constructor. User code must create a TimeNode in order to call a
+      schedule method.</dd>
+  <dt style="font-family: courier;">~TimerNode</dt>
+    <dd>The destructor. This is called as a result of the client calling: 
+      <pre>    delete timerNode;</pre>
+    </dd>
+  <dt style="font-family: courier;">getConstructDestructCallback</dt>
+    <dd>Provides access to the number of timerNodes that been created and
+      destroyed.</dd>
+  <dt style="font-family: courier;">cancel</dt>
+    <dd>This is called to cancel a timer request. If a callback has been
+      dequeued but the callback not called when cancel is called then a
+      callback may still happen. New schedule requests can be made after a
+      cancel request has been made.</dd>
+  <dt style="font-family: courier;">isScheduled</dt>
+    <dd>Is the timerNode scheduled to be called.</dd>
+</dl>
+
+<p>Timer has the methods:</p>
+<dl>
+  <dt style="font-family: courier;">Timer</dt>
+    <dd>The consttructor.</dd>
+  <dt style="font-family: courier;">~Timer</dt>
+    <dd>The destructor. The queue is emptied and TimerCallback.timerStopped
+      is called for each element of the queue.</dd>
+  <dt style="font-family: courier;">getConstructDestructCallback</dt>
+    <dd>Provides access to the number of timers that been created and
+      destroyed.</dd>
+  <dt style="font-family: courier;">scheduleAfterDelay</dt>
+    <dd>A request to schedule a callback after a delay specified in
+    seconds.</dd>
+  <dt style="font-family: courier;">schedulePeriodic</dt>
+    <dd>Schedule a periodic callback.</dd>
+</dl>
+
+<h3 style="text-align: center;">TimeStamp</h3>
+
+<p>TimeStamp is a class for accessing a timeStamp that consists of the number
+of seconds since the epoch and the number of nanoseconds within the current
+second. The epoch is the posix epoch which is Jan 1, 1970 at 00:00:00
+Universal Time Coordinated.</p>
+
+<p>The seconds since the epoch is kept as an int64 and the nano seconds is
+kept as in int32.</p>
+
+<p>The implementation of some of the methods (getCurrent, fromTime_t, and
+toTime_t) use epicsTime from EPICS base and will thus have a problem when the
+epics secPastEpoch overflows, which will happen in about 2126.</p>
+
+<p>The TimeStamp class provides arithmetic operations on time stamps. The
+result is always kept in normalized form, which means that the nano second
+portion is 0&le;=nano&lt;nanoSecPerSec. Note that it is OK to have timeStamps
+for times previous to the epoch.</p>
+
+<p>TimeStamp acts like a primitive. It can be allocated on the stack and the
+compiler is free to generate default methods, i.e. copy constructor,
+assignment constructor, and destructor.</p>
+
+<p>One use for TimeStamp is to time how long a section of code takes to
+execute. This is done as follows:</p>
+<pre>    TimeStamp startTime;
+    TimeStamp endTime;
+    ...
+    startTime.getCurrent();
+    // code to measure time
+    endTime.getCurrent();
+    double time = TimeStamp::diff(endTime,startTime);</pre>
+
+<p>TimeStamp is described as:</p>
+<pre>extern int32 milliSecPerSec;
+extern int32 microSecPerSec;
+extern int32 nanoSecPerSec;
+extern int64 posixEpochAtEpicsEpoch;
+
+class TimeStamp {
+public:
+    TimeStamp();
+    TimeStamp(int64 secondsPastEpoch,int32 nanoSeconds = 0);
+    //default constructors and destructor are OK
+    //This class should not be extended
+    void normalize();
+    void fromTime_t(const time_t &amp;);
+    void toTime_t(time_t &amp;) const;
+    int64 getSecondsPastEpoch() const;
+    int64 getEpicsSecondsPastEpoch() const;
+    int32 getNanoSeconds() const;
+    void put(int64 secondsPastEpoch,int32 nanoSeconds = 0);
+    void put(int64 milliseconds);
+    void getCurrent();
+    double toSeconds() const ;
+    bool operator==(TimeStamp const &amp;) const;
+    bool operator!=(TimeStamp const &amp;) const;
+    bool operator&lt;=(TimeStamp const &amp;) const;
+    bool operator&lt; (TimeStamp const &amp;) const;
+    bool operator&gt;=(TimeStamp const &amp;) const;
+    bool operator&gt; (TimeStamp const &amp;) const;
+    static double diff(TimeStamp const &amp; a,TimeStamp const &amp; b);
+    TimeStamp &amp; operator+=(int64 seconds);
+    TimeStamp &amp; operator-=(int64 seconds);
+    TimeStamp &amp; operator+=(double seconds);
+    TimeStamp &amp; operator-=(double seconds);
+    int64 getMilliseconds(); //milliseconds since epoch
+private:
+};</pre>
+
+<p>TimeStamp has the methods:</p>
+<dl>
+  <dt style="font-family: courier;">Timer</dt>
+    <dd>The default constructor sets both seconds and nano seconds to 0. The
+      other constructor shown above will call normalize.</dd>
+  <dt style="font-family: courier;">normalize</dt>
+    <dd>Adjust seconds and nano seconds so that
+    0&lt;=nano&lt;nanoSecPerSec</dd>
+  <dt style="font-family: courier;">fromTime_t</dt>
+    <dd>Set the timeStamp value from "time_t", which is defined
+      &lt;ctime&gt;, i.e. by the standard C++ library and also as part of
+      standard C. </dd>
+  <dt style="font-family: courier;">toTime_t</dt>
+    <dd>Convert the timeStamp to "time_t". From time_t, using that standard
+      C++ library &lt;ctime&gt; it is easy to get a "struct tm" that has the
+      the time broken into parts. For example: 
+      <pre>    TimeStamp current;
+    current.getCurrent();
+    time_t tt;
+    current.toTime_t(tt);
+    struct tm ctm;
+    memcpy(&amp;ctm,localtime(&amp;tt),sizeof(struct tm));
+    fprintf(auxfd,
+        "%4.4d.%2.2d.%2.2d %2.2d:%2.2d:%2.2d %d nanoSeconds isDst %s\n",
+        ctm.tm_year+1900,ctm.tm_mon + 1,ctm.tm_mday,
+        ctm.tm_hour,ctm.tm_min,ctm.tm_sec,
+        current.getNanoSeconds(),
+        (ctm.tm_isdst==0) ? "false" : "true");</pre>
+      <p>prints something like:</p>
+      <pre>2010.12.01 07:39:48 807264972 nanoSeconds isDst false</pre>
+    </dd>
+  <dt style="font-family: courier;">getSecondsPastEpoch</dt>
+    <dd>Gets the number of seconds since Jan 1 1970 UTC.</dd>
+  <dt style="font-family: courier;">getEpicsSecondsPastEpoch</dt>
+    <dd>Gets the number of seconds since Jan 1 1990 UTC.</dd>
+  <dt style="font-family: courier;">getNanoSeconds</dt>
+    <dd>Get the number of nano seconds. This is always
+      0&lt;=value&lt;nanoSecPerSec</dd>
+  <dt style="font-family: courier;">put</dt>
+    <dd>Set the timeStamp value. The result will always be normalized.</dd>
+  <dt style="font-family: courier;">getCurrent</dt>
+    <dd>Get the current time.</dd>
+  <dt style="font-family: courier;">toSeconds</dt>
+    <dd>Get the value as a double. It is the number of seconds since the
+      epoch.</dd>
+  <dt style="font-family: courier;">operator==</dt>
+    <dd>Compare equal.</dd>
+  <dt style="font-family: courier;">operator!=</dt>
+    <dd>Compare not equal.</dd>
+  <dt style="font-family: courier;">operator&lt;=</dt>
+    <dd>Is value &lt;= arg.</dd>
+  <dt style="font-family: courier;">operator&lt;</dt>
+    <dd>Is value &lt; arg.</dd>
+  <dt style="font-family: courier;">operator&gt;=</dt>
+    <dd>Is value &gt;= arg.</dd>
+  <dt style="font-family: courier;">operator&gt;</dt>
+    <dd>Is value &gt; arg.</dd>
+  <dt style="font-family: courier;">diff</dt>
+    <dd>The result is (a-b) in seconds.</dd>
+  <dt style="font-family: courier;">operator+=</dt>
+    <dd>Add the argument to the timeStamp. The argument can be an integer or
+      a double. The result will be normalized.</dd>
+  <dt style="font-family: courier;">operator-=</dt>
+    <dd>Subtract the argument from the timeStamp. The argument can be an
+      integer or a double. The result will be normalized.</dd>
+  <dt style="font-family: courier;">getMilliseconds</dt>
+    <dd>Get the timeStamp as number of milliseconds since the epoch.</dd>
+</dl>
+
+<h3 style="text-align: center;">Queue</h3>
+
+<p>This provides a queue which has an immutable capacity, which is specified
+when the queue is created. When the queue is full the user code is expected
+to keep using the current el;ement until a new free element becomes avalable.
+This is used by pvData.monitor.</p>
+<pre>NOT IMPLEMENTED</pre>
+
+<p>A queueCreate instance is created via a call like the following:</p>
+<pre> QueueCreate&lt;MyObject&gt; queueCreate = new QueueCreate&lt;MyObject&gt;();</pre>
+
+<p>Once a queueCreate is available a queue instance is created via code like
+the following:</p>
+<pre>Queue&lt;MyObject&gt; queue create(MyObject[] myObjects) {
+    QueueElement&lt;MyObject&gt;[] queueElements = new QueueElement[length];
+    for(int i=0; i&lt;length; i++) {
+        QueueElement&lt;MonitorElement&gt; queueElement =
+                 queueCreate.createQueueElement(myObjects[i);
+        queueElements[i] = queueElement;
+    }
+    return queueCreate.create(queueElements);
+}</pre>
+
+<p>The queue methods are:</p>
+<dl>
+  <dt style="font-family: courier;">clear</dt>
+    <dd>Make the queue empty.</dd>
+  <dt style="font-family: courier;">getNumberFree</dt>
+    <dd>Get the number of fee elements in the queue.</dd>
+  <dt style="font-family: courier;">capacity</dt>
+    <dd>Get the capacity, i.e. the maximun number of elements the queue can
+      hold.</dd>
+  <dt style="font-family: courier;">getFree</dt>
+    <dd>Get the next free element. Null is returned if no free elements are
+      available. If a non null value is returned then the element belongs to
+      the caller until setUsed is called.</dd>
+  <dt style="font-family: courier;">setUsed</dt>
+    <dd>Set a queue element used. This <span
+      style="font-weight:bold;">must</span> be the element returned by the
+      last call to getFree. </dd>
+  <dt style="font-family: courier;">getUsed</dt>
+    <dd>Get the next used element of null if no more used elements are
+      available.</dd>
+  <dt style="font-family: courier;">releaseUsed</dt>
+    <dd>Set a queue element free. This must be the element returned by the
+      last call to getUsed. </dd>
+</dl>
+
+<p>A producer calls getFree and setUsed via code like the following:</p>
+<pre>   MyObject getFree() {
+       QueueElement&lt;MyObject&gt; queueElement = queue.getFree();
+       if(queueElement==null) return null;
+       return queueElement.getObject();
+  }</pre>
+
+<p>A consumer calls getUsed and releaseUsed via code like the following:</p>
+<pre>     while(true) {
+         QueueElement&lt;MyObject&gt; queueElement = queue.getUsed();
+         if(queueElement==null) break;
+         MyObject myObject = queueElement.getObject();
+         // do something with myObject
+         queue.releaseUsed(queueElement);
+     }</pre>
+<hr />
+
+<h2 style="text-align: center">pvMisc</h2>
+<hr />
+
+<h3>BitSetUtil</h3>
+
+<p>The following is also provided:</p>
+<pre>NOT DONE</pre>
+
+<p>This provides functions that operate of a BitSet for a PVStructure. It
+currently has only one method:</p>
+<dl>
+  <dt style="font-family: courier;"><span
+  style="font-family: Courier">compress</span></dt>
+    <dd>Compress the bits in a BitSet related to a structure.<br />
+      For each structure: 
+      <ol>
+        <li>If the bit for the structure is set then the bit for all
+          subfields of the structure are cleared. </li>
+        <li>If the bit for the structure is not set but all immediate
+          subfields have their bit set then the bit for the structure is set
+          and the bits for all subfields are cleared. </li>
+      </ol>
+      Note that this is a recursive algorithm. That is if every immediate
+      subfield has it's offset bit set then the bits for ALL fields that
+      reside in the structure will be cleared.</dd>
+    <dd>Channel Access can call this before sending data. It can then pass
+      entire structures if the structure offset bit is set. </dd>
+</dl>
+
+<h3 style="text-align: center;">MultiChoice</h3>
+
+<p>MultiChoice defines an array of strings and a bit set that selects an
+arbitrary set of the choices.</p>
+<pre>NOT DONE</pre>
+
+<p>where</p>
+<dl>
+  <dt style="font-family: courier;">getBitMask</dt>
+    <dd>Returns the bitMask.</dd>
+  <dt style="font-family: courier;">getChoices</dt>
+    <dd>Returns the complete set of choices..</dd>
+  <dt style="font-family: courier;">getSelectedChoices</dt>
+    <dd>Returns the interface for getting the selected choices..</dd>
+  <dt style="font-family: courier;">setBit</dt>
+    <dd>Select the choice for specified bit..</dd>
+  <dt style="font-family: courier;">clear</dt>
+    <dd>Clear the bitMask, i.e. no choices are selected..</dd>
+  <dt style="font-family: courier;">registerChoice</dt>
+    <dd>Register a new choice. If thed choice already exists then it''s index
+      is returned. If not it is appended to the choices.</dd>
 </dl>
 <hr />
 
