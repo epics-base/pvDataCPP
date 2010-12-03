@@ -57,7 +57,7 @@ typedef int32 * IntArray;
 typedef int64 * LongArray;
 typedef float * FloatArray;
 typedef double * DoubleArray;
-//typedef String * StringArray; alreadt defined in pvType.h
+//typedef String * StringArray; already defined in pvType.h
 
 class PVAuxInfo : private NoDefaultMethods {
 public:

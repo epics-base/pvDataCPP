@@ -20,6 +20,8 @@ INC += showConstructDestruct.h
 INC += timeStamp.h
 INC += timeFunction.h
 INC += timer.h
+INC += queueVoid.h
+INC += queue.h
 
 LIBSRCS += byteBuffer.cpp
 LIBSRCS += bitSet.cpp
@@ -33,6 +35,7 @@ LIBSRCS += executor.cpp
 LIBSRCS += timeStamp.cpp
 LIBSRCS += timeFunction.cpp
 LIBSRCS += timer.cpp
+LIBSRCS += queueVoid.cpp
 
 LIBRARY=pvMisc
 

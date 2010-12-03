@@ -15,8 +15,8 @@ Overview<br />
 <p>TODO</p>
 <ul>
   <li>rename epicsException to exception</li>
-  <li>Implement pvMisc: BitSetUtil MessageQueue, MultiChoice,Status, and
-  Queue</li>
+  <li>implement misc: MessageQueue</li>
+  <li>Implement pvMisc: BitSetUtil, and Status.</li>
   <li>Implement property</li>
 </ul>
 CONTENTS 
@@ -3315,33 +3315,48 @@ private:
 
 <h3 style="text-align: center;">Queue</h3>
 
-<p>This provides a queue which has an immutable capacity, which is specified
-when the queue is created. When the queue is full the user code is expected
-to keep using the current el;ement until a new free element becomes avalable.
-This is used by pvData.monitor.</p>
-<pre>NOT IMPLEMENTED</pre>
+<p>This provides a queue which has an immutable capacit. When the queue is
+full the user code is expected to keep using the current element until a new
+free element becomes avalable.</p>
+<pre>template &lt;typename T&gt;
+class QueueElement : private QueueElementVoid {
+public:
+    QueueElement(T *object) : QueueElementVoid(static_cast&lt;void *&gt;(object)){}
+    ~QueueElement() {}
+    T *getObject() { return static_cast&lt;T *&gt;(QueueElementVoid::getObject());}
+    friend  class Queue&lt;T&gt;;
+};
 
-<p>A queueCreate instance is created via a call like the following:</p>
-<pre> QueueCreate&lt;MyObject&gt; queueCreate = new QueueCreate&lt;MyObject&gt;();</pre>
+template &lt;typename T&gt;
+class Queue : private QueueVoid {
+public:
+    Queue(QueueElement&lt;T&gt; **array,int number)
+    : QueueVoid((QueueElementVoid**)array,number)
+    //: QueueVoid(static_cast&lt;QueueElementVoid**&gt;(array),number)
+    {}
+    ~Queue() {}
+    void clear() {QueueVoid::clear();}
+    int getNumberFree() {return QueueVoid::getNumberFree();}
+    int capacity() {return QueueVoid::capacity();}
+    QueueElement&lt;T&gt; *getFree() {
+        return static_cast&lt;QueueElement&lt;T&gt; *&gt;(QueueVoid::getFree());}
+    void setUsed(QueueElement&lt;T&gt; *queueElement) {
+        QueueVoid::setUsed(static_cast&lt;QueueElementVoid *&gt;(queueElement));}
+    QueueElement&lt;T&gt; *getUsed() {
+        return static_cast&lt;QueueElement&lt;T&gt; *&gt;(QueueVoid::getUsed());}
+    void releaseUsed(QueueElement&lt;T&gt; *queueElement) {
+        QueueVoid::releaseUsed(static_cast&lt;QueueElementVoid *&gt;(queueElement));}
+};</pre>
 
-<p>Once a queueCreate is available a queue instance is created via code like
-the following:</p>
-<pre>Queue&lt;MyObject&gt; queue create(MyObject[] myObjects) {
-    QueueElement&lt;MyObject&gt;[] queueElements = new QueueElement[length];
-    for(int i=0; i&lt;length; i++) {
-        QueueElement&lt;MonitorElement&gt; queueElement =
-                 queueCreate.createQueueElement(myObjects[i);
-        queueElements[i] = queueElement;
-    }
-    return queueCreate.create(queueElements);
-}</pre>
+<p>miscTest/queueTest.cpp provides an example of how to define queueElements
+and a queue.</p>
 
 <p>The queue methods are:</p>
 <dl>
   <dt style="font-family: courier;">clear</dt>
     <dd>Make the queue empty.</dd>
   <dt style="font-family: courier;">getNumberFree</dt>
-    <dd>Get the number of fee elements in the queue.</dd>
+    <dd>Get the number of free elements in the queue.</dd>
   <dt style="font-family: courier;">capacity</dt>
     <dd>Get the capacity, i.e. the maximun number of elements the queue can
       hold.</dd>
@@ -3362,19 +3377,19 @@ the following:</p>
 </dl>
 
 <p>A producer calls getFree and setUsed via code like the following:</p>
-<pre>   MyObject getFree() {
-       QueueElement&lt;MyObject&gt; queueElement = queue.getFree();
-       if(queueElement==null) return null;
-       return queueElement.getObject();
+<pre>   MyObject *getFree() {
+       QueueElement&lt;MyObject&gt; *queueElement = queue-&gt;getFree();
+       if(queueElement==0) return 0;
+       return queueElement-&gt;getObject();
   }</pre>
 
 <p>A consumer calls getUsed and releaseUsed via code like the following:</p>
 <pre>     while(true) {
-         QueueElement&lt;MyObject&gt; queueElement = queue.getUsed();
-         if(queueElement==null) break;
-         MyObject myObject = queueElement.getObject();
+         QueueElement&lt;MyObject&gt; *queueElement = queue-&gt;getUsed();
+         if(queueElement==0) break;
+         MyObject *myObject = queueElement-&gt;getObject();
          // do something with myObject
-         queue.releaseUsed(queueElement);
+         queue-&gt;releaseUsed(queueElement);
      }</pre>
 <hr />
 
