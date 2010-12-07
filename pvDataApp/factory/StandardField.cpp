@@ -300,8 +300,7 @@ StructureConstPtr StandardField::structure(
     return fieldCreate->createStructure(fieldName,numFields,fields);
 }
 
-StructureConstPtr StandardField::enumerated(
-    String fieldName,StringArray choices)
+StructureConstPtr StandardField::enumerated(String fieldName)
 {
     FieldConstPtrArray fields = new FieldConstPtr[2];
     fields[0] = fieldCreate->createScalar(String("index"),pvInt);
@@ -310,9 +309,9 @@ StructureConstPtr StandardField::enumerated(
 }
 
 StructureConstPtr StandardField::enumerated(
-    String fieldName,StringArray choices, String properties)
+    String fieldName,String properties)
 {
-    StructureConstPtr field = standardField->enumerated(valueFieldName,choices);
+    StructureConstPtr field = standardField->enumerated(valueFieldName);
     return createProperties(fieldName,field,properties);
 }
 
@@ -362,7 +361,7 @@ StructureConstPtr StandardField::structureValue(
     return fieldCreate->createStructure(valueFieldName,numFields,fields);
 }
 
-StructureConstPtr StandardField::enumeratedValue(StringArray choices)
+StructureConstPtr StandardField::enumeratedValue()
 {
     FieldConstPtrArray fields = new FieldConstPtr[2];
     fields[0] = fieldCreate->createScalar(String("index"),pvInt);
@@ -370,10 +369,9 @@ StructureConstPtr StandardField::enumeratedValue(StringArray choices)
     return fieldCreate->createStructure(valueFieldName,2,fields);
 }
 
-StructureConstPtr StandardField::enumeratedValue(
-    StringArray choices, String properties)
+StructureConstPtr StandardField::enumeratedValue( String properties)
 {
-    StructureConstPtr field = standardField->enumerated(valueFieldName,choices);
+    StructureConstPtr field = standardField->enumerated(valueFieldName);
     return createProperties(valueFieldName,field,properties);
 }
 

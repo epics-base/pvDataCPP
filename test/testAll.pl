@@ -10,3 +10,5 @@ system ("./testPVStructureArray.pl");
 system ("./testPVAuxInfo.pl");
 system ("./testTimeStamp.pl");
 system ("./testTimer.pl");
+system ("./testQueue.pl");
+system ("./testMessageQueue.pl");

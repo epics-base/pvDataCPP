@@ -67,7 +67,7 @@ static void initPvt()
 }
 
 
-QueueElementVoid::QueueElementVoid(void *object)
+QueueElementVoid::QueueElementVoid(ObjectPtr object)
 : object(object)
 {
     initPvt();
@@ -88,16 +88,21 @@ ConstructDestructCallback *QueueElementVoid::getConstructDestructCallback()
     return pCDCallbackQueueNode;
 }
 
-void *QueueElementVoid::getObject() {
+ObjectPtr QueueElementVoid::getObject() {
     return object;
 }
 
-QueueVoid::QueueVoid(QueueElementVoidPtrArray array,int number)
-: array(array),number(number),
+
+
+QueueVoid::QueueVoid(ObjectPtr object[],int number)
+: array(new QueueElementVoidPtr[number]),number(number),
   numberFree(number),numberUsed(0),
   nextGetFree(0),nextSetUsed(),
   nextGetUsed(0),nextReleaseUsed(0)
 {
+    for(int i=0; i<number; i++) {
+        array[i] = new QueueElementVoid(object[i]);
+    }
     initPvt();
     Lock xx(globalMutex);
     totalQueueConstruct++;
@@ -105,6 +110,10 @@ QueueVoid::QueueVoid(QueueElementVoidPtrArray array,int number)
 
 QueueVoid::~QueueVoid()
 {
+    for(int i=0; i<number; i++) {
+        delete array[i];
+    }
+    delete[]array;
     Lock xx(globalMutex);
     totalQueueDestruct++;
 }

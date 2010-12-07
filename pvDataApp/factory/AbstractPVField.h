@@ -193,20 +193,22 @@ void PVField::renameField(String  newName)
     FieldCreate *fieldCreate = getFieldCreate();
     switch(pImpl->field->getType()) {
         case scalar: {
-            ScalarConstPtr scalar = (ScalarConstPtr)pImpl->field;
+            ScalarConstPtr scalar = static_cast<ScalarConstPtr>(pImpl->field);
             scalar = fieldCreate->createScalar(newName, scalar->getScalarType());
             pImpl->field = scalar;
             break;
         }
         case scalarArray: {
-            ScalarArrayConstPtr array = (ScalarArrayConstPtr)pImpl->field;
+            ScalarArrayConstPtr array =
+                static_cast<ScalarArrayConstPtr>(pImpl->field);
             array = fieldCreate->createScalarArray(
                 newName, array->getElementType());
             pImpl->field = array;
             break;
         }
         case structure: {
-            StructureConstPtr structure = (StructureConstPtr)pImpl->field;
+            StructureConstPtr structure =
+                 static_cast<StructureConstPtr>(pImpl->field);
             FieldConstPtrArray origFields = structure->getFields();
             int numberFields = structure->getNumberFields();
             structure = fieldCreate->createStructure(
@@ -215,7 +217,8 @@ void PVField::renameField(String  newName)
             break;
         }
         case structureArray: {
-            StructureArrayConstPtr structureArray = (StructureArrayConstPtr)pImpl->field;
+            StructureArrayConstPtr structureArray =
+                static_cast<StructureArrayConstPtr>(pImpl->field);
             structureArray = fieldCreate->createStructureArray(newName,
                 structureArray->getStructure());
             pImpl->field = structureArray;
@@ -258,7 +261,7 @@ void PVField::computeOffset(PVField   *  pvField) {
            pvField->pImpl->nextFieldOffset = 1;
            return;
         }
-        pvTop = (PVStructure *)pvField;
+        pvTop = static_cast<PVStructure *>(pvField);
     } else {
         while(pvTop->getParent()!=0) pvTop = pvTop->getParent();
     }
@@ -292,7 +295,7 @@ void PVField::computeOffset(PVField   *  pvField) {
 void PVField::computeOffset(PVField   *  pvField,int offset) {
    int beginOffset = offset;
    int nextOffset = offset + 1;
-   PVStructure *pvStructure = (PVStructure *)pvField;
+   PVStructure *pvStructure = static_cast<PVStructure *>(pvField);
    PVFieldPtrArray pvFields = pvStructure->getPVFields();
    for(int i=0; i < pvStructure->getStructure()->getNumberFields(); i++) {
        offset = nextOffset;

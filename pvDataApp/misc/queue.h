@@ -18,18 +18,19 @@ class QueueElement;
 template <typename T>
 class QueueElement : private QueueElementVoid {
 public:
+    T *getObject() { return static_cast<T *>(QueueElementVoid::getObject());}
+protected:
     QueueElement(T *object) : QueueElementVoid(static_cast<void *>(object)){}
     ~QueueElement() {}
-    T *getObject() { return static_cast<T *>(QueueElementVoid::getObject());}
     friend  class Queue<T>;
 };
 
 template <typename T>
 class Queue : private QueueVoid {
 public:
-    Queue(QueueElement<T> **array,int number)
-    : QueueVoid((QueueElementVoid**)array,number)
-    //: QueueVoid(static_cast<QueueElementVoid**>(array),number)
+    Queue(T *array[],int number)
+    : QueueVoid((ObjectPtr*)array,number)
+    //: QueueVoid(static_cast<ObjectPtr*>(array),number)
     {}
     ~Queue() {}
     void clear() {QueueVoid::clear();}

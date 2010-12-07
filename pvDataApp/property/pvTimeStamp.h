@@ -6,24 +6,26 @@
  */
 #include <string>
 #include <stdexcept>
-#ifndef PVTIMESTAMP_H
-#define PVTIMESTAMP_H
-#include "pvTypes.h"
+#include "pvType.h"
 #include "timeStamp.h"
 #include "pvData.h"
+#ifndef PVTIMESTAMP_H
+#define PVTIMESTAMP_H
 namespace epics { namespace pvData { 
 
 class PVTimeStamp {
 public:
+    PVTimeStamp() : pvSecs(0),pvNano(0) {}
     //default constructors and destructor are OK
     //This class should not be extended
     
     //returns (false,true) if pvField(isNot, is valid timeStamp structure
     bool attach(PVField *pvField);
-    // throws logic_error is not attached to PVField
-    TimeStamp &get();
-    // throws logic_error is not attached to PVField
-    void put (TimeStamp &timeStamp);
+    void detach();
+    // following throw logic_error is not attached to PVField
+    // a set returns false if field is immutable
+    TimeStamp get() const;
+    bool set(TimeStamp timeStamp);
 private:
     PVLong* pvSecs;
     PVInt* pvNano;

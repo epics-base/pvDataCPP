@@ -110,14 +110,13 @@ void Sink::run()
 }
 
 static void testBasic(FILE * fd,FILE *auxfd ) {
-    Data dataArray[numElements];
-    DataElement *array[numElements];
+    Data *dataArray[numElements];
     for(int i=0; i<numElements; i++) {
-        array[i] = new DataElement(&dataArray[i]);
-        dataArray[i].a = i;
-        dataArray[i].b = i*10;
+        dataArray[i] = new Data();
+        dataArray[i]->a = i;
+        dataArray[i]->b = i*10;
     }
-    DataQueue *queue = new DataQueue(array,numElements);
+    DataQueue *queue = new DataQueue(dataArray,numElements);
     Sink *sink = new Sink(queue,auxfd);
     while(true) {
         DataElement *element = queue->getFree();
@@ -139,7 +138,7 @@ static void testBasic(FILE * fd,FILE *auxfd ) {
     sink->stop();
     delete sink;
     delete queue;
-    for(int i=0; i<numElements; i++) delete array[i];
+    for(int i=0; i<numElements; i++) delete dataArray[i];
 }
 
 int main(int argc, char *argv[]) {

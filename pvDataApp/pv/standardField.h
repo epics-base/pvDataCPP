@@ -29,10 +29,8 @@ public:
         StructureConstPtr structure,String properties);
     StructureConstPtr structure(String fieldName,
         int numFields,FieldConstPtrArray fields);
-    StructureConstPtr enumerated(String fieldName,
-        StringArray choices);
-    StructureConstPtr enumerated(String fieldName,
-        StringArray choices, String properties);
+    StructureConstPtr enumerated(String fieldName);
+    StructureConstPtr enumerated(String fieldName, String properties);
     ScalarConstPtr scalarValue(ScalarType type);
     StructureConstPtr scalarValue(ScalarType type,String properties);
     ScalarArrayConstPtr scalarArrayValue(ScalarType elementType);
@@ -43,9 +41,8 @@ public:
         String properties);
     StructureConstPtr structureValue(
         int numFields,FieldConstPtrArray fields);
-    StructureConstPtr enumeratedValue(StringArray choices);
-    StructureConstPtr enumeratedValue(StringArray choices,
-         String properties);
+    StructureConstPtr enumeratedValue();
+    StructureConstPtr enumeratedValue(String properties);
     StructureConstPtr alarm();
     StructureConstPtr timeStamp();
     StructureConstPtr display();

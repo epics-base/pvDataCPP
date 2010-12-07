@@ -73,19 +73,34 @@ PVStructure* StandardPVField::structureArray(PVStructure *parent,
 }
 
 PVStructure * StandardPVField::enumerated(PVStructure *parent,
-    String fieldName,StringArray choices)
+    String fieldName,StringArray choices,int number)
 {
-    StructureConstPtr field = standardField->enumerated(
-        fieldName,choices);
-    return pvDataCreate->createPVStructure(parent,field);
+    StructureConstPtr field = standardField->enumerated(fieldName);
+    PVStructure *pvStructure = pvDataCreate->createPVStructure(parent,field);
+    PVScalarArray *pvScalarArray = pvStructure->getScalarArrayField(
+        "choices",pvString);
+    if(pvScalarArray==0) {
+        throw std::logic_error(String("StandardPVField::enumerated"));
+    }
+    PVStringArray *pvChoices = static_cast<PVStringArray *>(pvScalarArray);
+    pvChoices->put(0,number,choices,0);
+    return pvStructure;
 }
 
 PVStructure * StandardPVField::enumerated(PVStructure *parent,
-    String fieldName,StringArray choices, String properties)
+    String fieldName,StringArray choices,int number, String properties)
 {
     StructureConstPtr field = standardField->enumerated(
-        fieldName,choices,properties);
-    return pvDataCreate->createPVStructure(parent,field);
+        fieldName,properties);
+    PVStructure *pvStructure =  pvDataCreate->createPVStructure(parent,field);
+    PVScalarArray *pvScalarArray = pvStructure->getScalarArrayField(
+        fieldName += ".choices",pvString);
+    if(pvScalarArray==0) {
+        throw std::logic_error(String("StandardPVField::enumerated"));
+    }
+    PVStringArray *pvChoices = static_cast<PVStringArray *>(pvScalarArray);
+    pvChoices->put(0,number,choices,0);
+    return pvStructure;
 }
 
 PVScalar * StandardPVField::scalarValue(PVStructure *parent,
@@ -135,17 +150,33 @@ PVStructure * StandardPVField::structureArrayValue(PVStructure *parent,
 }
 
 PVStructure * StandardPVField::enumeratedValue(PVStructure *parent,
-    StringArray choices)
+    StringArray choices,int number)
 {
-    StructureConstPtr field = standardField->enumeratedValue( choices);
-    return pvDataCreate->createPVStructure(parent,field);
+    StructureConstPtr field = standardField->enumeratedValue();
+    PVStructure *pvStructure = pvDataCreate->createPVStructure(parent,field);
+    PVScalarArray *pvScalarArray = pvStructure->getScalarArrayField(
+        "choices",pvString);
+    if(pvScalarArray==0) {
+        throw std::logic_error(String("StandardPVField::enumerated"));
+    }
+    PVStringArray *pvChoices = static_cast<PVStringArray *>(pvScalarArray);
+    pvChoices->put(0,number,choices,0);
+    return pvStructure;
 }
 
 PVStructure * StandardPVField::enumeratedValue(PVStructure *parent,
-    StringArray choices, String properties)
+    StringArray choices, int number,String properties)
 {
-    StructureConstPtr field = standardField->enumeratedValue(
-        choices,properties);
+    StructureConstPtr field = standardField->enumeratedValue( properties);
+    PVStructure *pvStructure =  pvDataCreate->createPVStructure(parent,field);
+    PVScalarArray *pvScalarArray = pvStructure->getScalarArrayField(
+        String("value.choices"),pvString);
+    if(pvScalarArray==0) {
+        throw std::logic_error(String("StandardPVField::enumerated"));
+    }
+    PVStringArray *pvChoices = static_cast<PVStringArray *>(pvScalarArray);
+    pvChoices->put(0,number,choices,0);
+    return pvStructure;
     return pvDataCreate->createPVStructure(parent,field);
 }
 

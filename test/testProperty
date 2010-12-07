@@ -1,0 +1,76 @@
+structure value
+    double value 0
+    structure alarm
+        int severity 0
+        string message 
+    structure timeStamp
+        long secondsPastEpoch 0
+        int nanoSeconds 0
+    structure display
+        string description 
+        string format 
+        string units 
+        structure limit
+            double low 0
+            double high 0
+    structure control
+        structure limit
+            double low 0
+            double high 0
+        double minStep 0
+structure value
+    structure value
+        int index 0
+        stringArray choices [0,1,2,3]
+    structure alarm
+        int severity 0
+        string message 
+    structure timeStamp
+        long secondsPastEpoch 0
+        int nanoSeconds 0
+testAlarm
+ message testMessage severity major
+testTimeStamp
+testControl
+ low 1.000000 high 10.000000
+testDisplay
+ low -10.000000 high -1.000000
+testEnumerated
+index 0 choice 0 choices 0 1 2 3
+index 2 choice 2
+doubleRecord
+structure value
+    double value 0
+    structure alarm
+        int severity 2
+        string message testMessage
+    structure timeStamp
+        long secondsPastEpoch 0
+        int nanoSeconds 0
+    structure display
+        string description testDescription
+        string format %f10.0
+        string units volts
+        structure limit
+            double low -10
+            double high -1
+    structure control
+        structure limit
+            double low 1
+            double high 10
+        double minStep 0
+enumeratedRecord
+structure value
+    structure value
+        int index 2
+        stringArray choices [0,1,2,3]
+    structure alarm
+        int severity 0
+        string message 
+    structure timeStamp
+        long secondsPastEpoch 0
+        int nanoSeconds 0
+linkedListNode: totalConstruct 5 totalDestruct 0
+linkedList: totalConstruct 1 totalDestruct 0
+field: totalConstruct 127 totalDestruct 34 totalReference 93
+pvField: totalConstruct 30 totalDestruct 30

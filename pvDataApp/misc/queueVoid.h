@@ -12,36 +12,35 @@ namespace epics { namespace pvData {
 class QueueVoid;
 class QueueElementVoid;
 
+typedef void * ObjectPtr;
 typedef QueueElementVoid * QueueElementVoidPtr;
 typedef QueueElementVoidPtr * QueueElementVoidPtrArray;
 
 class QueueElementVoid {
 public:
-    ~QueueElementVoid();
     static ConstructDestructCallback *getConstructDestructCallback();
-    void *getObject();
 protected:
-    QueueElementVoid(void *object);
-private:
-    void *object;
+    ObjectPtr getObject();
+    QueueElementVoid(ObjectPtr object);
+    ~QueueElementVoid();
+    ObjectPtr object;
     friend  class QueueVoid;
 };
 
-typedef  class QueueElementVoid * QueueElementVoidArray;
 
 class QueueVoid {
 public:
-    ~QueueVoid();
     static ConstructDestructCallback *getConstructDestructCallback();
+protected:
+    QueueVoid(ObjectPtr array[],int number);
+    ~QueueVoid();
     void clear();
     int getNumberFree();
     int capacity();
-    QueueElementVoid *getFree();
+    QueueElementVoidPtr getFree();
     void setUsed(QueueElementVoid *queueElement);
     QueueElementVoid *getUsed();
     void releaseUsed(QueueElementVoid *queueElement);
-protected:
-    QueueVoid(QueueElementVoidPtrArray array,int number);
 private:
     friend class QueueElementVoid;
     QueueElementVoidPtrArray array;

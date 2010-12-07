@@ -1,0 +1,5 @@
+linkedListNode: totalConstruct 6 totalDestruct 0
+linkedList: totalConstruct 1 totalDestruct 0
+messageQueue: totalConstruct 1 totalDestruct 1
+queueElement: totalConstruct 3 totalDestruct 3
+queue: totalConstruct 1 totalDestruct 1

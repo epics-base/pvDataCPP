@@ -22,6 +22,7 @@ INC += timeFunction.h
 INC += timer.h
 INC += queueVoid.h
 INC += queue.h
+INC += messageQueue.h
 
 LIBSRCS += byteBuffer.cpp
 LIBSRCS += bitSet.cpp
@@ -36,6 +37,7 @@ LIBSRCS += timeStamp.cpp
 LIBSRCS += timeFunction.cpp
 LIBSRCS += timer.cpp
 LIBSRCS += queueVoid.cpp
+LIBSRCS += messageQueue.cpp
 
 LIBRARY=pvMisc
 

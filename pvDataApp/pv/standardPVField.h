@@ -29,9 +29,9 @@ public:
     PVStructure* structureArray(PVStructure *parent,
         String fieldName,StructureConstPtr structure,String properties);
     PVStructure * enumerated(PVStructure *parent,
-        String fieldName,StringArray choices);
+        String fieldName,StringArray choices, int number);
     PVStructure * enumerated(PVStructure *parent,
-        String fieldName,StringArray choices, String properties);
+        String fieldName,StringArray choices, int number, String properties);
     PVScalar * scalarValue(PVStructure *parent,ScalarType type);
     PVStructure * scalarValue(PVStructure *parent,
         ScalarType type,String properties);
@@ -42,9 +42,9 @@ public:
         StructureConstPtr structure);
     PVStructure * structureArrayValue(PVStructure *parent,
         StructureConstPtr structure,String properties);
-    PVStructure * enumeratedValue(PVStructure *parent,StringArray choices);
+    PVStructure * enumeratedValue(PVStructure *parent,StringArray choices,int number);
     PVStructure * enumeratedValue(PVStructure *parent,
-        StringArray choices, String properties);
+        StringArray choices,int number, String properties);
     PVStructure * alarm(PVStructure *parent);
     PVStructure * timeStamp(PVStructure *parent);
     PVStructure * display(PVStructure *parent);

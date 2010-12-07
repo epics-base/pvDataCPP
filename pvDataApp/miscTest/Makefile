@@ -14,6 +14,10 @@ PROD_HOST += testQueue
 testQueue_SRCS += testQueue.cpp
 testQueue_LIBS += pvMisc Com
 
+PROD_HOST += testMessageQueue
+testMessageQueue_SRCS += testMessageQueue.cpp
+testMessageQueue_LIBS += pvMisc Com
+
 PROD_HOST += testThread
 testThread_SRCS += testThread.cpp
 testThread_LIBS += pvMisc Com

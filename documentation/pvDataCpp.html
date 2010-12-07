@@ -10,13 +10,13 @@
 <body>
 <h1 style="text-align: center">EPICS pvDataCPP<br />
 Overview<br />
-2010.12.03</h1>
+2010.12.06</h1>
 
 <p>TODO</p>
 <ul>
   <li>rename epicsException to exception</li>
-  <li>implement misc: MessageQueue</li>
-  <li>Implement pvMisc: BitSetUtil, and Status.</li>
+  <li>implement misc: Status??</li>
+  <li>Implement pvMisc: BitSetUtil.</li>
   <li>Implement property</li>
 </ul>
 CONTENTS 
@@ -2670,7 +2670,26 @@ once. This can be implemented as follows:</p>
 <h3 style="text-align: center;">Message Queue</h3>
 
 <h4>Definitions</h4>
-<pre>NOT IMPLEMENTED</pre>
+<pre>class MessageNode {
+public:
+    String getMessage() const;
+    MessageType getMessageType() const;
+};
+
+class MessageQueue : private NoDefaultMethods {
+public:
+    MessageQueue(int size);
+    ~MessageQueue();
+    static ConstructDestructCallback *getConstructDestructCallback();
+    MessageNode *get();
+    // must call release before next get
+    void release();
+    // return (false,true) if message (was not, was) put into queue
+    bool put(String message,MessageType messageType,bool replaceLast);
+    bool isEmpty() const;
+    bool isFull() const;
+    int getClearOverrun();
+};</pre>
 
 <h4>MessageQueue</h4>
 
@@ -2679,76 +2698,39 @@ higher priority threads.</p>
 
 <p>A messageNode is a class with two public data members:</p>
 <dl>
-  <dt style="font-family: courier;">message</dt>
+  <dt style="font-family: courier;">getMessage</dt>
     <dd>The message.</dd>
-  <dt style="font-family: courier;">messageType</dt>
+  <dt style="font-family: courier;">getMessageType</dt>
     <dd>The message type.</dd>
 </dl>
 
-<p>A messageQueue is an interface with methods:</p>
+<p>A messageQueue is an interface with public methods:</p>
 <dl>
+  <dt style="font-family: courier;">MessageQueue</dt>
+    <dd>The constructor. The queue size must be specified.</dd>
+  <dt style="font-family: courier;">~MessageQueue</dt>
+    <dd>The destructor.</dd>
   <dt style="font-family: courier;">put</dt>
     <dd>Put a new message into the queue. False is returned if the queue was
-      full and true otherwise.</dd>
+      full and true otherwise. If <span
+      style="font-family: courier;">replaceLast</span> is <span
+      style="font-family: courier;">true</span> then the last message is
+      replaced with this message. </dd>
+  <dt style="font-family: courier;">get</dt>
+    <dd>Get the oldest queue element. If the queue is empty null is returned.
+      Before the next get can be issued release must be called.</dd>
+  <dt style="font-family: courier;">release</dt>
+    <dd>Release the queue element returned by the last get.</dd>
   <dt style="font-family: courier;">isEmpty</dt>
     <dd>Is the queue empty?</dd>
   <dt style="font-family: courier;">isFull</dt>
     <dd>Is the queue full?</dd>
-  <dt style="font-family: courier;">replaceFirst</dt>
-    <dd>Replace the oldest member in the queue.</dd>
-  <dt style="font-family: courier;">replaceLast</dt>
-    <dd>Replace the newest member in the queue.</dd>
   <dt style="font-family: courier;">getClearOverrun</dt>
-    <dd>Get the number of times replaceFirst or replaceLast have been called
-      since the last call to getClearOverrun. The internal counter is reset
-      to 0.</dd>
+    <dd>Get the number of times put has been called but no free element is
+      available.</dd>
 </dl>
 
-<p>MessageQueueFactory provides the public method:</p>
-<dl>
-  <dt style="font-family: courier;">create</dt>
-    <dd>Create a MessageQueue and return the interface.</dd>
-</dl>
-
-<p>An example is:</p>
-<pre>    private ExecutorNode executorNode;
-    ...
-      executorNode = executor.createNode(this);
-    ...
-
-    public void message(final String message, MessageType messageType) {
-        boolean execute = false;
-        synchronized(messageQueue) {
-            if(messageQueue.isEmpty()) execute = true;
-            if(messageQueue.isFull()) {
-                messageQueue.replaceLast(message, messageType);
-            } else {
-                messageQueue.put(message, messageType);
-            }
-        }
-        if(syncExec) {
-            iocExecutor.execute(executorNode);
-        }
-    }
-    ...
-    public run() { // handle messages
-        while(true) {
-            String message = null;
-            int numOverrun = 0;
-            synchronized(messageQueue) {
-                MessageNode messageNode = messageQueue.get();
-                numOverrun = messageQueue.getClearOverrun();
-                if(messageNode==null &amp;&amp; numOverrun==0) break;
-                message = messageNode.message;
-            }
-            if(numOverrun&gt;0) {
-                System.out.printf(String.format("%n%d missed messages&amp;n", numOverrun));
-            }
-            if(message!=null) {
-               System.out.printf(String.format("%s%n",message));
-            }
-        }
-    }</pre>
+<p>Look at miscTest/testMessageQueue.cpp for an example.</p>
 
 <h3 style="text-align: center;">NoDefaultMethods</h3>
 
@@ -3315,41 +3297,31 @@ private:
 
 <h3 style="text-align: center;">Queue</h3>
 
-<p>This provides a queue which has an immutable capacit. When the queue is
+<p>This provides a queue which has an immutable capacity. When the queue is
 full the user code is expected to keep using the current element until a new
 free element becomes avalable.</p>
 <pre>template &lt;typename T&gt;
 class QueueElement : private QueueElementVoid {
 public:
-    QueueElement(T *object) : QueueElementVoid(static_cast&lt;void *&gt;(object)){}
-    ~QueueElement() {}
     T *getObject() { return static_cast&lt;T *&gt;(QueueElementVoid::getObject());}
-    friend  class Queue&lt;T&gt;;
+protected:
 };
 
 template &lt;typename T&gt;
 class Queue : private QueueVoid {
 public:
-    Queue(QueueElement&lt;T&gt; **array,int number)
-    : QueueVoid((QueueElementVoid**)array,number)
-    //: QueueVoid(static_cast&lt;QueueElementVoid**&gt;(array),number)
-    {}
-    ~Queue() {}
-    void clear() {QueueVoid::clear();}
-    int getNumberFree() {return QueueVoid::getNumberFree();}
-    int capacity() {return QueueVoid::capacity();}
-    QueueElement&lt;T&gt; *getFree() {
-        return static_cast&lt;QueueElement&lt;T&gt; *&gt;(QueueVoid::getFree());}
-    void setUsed(QueueElement&lt;T&gt; *queueElement) {
-        QueueVoid::setUsed(static_cast&lt;QueueElementVoid *&gt;(queueElement));}
-    QueueElement&lt;T&gt; *getUsed() {
-        return static_cast&lt;QueueElement&lt;T&gt; *&gt;(QueueVoid::getUsed());}
-    void releaseUsed(QueueElement&lt;T&gt; *queueElement) {
-        QueueVoid::releaseUsed(static_cast&lt;QueueElementVoid *&gt;(queueElement));}
+    Queue(T *array[],int number);
+    ~Queue();
+    void clear();
+    int getNumberFree();
+    int capacity();
+    QueueElement&lt;T&gt; *getFree();
+    void setUsed(QueueElement&lt;T&gt; *queueElement);
+    QueueElement&lt;T&gt; *getUsed();
+    void releaseUsed(QueueElement&lt;T&gt; *queueElement);
 };</pre>
 
-<p>miscTest/queueTest.cpp provides an example of how to define queueElements
-and a queue.</p>
+<p>miscTest/queueTest.cpp provides an example of how to define a queue.</p>
 
 <p>The queue methods are:</p>
 <dl>
@@ -3376,20 +3348,32 @@ and a queue.</p>
       last call to getUsed. </dd>
 </dl>
 
+<p>A queue is created as follows:</p>
+<pre>   class MyClass;
+   typedef MyQueueElement&lt;MyClass&gt; MyElement;
+   typedef MyQueue&lt;MyClass&gt; MyQueue;
+   int numElement = 5;
+   ...
+   MyClass *array[numElements];
+   for(int i=0; i&lt;numElements; i++) {
+        array[i] = new MyClass();
+   }
+   MyQueue *queue = new MyQueue(array,numElements);</pre>
+
 <p>A producer calls getFree and setUsed via code like the following:</p>
-<pre>   MyObject *getFree() {
-       QueueElement&lt;MyObject&gt; *queueElement = queue-&gt;getFree();
-       if(queueElement==0) return 0;
-       return queueElement-&gt;getObject();
+<pre>   MyClass *getFree() {
+       MyElement *element = queue-&gt;getFree();
+       if(element==0) return 0;
+       return element-&gt;getObject();
   }</pre>
 
 <p>A consumer calls getUsed and releaseUsed via code like the following:</p>
 <pre>     while(true) {
-         QueueElement&lt;MyObject&gt; *queueElement = queue-&gt;getUsed();
-         if(queueElement==0) break;
-         MyObject *myObject = queueElement-&gt;getObject();
-         // do something with myObject
-         queue-&gt;releaseUsed(queueElement);
+         MyElement *element = queue-&gt;getUsed();
+         if(element==0) break;
+         MyClass *myClass = element-&gt;getObject();
+         // do something with myClass
+         queue-&gt;releaseUsed(element);
      }</pre>
 <hr />
 

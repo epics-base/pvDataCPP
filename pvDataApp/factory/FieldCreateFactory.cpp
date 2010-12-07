@@ -261,19 +261,19 @@ FieldConstPtr FieldCreate::create(String fieldName,
     Type type = pfield->getType();
     switch(type) {
     case scalar: {
-        ScalarConstPtr pscalar = dynamic_cast<ScalarConstPtr>(pfield);
+        ScalarConstPtr pscalar = static_cast<ScalarConstPtr>(pfield);
         return createScalar(fieldName,pscalar->getScalarType());
     }
     case scalarArray: {
-        ScalarArrayConstPtr pscalarArray = dynamic_cast<ScalarArrayConstPtr>(pfield);
+        ScalarArrayConstPtr pscalarArray = static_cast<ScalarArrayConstPtr>(pfield);
         return createScalarArray(fieldName,pscalarArray->getElementType());
     }
     case structure: {
-        StructureConstPtr pstructure = dynamic_cast<StructureConstPtr>(pfield);
+        StructureConstPtr pstructure = static_cast<StructureConstPtr>(pfield);
         return createStructure(fieldName,pstructure->getNumberFields(),pstructure->getFields());
     }
     case structureArray: {
-        StructureArrayConstPtr pstructureArray = dynamic_cast<StructureArrayConstPtr>(pfield);
+        StructureArrayConstPtr pstructureArray = static_cast<StructureArrayConstPtr>(pfield);
         return createStructureArray(fieldName,pstructureArray->getStructure());
     }
     }
