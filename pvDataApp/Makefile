@@ -102,6 +102,10 @@ LIBSRCS += pvDisplay.cpp
 LIBSRCS += pvEnumerated.cpp 
 LIBSRCS += pvTimeStamp.cpp
 
+SRC_DIRS += $(PVDATA)/pvMisc
+INC += bitSetUtil.h
+LIBSRCS += bitSetUtil.cpp 
+
 LIBRARY=pvData
 
 pvData_LIBS += Com
