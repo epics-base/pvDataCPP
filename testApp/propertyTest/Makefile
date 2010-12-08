@@ -4,7 +4,7 @@ include $(TOP)/configure/CONFIG
 
 PROD_HOST += testProperty
 testProperty_SRCS += testProperty.cpp
-testProperty_LIBS += pvFactory pvMisc pvProperty Com
+testProperty_LIBS += pvData  Com
 
 
 include $(TOP)/configure/RULES

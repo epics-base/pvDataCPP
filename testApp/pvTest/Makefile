@@ -4,23 +4,23 @@ include $(TOP)/configure/CONFIG
 
 PROD_HOST += testPVType
 testPVType_SRCS += testPVType.cpp
-testPVType_LIBS += pvFactory Com
+testPVType_LIBS += pvData Com
 
 PROD_HOST += testPVAuxInfo
 testPVAuxInfo_SRCS += testPVAuxInfo.cpp
-testPVAuxInfo_LIBS += pvFactory Com
+testPVAuxInfo_LIBS += pvData Com
 
 PROD_HOST += testIntrospect
 testIntrospect_SRCS += testIntrospect.cpp
-testIntrospect_LIBS += pvFactory Com
+testIntrospect_LIBS += pvData Com
 
 PROD_HOST += testPVData
 testPVData_SRCS += testPVData.cpp
-testPVData_LIBS += pvFactory Com
+testPVData_LIBS += pvData Com
 
 PROD_HOST += testPVStructureArray
 testPVStructureArray_SRCS += testPVStructureArray.cpp
-testPVStructureArray_LIBS += pvFactory Com
+testPVStructureArray_LIBS += pvData Com
 
 include $(TOP)/configure/RULES
 #----------------------------------------
