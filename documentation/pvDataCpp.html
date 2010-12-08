@@ -1852,56 +1852,41 @@ and a timeStamp and alarm. Do it the easy way.</p>
 
 <h3 style="text-align: center">Definition of Property</h3>
 
-<p>NOTE: The use of property is discouraged. But the Interfaces for standard
-properties are encouraged.</p>
-
 <p>Only fields named "value" have properties. A record can have multiple
 value fields, which can appear in the top level structure of a record or in a
 substructure. All other fields in the structure containing a value field are
 considered properties of the value field. The fieldname is also the property
 name. The value field can have any type, i.e. scalar, scalarArray, or
 structure. Typical property fields are timeStamp, alarm, display, control,
-and history.</p>
+and history</p>
 
-<p>The timeStamp is a special case. If it appears anywhere in the structure
-hieraracy above a value field it is a property of the value field.</p>
-
-<p>For example the following record has a single value field. The value field
-has propertys alarm, timeStamp, and display.</p>
-<pre>&lt;record name = "counterOutput" &gt;
-    &lt;structure name = "alarm" extends = "alarm" /&gt;
-    &lt;structure name = "timeStamp" extends = "timeStamp" /&gt;
-    &lt;scalar name = "value" scalarType = "double" /&gt;
-    &lt;structure name = "display" extends = "display" &gt;
-        &lt;scalar name = "description"&gt;Sample Description&lt;/scalar&gt;
-        &lt;scalar name = "format"&gt;%f&lt;/scalar&gt;
-        &lt;scalar name = "units"&gt;volts&lt;/scalar&gt;
-        &lt;structure name = "limit"&gt;
-            &lt;scalar name ="low"&gt;0.0&lt;/scalar&gt;
-            &lt;scalar name ="high"&gt;10.0&lt;/scalar&gt;
-        &lt;/structure&gt;
-    &lt;/structure&gt;
-&lt;/record&gt;</pre>
+<p>For example the following top level structure has a single value field.
+The value field has propertys alarm, timeStamp, and display.</p>
+<pre>structure counterOutput
+    structure alarm
+    structure timeStamp
+    double value
+    structure display
+        string description "Sample Description"
+        string format "%f"
+        string units volts
+        structure limit
+            double low 0.0
+            double high 10.0</pre>
 
 <p>The following example has three value fields each with properties alarm
 and timeStamp. Voltage, Current, and Power each have a different alarms but
 all share the timeStamp.</p>
-<pre>&lt;record name = "psSimple"&gt;
-    &lt;structure name = "alarm" extends = "alarm" /&gt;
-    &lt;structure name = "timeStamp" extends = "timeStamp" /&gt;
-    &lt;structure name = "voltage"&gt;
-        &lt;scalar name = "value" scalarType = "double" /&gt;
-        &lt;structure name = "alarm" extends = "alarm" /&gt;
-    &lt;/structure&gt;
-    &lt;structure name = "current"&gt;
-        &lt;scalar name = "value" scalarType = "double" /&gt;
-        &lt;structure name = "alarm" extends = "alarm" /&gt;
-    &lt;/structure&gt;
-    &lt;structure name = "power"&gt;
-        &lt;scalar name = "value" scalarType = "double" /&gt;
-        &lt;structure name = "alarm" extends = "alarm" /&gt;
-    &lt;/structure&gt;
-&lt;/record&gt;</pre>
+<pre>structure powerSupplyValueStructure
+    double value
+    structure alarm
+
+structure powerSupplySimple
+    structure alarm
+    structure timeStamp
+    powerSupplyValueStructure voltage
+    powerSupplyValueStructure power
+    powerSupplyValueStructure current</pre>
 
 <h3 style="text-align: center">Standard Properties</h3>
 
@@ -1972,175 +1957,247 @@ structures that support the PVData data model. For example a powerSupport
 record can have fields power, voltage, current that each support the PVData
 data model. </p>
 
-<h3 style="text-align: center">PVProperty</h3>
+<h3 style="text-align: center">timeStamp</h3>
 
-<p>Interface and factory for finding a field within a structure.</p>
-<pre>NOT DONE</pre>
-<ul>
-  <li>findProperty<br />
-    Find a field that is a subfield or property of this PVField. The
-    fieldName is of the form name.name... The pvField must be named value or
-    it does not have properties. </li>
-  <li>findPropertyViaParent<br />
-    Find a property by searching up the parent tree. The property name is
-    expected to match the name of a field. The return value is the interface
-    to the first field found that is not a null structure or null if not
-    found. </li>
-  <li>getPropertyNames<br />
-    Get a String array that holds the names of the properties for this field.
-  </li>
-  <li>getPVProperty<br />
-    Get the single instance of PVProperty. </li>
-</ul>
+<p>Two header files are provided for manipulating time stamps: <span
+style="font-family: courier;">timeStamp.h</span> and <span
+style="font-family: courier;">pvTimeStamp.h</span> <span
+style="font-family: courier;">timeStamp.h</span> defines a time stamp
+independent of pvData, i.e. it is a generally useful class for manipulating
+timeStamps. <span style="font-family: courier;">pvTimeStamp.h</span> is a
+class that can be attached to a time stamp pvData structure. It provides get
+and set methods to get/set a TimeStamp as defined by <span
+style="font-family: courier;">timeStamp.h</span></p>
 
-<h3 style="text-align: center;">Enumeration</h3>
+<h4><span style="font-family: courier;">timeStamp.h</span></h4>
+<pre>extern int32 milliSecPerSec;
+extern int32 microSecPerSec;
+extern int32 nanoSecPerSec;
+extern int64 posixEpochAtEpicsEpoch;
 
-<p>Enumerated is a convenience interface for a structure that happens to be
-an enumerated structure, which is a structure that has fields index and
-choices. Index is an integer and choices is an array of strings. Both index
-selects one of the choices.</p>
-<pre>class Enumerated ;
+class TimeStamp {
 public:
+    TimeStamp();
+    TimeStamp(int64 secondsPastEpoch,int32 nanoSeconds = 0);
     //default constructors and destructor are OK
     //This class should not be extended
+    void normalize();
+    void fromTime_t(const time_t &amp;);
+    void toTime_t(time_t &amp;) const;
+    int64 getSecondsPastEpoch();
+    int64 getEpicsSecondsPastEpoch() const;
+    int32 getNanoSeconds() const;
+    void put(int64 secondsPastEpoch,int32 nanoSeconds = 0);
+    void put(int64 milliseconds);
+    void getCurrent();
+    double toSeconds() const ;
+    bool operator==(TimeStamp const &amp;) const;
+    bool operator!=(TimeStamp const &amp;) const;
+    bool operator&lt;=(TimeStamp const &amp;) const;
+    bool operator&lt; (TimeStamp const &amp;) const;
+    bool operator&gt;=(TimeStamp const &amp;) const;
+    bool operator&gt; (TimeStamp const &amp;) const;
+    static double diff(TimeStamp const &amp; a,TimeStamp const &amp; b);
+    TimeStamp &amp; operator+=(int64 seconds);
+    TimeStamp &amp; operator-=(int64 seconds);
+    TimeStamp &amp; operator+=(double seconds);
+    TimeStamp &amp; operator-=(double seconds);
+    int64 getMilliseconds(); // milliseconds since epoch
+};</pre>
 
-    //returns (false,true) if pvField(isNot, is valid enumerated structure
+<p>where</p>
+
+<h4><span style="font-family: courier;">pvTimeStamp.h</span></h4>
+<pre>class PVTimeStamp {
+public:
+    PVTimeStamp();
+    //default constructors and destructor are OK
+    //This class should not be extended
+    //returns (false,true) if pvField(isNot, is valid timeStamp structure
     bool attach(PVField *pvField);
-    ~Enumerated();
+    void detach();
+    // following throw logic_error is not attached to PVField
+    // a set returns false if field is immutable
+    TimeStamp get() const;
+    bool set(TimeStamp timeStamp);
+};</pre>
+
+<p>where</p>
+
+<h3 style="text-align: center">alarm</h3>
+
+<p>Two header files are provided for manipulating alarms: <span
+style="font-family: courier;">alarm.h</span> and <span
+style="font-family: courier;">pvAlarm.h</span> <span
+style="font-family: courier;">alarm.h</span> defines a time stamp independent
+of pvData, i.e. it is a generally useful class for manipulating alarms. <span
+style="font-family: courier;">pvAlarm.h</span> is a class that can be
+attached to a time stamp pvData structure. It provides get and set methods to
+get/set a Alarm as defined by <span
+style="font-family: courier;">alarm.h</span></p>
+
+<h4><span style="font-family: courier;">alarm.h</span></h4>
+<pre>enum AlarmSeverity {
+ noAlarm,minorAlarm,majorAlarm,invalidAlarm
+};
+
+class AlarmSeverityFunc {
+public:
+    static AlarmSeverity getSeverity(int value);
+    static StringArray getSeverityNames();
+};
+
+class Alarm {
+public:
+    Alarm();
+    //default constructors and destructor are OK
+    String getMessage();
+    void setMessage(String value);
+    AlarmSeverity getSeverity() const;
+    void setSeverity(AlarmSeverity value);
+};
+</pre>
+
+<p>where</p>
+
+<h4><span style="font-family: courier;">pvAlarm.h</span></h4>
+<pre>class PVAlarm {
+public:
+    PVAlarm() : pvSeverity(0),pvMessage(0) {}
+    //default constructors and destructor are OK
+    //returns (false,true) if pvField(isNot, is valid enumerated structure
+    //An automatic detach is issued if already attached.
+    bool attach(PVField *pvField);
+    void detach();
     // each of the following throws logic_error is not attached to PVField
-    void putIndex(int32 index);
+    // set returns false if field is immutable
+    Alarm get() const;
+    bool set(Alarm alarm); 
+};
+</pre>
+
+<p>where</p>
+
+<h3 style="text-align: center">control</h3>
+
+<p>Two header files are provided for manipulating controls: <span
+style="font-family: courier;">control.h</span> and <span
+style="font-family: courier;">pvControl.h</span> <span
+style="font-family: courier;">control.h</span> defines a time stamp
+independent of pvData, i.e. it is a generally useful class for manipulating
+controls. <span style="font-family: courier;">pvControl.h</span> is a class
+that can be attached to a time stamp pvData structure. It provides get and
+set methods to get/set a Control as defined by <span
+style="font-family: courier;">control.h</span></p>
+
+<h4><span style="font-family: courier;">control.h</span></h4>
+<pre>class Control {
+public:
+    Control();
+    //default constructors and destructor are OK
+    double getLow() const;
+    double getHigh() const;
+    void setLow(double value);
+    void setHigh(double value);
+};
+</pre>
+
+<p>where</p>
+
+<h4><span style="font-family: courier;">pvControl.h</span></h4>
+<pre>class PVControl {
+public:
+    PVControl();
+    //default constructors and destructor are OK
+    //returns (false,true) if pvField(isNot, is valid enumerated structure
+    //An automatic detach is issued if already attached.
+    bool attach(PVField *pvField);
+    void detach();
+    // each of the following throws logic_error is not attached to PVField
+    // set returns false if field is immutable
+    Control get() const;
+    bool set(Control control);
+};
+</pre>
+
+<p>where</p>
+
+<h3 style="text-align: center">display</h3>
+
+<p>Two header files are provided for manipulating controls: <span
+style="font-family: courier;">display.h</span> and <span
+style="font-family: courier;">pvDisplay.h</span> <span
+style="font-family: courier;">display.h</span> defines display information
+independent of pvData, i.e. it is a generally useful class for manipulating
+display infomation. <span style="font-family: courier;">pvDisplay.h</span> is
+a class that can be attached to a display pvData structure. It provides get
+and set methods to get/set a Diaplay as defined by <span
+style="font-family: courier;">diaplay.h</span></p>
+
+<h4><span style="font-family: courier;">display.h</span></h4>
+<pre>class Display {
+public:
+    Display();
+    //default constructors and destructor are OK
+    double getLow() const;
+    double getHigh() const;
+    void setLow(double value);
+    void setHigh(double value);
+    String getDescription() const;
+    void setDescription(String value);
+    String getFormat() const;
+    void setFormat(String value);
+    String getUnits() const;
+    void setUnits(String value);
+};</pre>
+
+<p>where</p>
+
+<h4><span style="font-family: courier;">pvDisplay.h</span></h4>
+<pre>class PVDisplay {
+public:
+    PVDisplay()
+    : pvDescription(0),pvFormat(),pvUnits(),pvLow(),pvHigh() {}
+    //default constructors and destructor are OK
+    //An automatic detach is issued if already attached.
+    bool attach(PVField *pvField); 
+    void detach();
+    // each of the following throws logic_error is not attached to PVField
+    // a set returns false if field is immutable
+    Display get() const;
+    bool set(Display display);
+};
+</pre>
+
+<p>where</p>
+<pre>
+</pre>
+
+<h3 style="text-align: center">pvEnumerated</h3>
+
+<p>For enumerated structures a single header file <span
+style="font-family: courier;">pvEnumerted.h</span> is available</p>
+<pre>class PVEnumerated {
+public:
+    PVEnumerated();
+    //default constructors and destructor are OK
+    //This class should not be extended
+    //returns (false,true) if pvField(isNot, is valid enumerated structure
+    //An automatic detach is issued if already attached.
+    bool attach(PVField *pvField);
+    void detach();
+    // each of the following throws logic_error is not attached to PVField
+    // a set returns false if field is immutable
+    bool setIndex(int32 index);
     int32 getIndex();
     String getChoice();
     bool choicesMutable();
     StringArray getChoices();
     int32 getNumberChoices();
-    // also throws logic_error of immutable
-    void putChoices(StringArray choices,int32 numberChoices);
-private:
-    PVInt *pvIndex;
-    PVStringArray *pvChoices;
+    bool setChoices(StringArray choices,int32 numberChoices);
 };</pre>
 
 <p>where</p>
-<dl>
-  <dt style="font-family: courier;">getIndex</dt>
-    <dd>Returns the interface for field index.</dd>
-  <dt style="font-family: courier;">getChoice</dt>
-    <dd>Returns the choice for the current index.</dd>
-  <dt style="font-family: courier;">getChoices</dt>
-    <dd>Returns the interface for field choices.</dd>
-  <dt style="font-family: courier;">getPV</dt>
-    <dd>Returns the interface for the PVStructure for the enumerated
-      structure.</dd>
-  <dt style="font-family: courier;">replacePVField</dt>
-    <dd>Replace the PVField implementation. The new implementation implements
-      interface Enumerated and also replaces the implementations of fields
-      index, choice, and choices. The new implementation updates index when
-      choice is changed and choice when index is changed. If choices is
-      changed the index is set to 0.</dd>
-  <dt style="font-family: courier;">getEnumerated</dt>
-    <dd>If the field is an enumerated structure and replacePVField was called
-      for the field then interface Enumerated is returned.</dd>
-</dl>
-
-<h3 style="text-align: center">Standard Properties</h3>
-
-<p>This section has structure definitions that support standard properties.
-These definitions are defined in project javaIOC.</p>
-
-<h4>TimeStamp</h4>
-<pre>&lt;structure name = "timeStamp"&gt;
-  &lt;scalar name = "secondsPastEpoch" scalarType = "long" /&gt;
-  &lt;scalar name = "nanoSeconds" scalarType = "int" /&gt;
-&lt;/structure&gt;</pre>
-
-<h4>Alarm</h4>
-<pre>&lt;structure name = "alarmSeverity" extends = "enumerated" &gt;
-  &lt;array name = "choices"  immutable = "true" &gt;none,minor,major,invalid&lt;/array&gt;
-&lt;/structure&gt;
-
-&lt;structure name = "alarm"&gt;
-  &lt;structure name = "severity" extends = "alarmSeverity" /&gt;
-  &lt;scalar name = "message" scalarType = "string" /&gt;
-&lt;/structure&gt;</pre>
-
-<h4>Limits</h4>
-<pre>&lt;structure name = "byteLimit"&gt;
-    &lt;scalar name = "low" scalarType = "byte" /&gt;
-    &lt;scalar name = "high" scalarType = "byte" /&gt;
-&lt;/structure&gt;
-
-&lt;structure name = "shortLimit"&gt;
-    &lt;scalar name = "low" scalarType = "short" /&gt;
-    &lt;scalar name = "high" scalarType = "short" /&gt;
-&lt;/structure&gt;
-
-&lt;structure name = "intLimit"&gt;
-    &lt;scalar name = "low" scalarType = "int" /&gt;
-    &lt;scalar name = "high" scalarType = "int" /&gt;
-&lt;/structure&gt;
-
-&lt;structure name = "longLimit"&gt;
-    &lt;scalar name = "low" scalarType = "long" /&gt;
-    &lt;scalar name = "high" scalarType = "long" /&gt;
-&lt;/structure&gt;
-
-&lt;structure name = "floatLimit"&gt;
-    &lt;scalar name = "low" scalarType = "float" /&gt;
-    &lt;scalar name = "high" scalarType = "float" /&gt;
-&lt;/structure&gt;
-
-&lt;structure name = "doubleLimit"&gt;
-    &lt;scalar name = "low" scalarType = "double" /&gt;
-    &lt;scalar name = "high" scalarType = "double" /&gt;
-&lt;/structure&gt;</pre>
-
-<h4>Display</h4>
-<pre>&lt;structure name = "display"&gt;
-    &lt;scalar name = "description" scalarType = "string" /&gt;
-    &lt;scalar name = "format" scalarType = "string" /&gt;
-    &lt;scalar name = "units" scalarType = "string" /&gt;
-    &lt;structure name = "limit" extends = "doubleLimit" /&gt;
-&lt;/structure&gt;</pre>
-
-<h4>Control</h4>
-<pre>&lt;structure name = "control"&gt;
-    &lt;structure name = "limit" extends = "doubleLimit" /&gt;
-    &lt;scalar name = "minStep" scalarType = "double" /&gt;
-&lt;/structure&gt;</pre>
-
-<h3 style="text-align: center">Interfaces for Standard Properties</h3>
-
-<h4>PVTimeStamp</h4>
-
-<p>The following priovides convient access to a timeStamp structure.</p>
-<pre>class PVTimeStamp {
-public:
-    //default constructors and destructor are OK
-    //This class should not be extended
-
-    //returns (false,true) if pvField(isNot, is valid timeStamp structure
-    bool attach(PVField *pvField);
-    // throws logic_error is not attached to PVField
-    TimeStamp &amp;get();
-    // throws logic_error is not attached to PVField
-    void put (TimeStamp &amp;timeStamp);
-private:
-    PVLong* pvSecs;
-    PVInt* pvNano;
-};</pre>
-
-<h4>Alarm</h4>
-
-<p>The following provides convient access to the fields of an alarm
-structure.</p>
-<pre>NOT DONE</pre>
-
-<h4>Limits</h4>
-
-<h4>Display</h4>
-
-<h4>Control</h4>
 <hr />
 
 <h2 style="text-align: center">PVData Abstract and Base Classes</h2>
