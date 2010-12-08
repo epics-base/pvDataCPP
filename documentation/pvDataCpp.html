@@ -14,10 +14,13 @@ Overview<br />
 
 <p>TODO</p>
 <ul>
-  <li>rename epicsException to exception</li>
+  <li>rename epicsException to exception. Do we want a assert under pvData? I
+    think yes.</li>
   <li>implement misc: Status??</li>
-  <li>Implement pvMisc: BitSetUtil.</li>
-  <li>Implement property</li>
+  <li>pvMiscBitSetUtil has not been tested.</li>
+  <li>Update testBaseException testBitSet testByteBuffer testSerialization so
+    that they can be part of testAll.pl</li>
+  <li>Change all throw statements so that they generated stack trace.</li>
 </ul>
 CONTENTS 
 <hr />
@@ -2055,8 +2058,7 @@ public:
     void setMessage(String value);
     AlarmSeverity getSeverity() const;
     void setSeverity(AlarmSeverity value);
-};
-</pre>
+};</pre>
 
 <p>where</p>
 
@@ -2073,8 +2075,7 @@ public:
     // set returns false if field is immutable
     Alarm get() const;
     bool set(Alarm alarm); 
-};
-</pre>
+};</pre>
 
 <p>where</p>
 
@@ -2099,8 +2100,7 @@ public:
     double getHigh() const;
     void setLow(double value);
     void setHigh(double value);
-};
-</pre>
+};</pre>
 
 <p>where</p>
 
@@ -2117,8 +2117,7 @@ public:
     // set returns false if field is immutable
     Control get() const;
     bool set(Control control);
-};
-</pre>
+};</pre>
 
 <p>where</p>
 
@@ -2166,12 +2165,10 @@ public:
     // a set returns false if field is immutable
     Display get() const;
     bool set(Display display);
-};
-</pre>
+};</pre>
 
 <p>where</p>
-<pre>
-</pre>
+<pre></pre>
 
 <h3 style="text-align: center">pvEnumerated</h3>
 

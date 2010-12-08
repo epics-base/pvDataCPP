@@ -1,7 +1,7 @@
 TOP = ..
 include $(TOP)/configure/CONFIG
-DIRS += miscTest
-DIRS += pvTest
-DIRS += propertyTest
+DIRS += misc
+DIRS += pv
+DIRS += property
 include $(TOP)/configure/RULES_DIRS
 
