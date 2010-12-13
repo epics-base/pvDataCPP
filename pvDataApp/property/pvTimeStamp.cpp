@@ -24,7 +24,19 @@ bool PVTimeStamp::attach(PVField *pvField)
             pvField->message(noTimeStamp,errorMessage);
             return false;
         }
-        pvStructure = pvParent->getStructureField(String("timeStamp"));
+        if(pvField->getField()->getFieldName().compare("value")!=0) {
+            pvField->message(noTimeStamp,errorMessage);
+            return false;
+        }
+        // look up the tree for a timeSyamp
+        while(pvParent!=0) {
+            PVStructure *pvs = pvParent->getStructureField(String("timeStamp"));
+            if(pvs!=0) {
+                pvStructure = pvs;
+                break;
+            }
+            pvParent = pvParent->getParent();
+        }
         if(pvStructure==0) {
             pvField->message(noTimeStamp,errorMessage);
             return false;

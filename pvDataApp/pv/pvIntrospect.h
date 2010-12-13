@@ -60,14 +60,15 @@ public:
 
 class Field :  private NoDefaultMethods {
 public:
-   virtual ~Field();
-   Field(String fieldName,Type type);
    static ConstructDestructCallback *getConstructDestructCallback();
    int getReferenceCount() const;
    String getFieldName() const;
    Type getType() const;
    virtual void toString(StringBuilder buf) const{toString(buf,0);}
    virtual void toString(StringBuilder buf,int indentLevel) const;
+protected:
+   Field(String fieldName,Type type);
+   virtual ~Field();
 private:
    class FieldPvt *pImpl;
    void incReferenceCount() const;
@@ -77,55 +78,64 @@ private:
    friend class PVFieldPvt;
    friend class StandardField;
    friend class BasePVStructureArray;
+   friend class FieldCreate;
 };
 
 
 class Scalar : public Field{
 public:
-   Scalar(String fieldName,ScalarType scalarType);
-   virtual ~Scalar();
    ScalarType getScalarType() const {return scalarType;}
    virtual void toString(StringBuilder buf) const{toString(buf,0);}
    virtual void toString(StringBuilder buf,int indentLevel) const;
+protected:
+   Scalar(String fieldName,ScalarType scalarType);
+   virtual ~Scalar();
 private:
    ScalarType scalarType;
+   friend class FieldCreate;
 };
 
 class ScalarArray : public Field{
 public:
-   ScalarArray(String fieldName,ScalarType scalarType);
-   virtual ~ScalarArray();
    ScalarType  getElementType() const {return elementType;}
    virtual void toString(StringBuilder buf) const{toString(buf,0);}
    virtual void toString(StringBuilder buf,int indentLevel) const;
+protected:
+   ScalarArray(String fieldName,ScalarType scalarType);
+   virtual ~ScalarArray();
 private:
    ScalarType elementType;
+   friend class FieldCreate;
 };
 
 class StructureArray : public Field{
 public:
-   StructureArray(String fieldName,StructureConstPtr structure);
-   virtual ~StructureArray();
    StructureConstPtr  getStructure() const {return pstructure;}
    virtual void toString(StringBuilder buf) const{toString(buf,0);}
    virtual void toString(StringBuilder buf,int indentLevel) const;
+protected:
+   StructureArray(String fieldName,StructureConstPtr structure);
+   virtual ~StructureArray();
 private:
     StructureConstPtr pstructure;
+   friend class FieldCreate;
 };
 
 class Structure : public Field {
 public:
-   Structure(String fieldName, int numberFields,FieldConstPtrArray fields);
-   virtual ~Structure();
    int getNumberFields() const {return numberFields;}
    FieldConstPtr getField(String fieldName) const;
    int getFieldIndex(String fieldName) const;
    FieldConstPtrArray getFields() const {return fields;}
    virtual void toString(StringBuilder buf) const{toString(buf,0);}
    virtual void toString(StringBuilder buf,int indentLevel) const;
+protected:
+   Structure(String fieldName, int numberFields,FieldConstPtrArray fields);
+   virtual ~Structure();
 private:
     int numberFields;
     FieldConstPtrArray  fields;
+   friend class FieldCreate;
 };
 
 class FieldCreate : NoDefaultMethods {

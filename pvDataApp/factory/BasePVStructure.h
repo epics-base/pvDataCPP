@@ -517,20 +517,12 @@ namespace epics { namespace pvData {
 
     bool PVStructure::operator==(PVField &obj)
     {
-        PVStructure &b = dynamic_cast<PVStructure &>(obj);
-        PVFieldPtrArray bFields = b.pImpl->pvFields;
-        PVFieldPtrArray pvFields = pImpl->pvFields;
-        int len = b.pImpl->numberFields;
-        if(len!=pImpl->numberFields) return false;
-        for (int i = 0; i < len; i++) {
-            if (!(*pvFields[i]==*bFields[i])) return false;
-        }
-        return true;
+        return getConvert()->equals(this,&obj);
     }
 
     bool PVStructure::operator!=(PVField  &pv)
     {
-        return !(*this==pv);
+        return !(getConvert()->equals(this,&pv));
     }
 
     static PVField *findSubField(String fieldName,PVStructure *pvStructure) {

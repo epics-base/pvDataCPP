@@ -19,6 +19,10 @@ bool PVControl::attach(PVField *pvField)
 {
     PVStructure *pvStructure = 0;
     if(pvField->getField()->getFieldName().compare("control")!=0) {
+        if(pvField->getField()->getFieldName().compare("value")!=0) {
+            pvField->message(noControlFound,errorMessage);
+            return false;
+        }
         PVStructure *pvParent = pvField->getParent();
         if(pvParent==0) {
             pvField->message(noControlFound,errorMessage);
