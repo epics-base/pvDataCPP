@@ -25,6 +25,8 @@ INC += timer.h
 INC += queueVoid.h
 INC += queue.h
 INC += messageQueue.h
+INC += destroyable.h
+INC += status.h
 
 LIBSRCS += byteBuffer.cpp
 LIBSRCS += bitSet.cpp
@@ -105,6 +107,10 @@ LIBSRCS += pvTimeStamp.cpp
 SRC_DIRS += $(PVDATA)/pvMisc
 INC += bitSetUtil.h
 LIBSRCS += bitSetUtil.cpp 
+
+SRC_DIRS += $(PVDATA)/monitor
+INC += monitor.h
+
 
 LIBRARY=pvData
 
