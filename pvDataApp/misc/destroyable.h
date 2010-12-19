@@ -19,6 +19,12 @@ namespace epics { namespace pvData {
              * Destroy this instance.
              */
             virtual void destroy() = 0;
+            
+            private:
+            /**
+             * Do not allow delete on this instance.
+             */ 
+            //~Destroyable() {};
         };
 
 }}

@@ -83,6 +83,7 @@ LIBSRCS += PVDataCreateFactory.cpp
 LIBSRCS += Convert.cpp
 LIBSRCS += StandardField.cpp
 LIBSRCS += StandardPVField.cpp
+LIBSRCS += StatusCreateFactory.cpp 
 
 SRC_DIRS += $(PVDATA)/property
 

@@ -8,6 +8,8 @@
 #define STATUS_H
 
 #include "serialize.h"
+#include "epicsException.h"
+#include "byteBuffer.h"
 
 namespace epics { namespace pvData { 
 
@@ -16,14 +18,16 @@ namespace epics { namespace pvData {
     	 */
     	enum StatusType { 
                 /** Operation completed successfully. */
-                OK,
+                STATUSTYPE_OK,
                 /** Operation completed successfully, but there is a warning message. */
-                WARNING,
+                STATUSTYPE_WARNING,
                 /** Operation failed due to an error. */
-                ERROR,
+                STATUSTYPE_ERROR,
                 /** Operation failed due to an unexpected error. */
-                FATAL
+                STATUSTYPE_FATAL
     	};
+    	
+    	const char* StatusTypeName[] = { "OK", "WARNING", "ERROR", "FATAL" };
 
         /**
          * Status interface.
@@ -64,7 +68,47 @@ namespace epics { namespace pvData {
              * @return operation success status.
              */
             virtual bool isSuccess() = 0;
+
+            
+            virtual void toString(StringBuilder buffer, int indentLevel = 0) = 0;
+            
         };
+
+        
+        /**
+         * Interface for creating status.
+         * @author mse
+         */
+        class StatusCreate : private epics::pvData::NoDefaultMethods {
+            public:
+        	/**
+        	 * Get OK status. Static instance should be returned.
+        	 * @return OK <code>Status</code> instance.
+        	 */
+        	virtual Status* getStatusOK() = 0;
+        	
+        	/**
+        	 * Create status.
+        	 * @param type status type, non-<code>null</code>.
+        	 * @param message message describing an error, non-<code>null</code>.
+        	 * 		  NOTE: Do NOT use <code>throwable.getMessage()</code> as message, since it will be supplied with the <code>cause</code>.
+        	 * @param cause exception that caused an error. Optional.
+        	 * @return status instance.
+        	 */
+        	virtual Status* createStatus(StatusType type, String message, BaseException* cause) = 0;
+        	
+        	/**
+        	 * Deserialize status.
+        	 * NOTE: use this method instead of <code>Status.deserialize()</code>, since this allows OK status optimization. 
+        	 * @param buffer deserialization buffer.
+        	 * @param control deserialization control.
+        	 * @return status instance.
+        	 */
+        	virtual Status* deserializeStatus(ByteBuffer* buffer, DeserializableControl* control) = 0;
+        };
+        
+        extern StatusCreate* getStatusCreate();
+        
 
 }}
 #endif  /* STATUS_H */
