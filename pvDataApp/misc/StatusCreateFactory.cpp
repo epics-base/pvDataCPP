@@ -8,7 +8,7 @@
 #include <cstdlib>
 #include <string>
 #include <cstdio>
-#include <lock.h>
+#include "lock.h"
 #include "factory.h"
 #include "byteBuffer.h"
 #include "showConstructDestruct.h"
@@ -53,6 +53,13 @@ class StatusImpl : public Status
 {
     public:
     
+    StatusImpl(StatusType type, String message) :
+        m_type(type), m_message(message)
+    {
+        Lock xx(globalMutex);
+        totalConstruct++;
+    }
+
     StatusImpl(StatusType type, String message, String stackDump) :
         m_type(type), m_message(message), m_stackDump(stackDump)
     {
@@ -150,13 +157,18 @@ class StatusCreateImpl : public StatusCreate {
         m_ok = createStatus(STATUSTYPE_OK, "OK", 0);
     }
 
+    ~StatusCreateImpl()
+    {
+        delete m_ok;
+    }
+    
     virtual Status* getStatusOK() {
         return m_ok;
     }
         	
     virtual Status* createStatus(StatusType type, String message, BaseException* cause) {
         if (cause == 0)
-            return new StatusImpl(type, message, "");
+            return new StatusImpl(type, message);
         else
         {
             std::string stackDump;

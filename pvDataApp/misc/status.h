@@ -95,7 +95,7 @@ namespace epics { namespace pvData {
         	 * @param cause exception that caused an error. Optional.
         	 * @return status instance.
         	 */
-        	virtual Status* createStatus(StatusType type, String message, BaseException* cause) = 0;
+        	virtual Status* createStatus(StatusType type, String message, BaseException* cause = 0) = 0;
         	
         	/**
         	 * Deserialize status.

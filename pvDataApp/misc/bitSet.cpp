@@ -7,19 +7,63 @@
 #include "string.h"
 #include "stdio.h"
 #include "bitSet.h"
+#include "lock.h"
 
 namespace epics { namespace pvData {
 
+    //static DebugLevel debugLevel = lowDebug;
+    
+    static volatile int64 totalConstruct = 0;
+    static volatile int64 totalDestruct = 0;
+    static Mutex *globalMutex = 0;
+    
+    static int64 getTotalConstruct()
+    {
+        Lock xx(globalMutex);
+        return totalConstruct;
+    }
+    
+    static int64 getTotalDestruct()
+    {
+        Lock xx(globalMutex);
+        return totalDestruct;
+    }
+    
+    static ConstructDestructCallback *pConstructDestructCallback;
+    
+    static void init()
+    {
+         static Mutex mutex = Mutex();
+         Lock xx(&mutex);
+         if(globalMutex==0) {
+            globalMutex = new Mutex();
+            pConstructDestructCallback = new ConstructDestructCallback(
+                String("bitSet"),
+                getTotalConstruct,getTotalDestruct,0);
+         }
+    }
+    
     BitSet::BitSet() : words(0), wordsLength(0), wordsInUse(0) {
         initWords(BITS_PER_WORD);
+
+        init();
+        Lock xx(globalMutex);
+        totalConstruct++;
     }
 
     BitSet::BitSet(uint32 nbits) : words(0), wordsLength(0), wordsInUse(0) {
         initWords(nbits);
+
+        init();
+        Lock xx(globalMutex);
+        totalConstruct++;
     }
 
     BitSet::~BitSet() {
         delete words;
+
+        Lock xx(globalMutex);
+        totalDestruct++;
     }
 
     void BitSet::initWords(uint32 nbits) {
@@ -314,8 +358,6 @@ namespace epics { namespace pvData {
     {
         return !(*this == set);
     }
-
-    void BitSet::toString(StringBuilder buffer) { toString(buffer, 0); }
 
     void BitSet::toString(StringBuilder buffer, int indentLevel) const
     {
