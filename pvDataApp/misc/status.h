@@ -35,7 +35,8 @@ namespace epics { namespace pvData {
          */
         class Status : public epics::pvData::Serializable {
             public:
-
+            virtual ~Status() {};
+            
             /**
              * Get status type.
              * @return status type, non-<code>null</code>.

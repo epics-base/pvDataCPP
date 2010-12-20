@@ -67,7 +67,7 @@ class StatusImpl : public Status
         totalConstruct++;
     }
     
-    ~StatusImpl() {
+    virtual ~StatusImpl() {
         Lock xx(globalMutex);
         totalDestruct++;
     }
