@@ -19,10 +19,11 @@ public:
     //An automatic detach is issued if already attached.
     bool attach(PVField *pvField);
     void detach();
+    bool isAttached();
     // each of the following throws logic_error is not attached to PVField
     // set returns false if field is immutable
-    Alarm get() const;
-    bool set(Alarm alarm);
+    void get(Alarm & alarm) const;
+    bool set(Alarm const & alarm);
 private:
     PVInt *pvSeverity;
     PVString *pvMessage;

@@ -124,6 +124,7 @@ void PVAuxInfo::toString(StringBuilder buf)
 
 void PVAuxInfo::toString(StringBuilder buf,int indentLevel)
 {
+    if(pImpl->theMap.empty()) return;
     Convert *convert = getConvert();
     convert->newLine(buf,indentLevel);
     *buf += "auxInfo";
@@ -132,9 +133,6 @@ void PVAuxInfo::toString(StringBuilder buf,int indentLevel)
          convert->newLine(buf,indentLevel+1);
          String key = i->first;
          PVScalar *value = i->second;
-         *buf += "key(";
-         *buf += key.c_str();
-         *buf += ") ";
          value->toString(buf,indentLevel + 1);
          i++;
     }

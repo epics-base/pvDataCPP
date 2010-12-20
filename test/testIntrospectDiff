@@ -1,0 +1,22 @@
+13,20c13,20
+< boolean[] boolean
+< byte[] byte
+< short[] short
+< int[] int
+< long[] long
+< float[] float
+< double[] double
+< string[] string
+---
+> booleanArray boolean
+> byteArray byte
+> shortArray short
+> intArray int
+> longArray long
+> floatArray float
+> doubleArray double
+> stringArray string
+57c57
+<     structure[] value
+---
+>      structureArray  value

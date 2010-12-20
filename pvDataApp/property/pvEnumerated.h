@@ -20,6 +20,7 @@ public:
     //An automatic detach is issued if already attached.
     bool attach(PVField *pvField);
     void detach();
+    bool isAttached();
     // each of the following throws logic_error is not attached to PVField
     // a set returns false if field is immutable
     bool setIndex(int32 index);

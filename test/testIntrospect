@@ -10,14 +10,14 @@ double double
 string string
 
 testScalarArray
-booleanArray boolean
-byteArray byte
-shortArray short
-intArray int
-longArray long
-floatArray float
-doubleArray double
-stringArray string
+boolean[] boolean
+byte[] byte
+short[] short
+int[] int
+long[] long
+float[] float
+double[] double
+string[] string
 
 testSimpleStructure
 structure value
@@ -54,7 +54,7 @@ structure value
 
 testStructureArray
 structure value
-     structureArray  value
+    structure[] value
         structure powerSupply
             structure voltage
                 double value

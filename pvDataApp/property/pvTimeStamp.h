@@ -22,10 +22,11 @@ public:
     //returns (false,true) if pvField(isNot, is valid timeStamp structure
     bool attach(PVField *pvField);
     void detach();
+    bool isAttached();
     // following throw logic_error is not attached to PVField
     // a set returns false if field is immutable
-    TimeStamp get() const;
-    bool set(TimeStamp timeStamp);
+    void get(TimeStamp &) const;
+    bool set(TimeStamp const & timeStamp);
 private:
     PVLong* pvSecs;
     PVInt* pvNano;

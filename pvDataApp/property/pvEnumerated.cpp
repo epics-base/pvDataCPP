@@ -25,7 +25,7 @@ bool PVEnumerated::attach(PVField *pvField)
     }
     PVStructure *pvStructure = static_cast<PVStructure*>(pvField);
     PVInt *pvInt = pvStructure->getIntField(String("index"));
-    if(pvLong==0) {
+    if(pvInt==0) {
         pvField->message(notEnumerated,errorMessage);
         return false;
     }
@@ -44,6 +44,11 @@ void PVEnumerated::detach()
 {
     pvIndex = 0;
     pvChoices = 0;
+}
+
+bool PVEnumerated::isAttached() {
+    if(pvIndex==0 || pvChoices==0) return false;
+    return true;
 }
 
 bool PVEnumerated::setIndex(int32 index)

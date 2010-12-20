@@ -135,10 +135,8 @@ ScalarArray::ScalarArray(String fieldName,ScalarType elementType)
 ScalarArray::~ScalarArray() {}
 
 void ScalarArray::toString(StringBuilder buffer,int indentLevel) const{
-    String temp = String();
-    ScalarTypeFunc::toString(&temp,elementType);
-    temp += "Array";
-    *buffer += temp;
+    ScalarTypeFunc::toString(buffer,elementType);
+    *buffer += "[]";
     Field::toString(buffer,indentLevel);
 }
 
@@ -154,7 +152,7 @@ StructureArray::~StructureArray() {
 }
 
 void StructureArray::toString(StringBuilder buffer,int indentLevel) const {
-    *buffer +=  " structureArray ";
+    *buffer +=  "structure[]";
     Field::toString(buffer,indentLevel);
     newLine(buffer,indentLevel + 1);
     pstructure->toString(buffer,indentLevel + 1);

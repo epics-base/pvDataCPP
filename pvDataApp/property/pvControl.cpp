@@ -62,18 +62,21 @@ void PVControl::detach()
     pvHigh = 0;
 }
 
-Control PVControl::get() const
+bool PVControl::isAttached(){
+    if(pvLow==0 || pvHigh==0) return false;
+    return true;
+}
+
+void PVControl::get(Control &control) const
 {
     if(pvLow==0 || pvHigh==0) {
         throw std::logic_error(notAttached);
     }
-    Control control;
     control.setLow(pvLow->get());
     control.setHigh(pvHigh->get());
-    return control;
 }
 
-bool PVControl::set(Control control)
+bool PVControl::set(Control const & control)
 {
     if(pvLow==0 || pvHigh==0) {
         throw std::logic_error(notAttached);

@@ -856,6 +856,63 @@ double Convert::toDouble(PVScalar * pv)
     throw std::logic_error(logicError);
 }
 
+String Convert::toString(PVScalar * pv)
+{
+    static String trueString("true");
+    static String falseString("false");
+
+    ScalarConstPtr scalar = pv->getScalar();
+    ScalarType scalarType = scalar->getScalarType();
+    switch(scalarType) {
+        case pvBoolean: {
+            PVBoolean *pvalue = static_cast<PVBoolean *>(pv);
+            bool value = pvalue->get();
+            return value ? trueString : falseString;
+        }
+        case pvByte: {
+            PVByte *value = static_cast<PVByte *>(pv);
+            char buffer[30];
+            sprintf(buffer,"%d",(int)value->get());
+            return String(buffer);
+        }
+        case pvShort: {
+            PVShort *value = static_cast<PVShort *>(pv);
+            char buffer[30];
+            sprintf(buffer,"%d",(int)value->get());
+            return String(buffer);
+        }
+        case pvInt: {
+            PVInt *value = static_cast<PVInt *>(pv);
+            char buffer[30];
+            sprintf(buffer,"%d",value->get());
+            return String(buffer);
+        }
+        case pvLong: {
+            PVLong *value = static_cast<PVLong *>(pv);
+            char buffer[30];
+            sprintf(buffer,"%lli",value->get());
+            return String(buffer);
+        }
+        case pvFloat: {
+            PVFloat *value = static_cast<PVFloat *>(pv);
+            char buffer[30];
+            sprintf(buffer,"%g",value->get());
+            return String(buffer);
+        }
+        case pvDouble: {
+            PVDouble *value = static_cast<PVDouble *>(pv);
+            char buffer[30];
+            sprintf(buffer,"%lg",value->get());
+            return String(buffer);
+        }
+        case pvString: {
+            PVString *value = static_cast<PVString *>(pv);
+            return value->get();
+        }
+    }
+    throw std::logic_error(logicError);
+}
+
 void Convert::fromByte(PVScalar *pv,int8 from)
 {
     ScalarConstPtr scalar = pv->getScalar();
@@ -3077,15 +3134,19 @@ void convertToString(StringBuilder buffer,PVField * pv,int indentLevel)
 {
     Type type = pv->getField()->getType();
     if(type==scalarArray) {
-        return convertArray(buffer,(PVScalarArray *)pv,indentLevel);
+        convertArray(buffer,static_cast<PVScalarArray *>(pv),indentLevel);
+        return;
     }
     if(type==structure) {
-        return convertStructure(buffer,(PVStructure*)pv,indentLevel);
+        convertStructure(buffer,static_cast<PVStructure*>(pv),indentLevel);
+        return;
     }
     if(type==structureArray) {
-    	return convertStructureArray(buffer,(PVStructureArray*)pv,indentLevel);
+    	convertStructureArray(
+            buffer,static_cast<PVStructureArray*>(pv),indentLevel);
+        return;
     }
-    PVScalar *pvScalar = (PVScalar*)pv;
+    PVScalar *pvScalar = static_cast<PVScalar*>(pv);
     ScalarConstPtr pscalar = pvScalar->getScalar();
     ScalarType scalarType = pscalar->getScalarType();
     ScalarTypeFunc::toString(buffer,scalarType);
@@ -3094,7 +3155,7 @@ void convertToString(StringBuilder buffer,PVField * pv,int indentLevel)
     *buffer += " ";
     switch(scalarType) {
     case pvBoolean: {
-            PVBoolean *data = (PVBoolean*)pv;
+            PVBoolean *data = static_cast<PVBoolean*>(pv);
             bool value = data->get();
             if(value) {
                 *buffer += "true";
@@ -3104,49 +3165,49 @@ void convertToString(StringBuilder buffer,PVField * pv,int indentLevel)
         }
         return;
     case pvByte: {
-            PVByte *data = (PVByte*)pv;
+            PVByte *data = static_cast<PVByte*>(pv);
             char xxx[30];
             sprintf(xxx,"%d",(int)data->get());
             *buffer += xxx;
         }
         return;
     case pvShort: {
-            PVShort *data = (PVShort*)pv;
+            PVShort *data = static_cast<PVShort*>(pv);
             char xxx[30];
             sprintf(xxx,"%d",(int)data->get());
             *buffer += xxx;
         }
         return;
     case pvInt: {
-            PVInt *data = (PVInt*)pv;
+            PVInt *data = static_cast<PVInt*>(pv);
             char xxx[30];
             sprintf(xxx,"%d",(int)data->get());
             *buffer += xxx;
         }
         return;
     case pvLong: {
-            PVLong *data = (PVLong*)pv;
+            PVLong *data = static_cast<PVLong*>(pv);
             char xxx[30];
             sprintf(xxx,"%lld",(int64)data->get());
             *buffer += xxx;
         }
         return;
     case pvFloat: {
-            PVFloat *data = (PVFloat*)pv;
+            PVFloat *data = static_cast<PVFloat*>(pv);
             char xxx[30];
             sprintf(xxx,"%g",data->get());
             *buffer += xxx;
         }
         return;
     case pvDouble: {
-            PVDouble *data = (PVDouble*)pv;
+            PVDouble *data = static_cast<PVDouble*>(pv);
             char xxx[30];
             sprintf(xxx,"%lg",data->get());
             *buffer += xxx;
         }
         return;
     case pvString: {
-            PVString *data = (PVString*)pv;
+            PVString *data = static_cast<PVString*>(pv);
             *buffer += data->get();
         }
         return;
@@ -3157,16 +3218,21 @@ void convertToString(StringBuilder buffer,PVField * pv,int indentLevel)
 
 void convertStructure(StringBuilder buffer,PVStructure *data,int indentLevel)
 {
-    *buffer += "structure ";
+    String extendsName = data->getExtendsStructureName();
+    if(extendsName.length()<=0) {
+        *buffer += "structure ";
+    } else {
+        *buffer += extendsName;
+        *buffer += " ";
+    }
     *buffer += data->getField()->getFieldName();
-    convert->newLine(buffer, indentLevel+1);
     PVFieldPtrArray fieldsData = data->getPVFields();
     if (fieldsData != 0) {
         int length = data->getStructure()->getNumberFields();
         for(int i=0; i<length; i++) {
+            convert->newLine(buffer, indentLevel+1);
             PVField *fieldField = fieldsData[i];
             fieldField->toString(buffer,indentLevel + 1);
-            if(i<length-1) convert->newLine(buffer, indentLevel+1);
         }
     }
 }
@@ -3176,7 +3242,7 @@ void convertArray(StringBuilder buffer,PVScalarArray * pv,int indentLevel)
     ScalarArrayConstPtr array = pv->getScalarArray();
     ScalarType type = array->getElementType();
     ScalarTypeFunc::toString(buffer,type);
-    *buffer += "Array ";
+    *buffer += "[] ";
     *buffer += array->getFieldName();
     *buffer += " ";
     switch(type) {
@@ -3347,22 +3413,16 @@ void convertArray(StringBuilder buffer,PVScalarArray * pv,int indentLevel)
 void convertStructureArray(StringBuilder buffer,
     PVStructureArray * pvdata,int indentLevel)
 {
-    *buffer += "structureArray ";
+    *buffer += "structure[] ";
     *buffer += pvdata->getField()->getFieldName();
     *buffer += " ";
-    StructureArrayData data = StructureArrayData();
     int length = pvdata->getLength();
-    pvdata->get(0, length, &data);
     if(length<=0) {
-        *buffer += " []";
         return;
     }
-    convert->newLine(buffer, indentLevel);
-    *buffer += "[";
+    StructureArrayData data = StructureArrayData();
+    pvdata->get(0, length, &data);
     for (int i = 0; i < length; i++) {
-        if (i != 0) {
-            *buffer += ",";
-        }
         convert->newLine(buffer, indentLevel + 1);
         PVStructure *pvStructure = data.data[i];
         if (pvStructure == 0) {
@@ -3371,8 +3431,6 @@ void convertStructureArray(StringBuilder buffer,
             pvStructure->toString(buffer,indentLevel+1);
         }
     }
-    convert->newLine(buffer, indentLevel);
-    *buffer += "]";
 }
 
 int copyArrayDataReference(PVScalarArray *from,PVArray *to)

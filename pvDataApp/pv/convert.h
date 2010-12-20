@@ -49,12 +49,13 @@ public:
     int64 toLong(PVScalar *pv);
     float toFloat(PVScalar *pv);
     double toDouble(PVScalar *pv);
+    String toString(PVScalar *pv);
     void fromByte(PVScalar *pv,int8 from);
-    void  fromShort(PVScalar *pv,int16 from);
-    void  fromInt(PVScalar *pv, int32 from);
-    void  fromLong(PVScalar *pv, int64 from);
-    void  fromFloat(PVScalar* pv, float from);
-    void  fromDouble(PVScalar *pv, double from);
+    void fromShort(PVScalar *pv,int16 from);
+    void fromInt(PVScalar *pv, int32 from);
+    void fromLong(PVScalar *pv, int64 from);
+    void fromFloat(PVScalar* pv, float from);
+    void fromDouble(PVScalar *pv, double from);
     int toByteArray(PVScalarArray *pv, int offset, int length,
         ByteArray to, int toOffset);
     int toShortArray(PVScalarArray *pv, int offset, int length,

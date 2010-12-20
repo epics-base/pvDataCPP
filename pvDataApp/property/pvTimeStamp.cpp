@@ -69,17 +69,20 @@ void PVTimeStamp::detach()
     pvNano = 0;
 }
 
-TimeStamp PVTimeStamp::get() const
+bool PVTimeStamp::isAttached() {
+    if(pvSecs==0 || pvNano==0) return false;
+    return true;
+}
+
+void PVTimeStamp::get(TimeStamp & timeStamp) const
 {
     if(pvSecs==0 || pvNano==0) {
         throw std::logic_error(notAttached);
     }
-    TimeStamp timeStamp;
     timeStamp.put(pvSecs->get(),pvNano->get());
-    return timeStamp;
 }
 
-bool PVTimeStamp::set(TimeStamp timeStamp)
+bool PVTimeStamp::set(TimeStamp const & timeStamp)
 {
     if(pvSecs==0 || pvNano==0) {
         throw std::logic_error(notAttached);

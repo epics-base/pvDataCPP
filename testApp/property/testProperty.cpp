@@ -92,7 +92,7 @@ static void testAlarm(FILE * fd,FILE *auxfd)
     al.setSeverity(majorAlarm);
     result = pvAlarm.set(al);
     assert(result);
-    alarm = pvAlarm.get();
+    pvAlarm.get(alarm);
     assert(al.getMessage().compare(alarm.getMessage())==0);
     assert(al.getSeverity()==alarm.getSeverity());
     String message = alarm.getMessage();
@@ -117,7 +117,7 @@ static void testTimeStamp(FILE * fd,FILE *auxfd)
     ts.getCurrent();
     result = pvTimeStamp.set(ts);
     assert(result);
-    timeStamp = pvTimeStamp.get();
+    pvTimeStamp.get(timeStamp);
     assert(ts.getSecondsPastEpoch()==timeStamp.getSecondsPastEpoch());
     assert(ts.getNanoSeconds()==timeStamp.getNanoSeconds());
     time_t tt;
@@ -152,7 +152,7 @@ static void testControl(FILE * fd,FILE *auxfd)
     cl.setHigh(10.0);
     result = pvControl.set(cl);
     assert(result);
-    control = pvControl.get();
+    pvControl.get(control);
     assert(cl.getLow()==control.getLow());
     assert(cl.getHigh()==control.getHigh());
     double low = control.getLow();
@@ -181,7 +181,7 @@ static void testDisplay(FILE * fd,FILE *auxfd)
     dy.setUnits(String("volts"));
     result = pvDisplay.set(dy);
     assert(result);
-    display = pvDisplay.get();
+    pvDisplay.get(display);
     assert(dy.getLow()==display.getLow());
     assert(dy.getHigh()==display.getHigh());
     assert(dy.getDescription().compare(display.getDescription())==0);

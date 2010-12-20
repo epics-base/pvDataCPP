@@ -61,18 +61,22 @@ void PVAlarm::detach()
     pvMessage = 0;
 }
 
-Alarm PVAlarm::get() const
+bool PVAlarm::isAttached()
+{
+    if(pvSeverity==0 || pvMessage==0) return false;
+    return true;
+}
+
+void PVAlarm::get(Alarm & alarm) const
 {
     if(pvSeverity==0 || pvMessage==0) {
         throw std::logic_error(notAttached);
     }
-    Alarm alarm;
     alarm.setSeverity(AlarmSeverityFunc::getSeverity(pvSeverity->get()));
     alarm.setMessage(pvMessage->get());
-    return alarm;
 }
 
-bool PVAlarm::set(Alarm alarm)
+bool PVAlarm::set(Alarm const & alarm)
 {
     if(pvSeverity==0 || pvMessage==0) {
         throw std::logic_error(notAttached);

@@ -81,27 +81,33 @@ void PVDisplay::detach()
     pvHigh = 0;
 }
 
-Display PVDisplay::get() const
+bool PVDisplay::isAttached() {
+    if(pvDescription==0 || pvFormat==0 || pvUnits==0 || pvLow==0 || pvHigh==0)
+        return false;
+    return true;
+}
+
+void PVDisplay::get(Display & display) const
 {
     if(pvDescription==0 || pvFormat==0 || pvUnits==0 || pvLow==0 || pvHigh==0) {
         throw std::logic_error(notAttached);
     }
-    Display display;
     display.setDescription(pvDescription->get());
     display.setFormat(pvFormat->get());
     display.setUnits(pvUnits->get());
     display.setLow(pvLow->get());
     display.setHigh(pvHigh->get());
-    return display;
 }
 
-bool PVDisplay::set(Display display)
+bool PVDisplay::set(Display const & display)
 {
     if(pvDescription==0 || pvFormat==0 || pvUnits==0 || pvLow==0 || pvHigh==0) {
         throw std::logic_error(notAttached);
     }
     if(pvDescription->isImmutable() || pvFormat->isImmutable()) return false;
-    if(pvUnits->isImmutable() || pvLow->isImmutable() || pvHigh->isImmutable()) return false;
+    if(pvUnits->isImmutable() || pvLow->isImmutable() || pvHigh->isImmutable())
+         return false;
+
     pvDescription->put(display.getDescription());
     pvFormat->put(display.getFormat());
     pvUnits->put(display.getUnits());

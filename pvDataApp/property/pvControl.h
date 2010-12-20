@@ -18,10 +18,11 @@ public:
     //An automatic detach is issued if already attached.
     bool attach(PVField *pvField);
     void detach();
+    bool isAttached();
     // each of the following throws logic_error is not attached to PVField
     // set returns false if field is immutable
-    Control get() const;
-    bool set(Control control);
+    void get(Control &) const;
+    bool set(Control const & control);
 private:
     PVDouble *pvLow;
     PVDouble *pvHigh;

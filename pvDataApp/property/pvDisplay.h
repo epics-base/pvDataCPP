@@ -20,10 +20,11 @@ public:
     //An automatic detach is issued if already attached.
     bool attach(PVField *pvField);
     void detach();
+    bool isAttached();
     // each of the following throws logic_error is not attached to PVField
     // a set returns false if field is immutable
-    Display get() const;
-    bool set(Display display);
+    void get(Display &) const;
+    bool set(Display const & display);
 private:
     PVString *pvDescription;
     PVString *pvFormat;
