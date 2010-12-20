@@ -2,13 +2,13 @@
 testPVAuxInfo
 structure value
     double value 0
-    structure alarm
+    alarm alarm
         int severity 0
         string message 
-    structure timeStamp
+    timeStamp timeStamp
         long secondsPastEpoch 0
         int nanoSeconds 0
-    structure display
+    display display
         string description 
         string format 
         string units 
@@ -16,8 +16,8 @@ structure value
             double low 0
             double high 0
         auxInfo
-            key(factory) string factory factoryName
-            key(junk) double junk 3
+            string factory factoryName
+            double junk 3
 value offset 0 next 15 number 15
 value offset 1 next 2 number 1
 alarm offset 2 next 5 number 3

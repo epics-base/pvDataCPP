@@ -10,10 +10,10 @@ double double 10
 string string 10
 structure boolean
     boolean value true
-    structure alarm
+    alarm alarm
         int severity 2
         string message messageForAlarm
-    structure timeStamp
+    timeStamp timeStamp
         long secondsPastEpoch 123456789
         int nanoSeconds 1000000
     structure valueAlarm
@@ -23,20 +23,20 @@ structure boolean
         int changeStateSeverity 0
 structure byte
     byte value 127
-    structure alarm
+    alarm alarm
         int severity 2
         string message messageForAlarm
-    structure timeStamp
+    timeStamp timeStamp
         long secondsPastEpoch 123456789
         int nanoSeconds 1000000
-    structure display
+    display display
         string description this is a description
         string format f10.2
         string units SomeUnits
         structure limit
             double low 0
             double high 10
-    structure control
+    control control
         structure limit
             double low 1
             double high 9
@@ -54,20 +54,20 @@ structure byte
         byte hystersis 0
 structure short
     short value 32767
-    structure alarm
+    alarm alarm
         int severity 2
         string message messageForAlarm
-    structure timeStamp
+    timeStamp timeStamp
         long secondsPastEpoch 123456789
         int nanoSeconds 1000000
-    structure display
+    display display
         string description this is a description
         string format f10.2
         string units SomeUnits
         structure limit
             double low 0
             double high 10
-    structure control
+    control control
         structure limit
             double low 1
             double high 9
@@ -85,20 +85,20 @@ structure short
         short hystersis 0
 structure int
     int value -2147483648
-    structure alarm
+    alarm alarm
         int severity 2
         string message messageForAlarm
-    structure timeStamp
+    timeStamp timeStamp
         long secondsPastEpoch 123456789
         int nanoSeconds 1000000
-    structure display
+    display display
         string description this is a description
         string format f10.2
         string units SomeUnits
         structure limit
             double low 0
             double high 10
-    structure control
+    control control
         structure limit
             double low 1
             double high 9
@@ -116,20 +116,20 @@ structure int
         int hystersis 0
 structure long
     long value -9223372032559808513
-    structure alarm
+    alarm alarm
         int severity 2
         string message messageForAlarm
-    structure timeStamp
+    timeStamp timeStamp
         long secondsPastEpoch 123456789
         int nanoSeconds 1000000
-    structure display
+    display display
         string description this is a description
         string format f10.2
         string units SomeUnits
         structure limit
             double low 0
             double high 10
-    structure control
+    control control
         structure limit
             double low 1
             double high 9
@@ -147,20 +147,20 @@ structure long
         long hystersis 0
 structure float
     float value 1.123e+08
-    structure alarm
+    alarm alarm
         int severity 2
         string message messageForAlarm
-    structure timeStamp
+    timeStamp timeStamp
         long secondsPastEpoch 123456789
         int nanoSeconds 1000000
-    structure display
+    display display
         string description this is a description
         string format f10.2
         string units SomeUnits
         structure limit
             double low 0
             double high 10
-    structure control
+    control control
         structure limit
             double low 1
             double high 9
@@ -178,20 +178,20 @@ structure float
         float hystersis 0
 structure double
     double value 1.123e+35
-    structure alarm
+    alarm alarm
         int severity 2
         string message messageForAlarm
-    structure timeStamp
+    timeStamp timeStamp
         long secondsPastEpoch 123456789
         int nanoSeconds 1000000
-    structure display
+    display display
         string description this is a description
         string format f10.2
         string units SomeUnits
         structure limit
             double low 0
             double high 10
-    structure control
+    control control
         structure limit
             double low 1
             double high 9
@@ -209,76 +209,76 @@ structure double
         double hystersis 0
 structure string
     string value this is a string
-    structure alarm
+    alarm alarm
         int severity 2
         string message messageForAlarm
-    structure timeStamp
+    timeStamp timeStamp
         long secondsPastEpoch 123456789
         int nanoSeconds 1000000
 
 testScalarArray
 structure boolean
-    booleanArray value [true,false,true]
-    structure alarm
+    boolean[] value [true,false,true]
+    alarm alarm
         int severity 0
         string message 
-    structure timeStamp
+    timeStamp timeStamp
         long secondsPastEpoch 0
         int nanoSeconds 0
 structure byte
-    byteArray value [0,1,2]
-    structure alarm
+    byte[] value [0,1,2]
+    alarm alarm
         int severity 0
         string message 
-    structure timeStamp
+    timeStamp timeStamp
         long secondsPastEpoch 0
         int nanoSeconds 0
 structure short
-    shortArray value [0,1,2]
-    structure alarm
+    short[] value [0,1,2]
+    alarm alarm
         int severity 0
         string message 
-    structure timeStamp
+    timeStamp timeStamp
         long secondsPastEpoch 0
         int nanoSeconds 0
 structure int
-    intArray value [0,1,2]
-    structure alarm
+    int[] value [0,1,2]
+    alarm alarm
         int severity 0
         string message 
-    structure timeStamp
+    timeStamp timeStamp
         long secondsPastEpoch 0
         int nanoSeconds 0
 structure long
-    longArray value [0,1,2]
-    structure alarm
+    long[] value [0,1,2]
+    alarm alarm
         int severity 0
         string message 
-    structure timeStamp
+    timeStamp timeStamp
         long secondsPastEpoch 0
         int nanoSeconds 0
 structure float
-    floatArray value [0,1,2]
-    structure alarm
+    float[] value [0,1,2]
+    alarm alarm
         int severity 0
         string message 
-    structure timeStamp
+    timeStamp timeStamp
         long secondsPastEpoch 0
         int nanoSeconds 0
 structure double
-    doubleArray value [0,1,2]
-    structure alarm
+    double[] value [0,1,2]
+    alarm alarm
         int severity 0
         string message 
-    structure timeStamp
+    timeStamp timeStamp
         long secondsPastEpoch 0
         int nanoSeconds 0
 structure string
-    stringArray value [0,1,2]
-    structure alarm
+    string[] value [0,1,2]
+    alarm alarm
         int severity 0
         string message 
-    structure timeStamp
+    timeStamp timeStamp
         long secondsPastEpoch 0
         int nanoSeconds 0
 linkedListNode: totalConstruct 5 totalDestruct 0

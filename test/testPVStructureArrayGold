@@ -1,38 +1,5 @@
 structure powerSupply
-    structureArray value 
-    [
-        structure powerSupply
-            structure voltage
-                double value 0
-                structure alarm
-                    int severity 0
-                    string message 
-            structure power
-                double value 0
-                structure alarm
-                    int severity 0
-                    string message 
-            structure current
-                double value 0
-                structure alarm
-                    int severity 0
-                    string message ,
-        structure powerSupply
-            structure voltage
-                double value 0
-                structure alarm
-                    int severity 0
-                    string message 
-            structure power
-                double value 0
-                structure alarm
-                    int severity 0
-                    string message 
-            structure current
-                double value 0
-                structure alarm
-                    int severity 0
-                    string message ,
+    structure[] value 
         structure powerSupply
             structure voltage
                 double value 0
@@ -49,11 +16,42 @@ structure powerSupply
                 structure alarm
                     int severity 0
                     string message 
-    ]
-    structure alarm
+        structure powerSupply
+            structure voltage
+                double value 0
+                structure alarm
+                    int severity 0
+                    string message 
+            structure power
+                double value 0
+                structure alarm
+                    int severity 0
+                    string message 
+            structure current
+                double value 0
+                structure alarm
+                    int severity 0
+                    string message 
+        structure powerSupply
+            structure voltage
+                double value 0
+                structure alarm
+                    int severity 0
+                    string message 
+            structure power
+                double value 0
+                structure alarm
+                    int severity 0
+                    string message 
+            structure current
+                double value 0
+                structure alarm
+                    int severity 0
+                    string message 
+    alarm alarm
         int severity 0
         string message 
-    structure timeStamp
+    timeStamp timeStamp
         long secondsPastEpoch 0
         int nanoSeconds 0
 linkedListNode: totalConstruct 5 totalDestruct 0
