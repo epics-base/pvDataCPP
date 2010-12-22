@@ -2098,7 +2098,10 @@ substructure. All other fields in the structure containing a value field are
 considered properties of the value field. The fieldname is also the property
 name. The value field can have any type, i.e. scalar, scalarArray, or
 structure. Typical property fields are timeStamp, alarm, display, control,
-and history</p>
+and history The timeStamp is a special case.
+If it appears anywhere in the structure
+hieraracy above a value field it is a property of the value field.
+</p>
 
 <p>For example the following top level structure has a single value field.
 The value field has propertiess alarm, timeStamp, and display.</p>
@@ -2200,7 +2203,7 @@ have fields power, voltage, current that each support the PVData data model.
 <h3 style="text-align: center" id="Overview1">Overview of Property
 Support</h3>
 
-<p>Except for enumerated, each properey has two files: a property.h and a
+<p>Except for enumerated, each property has two files: a property.h and a
 pvProperty.h . For example: <span
 style="text-align: center">timeStamp.h</span> and <span
 style="text-align: center">pvTimeStamp.h</span> In each case the property.h
@@ -2338,7 +2341,7 @@ public:
   <dt style="font-family: courier;">diff</dt>
     <dd>diff = a - b</dd>
   <dt style="font-family: courier;">getMilliseconds</dt>
-    <dd>Get the nunber of milliseconds since the epoch.</dd>
+    <dd>Get the number of milliseconds since the epoch.</dd>
 </dl>
 
 <p>The TimeStamp class provides arithmetic operations on time stamps. The
@@ -2402,7 +2405,7 @@ public:
 
 <h3 style="text-align: center" id="alarm">alarm</h3>
 
-<p>An pvData alarm structure is defined as follows:</p>
+<p>An alarm structure is defined as follows:</p>
 <pre>structure alarm
     int32 severity
     String message</pre>
