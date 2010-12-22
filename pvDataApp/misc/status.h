@@ -35,7 +35,8 @@ namespace epics { namespace pvData {
          */
         class Status : public epics::pvData::Serializable {
             public:
-
+            virtual ~Status() {};
+            
             /**
              * Get status type.
              * @return status type, non-<code>null</code>.
@@ -69,7 +70,7 @@ namespace epics { namespace pvData {
              */
             virtual bool isSuccess() = 0;
 
-            
+            virtual String toString() = 0;
             virtual void toString(StringBuilder buffer, int indentLevel = 0) = 0;
             
         };
@@ -95,7 +96,7 @@ namespace epics { namespace pvData {
         	 * @param cause exception that caused an error. Optional.
         	 * @return status instance.
         	 */
-        	virtual Status* createStatus(StatusType type, String message, BaseException* cause) = 0;
+        	virtual Status* createStatus(StatusType type, String message, BaseException* cause = 0) = 0;
         	
         	/**
         	 * Deserialize status.

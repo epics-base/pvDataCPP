@@ -20,11 +20,11 @@ namespace epics { namespace pvData {
              */
             virtual void destroy() = 0;
             
-            private:
+            protected:
             /**
-             * Do not allow delete on this instance.
+             * Do not allow delete on this instance and derived classes, destroy() must be used instead.
              */ 
-            //~Destroyable() {};
+            virtual ~Destroyable() {};
         };
 
 }}

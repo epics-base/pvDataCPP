@@ -11,8 +11,8 @@
 #include <stddef.h>
 #include <string.h>
 #include <stdio.h>
-#include "bitSet.h"
-
+#include <bitSet.h>
+#include <showConstructDestruct.h>
 
 #include <epicsAssert.h>
 
@@ -143,6 +143,7 @@ int main(int argc,char *argv[])
 {
     testGetSetClearFlip();
     testOperators();
+    //getShowConstructDestruct()->constuctDestructTotals(stdout);
     return(0);
 }
 

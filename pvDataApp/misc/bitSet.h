@@ -8,6 +8,8 @@
 #define BITSET_H
 #include <stdexcept>
 #include <pvType.h>
+#include "factory.h"
+#include "showConstructDestruct.h"
 //#include "byteBuffer.h"
 //#include "serialize.h"
 namespace epics { namespace pvData { 
@@ -213,9 +215,7 @@ namespace epics { namespace pvData {
 
         bool operator!=(const BitSet &set) const;
 
-        void toString(StringBuilder buffer);
-
-        void toString(StringBuilder buffer, int indentLevel) const;
+        void toString(StringBuilder buffer, int indentLevel = 0) const;
 
     private:
 

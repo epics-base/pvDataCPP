@@ -41,6 +41,7 @@ LIBSRCS += timeFunction.cpp
 LIBSRCS += timer.cpp
 LIBSRCS += queueVoid.cpp
 LIBSRCS += messageQueue.cpp
+LIBSRCS += StatusCreateFactory.cpp
 
 SRC_DIRS += $(PVDATA)/pv
 
@@ -83,7 +84,6 @@ LIBSRCS += PVDataCreateFactory.cpp
 LIBSRCS += Convert.cpp
 LIBSRCS += StandardField.cpp
 LIBSRCS += StandardPVField.cpp
-LIBSRCS += StatusCreateFactory.cpp 
 
 SRC_DIRS += $(PVDATA)/property
 
