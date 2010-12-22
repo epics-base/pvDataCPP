@@ -119,6 +119,13 @@ class StatusImpl : public Status
 	   throw new std::runtime_error("use getStatusCreate()->deserialize()");
     }
 
+    virtual String toString()
+    {
+        String str;
+        toString(&str, 0);
+        return str;
+    }
+
     virtual void toString(StringBuilder buffer, int indentLevel)
     {
         *buffer += "StatusImpl [type=";

@@ -70,7 +70,7 @@ namespace epics { namespace pvData {
              */
             virtual bool isSuccess() = 0;
 
-            
+            virtual String toString() = 0;
             virtual void toString(StringBuilder buffer, int indentLevel = 0) = 0;
             
         };
