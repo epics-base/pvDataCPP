@@ -136,7 +136,7 @@ namespace epics { namespace pvData {
         delete[] pImpl->pvFields;
         pImpl->pvFields = newPVFields;
         pImpl->numberFields = origLength + 1;
-        PVField::replaceStructure(this);
+        PVField::replaceStructure(this,pImpl->numberFields);
     }
 
     void PVStructure::appendPVFields(int numberNewFields,PVFieldPtrArray pvFields)
@@ -154,7 +154,7 @@ namespace epics { namespace pvData {
         delete[] pImpl->pvFields;
         pImpl->pvFields = newPVFields;
         pImpl->numberFields = numberFields;
-        PVField::replaceStructure(this);
+        PVField::replaceStructure(this,numberFields);
     }
 
     void PVStructure::removePVField(String fieldName)
@@ -178,7 +178,7 @@ namespace epics { namespace pvData {
         delete[] pImpl->pvFields;
         pImpl->pvFields = newPVFields;
         pImpl->numberFields = newLength;
-        PVField::replaceStructure(this);
+        PVField::replaceStructure(this,newLength);
     }
 
     PVBoolean *PVStructure::getBooleanField(String fieldName)

@@ -35,6 +35,6 @@ low offset 13 next 14 number 1
 high offset 14 next 15 number 1
 linkedListNode: totalConstruct 6 totalDestruct 0
 linkedList: totalConstruct 1 totalDestruct 0
-field: totalConstruct 111 totalDestruct 18 totalReference 93
+field: totalConstruct 111 totalDestruct 12 totalReference 126
 pvField: totalConstruct 17 totalDestruct 17
 pvAuxInfo: totalConstruct 1 totalDestruct 1

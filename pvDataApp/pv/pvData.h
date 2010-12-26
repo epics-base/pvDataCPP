@@ -109,7 +109,7 @@ public:
     virtual bool operator!=(PVField &pv) = 0;
 protected:
     PVField(PVStructure *parent,FieldConstPtr field);
-    void replaceStructure(PVStructure *pvStructure);
+    void replaceStructure(PVStructure *pvStructure,int numberFields);
 private:
     class PVFieldPvt *pImpl;
     static void computeOffset(PVField *pvField);

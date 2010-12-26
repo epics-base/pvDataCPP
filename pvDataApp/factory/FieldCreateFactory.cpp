@@ -183,6 +183,7 @@ Structure::Structure (String fieldName,
         // inc reference counter
         fields[i]->incReferenceCount();
     }
+    this->incReferenceCount();
 }
 
 Structure::~Structure() {

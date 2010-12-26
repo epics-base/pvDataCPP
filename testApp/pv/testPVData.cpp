@@ -34,6 +34,21 @@ static String alarmTimeStamp("alarm,timeStamp");
 static String alarmTimeStampValueAlarm("alarm,timeStamp,valueAlarm");
 static String allProperties("alarm,timeStamp,display,control,valueAlarm");
 
+static void testAppend(FILE * fd)
+{
+    FieldConstPtrArray fields = new FieldConstPtr[0];
+    PVStructure *pvParent = pvDataCreate->createPVStructure(
+        0,String("request"),0,fields);
+    PVString* pvStringField = static_cast<PVString*>(
+        pvDataCreate->createPVScalar(pvParent, "fieldList", pvString));
+    pvStringField->put(String("value,timeStamp"));
+    pvParent->appendPVField(pvStringField);
+    builder.clear();
+    pvParent->toString(&builder);
+    fprintf(fd,"%s\n",builder.c_str());
+    delete pvParent;
+}
+
 static void testPVScalarCommon(FILE * fd,String fieldName,ScalarType stype)
 {
     PVScalar *pvScalar = standardPVField->scalar(0,fieldName,stype);
@@ -264,6 +279,7 @@ int main(int argc,char *argv[])
     standardField = getStandardField();
     standardPVField = getStandardPVField();
     convert = getConvert();
+    testAppend(fd);
     testPVScalar(fd);
     testScalarArray(fd);
     getShowConstructDestruct()->constuctDestructTotals(fd);
