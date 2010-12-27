@@ -27,7 +27,7 @@ namespace epics { namespace pvData {
                 STATUSTYPE_FATAL
     	};
     	
-    	const char* StatusTypeName[] = { "OK", "WARNING", "ERROR", "FATAL" };
+    	extern const char* StatusTypeName[];
 
         /**
          * Status interface.
