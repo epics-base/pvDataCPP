@@ -93,6 +93,21 @@ void testBasicOperations() {
     assert(buff->getLimit()==32);
     assert(buff->getRemaining()==32);
 
+    buff->setPosition(4);
+    assert(buff->getPosition()==4);
+    assert(buff->getLimit()==32);
+    assert(buff->getRemaining()==(32-4));
+
+    buff->setPosition(13);
+    assert(buff->getPosition()==13);
+    assert(buff->getLimit()==32);
+    assert(buff->getRemaining()==(32-13));
+
+    buff->clear();
+    assert(buff->getPosition()==0);
+    assert(buff->getLimit()==32);
+    assert(buff->getRemaining()==32);
+
     char src[] = { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l',
             'm' };
     char dst[] = { ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',

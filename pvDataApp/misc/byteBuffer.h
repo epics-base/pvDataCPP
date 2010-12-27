@@ -11,6 +11,8 @@
 #include <pvType.h>
 #include <epicsEndian.h>
 
+#include "epicsException.h"
+
 namespace epics {
     namespace pvData {
 
@@ -305,6 +307,21 @@ namespace epics {
                 return _buffer;
             }
 
+            /**
+             * Sets this buffer's position. If the new position is invalid in
+             * regards to the invariant then it is discarded.
+             *
+             * @param[in] newPosition The new position value; must be
+             * non-negative and no larger than the current limit.
+             * @throws EpicsException - If the preconditions on
+             * {@code newPosition} do not hold
+             */
+            inline void setPosition(int newPosition) {
+                if(newPosition<0||newPosition>_limit) throw EpicsException(
+                        "invalid limit");
+                _position = newPosition;
+            }
+            
             // TODO must define arrays
 
         private:
