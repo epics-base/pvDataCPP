@@ -66,13 +66,13 @@ public:
    Type getType() const;
    virtual void toString(StringBuilder buf) const{toString(buf,0);}
    virtual void toString(StringBuilder buf,int indentLevel) const;
+   void incReferenceCount() const;
+   void decReferenceCount() const;
 protected:
    Field(String fieldName,Type type);
    virtual ~Field();
 private:
    class FieldPvt *pImpl;
-   void incReferenceCount() const;
-   void decReferenceCount() const;
    friend class StructureArray;
    friend class Structure;
    friend class PVFieldPvt;
