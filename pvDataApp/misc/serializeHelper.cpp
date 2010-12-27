@@ -91,7 +91,10 @@ namespace epics {
                     break;
             }
         }
+        
+        static String emptyString;
 
+        // TODO consider by reference !!!
         String SerializeHelper::deserializeString(ByteBuffer* buffer,
                 DeserializableControl* control) {
 
@@ -110,15 +113,15 @@ namespace epics {
                             break;
                     }
                     String s = String(retBuffer, size);
-                    delete retBuffer;
+                    delete[] retBuffer;
                     return s;
                 } catch(...) {
-                    delete retBuffer; // remove the buffer
+                    delete[] retBuffer; // remove the buffer
                     throw;
                 }
             }
             else
-                return String("");
+                return emptyString;
         }
 
     }

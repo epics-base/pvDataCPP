@@ -16,7 +16,7 @@
 #include "serialize.h"
 #include "byteBuffer.h"
 #include "noDefaultMethods.h"
-#include "../pv/pvIntrospect.h"
+#include <pvIntrospect.h>
 
 namespace epics {
     namespace pvData {
