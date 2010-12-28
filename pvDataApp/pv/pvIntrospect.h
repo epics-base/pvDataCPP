@@ -68,6 +68,8 @@ public:
    virtual void toString(StringBuilder buf,int indentLevel) const;
    void incReferenceCount() const;
    void decReferenceCount() const;
+   virtual bool operator==(const Field& field) const;
+   virtual bool operator!=(const Field& field) const;
 protected:
    Field(String fieldName,Type type);
    virtual ~Field();

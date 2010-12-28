@@ -118,6 +118,80 @@ void Field::toString(StringBuilder buffer,int indentLevel) const{
     *buffer += pImpl->fieldName.c_str();
 }
 
+static bool fieldEquals(FieldConstPtr a,FieldConstPtr b);
+inline bool scalarFieldEquals(ScalarConstPtr a,ScalarConstPtr b)
+{
+    ScalarType ascalarType = a->getScalarType();
+    ScalarType bscalarType = b->getScalarType();
+    if(ascalarType != bscalarType)
+    {
+    	return false;
+    }
+    return true;
+}
+
+inline bool scalarArrayFieldEquals(ScalarArrayConstPtr a,ScalarArrayConstPtr b)
+{
+	ScalarType aType = a->getElementType();
+	ScalarType bType = b->getElementType();
+	if(aType != bType)
+	{
+		return false;
+	}
+	return true;
+}
+
+inline bool structureFieldEquals(StructureConstPtr a,StructureConstPtr b)
+{
+    int length = a->getNumberFields();
+    if(length != b->getNumberFields()) return false;
+    FieldConstPtrArray aFields = a->getFields();
+    FieldConstPtrArray bFields = b->getFields();
+    for(int i=0; i<length; i++)
+    {
+        if(!fieldEquals(aFields[i],bFields[i])) return false;
+    }
+    return true;
+}
+
+inline bool structureArrayFieldEquals(StructureArrayConstPtr a,StructureArrayConstPtr b)
+{
+    StructureConstPtr aStruct = a->getStructure();
+    StructureConstPtr bStruct = b->getStructure();
+    return fieldEquals(aStruct,bStruct);
+}
+
+static bool fieldEquals(FieldConstPtr a,FieldConstPtr b)
+{
+    const void * avoid = static_cast<const void *>(a);
+    const void * bvoid = static_cast<const void *>(b);
+    if(avoid == bvoid) return true;
+    if(a->getFieldName() != b->getFieldName()) return false;
+    Type atype = a->getType();
+    Type btype = b->getType();
+    if(atype!=btype) return false;
+    if(atype==scalar) return scalarFieldEquals(
+        static_cast<ScalarConstPtr>(a),static_cast<ScalarConstPtr>(b));
+    if(atype==scalarArray) return scalarArrayFieldEquals(
+        static_cast<ScalarArrayConstPtr>(a),static_cast<ScalarArrayConstPtr>(b));
+    if(atype==structureArray) return structureArrayFieldEquals(
+        static_cast<StructureArrayConstPtr>(a),static_cast<StructureArrayConstPtr>(b));
+    if(atype==structure) return structureFieldEquals(
+        static_cast<StructureConstPtr>(a),static_cast<StructureConstPtr>(b));
+    String message("should not get here");
+    throw std::logic_error(message);
+}
+
+bool Field::operator==(const Field& field) const
+{
+    return fieldEquals(this, &field);
+}
+
+bool Field::operator!=(const Field& field) const
+{
+    return !fieldEquals(this, &field);
+}
+
 Scalar::Scalar(String fieldName,ScalarType scalarType)
        : Field(fieldName,scalar),scalarType(scalarType){}
 
