@@ -62,6 +62,15 @@ void testBasicOperations() {
     assert(buff->getPosition()==28);
     assert(buff->getRemaining()==4);
 
+    // testing direct reads
+    assert(buff->getBoolean(0)==true);
+    assert(buff->getByte(1)==-12);
+    assert(buff->getShort(2)==10516);
+    assert(buff->getInt(4)==0x1937628B);
+    assert(buff->getLong(8)==2345678123LL);
+    assert(buff->getFloat(16)==testFloat);
+    assert(buff->getDouble(20)==testDouble);
+
     buff->flip();
     assert(buff->getLimit()==28);
     assert(buff->getPosition()==0);
@@ -102,6 +111,43 @@ void testBasicOperations() {
     assert(buff->getPosition()==13);
     assert(buff->getLimit()==32);
     assert(buff->getRemaining()==(32-13));
+
+    // testing absolute puts
+    buff->clear();
+    buff->setPosition(28);
+    buff->putBoolean(0, true);
+    buff->putByte(1, -12);
+    buff->putShort(2, 10516);
+    buff->putInt(4, 0x1937628B);
+    buff->putLong(8, 2345678123LL);
+    buff->putFloat(16, testFloat);
+    buff->putDouble(20, testDouble);
+
+    buff->flip();
+    assert(buff->getLimit()==28);
+    assert(buff->getPosition()==0);
+    assert(buff->getRemaining()==28);
+
+    assert(buff->getBoolean()==true);
+    assert(buff->getPosition()==1);
+
+    assert(buff->getByte()==-12);
+    assert(buff->getPosition()==2);
+
+    assert(buff->getShort()==10516);
+    assert(buff->getPosition()==4);
+
+    assert(buff->getInt()==0x1937628B);
+    assert(buff->getPosition()==8);
+
+    assert(buff->getLong()==2345678123LL);
+    assert(buff->getPosition()==16);
+
+    assert(buff->getFloat()==testFloat);
+    assert(buff->getPosition()==20);
+
+    assert(buff->getDouble()==testDouble);
+    assert(buff->getPosition()==28);
 
     buff->clear();
     assert(buff->getPosition()==0);

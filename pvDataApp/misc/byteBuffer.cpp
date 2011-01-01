@@ -22,11 +22,10 @@ namespace epics {
                 _bufferByteOrder(byteOrder), _size(size), _position(0),
                 _limit(size), _buffer(0) {
 
-            if (size < 0)
-                throw EpicsException("negative size");
+            if(size<0) throw EpicsException("negative size");
 
             if (byteOrder!=EPICS_ENDIAN_BIG && byteOrder!=EPICS_ENDIAN_LITTLE)
-                throw EpicsException("invalid endian");
+                throw EpicsException("invalid endianness");
 
             _buffer = new char[_size];
         }
@@ -53,17 +52,25 @@ namespace epics {
         }
 
         bool ByteBuffer::getBoolean() {
-            if(_position<_limit)
-                return _buffer[_position++]==0 ? false : true;
+            return getBoolean(_position++);
+        }
+
+        bool ByteBuffer::getBoolean(int index) {
+            if(index>=0&&index<_limit)
+                return _buffer[index]==0 ? false : true;
             else
-                throw EpicsException("buffer underflow");
+                throw EpicsException("index out of bounds");
         }
 
         int8 ByteBuffer::getByte() {
-            if(_position<_limit)
-                return (int8)_buffer[_position++];
+            return getByte(_position++);
+        }
+
+        int8 ByteBuffer::getByte(int index) {
+            if(index>=0&&index<_limit)
+                return (int8)_buffer[index];
             else
-                throw EpicsException("buffer underflow");
+                throw EpicsException("index out of bounds");
         }
 
         int16 ByteBuffer::getShort() {
@@ -74,11 +81,28 @@ namespace epics {
             return val;
         }
 
+        int16 ByteBuffer::getShort(int index) {
+            if(index<0||_limit-index<(int)sizeof(int16))
+                throw EpicsException("index out of bounds");
+            int16 val;
+            getWithEndianness(index, (char*)&val, sizeof(int16)); // store short into val
+            return val;
+
+        }
+
         int32 ByteBuffer::getInt() {
             if(_limit-_position<(int)sizeof(int32))
                 throw EpicsException("buffer underflow");
             int32 val;
             getWithEndianness((char*)&val, sizeof(int32)); // store int into val
+            return val;
+        }
+
+        int32 ByteBuffer::getInt(int index) {
+            if(index<0||_limit-index<(int)sizeof(int32))
+                throw EpicsException("index out of bounds");
+            int32 val;
+            getWithEndianness(index, (char*)&val, sizeof(int32)); // store int into val
             return val;
         }
 
@@ -90,6 +114,14 @@ namespace epics {
             return val;
         }
 
+        int64 ByteBuffer::getLong(int index) {
+            if(index<0||_limit-index<(int)sizeof(int64))
+                throw EpicsException("index out of bounds");
+            int64 val;
+            getWithEndianness(index, (char*)&val, sizeof(int64)); // store long into val
+            return val;
+        }
+
         float ByteBuffer::getFloat() {
             if(_limit-_position<(int)sizeof(float))
                 throw EpicsException("buffer underflow");
@@ -98,11 +130,27 @@ namespace epics {
             return val;
         }
 
+        float ByteBuffer::getFloat(int index) {
+            if(index<0||_limit-index<(int)sizeof(float))
+                throw EpicsException("index out of bounds");
+            float val;
+            getWithEndianness(index, (char*)&val, sizeof(float)); // store float into val
+            return val;
+        }
+
         double ByteBuffer::getDouble() {
             if(_limit-_position<(int)sizeof(double))
                 throw EpicsException("buffer underflow");
             double val;
             getWithEndianness((char*)&val, sizeof(double)); // store double into val
+            return val;
+        }
+
+        double ByteBuffer::getDouble(int index) {
+            if(index>=0&&_limit-index<(int)sizeof(double)) throw EpicsException(
+                    "index out of bounds");
+            double val;
+            getWithEndianness(index, (char*)&val, sizeof(double)); // store double into val
             return val;
         }
 
@@ -120,18 +168,22 @@ namespace epics {
         }
 
         ByteBuffer* ByteBuffer::putBoolean(bool value) {
-            if(_position<_limit)
-                _buffer[_position++] = value ? 1 : 0;
-            else
-                throw EpicsException("buffer overflow");
-            return this;
+            return putByte(_position++, value ? 1 : 0);
+        }
+
+        ByteBuffer* ByteBuffer::putBoolean(int index, bool value) {
+            return putByte(index, value ? 1 : 0);
         }
 
         ByteBuffer* ByteBuffer::putByte(int8 value) {
-            if(_position<_limit)
-                _buffer[_position++] = (char)value;
+            return putByte(_position++, value);
+        }
+
+        ByteBuffer* ByteBuffer::putByte(int index, int8 value) {
+            if(index>=0&&index<_limit)
+                _buffer[index] = (char)value;
             else
-                throw EpicsException("buffer overflow");
+                throw EpicsException("index out of bounds");
             return this;
         }
 
@@ -142,10 +194,24 @@ namespace epics {
             return this;
         }
 
+        ByteBuffer* ByteBuffer::putShort(int index, int16 value) {
+            if(index<0||_limit-index<(int)sizeof(int16))
+                throw EpicsException("index out of bounds");
+            putWithEndianness(index, (char*)&value, sizeof(int16)); // store short into buffer
+            return this;
+        }
+
         ByteBuffer* ByteBuffer::putInt(int32 value) {
             if(_limit-_position<(int)sizeof(int32))
                 throw EpicsException("buffer overflow");
             putWithEndianness((char*)&value, sizeof(int32)); // store int into buffer
+            return this;
+        }
+
+        ByteBuffer* ByteBuffer::putInt(int index, int32 value) {
+            if(index<0||_limit-index<(int)sizeof(int32))
+                throw EpicsException("index out of bounds");
+            putWithEndianness(index, (char*)&value, sizeof(int32)); // store int into buffer
             return this;
         }
 
@@ -156,6 +222,13 @@ namespace epics {
             return this;
         }
 
+        ByteBuffer* ByteBuffer::putLong(int index, int64 value) {
+            if(index<0||_limit-index<(int)sizeof(int64))
+                throw EpicsException("index out of bounds");
+            putWithEndianness(index, (char*)&value, sizeof(int64)); // store long into buffer
+            return this;
+        }
+
         ByteBuffer* ByteBuffer::putFloat(float value) {
             if(_limit-_position<(int)sizeof(float))
                 throw EpicsException("buffer overflow");
@@ -163,10 +236,24 @@ namespace epics {
             return this;
         }
 
+        ByteBuffer* ByteBuffer::putFloat(int index, float value) {
+            if(index<0||_limit-index<(int)sizeof(float))
+                throw EpicsException("index out of bounds");
+            putWithEndianness(index, (char*)&value, sizeof(float)); // store float into buffer
+            return this;
+        }
+
         ByteBuffer* ByteBuffer::putDouble(double value) {
             if(_limit-_position<(int)sizeof(double))
                 throw EpicsException("buffer overflow");
             putWithEndianness((char*)&value, sizeof(double)); // store double into buffer
+            return this;
+        }
+
+        ByteBuffer* ByteBuffer::putDouble(int index, double value) {
+            if(index<0||_limit-index<(int)sizeof(double))
+                throw EpicsException("index out of bounds");
+            putWithEndianness(index, (char*)&value, sizeof(double)); // store double into buffer
             return this;
         }
 
@@ -192,6 +279,30 @@ namespace epics {
             else
                 for(int i = (int)size-1; i>=0; i--)
                     _buffer[_position++] = src[i];
+        }
+
+        /**
+         * Buffer underflow or overflow checks are performed in the caller.
+         */
+        void ByteBuffer::putWithEndianness(int index, char* src, size_t size) {
+            if(_bufferByteOrder==EPICS_BYTE_ORDER)
+                for(size_t i = 0; i<size; i++)
+                    _buffer[index++] = src[i];
+            else
+                for(int i = (int)size-1; i>=0; i--)
+                    _buffer[index++] = src[i];
+        }
+
+        /**
+         * Buffer underflow or overflow checks are performed in the caller.
+         */
+        void ByteBuffer::getWithEndianness(int index, char* dest, size_t size) {
+            if(_bufferByteOrder==EPICS_BYTE_ORDER)
+                for(size_t i = 0; i<size; i++)
+                    dest[i] = _buffer[index++];
+            else
+                for(int i = (int)size-1; i>=0; i--)
+                    dest[i] = _buffer[index++];
         }
 
     }

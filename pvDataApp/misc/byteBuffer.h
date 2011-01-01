@@ -16,21 +16,20 @@
 namespace epics {
     namespace pvData {
 
-
         /** @brief A buffer of bytes.
-          *
-          * A buffer of bytes, which has
-          *  - capacity (size)
-          *  - limit
-          *  - position
-          * The capacity is the maximum capacity of the buffer, the buffer's
-          * limit is the index of the first element that should not be read or
-          * written, and its position is the index of the next element to be
-          * written.
-          *
-          * The buffer also ha a byte order specified which can be little or
-          * big endian.
-          */
+         *
+         * A buffer of bytes, which has
+         *  - capacity (size)
+         *  - limit
+         *  - position
+         * The capacity is the maximum capacity of the buffer, the buffer's
+         * limit is the index of the first element that should not be read or
+         * written, and its position is the index of the next element to be
+         * written.
+         *
+         * The buffer also ha a byte order specified which can be little or
+         * big endian.
+         */
         class ByteBuffer {
         public:
             /** @brief ByteBuffer constructor.
@@ -79,6 +78,16 @@ namespace epics {
             bool getBoolean();
 
             /**
+             * Absolute get method. Reads the bool at the given {@code index}.
+             *
+             * @param[in] index The index from which the bool will be read
+             * @returns The bool at the given index
+             * @throws EpicsException - If index is negative or not smaller
+             * than the buffer's limit
+             */
+            bool getBoolean(int index);
+
+            /**
              * Relative Int8 read, {@code position} is incremented by
              * {@code 1}.
              *
@@ -87,6 +96,16 @@ namespace epics {
              * remaining in the buffer.
              */
             int8 getByte();
+
+            /**
+             * Absolute get method. Reads the byte at the given {@code index}.
+             *
+             * @param[in] index The index from which the byte will be read
+             * @returns The byte at the given index
+             * @throws EpicsException - If index is negative or not smaller
+             * than the buffer's limit
+             */
+            int8 getByte(int index);
 
             /**
              * Relative Int16 read, {@code position} is incremented by
@@ -99,6 +118,16 @@ namespace epics {
             int16 getShort();
 
             /**
+             * Absolute get method. Reads the int16 at the given {@code index}.
+             *
+             * @param[in] index The index from which the int16 will be read
+             * @returns The int16 at the given index
+             * @throws EpicsException - If index is negative or not within
+             * the buffer's limit
+             */
+            int16 getShort(int index);
+
+            /**
              * Relative Int32 read, {@code position} is incremented by
              * {@code 4}.
              *
@@ -107,6 +136,16 @@ namespace epics {
              * 4 bytes remaining in the buffer.
              */
             int32 getInt();
+
+            /**
+             * Absolute get method. Reads the int32 at the given {@code index}.
+             *
+             * @param[in] index The index from which the int32 will be read
+             * @returns The int32 at the given index
+             * @throws EpicsException - If index is negative or not within
+             * the buffer's limit
+             */
+            int32 getInt(int index);
 
             /**
              * Relative Int64 read, {@code position} is incremented by
@@ -119,6 +158,16 @@ namespace epics {
             int64 getLong();
 
             /**
+             * Absolute get method. Reads the int64 at the given {@code index}.
+             *
+             * @param[in] index The index from which the int64 will be read
+             * @returns The int64 at the given index
+             * @throws EpicsException - If index is negative or not within
+             * the buffer's limit
+             */
+            int64 getLong(int index);
+
+            /**
              * Relative float read, {@code position} is incremented by
              * {@code 4}.
              *
@@ -129,6 +178,16 @@ namespace epics {
             float getFloat();
 
             /**
+             * Absolute get method. Reads the float at the given {@code index}.
+             *
+             * @param[in] index The index from which the float will be read
+             * @returns The float at the given index
+             * @throws EpicsException - If index is negative or not within
+             * the buffer's limit
+             */
+            float getFloat(int index);
+
+            /**
              * Relative double read, {@code position} is incremented by
              * {@code 8}.
              *
@@ -137,6 +196,16 @@ namespace epics {
              * 8 bytes remaining in the buffer.
              */
             double getDouble();
+
+            /**
+             * Absolute get method. Reads the double at the given {@code index}.
+             *
+             * @param[in] index The index from which the double will be read
+             * @returns The double at the given index
+             * @throws EpicsException - If index is negative or not within
+             * the buffer's limit
+             */
+            double getDouble(int index);
 
             /**
              * Relative bulk @em get method. It transfers {@code count} bytes
@@ -176,6 +245,15 @@ namespace epics {
              */
             ByteBuffer* putBoolean(bool value);
 
+            /**
+             * Absolute bool write.
+             *
+             * @param[in] index The index at which the bool will be written.
+             * @param[in] value The bool value to write.
+             * @throws EpicsException - Buffer overflow if there are no
+             * bytes remaining in the buffer.
+             */
+            ByteBuffer* putBoolean(int index, bool value);
 
             /**
              * Relative Int8 write, {@code position} is incremented by
@@ -188,6 +266,16 @@ namespace epics {
             ByteBuffer* putByte(int8 value);
 
             /**
+             * Absolute Int8 write.
+             *
+             * @param[in] index The index at which the byte will be written.
+             * @param[in] value The Int8 value to write.
+             * @throws EpicsException - Buffer overflow if there are no
+             * bytes remaining in the buffer.
+             */
+            ByteBuffer* putByte(int index, int8 value);
+
+            /**
              * Relative Int16 write, {@code position} is incremented by
              * {@code 2}.
              *
@@ -196,6 +284,16 @@ namespace epics {
              * 2 bytes remaining in the buffer.
              */
             ByteBuffer* putShort(int16 value);
+
+            /**
+             * Absolute Int16 write.
+             *
+             * @param[in] index The index at which the Int16 will be written.
+             * @param[in] value The Int16 value to write.
+             * @throws EpicsException - Buffer overflow if there are less than
+             * 2 bytes remaining in the buffer.
+             */
+            ByteBuffer* putShort(int index, int16 value);
 
             /**
              * Relative Int32 write, {@code position} is incremented by
@@ -208,6 +306,16 @@ namespace epics {
             ByteBuffer* putInt(int32 value);
 
             /**
+             * Absolute Int32 write.
+             *
+             * @param[in] index The index at which the Int32 will be written.
+             * @param[in] value The Int32 value to write.
+             * @throws EpicsException - Buffer overflow if there are less than
+             * 4 bytes remaining in the buffer.
+             */
+            ByteBuffer* putInt(int index, int32 value);
+
+            /**
              * Relative Int64 write, {@code position} is incremented by
              * {@code 8}.
              *
@@ -216,6 +324,16 @@ namespace epics {
              * 8 bytes remaining in the buffer.
              */
             ByteBuffer* putLong(int64 value);
+
+            /**
+             * Absolute Int64 write.
+             *
+             * @param[in] index The index at which the Int64 will be written.
+             * @param[in] value The Int64 value to write.
+             * @throws EpicsException - Buffer overflow if there are less than
+             * 8 bytes remaining in the buffer.
+             */
+            ByteBuffer* putLong(int index, int64 value);
 
             /**
              * Relative float write, {@code position} is incremented by
@@ -228,6 +346,16 @@ namespace epics {
             ByteBuffer* putFloat(float value);
 
             /**
+             * Absolute float write.
+             *
+             * @param[in] index The index at which the float will be written.
+             * @param[in] value The float value to write.
+             * @throws EpicsException - Buffer overflow if there are less than
+             * 4 bytes remaining in the buffer.
+             */
+            ByteBuffer* putFloat(int index, float value);
+
+            /**
              * Relative float write, {@code position} is incremented by
              * {@code 8}.
              *
@@ -236,6 +364,16 @@ namespace epics {
              * 8 bytes remaining in the buffer.
              */
             ByteBuffer* putDouble(double value);
+
+            /**
+             * Absolute double write.
+             *
+             * @param[in] index The index at which the double will be written.
+             * @param[in] value The double value to write.
+             * @throws EpicsException - Buffer overflow if there are less than
+             * 8 bytes remaining in the buffer.
+             */
+            ByteBuffer* putDouble(int index, double value);
 
             //virtual ByteBuffer *putString(String value) = 0; // TODO
 
@@ -321,7 +459,13 @@ namespace epics {
                         "invalid limit");
                 _position = newPosition;
             }
-            
+
+            inline void setLimit(int newLimit) {
+                if(newLimit<0||_position>newLimit) throw EpicsException(
+                        "invalid limit");
+                _limit = newLimit;
+            }
+
             // TODO must define arrays
 
         private:
@@ -334,12 +478,28 @@ namespace epics {
              * and the current hardware.
              */
             void getWithEndianness(char* dest, size_t size);
+
             /**
              * Puts the  next <pre>size</pre> bytes into the buffer reading them
              * from source taking into account endianness of the buffer
              * and the current hardware.
              */
             void putWithEndianness(char* src, size_t size);
+
+            /**
+             * Puts the <pre>size</pre> bytes into the buffer reading them
+             * from source taking into account endianness of the buffer
+             * and the current hardware.
+             */
+            void putWithEndianness(int index, char* src, size_t size);
+
+            /**
+             * Reads the next <pre>size</pre> bytes from the buffer and stores them
+             * into the destination taking into account endianness of the buffer
+             * and the current hardware.
+             */
+            void getWithEndianness(int index, char* dest, size_t size);
+
         };
 
     }
