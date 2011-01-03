@@ -31,7 +31,7 @@ namespace epics {
         }
 
         ByteBuffer::~ByteBuffer() {
-            if (_buffer) delete _buffer;
+            if (_buffer) delete[] _buffer;
         }
 
         ByteBuffer* ByteBuffer::clear() {

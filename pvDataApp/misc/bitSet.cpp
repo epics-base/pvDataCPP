@@ -60,7 +60,7 @@ namespace epics { namespace pvData {
     }
 
     BitSet::~BitSet() {
-        delete words;
+        delete[] words;
 
         Lock xx(globalMutex);
         totalDestruct++;
@@ -68,7 +68,7 @@ namespace epics { namespace pvData {
 
     void BitSet::initWords(uint32 nbits) {
         uint32 length = (nbits <= 0) ? 1 : wordIndex(nbits-1) + 1;
-        if (words) delete words;
+        if (words) delete[] words;
         words = new uint64[length];
         bzero(words, sizeof(uint64)*length);
         wordsLength = length;
@@ -95,7 +95,7 @@ namespace epics { namespace pvData {
             uint64* newwords = new uint64[wordsRequired];
             bzero(newwords, sizeof(uint64)*wordsRequired);
             memcpy(newwords, words, sizeof(uint64)*wordsLength);
-            if (words) delete words;
+            if (words) delete[] words;
             words = newwords;
             wordsLength = wordsRequired;
         }
@@ -315,7 +315,7 @@ namespace epics { namespace pvData {
         // we ensure that words array size is adequate (and not wordsInUse to ensure capacity to the future)
         if (wordsLength < set.wordsLength)
         {
-            if (words) delete words;
+            if (words) delete[] words;
             words = new uint64[set.wordsLength];
             wordsLength = set.wordsLength;
         }
