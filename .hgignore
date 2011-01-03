@@ -1,1 +1,5 @@
 QtC-pvData.creator.user
+bin
+lib
+include
+./O.*
