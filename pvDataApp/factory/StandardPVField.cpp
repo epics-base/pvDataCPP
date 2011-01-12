@@ -12,13 +12,17 @@
 #include "convert.h"
 #include "standardField.h"
 #include "standardPVField.h"
+#include "showConstructDestruct.h"
 
 namespace epics { namespace pvData { 
+
+static Mutex globalMutex;
+static bool notInited = true;
+static StandardField *standardField = 0;
 
 static String notImplemented("not implemented");
 static FieldCreate* fieldCreate = 0;
 static PVDataCreate* pvDataCreate = 0;
-static StandardField *standardField = 0;
 static StandardPVField *standardPVField = 0;
 
 static void addExtendsStructureName(PVStructure *pvStructure,String properties)
@@ -325,15 +329,22 @@ public:
     StandardPVFieldExt(): StandardPVField(){};
 };
 
-StandardPVField * getStandardPVField() {
-    static Mutex mutex = Mutex();
-    Lock xx(&mutex);
+static void myDeleteStatic()
+{
+    delete standardPVField;
+}
 
-    if(standardPVField==0) {
+StandardPVField * getStandardPVField() {
+    Lock xx(&globalMutex);
+    if(notInited) {
+        notInited = false;
         fieldCreate = getFieldCreate();
         pvDataCreate = getPVDataCreate();
         standardField = getStandardField();
         standardPVField = new StandardPVFieldExt();
+         ShowConstructDestruct::registerCallback(
+            "standardPVField",
+            0,0,0,myDeleteStatic);
     }
     return standardPVField;
 }

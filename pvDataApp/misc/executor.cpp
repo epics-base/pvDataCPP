@@ -17,35 +17,34 @@
 #include "thread.h"
 #include "event.h"
 #include "executor.h"
+#include "showConstructDestruct.h"
 
 namespace epics { namespace pvData {
 
 static volatile int64 totalConstruct = 0;
 static volatile int64 totalDestruct = 0;
-static Mutex *globalMutex = 0;
+static Mutex globalMutex;
+static bool notInited = true;
 
 static int64 getTotalConstruct()
 {
-    Lock xx(globalMutex);
+    Lock xx(&globalMutex);
     return totalConstruct;
 }
 
 static int64 getTotalDestruct()
 {
-    Lock xx(globalMutex);
+    Lock xx(&globalMutex);
     return totalDestruct;
 }
 
-static ConstructDestructCallback *pConstructDestructCallback;
-
 static void init() {
-    static Mutex mutex = Mutex();
-    Lock xx(&mutex);
-    if(globalMutex==0) {
-        globalMutex = new Mutex();
-        pConstructDestructCallback = new ConstructDestructCallback(
+    Lock xx(&globalMutex);
+    if(notInited) {
+        notInited = false;
+        ShowConstructDestruct::registerCallback(
             String("executor"),
-            getTotalConstruct,getTotalDestruct,0);
+            getTotalConstruct,getTotalDestruct,0,0);
     }
 }
 
@@ -73,12 +72,6 @@ ExecutorNode::~ExecutorNode()
 {
     delete node;
     delete runNode;
-}
-
-ConstructDestructCallback *Executor::getConstructDestructCallback()
-{
-    init();
-    return pConstructDestructCallback;
 }
 
 class ExecutorPvt : public Runnable{
@@ -169,13 +162,13 @@ Executor::Executor(String threadName,ThreadPriority priority)
 : pImpl(new ExecutorPvt(threadName,priority))
 {
     init();
-    Lock xx(globalMutex);
+    Lock xx(&globalMutex);
     totalConstruct++;
 }
 
 Executor::~Executor() {
     delete pImpl;
-    Lock xx(globalMutex);
+    Lock xx(&globalMutex);
     totalDestruct++;
 }
 

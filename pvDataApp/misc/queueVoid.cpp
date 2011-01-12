@@ -14,6 +14,7 @@
 #include "lock.h"
 #include "pvType.h"
 #include "queueVoid.h"
+#include "showConstructDestruct.h"
 
 namespace epics { namespace pvData { 
 
@@ -21,48 +22,44 @@ static volatile int64 totalElementConstruct = 0;
 static volatile int64 totalElementDestruct = 0;
 static volatile int64 totalQueueConstruct = 0;
 static volatile int64 totalQueueDestruct = 0;
-static Mutex *globalMutex = 0;
+static Mutex globalMutex;
+static bool notInited = true;
 
 static int64 getTotalNodeConstruct()
 {
-    Lock xx(globalMutex);
+    Lock xx(&globalMutex);
     return totalElementConstruct;
 }
 
 static int64 getTotalNodeDestruct()
 {
-    Lock xx(globalMutex);
+    Lock xx(&globalMutex);
     return totalElementDestruct;
 }
 
 static int64 getTotalListConstruct()
 {
-    Lock xx(globalMutex);
+    Lock xx(&globalMutex);
     return totalQueueConstruct;
 }
 
 static int64 getTotalListDestruct()
 {
-    Lock xx(globalMutex);
+    Lock xx(&globalMutex);
     return totalQueueDestruct;
 }
 
-static ConstructDestructCallback *pCDCallbackQueueNode;
-static ConstructDestructCallback *pCDCallbackQueue;
-
 static void initPvt()
 {
-     static Mutex mutex = Mutex();
-     Lock xx(&mutex);
-     if(globalMutex==0) {
-        globalMutex = new Mutex();
-        pCDCallbackQueueNode = new ConstructDestructCallback(
+     Lock xx(&globalMutex);
+     if(notInited) {
+        notInited = false;
+        ShowConstructDestruct::registerCallback(
             "queueElement",
-            getTotalNodeConstruct,getTotalNodeDestruct,0);
-        
-        pCDCallbackQueue = new ConstructDestructCallback(
+            getTotalNodeConstruct,getTotalNodeDestruct,0,0);
+        ShowConstructDestruct::registerCallback(
             "queue",
-            getTotalListConstruct,getTotalListDestruct,0);
+            getTotalListConstruct,getTotalListDestruct,0,0);
      }
 }
 
@@ -71,21 +68,15 @@ QueueElementVoid::QueueElementVoid(ObjectPtr object)
 : object(object)
 {
     initPvt();
-    Lock xx(globalMutex);
+    Lock xx(&globalMutex);
     totalElementConstruct++;
 }
 
 
 QueueElementVoid::~QueueElementVoid()
 {
-    Lock xx(globalMutex);
+    Lock xx(&globalMutex);
     totalElementDestruct++;
-}
-
-ConstructDestructCallback *QueueElementVoid::getConstructDestructCallback()
-{
-    initPvt();
-    return pCDCallbackQueueNode;
 }
 
 ObjectPtr QueueElementVoid::getObject() {
@@ -104,7 +95,7 @@ QueueVoid::QueueVoid(ObjectPtr object[],int number)
         array[i] = new QueueElementVoid(object[i]);
     }
     initPvt();
-    Lock xx(globalMutex);
+    Lock xx(&globalMutex);
     totalQueueConstruct++;
 }
 
@@ -114,14 +105,8 @@ QueueVoid::~QueueVoid()
         delete array[i];
     }
     delete[]array;
-    Lock xx(globalMutex);
+    Lock xx(&globalMutex);
     totalQueueDestruct++;
-}
-
-ConstructDestructCallback *QueueVoid::getConstructDestructCallback()
-{
-    initPvt();
-    return pCDCallbackQueue;
 }
 
 void QueueVoid::clear()

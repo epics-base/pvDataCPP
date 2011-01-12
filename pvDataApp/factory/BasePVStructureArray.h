@@ -57,16 +57,16 @@ namespace epics { namespace pvData {
       structureArrayData(new StructureArrayData()),
       value(new PVStructurePtr[0])
      {
-        structureArray->incReferenceCount();
      }
 
     BasePVStructureArray::~BasePVStructureArray()
     {
-        structureArray->decReferenceCount();
         delete structureArrayData;
         int length = getLength();
         for(int i=0; i<length; i++) {
-           if(value[i]!=0) delete value[i];
+           if(value[i]!=0) {
+                delete value[i];
+           }
         }
         delete[] value;
     }
@@ -135,6 +135,7 @@ namespace epics { namespace pvData {
         }
         StructureConstPtr structure = structureArray->getStructure();
         for(int i=0; i<len; i++) {
+                if(value[i+offset]!=0) delete value[i+offset];
         	PVStructurePtr frompv = from[i+fromOffset];
         	if(frompv==0) {
         		value[i+offset] = 0;
@@ -151,9 +152,13 @@ namespace epics { namespace pvData {
     }
 
     void BasePVStructureArray::shareData(
-        PVStructurePtrArray value,int capacity,int length)
+        PVStructurePtrArray newValue,int capacity,int length)
     {
-        this->value = value;
+        for(int i=0; i<getLength(); i++) {
+           if(value[i]!=0) delete value[i];
+        }
+        delete[] value;
+        value = newValue;
         setCapacity(capacity);
         setLength(length);
     }

@@ -115,6 +115,6 @@ int main(int argc, char *argv[]) {
     }
     testBasic(fd);
     testThreadContext(fd,auxFd);
-    getShowConstructDestruct()->constuctDestructTotals(fd);
+    getShowConstructDestruct()->showDeleteStaticExit(fd);
     return (0);
 }

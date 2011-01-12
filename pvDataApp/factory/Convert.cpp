@@ -3665,7 +3665,7 @@ public:
 };
 
 Convert * getConvert() {
-    static Mutex mutex = Mutex();
+    static Mutex mutex;
     Lock xx(&mutex);
 
     if(convert==0){

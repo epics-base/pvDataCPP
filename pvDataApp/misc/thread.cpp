@@ -17,6 +17,7 @@
 #include "event.h"
 #include "thread.h"
 #include "linkedList.h"
+#include "showConstructDestruct.h"
 
 namespace epics { namespace pvData { 
 
@@ -48,33 +49,36 @@ typedef LinkedList<ThreadListElement> ThreadList;
 
 static volatile int64 totalConstruct = 0;
 static volatile int64 totalDestruct = 0;
-static Mutex *globalMutex = 0;
+static Mutex globalMutex;
+static bool notInited = true;
 static ThreadList *threadList;
 
 static int64 getTotalConstruct()
 {
-    Lock xx(globalMutex);
+    Lock xx(&globalMutex);
     return totalConstruct;
 }
 
 static int64 getTotalDestruct()
 {
-    Lock xx(globalMutex);
+    Lock xx(&globalMutex);
     return totalDestruct;
 }
 
-static ConstructDestructCallback *pConstructDestructCallback;
+static void deleteStatic()
+{
+    delete threadList;
+}
 
 static void init()
 {
-     static Mutex mutex = Mutex();
-     Lock xx(&mutex);
-     if(globalMutex==0) {
-        globalMutex = new Mutex();
+     Lock xx(&globalMutex);
+     if(notInited) {
+        notInited = false;
         threadList = new ThreadList();
-        pConstructDestructCallback = new ConstructDestructCallback(
+        ShowConstructDestruct::registerCallback(
             String("thread"),
-            getTotalConstruct,getTotalDestruct,0);
+            getTotalConstruct,getTotalDestruct,0,deleteStatic);
      }
 }
 
@@ -133,7 +137,7 @@ ThreadPvt::ThreadPvt(Thread *thread,String name,
         myFunc,this))
 {
     init();
-    Lock xx(globalMutex);
+    Lock xx(&globalMutex);
     threadList->addTail(threadListElement->node);
     totalConstruct++;
 }
@@ -157,7 +161,7 @@ ThreadPvt::~ThreadPvt()
     threadList->remove(threadListElement->node);
     delete waitDone;
     delete threadListElement;
-    Lock xx(globalMutex);
+    Lock xx(&globalMutex);
     totalDestruct++;
 }
 
@@ -169,12 +173,6 @@ Thread::Thread(String name,ThreadPriority priority,Runnable *runnable)
 Thread::~Thread()
 {
    delete pImpl;
-}
-
-ConstructDestructCallback *Thread::getConstructDestructCallback()
-{
-    init();
-    return pConstructDestructCallback;
 }
 
 void Thread::sleep(double seconds)
@@ -195,7 +193,7 @@ ThreadPriority Thread::getPriority()
 void Thread::showThreads(StringBuilder buf)
 {
     init();
-    Lock xx(globalMutex);
+    Lock xx(&globalMutex);
     ThreadListNode *node = threadList->getHead();    
     while(node!=0) {
         Thread *thread = node->getObject()->thread;

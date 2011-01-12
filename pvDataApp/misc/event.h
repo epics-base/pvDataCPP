@@ -8,11 +8,9 @@
 #define EVENT_H
 #include <memory>
 #include <vector>
-#include <epicsMutex.h>
 #include <epicsEvent.h>
 #include "noDefaultMethods.h"
 #include "pvType.h"
-#include "showConstructDestruct.h"
 
 namespace epics { namespace pvData { 
 
@@ -20,7 +18,6 @@ class Event : private NoDefaultMethods {
 public:
     explicit Event(bool = false);
     ~Event();
-    static ConstructDestructCallback *getConstructDestructCallback();
     void signal();
     bool wait (); /* blocks until full */
     bool wait ( double timeOut ); /* false if empty at time out */

@@ -21,31 +21,29 @@ namespace epics { namespace pvData {
 
 static volatile int64 totalConstruct = 0;
 static volatile int64 totalDestruct = 0;
-static Mutex *globalMutex = 0;
+static Mutex globalMutex;
+static bool notInited = true;
 
 static int64 getTotalConstruct()
 {
-    Lock xx(globalMutex);
+    Lock xx(&globalMutex);
     return totalConstruct;
 }
 
 static int64 getTotalDestruct()
 {
-    Lock xx(globalMutex);
+    Lock xx(&globalMutex);
     return totalDestruct;
 }
 
-static ConstructDestructCallback *pConstructDestructCallback;
-
 static void init()
 {
-     static Mutex mutex = Mutex();
-     Lock xx(&mutex);
-     if(globalMutex==0) {
-        globalMutex = new Mutex();
-        pConstructDestructCallback = new ConstructDestructCallback(
+     Lock xx(&globalMutex);
+     if(notInited) {
+        notInited = false;
+        ShowConstructDestruct::registerCallback(
             String("status"),
-            getTotalConstruct,getTotalDestruct,0);
+            getTotalConstruct,getTotalDestruct,0,0);
      }
 }
 
@@ -56,19 +54,19 @@ class StatusImpl : public Status
     StatusImpl(StatusType type, String message) :
         m_type(type), m_message(message)
     {
-        Lock xx(globalMutex);
+        Lock xx(&globalMutex);
         totalConstruct++;
     }
 
     StatusImpl(StatusType type, String message, String stackDump) :
         m_type(type), m_message(message), m_stackDump(stackDump)
     {
-        Lock xx(globalMutex);
+        Lock xx(&globalMutex);
         totalConstruct++;
     }
     
     virtual ~StatusImpl() {
-        Lock xx(globalMutex);
+        Lock xx(&globalMutex);
         totalDestruct++;
     }
     
@@ -207,7 +205,7 @@ class StatusCreateImpl : public StatusCreate {
 static StatusCreate* statusCreate = 0;
 
 StatusCreate* getStatusCreate() {
-    static Mutex mutex = Mutex();
+    static Mutex mutex;
     Lock xx(&mutex);
 
     if(statusCreate==0) statusCreate = new StatusCreateImpl();

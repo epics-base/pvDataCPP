@@ -1,9 +1,0 @@
-1,2d0
-< structure request
-<     string fieldList value,timeStamp
-288,289c286,287
-< field: totalConstruct 391 totalDestruct 202 totalReference 443
-< pvField: totalConstruct 281 totalDestruct 281
----
-> field: totalConstruct 388 totalDestruct 295 totalReference 93
-> pvField: totalConstruct 279 totalDestruct 279

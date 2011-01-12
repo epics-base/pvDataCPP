@@ -243,7 +243,7 @@ int main(int argc,char *argv[])
     testDisplay(fd,auxfd);
     testEnumerated(fd,auxfd);
     deleteRecords(fd,auxfd);
-    getShowConstructDestruct()->constuctDestructTotals(fd);
+    getShowConstructDestruct()->showDeleteStaticExit(fd);
     return(0);
 }
 

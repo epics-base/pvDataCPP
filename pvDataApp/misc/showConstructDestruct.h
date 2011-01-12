@@ -17,33 +17,46 @@
 
 namespace epics { namespace pvData { 
 
-typedef int64 (*getTotal)();
+typedef int64 (*getTotalFunc)();
+typedef void (*deleteStaticFunc)();
 
 class ConstructDestructCallback : private NoDefaultMethods {
 public:
-    ConstructDestructCallback(
-        String name,
-        getTotal construct,
-        getTotal destruct,
-        getTotal reference);
     String getConstructName();
     int64 getTotalConstruct();
     int64 getTotalDestruct();
     int64 getTotalReferenceCount();
 private:
+    ConstructDestructCallback(
+        String name,
+        getTotalFunc construct,
+        getTotalFunc destruct,
+        getTotalFunc reference,
+        deleteStaticFunc deleteFunc);
     ~ConstructDestructCallback();
+    void deleteStatic();
     String name;
-    getTotal construct;
-    getTotal destruct;
-    getTotal reference;
+    getTotalFunc construct;
+    getTotalFunc destruct;
+    getTotalFunc reference;
+    deleteStaticFunc deleteFunc;
+    friend class ShowConstructDestruct;
 };
 
 class ShowConstructDestruct : private NoDefaultMethods {
 public:
+    static void registerCallback(
+        String name,
+        getTotalFunc construct,
+        getTotalFunc destruct,
+        getTotalFunc reference,
+        deleteStaticFunc deleteFunc);
+    ConstructDestructCallback* getConstructDestructCallback(String name);
     void constuctDestructTotals(FILE *fd);
-    void registerCallback(ConstructDestructCallback *callback);
+    static void showDeleteStaticExit(FILE *fd);
 private:
     ShowConstructDestruct();
+    ~ShowConstructDestruct();
     friend ShowConstructDestruct* getShowConstructDestruct();
 };
 
@@ -56,41 +69,39 @@ extern ShowConstructDestruct* getShowConstructDestruct();
 #define PVDATA_REFCOUNT_MONITOR_DEFINE(NAME) \
     static volatile int64 NAME ## _totalConstruct = 0; \
     static volatile int64 NAME ## _totalDestruct = 0; \
-    static Mutex * NAME ## _globalMutex = 0; \
+    static Mutex  globalMutex; \
     \
+    static bool notInited = true; \
     static int64 NAME ## _processTotalConstruct() \
     { \
-        Lock xx(NAME ## _globalMutex); \
+        Lock xx(&globalMutex); \
         return NAME ## _totalConstruct; \
     } \
     \
     static int64 NAME ## _processTotalDestruct() \
     { \
-        Lock xx(NAME ## _globalMutex); \
+        Lock xx(&globalMutex); \
         return NAME ## _totalDestruct; \
     } \
     \
-    static ConstructDestructCallback * NAME ## _pConstructDestructCallback; \
-    \
     static void NAME ## _init() \
     { \
-         static Mutex mutex = Mutex(); \
-         Lock xx(&mutex); \
-         if(NAME ## _globalMutex==0) { \
-            NAME ## _globalMutex = new Mutex(); \
-            NAME ## _pConstructDestructCallback = new ConstructDestructCallback( \
-                String(#NAME), \
+         Lock xx(&globalMutex); \
+         if(notInited) { \
+            notInited = false; \
+            ShowConstructDestruct::registerCallback( \
+                String("#NAME"), \
                 NAME ## _processTotalConstruct,NAME ## _processTotalDestruct,0); \
          } \
     }
 
 #define PVDATA_REFCOUNT_MONITOR_DESTRUCT(NAME) \
-    Lock xx(NAME ## _globalMutex); \
+    Lock xx(&globalMutex); \
     NAME ## _totalDestruct++;
 
 #define PVDATA_REFCOUNT_MONITOR_CONSTRUCT(NAME) \
     NAME ## _init(); \
-    Lock xx(NAME ## _globalMutex); \
+    Lock xx(&globalMutex); \
     NAME ## _totalConstruct++;
 
 

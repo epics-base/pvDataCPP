@@ -54,22 +54,17 @@ namespace epics { namespace pvData {
             switch(field->getType()) {
             case scalar: {
                 ScalarConstPtr scalar = (ScalarConstPtr)field;
-                pvFields[i] = pvDataCreate->createPVScalar(this,
-                    field->getFieldName(),scalar->getScalarType());
+                pvFields[i] = pvDataCreate->createPVScalar(this,scalar);
                 break;
             }
             case scalarArray: {
                 ScalarArrayConstPtr array = (ScalarArrayConstPtr)field;
-                ScalarType elementType = array->getElementType();
-                pvFields[i] = pvDataCreate->createPVScalarArray(this,
-                    field->getFieldName(),elementType);
+                pvFields[i] = pvDataCreate->createPVScalarArray(this,array);
                 break;
             }
             case structure: {
                 StructureConstPtr structPtr = (StructureConstPtr)field;
-                int numberFields = structPtr->getNumberFields();
-                pvFields[i] = pvDataCreate->createPVStructure(this,
-                    field->getFieldName(), numberFields,structPtr->getFields());
+                pvFields[i] = pvDataCreate->createPVStructure(this, structPtr);
                 break;
             }
             case structureArray: {

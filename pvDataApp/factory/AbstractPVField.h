@@ -12,6 +12,7 @@
 #include <cstdio>
 #include "pvData.h"
 #include "factory.h"
+#include "showConstructDestruct.h"
 
 namespace epics { namespace pvData {
 
@@ -19,31 +20,29 @@ static String notImplemented("not implemented");
 
 static volatile int64 totalConstruct = 0;
 static volatile int64 totalDestruct = 0;
-static Mutex *globalMutex = 0;
+static Mutex globalMutex;
+static bool notInited = true;
 
 static int64 getTotalConstruct()
 {
-    Lock xx(globalMutex);
+    Lock xx(&globalMutex);
     return totalConstruct;
 }
 
 static int64 getTotalDestruct()
 {
-    Lock xx(globalMutex);
+    Lock xx(&globalMutex);
     return totalDestruct;
 }
 
-static ConstructDestructCallback *pConstructDestructCallback;
-
 static void init()
 {
-    static Mutex mutex = Mutex();
-    Lock xx(&mutex);
-    if(globalMutex==0) {
-        globalMutex = new Mutex();
-        pConstructDestructCallback = new ConstructDestructCallback(
+    Lock xx(&globalMutex);
+   if(notInited) {
+        notInited = false;
+        ShowConstructDestruct::registerCallback(
             String("pvField"),
-            getTotalConstruct,getTotalDestruct,0);
+            getTotalConstruct,getTotalDestruct,0,0);
     }
 }
 
@@ -67,13 +66,12 @@ PVFieldPvt::PVFieldPvt(PVStructure *parent,FieldConstPtr field)
  pvAuxInfo(0),
  immutable(false),requester(0),postHandler(0)
 {
-   field->incReferenceCount();
 }
 
 PVFieldPvt::~PVFieldPvt()
 {
-   if(pvAuxInfo!=0) delete pvAuxInfo;
-   field->decReferenceCount();
+    if(pvAuxInfo!=0) delete pvAuxInfo;
+    if(parent==0) field->decReferenceCount();
 }
 
 
@@ -82,23 +80,16 @@ PVField::PVField(PVStructure *parent,FieldConstPtr field)
 : pImpl(new PVFieldPvt(parent,field))
 {
     init();
-    Lock xx(globalMutex);
+    Lock xx(&globalMutex);
     totalConstruct++;
 }
 
 PVField::~PVField()
 {
-    Lock xx(globalMutex);
+    Lock xx(&globalMutex);
     totalDestruct++;
    delete pImpl;
 }
-
-ConstructDestructCallback *PVField::getConstructDestructCallback()
-{
-    init();
-    return pConstructDestructCallback;
-}
-
 
 String PVField::getRequesterName() 
 {
@@ -322,18 +313,22 @@ void PVField::computeOffset(PVField   *  pvField,int offset) {
 
 void PVField::replaceStructure(PVStructure *pvStructure,int length)
 {
-        PVFieldPtrArray pvFields = pvStructure->getPVFields();
-        FieldConstPtrArray newFields = new FieldConstPtr[length];
-        for(int i=0; i<length; i++) {
-            newFields[i] = pvFields[i]->getField();
-        }
-        StructureConstPtr newStructure = getFieldCreate()->createStructure(
-             pImpl->field->getFieldName(),length, newFields);
-        pImpl->field = newStructure;
-        PVStructure *parent = pImpl->parent;
-        if(parent!=0) {
-            parent->replaceStructure(parent,parent->getStructure()->getNumberFields());
-        }
+    PVFieldPtrArray pvFields = pvStructure->getPVFields();
+    FieldConstPtrArray newFields = new FieldConstPtr[length];
+    for(int i=0; i<length; i++) {
+        newFields[i] = pvFields[i]->getField();
+    }
+    StructureConstPtr newStructure = getFieldCreate()->createStructure(
+         pImpl->field->getFieldName(),length, newFields);
+    PVStructure *parent = pImpl->parent;
+    if(parent==0) {
+        pImpl->field->decReferenceCount();
+    }
+    pImpl->field = newStructure;
+    if(parent!=0) {
+        parent->replaceStructure(
+            parent,parent->getStructure()->getNumberFields());
+    }
 }
 
 

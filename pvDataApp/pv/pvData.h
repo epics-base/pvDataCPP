@@ -14,7 +14,6 @@
 #include "requester.h"
 #include "byteBuffer.h"
 #include "serialize.h"
-#include "showConstructDestruct.h"
 namespace epics { namespace pvData { 
 
 class PVAuxInfo;
@@ -63,7 +62,6 @@ class PVAuxInfo : private NoDefaultMethods {
 public:
     PVAuxInfo(PVField *pvField);
     ~PVAuxInfo();
-    static ConstructDestructCallback *getConstructDestructCallback();
     PVField * getPVField();
     PVScalar * createInfo(String key,ScalarType scalarType);
     PVScalarMap getInfos();
@@ -87,7 +85,6 @@ class PVField
 {
 public:
     virtual ~PVField();
-    static ConstructDestructCallback *getConstructDestructCallback();
     String getRequesterName() ;
     virtual void message(String message,MessageType messageType) ;
     virtual void setRequester(Requester *prequester);

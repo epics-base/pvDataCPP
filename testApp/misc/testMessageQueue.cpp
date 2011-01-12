@@ -52,7 +52,7 @@ static void testBasic(FILE * fd,FILE *auxfd ) {
     assert(result==false);
     messageNode = queue->get();
     assert(messageNode!=0);
-    fprintf(auxfd,"message %s messageType %s\n",
+    fprintf(fd,"message %s messageType %s\n",
         messageNode->getMessage().c_str(),
         messageTypeName[messageNode->getMessageType()].c_str());
     assert(messageNode->getMessage().compare(messages[0])==0);
@@ -63,7 +63,7 @@ static void testBasic(FILE * fd,FILE *auxfd ) {
     queue->release();
     messageNode = queue->get();
     assert(messageNode!=0);
-    fprintf(auxfd,"message %s messageType %s\n",
+    fprintf(fd,"message %s messageType %s\n",
         messageNode->getMessage().c_str(),
         messageTypeName[messageNode->getMessageType()].c_str());
     assert(messageNode->getMessage().compare(messages[3])==0);
@@ -86,7 +86,7 @@ int main(int argc, char *argv[]) {
         auxfd = fopen(auxFileName,"w+");
     }
     testBasic(fd,auxfd);
-    getShowConstructDestruct()->constuctDestructTotals(fd);
+    getShowConstructDestruct()->showDeleteStaticExit(fd);
     return (0);
 }
  

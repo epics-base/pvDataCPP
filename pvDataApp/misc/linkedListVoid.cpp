@@ -14,56 +14,55 @@
 #include "lock.h"
 #include "pvType.h"
 #include "linkedListVoid.h"
+#include "showConstructDestruct.h"
 
 namespace epics { namespace pvData { 
+
+static Mutex globalMutex;
+static String alreadyOnList("already on list");
 
 static volatile int64 totalNodeConstruct = 0;
 static volatile int64 totalNodeDestruct = 0;
 static volatile int64 totalListConstruct = 0;
 static volatile int64 totalListDestruct = 0;
-static Mutex *globalMutex = 0;
-static String alreadyOnList("already on list");
+static bool notInited = true;
 
 static int64 getTotalNodeConstruct()
 {
-    Lock xx(globalMutex);
+    Lock xx(&globalMutex);
     return totalNodeConstruct;
 }
 
 static int64 getTotalNodeDestruct()
 {
-    Lock xx(globalMutex);
+    Lock xx(&globalMutex);
     return totalNodeDestruct;
 }
 
 static int64 getTotalListConstruct()
 {
-    Lock xx(globalMutex);
+    Lock xx(&globalMutex);
     return totalListConstruct;
 }
 
 static int64 getTotalListDestruct()
 {
-    Lock xx(globalMutex);
+    Lock xx(&globalMutex);
     return totalListDestruct;
 }
 
-static ConstructDestructCallback *pCDCallbackLinkedListNode;
-static ConstructDestructCallback *pCDCallbackLinkedList;
-
 static void initPvt()
 {
-     static Mutex mutex = Mutex();
-     Lock xx(&mutex);
-     if(globalMutex==0) {
-        globalMutex = new Mutex();
-        pCDCallbackLinkedListNode = new ConstructDestructCallback(
+     Lock xx(&globalMutex);
+     if(notInited) {
+        notInited = false;
+        ShowConstructDestruct::registerCallback(
             "linkedListNode",
-            getTotalNodeConstruct,getTotalNodeDestruct,0);
+            getTotalNodeConstruct,getTotalNodeDestruct,0,0);
         
-        pCDCallbackLinkedList = new ConstructDestructCallback(
+        ShowConstructDestruct::registerCallback(
             "linkedList",
-            getTotalListConstruct,getTotalListDestruct,0);
+            getTotalListConstruct,getTotalListDestruct,0,0);
      }
 }
 
@@ -72,7 +71,7 @@ LinkedListVoidNode::LinkedListVoidNode(void *object)
 : object(object),before(0),after(0),linkedListVoid(0)
 {
     initPvt();
-    Lock xx(globalMutex);
+    Lock xx(&globalMutex);
     totalNodeConstruct++;
 }
 
@@ -80,21 +79,15 @@ LinkedListVoidNode::LinkedListVoidNode(bool isHead)
 : object(this),before(this),after(this)
 {
     initPvt();
-    Lock xx(globalMutex);
+    Lock xx(&globalMutex);
     totalNodeConstruct++;
 }
 
 
 LinkedListVoidNode::~LinkedListVoidNode()
 {
-    Lock xx(globalMutex);
+    Lock xx(&globalMutex);
     totalNodeDestruct++;
-}
-
-ConstructDestructCallback *LinkedListVoidNode::getConstructDestructCallback()
-{
-    initPvt();
-    return pCDCallbackLinkedListNode;
 }
 
 void *LinkedListVoidNode::getObject() {
@@ -111,21 +104,15 @@ LinkedListVoid::LinkedListVoid()
 : head(new LinkedListVoidNode(true)),length(0)
 {
     initPvt();
-    Lock xx(globalMutex);
+    Lock xx(&globalMutex);
     totalListConstruct++;
 }
 
 LinkedListVoid::~LinkedListVoid()
 {
-    Lock xx(globalMutex);
+    Lock xx(&globalMutex);
     delete head;
     totalListDestruct++;
-}
-
-ConstructDestructCallback *LinkedListVoid::getConstructDestructCallback()
-{
-    initPvt();
-    return pCDCallbackLinkedList;
 }
 
 int LinkedListVoid::getLength()

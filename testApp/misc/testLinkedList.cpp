@@ -349,6 +349,7 @@ static void testTimeLocked(FILE *auxFd) {
     assert(basicList->isEmpty());
     delete basicList;
     for(int i=0; i<numNodes; i++) delete basics[i];
+    delete mutex;
 }
 
 typedef std::list<Basic *> stdList;
@@ -421,6 +422,7 @@ static void testStdListTimeLocked(FILE *auxFd) {
     diff = diff/(numNodes*2); // convert to per addTail/removeHead
     fprintf(auxFd,"time per addTail/removeHead %f microseconds\n",diff);
     for(int i=0; i<numNodes; i++) delete basics[i];
+    delete mutex;
 }
 
 int main(int argc, char *argv[]) {
@@ -446,7 +448,7 @@ int main(int argc, char *argv[]) {
     testTimeLocked(auxFd);
     testStdListTime(auxFd);
     testStdListTimeLocked(auxFd);
-    getShowConstructDestruct()->constuctDestructTotals(fd);
+    getShowConstructDestruct()->showDeleteStaticExit(fd);
     return (0);
 }
  

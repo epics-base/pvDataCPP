@@ -23,31 +23,29 @@ namespace epics { namespace pvData {
 
 static volatile int64 totalQueueConstruct = 0;
 static volatile int64 totalQueueDestruct = 0;
-static Mutex *globalMutex = 0;
+static Mutex globalMutex;
+static bool notInited = true;
 
 static int64 getTotalQueueConstruct()
 {
-    Lock xx(globalMutex);
+    Lock xx(&globalMutex);
     return totalQueueConstruct;
 }
 
 static int64 getTotalQueueDestruct()
 {
-    Lock xx(globalMutex);
+    Lock xx(&globalMutex);
     return totalQueueDestruct;
 }
 
-static ConstructDestructCallback *pCDCallbackQueue;
-
 static void initPvt()
 {
-     static Mutex mutex = Mutex();
-     Lock xx(&mutex);
-     if(globalMutex==0) {
-        globalMutex = new Mutex();
-        pCDCallbackQueue = new ConstructDestructCallback(
+     Lock xx(&globalMutex);
+     if(notInited) {
+        notInited = false;
+        ShowConstructDestruct::registerCallback(
             "messageQueue",
-            getTotalQueueConstruct,getTotalQueueDestruct,0);
+            getTotalQueueConstruct,getTotalQueueDestruct,0,0);
      }
 }
 
@@ -60,7 +58,8 @@ typedef Queue<MessageNode> MessageNodeQueue;
 MessageNode::MessageNode()
 : message(String("")),messageType(infoMessage){}
 
-MessageNode::~MessageNode() {}
+MessageNode::~MessageNode() {
+}
 
 String MessageNode::getMessage() const { return message;};
 
@@ -81,7 +80,7 @@ MessageQueue::MessageQueue(int size)
 : pImpl(new MessageQueuePvt)
 {
     initPvt();
-    Lock xx(globalMutex);
+    Lock xx(&globalMutex);
     totalQueueConstruct++;
     pImpl->size = size;
     pImpl->overrun = 0;
@@ -101,8 +100,7 @@ MessageQueue::~MessageQueue()
         delete pImpl->messageNodeArray[i];
     }
     delete[] pImpl->messageNodeArray;
-    initPvt();
-    Lock xx(globalMutex);
+    Lock xx(&globalMutex);
     totalQueueDestruct++;
 }
 

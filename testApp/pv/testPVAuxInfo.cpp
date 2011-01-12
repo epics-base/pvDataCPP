@@ -92,7 +92,7 @@ int main(int argc,char *argv[])
     standardPVField = getStandardPVField();
     convert = getConvert();
     testPVAuxInfo(fd);
-    getShowConstructDestruct()->constuctDestructTotals(fd);
+    getShowConstructDestruct()->showDeleteStaticExit(fd);
     return(0);
 }
 

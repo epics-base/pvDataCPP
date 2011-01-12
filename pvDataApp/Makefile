@@ -28,11 +28,11 @@ INC += messageQueue.h
 INC += destroyable.h
 INC += status.h
 
+LIBSRCS += showConstructDestruct.cpp
 LIBSRCS += byteBuffer.cpp
 LIBSRCS += bitSet.cpp
 LIBSRCS += requester.cpp
 LIBSRCS += serializeHelper.cpp
-LIBSRCS += showConstructDestruct.cpp
 LIBSRCS += linkedListVoid.cpp
 LIBSRCS += event.cpp
 LIBSRCS += thread.cpp

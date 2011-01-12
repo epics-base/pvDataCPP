@@ -15,7 +15,6 @@
 #include "pvType.h"
 #include "thread.h"
 #include "noDefaultMethods.h"
-#include "showConstructDestruct.h"
 
 namespace epics { namespace pvData { 
 
@@ -29,7 +28,6 @@ class TimerNode : private NoDefaultMethods {
 public:
     TimerNode(TimerCallback *timerCallback);
     ~TimerNode();
-    static ConstructDestructCallback *getConstructDestructCallback();
     void cancel();
     bool isScheduled();
 private:
@@ -41,7 +39,6 @@ class Timer : private NoDefaultMethods {
 public:
     Timer(String threadName, ThreadPriority priority);
     ~Timer();
-    static ConstructDestructCallback *getConstructDestructCallback();
     void scheduleAfterDelay(TimerNode *timerNode,double delay);
     void schedulePeriodic(TimerNode *timerNode,double delay,double period);
 private:

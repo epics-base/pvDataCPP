@@ -110,7 +110,7 @@ static void testSimpleStructure(FILE * fd) {
 
 static StructureConstPtr createPowerSupply() {
     String properties("alarm");
-    FieldConstPtr powerSupply[3];
+   FieldConstPtrArray powerSupply = new FieldConstPtr[3];
     powerSupply[0] = standardField->scalar(
         String("voltage"),pvDouble,properties);
     powerSupply[1] = standardField->scalar(
@@ -129,9 +129,7 @@ static void testStructureArray(FILE * fd) {
     builder.clear();
     top->toString(&builder);
     fprintf(fd,"%s\n",builder.c_str());
-    // create tempory PVField so that memory can be released
-    PVField *pvField = pvDataCreate->createPVField(0,top);
-    delete pvField;
+    top->decReferenceCount();
 }
 
 int main(int argc,char *argv[])
@@ -149,7 +147,7 @@ int main(int argc,char *argv[])
     testScalarArray(fd);
     testSimpleStructure(fd);
     testStructureArray(fd);
-    getShowConstructDestruct()->constuctDestructTotals(fd);
+    getShowConstructDestruct()->showDeleteStaticExit(fd);
     return(0);
 }
 

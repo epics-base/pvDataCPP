@@ -10,7 +10,9 @@
 #include <cstdio>
 #include <lock.h>
 #include "pvIntrospect.h"
+#include "convert.h"
 #include "factory.h"
+#include "showConstructDestruct.h"
 
 namespace epics { namespace pvData {
 
@@ -27,26 +29,27 @@ public :
     FieldPvt(String fieldName,Type type);
     String fieldName;
     Type type;
-    mutable volatile int referenceCount;
+    int referenceCount;
 };
 
 FieldPvt::FieldPvt(String fieldName,Type type)
- : fieldName(fieldName),type(type),referenceCount(0) { }
+ : fieldName(fieldName),type(type),referenceCount(1) { }
 
 static volatile int64 totalReferenceCount = 0;
 static volatile int64 totalConstruct = 0;
 static volatile int64 totalDestruct = 0;
-static Mutex *globalMutex = 0;
+static Mutex globalMutex;
+static bool notInited = true;
 
 static int64 getTotalConstruct()
 {
-    Lock xx(globalMutex);
+    Lock xx(&globalMutex);
     return totalConstruct;
 }
 
 static int64 getTotalDestruct()
 {
-    Lock xx(globalMutex);
+    Lock xx(&globalMutex);
     return totalDestruct;
 }
 
@@ -55,17 +58,15 @@ static int64 getTotalReferenceCount()
     return totalReferenceCount;
 }
 
-static ConstructDestructCallback *pConstructDestructCallback;
-
 static void init()
 {
-     static Mutex mutex = Mutex();
+     static Mutex mutex;
      Lock xx(&mutex);
-     if(globalMutex==0) {
-        globalMutex = new Mutex();
-        pConstructDestructCallback = new ConstructDestructCallback(
+     if(notInited) {
+        notInited = false;
+        ShowConstructDestruct::registerCallback(
             String("field"),
-            getTotalConstruct,getTotalDestruct,getTotalReferenceCount);
+            getTotalConstruct,getTotalDestruct,getTotalReferenceCount,0);
      }
 }
 
@@ -73,20 +74,21 @@ static void init()
 Field::Field(String fieldName,Type type)
     : pImpl(new FieldPvt(fieldName,type))
 {
-    Lock xx(globalMutex);
+    Lock xx(&globalMutex);
     totalConstruct++;
 }
 
 Field::~Field() {
-    Lock xx(globalMutex);
+    Lock xx(&globalMutex);
     totalDestruct++;
     // note that compiler automatically calls destructor for fieldName
-    delete pImpl;
     if(debugLevel==highDebug) printf("~Field %s\n",pImpl->fieldName.c_str());
+    delete pImpl;
+    pImpl = 0;
 }
 
 int Field::getReferenceCount() const {
-    Lock xx(globalMutex);
+    Lock xx(&globalMutex);
     return pImpl->referenceCount;
 }
 
@@ -95,23 +97,59 @@ String Field::getFieldName() const {return pImpl->fieldName;}
 Type Field::getType() const {return pImpl->type;}
 
 void Field::incReferenceCount() const {
-    Lock xx(globalMutex);
+    Lock xx(&globalMutex);
     pImpl->referenceCount++;
     totalReferenceCount++;
+    if(pImpl->type!=structure) return;
+    StructureConstPtr structure = static_cast<StructureConstPtr>(this);
+    FieldConstPtrArray fields = structure->getFields();
+    int numberFields = structure->getNumberFields();
+    for(int i=0; i<numberFields; i++) {
+        fields[i]->incReferenceCount();
+    }
 }
 
 void Field::decReferenceCount() const {
-    Lock xx(globalMutex);
-     if(pImpl->referenceCount<=0) {
+    Lock xx(&globalMutex);
+    if(pImpl->referenceCount<=0) {
           String message("logicError field ");
           message += pImpl->fieldName;
           throw std::logic_error(message);
-     }
-     pImpl->referenceCount--;
+    }
+    pImpl->referenceCount--;
     totalReferenceCount--;
-     if(pImpl->referenceCount==0) delete this;
+    if(pImpl->type!=structure) {
+        if(pImpl->referenceCount==0) {
+             delete this;
+        }
+        return;
+    }
+    StructureConstPtr structure = static_cast<StructureConstPtr>(this);
+    FieldConstPtrArray fields = structure->getFields();
+    int numberFields = structure->getNumberFields();
+    for(int i=0; i<numberFields; i++) {
+        fields[i]->decReferenceCount();
+    }
+    if(pImpl->referenceCount==0) {
+        delete this;
+    }
 }
 
+void Field:: dumpReferenceCount(StringBuilder buffer,int indentLevel) const {
+    *buffer += getFieldName();
+    char buf[40];
+    sprintf(buf," referenceCount %d",getReferenceCount());
+    *buffer += buf;
+    if(pImpl->type!=structure) return;
+    Convert *convert = getConvert();
+    StructureConstPtr structure = static_cast<StructureConstPtr>(this);
+    FieldConstPtrArray fields = structure->getFields();
+    int numberFields = structure->getNumberFields();
+    for(int i=0; i<numberFields; i++) {
+        convert->newLine(buffer,indentLevel+1);
+        fields[i]->dumpReferenceCount(buffer,indentLevel +1);
+    }
+}
  
 void Field::toString(StringBuilder buffer,int indentLevel) const{
     *buffer += " ";
@@ -217,7 +255,6 @@ void ScalarArray::toString(StringBuilder buffer,int indentLevel) const{
 StructureArray::StructureArray(String fieldName,StructureConstPtr structure)
 : Field(fieldName,structureArray),pstructure(structure)
 {
-    pstructure->incReferenceCount();
 }
 
 StructureArray::~StructureArray() {
@@ -237,7 +274,7 @@ Structure::Structure (String fieldName,
     int numberFields, FieldConstPtrArray infields)
 : Field(fieldName,structure),
       numberFields(numberFields),
-      fields(new FieldConstPtr[numberFields])
+      fields(infields)
 {
     for(int i=0; i<numberFields; i++) {
         fields[i] = infields[i];
@@ -254,18 +291,14 @@ Structure::Structure (String fieldName,
                 throw std::invalid_argument(message);
             }
         }
-        // inc reference counter
-        fields[i]->incReferenceCount();
     }
-    this->incReferenceCount();
 }
 
 Structure::~Structure() {
     if(debugLevel==highDebug)
         printf("~Structure %s\n",Field::getFieldName().c_str());
     for(int i=0; i<numberFields; i++) {
-        FieldConstPtr pfield = fields[i];
-        pfield->decReferenceCount();
+        fields[i] = 0;
     }
     delete[] fields;
 }
@@ -363,7 +396,7 @@ FieldCreate::FieldCreate()
 }
 
 FieldCreate * getFieldCreate() {
-    static Mutex mutex = Mutex();
+    static Mutex mutex;
     Lock xx(&mutex);
 
     if(fieldCreate==0) fieldCreate = new FieldCreate();

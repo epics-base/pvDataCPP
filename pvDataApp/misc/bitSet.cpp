@@ -8,38 +8,38 @@
 #include "stdio.h"
 #include "bitSet.h"
 #include "lock.h"
+#include "showConstructDestruct.h"
 
 namespace epics { namespace pvData {
-
+ 
     //static DebugLevel debugLevel = lowDebug;
-    
+
+    static Mutex globalMutex;
+
     static volatile int64 totalConstruct = 0;
     static volatile int64 totalDestruct = 0;
-    static Mutex *globalMutex = 0;
+    static bool notInited = true;
     
     static int64 getTotalConstruct()
     {
-        Lock xx(globalMutex);
+        Lock xx(&globalMutex);
         return totalConstruct;
     }
     
     static int64 getTotalDestruct()
     {
-        Lock xx(globalMutex);
+        Lock xx(&globalMutex);
         return totalDestruct;
     }
     
-    static ConstructDestructCallback *pConstructDestructCallback;
-    
     static void init()
     {
-         static Mutex mutex = Mutex();
-         Lock xx(&mutex);
-         if(globalMutex==0) {
-            globalMutex = new Mutex();
-            pConstructDestructCallback = new ConstructDestructCallback(
+         Lock xx(&globalMutex);
+         if(notInited) {
+            notInited = false;
+            ShowConstructDestruct::registerCallback(
                 String("bitSet"),
-                getTotalConstruct,getTotalDestruct,0);
+                getTotalConstruct,getTotalDestruct,0,0);
          }
     }
     
@@ -47,7 +47,7 @@ namespace epics { namespace pvData {
         initWords(BITS_PER_WORD);
 
         init();
-        Lock xx(globalMutex);
+        Lock xx(&globalMutex);
         totalConstruct++;
     }
 
@@ -55,14 +55,14 @@ namespace epics { namespace pvData {
         initWords(nbits);
 
         init();
-        Lock xx(globalMutex);
+        Lock xx(&globalMutex);
         totalConstruct++;
     }
 
     BitSet::~BitSet() {
         delete[] words;
 
-        Lock xx(globalMutex);
+        Lock xx(&globalMutex);
         totalDestruct++;
     }
 

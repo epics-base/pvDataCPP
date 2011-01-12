@@ -9,7 +9,6 @@
 #include "pvType.h"
 #include "requester.h"
 #include "noDefaultMethods.h"
-#include "showConstructDestruct.h"
 
 namespace epics { namespace pvData { 
 
@@ -29,7 +28,6 @@ class MessageQueue : private NoDefaultMethods {
 public:
     MessageQueue(int size);
     ~MessageQueue();
-    static ConstructDestructCallback *getConstructDestructCallback();
     MessageNode *get();
     // must call release before next get
     void release();

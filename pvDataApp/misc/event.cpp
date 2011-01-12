@@ -20,45 +20,44 @@
 #include "pvType.h"
 #include "lock.h"
 #include "event.h"
+#include "showConstructDestruct.h"
 
 namespace epics { namespace pvData { 
 
+static Mutex globalMutex;
 static volatile int64 totalConstruct = 0;
 static volatile int64 totalDestruct = 0;
-static Mutex *globalMutex = 0;
+static bool notInited = true;
 static String alreadyOn("already on list");
 
 
 static int64 getTotalConstruct()
 {
-    Lock xx(globalMutex);
+    Lock xx(&globalMutex);
     return totalConstruct;
 }
 
 static int64 getTotalDestruct()
 {
-    Lock xx(globalMutex);
+    Lock xx(&globalMutex);
     return totalDestruct;
 }
 
-static ConstructDestructCallback *pConstructDestructCallback;
-
 static void init()
 {
-     static Mutex mutex = Mutex();
-     Lock xx(&mutex);
-     if(globalMutex==0) {
-        globalMutex = new Mutex();
-        pConstructDestructCallback = new ConstructDestructCallback(
+     Lock xx(&globalMutex);
+     if(notInited) {
+        notInited = false;
+        ShowConstructDestruct::registerCallback(
             String("event"),
-            getTotalConstruct,getTotalDestruct,0);
+            getTotalConstruct,getTotalDestruct,0,0);
      }
-}
+} 
 
 Event::~Event() {
     epicsEventDestroy(id);
     id = 0;
-    Lock xx(globalMutex);
+    Lock xx(&globalMutex);
     totalDestruct++;
 }
 
@@ -67,14 +66,8 @@ Event::Event(bool full)
 : id(epicsEventCreate(full?epicsEventFull : epicsEventEmpty))
 {
     init();
-    Lock xx(globalMutex);
+    Lock xx(&globalMutex);
     totalConstruct++;
-}
-
-ConstructDestructCallback *Event::getConstructDestructCallback()
-{
-    init();
-    return pConstructDestructCallback;
 }
 
 void Event::signal()

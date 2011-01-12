@@ -4,7 +4,6 @@
  * EPICS pvDataCPP is distributed subject to a Software License Agreement found
  * in file LICENSE that is included with this distribution.
  */
-#include "showConstructDestruct.h"
 #ifndef QUEUEVOID_H
 #define QUEUEVOID_H
 namespace epics { namespace pvData { 
@@ -17,8 +16,6 @@ typedef QueueElementVoid * QueueElementVoidPtr;
 typedef QueueElementVoidPtr * QueueElementVoidPtrArray;
 
 class QueueElementVoid {
-public:
-    static ConstructDestructCallback *getConstructDestructCallback();
 protected:
     ObjectPtr getObject();
     QueueElementVoid(ObjectPtr object);
@@ -29,8 +26,6 @@ protected:
 
 
 class QueueVoid {
-public:
-    static ConstructDestructCallback *getConstructDestructCallback();
 protected:
     QueueVoid(ObjectPtr array[],int number);
     ~QueueVoid();

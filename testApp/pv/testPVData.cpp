@@ -282,7 +282,7 @@ int main(int argc,char *argv[])
     testAppend(fd);
     testPVScalar(fd);
     testScalarArray(fd);
-    getShowConstructDestruct()->constuctDestructTotals(fd);
+    getShowConstructDestruct()->showDeleteStaticExit(fd);
     return(0);
 }
 

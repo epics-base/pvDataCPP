@@ -54,7 +54,15 @@ structure powerSupply
     timeStamp timeStamp
         long secondsPastEpoch 0
         int nanoSeconds 0
-linkedListNode: totalConstruct 5 totalDestruct 0
-linkedList: totalConstruct 1 totalDestruct 0
-field: totalConstruct 153 totalDestruct 60 totalReference 93
-pvField: totalConstruct 56 totalDestruct 56
+ reference counts powerSupply referenceCount 1
+    value referenceCount 1
+    alarm referenceCount 14
+        severity referenceCount 14
+        message referenceCount 14
+    timeStamp referenceCount 2
+        secondsPastEpoch referenceCount 2
+        nanoSeconds referenceCount 2
+field:  totalConstruct 102 totalDestruct 102
+pvField:  totalConstruct 56 totalDestruct 56
+linkedListNode:  totalConstruct 5 totalDestruct 5
+linkedList:  totalConstruct 1 totalDestruct 1

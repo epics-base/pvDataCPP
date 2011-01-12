@@ -10,12 +10,16 @@
 #include <lock.h>
 #include "pvIntrospect.h"
 #include "standardField.h"
+#include "showConstructDestruct.h"
 
 namespace epics { namespace pvData { 
 
+static Mutex globalMutex;
+static bool notInited = true;
+static StandardField* standardField = 0;
+
 static String notImplemented("not implemented");
 static FieldCreate* fieldCreate = 0;
-static StandardField* standardField = 0;
 static String valueFieldName("value");
 
 // following are preallocated structures
@@ -32,6 +36,7 @@ static StructureConstPtr longAlarmField = 0;
 static StructureConstPtr floatAlarmField = 0;
 static StructureConstPtr doubleAlarmField = 0;
 static StructureConstPtr enumeratedAlarmField = 0;
+
 
 static void createAlarm() {
     FieldConstPtrArray fields = new FieldConstPtr[2];
@@ -245,11 +250,11 @@ static StructureConstPtr createProperties(String fieldName,FieldConstPtr field,S
     FieldConstPtrArray fields = new FieldConstPtr[numFields];
     int next = 0;
     fields[next++] = field;
-    if(gotAlarm) fields[next++] = alarmField;
-    if(gotTimeStamp) fields[next++] = timeStampField;
-    if(gotDisplay) fields[next++] = displayField;
-    if(gotControl) fields[next++] = controlField;
-    if(gotValueAlarm) fields[next++] = valueAlarm;
+    if(gotAlarm) {fields[next++] = alarmField; alarmField->incReferenceCount();}
+    if(gotTimeStamp) {fields[next++] = timeStampField; timeStampField->incReferenceCount();}
+    if(gotDisplay) {fields[next++] = displayField; displayField->incReferenceCount();}
+    if(gotControl) {fields[next++] = controlField; controlField->incReferenceCount();}
+    if(gotValueAlarm) {fields[next++] = valueAlarm; valueAlarm->incReferenceCount();}
     return fieldCreate->createStructure(fieldName,numFields,fields);
 }
 
@@ -438,44 +443,74 @@ StructureConstPtr StandardField::enumeratedAlarm()
 void StandardField::init()
 {
     createAlarm();
-    alarmField->incReferenceCount();
     createTimeStamp();
-    timeStampField->incReferenceCount();
     createDisplay();
-    displayField->incReferenceCount();
     createControl();
-    controlField->incReferenceCount();
     createBooleanAlarm();
-    booleanAlarmField->incReferenceCount();
     createByteAlarm();
-    byteAlarmField->incReferenceCount();
     createShortAlarm();
-    shortAlarmField->incReferenceCount();
     createIntAlarm();
-    intAlarmField->incReferenceCount();
     createLongAlarm();
-    longAlarmField->incReferenceCount();
     createFloatAlarm();
-    floatAlarmField->incReferenceCount();
     createDoubleAlarm();
-    doubleAlarmField->incReferenceCount();
     createEnumeratedAlarm();
-    enumeratedAlarmField->incReferenceCount();
 }
 
 
 StandardField::StandardField(){init();}
 
-StandardField::~StandardField(){}
+StandardField::~StandardField(){
+}
 
+static void myDeleteStatic()
+{
+    int count = alarmField->getReferenceCount();
+    if(count!=1) printf("~StandardField() alarmField reference count %d\n",count);
+    alarmField->decReferenceCount();
+    count = timeStampField->getReferenceCount();
+    if(count!=1) printf("~StandardField() timeStampField reference count %d\n",count);
+    timeStampField->decReferenceCount();
+    count = displayField->getReferenceCount();
+    if(count!=1) printf("~StandardField() displayField reference count %d\n",count);
+    displayField->decReferenceCount();
+    count = controlField->getReferenceCount();
+    if(count!=1) printf("~StandardField() controlField reference count %d\n",count);
+    controlField->decReferenceCount();
+    count = booleanAlarmField->getReferenceCount();
+    if(count!=1) printf("~StandardField() booleanAlarmField reference count %d\n",count);
+    booleanAlarmField->decReferenceCount();
+    count = byteAlarmField->getReferenceCount();
+    if(count!=1) printf("~StandardField() byteAlarmField reference count %d\n",count);
+    byteAlarmField->decReferenceCount();
+    count = shortAlarmField->getReferenceCount();
+    if(count!=1) printf("~StandardField() shortAlarmField reference count %d\n",count);
+    shortAlarmField->decReferenceCount();
+    count = intAlarmField->getReferenceCount();
+    if(count!=1) printf("~StandardField() intAlarmField reference count %d\n",count);
+    intAlarmField->decReferenceCount();
+    count = longAlarmField->getReferenceCount();
+    if(count!=1) printf("~StandardField() longAlarmField reference count %d\n",count);
+    longAlarmField->decReferenceCount();
+    count = floatAlarmField->getReferenceCount();
+    if(count!=1) printf("~StandardField() floatAlarmField reference count %d\n",count);
+    floatAlarmField->decReferenceCount();
+    count = doubleAlarmField->getReferenceCount();
+    if(count!=1) printf("~StandardField() doubleAlarmField reference count %d\n",count);
+    doubleAlarmField->decReferenceCount();
+    count = enumeratedAlarmField->getReferenceCount();
+    if(count!=1) printf("~StandardField() enumeratedAlarmField reference count %d\n",count);
+    enumeratedAlarmField->decReferenceCount();
+}
 
 StandardField * getStandardField() {
-    static Mutex mutex = Mutex();
-    Lock xx(&mutex);
-
-    if(standardField==0) {
+    Lock xx(&globalMutex);
+    if(notInited) {
+        notInited = false;
         standardField = new StandardField();
         fieldCreate = getFieldCreate();
+        ShowConstructDestruct::registerCallback(
+            "standardField",
+            0,0,0,myDeleteStatic);
     }
     return standardField;
 }

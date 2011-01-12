@@ -10,7 +10,6 @@
 #define PVINTROSPECT_H
 #include "noDefaultMethods.h"
 #include "pvType.h"
-#include "showConstructDestruct.h"
 namespace epics { namespace pvData { 
 
 class Field;
@@ -60,7 +59,6 @@ public:
 
 class Field :  private NoDefaultMethods {
 public:
-   static ConstructDestructCallback *getConstructDestructCallback();
    int getReferenceCount() const;
    String getFieldName() const;
    Type getType() const;
@@ -68,6 +66,7 @@ public:
    virtual void toString(StringBuilder buf,int indentLevel) const;
    void incReferenceCount() const;
    void decReferenceCount() const;
+   void dumpReferenceCount(StringBuilder buf,int indentLevel) const;
    virtual bool operator==(const Field& field) const;
    virtual bool operator!=(const Field& field) const;
 protected:

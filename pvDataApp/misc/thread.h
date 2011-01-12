@@ -8,7 +8,6 @@
 #define THREAD_H
 #include "noDefaultMethods.h"
 #include "pvType.h"
-#include "showConstructDestruct.h"
 
 namespace epics { namespace pvData { 
 
@@ -39,7 +38,6 @@ class Thread :  private NoDefaultMethods {
 public:
     Thread(String name,ThreadPriority priority,Runnable *runnable);
     ~Thread();
-    static ConstructDestructCallback *getConstructDestructCallback();
     String getName();
     ThreadPriority getPriority();
     static void showThreads(StringBuilder buf);

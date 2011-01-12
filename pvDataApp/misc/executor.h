@@ -26,7 +26,6 @@ class Executor : private NoDefaultMethods {
 public:
     Executor(String threadName,ThreadPriority priority);
     ~Executor();
-    static ConstructDestructCallback *getConstructDestructCallback();
     ExecutorNode * createNode(Command *command);
     void execute(ExecutorNode *node);
 private:

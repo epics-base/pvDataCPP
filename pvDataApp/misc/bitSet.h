@@ -9,7 +9,6 @@
 #include <stdexcept>
 #include <pvType.h>
 #include "factory.h"
-#include "showConstructDestruct.h"
 //#include "byteBuffer.h"
 //#include "serialize.h"
 namespace epics { namespace pvData { 

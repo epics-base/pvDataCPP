@@ -141,9 +141,15 @@ void testOperators() {
 
 int main(int argc,char *argv[])
 {
+    char *fileName = 0;
+    if(argc>1) fileName = argv[1];
+    FILE * fd = stdout;
+    if(fileName!=0 && fileName[0]!=0) {
+        fd = fopen(fileName,"w+");
+    }
     testGetSetClearFlip();
     testOperators();
-    //getShowConstructDestruct()->constuctDestructTotals(stdout);
+    getShowConstructDestruct()->showDeleteStaticExit(fd);
     return(0);
 }
 

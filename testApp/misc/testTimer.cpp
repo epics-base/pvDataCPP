@@ -112,6 +112,6 @@ int main(int argc, char *argv[]) {
     oneDelay = .0;
     twoDelay = .0;
     testBasic(fd,auxfd);
-    getShowConstructDestruct()->constuctDestructTotals(fd);
+    getShowConstructDestruct()->showDeleteStaticExit(fd);
     return (0);
 }

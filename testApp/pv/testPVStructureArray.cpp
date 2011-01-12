@@ -31,7 +31,7 @@ static String buffer("");
 
 StructureConstPtr getPowerSupplyStructure() {
     String properties("alarm");
-    FieldConstPtr powerSupply[3];
+    FieldConstPtrArray powerSupply = new FieldConstPtr[3];
     powerSupply[0] = standardField->scalar(
         String("voltage"),pvDouble,properties);
     powerSupply[1] = standardField->scalar(
@@ -49,16 +49,22 @@ void testPowerSupplyArray(FILE * fd) {
     PVStructureArray * powerSupplyArray =
         powerSupplyArrayStruct->getStructureArrayField(String("value"));
     assert(powerSupplyArray!=0);
-    PVStructure *structureArray[3];
+    PVStructurePtrArray structureArray = new PVStructurePtr[3];
     StructureConstPtr structure =
         powerSupplyArray->getStructureArray()->getStructure();
+    structure->incReferenceCount();
     structureArray[0] = pvDataCreate->createPVStructure(0,structure);
+    structure->incReferenceCount();
     structureArray[1] = pvDataCreate->createPVStructure(0,structure);
+    structure->incReferenceCount();
     structureArray[2] = pvDataCreate->createPVStructure(0,structure);
     powerSupplyArray->put(0,3,structureArray,0);
     buffer.clear();
     powerSupplyArrayStruct->toString(&buffer);
     fprintf(fd,"%s\n",buffer.c_str());
+    buffer.clear();
+    powerSupplyArrayStruct->getField()->dumpReferenceCount(&buffer,0);
+    fprintf(fd," reference counts %s\n",buffer.c_str());
     delete powerSupplyArrayStruct;
 }
 
@@ -75,7 +81,7 @@ int main(int argc,char *argv[])
     standardField = getStandardField();
     standardPVField = getStandardPVField();
     testPowerSupplyArray(fd);
-    getShowConstructDestruct()->constuctDestructTotals(fd);
+    getShowConstructDestruct()->showDeleteStaticExit(fd);
     return(0);
 }
 
