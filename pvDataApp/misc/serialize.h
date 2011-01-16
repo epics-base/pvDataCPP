@@ -6,7 +6,6 @@
  */
 #ifndef SERIALIZE_H
 #define SERIALIZE_H
-#include "bitSet.h"
 #include "byteBuffer.h"
 namespace epics { namespace pvData { 
 
@@ -15,6 +14,7 @@ namespace epics { namespace pvData {
     class Serializable;
     class BitSetSerializable;
     class SerializableArray;
+    class BitSet;
 
     class SerializableControl {
     public:

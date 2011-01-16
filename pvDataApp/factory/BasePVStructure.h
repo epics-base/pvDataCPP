@@ -12,6 +12,7 @@
 #include <cstdio>
 #include "pvData.h"
 #include "factory.h"
+#include "bitSet.h"
 
 namespace epics { namespace pvData {
 

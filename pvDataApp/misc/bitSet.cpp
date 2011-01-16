@@ -9,6 +9,7 @@
 #include "bitSet.h"
 #include "lock.h"
 #include "showConstructDestruct.h"
+#include "serializeHelper.h"
 
 namespace epics { namespace pvData {
  
@@ -374,55 +375,55 @@ namespace epics { namespace pvData {
         *buffer += '}';
     }
 
-
-    /*
-
-void serialize(ByteBuffer buffer, SerializableControl flusher) {
-
-    final int n = wordsInUse;
-    if (n == 0) {
-        SerializeHelper.writeSize(0, buffer, flusher);
-        return;
+    void BitSet::serialize(ByteBuffer* buffer, SerializableControl* flusher) {
+    
+        uint32 n = wordsInUse;
+        if (n == 0) {
+            SerializeHelper::writeSize(0, buffer, flusher);
+            return;
+        }
+        uint32 len = 8 * (n-1);
+        for (uint64 x = words[n - 1]; x != 0; x >>= 8)
+            len++;
+    
+        SerializeHelper::writeSize(len, buffer, flusher);
+        flusher->ensureBuffer(len);
+    
+        for (uint32 i = 0; i < n - 1; i++)
+            buffer->putLong(words[i]);
+    
+        for (uint64 x = words[n - 1]; x != 0; x >>= 8)
+            buffer->putByte((int8) (x & 0xff));
     }
-    int len = 8 * (n-1);
-    for (long x = words[n - 1]; x != 0; x >>>= 8)
-        len++;
-
-    SerializeHelper.writeSize(len, buffer, flusher);
-    flusher.ensureBuffer(len);
-
-    for (int i = 0; i < n - 1; i++)
-        buffer.putLong(words[i]);
-
-    for (long x = words[n - 1]; x != 0; x >>>= 8)
-        buffer.put((byte) (x & 0xff));
-}
-
-public void deserialize(ByteBuffer buffer, DeserializableControl control) {
-
-    final int bytes = SerializeHelper.readSize(buffer, control);	// in bytes
-
-    wordsInUse = (bytes + 7) / 8;
-    if (wordsInUse > words.length)
-        words = new long[wordsInUse];
-
-    if (wordsInUse == 0)
-        return;
-
-    control.ensureData(bytes);
-
-    int i = 0;
-    final int longs = bytes / 8;
-    while (i < longs)
-        words[i++] = buffer.getLong();
-
-    for (int j = i; j < wordsInUse; j++)
-        words[j] = 0;
-
-    for (int remaining = (bytes - longs * 8), j = 0; j < remaining; j++)
-        words[i] |= (buffer.get() & 0xffL) << (8 * j);
-
-}
-     */
+    
+    void BitSet::deserialize(ByteBuffer* buffer, DeserializableControl* control) {
+    
+        uint32 bytes = SerializeHelper::readSize(buffer, control);	// in bytes
+    
+        wordsInUse = (bytes + 7) / 8;
+        if (wordsInUse > wordsLength)
+        {
+            if (words) delete[] words;
+            words = new uint64[wordsInUse];
+            wordsLength = wordsInUse;
+        }
+        
+        if (wordsInUse == 0)
+            return;
+    
+        control->ensureData(bytes);
+    
+        uint32 i = 0;
+        uint32 longs = bytes / 8;
+        while (i < longs)
+            words[i++] = buffer->getLong();
+    
+        for (uint32 j = i; j < wordsInUse; j++)
+            words[j] = 0;
+    
+        for (uint32 remaining = (bytes - longs * 8), j = 0; j < remaining; j++)
+            words[i] |= (buffer->getByte() & 0xffL) << (8 * j);
+    
+    }
 
 }};
