@@ -2,6 +2,10 @@ TOP=../..
 
 include $(TOP)/configure/CONFIG
 
+PROD_HOST += testPVAppend
+testPVAppend_SRCS += testPVAppend.cpp
+testPVAppend_LIBS += pvData Com
+
 PROD_HOST += testPVType
 testPVType_SRCS += testPVType.cpp
 testPVType_LIBS += pvData Com

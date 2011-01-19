@@ -314,17 +314,29 @@ void PVField::computeOffset(PVField   *  pvField,int offset) {
 void PVField::replaceStructure(PVStructure *pvStructure,int length)
 {
     PVFieldPtrArray pvFields = pvStructure->getPVFields();
+    StructureConstPtr old = static_cast<StructureConstPtr>(pImpl->field);
+    if(old->getNumberFields() == length) {
+        FieldConstPtrArray fields = old->getFields();
+        for(int i=0; i<length; i++) {
+            FieldConstPtr newField = pvFields[i]->getField();
+            FieldConstPtr oldField = fields[i];
+            if(newField==oldField) continue;
+            oldField->decReferenceCount();
+            fields[i] = newField;
+        }
+        return;
+    }
     FieldConstPtrArray newFields = new FieldConstPtr[length];
     for(int i=0; i<length; i++) {
-        newFields[i] = pvFields[i]->getField();
+        FieldConstPtr field = pvFields[i]->getField();
+        field->incReferenceCount();
+        newFields[i] = field;
     }
     StructureConstPtr newStructure = getFieldCreate()->createStructure(
          pImpl->field->getFieldName(),length, newFields);
-    PVStructure *parent = pImpl->parent;
-    if(parent==0) {
-        pImpl->field->decReferenceCount();
-    }
+    pImpl->field->decReferenceCount();
     pImpl->field = newStructure;
+    PVStructure *parent = pImpl->parent;
     if(parent!=0) {
         parent->replaceStructure(
             parent,parent->getStructure()->getNumberFields());

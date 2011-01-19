@@ -1,0 +1,14 @@
+structure request
+    string fieldList value,timeStamp
+structure request
+    string fieldList value,timeStamp
+    string extra junk
+structure parent
+    structure child1
+        string value bla
+    structure child2
+        string value bla
+field:  totalConstruct 107 totalDestruct 101 ACTIVE 6
+pvField:  totalConstruct 8 totalDestruct 8
+linkedListNode:  totalConstruct 5 totalDestruct 5
+linkedList:  totalConstruct 1 totalDestruct 1
