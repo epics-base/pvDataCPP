@@ -69,39 +69,39 @@ extern ShowConstructDestruct* getShowConstructDestruct();
 #define PVDATA_REFCOUNT_MONITOR_DEFINE(NAME) \
     static volatile int64 NAME ## _totalConstruct = 0; \
     static volatile int64 NAME ## _totalDestruct = 0; \
-    static Mutex  globalMutex; \
+    static Mutex NAME ## _globalMutex; \
     \
-    static bool notInited = true; \
+    static bool NAME ## _notInited = true; \
     static int64 NAME ## _processTotalConstruct() \
     { \
-        Lock xx(&globalMutex); \
+        Lock xx(&NAME ## _globalMutex); \
         return NAME ## _totalConstruct; \
     } \
     \
     static int64 NAME ## _processTotalDestruct() \
     { \
-        Lock xx(&globalMutex); \
+        Lock xx(&NAME ## _globalMutex); \
         return NAME ## _totalDestruct; \
     } \
     \
     static void NAME ## _init() \
     { \
-         Lock xx(&globalMutex); \
-         if(notInited) { \
-            notInited = false; \
+         Lock xx(&NAME ## _globalMutex); \
+         if(NAME ## _notInited) { \
+            NAME ## _notInited = false; \
             ShowConstructDestruct::registerCallback( \
-                String("#NAME"), \
-                NAME ## _processTotalConstruct,NAME ## _processTotalDestruct,0); \
+                String(#NAME), \
+                NAME ## _processTotalConstruct,NAME ## _processTotalDestruct,0,0); \
          } \
     }
 
 #define PVDATA_REFCOUNT_MONITOR_DESTRUCT(NAME) \
-    Lock xx(&globalMutex); \
+    Lock xx(&NAME ## _globalMutex); \
     NAME ## _totalDestruct++;
 
 #define PVDATA_REFCOUNT_MONITOR_CONSTRUCT(NAME) \
     NAME ## _init(); \
-    Lock xx(&globalMutex); \
+    Lock xx(&NAME ## _globalMutex); \
     NAME ## _totalConstruct++;
 
 

@@ -9,8 +9,8 @@
 #include <stdexcept>
 #include <pvType.h>
 #include "factory.h"
-//#include "byteBuffer.h"
-//#include "serialize.h"
+#include "serialize.h"
+
 namespace epics { namespace pvData { 
 
     /**
@@ -36,7 +36,7 @@ namespace epics { namespace pvData {
      *
      * Based on Java implementation.
      */
-    class BitSet /*: public Serializable*/ {
+    class BitSet : public Serializable {
     public:
 
         /**
@@ -215,6 +215,11 @@ namespace epics { namespace pvData {
         bool operator!=(const BitSet &set) const;
 
         void toString(StringBuilder buffer, int indentLevel = 0) const;
+
+        virtual void serialize(ByteBuffer *buffer,
+            SerializableControl *flusher);
+        virtual void deserialize(ByteBuffer *buffer,
+            DeserializableControl *flusher);
 
     private:
 
