@@ -64,6 +64,7 @@ public:
    Type getType() const;
    virtual void toString(StringBuilder buf) const{toString(buf,0);}
    virtual void toString(StringBuilder buf,int indentLevel) const;
+   void renameField(String  newName);
    void incReferenceCount() const;
    void decReferenceCount() const;
    void dumpReferenceCount(StringBuilder buf,int indentLevel) const;
@@ -128,6 +129,9 @@ public:
    FieldConstPtr getField(String fieldName) const;
    int getFieldIndex(String fieldName) const;
    FieldConstPtrArray getFields() const {return fields;}
+   void appendField(FieldConstPtr field);
+   void appendFields(int numberFields,FieldConstPtrArray fields);
+   void removeField(int index);
    virtual void toString(StringBuilder buf) const{toString(buf,0);}
    virtual void toString(StringBuilder buf,int indentLevel) const;
 protected:

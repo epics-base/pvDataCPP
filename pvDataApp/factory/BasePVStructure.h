@@ -121,6 +121,8 @@ namespace epics { namespace pvData {
 
     void PVStructure::appendPVField(PVFieldPtr pvField)
     {
+        Structure *structure = const_cast<Structure *>(getStructure());
+        structure->appendField(pvField->getField());
         int origLength = pImpl->numberFields;
         PVFieldPtrArray oldPVFields = pImpl->pvFields;
         PVFieldPtrArray newPVFields = new PVFieldPtr[origLength + 1];
@@ -132,11 +134,14 @@ namespace epics { namespace pvData {
         delete[] pImpl->pvFields;
         pImpl->pvFields = newPVFields;
         pImpl->numberFields = origLength + 1;
-        PVField::replaceStructure(this,pImpl->numberFields);
     }
 
     void PVStructure::appendPVFields(int numberNewFields,PVFieldPtrArray pvFields)
     {
+        Structure *structure = const_cast<Structure *>(getStructure());
+        FieldConstPtr fields[numberNewFields];
+        for(int i=0; i<numberNewFields; i++) fields[i] = pvFields[i]->getField();
+        structure->appendFields(numberNewFields,fields);
         int origLength = pImpl->numberFields;
         PVFieldPtrArray oldPVFields = pImpl->pvFields;
         int numberFields = origLength + numberNewFields;
@@ -150,7 +155,6 @@ namespace epics { namespace pvData {
         delete[] pImpl->pvFields;
         pImpl->pvFields = newPVFields;
         pImpl->numberFields = numberFields;
-        PVField::replaceStructure(this,numberFields);
     }
 
     void PVStructure::removePVField(String fieldName)
@@ -167,14 +171,19 @@ namespace epics { namespace pvData {
         PVFieldPtrArray origPVFields = pImpl->pvFields;
         PVFieldPtrArray newPVFields = new PVFieldPtr[newLength];
         int newIndex = 0;
+        int indRemove = -1;
         for(int i=0; i<origLength; i++) {
-            if(origPVFields[i]==pvField) continue;
-            newPVFields[newIndex++] = origPVFields[i];
+            if(origPVFields[i]==pvField) {
+                indRemove = i;
+            } else {
+                newPVFields[newIndex++] = origPVFields[i];
+            }
         }
+        Structure *structure = const_cast<Structure *>(getStructure());
+        structure->removeField(indRemove);
         delete[] pImpl->pvFields;
         pImpl->pvFields = newPVFields;
         pImpl->numberFields = newLength;
-        PVField::replaceStructure(this,newLength);
     }
 
     PVBoolean *PVStructure::getBooleanField(String fieldName)

@@ -283,7 +283,7 @@ structure string
     timeStamp timeStamp
         long secondsPastEpoch 0
         int nanoSeconds 0
-field:  totalConstruct 136 totalDestruct 135 ACTIVE 1
+field:  totalConstruct 135 totalDestruct 135
 pvField:  totalConstruct 281 totalDestruct 281
 linkedListNode:  totalConstruct 5 totalDestruct 5
 linkedList:  totalConstruct 1 totalDestruct 1

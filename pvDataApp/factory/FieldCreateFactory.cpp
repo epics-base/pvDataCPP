@@ -96,6 +96,11 @@ String Field::getFieldName() const {return pImpl->fieldName;}
 
 Type Field::getType() const {return pImpl->type;}
 
+void Field::renameField(String  newName)
+{
+    pImpl->fieldName = newName;
+}
+
 void Field::incReferenceCount() const {
     Lock xx(&globalMutex);
     pImpl->referenceCount++;
@@ -319,6 +324,44 @@ int Structure::getFieldIndex(String fieldName) const {
         if(result==0) return i;
     }
     return -1;
+}
+
+void Structure::appendField(FieldConstPtr field)
+{
+    FieldConstPtr *newFields = new FieldConstPtr[numberFields+1];
+    for(int i=0; i<numberFields; i++) newFields[i] = fields[i];
+    newFields[numberFields] = field;
+    delete[] fields;
+    fields = newFields;
+    numberFields++;
+}
+
+void Structure::appendFields(int numberNew,FieldConstPtrArray nfields)
+{
+    FieldConstPtr *newFields = new FieldConstPtr[numberFields+numberNew];
+    for(int i=0; i<numberFields; i++) newFields[i] = fields[i];
+    for(int i=0; i<numberNew; i++) newFields[numberFields+i] = nfields[i];
+    delete[] fields;
+    fields = newFields;
+    numberFields += numberNew;
+}
+
+void Structure::removeField(int index)
+{
+    if(index<0 || index>=numberFields) {
+        throw std::invalid_argument(
+           String("Structure::removeField index out of bounds"));
+    }
+    FieldConstPtr *newFields = new FieldConstPtr[numberFields-1];
+    fields[index]->decReferenceCount();
+    int ind=0;
+    for(int i=0; i<numberFields; i++) {
+        if(i==index) continue;
+        newFields[ind++] = fields[i];
+    }
+    delete[] fields;
+    fields = newFields;
+    --numberFields;
 }
 
 void Structure::toString(StringBuilder buffer,int indentLevel) const{

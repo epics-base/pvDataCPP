@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS pvDataCPP<br />
 Overview<br />
-2011.01.12</h1>
+2011.01.20</h1>
 
 <p>TODO</p>
 <ul>
@@ -627,6 +627,7 @@ public:
    Type getType() const;
    virtual void toString(StringBuilder buf) const{toString(buf,0);}
    virtual void toString(StringBuilder buf,int indentLevel) const;
+   void renameField(String  newName);
    void incReferenceCount() const;
    void decReferenceCount() const;
    void dumpReferenceCount(StringBuilder buf,int indentLevel) const;
@@ -676,6 +677,9 @@ public:
    FieldConstPtr getField(String fieldName) const;
    int getFieldIndex(String fieldName) const;
    FieldConstPtrArray getFields() const {return fields;}
+   void appendField(FieldConstPtr field);
+   void appendFields(int numberFields,FieldConstPtrArray fields);
+   void removeField(int index);
    virtual void toString(StringBuilder buf) const{toString(buf,0);}
    virtual void toString(StringBuilder buf,int indentLevel) const;
 protected:
@@ -720,6 +724,8 @@ descriptions:</p>
     <dd>Get the name of the field.</dd>
   <dt style="font-family: courier;">getType</dt>
     <dd>Get the field type.</dd>
+  <dt style="font-family: courier;">renameField</dt>
+    <dd>Rename the field name.</dd>
   <dt style="font-family: courier;">incReferenceCount</dt>
     <dd>Increment the reference count. This must be called by any code that
       wants to "clone" an instance of the introspection interface and use it as
@@ -775,6 +781,15 @@ methods:</p>
       method, of the field.</dd>
   <dt style="font-family: courier;">getFields</dt>
     <dd>Get the array of introspection interfaces for the field,</dd>
+  <dt style="font-family: courier;">appendField</dt>
+    <dd>Append a field to the Structure.</dd>
+  <dt style="font-family: courier;">appendFields</dt>
+    <dd>Append the fields to the Structure. The caller is responsible for the
+      storage for the array for the fields. It is OK if the array is allocate
+      on the stack.</dd>
+  <dt style="font-family: courier;">removeField</dt>
+    <dd>Remove the field at the specified index. An exception is thrown if the
+      index is out of bounds.</dd>
 </dl>
 
 <p><span style="font-family: courier;">FieldCreate</span> has the methods:</p>
@@ -972,8 +987,7 @@ public:
     void setImmutable();
     FieldConstPtr getField() ;
     PVStructure * getParent() ;
-    void replacePVField(PVField * newPVField);
-    void renameField(String  newName);
+    bool renameField(String  newName);
     void postPut() ;
     void setPostHandler(PostHandler *postHandler);
     virtual void toString(StringBuilder buf) ;
@@ -982,7 +996,6 @@ public:
     virtual bool operator!=(PVField &amp;pv) = 0;
 protected:
     PVField(PVStructure *parent,FieldConstPtr field);
-    void replaceStructure(PVStructure *pvStructure);
 private:
 };</pre>
 
@@ -1032,12 +1045,12 @@ are:</p>
   <dt style="font-family: courier;">getParent</dt>
     <dd>Get the interface for the parent or null if this is the top level
       PVStructure.</dd>
-  <dt style="font-family: courier;">replacePVField</dt>
-    <dd>Replace this PVField. This is called by support code that wants to
-      replace the default implementation of a data field with it's own
-      implementation.</dd>
   <dt style="font-family: courier;">renameField</dt>
-    <dd>Rename the field name.</dd>
+    <dd>Rename the field name.
+    (false,true) is returned if the name (was not,was) changed.
+    It is not changed if the field is an an element of a structure that
+    already has a field with the same name.
+    </dd>
   <dt style="font-family: courier;">postPut</dt>
     <dd>If a postHandler is registered it is called otherwise no action is
       taken.</dd>
@@ -1668,8 +1681,7 @@ introspection interface must be used. The following shows an example:</p>
     structure-&gt;incReferenceCount();
     structureArray[2] = pvDataCreate-&gt;createPVStructure(0,structure);
     powerSupplyArray-&gt;put(0,3,structureArray,0);
-}
-</pre>
+}</pre>
 
 <p>Note that incReferenceCount is called before each element is created.</p>
 

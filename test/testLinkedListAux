@@ -1,20 +1,20 @@
 
 Time test
-diff 23.955010 milliSeconds
-time per iteration 23.955010 microseconds
-time per addTail/removeHead 0.011978 microseconds
+diff 23.579571 milliSeconds
+time per iteration 23.579571 microseconds
+time per addTail/removeHead 0.011790 microseconds
 
 Time test locked
-diff 176.706476 milliSeconds
-time per iteration 176.706476 microseconds
-time per addTail/removeHead 0.088353 microseconds
+diff 179.506759 milliSeconds
+time per iteration 179.506759 microseconds
+time per addTail/removeHead 0.089753 microseconds
 
 Time std::list test
-diff 631.501215 milliSeconds
-time per iteration 631.501215 microseconds
-time per addTail/removeHead 0.315751 microseconds
+diff 632.658369 milliSeconds
+time per iteration 632.658369 microseconds
+time per addTail/removeHead 0.316329 microseconds
 
 Time std::list test locked
-diff 787.995967 milliSeconds
-time per iteration 787.995967 microseconds
-time per addTail/removeHead 0.393998 microseconds
+diff 789.969392 milliSeconds
+time per iteration 789.969392 microseconds
+time per addTail/removeHead 0.394985 microseconds

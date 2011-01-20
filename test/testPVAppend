@@ -8,7 +8,27 @@ structure parent
         string value bla
     structure child2
         string value bla
-field:  totalConstruct 107 totalDestruct 101 ACTIVE 6
-pvField:  totalConstruct 8 totalDestruct 8
+structure parent
+    structure child1
+        string Joe Good Guy
+        string Mary Good Girl
+    structure child2
+        string Bill Bad Guy
+        string Jane Bad Girl
+structure parent
+    structure child1
+        string Joe Good Guy
+        string Mary Good Girl
+    structure child2
+        string Joe Bad Guy
+        string Jane Bad Girl
+structure parent
+    structure child1
+        string Joe Good Guy
+        string Mary Good Girl
+    structure child2
+        string Jane Bad Girl
+field:  totalConstruct 108 totalDestruct 108
+pvField:  totalConstruct 15 totalDestruct 14 ACTIVE 1
 linkedListNode:  totalConstruct 5 totalDestruct 5
 linkedList:  totalConstruct 1 totalDestruct 1

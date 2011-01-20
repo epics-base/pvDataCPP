@@ -153,70 +153,17 @@ FieldConstPtr PVField::getField()  {return pImpl->field;}
 
 PVStructure * PVField::getParent()  {return pImpl->parent;}
 
-void PVField::replacePVField(PVField * newPVField)
-{
-   PVStructure *parent = getParent();
-   if(parent==0) {
-       String message("PVField::replacePVField no parent");
-       throw std::invalid_argument(message);
-   }
-   PVFieldPtrArray pvFields = parent->getPVFields();
-   int index = -1;
-   String fieldName = pImpl->field->getFieldName();
-   int length = parent->getStructure()->getNumberFields();
-   for(int i=0; i<length; i++) {
-   	PVField *pvField = pvFields[i];
-   	if(pvField->getField()->getFieldName().compare(fieldName) ==0) {
-   		index = i;
-   		break;
-   	}
-   }
-   if(index==-1) {
-   String message("PVField::replacePVField did not find field in parent");
-   throw std::logic_error(message);
-   }
-   pvFields[index] = newPVField;
-   parent->replaceStructure(parent,length);
-}
 
-void PVField::renameField(String  newName)
+bool PVField::renameField(String  newName)
 {
-    FieldCreate *fieldCreate = getFieldCreate();
-    switch(pImpl->field->getType()) {
-        case scalar: {
-            ScalarConstPtr scalar = static_cast<ScalarConstPtr>(pImpl->field);
-            scalar = fieldCreate->createScalar(newName, scalar->getScalarType());
-            pImpl->field = scalar;
-            break;
-        }
-        case scalarArray: {
-            ScalarArrayConstPtr array =
-                static_cast<ScalarArrayConstPtr>(pImpl->field);
-            array = fieldCreate->createScalarArray(
-                newName, array->getElementType());
-            pImpl->field = array;
-            break;
-        }
-        case structure: {
-            StructureConstPtr structure =
-                 static_cast<StructureConstPtr>(pImpl->field);
-            FieldConstPtrArray origFields = structure->getFields();
-            int numberFields = structure->getNumberFields();
-            structure = fieldCreate->createStructure(
-                newName,numberFields,origFields);
-            pImpl->field = structure;
-            break;
-        }
-        case structureArray: {
-            StructureArrayConstPtr structureArray =
-                static_cast<StructureArrayConstPtr>(pImpl->field);
-            structureArray = fieldCreate->createStructureArray(newName,
-                structureArray->getStructure());
-            pImpl->field = structureArray;
-        }
+    if(pImpl->parent!=0) {
+        StructureConstPtr structure = pImpl->parent->getStructure();
+        int index = structure->getFieldIndex(newName);
+        if(index>=0) return false;
     }
-   String message("PVField::renameField logic error. should not get here");
-   throw std::logic_error(message);
+    Field * field = const_cast<Field *>(pImpl->field);
+    field->renameField(newName);
+    return true;
 }
 
 void PVField::postPut() 
@@ -310,39 +257,6 @@ void PVField::computeOffset(PVField   *  pvField,int offset) {
    pvField->pImpl->fieldOffset = beginOffset;
    pvField->pImpl->nextFieldOffset = nextOffset;
 }
-
-void PVField::replaceStructure(PVStructure *pvStructure,int length)
-{
-    PVFieldPtrArray pvFields = pvStructure->getPVFields();
-    StructureConstPtr old = static_cast<StructureConstPtr>(pImpl->field);
-    if(old->getNumberFields() == length) {
-        FieldConstPtrArray fields = old->getFields();
-        for(int i=0; i<length; i++) {
-            FieldConstPtr newField = pvFields[i]->getField();
-            FieldConstPtr oldField = fields[i];
-            if(newField==oldField) continue;
-            oldField->decReferenceCount();
-            fields[i] = newField;
-        }
-        return;
-    }
-    FieldConstPtrArray newFields = new FieldConstPtr[length];
-    for(int i=0; i<length; i++) {
-        FieldConstPtr field = pvFields[i]->getField();
-        field->incReferenceCount();
-        newFields[i] = field;
-    }
-    StructureConstPtr newStructure = getFieldCreate()->createStructure(
-         pImpl->field->getFieldName(),length, newFields);
-    pImpl->field->decReferenceCount();
-    pImpl->field = newStructure;
-    PVStructure *parent = pImpl->parent;
-    if(parent!=0) {
-        parent->replaceStructure(
-            parent,parent->getStructure()->getNumberFields());
-    }
-}
-
 
 }}
 #endif  /* ABSTRACTPVFIELD_H */

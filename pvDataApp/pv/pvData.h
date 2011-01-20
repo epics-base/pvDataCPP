@@ -96,8 +96,7 @@ public:
     void setImmutable();
     FieldConstPtr getField() ;
     PVStructure * getParent() ;
-    void replacePVField(PVField * newPVField);
-    void renameField(String  newName);
+    bool renameField(String  newName);
     void postPut() ;
     void setPostHandler(PostHandler *postHandler);
     virtual void toString(StringBuilder buf) ;
@@ -106,7 +105,6 @@ public:
     virtual bool operator!=(PVField &pv) = 0;
 protected:
     PVField(PVStructure *parent,FieldConstPtr field);
-    void replaceStructure(PVStructure *pvStructure,int numberFields);
 private:
     class PVFieldPvt *pImpl;
     static void computeOffset(PVField *pvField);

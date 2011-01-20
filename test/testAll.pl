@@ -7,6 +7,7 @@ system ("./testLinkedList.pl");
 system ("./testIntrospect.pl");
 system ("./testPVData.pl");
 system ("./testPVStructureArray.pl");
+system ("./testPVAppend.pl");
 system ("./testPVAuxInfo.pl");
 system ("./testTimeStamp.pl");
 system ("./testTimer.pl");
