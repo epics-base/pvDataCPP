@@ -10,6 +10,7 @@
 #include "serialize.h"
 #include "epicsException.h"
 #include "byteBuffer.h"
+#include "noDefaultMethods.h"
 
 namespace epics { namespace pvData { 
 
