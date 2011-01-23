@@ -178,10 +178,14 @@ namespace epics { namespace pvData {
                 pcontrol->ensureData(1);
                 int8 temp = pbuffer->getByte();
                 if(temp==0) {
-                    value[i] = NULL;
+                    if (value[i]) {
+                        delete value[i];
+                        value[i] = NULL;
+                    }
                 }
                 else {
                     if(value[i]==NULL) {
+                        structureArray->getStructure()->incReferenceCount();
                         value[i] = getPVDataCreate()->createPVStructure(
                                 NULL, structureArray->getStructure());
                     }
