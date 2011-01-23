@@ -65,6 +65,17 @@ void testPowerSupplyArray(FILE * fd) {
     buffer.clear();
     powerSupplyArrayStruct->getField()->dumpReferenceCount(&buffer,0);
     fprintf(fd," reference counts %s\n",buffer.c_str());
+    buffer.clear();
+    structure->dumpReferenceCount(&buffer,0);
+    fprintf(fd,"before incReferenceCount reference counts %s\n",buffer.c_str());
+    structure->incReferenceCount();
+    buffer.clear();
+    structure->dumpReferenceCount(&buffer,0);
+    fprintf(fd,"after incReferenceCount reference counts %s\n",buffer.c_str());
+    structure->decReferenceCount();
+    buffer.clear();
+    structure->dumpReferenceCount(&buffer,0);
+    fprintf(fd,"after decReferenceCount reference counts %s\n",buffer.c_str());
     delete powerSupplyArrayStruct;
 }
 
