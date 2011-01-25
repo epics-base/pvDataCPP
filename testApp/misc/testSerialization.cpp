@@ -18,6 +18,7 @@
 #include "serialize.h"
 #include "noDefaultMethods.h"
 #include "byteBuffer.h"
+#include "showConstructDestruct.h"
 
 #define BYTE_MAX_VALUE 127
 #define BYTE_MIN_VALUE -128
@@ -83,6 +84,7 @@ void serializationTest(PVField* field) {
     buffer->flip();
 
     // create new instance and deserialize
+    field->getField()->incReferenceCount();
     PVField* deserializedField = getPVDataCreate()->createPVField(NULL,
             field->getField());
     deserializedField->deserialize(buffer, control);
@@ -408,7 +410,7 @@ void testScalarEquals() {
     delete scalar2;
 
     FieldCreate* fieldCreate = getFieldCreate();
-    FieldConstPtr fields[2];
+    FieldConstPtrArray fields = new FieldConstPtr[2];
     fields[0] = fieldCreate->createScalar("secondsSinceEpoch",
             epics::pvData::pvLong);
     fields[1] = fieldCreate->createScalar("nanoSeconds", epics::pvData::pvInt);
@@ -416,6 +418,7 @@ void testScalarEquals() {
             fields);
 
     PVStructure* pvStruct1 = factory->createPVStructure(NULL, structure);
+    structure->incReferenceCount();
     PVStructure* pvStruct2 = factory->createPVStructure(NULL, structure);
     assert((*pvStruct1)==(*pvStruct2));
     delete pvStruct2;
@@ -466,7 +469,7 @@ void testScalarNonInitialized() {
     delete scalar;
 
     FieldCreate* fieldCreate = getFieldCreate();
-    FieldConstPtr fields[2];
+    FieldConstPtrArray fields = new FieldConstPtr[2];
     fields[0] = fieldCreate->createScalar("secondsSinceEpoch",
             epics::pvData::pvLong);
     fields[1] = fieldCreate->createScalar("nanoSeconds", epics::pvData::pvInt);
@@ -528,7 +531,7 @@ void testArrayNonInitialized() {
     delete array;
 
     FieldCreate* fieldCreate = getFieldCreate();
-    FieldConstPtr fields[2];
+    FieldConstPtrArray fields = new FieldConstPtr[2];
     fields[0] = fieldCreate->createScalar("secondsSinceEpoch",
             epics::pvData::pvLong);
     fields[1] = fieldCreate->createScalar("nanoSeconds", epics::pvData::pvInt);
@@ -556,7 +559,7 @@ void testStructure() {
     assert(pvDataCreate!=NULL);
 
     cout<<"\tSimple structure serialization\n";
-    FieldConstPtr fields[2];
+    FieldConstPtrArray fields = new FieldConstPtr[2];
     fields[0] = fieldCreate->createScalar("secondsSinceEpoch",
             epics::pvData::pvLong);
     fields[1] = fieldCreate->createScalar("nanoSeconds", epics::pvData::pvInt);
@@ -567,14 +570,18 @@ void testStructure() {
 
     serializationTest(pvStructure);
     //serializationTest(pvStructure->getStructure());
+    delete pvStructure;
 
     cout<<"\tComplex structure serialization\n";
     // and more complex :)
-    FieldConstPtr fields2[4];
+    FieldConstPtrArray fields2 = new FieldConstPtr[4];
     fields2[0] = fieldCreate->createScalar("longVal", epics::pvData::pvLong);
     fields2[1] = fieldCreate->createScalar("intVal", epics::pvData::pvInt);
     fields2[2] = fieldCreate->createScalarArray("values", epics::pvData::pvDouble);
-    fields2[3] = fieldCreate->createStructure("timeStamp", 2, fields);
+    FieldConstPtrArray fields3 = new FieldConstPtr[2];
+    fields3[0] = fieldCreate->createScalar("secondsSinceEpoch", epics::pvData::pvLong);
+    fields3[1] = fieldCreate->createScalar("nanoSeconds", epics::pvData::pvInt);
+    fields2[3] = fieldCreate->createStructure("timeStamp", 2, fields3);
     PVStructure* pvStructure2 = pvDataCreate->createPVStructure(NULL,
             "complexStructure", 4, fields2);
     pvStructure2->getLongField(fields2[0]->getFieldName())->put(1234);
@@ -586,13 +593,13 @@ void testStructure() {
 
     PVStructure* ps = pvStructure2->getStructureField(
             fields2[3]->getFieldName());
-    ps->getLongField(fields[0]->getFieldName())->put(789);
-    ps->getIntField(fields[1]->getFieldName())->put(1011);
+    ps->getLongField(fields3[0]->getFieldName())->put(789);
+    ps->getIntField(fields3[1]->getFieldName())->put(1011);
 
     serializationTest(pvStructure2);
     //serializationTest(pvStructure2->getStructure());
     delete pvStructure2;
-    delete pvStructure;
+
 
     cout<<"!!!  PASSED\n\n";
 }
@@ -632,6 +639,7 @@ int main(int argc, char *argv[]) {
     delete control;
     delete flusher;
 
+    getShowConstructDestruct()->showDeleteStaticExit(stdout);
     cout<<"\nDone!\n";
 
     return (0);

@@ -1467,7 +1467,7 @@ static bool structureArrayEquals(PVStructureArray *a,PVStructureArray *b)
         } else {
             if(bArray[i]==0) return false;
         }
-        if(aArray[i]!=bArray[i]) return false;
+        if(*aArray[i]!=*bArray[i]) return false;
     }
     return true;
 }
@@ -1481,7 +1481,7 @@ static bool structureEquals(PVStructure *a,PVStructure *b)
     PVFieldPtrArray aFields = a->getPVFields();
     PVFieldPtrArray bFields = b->getPVFields();
     for(int i=0; i<length; i++) {
-        if(aFields[i]!=bFields[i]) return false;
+        if(*aFields[i]!=*bFields[i]) return false;
     }
     return true;
 }
