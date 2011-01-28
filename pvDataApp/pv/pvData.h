@@ -9,6 +9,7 @@
 #include <map>
 #ifndef PVDATA_H
 #define PVDATA_H
+#include "pvType.h"
 #include "pvIntrospect.h"
 #include "noDefaultMethods.h"
 #include "requester.h"
@@ -49,14 +50,6 @@ typedef PVStructure * PVStructurePtr;
 typedef PVStructurePtr* PVStructurePtrArray;
 typedef PVField* PVFieldPtr;
 typedef PVFieldPtr * PVFieldPtrArray;
-typedef bool * BooleanArray;
-typedef int8 * ByteArray;
-typedef int16 * ShortArray;
-typedef int32 * IntArray;
-typedef int64 * LongArray;
-typedef float * FloatArray;
-typedef double * DoubleArray;
-//typedef String * StringArray; already defined in pvType.h
 
 class PVAuxInfo : private NoDefaultMethods {
 public:

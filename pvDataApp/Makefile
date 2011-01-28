@@ -5,7 +5,6 @@ PVDATA = $(TOP)/pvDataApp/
 
 SRC_DIRS += $(PVDATA)/misc
 
-INC += pvType.h
 INC += noDefaultMethods.h
 INC += linkedListVoid.h
 INC += linkedList.h
@@ -46,6 +45,7 @@ LIBSRCS += StatusCreateFactory.cpp
 
 SRC_DIRS += $(PVDATA)/pv
 
+INC += pvType.h
 INC += pvIntrospect.h
 INC += pvData.h
 INC += convert.h
