@@ -176,9 +176,7 @@ class StatusCreateImpl : public StatusCreate {
             return new StatusImpl(type, message);
         else
         {
-            std::string stackDump;
-            cause->toString(stackDump);
-            return new StatusImpl(type, message, stackDump);
+            return new StatusImpl(type, message, cause->what());
         }
     }
         	

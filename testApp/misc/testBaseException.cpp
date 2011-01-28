@@ -36,7 +36,7 @@ void internalTestBaseException(int unused = 0)
     try {
         // NOTE: 5, 4, 3, 2, 1 calls will be optimized and not shown
         Unroller().unroll<5>(42.0);
-    } catch (BaseException *be3) {
+    } catch (BaseException& be3) {
         THROW_BASE_EXCEPTION_CAUSE("exception 1", be3);
     }
 }
@@ -46,23 +46,18 @@ void testBaseException() {
 
     try {
         THROW_BASE_EXCEPTION("all is OK");
-    } catch (BaseException *be) {
-        std::string str;
-        be->toString(str);
-        printf("\n\n%s\n\n", str.c_str());
+    } catch (BaseException& be) {
+        printf("\n\n%s\n\n", be.what());
     }
 
     try {
         try {
             internalTestBaseException();
-        } catch (BaseException *be2) {
+        } catch (BaseException& be2) {
             THROW_BASE_EXCEPTION_CAUSE("exception 2", be2);
         }
-    } catch (BaseException *be) {
-        std::string str;
-        be->toString(str);
-        printf("\n\n%s\n\n", str.c_str());
-        delete be;
+    } catch (BaseException& be) {
+        printf("\n\n%s\n\n", be.what());
     }
 
     printf("PASSED\n");
