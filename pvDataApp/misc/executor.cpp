@@ -55,24 +55,17 @@ typedef LinkedList<ExecutorNode> ExecutorList;
 class ExecutorNode {
 public:
     ExecutorNode(Command *command);
-    ~ExecutorNode();
 
     Command *command;
-    ExecutorListNode *node;
-    ExecutorListNode *runNode;
+    ExecutorListNode node;
+    ExecutorListNode runNode;
 };
 
 ExecutorNode::ExecutorNode(Command *command)
 : command(command),
-  node(new ExecutorListNode(this)),
-  runNode(new ExecutorListNode(this))
+  node(this),
+  runNode(this)
 {}
-
-ExecutorNode::~ExecutorNode()
-{
-    delete node;
-    delete runNode;
-}
 
 class ExecutorPvt : public Runnable{
 public:
@@ -82,23 +75,23 @@ public:
     void execute(ExecutorNode *node);
     virtual void run();
 private:
-    ExecutorList *executorList; 
-    ExecutorList *runList; 
-    Event *moreWork;
-    Event *stopped;
+    ExecutorList executorList;
+    ExecutorList runList;
+    Event moreWork;
+    Event stopped;
     Mutex mutex;
     volatile bool alive;
-    Thread *thread;
+    Thread thread;
 };
 
 ExecutorPvt::ExecutorPvt(String threadName,ThreadPriority priority)
-:  executorList(new ExecutorList()),
-   runList(new ExecutorList()),
-   moreWork(new Event(false)),
-   stopped(new Event(false)),
-   mutex(Mutex()),
+:  executorList(),
+   runList(),
+   moreWork(),
+   stopped(),
+   mutex(),
    alive(true),
-   thread(new Thread(threadName,priority,this))
+   thread(threadName,priority,this)
 {} 
 
 ExecutorPvt::~ExecutorPvt()
@@ -107,55 +100,50 @@ ExecutorPvt::~ExecutorPvt()
         Lock xx(&mutex);
         alive = false;
     }
-    moreWork->signal();
+    moreWork.signal();
     {
         Lock xx(&mutex);
-        stopped->wait();
+        stopped.wait();
     }
     ExecutorListNode *node;
-    while((node=executorList->removeHead())!=0) {
+    while((node=executorList.removeHead())!=0) {
         delete node->getObject();
     }
-    delete thread;
-    delete stopped;
-    delete moreWork;
-    delete runList;
-    delete executorList;
 }
 
 void ExecutorPvt::run()
 {
     while(alive) {
         ExecutorListNode * executorListNode = 0;
-        while(alive && runList->isEmpty()) {
-            moreWork->wait();
+        while(alive && runList.isEmpty()) {
+            moreWork.wait();
         }
         if(alive) {
             Lock xx(&mutex);
-            executorListNode = runList->removeHead();
+            executorListNode = runList.removeHead();
         }
         if(alive && executorListNode!=0) {
              executorListNode->getObject()->command->command();
         }
     }
-    stopped->signal();
+    stopped.signal();
 }
 
 ExecutorNode * ExecutorPvt::createNode(Command *command)
 {
     Lock xx(&mutex);
     ExecutorNode *executorNode = new ExecutorNode(command);
-    executorList->addTail(executorNode->node);
+    executorList.addTail(&executorNode->node);
     return executorNode;
 }
 
 void ExecutorPvt::execute(ExecutorNode *node)
 {
     Lock xx(&mutex);
-    if(!alive || node->runNode->isOnList()) return;
-    bool isEmpty = runList->isEmpty();
-    runList->addTail(node->runNode);
-    if(isEmpty) moreWork->signal();
+    if(!alive || node->runNode.isOnList()) return;
+    bool isEmpty = runList.isEmpty();
+    runList.addTail(&node->runNode);
+    if(isEmpty) moreWork.signal();
 }
 
 Executor::Executor(String threadName,ThreadPriority priority)
