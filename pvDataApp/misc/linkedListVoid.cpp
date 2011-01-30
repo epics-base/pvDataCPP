@@ -18,76 +18,27 @@
 
 namespace epics { namespace pvData { 
 
-static Mutex globalMutex;
 static String alreadyOnList("already on list");
 
-static volatile int64 totalNodeConstruct = 0;
-static volatile int64 totalNodeDestruct = 0;
-static volatile int64 totalListConstruct = 0;
-static volatile int64 totalListDestruct = 0;
-static bool notInited = true;
-
-static int64 getTotalNodeConstruct()
-{
-    Lock xx(&globalMutex);
-    return totalNodeConstruct;
-}
-
-static int64 getTotalNodeDestruct()
-{
-    Lock xx(&globalMutex);
-    return totalNodeDestruct;
-}
-
-static int64 getTotalListConstruct()
-{
-    Lock xx(&globalMutex);
-    return totalListConstruct;
-}
-
-static int64 getTotalListDestruct()
-{
-    Lock xx(&globalMutex);
-    return totalListDestruct;
-}
-
-static void initPvt()
-{
-     Lock xx(&globalMutex);
-     if(notInited) {
-        notInited = false;
-        ShowConstructDestruct::registerCallback(
-            "linkedListNode",
-            getTotalNodeConstruct,getTotalNodeDestruct,0,0);
-        
-        ShowConstructDestruct::registerCallback(
-            "linkedList",
-            getTotalListConstruct,getTotalListDestruct,0,0);
-     }
-}
-
+PVDATA_REFCOUNT_MONITOR_DEFINE(LinkedListNode);
+PVDATA_REFCOUNT_MONITOR_DEFINE(LinkedList);
 
 LinkedListVoidNode::LinkedListVoidNode(void *object)
 : object(object),before(0),after(0),linkedListVoid(0)
 {
-    initPvt();
-    Lock xx(&globalMutex);
-    totalNodeConstruct++;
+    PVDATA_REFCOUNT_MONITOR_CONSTRUCT(LinkedListNode);
 }
 
 LinkedListVoidNode::LinkedListVoidNode(bool isHead)
 : object(this),before(this),after(this)
 {
-    initPvt();
-    Lock xx(&globalMutex);
-    totalNodeConstruct++;
+    PVDATA_REFCOUNT_MONITOR_CONSTRUCT(LinkedListNode);
 }
 
 
 LinkedListVoidNode::~LinkedListVoidNode()
 {
-    Lock xx(&globalMutex);
-    totalNodeDestruct++;
+    PVDATA_REFCOUNT_MONITOR_DESTRUCT(LinkedListNode);
 }
 
 void *LinkedListVoidNode::getObject() {
@@ -103,16 +54,13 @@ bool LinkedListVoidNode::isOnList()
 LinkedListVoid::LinkedListVoid()
 : head(new LinkedListVoidNode(true)),length(0)
 {
-    initPvt();
-    Lock xx(&globalMutex);
-    totalListConstruct++;
+    PVDATA_REFCOUNT_MONITOR_CONSTRUCT(LinkedList);
 }
 
 LinkedListVoid::~LinkedListVoid()
 {
-    Lock xx(&globalMutex);
     delete head;
-    totalListDestruct++;
+    PVDATA_REFCOUNT_MONITOR_DESTRUCT(LinkedList);
 }
 
 int LinkedListVoid::getLength()

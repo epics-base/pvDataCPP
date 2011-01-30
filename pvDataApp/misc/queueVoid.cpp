@@ -18,65 +18,19 @@
 
 namespace epics { namespace pvData { 
 
-static volatile int64 totalElementConstruct = 0;
-static volatile int64 totalElementDestruct = 0;
-static volatile int64 totalQueueConstruct = 0;
-static volatile int64 totalQueueDestruct = 0;
-static Mutex globalMutex;
-static bool notInited = true;
-
-static int64 getTotalNodeConstruct()
-{
-    Lock xx(&globalMutex);
-    return totalElementConstruct;
-}
-
-static int64 getTotalNodeDestruct()
-{
-    Lock xx(&globalMutex);
-    return totalElementDestruct;
-}
-
-static int64 getTotalListConstruct()
-{
-    Lock xx(&globalMutex);
-    return totalQueueConstruct;
-}
-
-static int64 getTotalListDestruct()
-{
-    Lock xx(&globalMutex);
-    return totalQueueDestruct;
-}
-
-static void initPvt()
-{
-     Lock xx(&globalMutex);
-     if(notInited) {
-        notInited = false;
-        ShowConstructDestruct::registerCallback(
-            "queueElement",
-            getTotalNodeConstruct,getTotalNodeDestruct,0,0);
-        ShowConstructDestruct::registerCallback(
-            "queue",
-            getTotalListConstruct,getTotalListDestruct,0,0);
-     }
-}
-
+PVDATA_REFCOUNT_MONITOR_DEFINE(queueElement);
+PVDATA_REFCOUNT_MONITOR_DEFINE(queue);
 
 QueueElementVoid::QueueElementVoid(ObjectPtr object)
 : object(object)
 {
-    initPvt();
-    Lock xx(&globalMutex);
-    totalElementConstruct++;
+    PVDATA_REFCOUNT_MONITOR_CONSTRUCT(queueElement);
 }
 
 
 QueueElementVoid::~QueueElementVoid()
 {
-    Lock xx(&globalMutex);
-    totalElementDestruct++;
+    PVDATA_REFCOUNT_MONITOR_DESTRUCT(queueElement);
 }
 
 ObjectPtr QueueElementVoid::getObject() {
@@ -94,9 +48,7 @@ QueueVoid::QueueVoid(ObjectPtr object[],int number)
     for(int i=0; i<number; i++) {
         array[i] = new QueueElementVoid(object[i]);
     }
-    initPvt();
-    Lock xx(&globalMutex);
-    totalQueueConstruct++;
+    PVDATA_REFCOUNT_MONITOR_CONSTRUCT(queue);
 }
 
 QueueVoid::~QueueVoid()
@@ -105,8 +57,7 @@ QueueVoid::~QueueVoid()
         delete array[i];
     }
     delete[]array;
-    Lock xx(&globalMutex);
-    totalQueueDestruct++;
+    PVDATA_REFCOUNT_MONITOR_DESTRUCT(queue);
 }
 
 void QueueVoid::clear()

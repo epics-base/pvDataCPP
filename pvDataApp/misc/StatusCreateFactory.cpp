@@ -19,33 +19,7 @@ namespace epics { namespace pvData {
 
 //static DebugLevel debugLevel = lowDebug;
 
-static volatile int64 totalConstruct = 0;
-static volatile int64 totalDestruct = 0;
-static Mutex globalMutex;
-static bool notInited = true;
-
-static int64 getTotalConstruct()
-{
-    Lock xx(&globalMutex);
-    return totalConstruct;
-}
-
-static int64 getTotalDestruct()
-{
-    Lock xx(&globalMutex);
-    return totalDestruct;
-}
-
-static void init()
-{
-     Lock xx(&globalMutex);
-     if(notInited) {
-        notInited = false;
-        ShowConstructDestruct::registerCallback(
-            String("status"),
-            getTotalConstruct,getTotalDestruct,0,0);
-     }
-}
+PVDATA_REFCOUNT_MONITOR_DEFINE(status);
 
 class StatusImpl : public Status
 {
@@ -54,20 +28,17 @@ class StatusImpl : public Status
     StatusImpl(StatusType type, String message) :
         m_type(type), m_message(message)
     {
-        Lock xx(&globalMutex);
-        totalConstruct++;
+        PVDATA_REFCOUNT_MONITOR_CONSTRUCT(status);
     }
 
     StatusImpl(StatusType type, String message, String stackDump) :
         m_type(type), m_message(message), m_stackDump(stackDump)
     {
-        Lock xx(&globalMutex);
-        totalConstruct++;
+        PVDATA_REFCOUNT_MONITOR_DESTRUCT(status);
     }
     
     virtual ~StatusImpl() {
-        Lock xx(&globalMutex);
-        totalDestruct++;
+        PVDATA_REFCOUNT_MONITOR_DESTRUCT(status);
     }
     
     virtual StatusType getType()
@@ -158,7 +129,6 @@ class StatusCreateImpl : public StatusCreate {
     
     StatusCreateImpl()
     {
-        init();
         m_ok = createStatus(STATUSTYPE_OK, "OK", 0);
     }
 

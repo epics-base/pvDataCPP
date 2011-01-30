@@ -23,51 +23,8 @@
 
 namespace epics { namespace pvData { 
 
-
-static volatile int64 totalNodeConstruct = 0;
-static volatile int64 totalNodeDestruct = 0;
-static volatile int64 totalTimerConstruct = 0;
-static volatile int64 totalTimerDestruct = 0;
-static Mutex globalMutex;
-static bool notInited = true;
-
-static int64 getTotalTimerNodeConstruct()
-{
-    Lock xx(&globalMutex);
-    return totalNodeConstruct;
-}
-
-static int64 getTotalTimerNodeDestruct()
-{
-    Lock xx(&globalMutex);
-    return totalNodeDestruct;
-}
-
-static int64 getTotalTimerConstruct()
-{
-    Lock xx(&globalMutex);
-    return totalTimerConstruct;
-}
-
-static int64 getTotalTimerDestruct()
-{
-    Lock xx(&globalMutex);
-    return totalTimerDestruct;
-}
-
-static void init()
-{
-     Lock xx(&globalMutex);
-     if(notInited) {
-        notInited = false;
-        ShowConstructDestruct::registerCallback(
-            "timerNode",
-            getTotalTimerNodeConstruct,getTotalTimerNodeDestruct,0,0);
-        ShowConstructDestruct::registerCallback(
-            "timer",
-            getTotalTimerConstruct,getTotalTimerDestruct,0,0);
-     }
-}
+PVDATA_REFCOUNT_MONITOR_DEFINE(timerNode);
+PVDATA_REFCOUNT_MONITOR_DEFINE(timer);
 
 class TimerNodePvt;
 
@@ -154,9 +111,7 @@ static void addElement(TimerPvt *timer,TimerNodePvt *node)
 TimerNode::TimerNode(TimerCallback *callback)
 : pImpl(new TimerNodePvt(this,callback))
 {
-    init();
-    Lock xx(&globalMutex);
-    totalNodeConstruct++;
+    PVDATA_REFCOUNT_MONITOR_CONSTRUCT(timerNode);
 }
 
 
@@ -164,8 +119,7 @@ TimerNode::~TimerNode()
 {
     cancel();
     delete pImpl;
-    Lock xx(&globalMutex);
-    totalNodeDestruct++;
+    PVDATA_REFCOUNT_MONITOR_DESTRUCT(timerNode);
 }
 
 void TimerNode::cancel()
@@ -240,9 +194,7 @@ void TimerPvt::run()
 Timer::Timer(String threadName, ThreadPriority priority)
 : pImpl(new TimerPvt(threadName,priority))
 {
-    init();
-    Lock xx(&globalMutex);
-    totalTimerConstruct++;
+    PVDATA_REFCOUNT_MONITOR_CONSTRUCT(timer);
 }
 
 Timer::~Timer() {
@@ -258,8 +210,7 @@ Timer::~Timer() {
         node->getObject()->callback->timerStopped();
     }
     delete pImpl;
-    Lock xx(&globalMutex);
-    totalTimerDestruct++;
+    PVDATA_REFCOUNT_MONITOR_DESTRUCT(timer);
 }
 
 void Timer::scheduleAfterDelay(TimerNode *timerNode,double delay)

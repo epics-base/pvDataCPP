@@ -21,33 +21,7 @@
 
 namespace epics { namespace pvData {
 
-static volatile int64 totalConstruct = 0;
-static volatile int64 totalDestruct = 0;
-static Mutex globalMutex;
-static bool notInited = true;
-
-static int64 getTotalConstruct()
-{
-    Lock xx(&globalMutex);
-    return totalConstruct;
-}
-
-static int64 getTotalDestruct()
-{
-    Lock xx(&globalMutex);
-    return totalDestruct;
-}
-
-static void init() {
-    Lock xx(&globalMutex);
-    if(notInited) {
-        notInited = false;
-        ShowConstructDestruct::registerCallback(
-            String("executor"),
-            getTotalConstruct,getTotalDestruct,0,0);
-    }
-}
-
+PVDATA_REFCOUNT_MONITOR_DEFINE(executor);
 
 typedef LinkedListNode<ExecutorNode> ExecutorListNode;
 typedef LinkedList<ExecutorNode> ExecutorList;
@@ -149,15 +123,12 @@ void ExecutorPvt::execute(ExecutorNode *node)
 Executor::Executor(String threadName,ThreadPriority priority)
 : pImpl(new ExecutorPvt(threadName,priority))
 {
-    init();
-    Lock xx(&globalMutex);
-    totalConstruct++;
+    PVDATA_REFCOUNT_MONITOR_CONSTRUCT(executor);
 }
 
 Executor::~Executor() {
     delete pImpl;
-    Lock xx(&globalMutex);
-    totalDestruct++;
+    PVDATA_REFCOUNT_MONITOR_DESTRUCT(executor);
 }
 
 ExecutorNode * Executor::createNode(Command*command)

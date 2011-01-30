@@ -35,52 +35,18 @@ public :
 FieldPvt::FieldPvt(String fieldName,Type type)
  : fieldName(fieldName),type(type),referenceCount(1) { }
 
-static volatile int64 totalReferenceCount = 0;
-static volatile int64 totalConstruct = 0;
-static volatile int64 totalDestruct = 0;
-static Mutex globalMutex;
-static bool notInited = true;
+PVDATA_REFCOUNT_MONITOR_DEFINE(field);
 
-static int64 getTotalConstruct()
-{
-    Lock xx(&globalMutex);
-    return totalConstruct;
-}
-
-static int64 getTotalDestruct()
-{
-    Lock xx(&globalMutex);
-    return totalDestruct;
-}
-
-static int64 getTotalReferenceCount()
-{
-    return totalReferenceCount;
-}
-
-static void init()
-{
-     static Mutex mutex;
-     Lock xx(&mutex);
-     if(notInited) {
-        notInited = false;
-        ShowConstructDestruct::registerCallback(
-            String("field"),
-            getTotalConstruct,getTotalDestruct,getTotalReferenceCount,0);
-     }
-}
-
+static Mutex refCountMutex;
 
 Field::Field(String fieldName,Type type)
     : pImpl(new FieldPvt(fieldName,type))
 {
-    Lock xx(&globalMutex);
-    totalConstruct++;
+    PVDATA_REFCOUNT_MONITOR_CONSTRUCT(field);
 }
 
 Field::~Field() {
-    Lock xx(&globalMutex);
-    totalDestruct++;
+    PVDATA_REFCOUNT_MONITOR_DESTRUCT(field);
     // note that compiler automatically calls destructor for fieldName
     if(debugLevel==highDebug) printf("~Field %s\n",pImpl->fieldName.c_str());
     delete pImpl;
@@ -88,7 +54,7 @@ Field::~Field() {
 }
 
 int Field::getReferenceCount() const {
-    Lock xx(&globalMutex);
+    Lock xx(&refCountMutex);
     return pImpl->referenceCount;
 }
 
@@ -102,9 +68,9 @@ void Field::renameField(String  newName)
 }
 
 void Field::incReferenceCount() const {
-    Lock xx(&globalMutex);
+    field_node.incRef();
+    Lock xx(&refCountMutex);
     pImpl->referenceCount++;
-    totalReferenceCount++;
     if(pImpl->type!=structure) return;
     StructureConstPtr structure = static_cast<StructureConstPtr>(this);
     FieldConstPtrArray fields = structure->getFields();
@@ -115,14 +81,14 @@ void Field::incReferenceCount() const {
 }
 
 void Field::decReferenceCount() const {
-    Lock xx(&globalMutex);
+    field_node.decRef();
+    Lock xx(&refCountMutex);
     if(pImpl->referenceCount<=0) {
           String message("logicError field ");
           message += pImpl->fieldName;
           throw std::logic_error(message);
     }
     pImpl->referenceCount--;
-    totalReferenceCount--;
     if(pImpl->type!=structure) {
         if(pImpl->referenceCount==0) {
              delete this;
@@ -435,7 +401,6 @@ static FieldCreate* fieldCreate = 0;
 
 FieldCreate::FieldCreate()
 {
-     init();
 }
 
 FieldCreate * getFieldCreate() {
