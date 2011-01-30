@@ -13,96 +13,81 @@
 #include <stdio.h>
 
 #include "noDefaultMethods.h"
+#include "lock.h"
 #include "pvType.h"
 
 namespace epics { namespace pvData { 
 
-typedef int64 (*getTotalFunc)();
-typedef void (*deleteStaticFunc)();
-
-class ConstructDestructCallback : private NoDefaultMethods {
-public:
-    String getConstructName();
-    int64 getTotalConstruct();
-    int64 getTotalDestruct();
-    int64 getTotalReferenceCount();
-private:
-    ConstructDestructCallback(
-        String name,
-        getTotalFunc construct,
-        getTotalFunc destruct,
-        getTotalFunc reference,
-        deleteStaticFunc deleteFunc);
-    ~ConstructDestructCallback();
-    void deleteStatic();
-    String name;
-    getTotalFunc construct;
-    getTotalFunc destruct;
-    getTotalFunc reference;
-    deleteStaticFunc deleteFunc;
-    friend class ShowConstructDestruct;
+//! Used to pass around snapshots
+struct CDRCount { // default copy and assignment are ok
+    size_t cons, dtys;
+    long refs;
+    CDRCount():cons(0),dtys(0),refs(0){}
+    CDRCount& operator+=(const CDRCount& o)
+        {cons+=o.cons; dtys+=o.dtys; refs+=o.refs; return *this;}
+    CDRCount& operator=(size_t count) // reset counters
+        {cons=count; dtys=count; refs=count; return *this;}
 };
 
-class ShowConstructDestruct : private NoDefaultMethods {
+class CDRNode;
+
+//! @brief Global registrar for CDRNodes
+class CDRMonitor : private NoDefaultMethods {
 public:
-    static void registerCallback(
-        String name,
-        getTotalFunc construct,
-        getTotalFunc destruct,
-        getTotalFunc reference,
-        deleteStaticFunc deleteFunc);
-    ConstructDestructCallback* getConstructDestructCallback(String name);
-    void constuctDestructTotals(FILE *fd);
-    static void showDeleteStaticExit(FILE *fd);
-private:
-    ShowConstructDestruct();
-    ~ShowConstructDestruct();
-    friend ShowConstructDestruct* getShowConstructDestruct();
-};
+    static CDRMonitor& get();
 
-extern ShowConstructDestruct* getShowConstructDestruct();
-
-
-
-/* convenience macros - no getTotalReferenceCount() support */
-
-#define PVDATA_REFCOUNT_MONITOR_DEFINE(NAME) \
-    static volatile int64 NAME ## _totalConstruct = 0; \
-    static volatile int64 NAME ## _totalDestruct = 0; \
-    static Mutex NAME ## _globalMutex; \
-    \
-    static bool NAME ## _notInited = true; \
-    static int64 NAME ## _processTotalConstruct() \
-    { \
-        Lock xx(&NAME ## _globalMutex); \
-        return NAME ## _totalConstruct; \
-    } \
-    \
-    static int64 NAME ## _processTotalDestruct() \
-    { \
-        Lock xx(&NAME ## _globalMutex); \
-        return NAME ## _totalDestruct; \
-    } \
-    \
-    static void NAME ## _init() \
-    { \
-         Lock xx(&NAME ## _globalMutex); \
-         if(NAME ## _notInited) { \
-            NAME ## _notInited = false; \
-            ShowConstructDestruct::registerCallback( \
-                String(#NAME), \
-                NAME ## _processTotalConstruct,NAME ## _processTotalDestruct,0,0); \
-         } \
+    CDRNode* addNode(CDRNode& next)
+    {
+        CDRNode *ret=firstNode;
+        firstNode=&next;
+        return ret;
     }
 
-#define PVDATA_REFCOUNT_MONITOR_DESTRUCT(NAME) \
-    Lock xx(&NAME ## _globalMutex); \
-    NAME ## _totalDestruct++;
+    CDRCount current(); //!< current global count
 
-#define PVDATA_REFCOUNT_MONITOR_CONSTRUCT(NAME) \
-    NAME ## _init(); \
-    Lock xx(&NAME ## _globalMutex); \
-    NAME ## _totalConstruct++;
+    CDRNode* first(){return firstNode;}
+
+    void show(FILE*);
+private:
+    // Private ctor for singleton
+    CDRMonitor();
+    CDRNode *firstNode;
+
+    static CDRMonitor *theone;
+    static void init(void*);
+};
+
+//! Counters for Construction, Destruction, and References of one class
+class CDRNode : private NoDefaultMethods {
+public:
+    CDRNode(const String& name)
+        :nodeName(name)
+        ,current()
+        ,guard()
+        ,nextNode(CDRMonitor::get().addNode(*this))
+    {}
+    void construct(){Lock x(&guard); current.cons++;}
+    void destruct(){Lock x(&guard); current.dtys++;}
+    void incRef(){Lock x(&guard); current.refs++;}
+    void decRef(){Lock x(&guard); current.refs--;}
+
+    CDRNode* next() const{return nextNode;}
+
+    CDRCount get() const{Lock x(&guard); return current;}
+
+    void show(FILE*);
+private:
+    const String nodeName;
+    CDRCount current;
+    mutable Mutex guard;
+    CDRNode * const nextNode;
+};
+
+#define PVDATA_REFCOUNT_MONITOR_DEFINE(NAME) static CDRNode NAME ## _node(#NAME)
+
+#define PVDATA_REFCOUNT_MONITOR_DESTRUCT(NAME) NAME ## _node.destruct()
+
+#define PVDATA_REFCOUNT_MONITOR_CONSTRUCT(NAME) NAME ## _node.construct()
 
 
 }}

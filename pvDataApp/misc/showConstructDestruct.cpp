@@ -11,201 +11,80 @@
 #include <stdio.h>
 #include <stdexcept>
 
+#include <epicsThread.h>
+
 #include "noDefaultMethods.h"
 #include "lock.h"
 #include "pvType.h"
 #include "linkedList.h"
 #include "showConstructDestruct.h"
 
-namespace epics { namespace pvData { 
+namespace epics { namespace pvData {
 
-static ShowConstructDestruct *pShowConstructDestruct = 0;
-static Mutex globalMutex;
-static bool notInited = true;
-typedef LinkedListNode<ConstructDestructCallback> ListNode;
-typedef LinkedList<ConstructDestructCallback> List;
-static List *list;
+static
+epicsThreadOnceId monitorInit = EPICS_THREAD_ONCE_INIT;
 
-/* list callbacks are special because showConstructDestruct creates a list
-   Thus list can be null when list calls registerCallback
-   The list callbacks are not put on the list but handled separately
- */
-static ConstructDestructCallback *listCallback = 0;
-static ConstructDestructCallback *listNodeCallback = 0;
+// Must use a pointer w/ lazy init due to lack of
+// initialization order guarantees
+CDRMonitor* CDRMonitor::theone = 0;
 
-ConstructDestructCallback::ConstructDestructCallback(
-    String name,
-    getTotalFunc construct,
-    getTotalFunc destruct,
-    getTotalFunc reference,
-    deleteStaticFunc deleteFunc)
-: name(name), construct(construct), destruct(destruct) ,reference(reference),
-  deleteFunc(deleteFunc)
-{ }
-
-ConstructDestructCallback::~ConstructDestructCallback() {}
-
-String ConstructDestructCallback::getConstructName()
+CDRMonitor&
+CDRMonitor::get()
 {
-    return name;
+    epicsThreadOnce(&monitorInit, &CDRMonitor::init, 0);
+    assert(theone);
+    return *theone;
 }
 
-int64 ConstructDestructCallback::getTotalConstruct()
+void
+CDRMonitor::init(void *)
 {
-    if(construct==0) return 0;
-    return construct();
+    //BUG: No idea how to handle allocation failure at this stage.
+    theone=new CDRMonitor;
 }
 
-int64 ConstructDestructCallback:: getTotalDestruct()
-{
-    if(destruct==0) return 0;
-    return destruct();
-}
+CDRMonitor::CDRMonitor()
+    :firstNode(0)
+{}
 
-int64 ConstructDestructCallback::getTotalReferenceCount()
+CDRCount
+CDRMonitor::current()
 {
-    if(reference==0) return 0;
-    return reference();
-}
-
-void ConstructDestructCallback::deleteStatic()
-{
-    if(deleteFunc==0) return;
-    deleteFunc();
-}
-
-ShowConstructDestruct::ShowConstructDestruct() {}
-
-ShowConstructDestruct::~ShowConstructDestruct() {
-    delete listCallback;
-    delete listNodeCallback;
-    listCallback = 0;
-    listNodeCallback = 0;
-}
-
-void ShowConstructDestruct::registerCallback(
-    String name,
-    getTotalFunc construct,
-    getTotalFunc destruct,
-    getTotalFunc reference,
-        deleteStaticFunc deleteFunc)
-{
-    getShowConstructDestruct(); // make it initialize
-    Lock xx(&globalMutex);
-    if(name.compare("linkedList")==0) {
-        listCallback = new ConstructDestructCallback(
-            name,construct,destruct,reference,deleteFunc);
-        return;
-    } else if(name.compare("linkedListNode")==0) {
-        listNodeCallback = new ConstructDestructCallback(
-            name,construct,destruct,reference,deleteFunc);
-        return;
-    }
-    if(list==0) {
-        throw std::logic_error(String(
-            "ShowConstructDestruct::registerCallback"));
-    }
-    ConstructDestructCallback *callback = new ConstructDestructCallback(
-        name,construct,destruct,reference,deleteFunc);
-    ListNode *listNode = new ListNode(callback);
-    list->addTail(listNode);
-}
-static void showOne(ConstructDestructCallback *callback,FILE *fd)
-{
-    String name = callback->getConstructName();
-    int64 reference = callback->getTotalReferenceCount();
-    int64 construct = callback->getTotalConstruct();
-    int64 destruct = callback->getTotalDestruct();
-    if(reference==0&&construct==0&&destruct==0) return;
-    fprintf(fd,"%s: ", name.c_str());
-    if(construct>0 || destruct>0) {
-        fprintf(fd," totalConstruct %lli totalDestruct %lli",
-        construct,destruct);
-    }
-    if(reference>0) fprintf(fd," totalReference %lli",reference);
-    int64 diff = construct - destruct;
-    if(diff!=0) fprintf(fd," ACTIVE %lli",diff);
-    fprintf(fd,"\n");
-}
-
-ConstructDestructCallback* ShowConstructDestruct::getConstructDestructCallback(
-    String name)
-{
-    if(name.compare(listNodeCallback->getConstructName())==0) {
-        return listNodeCallback;
-    }
-    if(name.compare(listCallback->getConstructName())==0) {
-        return listCallback;
-    }
-    Lock xx(&globalMutex);
-    ListNode *node = list->getHead();
-    while(node!=0) {
-        ConstructDestructCallback *callback = node->getObject();
-        if(name.compare(callback->getConstructName())==0) {
-            return callback;
-        }
-        node = list->getNext(node);
-    }
-    return 0;
-}
-
-void ShowConstructDestruct::constuctDestructTotals(FILE *fd)
-{
-    getShowConstructDestruct(); // make it initialize
-    Lock xx(&globalMutex);
-    ListNode *node = list->getHead();
-    while(node!=0) {
-        ConstructDestructCallback *callback = node->getObject();
-        showOne(callback,fd);
-        node = list->getNext(node);
-    }
-    showOne(listNodeCallback,fd);
-    showOne(listCallback,fd);
-}
-
-void ShowConstructDestruct::showDeleteStaticExit(FILE *fd)
-{
-    getShowConstructDestruct(); // make it initialize
+    CDRCount total;
+    for(CDRNode *cur=first(); !!cur; cur=cur->next())
     {
-        Lock xx(&globalMutex);
-        ListNode *node = list->getHead();
-        while(node!=0) {
-            ConstructDestructCallback *callback = node->getObject();
-            if(callback->deleteFunc!=0) callback->deleteFunc();
-            node = list->getNext(node);
-        }
-        node = list->getHead();
-        while(node!=0) {
-            ConstructDestructCallback *callback = node->getObject();
-            showOne(callback,fd);
-            list->removeHead();
-            delete callback;
-            delete node;
-            node = list->getHead();
-        }
-        delete list;
-        if(listNodeCallback->deleteFunc!=0) listNodeCallback->deleteFunc();
-        if(listCallback->deleteFunc!=0) listCallback->deleteFunc();
-        showOne(listNodeCallback,fd);
-        showOne(listCallback,fd);
-        delete pShowConstructDestruct;
-        pShowConstructDestruct = 0;
+        total+=cur->get();
     }
-    exit( 0);
+    return total;
 }
 
-ShowConstructDestruct * getShowConstructDestruct()
+void
+CDRMonitor::show(FILE *fd)
 {
-    static Mutex mutex;
-    Lock xx(&mutex);
-    if(notInited) {
-        notInited = false;
-        pShowConstructDestruct = new ShowConstructDestruct();
-        List *listTemp;
-        listTemp = new List();
-        list = listTemp;
-    } 
-    return pShowConstructDestruct;
+    for(CDRNode *cur=first(); !!cur; cur=cur->next())
+    {
+        cur->show(fd);
+    }
 }
+
+void
+CDRNode::show(FILE *fd)
+{
+    Lock x(&guard);
+    if(!current.cons && !current.dtys && !current.refs)
+        return;
+    fprintf(fd,"%s:  totalConstruct %lu totalDestruct %lu",
+            nodeName.c_str(), (unsigned long)current.cons,
+            (unsigned long)current.dtys);
+    ssize_t alive=current.cons;
+    alive-=current.dtys;
+    if(current.refs)
+        fprintf(fd," totalReference %ld", current.refs);
+    if(alive)
+        fprintf(fd," ACTIVE %ld\n", (long)alive);
+    else
+        fprintf(fd,"\n");
+}
+
 
 }}
