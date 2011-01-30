@@ -6,6 +6,8 @@
  */
 #include <string>
 #include <stdexcept>
+#include <epicsThread.h>
+#include <epicsExit.h>
 #include <lock.h>
 #include "pvIntrospect.h"
 #include "pvData.h"
@@ -16,8 +18,6 @@
 
 namespace epics { namespace pvData { 
 
-static Mutex globalMutex;
-static bool notInited = true;
 static StandardField *standardField = 0;
 
 static String notImplemented("not implemented");
@@ -329,23 +329,25 @@ public:
     StandardPVFieldExt(): StandardPVField(){};
 };
 
-static void myDeleteStatic()
+static void myDeleteStatic(void*)
 {
     delete standardPVField;
 }
 
+static void myInitStatic(void*)
+{
+    fieldCreate = getFieldCreate();
+    pvDataCreate = getPVDataCreate();
+    standardField = getStandardField();
+    standardPVField = new StandardPVFieldExt();
+    epicsAtExit(&myDeleteStatic, 0);
+}
+
+static
+epicsThreadOnceId myInitOnce = EPICS_THREAD_ONCE_INIT;
+
 StandardPVField * getStandardPVField() {
-    Lock xx(&globalMutex);
-    if(notInited) {
-        notInited = false;
-        fieldCreate = getFieldCreate();
-        pvDataCreate = getPVDataCreate();
-        standardField = getStandardField();
-        standardPVField = new StandardPVFieldExt();
-         ShowConstructDestruct::registerCallback(
-            "standardPVField",
-            0,0,0,myDeleteStatic);
-    }
+    epicsThreadOnce(&myInitOnce, &myInitStatic, 0);
     return standardPVField;
 }
 

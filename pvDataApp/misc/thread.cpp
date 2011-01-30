@@ -13,6 +13,7 @@
 
 #include <epicsThread.h>
 #include <epicsEvent.h>
+#include <epicsExit.h>
 #include "lock.h"
 #include "event.h"
 #include "thread.h"
@@ -47,40 +48,24 @@ class ThreadListElement;
 typedef LinkedListNode<ThreadListElement> ThreadListNode;
 typedef LinkedList<ThreadListElement> ThreadList;
 
-static volatile int64 totalConstruct = 0;
-static volatile int64 totalDestruct = 0;
-static Mutex globalMutex;
-static bool notInited = true;
+PVDATA_REFCOUNT_MONITOR_DEFINE(thread);
+
+static Mutex listGuard;
 static ThreadList *threadList;
 
-static int64 getTotalConstruct()
-{
-    Lock xx(&globalMutex);
-    return totalConstruct;
-}
-
-static int64 getTotalDestruct()
-{
-    Lock xx(&globalMutex);
-    return totalDestruct;
-}
-
-static void deleteStatic()
+static void deleteStatic(void*)
 {
     delete threadList;
 }
 
-static void init()
+static void init(void*)
 {
-     Lock xx(&globalMutex);
-     if(notInited) {
-        notInited = false;
-        threadList = new ThreadList();
-        ShowConstructDestruct::registerCallback(
-            String("thread"),
-            getTotalConstruct,getTotalDestruct,0,deleteStatic);
-     }
+    threadList = new ThreadList();
+    epicsAtExit(&deleteStatic,0);
 }
+
+static
+epicsThreadOnceId initOnce = EPICS_THREAD_ONCE_INIT;
 
 
 class ThreadListElement {
@@ -136,10 +121,10 @@ ThreadPvt::ThreadPvt(Thread *thread,String name,
         epicsThreadGetStackSize(epicsThreadStackSmall),
         myFunc,this))
 {
-    init();
-    Lock xx(&globalMutex);
+    epicsThreadOnce(&initOnce, &init, 0);
+    PVDATA_REFCOUNT_MONITOR_CONSTRUCT(thread);
+    Lock x(&listGuard);
     threadList->addTail(threadListElement->node);
-    totalConstruct++;
 }
 
 ThreadPvt::~ThreadPvt()
@@ -158,11 +143,11 @@ ThreadPvt::~ThreadPvt()
         message += " is not on threadlist";
         throw std::logic_error(message);
     }
+    Lock x(&listGuard);
     threadList->remove(threadListElement->node);
     delete waitDone;
     delete threadListElement;
-    Lock xx(&globalMutex);
-    totalDestruct++;
+    PVDATA_REFCOUNT_MONITOR_DESTRUCT(thread);
 }
 
 Thread::Thread(String name,ThreadPriority priority,Runnable *runnable)
@@ -192,8 +177,7 @@ ThreadPriority Thread::getPriority()
 
 void Thread::showThreads(StringBuilder buf)
 {
-    init();
-    Lock xx(&globalMutex);
+    Lock x(&listGuard);
     ThreadListNode *node = threadList->getHead();    
     while(node!=0) {
         Thread *thread = node->getObject()->thread;
