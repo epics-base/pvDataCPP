@@ -24,6 +24,8 @@ static void newLine(StringBuilder buffer, int indentLevel)
     for(int i=0; i<indentLevel; i++) *buffer += "    ";
 }
 
+PVDATA_REFCOUNT_MONITOR_DEFINE(field);
+
 class FieldPvt {
 public :
     FieldPvt(String fieldName,Type type);
@@ -33,9 +35,8 @@ public :
 };
 
 FieldPvt::FieldPvt(String fieldName,Type type)
- : fieldName(fieldName),type(type),referenceCount(1) { }
-
-PVDATA_REFCOUNT_MONITOR_DEFINE(field);
+ : fieldName(fieldName),type(type),referenceCount(1)
+{field_node.incRef();}
 
 static Mutex refCountMutex;
 
