@@ -162,6 +162,8 @@ class PVStructureArray : public PVArray {
 public:
     virtual ~PVStructureArray();
     virtual StructureArrayConstPtr getStructureArray() = 0;
+    virtual int append(int number) = 0;
+    virtual bool remove(int offset,int number) = 0;
     virtual void setCapacity(int capacity) = 0;
     virtual int get(int offset, int length,
         StructureArrayData *data) = 0;

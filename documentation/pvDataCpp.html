@@ -1691,6 +1691,8 @@ public:
     virtual ~PVStructureArray();
     virtual StructureArrayConstPtr getStructureArray() = 0;
     virtual void setCapacity(int capacity) = 0;
+    virtual int append(int number) = 0;
+    virtual bool remove(int offset,int number) = 0;
     virtual int get(int offset, int length,
         StructureArrayData *data) = 0;
     virtual int put(int offset,int length,
@@ -1712,6 +1714,14 @@ private:
 <dl>
   <dt style="font-family: courier;">getStructureArray</dt>
     <dd>Get the introspection interface shared by each element.</dd>
+  <dt style="font-family: courier;">append</dt>
+     <dd>Create new elements and append them to the end of the array.
+     It returns the index of the first new element.</dd>
+  <dt style="font-family: courier;">remove</dt>
+     <dd>Remove the specfied set of elements. It returns (false,true)
+     if the elements (were not, were) removed.
+     It will not removed any elements unless all requested elements
+     exist or are null.</dd>
 </dl>
 
 <p>The other methods are similar to the methods for other array types.</p>

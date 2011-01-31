@@ -49,33 +49,13 @@ void testPowerSupplyArray(FILE * fd) {
     PVStructureArray * powerSupplyArray =
         powerSupplyArrayStruct->getStructureArrayField(String("value"));
     assert(powerSupplyArray!=0);
-    PVStructurePtrArray structureArray = new PVStructurePtr[3];
-    StructureConstPtr structure =
-        powerSupplyArray->getStructureArray()->getStructure();
-    structure->incReferenceCount();
-    structureArray[0] = pvDataCreate->createPVStructure(0,structure);
-    structure->incReferenceCount();
-    structureArray[1] = pvDataCreate->createPVStructure(0,structure);
-    structure->incReferenceCount();
-    structureArray[2] = pvDataCreate->createPVStructure(0,structure);
-    powerSupplyArray->put(0,3,structureArray,0);
+    int offset = powerSupplyArray->append(3);
+    powerSupplyArray->setLength(offset);
     buffer.clear();
     powerSupplyArrayStruct->toString(&buffer);
     fprintf(fd,"%s\n",buffer.c_str());
-    buffer.clear();
-    powerSupplyArrayStruct->getField()->dumpReferenceCount(&buffer,0);
-    fprintf(fd," reference counts %s\n",buffer.c_str());
-    buffer.clear();
-    structure->dumpReferenceCount(&buffer,0);
-    fprintf(fd,"before incReferenceCount reference counts %s\n",buffer.c_str());
-    structure->incReferenceCount();
-    buffer.clear();
-    structure->dumpReferenceCount(&buffer,0);
-    fprintf(fd,"after incReferenceCount reference counts %s\n",buffer.c_str());
-    structure->decReferenceCount();
-    buffer.clear();
-    structure->dumpReferenceCount(&buffer,0);
-    fprintf(fd,"after decReferenceCount reference counts %s\n",buffer.c_str());
+    StructureConstPtr structure = 
+         powerSupplyArray->getStructureArray()->getStructure();
     delete powerSupplyArrayStruct;
 }
 

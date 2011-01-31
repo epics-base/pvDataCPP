@@ -29,6 +29,8 @@ namespace epics { namespace pvData {
              StructureArrayConstPtr structureArray);
         virtual ~BasePVStructureArray();
         virtual StructureArrayConstPtr getStructureArray();
+        virtual int append(int number);
+        virtual bool remove(int offset,int number);
         virtual void setCapacity(int capacity);
         virtual int get(int offset, int length,
             StructureArrayData *data);
@@ -62,13 +64,45 @@ namespace epics { namespace pvData {
     BasePVStructureArray::~BasePVStructureArray()
     {
         delete structureArrayData;
-        int length = getLength();
-        for(int i=0; i<length; i++) {
+        int number = getCapacity();
+        for(int i=0; i<number; i++) {
            if(value[i]!=0) {
                 delete value[i];
            }
         }
         delete[] value;
+    }
+
+    int BasePVStructureArray::append(int number)
+    {
+        int currentLength = getCapacity();
+        int newLength = currentLength + number;
+        setCapacity(newLength);
+        StructureConstPtr structure = structureArray->getStructure();
+        for(int i=currentLength; i<newLength; i++) {
+            structure->incReferenceCount();
+            value[i] =  getPVDataCreate()->createPVStructure(0,structure);
+        }
+        return newLength;
+    }
+
+    bool BasePVStructureArray::remove(int offset,int number)
+    {
+        int length = getCapacity();
+        if(offset+number>length) return false;
+        for(int i=offset;i<offset+number;i++) {
+           if(value[i]!=0) {
+                delete value[i];
+                value[i] = 0;
+           }
+        }
+        // move any at end up
+        int nToMove = length - (offset+number);
+        for(int i=0; i<nToMove; i++) {
+            value[i+offset] = value[i+length];
+            value[i+length] = 0;
+        }
+        return true;
     }
 
     void BasePVStructureArray::setCapacity(int capacity) {
@@ -78,7 +112,9 @@ namespace epics { namespace pvData {
             PVField::message(message, errorMessage);
             return;
         }
-        int length = PVArray::getLength();
+        int length = getCapacity();
+        int numRemove = length - capacity;
+        if(numRemove>0) remove(length,numRemove);
         PVStructurePtrArray  newValue = new PVStructurePtr[capacity];
         int limit = length;
         if(length>capacity) limit = capacity;
