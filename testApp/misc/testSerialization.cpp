@@ -13,6 +13,7 @@
 
 #include <epicsAssert.h>
 
+#include <epicsExit.h>
 #include "pvIntrospect.h"
 #include "pvData.h"
 #include "serialize.h"
@@ -639,7 +640,8 @@ int main(int argc, char *argv[]) {
     delete control;
     delete flusher;
 
-    getShowConstructDestruct()->showDeleteStaticExit(stdout);
+    epicsExitCallAtExits();
+    CDRMonitor::get().show(stdout);
     cout<<"\nDone!\n";
 
     return (0);

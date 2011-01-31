@@ -18,6 +18,7 @@
 #include <list>
 
 #include <epicsAssert.h>
+#include <epicsExit.h>
 
 #include "event.h"
 #include "thread.h"
@@ -115,6 +116,7 @@ int main(int argc, char *argv[]) {
     }
     testBasic(fd);
     testThreadContext(fd,auxFd);
-    getShowConstructDestruct()->showDeleteStaticExit(fd);
+    epicsExitCallAtExits();
+    CDRMonitor::get().show(fd);
     return (0);
 }

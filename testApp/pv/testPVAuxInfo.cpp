@@ -13,6 +13,7 @@
 #include <cstdio>
 
 #include <epicsAssert.h>
+#include <epicsExit.h>
 
 #include "requester.h"
 #include "pvIntrospect.h"
@@ -92,7 +93,8 @@ int main(int argc,char *argv[])
     standardPVField = getStandardPVField();
     convert = getConvert();
     testPVAuxInfo(fd);
-    getShowConstructDestruct()->showDeleteStaticExit(fd);
+    epicsExitCallAtExits();
+    CDRMonitor::get().show(fd);
     return(0);
 }
 

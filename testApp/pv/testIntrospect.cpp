@@ -13,6 +13,7 @@
 #include <cstdio>
 
 #include <epicsAssert.h>
+#include <epicsExit.h>
 
 #include "requester.h"
 #include "executor.h"
@@ -147,7 +148,8 @@ int main(int argc,char *argv[])
     testScalarArray(fd);
     testSimpleStructure(fd);
     testStructureArray(fd);
-    getShowConstructDestruct()->showDeleteStaticExit(fd);
+    epicsExitCallAtExits();
+    CDRMonitor::get().show(fd);
     return(0);
 }
 

@@ -13,6 +13,7 @@
 #include <cstdio>
 
 #include <epicsAssert.h>
+#include <epicsExit.h>
 
 #include "requester.h"
 #include "pvIntrospect.h"
@@ -282,7 +283,8 @@ int main(int argc,char *argv[])
     testAppend(fd);
     testPVScalar(fd);
     testScalarArray(fd);
-    getShowConstructDestruct()->showDeleteStaticExit(fd);
+    epicsExitCallAtExits();
+    CDRMonitor::get().show(fd);
     return(0);
 }
 

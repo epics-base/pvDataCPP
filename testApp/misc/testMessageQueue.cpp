@@ -17,6 +17,7 @@
 #include <cstdio>
 
 #include <epicsAssert.h>
+#include <epicsExit.h>
 
 #include "lock.h"
 #include "timeStamp.h"
@@ -86,7 +87,8 @@ int main(int argc, char *argv[]) {
         auxfd = fopen(auxFileName,"w+");
     }
     testBasic(fd,auxfd);
-    getShowConstructDestruct()->showDeleteStaticExit(fd);
+    epicsExitCallAtExits();
+    CDRMonitor::get().show(fd);
     return (0);
 }
  

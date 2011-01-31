@@ -18,6 +18,7 @@
 #include <list>
 
 #include <epicsAssert.h>
+#include <epicsExit.h>
 
 #include "lock.h"
 #include "timeStamp.h"
@@ -448,7 +449,8 @@ int main(int argc, char *argv[]) {
     testTimeLocked(auxFd);
     testStdListTime(auxFd);
     testStdListTimeLocked(auxFd);
-    getShowConstructDestruct()->showDeleteStaticExit(fd);
+    epicsExitCallAtExits();
+    CDRMonitor::get().show(fd);
     return (0);
 }
  
