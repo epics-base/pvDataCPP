@@ -160,10 +160,11 @@ public:
 
 class PVStructureArray : public PVArray {
 public:
-    virtual ~PVStructureArray();
+    virtual ~PVStructureArray() {}
     virtual StructureArrayConstPtr getStructureArray() = 0;
     virtual int append(int number) = 0;
     virtual bool remove(int offset,int number) = 0;
+    virtual void compress() = 0;
     virtual void setCapacity(int capacity) = 0;
     virtual int get(int offset, int length,
         StructureArrayData *data) = 0;
@@ -177,8 +178,8 @@ public:
     virtual void serialize(ByteBuffer *pbuffer,
         SerializableControl *pflusher, int offset, int count) = 0;
 protected:
-    PVStructureArray(PVStructure *parent,
-        StructureArrayConstPtr structureArray);
+    PVStructureArray(PVStructure *parent, StructureArrayConstPtr structureArray)
+    : PVArray(parent,structureArray) {}
 private:
 };
 
@@ -228,7 +229,7 @@ private:
 
 class PVBoolean : public PVScalar {
 public:
-    virtual ~PVBoolean();
+    virtual ~PVBoolean() {}
     virtual bool get() = 0;
     virtual void put(bool value) = 0;
 protected:
@@ -239,7 +240,7 @@ private:
 
 class PVByte : public PVScalar {
 public:
-    virtual ~PVByte();
+    virtual ~PVByte() {}
     virtual int8 get() = 0;
     virtual void put(int8 value) = 0;
 protected:
@@ -250,7 +251,7 @@ private:
 
 class PVShort : public PVScalar {
 public:
-    virtual ~PVShort();
+    virtual ~PVShort() {}
     virtual int16 get() = 0;
     virtual void put(int16 value) = 0;
 protected:
@@ -261,7 +262,7 @@ private:
 
 class PVInt : public PVScalar{
 public:
-    virtual ~PVInt();
+    virtual ~PVInt() {}
     virtual int32 get() = 0;
     virtual void put(int32 value) = 0;
 protected:
@@ -272,7 +273,7 @@ private:
 
 class PVLong : public PVScalar {
 public:
-    virtual ~PVLong();
+    virtual ~PVLong() {}
     virtual int64 get() = 0;
     virtual void put(int64 value) = 0;
 protected:
@@ -283,7 +284,7 @@ private:
 
 class PVFloat : public PVScalar {
 public:
-    virtual ~PVFloat();
+    virtual ~PVFloat() {}
     virtual float get() = 0;
     virtual void put(float value) = 0;
 protected:
@@ -294,7 +295,7 @@ private:
 
 class PVDouble : public PVScalar {
 public:
-    virtual ~PVDouble();
+    virtual ~PVDouble() {}
     virtual double get() = 0;
     virtual void put(double value) = 0;
 protected:
@@ -305,7 +306,7 @@ private:
 
 class PVString : public PVScalar {
 public:
-    virtual ~PVString();
+    virtual ~PVString() {}
     virtual String get() = 0;
     virtual void put(String value) = 0;
 protected:
@@ -322,7 +323,7 @@ public:
 
 class PVBooleanArray : public PVScalarArray {
 public:
-    virtual ~PVBooleanArray();
+    virtual ~PVBooleanArray() {}
     virtual void setCapacity(int capacity) = 0;
     virtual int get(int offset, int length, BooleanArrayData *data) = 0;
     virtual int put(int offset,int length, BooleanArray from, int fromOffset) = 0;
@@ -330,7 +331,8 @@ public:
     virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) = 0;
     virtual void deserialize(ByteBuffer *pbuffer,DeserializableControl *pflusher) = 0;
 protected:
-    PVBooleanArray(PVStructure *parent,ScalarArrayConstPtr scalar);
+    PVBooleanArray(PVStructure *parent,ScalarArrayConstPtr scalar)
+    : PVScalarArray(parent,scalar) {}
 private:
 };
 
@@ -343,7 +345,7 @@ public:
 
 class PVByteArray : public PVScalarArray {
 public:
-    virtual ~PVByteArray();
+    virtual ~PVByteArray() {}
     virtual void setCapacity(int capacity) = 0;
     virtual int get(int offset, int length, ByteArrayData *data) = 0;
     virtual int put(int offset,int length, ByteArray  from, int fromOffset) = 0;
@@ -351,7 +353,8 @@ public:
     virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) = 0;
     virtual void deserialize(ByteBuffer *pbuffer,DeserializableControl *pflusher) = 0;
 protected:
-    PVByteArray(PVStructure *parent,ScalarArrayConstPtr scalar);
+    PVByteArray(PVStructure *parent,ScalarArrayConstPtr scalar)
+    : PVScalarArray(parent,scalar) {}
 private:
 };
 
@@ -363,7 +366,7 @@ public:
 
 class PVShortArray : public PVScalarArray {
 public:
-    virtual ~PVShortArray();
+    virtual ~PVShortArray() {}
     virtual void setCapacity(int capacity) = 0;
     virtual int get(int offset, int length, ShortArrayData *data) = 0;
     virtual int put(int offset,int length, ShortArray  from, int fromOffset) = 0;
@@ -371,7 +374,8 @@ public:
     virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) = 0;
     virtual void deserialize(ByteBuffer *pbuffer,DeserializableControl *pflusher) = 0;
 protected:
-    PVShortArray(PVStructure *parent,ScalarArrayConstPtr scalar);
+    PVShortArray(PVStructure *parent,ScalarArrayConstPtr scalar)
+    : PVScalarArray(parent,scalar) {}
 private:
 };
 
@@ -383,7 +387,7 @@ public:
 
 class PVIntArray : public PVScalarArray {
 public:
-    virtual ~PVIntArray();
+    virtual ~PVIntArray() {}
     virtual void setCapacity(int capacity) = 0;
     virtual int get(int offset, int length, IntArrayData *data) = 0;
     virtual int put(int offset,int length, IntArray  from, int fromOffset)= 0;
@@ -391,7 +395,8 @@ public:
     virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) = 0;
     virtual void deserialize(ByteBuffer *pbuffer,DeserializableControl *pflusher)= 0;
 protected:
-    PVIntArray(PVStructure *parent,ScalarArrayConstPtr scalar);
+    PVIntArray(PVStructure *parent,ScalarArrayConstPtr scalar)
+    : PVScalarArray(parent,scalar) {}
 private:
 };
 
@@ -403,7 +408,7 @@ public:
 
 class PVLongArray : public PVScalarArray {
 public:
-    virtual ~PVLongArray();
+    virtual ~PVLongArray() {}
     virtual void setCapacity(int capacity) = 0;
     virtual int get(int offset, int length, LongArrayData *data) = 0;
     virtual int put(int offset,int length, LongArray  from, int fromOffset)= 0;
@@ -411,7 +416,8 @@ public:
     virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) = 0;
     virtual void deserialize(ByteBuffer *pbuffer,DeserializableControl *pflusher)= 0;
 protected:
-    PVLongArray(PVStructure *parent,ScalarArrayConstPtr scalar);
+    PVLongArray(PVStructure *parent,ScalarArrayConstPtr scalar)
+    : PVScalarArray(parent,scalar) {}
 private:
 };
 
@@ -424,7 +430,7 @@ public:
 
 class PVFloatArray : public PVScalarArray {
 public:
-    virtual ~PVFloatArray();
+    virtual ~PVFloatArray() {}
     virtual void setCapacity(int capacity) = 0;
     virtual int get(int offset, int length, FloatArrayData *data) = 0;
     virtual int put(int offset,int length, FloatArray  from, int fromOffset)= 0;
@@ -432,7 +438,8 @@ public:
     virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) = 0;
     virtual void deserialize(ByteBuffer *pbuffer,DeserializableControl *pflusher)= 0;
 protected:
-    PVFloatArray(PVStructure *parent,ScalarArrayConstPtr scalar);
+    PVFloatArray(PVStructure *parent,ScalarArrayConstPtr scalar)
+    : PVScalarArray(parent,scalar) {}
 private:
 };
 
@@ -447,7 +454,7 @@ public:
 
 class PVDoubleArray : public PVScalarArray {
 public:
-    virtual ~PVDoubleArray();
+    virtual ~PVDoubleArray() {}
     virtual void setCapacity(int capacity) = 0;
     virtual int get(int offset, int length, DoubleArrayData *data) = 0;
     virtual int put(int offset,int length, DoubleArray  from, int fromOffset) = 0;
@@ -455,7 +462,8 @@ public:
     virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) = 0;
     virtual void deserialize(ByteBuffer *pbuffer,DeserializableControl *pflusher) = 0;
 protected:
-    PVDoubleArray(PVStructure *parent,ScalarArrayConstPtr scalar);
+    PVDoubleArray(PVStructure *parent,ScalarArrayConstPtr scalar)
+    : PVScalarArray(parent,scalar) {}
 private:
 };
 
@@ -468,7 +476,7 @@ public:
 
 class PVStringArray : public PVScalarArray {
 public:
-    virtual ~PVStringArray();
+    virtual ~PVStringArray() {}
     virtual void setCapacity(int capacity) = 0;
     virtual int get(int offset, int length, StringArrayData *data) = 0;
     virtual int put(int offset,int length, StringArray  from, int fromOffset)= 0;
@@ -476,7 +484,8 @@ public:
     virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) = 0;
     virtual void deserialize(ByteBuffer *pbuffer,DeserializableControl *pflusher)= 0;
 protected:
-    PVStringArray(PVStructure *parent,ScalarArrayConstPtr scalar);
+    PVStringArray(PVStructure *parent,ScalarArrayConstPtr scalar)
+    : PVScalarArray(parent,scalar) {}
 private:
 };
 

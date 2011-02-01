@@ -1,30 +1,27 @@
-/*AbstractPVScalar.h*/
+/*PVScalarArray.cpp*/
 /**
  * Copyright - See the COPYRIGHT that is included with this distribution.
  * EPICS pvDataCPP is distributed subject to a Software License Agreement found
  * in file LICENSE that is included with this distribution.
  */
-#ifndef ABSTRACTPVSCALAR_H
-#define ABSTRACTPVSCALAR_H
 #include <cstddef>
 #include <cstdlib>
 #include <string>
 #include <cstdio>
 #include "pvData.h"
 #include "factory.h"
-#include "AbstractPVField.h"
 
 namespace epics { namespace pvData {
 
-    PVScalar::~PVScalar() {}
+    PVScalarArray::~PVScalarArray() {}
 
-    PVScalar::PVScalar(PVStructure *parent,ScalarConstPtr scalar)
-    : PVField(parent,scalar) {}
+    PVScalarArray::PVScalarArray(PVStructure *parent,
+        ScalarArrayConstPtr scalarArray)
+    : PVArray(parent,scalarArray) {}
 
-    ScalarConstPtr PVScalar::getScalar() 
+    ScalarArrayConstPtr PVScalarArray::getScalarArray() 
     {
-       return (ScalarConstPtr) PVField::getField();
+       return (ScalarArrayConstPtr) PVField::getField();
     }
 
 }}
-#endif  /* ABSTRACTPVSCALAR_H */

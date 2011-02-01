@@ -1,11 +1,9 @@
-/*BasePVInt.h*/
+/*PVFloat.cpp*/
 /**
  * Copyright - See the COPYRIGHT that is included with this distribution.
  * EPICS pvDataCPP is distributed subject to a Software License Agreement found
  * in file LICENSE that is included with this distribution.
  */
-#ifndef BASEPVINT_H
-#define BASEPVINT_H
 #include <cstddef>
 #include <cstdlib>
 #include <string>
@@ -13,19 +11,16 @@
 #include "pvData.h"
 #include "convert.h"
 #include "factory.h"
-#include "AbstractPVField.h"
 #include "byteBuffer.h"
 
 namespace epics { namespace pvData {
 
-    PVInt::~PVInt() {}
-
-    class BasePVInt : public PVInt {
+    class BasePVFloat : public PVFloat {
     public:
-        BasePVInt(PVStructure *parent,ScalarConstPtr scalar);
-        virtual ~BasePVInt();
-        virtual int32 get();
-        virtual void put(int32 val);
+        BasePVFloat(PVStructure *parent,ScalarConstPtr scalar);
+        virtual ~BasePVFloat();
+        virtual float get();
+        virtual void put(float val);
         virtual void serialize(ByteBuffer *pbuffer,
             SerializableControl *pflusher) ;
         virtual void deserialize(ByteBuffer *pbuffer,
@@ -33,40 +28,39 @@ namespace epics { namespace pvData {
         virtual bool operator==(PVField& pv) ;
         virtual bool operator!=(PVField& pv) ;
     private:
-        int32 value;
+        float value;
     };
 
-    BasePVInt::BasePVInt(PVStructure *parent,ScalarConstPtr scalar)
-    : PVInt(parent,scalar),value(0)
+    BasePVFloat::BasePVFloat(PVStructure *parent,ScalarConstPtr scalar)
+    : PVFloat(parent,scalar),value(0.0)
     {}
 
-    BasePVInt::~BasePVInt() {}
+    BasePVFloat::~BasePVFloat() {}
 
-    int32 BasePVInt::get() { return value;}
+    float BasePVFloat::get() { return value;}
 
-    void BasePVInt::put(int32 val){value = val;}
+    void BasePVFloat::put(float val){value = val;}
 
-    void BasePVInt::serialize(ByteBuffer *pbuffer,
+    void BasePVFloat::serialize(ByteBuffer *pbuffer,
         SerializableControl *pflusher) {
-        pflusher->ensureBuffer(sizeof(int32));
-        pbuffer->putInt(value);
+        pflusher->ensureBuffer(sizeof(float));
+        pbuffer->putFloat(value);
     }
 
-    void BasePVInt::deserialize(ByteBuffer *pbuffer,
+    void BasePVFloat::deserialize(ByteBuffer *pbuffer,
         DeserializableControl *pflusher) {
-        pflusher->ensureData(sizeof(int32));
-        value = pbuffer->getInt();
+        pflusher->ensureData(sizeof(float));
+        value = pbuffer->getFloat();
     }
 
-    bool BasePVInt::operator==(PVField& pvField)
+    bool BasePVFloat::operator==(PVField& pvField)
     {
         return getConvert()->equals(this, &pvField);
     }
 
-    bool BasePVInt::operator!=(PVField& pvField)
+    bool BasePVFloat::operator!=(PVField& pvField)
     {
         return !(getConvert()->equals(this, &pvField));
     }
 
 }}
-#endif  /* BASEPVINT_H */

@@ -1,5 +1,38 @@
+after append 5
 structure powerSupply
     structure[] value 
+        structure powerSupply
+            structure voltage
+                double value 0
+                structure alarm
+                    int severity 0
+                    string message 
+            structure power
+                double value 0
+                structure alarm
+                    int severity 0
+                    string message 
+            structure current
+                double value 0
+                structure alarm
+                    int severity 0
+                    string message 
+        structure powerSupply
+            structure voltage
+                double value 0
+                structure alarm
+                    int severity 0
+                    string message 
+            structure power
+                double value 0
+                structure alarm
+                    int severity 0
+                    string message 
+            structure current
+                double value 0
+                structure alarm
+                    int severity 0
+                    string message 
         structure powerSupply
             structure voltage
                 double value 0
@@ -54,7 +87,90 @@ structure powerSupply
     timeStamp timeStamp
         long secondsPastEpoch 0
         int nanoSeconds 0
+after remove 0,1,3structure powerSupply
+    structure[] value 
+        null
+        null
+        structure powerSupply
+            structure voltage
+                double value 0
+                structure alarm
+                    int severity 0
+                    string message 
+            structure power
+                double value 0
+                structure alarm
+                    int severity 0
+                    string message 
+            structure current
+                double value 0
+                structure alarm
+                    int severity 0
+                    string message 
+        null
+        structure powerSupply
+            structure voltage
+                double value 0
+                structure alarm
+                    int severity 0
+                    string message 
+            structure power
+                double value 0
+                structure alarm
+                    int severity 0
+                    string message 
+            structure current
+                double value 0
+                structure alarm
+                    int severity 0
+                    string message 
+    alarm alarm
+        int severity 0
+        string message 
+    timeStamp timeStamp
+        long secondsPastEpoch 0
+        int nanoSeconds 0
+after compressstructure powerSupply
+    structure[] value 
+        structure powerSupply
+            structure voltage
+                double value 0
+                structure alarm
+                    int severity 0
+                    string message 
+            structure power
+                double value 0
+                structure alarm
+                    int severity 0
+                    string message 
+            structure current
+                double value 0
+                structure alarm
+                    int severity 0
+                    string message 
+        structure powerSupply
+            structure voltage
+                double value 0
+                structure alarm
+                    int severity 0
+                    string message 
+            structure power
+                double value 0
+                structure alarm
+                    int severity 0
+                    string message 
+            structure current
+                double value 0
+                structure alarm
+                    int severity 0
+                    string message 
+    alarm alarm
+        int severity 0
+        string message 
+    timeStamp timeStamp
+        long secondsPastEpoch 0
+        int nanoSeconds 0
 field:  totalConstruct 102 totalDestruct 102
-pvField:  totalConstruct 56 totalDestruct 56
+pvField:  totalConstruct 88 totalDestruct 88
 linkedListNode:  totalConstruct 5 totalDestruct 5
 linkedList:  totalConstruct 1 totalDestruct 1

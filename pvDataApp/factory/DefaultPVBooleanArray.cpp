@@ -1,33 +1,25 @@
-/*BasePVBooleanArrray.h*/
+/*PVBooleanArrray.cpp*/
 /**
  * Copyright - See the COPYRIGHT that is included with this distribution.
  * EPICS pvDataCPP is distributed subject to a Software License Agreement found
  * in file LICENSE that is included with this distribution.
  */
-#ifndef BASEPVBOOLEANARRAY_H
-#define BASEPVBOOLEANARRAY_H
 #include <cstddef>
 #include <cstdlib>
 #include <string>
 #include <cstdio>
 #include "pvData.h"
 #include "factory.h"
-#include "AbstractPVScalarArray.h"
 #include "serializeHelper.h"
 
 using std::min;
 
 namespace epics { namespace pvData {
 
-    PVBooleanArray::~PVBooleanArray() {}
-
-    PVBooleanArray::PVBooleanArray(PVStructure *parent,ScalarArrayConstPtr scalar)
-    : PVScalarArray(parent,scalar) {}
-
-    class BasePVBooleanArray : public PVBooleanArray {
+    class DefaultPVBooleanArray : public PVBooleanArray {
     public:
-        BasePVBooleanArray(PVStructure *parent,ScalarArrayConstPtr scalarArray);
-        virtual ~BasePVBooleanArray();
+        DefaultPVBooleanArray(PVStructure *parent,ScalarArrayConstPtr scalarArray);
+        virtual ~DefaultPVBooleanArray();
         virtual void setCapacity(int capacity);
         virtual int get(int offset, int length, BooleanArrayData *data) ;
         virtual int put(int offset,int length,BooleanArray from,
@@ -44,17 +36,17 @@ namespace epics { namespace pvData {
         bool *value;
     };
 
-    BasePVBooleanArray::BasePVBooleanArray(PVStructure *parent,
+    DefaultPVBooleanArray::DefaultPVBooleanArray(PVStructure *parent,
         ScalarArrayConstPtr scalarArray)
     : PVBooleanArray(parent,scalarArray),value(new bool[0])
     { }
 
-    BasePVBooleanArray::~BasePVBooleanArray()
+    DefaultPVBooleanArray::~DefaultPVBooleanArray()
     {
         delete[] value;
     }
 
-    void BasePVBooleanArray::setCapacity(int capacity)
+    void DefaultPVBooleanArray::setCapacity(int capacity)
     {
         if(PVArray::getCapacity()==capacity) return;
         if(!PVArray::isCapacityMutable()) {
@@ -71,7 +63,7 @@ namespace epics { namespace pvData {
         PVArray::setCapacityLength(capacity,length);
     }
 
-    int BasePVBooleanArray::get(int offset, int len, BooleanArrayData *data)
+    int DefaultPVBooleanArray::get(int offset, int len, BooleanArrayData *data)
     {
         int n = len;
         int length = PVArray::getLength();
@@ -84,7 +76,7 @@ namespace epics { namespace pvData {
         return n;
     }
 
-    int BasePVBooleanArray::put(int offset,int len,
+    int DefaultPVBooleanArray::put(int offset,int len,
         BooleanArray from,int fromOffset)
     {
         if(PVField::isImmutable()) {
@@ -113,19 +105,19 @@ namespace epics { namespace pvData {
         return len;
     }
 
-    void BasePVBooleanArray::shareData(BooleanArray shareValue,int capacity,int length)
+    void DefaultPVBooleanArray::shareData(BooleanArray shareValue,int capacity,int length)
     {
         delete[] value;
         value = shareValue;
         PVArray::setCapacityLength(capacity,length);
     }
 
-    void BasePVBooleanArray::serialize(ByteBuffer *pbuffer,
+    void DefaultPVBooleanArray::serialize(ByteBuffer *pbuffer,
                 SerializableControl *pflusher) {
         serialize(pbuffer, pflusher, 0, getLength());
     }
 
-    void BasePVBooleanArray::deserialize(ByteBuffer *pbuffer,
+    void DefaultPVBooleanArray::deserialize(ByteBuffer *pbuffer,
             DeserializableControl *pcontrol) {
         int size = SerializeHelper::readSize(pbuffer, pcontrol);
         if(size>=0) {
@@ -149,7 +141,7 @@ namespace epics { namespace pvData {
         // TODO null arrays (size == -1) not supported
     }
 
-    void BasePVBooleanArray::serialize(ByteBuffer *pbuffer,
+    void DefaultPVBooleanArray::serialize(ByteBuffer *pbuffer,
             SerializableControl *pflusher, int offset, int count) {
         // cache
         int length = getLength();
@@ -178,14 +170,13 @@ namespace epics { namespace pvData {
         }
     }
 
-    bool BasePVBooleanArray::operator==(PVField& pv)
+    bool DefaultPVBooleanArray::operator==(PVField& pv)
     {
         return getConvert()->equals(this, &pv);
     }
 
-    bool BasePVBooleanArray::operator!=(PVField& pv)
+    bool DefaultPVBooleanArray::operator!=(PVField& pv)
     {
         return !(getConvert()->equals(this, &pv));
     }
 }}
-#endif  /* BASEPVBOOLEANARRAY_H */

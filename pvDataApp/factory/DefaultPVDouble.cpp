@@ -4,8 +4,6 @@
  * EPICS pvDataCPP is distributed subject to a Software License Agreement found
  * in file LICENSE that is included with this distribution.
  */
-#ifndef BASEPVDOUBLE_H
-#define BASEPVDOUBLE_H
 #include <cstddef>
 #include <cstdlib>
 #include <string>
@@ -13,12 +11,9 @@
 #include "pvData.h"
 #include "convert.h"
 #include "factory.h"
-#include "AbstractPVField.h"
 #include "byteBuffer.h"
 
 namespace epics { namespace pvData {
-
-    PVDouble::~PVDouble() {}
 
     class BasePVDouble : public PVDouble {
     public:
@@ -69,4 +64,3 @@ namespace epics { namespace pvData {
     }
 
 }}
-#endif  /* BASEPVDOUBLE_H */

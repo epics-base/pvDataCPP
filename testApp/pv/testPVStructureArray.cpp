@@ -49,13 +49,20 @@ void testPowerSupplyArray(FILE * fd) {
     PVStructureArray * powerSupplyArray =
         powerSupplyArrayStruct->getStructureArrayField(String("value"));
     assert(powerSupplyArray!=0);
-    int offset = powerSupplyArray->append(3);
+    int offset = powerSupplyArray->append(5);
     powerSupplyArray->setLength(offset);
     buffer.clear();
     powerSupplyArrayStruct->toString(&buffer);
-    fprintf(fd,"%s\n",buffer.c_str());
-    StructureConstPtr structure = 
-         powerSupplyArray->getStructureArray()->getStructure();
+    fprintf(fd,"after append 5\n%s\n",buffer.c_str());
+    powerSupplyArray->remove(0,2);
+    powerSupplyArray->remove(3,1);
+    buffer.clear();
+    powerSupplyArrayStruct->toString(&buffer);
+    fprintf(fd,"after remove 0,1,3%s\n",buffer.c_str());
+    powerSupplyArray->compress();
+    buffer.clear();
+    powerSupplyArrayStruct->toString(&buffer);
+    fprintf(fd,"after compress%s\n",buffer.c_str());
     delete powerSupplyArrayStruct;
 }
 

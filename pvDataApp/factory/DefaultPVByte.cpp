@@ -1,11 +1,9 @@
-/*BasePVByte.h*/
+/*PVByte.cpp*/
 /**
  * Copyright - See the COPYRIGHT that is included with this distribution.
  * EPICS pvDataCPP is distributed subject to a Software License Agreement found
  * in file LICENSE that is included with this distribution.
  */
-#ifndef BASEPVBYTE_H
-#define BASEPVBYTE_H
 #include <cstddef>
 #include <cstdlib>
 #include <string>
@@ -13,12 +11,9 @@
 #include "pvData.h"
 #include "convert.h"
 #include "factory.h"
-#include "AbstractPVField.h"
 #include "byteBuffer.h"
 
 namespace epics { namespace pvData {
-
-    PVByte::~PVByte() {}
 
     class BasePVByte : public PVByte {
     public:
@@ -69,4 +64,3 @@ namespace epics { namespace pvData {
     }
 
 }}
-#endif  /* BASEPVBYTE_H */

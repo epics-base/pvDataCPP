@@ -13,29 +13,28 @@
 #include "pvData.h"
 #include "convert.h"
 #include "factory.h"
-#include "AbstractPVField.h"
-#include "AbstractPVScalar.h"
-#include "AbstractPVArray.h"
-#include "AbstractPVScalarArray.h"
-#include "BasePVBoolean.h"
-#include "BasePVByte.h"
-#include "BasePVShort.h"
-#include "BasePVInt.h"
-#include "BasePVLong.h"
-#include "BasePVFloat.h"
-#include "BasePVDouble.h"
-#include "BasePVString.h"
-#include "AbstractPVArray.h"
-#include "BasePVBooleanArray.h"
-#include "BasePVByteArray.h"
-#include "BasePVShortArray.h"
-#include "BasePVIntArray.h"
-#include "BasePVLongArray.h"
-#include "BasePVFloatArray.h"
-#include "BasePVDoubleArray.h"
-#include "BasePVStringArray.h"
-#include "BasePVStructure.h"
-#include "BasePVStructureArray.h"
+#include "PVField.cpp"
+#include "PVScalar.cpp"
+#include "PVArray.cpp"
+#include "PVScalarArray.cpp"
+#include "PVStructure.cpp"
+#include "DefaultPVBoolean.cpp"
+#include "DefaultPVByte.cpp"
+#include "DefaultPVShort.cpp"
+#include "DefaultPVInt.cpp"
+#include "DefaultPVLong.cpp"
+#include "DefaultPVFloat.cpp"
+#include "DefaultPVDouble.cpp"
+#include "DefaultPVString.cpp"
+#include "DefaultPVBooleanArray.cpp"
+#include "DefaultPVByteArray.cpp"
+#include "DefaultPVShortArray.cpp"
+#include "DefaultPVIntArray.cpp"
+#include "DefaultPVLongArray.cpp"
+#include "DefaultPVFloatArray.cpp"
+#include "DefaultPVDoubleArray.cpp"
+#include "DefaultPVStringArray.cpp"
+#include "DefaultPVStructureArray.cpp"
 
 namespace epics { namespace pvData {
 
@@ -144,7 +143,7 @@ PVScalarArray *PVDataCreate::createPVScalarArray(PVStructure *parent,
 {
      switch(scalarArray->getElementType()) {
      case pvBoolean:
-           return new BasePVBooleanArray(parent,scalarArray);
+           return new DefaultPVBooleanArray(parent,scalarArray);
      case pvByte:
            return new BasePVByteArray(parent,scalarArray);
      case pvShort:

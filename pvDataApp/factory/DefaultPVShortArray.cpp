@@ -1,36 +1,30 @@
-/*BasePVStringArray.h*/
+/*PVShortArray.cpp*/
 /**
  * Copyright - See the COPYRIGHT that is included with this distribution.
  * EPICS pvDataCPP is distributed subject to a Software License Agreement found
  * in file LICENSE that is included with this distribution.
  */
-#ifndef BASEPVSTRINGARRAY_H
-#define BASEPVSTRINGARRAY_H
 #include <cstddef>
 #include <cstdlib>
 #include <string>
 #include <cstdio>
 #include "pvData.h"
 #include "factory.h"
-#include "AbstractPVScalarArray.h"
 #include "serializeHelper.h"
+
+using std::min;
 
 namespace epics { namespace pvData {
 
-    PVStringArray::~PVStringArray() {}
-
-    PVStringArray::PVStringArray(PVStructure *parent,ScalarArrayConstPtr scalar)
-    : PVScalarArray(parent,scalar) {}
-
-    class BasePVStringArray : public PVStringArray {
+    class BasePVShortArray : public PVShortArray {
     public:
-        BasePVStringArray(PVStructure *parent,ScalarArrayConstPtr scalarArray);
-        virtual ~BasePVStringArray();
+        BasePVShortArray(PVStructure *parent,ScalarArrayConstPtr scalarArray);
+        virtual ~BasePVShortArray();
         virtual void setCapacity(int capacity);
-        virtual int get(int offset, int length, StringArrayData *data) ;
-        virtual int put(int offset,int length,StringArray from,
+        virtual int get(int offset, int length, ShortArrayData *data) ;
+        virtual int put(int offset,int length,ShortArray from,
            int fromOffset);
-        virtual void shareData(String value[],int capacity,int length);
+        virtual void shareData(int16 value[],int capacity,int length);
         // from Serializable
         virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) ;
         virtual void deserialize(ByteBuffer *pbuffer,DeserializableControl *pflusher);
@@ -39,20 +33,20 @@ namespace epics { namespace pvData {
         virtual bool operator==(PVField& pv) ;
         virtual bool operator!=(PVField& pv) ;
     private:
-        String *value;
+        int16 *value;
     };
 
-    BasePVStringArray::BasePVStringArray(PVStructure *parent,
+    BasePVShortArray::BasePVShortArray(PVStructure *parent,
         ScalarArrayConstPtr scalarArray)
-    : PVStringArray(parent,scalarArray),value(new String[0])
-    { }
+    : PVShortArray(parent,scalarArray),value(new int16[0])
+    { } 
 
-    BasePVStringArray::~BasePVStringArray()
+    BasePVShortArray::~BasePVShortArray()
     {
         delete[] value;
     }
 
-    void BasePVStringArray::setCapacity(int capacity)
+    void BasePVShortArray::setCapacity(int capacity)
     {
         if(PVArray::getCapacity()==capacity) return;
         if(!PVArray::isCapacityMutable()) {
@@ -62,14 +56,14 @@ namespace epics { namespace pvData {
         }
         int length = PVArray::getLength();
         if(length>capacity) length = capacity;
-        String *newValue = new String[capacity];
+        int16 *newValue = new int16[capacity]; 
         for(int i=0; i<length; i++) newValue[i] = value[i];
         delete[]value;
         value = newValue;
         PVArray::setCapacityLength(capacity,length);
     }
 
-    int BasePVStringArray::get(int offset, int len, StringArrayData *data)
+    int BasePVShortArray::get(int offset, int len, ShortArrayData *data)
     {
         int n = len;
         int length = PVArray::getLength();
@@ -82,8 +76,8 @@ namespace epics { namespace pvData {
         return n;
     }
 
-    int BasePVStringArray::put(int offset,int len,
-        StringArray from,int fromOffset)
+    int BasePVShortArray::put(int offset,int len,
+        ShortArray from,int fromOffset)
     {
         if(PVField::isImmutable()) {
             PVField::message("field is immutable",errorMessage);
@@ -111,29 +105,37 @@ namespace epics { namespace pvData {
         return len;
     }
 
-    void BasePVStringArray::shareData(
-        String shareValue[],int capacity,int length)
+    void BasePVShortArray::shareData(
+        int16 shareValue[],int capacity,int length)
     {
         delete[] value;
         value = shareValue;
         PVArray::setCapacityLength(capacity,length);
     }
 
-    void BasePVStringArray::serialize(ByteBuffer *pbuffer,
+    void BasePVShortArray::serialize(ByteBuffer *pbuffer,
             SerializableControl *pflusher) {
         serialize(pbuffer, pflusher, 0, getLength());
     }
 
-    void BasePVStringArray::deserialize(ByteBuffer *pbuffer,
+    void BasePVShortArray::deserialize(ByteBuffer *pbuffer,
             DeserializableControl *pcontrol) {
         int size = SerializeHelper::readSize(pbuffer, pcontrol);
         if(size>=0) {
             // prepare array, if necessary
             if(size>getCapacity()) setCapacity(size);
             // retrieve value from the buffer
-            for(int i = 0; i<size; i++)
-                value[i] = SerializeHelper::deserializeString(pbuffer,
-                        pcontrol);
+            int i = 0;
+            while(true) {
+                int maxIndex = min(size-i, (int)(pbuffer->getRemaining()
+                        /sizeof(int16)))+i;
+                for(; i<maxIndex; i++)
+                    value[i] = pbuffer->getShort();
+                if(i<size)
+                    pcontrol->ensureData(sizeof(int16)); // TODO: is there a better way to ensureData?
+                else
+                    break;
+            }
             // set new length
             setLength(size);
             postPut();
@@ -141,8 +143,9 @@ namespace epics { namespace pvData {
         // TODO null arrays (size == -1) not supported
     }
 
-    void BasePVStringArray::serialize(ByteBuffer *pbuffer,
+    void BasePVShortArray::serialize(ByteBuffer *pbuffer,
             SerializableControl *pflusher, int offset, int count) {
+        // cache
         int length = getLength();
 
         // check bounds
@@ -157,18 +160,26 @@ namespace epics { namespace pvData {
         // write
         SerializeHelper::writeSize(count, pbuffer, pflusher);
         int end = offset+count;
-        for(int i = offset; i<end; i++)
-            SerializeHelper::serializeString(value[i], pbuffer, pflusher);
+        int i = offset;
+        while(true) {
+            int maxIndex = min(end-i, (int)(pbuffer->getRemaining()
+                    /sizeof(int16)))+i;
+            for(; i<maxIndex; i++)
+                pbuffer->putShort(value[i]);
+            if(i<end)
+                pflusher->flushSerializeBuffer();
+            else
+                break;
+        }
     }
 
-    bool BasePVStringArray::operator==(PVField& pv)
+    bool BasePVShortArray::operator==(PVField& pv)
     {
         return getConvert()->equals(this, &pv);
     }
 
-    bool BasePVStringArray::operator!=(PVField& pv)
+    bool BasePVShortArray::operator!=(PVField& pv)
     {
         return !(getConvert()->equals(this, &pv));
     }
 }}
-#endif  /* BASEPVSTRINGARRAY_H */

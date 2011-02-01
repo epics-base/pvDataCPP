@@ -1,11 +1,9 @@
-/*BasePVShort.h*/
+/*PVLong.cpp*/
 /**
  * Copyright - See the COPYRIGHT that is included with this distribution.
  * EPICS pvDataCPP is distributed subject to a Software License Agreement found
  * in file LICENSE that is included with this distribution.
  */
-#ifndef BASEPVSHORT_H
-#define BASEPVSHORT_H
 #include <cstddef>
 #include <cstdlib>
 #include <string>
@@ -13,19 +11,16 @@
 #include "pvData.h"
 #include "convert.h"
 #include "factory.h"
-#include "AbstractPVField.h"
 #include "byteBuffer.h"
 
 namespace epics { namespace pvData {
 
-    PVShort::~PVShort() {}
-
-    class BasePVShort : public PVShort {
+    class BasePVLong : public PVLong {
     public:
-        BasePVShort(PVStructure *parent,ScalarConstPtr scalar);
-        virtual ~BasePVShort();
-        virtual int16 get();
-        virtual void put(int16 val);
+        BasePVLong(PVStructure *parent,ScalarConstPtr scalar);
+        virtual ~BasePVLong();
+        virtual int64 get();
+        virtual void put(int64 val);
         virtual void serialize(ByteBuffer *pbuffer,
             SerializableControl *pflusher) ;
         virtual void deserialize(ByteBuffer *pbuffer,
@@ -33,40 +28,39 @@ namespace epics { namespace pvData {
         virtual bool operator==(PVField& pv) ;
         virtual bool operator!=(PVField& pv) ;
     private:
-        int16 value;
+        int64 value;
     };
 
-    BasePVShort::BasePVShort(PVStructure *parent,ScalarConstPtr scalar)
-    : PVShort(parent,scalar),value(0)
+    BasePVLong::BasePVLong(PVStructure *parent,ScalarConstPtr scalar)
+    : PVLong(parent,scalar),value(0)
     {}
 
-    BasePVShort::~BasePVShort() {}
+    BasePVLong::~BasePVLong() {}
 
-    int16 BasePVShort::get() { return value;}
+    int64 BasePVLong::get() { return value;}
 
-    void BasePVShort::put(int16 val){value = val;}
+    void BasePVLong::put(int64 val){value = val;}
 
-    void BasePVShort::serialize(ByteBuffer *pbuffer,
+    void BasePVLong::serialize(ByteBuffer *pbuffer,
         SerializableControl *pflusher) {
-        pflusher->ensureBuffer(sizeof(int16));
-        pbuffer->putShort(value);
+        pflusher->ensureBuffer(sizeof(int64));
+        pbuffer->putLong(value);
     }
 
-    void BasePVShort::deserialize(ByteBuffer *pbuffer,
+    void BasePVLong::deserialize(ByteBuffer *pbuffer,
         DeserializableControl *pflusher) {
-        pflusher->ensureData(sizeof(int16));
-        value = pbuffer->getShort();
+        pflusher->ensureData(sizeof(int64));
+        value = pbuffer->getLong();
     }
 
-    bool BasePVShort::operator==(PVField& pvField)
+    bool BasePVLong::operator==(PVField& pvField)
     {
         return getConvert()->equals(this, &pvField);
     }
 
-    bool BasePVShort::operator!=(PVField& pvField)
+    bool BasePVLong::operator!=(PVField& pvField)
     {
         return !(getConvert()->equals(this, &pvField));
     }
 
 }}
-#endif  /* BASEPVSHORT_H */

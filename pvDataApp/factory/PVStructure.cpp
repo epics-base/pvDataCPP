@@ -1,11 +1,9 @@
-/*BasePVStructure.h*/
+/*PVStructure.cpp*/
 /**
  * Copyright - See the COPYRIGHT that is included with this distribution.
  * EPICS pvDataCPP is distributed subject to a Software License Agreement found
  * in file LICENSE that is included with this distribution.
  */
-#ifndef BASEPVSTRUCTURE_H
-#define BASEPVSTRUCTURE_H
 #include <cstddef>
 #include <cstdlib>
 #include <string>
@@ -571,4 +569,3 @@ namespace epics { namespace pvData {
     BasePVStructure::~BasePVStructure() {}
 
 }}
-#endif  /* BASEPVSTRUCTURE_H */

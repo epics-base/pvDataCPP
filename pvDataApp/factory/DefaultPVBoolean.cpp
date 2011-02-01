@@ -1,11 +1,9 @@
-/*BasePVBoolean.h*/
+/*PVBoolean.cpp*/
 /**
  * Copyright - See the COPYRIGHT that is included with this distribution.
  * EPICS pvDataCPP is distributed subject to a Software License Agreement found
  * in file LICENSE that is included with this distribution.
  */
-#ifndef BASEPVBOOLEAN_H
-#define BASEPVBOOLEAN_H
 #include <cstddef>
 #include <cstdlib>
 #include <string>
@@ -13,12 +11,9 @@
 #include "pvData.h"
 #include "convert.h"
 #include "factory.h"
-#include "AbstractPVField.h"
 #include "byteBuffer.h"
 
 namespace epics { namespace pvData {
-
-    PVBoolean::~PVBoolean() {}
 
     class BasePVBoolean : public PVBoolean {
     public:
@@ -70,4 +65,3 @@ namespace epics { namespace pvData {
     }
 
 }}
-#endif  /* BASEPVBOOLEAN_H */

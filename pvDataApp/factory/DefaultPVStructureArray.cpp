@@ -1,11 +1,9 @@
-/*BasePVStructureArray.h*/
+/*PVStructureArray.cpp*/
 /**
  * Copyright - See the COPYRIGHT that is included with this distribution.
  * EPICS pvDataCPP is distributed subject to a Software License Agreement found
  * in file LICENSE that is included with this distribution.
  */
-#ifndef BASEPVSTRUCTUREARRAY_H
-#define BASEPVSTRUCTUREARRAY_H
 #include <cstddef>
 #include <cstdlib>
 #include <string>
@@ -16,13 +14,6 @@
 
 namespace epics { namespace pvData {
 
-    PVStructureArray::PVStructureArray(PVStructure *parent,
-        StructureArrayConstPtr structureArray)
-    : PVArray(parent,structureArray)
-    {}
-
-    PVStructureArray::~PVStructureArray() {}
-
     class BasePVStructureArray : public PVStructureArray {
     public:
         BasePVStructureArray(PVStructure *parent,
@@ -31,6 +22,7 @@ namespace epics { namespace pvData {
         virtual StructureArrayConstPtr getStructureArray();
         virtual int append(int number);
         virtual bool remove(int offset,int number);
+        virtual void compress();
         virtual void setCapacity(int capacity);
         virtual int get(int offset, int length,
             StructureArrayData *data);
@@ -96,13 +88,34 @@ namespace epics { namespace pvData {
                 value[i] = 0;
            }
         }
-        // move any at end up
-        int nToMove = length - (offset+number);
-        for(int i=0; i<nToMove; i++) {
-            value[i+offset] = value[i+length];
-            value[i+length] = 0;
-        }
         return true;
+    }
+
+    void BasePVStructureArray::compress() {
+        int length = getCapacity();
+        int newLength = 0;
+        for(int i=0; i<length; i++) {
+            if(value[i]!=0) {
+                newLength++;
+                continue;
+            }
+            // find first non 0
+            int notNull = 0;
+            for(int j=i+1;j<length;j++) {
+                if(value[j]!=0) {
+                    notNull = j;
+                    break;
+                }
+            }
+            if(notNull!=0) {
+                value[i] = value[notNull];
+                value[notNull] = 0;
+                newLength++;
+                continue;
+             }
+             break;
+        }
+        setCapacity(newLength);
     }
 
     void BasePVStructureArray::setCapacity(int capacity) {
@@ -273,4 +286,3 @@ namespace epics { namespace pvData {
     }
 
 }}
-#endif  /* BASEPVSTRUCTUREARRAY_H */

@@ -1,38 +1,30 @@
-/*BasePVFloatArray.h*/
+/*PVLongArray.cpp*/
 /**
  * Copyright - See the COPYRIGHT that is included with this distribution.
  * EPICS pvDataCPP is distributed subject to a Software License Agreement found
  * in file LICENSE that is included with this distribution.
  */
-#ifndef BASEPVFLOATARRAY_H
-#define BASEPVFLOATARRAY_H
 #include <cstddef>
 #include <cstdlib>
 #include <string>
 #include <cstdio>
 #include "pvData.h"
 #include "factory.h"
-#include "AbstractPVScalarArray.h"
 #include "serializeHelper.h"
+
+using std::min;
 
 namespace epics { namespace pvData {
 
-    using std::min;
-
-    PVFloatArray::~PVFloatArray() {}
-
-    PVFloatArray::PVFloatArray(PVStructure *parent,ScalarArrayConstPtr scalar)
-    : PVScalarArray(parent,scalar) {}
-
-    class BasePVFloatArray : public PVFloatArray {
+    class BasePVLongArray : public PVLongArray {
     public:
-        BasePVFloatArray(PVStructure *parent,ScalarArrayConstPtr scalarArray);
-        virtual ~BasePVFloatArray();
+        BasePVLongArray(PVStructure *parent,ScalarArrayConstPtr scalarArray);
+        virtual ~BasePVLongArray();
         virtual void setCapacity(int capacity);
-        virtual int get(int offset, int length, FloatArrayData *data) ;
-        virtual int put(int offset,int length,FloatArray from,
+        virtual int get(int offset, int length, LongArrayData *data) ;
+        virtual int put(int offset,int length,LongArray from,
            int fromOffset);
-        virtual void shareData(float value[],int capacity,int length);
+        virtual void shareData(int64 value[],int capacity,int length);
         // from Serializable
         virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) ;
         virtual void deserialize(ByteBuffer *pbuffer,DeserializableControl *pflusher);
@@ -41,20 +33,20 @@ namespace epics { namespace pvData {
         virtual bool operator==(PVField& pv) ;
         virtual bool operator!=(PVField& pv) ;
     private:
-        float *value;
+        int64 *value;
     };
 
-    BasePVFloatArray::BasePVFloatArray(PVStructure *parent,
+    BasePVLongArray::BasePVLongArray(PVStructure *parent,
         ScalarArrayConstPtr scalarArray)
-    : PVFloatArray(parent,scalarArray),value(new float[0])
-    { }
+    : PVLongArray(parent,scalarArray),value(new int64[0])
+    { } 
 
-    BasePVFloatArray::~BasePVFloatArray()
+    BasePVLongArray::~BasePVLongArray()
     {
         delete[] value;
     }
 
-    void BasePVFloatArray::setCapacity(int capacity)
+    void BasePVLongArray::setCapacity(int capacity)
     {
         if(PVArray::getCapacity()==capacity) return;
         if(!PVArray::isCapacityMutable()) {
@@ -64,14 +56,14 @@ namespace epics { namespace pvData {
         }
         int length = PVArray::getLength();
         if(length>capacity) length = capacity;
-        float *newValue = new float[capacity];
+        int64 *newValue = new int64[capacity]; 
         for(int i=0; i<length; i++) newValue[i] = value[i];
         delete[]value;
         value = newValue;
         PVArray::setCapacityLength(capacity,length);
     }
 
-    int BasePVFloatArray::get(int offset, int len, FloatArrayData *data)
+    int BasePVLongArray::get(int offset, int len, LongArrayData *data)
     {
         int n = len;
         int length = PVArray::getLength();
@@ -84,8 +76,8 @@ namespace epics { namespace pvData {
         return n;
     }
 
-    int BasePVFloatArray::put(int offset,int len,
-        FloatArray from,int fromOffset)
+    int BasePVLongArray::put(int offset,int len,
+        LongArray from,int fromOffset)
     {
         if(PVField::isImmutable()) {
             PVField::message("field is immutable",errorMessage);
@@ -113,20 +105,20 @@ namespace epics { namespace pvData {
         return len;
     }
 
-    void BasePVFloatArray::shareData(
-        float shareValue[],int capacity,int length)
+    void BasePVLongArray::shareData(
+        int64 shareValue[],int capacity,int length)
     {
         delete[] value;
         value = shareValue;
         PVArray::setCapacityLength(capacity,length);
     }
 
- void BasePVFloatArray::serialize(ByteBuffer *pbuffer,
+    void BasePVLongArray::serialize(ByteBuffer *pbuffer,
             SerializableControl *pflusher) {
         serialize(pbuffer, pflusher, 0, getLength());
     }
 
-    void BasePVFloatArray::deserialize(ByteBuffer *pbuffer,
+    void BasePVLongArray::deserialize(ByteBuffer *pbuffer,
             DeserializableControl *pcontrol) {
         int size = SerializeHelper::readSize(pbuffer, pcontrol);
         if(size>=0) {
@@ -136,11 +128,11 @@ namespace epics { namespace pvData {
             int i = 0;
             while(true) {
                 int maxIndex = min(size-i, (int)(pbuffer->getRemaining()
-                        /sizeof(float)))+i;
+                        /sizeof(int64)))+i;
                 for(; i<maxIndex; i++)
-                    value[i] = pbuffer->getFloat();
+                    value[i] = pbuffer->getLong();
                 if(i<size)
-                    pcontrol->ensureData(sizeof(float)); // TODO: is there a better way to ensureData?
+                    pcontrol->ensureData(sizeof(int64)); // TODO: is there a better way to ensureData?
                 else
                     break;
             }
@@ -151,7 +143,7 @@ namespace epics { namespace pvData {
         // TODO null arrays (size == -1) not supported
     }
 
-    void BasePVFloatArray::serialize(ByteBuffer *pbuffer,
+    void BasePVLongArray::serialize(ByteBuffer *pbuffer,
             SerializableControl *pflusher, int offset, int count) {
         // cache
         int length = getLength();
@@ -171,9 +163,9 @@ namespace epics { namespace pvData {
         int i = offset;
         while(true) {
             int maxIndex = min(end-i, (int)(pbuffer->getRemaining()
-                    /sizeof(float)))+i;
+                    /sizeof(int64)))+i;
             for(; i<maxIndex; i++)
-                pbuffer->putFloat(value[i]);
+                pbuffer->putLong(value[i]);
             if(i<end)
                 pflusher->flushSerializeBuffer();
             else
@@ -181,14 +173,13 @@ namespace epics { namespace pvData {
         }
     }
 
-    bool BasePVFloatArray::operator==(PVField& pv)
+    bool BasePVLongArray::operator==(PVField& pv)
     {
         return getConvert()->equals(this, &pv);
     }
 
-    bool BasePVFloatArray::operator!=(PVField& pv)
+    bool BasePVLongArray::operator!=(PVField& pv)
     {
         return !(getConvert()->equals(this, &pv));
     }
 }}
-#endif  /* BASEPVFLOATARRAY_H */

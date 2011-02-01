@@ -1,11 +1,9 @@
-/*BasePVString.h*/
+/*PVString.cpp*/
 /**
  * Copyright - See the COPYRIGHT that is included with this distribution.
  * EPICS pvDataCPP is distributed subject to a Software License Agreement found
  * in file LICENSE that is included with this distribution.
  */
-#ifndef BASEPVSTRING_H
-#define BASEPVSTRING_H
 #include <cstddef>
 #include <cstdlib>
 #include <string>
@@ -13,13 +11,10 @@
 #include "pvData.h"
 #include "convert.h"
 #include "factory.h"
-#include "AbstractPVField.h"
 #include "byteBuffer.h"
 #include "serializeHelper.h"
 
 namespace epics { namespace pvData {
-
-    PVString::~PVString() {}
 
     class BasePVString : public PVString {
     public:
@@ -68,4 +63,3 @@ namespace epics { namespace pvData {
     }
 
 }}
-#endif  /* BASEPVSTRING_H */

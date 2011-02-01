@@ -1,38 +1,30 @@
-/*BasePVLongArray.h*/
+/*PVDoubleArray.cpp*/
 /**
  * Copyright - See the COPYRIGHT that is included with this distribution.
  * EPICS pvDataCPP is distributed subject to a Software License Agreement found
  * in file LICENSE that is included with this distribution.
  */
-#ifndef BASEPVLONGARRAY_H
-#define BASEPVLONGARRAY_H
 #include <cstddef>
 #include <cstdlib>
 #include <string>
 #include <cstdio>
 #include "pvData.h"
 #include "factory.h"
-#include "AbstractPVScalarArray.h"
 #include "serializeHelper.h"
 
 using std::min;
 
 namespace epics { namespace pvData {
 
-    PVLongArray::~PVLongArray() {}
-
-    PVLongArray::PVLongArray(PVStructure *parent,ScalarArrayConstPtr scalar)
-    : PVScalarArray(parent,scalar) {}
-
-    class BasePVLongArray : public PVLongArray {
+    class BasePVDoubleArray : public PVDoubleArray {
     public:
-        BasePVLongArray(PVStructure *parent,ScalarArrayConstPtr scalarArray);
-        virtual ~BasePVLongArray();
+        BasePVDoubleArray(PVStructure *parent,ScalarArrayConstPtr scalarArray);
+        virtual ~BasePVDoubleArray();
         virtual void setCapacity(int capacity);
-        virtual int get(int offset, int length, LongArrayData *data) ;
-        virtual int put(int offset,int length,LongArray from,
+        virtual int get(int offset, int length, DoubleArrayData *data) ;
+        virtual int put(int offset,int length,DoubleArray from,
            int fromOffset);
-        virtual void shareData(int64 value[],int capacity,int length);
+        virtual void shareData(double value[],int capacity,int length);
         // from Serializable
         virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) ;
         virtual void deserialize(ByteBuffer *pbuffer,DeserializableControl *pflusher);
@@ -41,37 +33,37 @@ namespace epics { namespace pvData {
         virtual bool operator==(PVField& pv) ;
         virtual bool operator!=(PVField& pv) ;
     private:
-        int64 *value;
+        double *value;
     };
 
-    BasePVLongArray::BasePVLongArray(PVStructure *parent,
+    BasePVDoubleArray::BasePVDoubleArray(PVStructure *parent,
         ScalarArrayConstPtr scalarArray)
-    : PVLongArray(parent,scalarArray),value(new int64[0])
-    { } 
+    : PVDoubleArray(parent,scalarArray),value(new double[0])
+    { }
 
-    BasePVLongArray::~BasePVLongArray()
+    BasePVDoubleArray::~BasePVDoubleArray()
     {
         delete[] value;
     }
 
-    void BasePVLongArray::setCapacity(int capacity)
+    void BasePVDoubleArray::setCapacity(int capacity)
     {
-        if(PVArray::getCapacity()==capacity) return;
-        if(!PVArray::isCapacityMutable()) {
+        if(getCapacity()==capacity) return;
+        if(!isCapacityMutable()) {
             std::string message("not capacityMutable");
             PVField::message(message, errorMessage);
             return;
         }
         int length = PVArray::getLength();
         if(length>capacity) length = capacity;
-        int64 *newValue = new int64[capacity]; 
+        double *newValue = new double[capacity];
         for(int i=0; i<length; i++) newValue[i] = value[i];
         delete[]value;
         value = newValue;
-        PVArray::setCapacityLength(capacity,length);
+        setCapacityLength(capacity,length);
     }
 
-    int BasePVLongArray::get(int offset, int len, LongArrayData *data)
+    int BasePVDoubleArray::get(int offset, int len, DoubleArrayData *data)
     {
         int n = len;
         int length = PVArray::getLength();
@@ -84,8 +76,8 @@ namespace epics { namespace pvData {
         return n;
     }
 
-    int BasePVLongArray::put(int offset,int len,
-        LongArray from,int fromOffset)
+    int BasePVDoubleArray::put(int offset,int len,
+        DoubleArray from,int fromOffset)
     {
         if(PVField::isImmutable()) {
             PVField::message("field is immutable",errorMessage);
@@ -113,20 +105,20 @@ namespace epics { namespace pvData {
         return len;
     }
 
-    void BasePVLongArray::shareData(
-        int64 shareValue[],int capacity,int length)
+    void BasePVDoubleArray::shareData(
+        double shareValue[],int capacity,int length)
     {
         delete[] value;
         value = shareValue;
         PVArray::setCapacityLength(capacity,length);
     }
 
-    void BasePVLongArray::serialize(ByteBuffer *pbuffer,
+    void BasePVDoubleArray::serialize(ByteBuffer *pbuffer,
             SerializableControl *pflusher) {
         serialize(pbuffer, pflusher, 0, getLength());
     }
 
-    void BasePVLongArray::deserialize(ByteBuffer *pbuffer,
+    void BasePVDoubleArray::deserialize(ByteBuffer *pbuffer,
             DeserializableControl *pcontrol) {
         int size = SerializeHelper::readSize(pbuffer, pcontrol);
         if(size>=0) {
@@ -136,11 +128,11 @@ namespace epics { namespace pvData {
             int i = 0;
             while(true) {
                 int maxIndex = min(size-i, (int)(pbuffer->getRemaining()
-                        /sizeof(int64)))+i;
+                        /sizeof(double)))+i;
                 for(; i<maxIndex; i++)
-                    value[i] = pbuffer->getLong();
+                    value[i] = pbuffer->getDouble();
                 if(i<size)
-                    pcontrol->ensureData(sizeof(int64)); // TODO: is there a better way to ensureData?
+                    pcontrol->ensureData(sizeof(double));
                 else
                     break;
             }
@@ -151,7 +143,7 @@ namespace epics { namespace pvData {
         // TODO null arrays (size == -1) not supported
     }
 
-    void BasePVLongArray::serialize(ByteBuffer *pbuffer,
+    void BasePVDoubleArray::serialize(ByteBuffer *pbuffer,
             SerializableControl *pflusher, int offset, int count) {
         // cache
         int length = getLength();
@@ -171,9 +163,9 @@ namespace epics { namespace pvData {
         int i = offset;
         while(true) {
             int maxIndex = min(end-i, (int)(pbuffer->getRemaining()
-                    /sizeof(int64)))+i;
+                    /sizeof(double)))+i;
             for(; i<maxIndex; i++)
-                pbuffer->putLong(value[i]);
+                pbuffer->putDouble(value[i]);
             if(i<end)
                 pflusher->flushSerializeBuffer();
             else
@@ -181,14 +173,13 @@ namespace epics { namespace pvData {
         }
     }
 
-    bool BasePVLongArray::operator==(PVField& pv)
+    bool BasePVDoubleArray::operator==(PVField& pv)
     {
         return getConvert()->equals(this, &pv);
     }
 
-    bool BasePVLongArray::operator!=(PVField& pv)
+    bool BasePVDoubleArray::operator!=(PVField& pv)
     {
         return !(getConvert()->equals(this, &pv));
     }
 }}
-#endif  /* BASEPVLONGARRAY_H */
