@@ -47,7 +47,7 @@ namespace epics {
             else if(b==-2) {
                 control->ensureData(sizeof(int32));
                 int32 s = buffer->getInt();
-                if(s<0) throw EpicsException("negative array size");
+                if(s<0) THROW_BASE_EXCEPTION("negative array size");
                 return s;
             }
             else

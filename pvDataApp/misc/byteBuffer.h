@@ -455,13 +455,13 @@ namespace epics {
              * {@code newPosition} do not hold
              */
             inline void setPosition(int newPosition) {
-                if(newPosition<0||newPosition>_limit) throw EpicsException(
+                if(newPosition<0||newPosition>_limit) THROW_BASE_EXCEPTION(
                         "invalid limit");
                 _position = newPosition;
             }
 
             inline void setLimit(int newLimit) {
-                if(newLimit<0||_position>newLimit) throw EpicsException(
+                if(newLimit<0||_position>newLimit) THROW_BASE_EXCEPTION(
                         "invalid limit");
                 _limit = newLimit;
             }

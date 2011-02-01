@@ -14,8 +14,6 @@
 #ifndef EPICSEXCEPTION_H_
 #define EPICSEXCEPTION_H_
 
-// TODO to be redefined!!!!!!
-
 #include <stdexcept>
 #include <string>
 
@@ -30,42 +28,35 @@ namespace epics { namespace pvData {
 class BaseException :
     public std::exception {
 public:
-    BaseException(const char* message, const char* file, int line, std::exception* cause = 0)
-      : m_msg(message), m_file(file), m_line(line), m_cause(cause)
+    BaseException(const char* message, const char* file, int line)
     {
-        getStackTrace(&m_stackTrace);
+        toString(m_what, message, file, line, 0);
+    }
+
+    BaseException(const char* message, const char* file, int line, std::exception& cause)
+    {
+        toString(m_what, message, file, line, cause.what());
     }
 
     virtual ~BaseException() throw()
     {
-        if (m_cause) delete m_cause;
     }
 
-    virtual const char* what() const throw() { return m_msg.c_str(); }
+    virtual const char* what() const throw() { return m_what.c_str(); }
 
-    const char* getFile() const { return m_file.c_str(); }
-    int getLine() const { return m_line; }
-
-    void toString(std::string& str, unsigned int depth = 0) {
-        str.append("BaseException: ");
-        str.append(m_msg);
+private:
+    static inline void toString(std::string& str, const char* message, const char* file, int line, const char * cause) {
+        str.append(message);
         str.append("\n\tat ");
-        str.append(m_file);
+        str.append(file);
         str.append(":");
         char sline[10];
-        snprintf(sline, 10, "%d", m_line);
+        snprintf(sline, 10, "%d", line);
         str.append(sline);
         str.append("\n");
-        str.append(m_stackTrace);
-        if (m_cause)
-        {
-            str.append("caused by: ");
-            BaseException *be = dynamic_cast<BaseException*>(m_cause);
-            if (be)
-                be->toString(str, depth+1);
-            else
-                str.append(m_cause->what());
-        }
+        getStackTrace(&str);
+        if (cause)
+            str.append(cause);
     }
 
     /** Get stack trace, i.e. demangled backtrace of the caller. */
@@ -200,30 +191,13 @@ public:
     }
 
 private:
-    std::string m_msg;
-    std::string m_file;
-    int m_line;
-    std::exception* m_cause;
-    std::string m_stackTrace;
+    std::string m_what;
 };
 
 
-#define THROW_BASE_EXCEPTION(msg) throw new BaseException(msg, __FILE__, __LINE__)
-#define THROW_BASE_EXCEPTION_CAUSE(msg, cause) throw new BaseException(msg, __FILE__, __LINE__, cause)
+#define THROW_BASE_EXCEPTION(msg) throw ::epics::pvData::BaseException(msg, __FILE__, __LINE__)
+#define THROW_BASE_EXCEPTION_CAUSE(msg, cause) throw ::epics::pvData::BaseException(msg, __FILE__, __LINE__, cause)
 
-/*
-        /// Construct with file, line info and printf-type arguments.
-        GenericException(const char *sourcefile, size_t line, const char *format, ...)
-        __attribute__ ((format (printf, 4, 5)));
-*/
-
-        /** Base Epics Exception */
-        class EpicsException : public std::logic_error {
-        public:
-            explicit EpicsException(const std::string& arg) :
-                    std::logic_error(arg) {
-            }
-        };
     }
 }
 
