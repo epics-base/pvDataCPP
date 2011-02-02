@@ -79,5 +79,3 @@ structure value
         int nanoSeconds
 field:  totalConstruct 120 totalDestruct 120
 pvField:  totalConstruct 47 totalDestruct 47
-linkedListNode:  totalConstruct 4 totalDestruct 4
-linkedList:  totalConstruct 1 totalDestruct 1

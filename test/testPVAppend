@@ -30,5 +30,3 @@ structure parent
         string Jane Bad Girl
 field:  totalConstruct 108 totalDestruct 108
 pvField:  totalConstruct 15 totalDestruct 14 ACTIVE 1
-linkedListNode:  totalConstruct 5 totalDestruct 5
-linkedList:  totalConstruct 1 totalDestruct 1
