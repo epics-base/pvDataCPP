@@ -56,10 +56,11 @@ public:
     typedef Lockable mutex_type;
     explicit unique_lock(Lockable &m)
         : mutexPtr(&m), locked(true)
-    {mutex->lock();}
+    {mutexPtr->lock();}
     unique_lock(Lockable &m, defer_lock_t)
         : mutexPtr(m), locked(false)
     {}
+    ~unique_lock(){unlock();}
     void swap(unique_lock& O)
     {
         Lockable *t=O.mutexPtr;
