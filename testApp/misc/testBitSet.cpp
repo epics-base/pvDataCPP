@@ -12,9 +12,10 @@
 #include <string.h>
 #include <stdio.h>
 #include <bitSet.h>
-#include <showConstructDestruct.h>
+#include <CDRMonitor.h>
 
 #include <epicsAssert.h>
+#include <epicsExit.h>
 
 using namespace epics::pvData;
 
@@ -149,7 +150,8 @@ int main(int argc,char *argv[])
     }
     testGetSetClearFlip();
     testOperators();
-    getShowConstructDestruct()->showDeleteStaticExit(fd);
+    epicsExitCallAtExits();
+    CDRMonitor::get().show(fd);
     return(0);
 }
 

@@ -18,11 +18,12 @@
 #include <list>
 
 #include <epicsAssert.h>
+#include <epicsExit.h>
 
 #include "event.h"
 #include "thread.h"
 #include "executor.h"
-#include "showConstructDestruct.h"
+#include "CDRMonitor.h"
 #include "timeFunction.h"
 
 using namespace epics::pvData;
@@ -115,6 +116,7 @@ int main(int argc, char *argv[]) {
     }
     testBasic(fd);
     testThreadContext(fd,auxFd);
-    getShowConstructDestruct()->showDeleteStaticExit(fd);
+    epicsExitCallAtExits();
+    CDRMonitor::get().show(fd);
     return (0);
 }

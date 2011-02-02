@@ -13,38 +13,11 @@
 #include "convert.h"
 #include "factory.h"
 #include "lock.h"
-#include "showConstructDestruct.h"
+#include "CDRMonitor.h"
 
 namespace epics { namespace pvData {
 
-static volatile int64 totalConstruct = 0;
-static volatile int64 totalDestruct = 0;
-static Mutex globalMutex;
-static bool notInited = true;
-
-static int64 getTotalConstruct()
-{
-    Lock xx(&globalMutex);
-    return totalConstruct;
-}
-
-static int64 getTotalDestruct()
-{
-    Lock xx(&globalMutex);
-    return totalDestruct;
-}
-
-static void init()
-{
-    static Mutex mutex = Mutex();
-    Lock xx(&globalMutex);
-    if(notInited) {
-        notInited = false;
-        ShowConstructDestruct::registerCallback(
-            String("pvAuxInfo"),
-            getTotalConstruct,getTotalDestruct,0,0);
-    }
-}
+PVDATA_REFCOUNT_MONITOR_DEFINE(pvAuxInfo);
 
 typedef std::map<String,PVScalar * >::const_iterator map_iterator;
 
@@ -61,14 +34,11 @@ public:
 PVAuxInfo::PVAuxInfo(PVField *pvField)
 : pImpl(new PVAuxInfoPvt(pvField))
 {
-    init();
-    Lock xx(&globalMutex);
-    totalConstruct++;
+    PVDATA_REFCOUNT_MONITOR_CONSTRUCT(pvAuxInfo);
 }
 
 PVAuxInfo::~PVAuxInfo() {
-    Lock xx(&globalMutex);
-    totalDestruct++;
+    PVDATA_REFCOUNT_MONITOR_DESTRUCT(pvAuxInfo);
     map_iterator i = pImpl->theMap.begin();
     while(i!=pImpl->theMap.end()) {
          PVScalar *value = i->second;

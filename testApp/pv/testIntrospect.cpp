@@ -13,13 +13,14 @@
 #include <cstdio>
 
 #include <epicsAssert.h>
+#include <epicsExit.h>
 
 #include "requester.h"
 #include "executor.h"
 #include "pvIntrospect.h"
 #include "pvData.h"
 #include "standardField.h"
-#include "showConstructDestruct.h"
+#include "CDRMonitor.h"
 
 using namespace epics::pvData;
 
@@ -147,7 +148,8 @@ int main(int argc,char *argv[])
     testScalarArray(fd);
     testSimpleStructure(fd);
     testStructureArray(fd);
-    getShowConstructDestruct()->showDeleteStaticExit(fd);
+    epicsExitCallAtExits();
+    CDRMonitor::get().show(fd);
     return(0);
 }
 

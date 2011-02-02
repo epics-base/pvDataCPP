@@ -17,11 +17,12 @@
 #include <cstdio>
 
 #include <epicsAssert.h>
+#include <epicsExit.h>
 #include "timeStamp.h"
 #include "event.h"
 #include "timer.h"
 #include "thread.h"
-#include "showConstructDestruct.h"
+#include "CDRMonitor.h"
 
 using namespace epics::pvData;
 
@@ -112,6 +113,7 @@ int main(int argc, char *argv[]) {
     oneDelay = .0;
     twoDelay = .0;
     testBasic(fd,auxfd);
-    getShowConstructDestruct()->showDeleteStaticExit(fd);
+    epicsExitCallAtExits();
+    CDRMonitor::get().show(fd);
     return (0);
 }

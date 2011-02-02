@@ -18,7 +18,7 @@ INC += serializeHelper.h
 INC += event.h
 INC += thread.h
 INC += executor.h
-INC += showConstructDestruct.h
+INC += CDRMonitor.h
 INC += timeFunction.h
 INC += timer.h
 INC += queueVoid.h
@@ -27,7 +27,7 @@ INC += messageQueue.h
 INC += destroyable.h
 INC += status.h
 
-LIBSRCS += showConstructDestruct.cpp
+LIBSRCS += CDRMonitor.cpp
 LIBSRCS += byteBuffer.cpp
 LIBSRCS += bitSet.cpp
 LIBSRCS += requester.cpp

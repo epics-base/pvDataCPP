@@ -15,39 +15,13 @@
 #include "lock.h"
 #include "requester.h"
 #include "noDefaultMethods.h"
-#include "showConstructDestruct.h"
+#include "CDRMonitor.h"
 #include "queue.h"
 #include "messageQueue.h"
 
 namespace epics { namespace pvData { 
 
-static volatile int64 totalQueueConstruct = 0;
-static volatile int64 totalQueueDestruct = 0;
-static Mutex globalMutex;
-static bool notInited = true;
-
-static int64 getTotalQueueConstruct()
-{
-    Lock xx(&globalMutex);
-    return totalQueueConstruct;
-}
-
-static int64 getTotalQueueDestruct()
-{
-    Lock xx(&globalMutex);
-    return totalQueueDestruct;
-}
-
-static void initPvt()
-{
-     Lock xx(&globalMutex);
-     if(notInited) {
-        notInited = false;
-        ShowConstructDestruct::registerCallback(
-            "messageQueue",
-            getTotalQueueConstruct,getTotalQueueDestruct,0,0);
-     }
-}
+PVDATA_REFCOUNT_MONITOR_DEFINE(messageQueue);
 
 typedef MessageNode * MessageNodePtr;
 typedef QueueElement<MessageNode> MessageElement;
@@ -79,9 +53,7 @@ public:
 MessageQueue::MessageQueue(int size)
 : pImpl(new MessageQueuePvt)
 {
-    initPvt();
-    Lock xx(&globalMutex);
-    totalQueueConstruct++;
+    PVDATA_REFCOUNT_MONITOR_CONSTRUCT(messageQueue);
     pImpl->size = size;
     pImpl->overrun = 0;
     pImpl->lastPut = 0;
@@ -100,8 +72,7 @@ MessageQueue::~MessageQueue()
         delete pImpl->messageNodeArray[i];
     }
     delete[] pImpl->messageNodeArray;
-    Lock xx(&globalMutex);
-    totalQueueDestruct++;
+    PVDATA_REFCOUNT_MONITOR_DESTRUCT(messageQueue);
 }
 
 MessageNode *MessageQueue::get() {

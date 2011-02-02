@@ -8,41 +8,16 @@
 #include <cstdlib>
 #include <string>
 #include <cstdio>
+#include "lock.h"
 #include "pvData.h"
 #include "factory.h"
-#include "showConstructDestruct.h"
+#include "CDRMonitor.h"
 
 namespace epics { namespace pvData {
 
 static String notImplemented("not implemented");
 
-static volatile int64 totalConstruct = 0;
-static volatile int64 totalDestruct = 0;
-static Mutex globalMutex;
-static bool notInited = true;
-
-static int64 getTotalConstruct()
-{
-    Lock xx(&globalMutex);
-    return totalConstruct;
-}
-
-static int64 getTotalDestruct()
-{
-    Lock xx(&globalMutex);
-    return totalDestruct;
-}
-
-static void init()
-{
-    Lock xx(&globalMutex);
-   if(notInited) {
-        notInited = false;
-        ShowConstructDestruct::registerCallback(
-            String("pvField"),
-            getTotalConstruct,getTotalDestruct,0,0);
-    }
-}
+PVDATA_REFCOUNT_MONITOR_DEFINE(pvField);
 
 class PVFieldPvt {
 public:
@@ -77,15 +52,12 @@ PVFieldPvt::~PVFieldPvt()
 PVField::PVField(PVStructure *parent,FieldConstPtr field)
 : pImpl(new PVFieldPvt(parent,field))
 {
-    init();
-    Lock xx(&globalMutex);
-    totalConstruct++;
+    PVDATA_REFCOUNT_MONITOR_CONSTRUCT(pvField);
 }
 
 PVField::~PVField()
 {
-    Lock xx(&globalMutex);
-    totalDestruct++;
+    PVDATA_REFCOUNT_MONITOR_DESTRUCT(pvField);
    delete pImpl;
 }
 

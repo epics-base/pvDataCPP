@@ -7,15 +7,15 @@
 #include <string>
 #include <cstdio>
 #include <stdexcept>
+#include <epicsThread.h>
+#include <epicsExit.h>
 #include <lock.h>
 #include "pvIntrospect.h"
 #include "standardField.h"
-#include "showConstructDestruct.h"
+#include "CDRMonitor.h"
 
 namespace epics { namespace pvData { 
 
-static Mutex globalMutex;
-static bool notInited = true;
 static StandardField* standardField = 0;
 
 static String notImplemented("not implemented");
@@ -462,7 +462,7 @@ StandardField::StandardField(){init();}
 StandardField::~StandardField(){
 }
 
-static void myDeleteStatic()
+static void myDeleteStatic(void*)
 {
     int count = alarmField->getReferenceCount();
     if(count!=1) printf("~StandardField() alarmField reference count %d\n",count);
@@ -502,16 +502,18 @@ static void myDeleteStatic()
     enumeratedAlarmField->decReferenceCount();
 }
 
+static void myInitStatic(void*)
+{
+    standardField = new StandardField();
+    fieldCreate = getFieldCreate();
+    epicsAtExit(&myDeleteStatic,0);
+}
+
+static
+epicsThreadOnceId myInitOnce = EPICS_THREAD_ONCE_INIT;
+
 StandardField * getStandardField() {
-    Lock xx(&globalMutex);
-    if(notInited) {
-        notInited = false;
-        standardField = new StandardField();
-        fieldCreate = getFieldCreate();
-        ShowConstructDestruct::registerCallback(
-            "standardField",
-            0,0,0,myDeleteStatic);
-    }
+    epicsThreadOnce(&myInitOnce,&myInitStatic,0);
     return standardField;
 }
 

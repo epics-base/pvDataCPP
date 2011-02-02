@@ -13,6 +13,7 @@
 #include <cstdio>
 
 #include <epicsAssert.h>
+#include <epicsExit.h>
 
 #include "requester.h"
 #include "pvIntrospect.h"
@@ -20,7 +21,7 @@
 #include "convert.h"
 #include "standardField.h"
 #include "standardPVField.h"
-#include "showConstructDestruct.h"
+#include "CDRMonitor.h"
 
 using namespace epics::pvData;
 
@@ -282,7 +283,8 @@ int main(int argc,char *argv[])
     testAppend(fd);
     testPVScalar(fd);
     testScalarArray(fd);
-    getShowConstructDestruct()->showDeleteStaticExit(fd);
+    epicsExitCallAtExits();
+    CDRMonitor::get().show(fd);
     return(0);
 }
 

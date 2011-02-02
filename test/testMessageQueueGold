@@ -1,7 +1,5 @@
 message 1 messageType info
 message 4 messageType info
-messageQueue:  totalConstruct 1 totalDestruct 1
-queueElement:  totalConstruct 3 totalDestruct 3
 queue:  totalConstruct 1 totalDestruct 1
-linkedListNode:  totalConstruct 4 totalDestruct 4
-linkedList:  totalConstruct 1 totalDestruct 1
+queueElement:  totalConstruct 3 totalDestruct 3
+messageQueue:  totalConstruct 1 totalDestruct 1

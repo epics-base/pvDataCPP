@@ -172,5 +172,3 @@ after compressstructure powerSupply
         int nanoSeconds 0
 field:  totalConstruct 102 totalDestruct 102
 pvField:  totalConstruct 88 totalDestruct 88
-linkedListNode:  totalConstruct 5 totalDestruct 5
-linkedList:  totalConstruct 1 totalDestruct 1

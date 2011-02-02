@@ -13,12 +13,13 @@
 
 #include <epicsAssert.h>
 
+#include <epicsExit.h>
 #include "pvIntrospect.h"
 #include "pvData.h"
 #include "serialize.h"
 #include "noDefaultMethods.h"
 #include "byteBuffer.h"
-#include "showConstructDestruct.h"
+#include "CDRMonitor.h"
 
 #define BYTE_MAX_VALUE 127
 #define BYTE_MIN_VALUE -128
@@ -639,7 +640,8 @@ int main(int argc, char *argv[]) {
     delete control;
     delete flusher;
 
-    getShowConstructDestruct()->showDeleteStaticExit(stdout);
+    epicsExitCallAtExits();
+    CDRMonitor::get().show(stdout);
     cout<<"\nDone!\n";
 
     return (0);

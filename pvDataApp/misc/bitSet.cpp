@@ -8,7 +8,7 @@
 #include "stdio.h"
 #include "bitSet.h"
 #include "lock.h"
-#include "showConstructDestruct.h"
+#include "CDRMonitor.h"
 #include "serializeHelper.h"
 
 namespace epics { namespace pvData {

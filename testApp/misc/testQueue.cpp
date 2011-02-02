@@ -17,11 +17,12 @@
 #include <cstdio>
 
 #include <epicsAssert.h>
+#include <epicsExit.h>
 
 #include "lock.h"
 #include "timeStamp.h"
 #include "queue.h"
-#include "showConstructDestruct.h"
+#include "CDRMonitor.h"
 #include "event.h"
 #include "thread.h"
 #include "executor.h"
@@ -155,7 +156,8 @@ int main(int argc, char *argv[]) {
         auxfd = fopen(auxFileName,"w+");
     }
     testBasic(fd,auxfd);
-    getShowConstructDestruct()->showDeleteStaticExit(fd);
+    epicsExitCallAtExits();
+    CDRMonitor::get().show(fd);
     return (0);
 }
  
