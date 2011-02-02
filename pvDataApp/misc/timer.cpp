@@ -26,82 +26,66 @@ namespace epics { namespace pvData {
 PVDATA_REFCOUNT_MONITOR_DEFINE(timerNode);
 PVDATA_REFCOUNT_MONITOR_DEFINE(timer);
 
-class TimerNodePvt;
+typedef LinkedListNode<TimerNode::Pvt> TimerListNode;
+typedef LinkedList<TimerNode::Pvt> TimerList;
 
-typedef LinkedListNode<TimerNodePvt> TimerListNode;
-typedef LinkedList<TimerNodePvt> TimerList;
-
-class TimerNodePvt {
+class TimerNode::Pvt {
 public:
     TimerNode *timerNode;
     TimerCallback *callback;
-    TimerListNode *timerListNode;
+    TimerListNode timerListNode;
     TimeStamp timeToRun;
-    TimerPvt *timerPvt;
+    Timer::Pvt *timerPvt;
     double period;
-    TimerNodePvt(TimerNode *timerNode,TimerCallback *callback);
-    ~TimerNodePvt();
+    Pvt(TimerNode *timerNode,TimerCallback *callback);
 };
 
-TimerNodePvt::TimerNodePvt(TimerNode *timerNode,TimerCallback *callback)
+TimerNode::Pvt::Pvt(TimerNode *timerNode,TimerCallback *callback)
 : timerNode(timerNode),callback(callback),
-  timerListNode(new TimerListNode(this)),timeToRun(TimeStamp()),
+  timerListNode(this),timeToRun(),
   timerPvt(0), period(0.0)
 {}
 
-TimerNodePvt::~TimerNodePvt()
-{
-    delete timerListNode;
-}
-
-struct TimerPvt : public Runnable{
+struct Timer::Pvt : public Runnable{
 public:
-    TimerPvt(String threadName,ThreadPriority priority);
-    ~TimerPvt();
+    Pvt(String threadName,ThreadPriority priority);
     virtual void run();
 public: // only used by this source module
-    TimerList *timerList;
+    TimerList timerList;
     Mutex mutex;
-    Event *waitForWork;
-    Event *waitForDone;
+    Event waitForWork;
+    Event waitForDone;
     volatile bool alive;
-    Thread *thread;
+    Thread thread;
+
+    void addElement(TimerNode::Pvt *node);
 };
 
-TimerPvt::TimerPvt(String threadName,ThreadPriority priority)
-: timerList(new TimerList()),
+Timer::Pvt::Pvt(String threadName,ThreadPriority priority)
+: timerList(),
   mutex(Mutex()),
-  waitForWork(new Event(false)),
-  waitForDone(new Event(false)),
+  waitForWork(false),
+  waitForDone(false),
   alive(true),
-  thread(new Thread(threadName,priority,this))
+  thread(threadName,priority,this)
 {}
 
-TimerPvt::~TimerPvt()
+void Timer::Pvt::addElement(TimerNode::Pvt *node)
 {
-    delete thread;
-    delete waitForDone;
-    delete waitForWork;
-    delete timerList;
-}
-
-static void addElement(TimerPvt *timer,TimerNodePvt *node)
-{
-    TimerList *timerList = timer->timerList;
-    TimerListNode *nextNode = timerList->getHead();
+    TimerListNode *nextNode = timerList.getHead();
     if(nextNode==0) {
-        timerList->addTail(node->timerListNode);
+        timerList.addTail(&node->timerListNode);
         return;
     }
     while(true) {
-        TimerNodePvt *timerListNode = nextNode->getObject();
+        TimerNode::Pvt *timerListNode = nextNode->getObject();
         if((node->timeToRun)<(timerListNode->timeToRun)) {
-            timerList->insertBefore(timerListNode->timerListNode,node->timerListNode);
+            timerList.insertBefore(&timerListNode->timerListNode,&node->timerListNode);
             return;
         } 
-        nextNode = timerList->getNext(timerListNode->timerListNode);
+        nextNode = timerList.getNext(&timerListNode->timerListNode);
         if(nextNode==0) {
-            timerList->addTail(node->timerListNode);
+            timerList.addTail(&node->timerListNode);
             return;
         }
     }
@@ -109,7 +93,7 @@ static void addElement(TimerPvt *timer,TimerNodePvt *node)
 
 
 TimerNode::TimerNode(TimerCallback *callback)
-: pImpl(new TimerNodePvt(this,callback))
+: pImpl(new Pvt(this,callback))
 {
     PVDATA_REFCOUNT_MONITOR_CONSTRUCT(timerNode);
 }
@@ -118,56 +102,55 @@ TimerNode::TimerNode(TimerCallback *callback)
 TimerNode::~TimerNode()
 {
     cancel();
-    delete pImpl;
     PVDATA_REFCOUNT_MONITOR_DESTRUCT(timerNode);
 }
 
 void TimerNode::cancel()
 {
-    TimerPvt *timerPvt = pImpl->timerPvt;
+    Timer::Pvt *timerPvt = pImpl->timerPvt;
     if(timerPvt==0) return;
     Lock xx(&timerPvt->mutex);
     if(pImpl->timerPvt==0) return;
-    pImpl->timerPvt->timerList->remove(pImpl);
+    pImpl->timerPvt->timerList.remove(pImpl.get());
     pImpl->timerPvt = 0;
 }
 
 bool TimerNode::isScheduled()
 {
-    TimerPvt *pvt = pImpl->timerPvt;
+    Timer::Pvt *pvt = pImpl->timerPvt;
     if(pvt==0) return false;
     Lock xx(&pvt->mutex);
-    return pImpl->timerListNode->isOnList();
+    return pImpl->timerListNode.isOnList();
 }
 
 
-void TimerPvt::run()
+void Timer::Pvt::run()
 {
     TimeStamp currentTime;
     while(alive) {
          currentTime.getCurrent();
          TimeStamp *timeToRun = 0;
          double period = 0.0;
-         TimerNodePvt *nodeToCall = 0;
+         TimerNode::Pvt *nodeToCall = 0;
          {
              Lock xx(&mutex);
-             TimerListNode *timerListNode = timerList->getHead();
+             TimerListNode *timerListNode = timerList.getHead();
              if(timerListNode!=0) {
-                 TimerNodePvt *timerNodePvt = timerListNode->getObject();
+                 TimerNode::Pvt *timerNodePvt = timerListNode->getObject();
                  timeToRun = &timerNodePvt->timeToRun;
                  double diff = TimeStamp::diff(
                      *timeToRun,currentTime);
                  if(diff<=0.0) {
                      nodeToCall = timerNodePvt;
-                     timerList->removeHead();
+                     timerList.removeHead();
                      period = timerNodePvt->period;
                      if(period>0.0) {
                          timerNodePvt->timeToRun += period;
-                         addElement(this,timerNodePvt);
+                         addElement(timerNodePvt);
                      } else {
                          timerNodePvt->timerPvt = 0;
                      }
-                     timerListNode = timerList->getHead();
+                     timerListNode = timerList.getHead();
                      if(timerListNode!=0) {
                          timerNodePvt = timerListNode->getObject();
                          timeToRun = &timerNodePvt->timeToRun;
@@ -182,17 +165,17 @@ void TimerPvt::run()
          }
          if(!alive) break;
          if(timeToRun==0) {
-            waitForWork->wait();
+            waitForWork.wait();
          } else {
              double delay = TimeStamp::diff(*timeToRun,currentTime);
-             waitForWork->wait(delay);
+             waitForWork.wait(delay);
          }
     } 
-    waitForDone->signal();
+    waitForDone.signal();
 }
 
 Timer::Timer(String threadName, ThreadPriority priority)
-: pImpl(new TimerPvt(threadName,priority))
+: pImpl(new Pvt(threadName,priority))
 {
     PVDATA_REFCOUNT_MONITOR_CONSTRUCT(timer);
 }
@@ -202,14 +185,12 @@ Timer::~Timer() {
          Lock xx(&pImpl->mutex);
          pImpl->alive = false;
     }
-    pImpl->waitForWork->signal();
-    pImpl->waitForDone->wait();
-    TimerList *timerList = pImpl->timerList;
+    pImpl->waitForWork.signal();
+    pImpl->waitForDone.wait();
     TimerListNode *node = 0;
-    while((node = timerList->removeHead())!=0) {
+    while((node = pImpl->timerList.removeHead())!=0) {
         node->getObject()->callback->timerStopped();
     }
-    delete pImpl;
     PVDATA_REFCOUNT_MONITOR_DESTRUCT(timer);
 }
 
@@ -219,8 +200,8 @@ void Timer::scheduleAfterDelay(TimerNode *timerNode,double delay)
 }
 void Timer::schedulePeriodic(TimerNode *timerNode,double delay,double period)
 {
-    TimerNodePvt *timerNodePvt = timerNode->pImpl;
-    if(timerNodePvt->timerListNode->isOnList()) {
+    TimerNode::Pvt *timerNodePvt = timerNode->pImpl.get();
+    if(timerNodePvt->timerListNode.isOnList()) {
         throw std::logic_error(String("already queued"));
     }
     if(!pImpl->alive) {
@@ -234,12 +215,12 @@ void Timer::schedulePeriodic(TimerNode *timerNode,double delay,double period)
     bool isFirst = false;
     {
         Lock xx(&pImpl->mutex);
-        timerNodePvt->timerPvt = pImpl;
-        addElement(pImpl,timerNodePvt);
-        TimerNodePvt *first = pImpl->timerList->getHead()->getObject();
+        timerNodePvt->timerPvt = pImpl.get();
+        pImpl->addElement(timerNodePvt);
+        TimerNode::Pvt *first = pImpl->timerList.getHead()->getObject();
         if(first==timerNodePvt) isFirst = true;
     }
-    if(isFirst) pImpl->waitForWork->signal();
+    if(isFirst) pImpl->waitForWork.signal();
 }
 
 }}

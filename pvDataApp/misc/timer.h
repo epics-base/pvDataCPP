@@ -6,6 +6,7 @@
  */
 #ifndef TIMER_H
 #define TIMER_H
+#include <memory>
 #include <stddef.h>
 #include <stdlib.h>
 #include <stddef.h>
@@ -17,6 +18,8 @@
 #include "noDefaultMethods.h"
 
 namespace epics { namespace pvData { 
+
+class Timer;
 
 class TimerCallback {
 public:
@@ -30,8 +33,10 @@ public:
     ~TimerNode();
     void cancel();
     bool isScheduled();
+
+    class Pvt;
 private:
-    class TimerNodePvt *pImpl;
+    std::auto_ptr<Pvt> pImpl;
     friend class Timer;
 };
 
@@ -41,9 +46,10 @@ public:
     ~Timer();
     void scheduleAfterDelay(TimerNode *timerNode,double delay);
     void schedulePeriodic(TimerNode *timerNode,double delay,double period);
+
+    class Pvt;
 private:
-    class TimerPvt *pImpl;
-    friend class TimerNode;
+    std::auto_ptr<Pvt> pImpl;
 };
 
 }}
