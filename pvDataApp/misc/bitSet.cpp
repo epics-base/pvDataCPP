@@ -13,58 +13,24 @@
 
 namespace epics { namespace pvData {
  
-    //static DebugLevel debugLevel = lowDebug;
-
-    static Mutex globalMutex;
-
-    static volatile int64 totalConstruct = 0;
-    static volatile int64 totalDestruct = 0;
-    static bool notInited = true;
-    
-    static int64 getTotalConstruct()
-    {
-        Lock xx(&globalMutex);
-        return totalConstruct;
-    }
-    
-    static int64 getTotalDestruct()
-    {
-        Lock xx(&globalMutex);
-        return totalDestruct;
-    }
-    
-    static void init()
-    {
-         Lock xx(&globalMutex);
-         if(notInited) {
-            notInited = false;
-            ShowConstructDestruct::registerCallback(
-                String("bitSet"),
-                getTotalConstruct,getTotalDestruct,0,0);
-         }
-    }
+    PVDATA_REFCOUNT_MONITOR_DEFINE(bitSet);
     
     BitSet::BitSet() : words(0), wordsLength(0), wordsInUse(0) {
         initWords(BITS_PER_WORD);
 
-        init();
-        Lock xx(&globalMutex);
-        totalConstruct++;
+        PVDATA_REFCOUNT_MONITOR_CONSTRUCT(bitSet);
     }
 
     BitSet::BitSet(uint32 nbits) : words(0), wordsLength(0), wordsInUse(0) {
         initWords(nbits);
 
-        init();
-        Lock xx(&globalMutex);
-        totalConstruct++;
+        PVDATA_REFCOUNT_MONITOR_CONSTRUCT(bitSet);
     }
 
     BitSet::~BitSet() {
         delete[] words;
 
-        Lock xx(&globalMutex);
-        totalDestruct++;
+        PVDATA_REFCOUNT_MONITOR_DESTRUCT(bitSet);
     }
 
     void BitSet::initWords(uint32 nbits) {

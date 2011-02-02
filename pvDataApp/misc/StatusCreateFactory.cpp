@@ -15,37 +15,11 @@
 #include "status.h"
 #include "serializeHelper.h"
 
+#include <epicsThread.h>
+
 namespace epics { namespace pvData {
 
-//static DebugLevel debugLevel = lowDebug;
-
-static volatile int64 totalConstruct = 0;
-static volatile int64 totalDestruct = 0;
-static Mutex globalMutex;
-static bool notInited = true;
-
-static int64 getTotalConstruct()
-{
-    Lock xx(&globalMutex);
-    return totalConstruct;
-}
-
-static int64 getTotalDestruct()
-{
-    Lock xx(&globalMutex);
-    return totalDestruct;
-}
-
-static void init()
-{
-     Lock xx(&globalMutex);
-     if(notInited) {
-        notInited = false;
-        ShowConstructDestruct::registerCallback(
-            String("status"),
-            getTotalConstruct,getTotalDestruct,0,0);
-     }
-}
+PVDATA_REFCOUNT_MONITOR_DEFINE(status);
 
 class StatusImpl : public Status
 {
@@ -54,20 +28,17 @@ class StatusImpl : public Status
     StatusImpl(StatusType type, String message) :
         m_type(type), m_message(message)
     {
-        Lock xx(&globalMutex);
-        totalConstruct++;
+        PVDATA_REFCOUNT_MONITOR_CONSTRUCT(status);
     }
 
     StatusImpl(StatusType type, String message, String stackDump) :
         m_type(type), m_message(message), m_stackDump(stackDump)
     {
-        Lock xx(&globalMutex);
-        totalConstruct++;
+        PVDATA_REFCOUNT_MONITOR_CONSTRUCT(status);
     }
     
     virtual ~StatusImpl() {
-        Lock xx(&globalMutex);
-        totalDestruct++;
+        PVDATA_REFCOUNT_MONITOR_DESTRUCT(status);
     }
     
     virtual StatusType getType()
@@ -152,13 +123,14 @@ class StatusImpl : public Status
 
 
 
+static epicsThreadOnceId statusFactoryInit = EPICS_THREAD_ONCE_INIT;
+
 
 class StatusCreateImpl : public StatusCreate {
     public:
     
     StatusCreateImpl()
     {
-        init();
         m_ok = createStatus(STATUSTYPE_OK, "OK", 0);
     }
 
@@ -192,22 +164,32 @@ class StatusCreateImpl : public StatusCreate {
 		}
     }
 
+    static StatusCreateImpl* getInstance()
+    {
+        epicsThreadOnce(&statusFactoryInit, &StatusCreateImpl::init, 0);
+        assert(singleton);
+        return singleton;
+    }
+
     private:
     
     Status* m_ok;
+    
+    static StatusCreateImpl *singleton;
+    
+    static void init(void*) {
+        singleton = new StatusCreateImpl();
+    }
+    
 };
 
 
 
 
-static StatusCreate* statusCreate = 0;
+StatusCreateImpl* StatusCreateImpl::singleton = 0;
 
 StatusCreate* getStatusCreate() {
-    static Mutex mutex;
-    Lock xx(&mutex);
-
-    if(statusCreate==0) statusCreate = new StatusCreateImpl();
-    return statusCreate;
+    return StatusCreateImpl::getInstance();
 }
 
 }}
