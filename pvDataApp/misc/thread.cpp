@@ -44,9 +44,8 @@ static String threadPriorityNames[] = {
     String("high"),String("higher"),String("highest")
 };
 
-class ThreadListElement;
-typedef LinkedListNode<ThreadListElement> ThreadListNode;
-typedef LinkedList<ThreadListElement> ThreadList;
+typedef LinkedListNode<Thread> ThreadListNode;
+typedef LinkedList<Thread> ThreadList;
 
 PVDATA_REFCOUNT_MONITOR_DEFINE(thread);
 
@@ -67,86 +66,77 @@ static void init(void*)
 static
 epicsThreadOnceId initOnce = EPICS_THREAD_ONCE_INIT;
 
-
-class ThreadListElement {
-public:
-    ThreadListElement(Thread *thread) : thread(thread),node(new ThreadListNode(this)){}
-    ~ThreadListElement(){delete node;}
-    Thread *thread;
-    ThreadListNode *node;
-};
-
-
 int ThreadPriorityFunc::getEpicsPriority(ThreadPriority threadPriority) {
         return epicsPriority[threadPriority];
 }
 
-extern  "C" void myFunc ( void * pPvt );
 
-
-class ThreadPvt {
+class Thread::ThreadPvt {
 public:
     ThreadPvt(Thread *thread,String name,
         ThreadPriority priority, Runnable*runnable);
-    virtual ~ThreadPvt();
+    ~ThreadPvt();
     void ready();
-public: // only used within this source module
-    Thread *thread;
-    String name;
-    ThreadPriority priority;
+    const String name;
+    const ThreadPriority priority;
+private:
     Runnable *runnable;
     bool isReady;
-    ThreadListElement *threadListElement;
-    Event *waitDone;
+    ThreadListNode threadNode;
+    Event waitDone;
     epicsThreadId id;
+
+    static void threadMain(void*);
 };
 
-extern "C" void myFunc ( void * pPvt )
+void Thread::ThreadPvt::threadMain ( void * pPvt )
 {
     ThreadPvt *threadPvt = (ThreadPvt *)pPvt;
     threadPvt->runnable->run();
-    threadPvt->waitDone->signal();
+    threadPvt->waitDone.signal();
 }
 
-ThreadPvt::ThreadPvt(Thread *thread,String name,
+Thread::ThreadPvt::ThreadPvt(Thread *thread,String name,
     ThreadPriority priority, Runnable *runnable)
-: thread(thread),name(name),priority(priority),
+: name(name),priority(priority),
   runnable(runnable),
   isReady(false),
-  threadListElement(new ThreadListElement(thread)),
-  waitDone(new Event()),
+  threadNode(thread),
+  waitDone(),
   id(epicsThreadCreate(
         name.c_str(),
         epicsPriority[priority],
         epicsThreadGetStackSize(epicsThreadStackSmall),
-        myFunc,this))
+        &threadMain,this))
 {
+    if(!id) {
+        throw std::runtime_error("Unable to create thread");
+    }
     epicsThreadOnce(&initOnce, &init, 0);
+    assert(threadList);
     PVDATA_REFCOUNT_MONITOR_CONSTRUCT(thread);
     Lock x(&listGuard);
-    threadList->addTail(threadListElement->node);
+    threadList->addTail(&threadNode);
 }
 
-ThreadPvt::~ThreadPvt()
+Thread::ThreadPvt::~ThreadPvt()
 {
-    bool result = waitDone->wait(2.0);
+    bool result = waitDone.wait(2.0);
     if(!result) {
         throw std::logic_error(String("delete thread but run did not return"));
         String message("destroy thread ");
-        message += thread->getName();
+        message += name;
         message += " but run did not return";
         throw std::logic_error(message);
     }
-    if(!threadListElement->node->isOnList()) {
+    if(!threadNode.isOnList()) {
         String message("destroy thread ");
-        message += thread->getName();
+        message += name;
         message += " is not on threadlist";
         throw std::logic_error(message);
     }
     Lock x(&listGuard);
-    threadList->remove(threadListElement->node);
-    delete waitDone;
-    delete threadListElement;
+    threadList->remove(&threadNode);
     PVDATA_REFCOUNT_MONITOR_DESTRUCT(thread);
 }
 
@@ -155,10 +145,8 @@ Thread::Thread(String name,ThreadPriority priority,Runnable *runnable)
 {
 }
 
-Thread::~Thread()
-{
-   delete pImpl;
-}
+// Must be present or auto_ptr<> will not delete ThreadPvt
+Thread::~Thread() {}
 
 void Thread::sleep(double seconds)
 {
@@ -180,7 +168,7 @@ void Thread::showThreads(StringBuilder buf)
     Lock x(&listGuard);
     ThreadListNode *node = threadList->getHead();    
     while(node!=0) {
-        Thread *thread = node->getObject()->thread;
+        Thread *thread = node->getObject();
         *buf += thread->getName();
         *buf += " ";
         *buf += threadPriorityNames[thread->getPriority()];

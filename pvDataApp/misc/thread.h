@@ -6,6 +6,7 @@
  */
 #ifndef THREAD_H
 #define THREAD_H
+#include <memory>
 #include "noDefaultMethods.h"
 #include "pvType.h"
 
@@ -43,8 +44,8 @@ public:
     static void showThreads(StringBuilder buf);
     static void sleep(double seconds);
 private:
-    class ThreadPvt *pImpl;
-    friend class ThreadPvt;
+    class ThreadPvt;
+    std::auto_ptr<ThreadPvt> pImpl;
 };
 
 }}
