@@ -22,24 +22,8 @@ class PostHandler;
 
 class PVField;
 class PVScalar;
-class PVBoolean;
-class PVByte;
-class PVShort;
-class PVInt;
-class PVLong;
-class PVFloat;
-class PVDouble;
-class PVString;
 
 class PVScalarArray;
-class PVBooleanArray;
-class PVByteArray;
-class PVShortArray;
-class PVIntArray;
-class PVLongArray;
-class PVFloatArray;
-class PVDoubleArray;
-class PVStringArray;
 
 class PVStructure;
 class PVStructureArray;
@@ -113,6 +97,31 @@ protected:
     PVScalar(PVStructure *parent,ScalarConstPtr scalar);
 };
 
+template<typename T>
+class PVScalarValue : public PVScalar {
+public:
+    typedef T value_type;
+    typedef T* pointer;
+    typedef const T* const_pointer;
+
+    virtual ~PVScalarValue() {}
+    virtual T get() = 0;
+    virtual void put(T value) = 0;
+protected:
+    PVScalarValue(PVStructure *parent,ScalarConstPtr scalar)
+    : PVScalar(parent,scalar) {}
+private:
+};
+
+typedef PVScalarValue<bool> PVBoolean;
+typedef PVScalarValue<int8> PVByte;
+typedef PVScalarValue<int16> PVShort;
+typedef PVScalarValue<int32> PVInt;
+typedef PVScalarValue<int64> PVLong;
+typedef PVScalarValue<float> PVFloat;
+typedef PVScalarValue<double> PVDouble;
+typedef PVScalarValue<String> PVString;
+
 class PVArray : public PVField, public SerializableArray {
 public:
     virtual ~PVArray();
@@ -135,6 +144,17 @@ private:
     class PVArrayPvt * pImpl;
 };
 
+template<typename T>
+class PVArrayData {
+public:
+    typedef T  value_type;
+    typedef T* pointer;
+    typedef const T* const_pointer;
+
+    pointer data;
+    int offset;
+};
+
 
 class PVScalarArray : public PVArray {
 public:
@@ -152,11 +172,7 @@ protected:
 private:
 };
 
-class StructureArrayData {
-public:
-    PVStructurePtrArray data;
-    int offset;
-};
+typedef PVArrayData<PVStructurePtr> StructureArrayData;
 
 class PVStructureArray : public PVArray {
 public:
@@ -227,267 +243,51 @@ private:
     class PVStructurePvt * pImpl;
 };
 
-class PVBoolean : public PVScalar {
+template<typename T>
+class PVValueArray : public PVScalarArray {
 public:
-    virtual ~PVBoolean() {}
-    virtual bool get() = 0;
-    virtual void put(bool value) = 0;
-protected:
-    PVBoolean(PVStructure *parent,ScalarConstPtr scalar)
-    : PVScalar(parent,scalar) {}
-private:
-};
+    typedef T  value_type;
+    typedef T* pointer;
+    typedef const T* const_pointer;
+    typedef PVArrayData<T> ArrayDataType;
 
-class PVByte : public PVScalar {
-public:
-    virtual ~PVByte() {}
-    virtual int8 get() = 0;
-    virtual void put(int8 value) = 0;
-protected:
-    PVByte(PVStructure *parent,ScalarConstPtr scalar)
-    : PVScalar(parent,scalar) {}
-private:
-};
-
-class PVShort : public PVScalar {
-public:
-    virtual ~PVShort() {}
-    virtual int16 get() = 0;
-    virtual void put(int16 value) = 0;
-protected:
-    PVShort(PVStructure *parent,ScalarConstPtr scalar)
-    : PVScalar(parent,scalar) {}
-private:
-};
-
-class PVInt : public PVScalar{
-public:
-    virtual ~PVInt() {}
-    virtual int32 get() = 0;
-    virtual void put(int32 value) = 0;
-protected:
-    PVInt(PVStructure *parent,ScalarConstPtr scalar)
-    : PVScalar(parent,scalar) {}
-private:
-};
-
-class PVLong : public PVScalar {
-public:
-    virtual ~PVLong() {}
-    virtual int64 get() = 0;
-    virtual void put(int64 value) = 0;
-protected:
-    PVLong(PVStructure *parent,ScalarConstPtr scalar)
-    : PVScalar(parent,scalar) {}
-private:
-};
-
-class PVFloat : public PVScalar {
-public:
-    virtual ~PVFloat() {}
-    virtual float get() = 0;
-    virtual void put(float value) = 0;
-protected:
-    PVFloat(PVStructure *parent,ScalarConstPtr scalar)
-    : PVScalar(parent,scalar) {}
-private:
-};
-
-class PVDouble : public PVScalar {
-public:
-    virtual ~PVDouble() {}
-    virtual double get() = 0;
-    virtual void put(double value) = 0;
-protected:
-    PVDouble(PVStructure *parent,ScalarConstPtr scalar)
-    : PVScalar(parent,scalar) {}
-private:
-};
-
-class PVString : public PVScalar {
-public:
-    virtual ~PVString() {}
-    virtual String get() = 0;
-    virtual void put(String value) = 0;
-protected:
-    PVString(PVStructure *parent,ScalarConstPtr scalar)
-    : PVScalar(parent,scalar) {}
-private:
-};
-
-class BooleanArrayData {
-public:
-    BooleanArray data;
-    int offset;
-};
-
-class PVBooleanArray : public PVScalarArray {
-public:
-    virtual ~PVBooleanArray() {}
+    virtual ~PVValueArray() {}
     virtual void setCapacity(int capacity) = 0;
-    virtual int get(int offset, int length, BooleanArrayData *data) = 0;
-    virtual int put(int offset,int length, BooleanArray from, int fromOffset) = 0;
-    virtual void shareData(BooleanArray value,int capacity,int length) = 0;
+    virtual int get(int offset, int length, ArrayDataType *data) = 0;
+    virtual int put(int offset,int length, pointer from, int fromOffset) = 0;
+    virtual void shareData(pointer value,int capacity,int length) = 0;
     virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) = 0;
     virtual void deserialize(ByteBuffer *pbuffer,DeserializableControl *pflusher) = 0;
 protected:
-    PVBooleanArray(PVStructure *parent,ScalarArrayConstPtr scalar)
+    PVValueArray(PVStructure *parent,ScalarArrayConstPtr scalar)
     : PVScalarArray(parent,scalar) {}
 private:
 };
 
+typedef PVArrayData<bool> BooleanArrayData;
+typedef PVValueArray<bool> PVBooleanArray;
 
-class ByteArrayData {
-public:
-    ByteArray data;
-    int offset;
-};
+typedef PVArrayData<int8> ByteArrayData;
+typedef PVValueArray<int8> PVByteArray;
 
-class PVByteArray : public PVScalarArray {
-public:
-    virtual ~PVByteArray() {}
-    virtual void setCapacity(int capacity) = 0;
-    virtual int get(int offset, int length, ByteArrayData *data) = 0;
-    virtual int put(int offset,int length, ByteArray  from, int fromOffset) = 0;
-    virtual void shareData(ByteArray value,int capacity,int length) = 0;
-    virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) = 0;
-    virtual void deserialize(ByteBuffer *pbuffer,DeserializableControl *pflusher) = 0;
-protected:
-    PVByteArray(PVStructure *parent,ScalarArrayConstPtr scalar)
-    : PVScalarArray(parent,scalar) {}
-private:
-};
+typedef PVArrayData<int16> ShortArrayData;
+typedef PVValueArray<int16> PVShortArray;
 
-class ShortArrayData {
-public:
-    ShortArray data;
-    int offset;
-};
+typedef PVArrayData<int32> IntArrayData;
+typedef PVValueArray<int32> PVIntArray;
 
-class PVShortArray : public PVScalarArray {
-public:
-    virtual ~PVShortArray() {}
-    virtual void setCapacity(int capacity) = 0;
-    virtual int get(int offset, int length, ShortArrayData *data) = 0;
-    virtual int put(int offset,int length, ShortArray  from, int fromOffset) = 0;
-    virtual void shareData(ShortArray value,int capacity,int length) = 0;
-    virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) = 0;
-    virtual void deserialize(ByteBuffer *pbuffer,DeserializableControl *pflusher) = 0;
-protected:
-    PVShortArray(PVStructure *parent,ScalarArrayConstPtr scalar)
-    : PVScalarArray(parent,scalar) {}
-private:
-};
-
-class IntArrayData {
-public:
-    IntArray data;
-    int offset;
-};
-
-class PVIntArray : public PVScalarArray {
-public:
-    virtual ~PVIntArray() {}
-    virtual void setCapacity(int capacity) = 0;
-    virtual int get(int offset, int length, IntArrayData *data) = 0;
-    virtual int put(int offset,int length, IntArray  from, int fromOffset)= 0;
-    virtual void shareData(IntArray value,int capacity,int length)= 0;
-    virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) = 0;
-    virtual void deserialize(ByteBuffer *pbuffer,DeserializableControl *pflusher)= 0;
-protected:
-    PVIntArray(PVStructure *parent,ScalarArrayConstPtr scalar)
-    : PVScalarArray(parent,scalar) {}
-private:
-};
-
-class LongArrayData {
-public:
-    LongArray data;
-    int offset;
-};
-
-class PVLongArray : public PVScalarArray {
-public:
-    virtual ~PVLongArray() {}
-    virtual void setCapacity(int capacity) = 0;
-    virtual int get(int offset, int length, LongArrayData *data) = 0;
-    virtual int put(int offset,int length, LongArray  from, int fromOffset)= 0;
-    virtual void shareData(LongArray value,int capacity,int length)= 0;
-    virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) = 0;
-    virtual void deserialize(ByteBuffer *pbuffer,DeserializableControl *pflusher)= 0;
-protected:
-    PVLongArray(PVStructure *parent,ScalarArrayConstPtr scalar)
-    : PVScalarArray(parent,scalar) {}
-private:
-};
+typedef PVArrayData<int64> LongArrayData;
+typedef PVValueArray<int64> PVLongArray;
 
 
-class FloatArrayData {
-public:
-    FloatArray data;
-    int offset;
-};
+typedef PVArrayData<float> FloatArrayData;
+typedef PVValueArray<float> PVFloatArray;
 
-class PVFloatArray : public PVScalarArray {
-public:
-    virtual ~PVFloatArray() {}
-    virtual void setCapacity(int capacity) = 0;
-    virtual int get(int offset, int length, FloatArrayData *data) = 0;
-    virtual int put(int offset,int length, FloatArray  from, int fromOffset)= 0;
-    virtual void shareData(FloatArray value,int capacity,int length)= 0;
-    virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) = 0;
-    virtual void deserialize(ByteBuffer *pbuffer,DeserializableControl *pflusher)= 0;
-protected:
-    PVFloatArray(PVStructure *parent,ScalarArrayConstPtr scalar)
-    : PVScalarArray(parent,scalar) {}
-private:
-};
+typedef PVArrayData<double> DoubleArrayData;
+typedef PVValueArray<double> PVDoubleArray;
 
-
-class DoubleArrayData {
-public:
-    DoubleArrayData(){}
-    ~DoubleArrayData(){};
-    DoubleArray data;
-    int offset;
-};
-
-class PVDoubleArray : public PVScalarArray {
-public:
-    virtual ~PVDoubleArray() {}
-    virtual void setCapacity(int capacity) = 0;
-    virtual int get(int offset, int length, DoubleArrayData *data) = 0;
-    virtual int put(int offset,int length, DoubleArray  from, int fromOffset) = 0;
-    virtual void shareData(DoubleArray value,int capacity,int length) = 0;
-    virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) = 0;
-    virtual void deserialize(ByteBuffer *pbuffer,DeserializableControl *pflusher) = 0;
-protected:
-    PVDoubleArray(PVStructure *parent,ScalarArrayConstPtr scalar)
-    : PVScalarArray(parent,scalar) {}
-private:
-};
-
-
-class StringArrayData {
-public:
-    StringArray data;
-    int offset;
-};
-
-class PVStringArray : public PVScalarArray {
-public:
-    virtual ~PVStringArray() {}
-    virtual void setCapacity(int capacity) = 0;
-    virtual int get(int offset, int length, StringArrayData *data) = 0;
-    virtual int put(int offset,int length, StringArray  from, int fromOffset)= 0;
-    virtual void shareData(StringArray value,int capacity,int length)= 0;
-    virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) = 0;
-    virtual void deserialize(ByteBuffer *pbuffer,DeserializableControl *pflusher)= 0;
-protected:
-    PVStringArray(PVStructure *parent,ScalarArrayConstPtr scalar)
-    : PVScalarArray(parent,scalar) {}
-private:
-};
+typedef PVArrayData<String> StringArrayData;
+typedef PVValueArray<String> PVStringArray;
 
 class PVDataCreate {
 public:
