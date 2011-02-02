@@ -20,7 +20,7 @@
 #include "pvType.h"
 #include "lock.h"
 #include "event.h"
-#include "showConstructDestruct.h"
+#include "CDRMonitor.h"
 
 namespace epics { namespace pvData { 
 

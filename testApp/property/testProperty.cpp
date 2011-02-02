@@ -30,7 +30,7 @@
 #include "pvDisplay.h"
 #include "pvEnumerated.h"
 #include "pvTimeStamp.h"
-#include "showConstructDestruct.h"
+#include "CDRMonitor.h"
 
 using namespace epics::pvData;
 

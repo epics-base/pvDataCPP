@@ -12,7 +12,7 @@
 #include "pvIntrospect.h"
 #include "convert.h"
 #include "factory.h"
-#include "showConstructDestruct.h"
+#include "CDRMonitor.h"
 
 namespace epics { namespace pvData {
 

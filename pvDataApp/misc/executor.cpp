@@ -17,7 +17,7 @@
 #include "thread.h"
 #include "event.h"
 #include "executor.h"
-#include "showConstructDestruct.h"
+#include "CDRMonitor.h"
 
 namespace epics { namespace pvData {
 

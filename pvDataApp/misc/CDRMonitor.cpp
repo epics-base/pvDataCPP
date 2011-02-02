@@ -1,4 +1,4 @@
-/* showConstructDestruct.cpp */
+/* CDRMonitor.cpp */
 /**
  * Copyright - See the COPYRIGHT that is included with this distribution.
  * EPICS pvDataCPP is distributed subject to a Software License Agreement found
@@ -17,7 +17,7 @@
 #include "lock.h"
 #include "pvType.h"
 #include "linkedList.h"
-#include "showConstructDestruct.h"
+#include "CDRMonitor.h"
 
 namespace epics { namespace pvData {
 

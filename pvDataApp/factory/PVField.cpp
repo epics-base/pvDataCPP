@@ -11,7 +11,7 @@
 #include "lock.h"
 #include "pvData.h"
 #include "factory.h"
-#include "showConstructDestruct.h"
+#include "CDRMonitor.h"
 
 namespace epics { namespace pvData {
 

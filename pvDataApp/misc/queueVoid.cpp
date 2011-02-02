@@ -14,7 +14,7 @@
 #include "lock.h"
 #include "pvType.h"
 #include "queueVoid.h"
-#include "showConstructDestruct.h"
+#include "CDRMonitor.h"
 
 namespace epics { namespace pvData { 
 

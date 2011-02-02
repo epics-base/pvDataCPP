@@ -12,7 +12,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <bitSet.h>
-#include <showConstructDestruct.h>
+#include <CDRMonitor.h>
 
 #include <epicsAssert.h>
 #include <epicsExit.h>

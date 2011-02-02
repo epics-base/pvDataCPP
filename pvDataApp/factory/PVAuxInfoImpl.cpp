@@ -13,7 +13,7 @@
 #include "convert.h"
 #include "factory.h"
 #include "lock.h"
-#include "showConstructDestruct.h"
+#include "CDRMonitor.h"
 
 namespace epics { namespace pvData {
 

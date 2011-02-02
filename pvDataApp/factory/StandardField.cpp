@@ -12,7 +12,7 @@
 #include <lock.h>
 #include "pvIntrospect.h"
 #include "standardField.h"
-#include "showConstructDestruct.h"
+#include "CDRMonitor.h"
 
 namespace epics { namespace pvData { 
 
