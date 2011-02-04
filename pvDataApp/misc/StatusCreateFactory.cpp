@@ -19,7 +19,8 @@
 
 namespace epics { namespace pvData {
 
-PVDATA_REFCOUNT_MONITOR_DEFINE(status);
+// TODO disabled due to problem with static initialization (order)
+//PVDATA_REFCOUNT_MONITOR_DEFINE(status);
 
 class StatusImpl : public Status
 {
@@ -28,17 +29,17 @@ class StatusImpl : public Status
     StatusImpl(StatusType type, String message) :
         m_type(type), m_message(message)
     {
-        PVDATA_REFCOUNT_MONITOR_CONSTRUCT(status);
+       // PVDATA_REFCOUNT_MONITOR_CONSTRUCT(status);
     }
 
     StatusImpl(StatusType type, String message, String stackDump) :
         m_type(type), m_message(message), m_stackDump(stackDump)
     {
-        PVDATA_REFCOUNT_MONITOR_CONSTRUCT(status);
+        //PVDATA_REFCOUNT_MONITOR_CONSTRUCT(status);
     }
     
     virtual ~StatusImpl() {
-        PVDATA_REFCOUNT_MONITOR_DESTRUCT(status);
+        //PVDATA_REFCOUNT_MONITOR_DESTRUCT(status);
     }
     
     virtual StatusType getType()
