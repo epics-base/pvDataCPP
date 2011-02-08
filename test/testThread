@@ -1,8 +1,8 @@
 threads
 basic middle
 
+executor:  totalConstruct 2 totalDestruct 2
+thread:  totalConstruct 2 totalDestruct 2
+event:  totalConstruct 8 totalDestruct 8
 LinkedList:  totalConstruct 5 totalDestruct 5
 LinkedListNode:  totalConstruct 15 totalDestruct 15
-event:  totalConstruct 8 totalDestruct 8
-thread:  totalConstruct 2 totalDestruct 2
-executor:  totalConstruct 2 totalDestruct 2

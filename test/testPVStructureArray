@@ -170,5 +170,5 @@ after compressstructure powerSupply
     timeStamp timeStamp
         long secondsPastEpoch 0
         int nanoSeconds 0
-field:  totalConstruct 102 totalDestruct 102
 pvField:  totalConstruct 88 totalDestruct 88
+field:  totalConstruct 102 totalDestruct 102

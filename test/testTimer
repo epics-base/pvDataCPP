@@ -1,6 +1,6 @@
+timerNode:  totalConstruct 6 totalDestruct 6
+timer:  totalConstruct 3 totalDestruct 3
+thread:  totalConstruct 3 totalDestruct 3
 LinkedList:  totalConstruct 4 totalDestruct 4
 LinkedListNode:  totalConstruct 13 totalDestruct 13
 event:  totalConstruct 15 totalDestruct 15
-thread:  totalConstruct 3 totalDestruct 3
-timer:  totalConstruct 3 totalDestruct 3
-timerNode:  totalConstruct 6 totalDestruct 6

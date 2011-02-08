@@ -283,5 +283,5 @@ structure string
     timeStamp timeStamp
         long secondsPastEpoch 0
         int nanoSeconds 0
-field:  totalConstruct 135 totalDestruct 135
 pvField:  totalConstruct 281 totalDestruct 281
+field:  totalConstruct 135 totalDestruct 135
