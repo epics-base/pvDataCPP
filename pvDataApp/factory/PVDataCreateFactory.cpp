@@ -18,13 +18,6 @@
 #include "PVArray.cpp"
 #include "PVScalarArray.cpp"
 #include "PVStructure.cpp"
-#include "DefaultPVBoolean.cpp"
-#include "DefaultPVByte.cpp"
-#include "DefaultPVShort.cpp"
-#include "DefaultPVInt.cpp"
-#include "DefaultPVLong.cpp"
-#include "DefaultPVFloat.cpp"
-#include "DefaultPVDouble.cpp"
 #include "DefaultPVString.cpp"
 #include "DefaultPVBooleanArray.cpp"
 #include "DefaultPVByteArray.cpp"
@@ -41,6 +34,99 @@ namespace epics { namespace pvData {
 static Convert* convert = 0;
 static FieldCreate * fieldCreate = 0;
 static PVDataCreate* pvDataCreate = 0;
+
+/** Default storage for scalar values
+ */
+template<typename T>
+class BasePVScalar : public PVScalarValue<T> {
+public:
+    typedef T  value_type;
+    typedef T* pointer;
+    typedef const T* const_pointer;
+
+    BasePVScalar(PVStructure *parent,ScalarConstPtr scalar);
+    virtual ~BasePVScalar();
+    virtual T get();
+    virtual void put(T val);
+    virtual void serialize(ByteBuffer *pbuffer,
+        SerializableControl *pflusher);
+    virtual void deserialize(ByteBuffer *pbuffer,
+        DeserializableControl *pflusher);
+    virtual bool operator==(PVField& pv) ;
+    virtual bool operator!=(PVField& pv) ;
+private:
+    T value;
+};
+
+template<typename T>
+BasePVScalar<T>::BasePVScalar(PVStructure *parent,ScalarConstPtr scalar)
+    : PVScalarValue<T>(parent,scalar),value(0)
+{}
+//Note: '0' is a suitable default for all POD types (not String)
+
+template<typename T>
+BasePVScalar<T>::~BasePVScalar() {}
+
+template<typename T>
+T BasePVScalar<T>::get() { return value;}
+
+template<typename T>
+void BasePVScalar<T>::put(T val){value = val;}
+
+template<typename T>
+void BasePVScalar<T>::serialize(ByteBuffer *pbuffer,
+    SerializableControl *pflusher) {
+    pflusher->ensureBuffer(1);
+    pbuffer->putBoolean(value);
+}
+
+template<typename T>
+void BasePVScalar<T>::deserialize(ByteBuffer *pbuffer,
+    DeserializableControl *pflusher)
+{
+    pflusher->ensureData(1);
+    value = pbuffer->getBoolean();
+}
+
+template<typename T>
+bool BasePVScalar<T>::operator==(PVField& pvField)
+{
+    return getConvert()->equals(this, &pvField);
+}
+
+template<typename T>
+bool BasePVScalar<T>::operator!=(PVField& pvField)
+{
+    return !(getConvert()->equals(this, &pvField));
+}
+
+// Specializations for scalar String
+
+template<>
+BasePVScalar<String>::BasePVScalar(PVStructure *parent,ScalarConstPtr scalar)
+: PVScalarValue<String>(parent,scalar),value()
+{}
+
+template<>
+void BasePVScalar<String>::serialize(ByteBuffer *pbuffer,
+    SerializableControl *pflusher) {
+    SerializeHelper::serializeString(value, pbuffer, pflusher);
+}
+
+template<>
+void BasePVScalar<String>::deserialize(ByteBuffer *pbuffer,
+    DeserializableControl *pflusher) {
+    value = SerializeHelper::deserializeString(pbuffer, pflusher);
+}
+
+typedef BasePVScalar<bool> BasePVBoolean;
+typedef BasePVScalar<int8> BasePVByte;
+typedef BasePVScalar<int16> BasePVShort;
+typedef BasePVScalar<int32> BasePVInt;
+typedef BasePVScalar<int64> BasePVLong;
+typedef BasePVScalar<float> BasePVFloat;
+typedef BasePVScalar<double> BasePVDouble;
+typedef BasePVScalar<String> BasePVString;
 
 PVDataCreate::PVDataCreate(){ }
 
