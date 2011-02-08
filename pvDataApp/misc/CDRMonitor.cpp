@@ -86,5 +86,11 @@ CDRNode::show(FILE *fd)
         fprintf(fd,"\n");
 }
 
+void
+onceNode(void* raw)
+{
+    CDRNodeInstance* inst=static_cast<CDRNodeInstance*>(raw);
+    inst->node=new CDRNode(inst->name);
+}
 
 }}

@@ -12,6 +12,7 @@
 #include <string.h>
 #include <stdio.h>
 
+#include <epicsThread.h>
 #include "noDefaultMethods.h"
 #include "lock.h"
 #include "pvType.h"
@@ -83,11 +84,37 @@ private:
     CDRNode * const nextNode;
 };
 
-#define PVDATA_REFCOUNT_MONITOR_DEFINE(NAME) static CDRNode NAME ## _node(#NAME)
+struct CDRNodeInstance
+{
+    CDRNode *node;
+    epicsThreadOnceId once;
+    const char* const name;
+};
 
-#define PVDATA_REFCOUNT_MONITOR_DESTRUCT(NAME) NAME ## _node.destruct()
+void onceNode(void* raw);
 
-#define PVDATA_REFCOUNT_MONITOR_CONSTRUCT(NAME) NAME ## _node.construct()
+static inline
+CDRNode*
+getNode(CDRNodeInstance *inst)
+{
+    epicsThreadOnce(&inst->once,&onceNode,
+                    static_cast<void*>(inst));
+    return inst->node;
+}
+
+#define PVDATA_REFCOUNT_MONITOR_DEFINE(NAME) \
+static CDRNodeInstance NAME ## _node={0,EPICS_THREAD_ONCE_INIT,#NAME}
+
+#define PVDATA_REFCOUNT_MONITOR_DESTRUCT(NAME) \
+            getNode(&NAME ## _node)->destruct()
+
+#define PVDATA_REFCOUNT_MONITOR_CONSTRUCT(NAME) \
+            getNode(&NAME ## _node)->construct()
+
+#define PVDATA_REFCOUNT_MONITOR_INCREF(NAME) \
+            getNode(&NAME ## _node)->incRef()
+#define PVDATA_REFCOUNT_MONITOR_DECREF(NAME) \
+            getNode(&NAME ## _node)->decRef()
 
 
 }}

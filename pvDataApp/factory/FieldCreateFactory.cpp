@@ -36,7 +36,7 @@ public :
 
 FieldPvt::FieldPvt(String fieldName,Type type)
  : fieldName(fieldName),type(type),referenceCount(1)
-{field_node.incRef();}
+{PVDATA_REFCOUNT_MONITOR_INCREF(field);}
 
 static Mutex refCountMutex;
 
@@ -69,7 +69,7 @@ void Field::renameField(String  newName)
 }
 
 void Field::incReferenceCount() const {
-    field_node.incRef();
+    PVDATA_REFCOUNT_MONITOR_INCREF(field);
     Lock xx(&refCountMutex);
     pImpl->referenceCount++;
     if(pImpl->type!=structure) return;
@@ -82,7 +82,7 @@ void Field::incReferenceCount() const {
 }
 
 void Field::decReferenceCount() const {
-    field_node.decRef();
+    PVDATA_REFCOUNT_MONITOR_DECREF(field);
     Lock xx(&refCountMutex);
     if(pImpl->referenceCount<=0) {
           String message("logicError field ");
