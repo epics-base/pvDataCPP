@@ -102,6 +102,8 @@ getNode(CDRNodeInstance *inst)
     return inst->node;
 }
 
+#ifndef NDEBUG
+
 #define PVDATA_REFCOUNT_MONITOR_DEFINE(NAME) \
 static CDRNodeInstance NAME ## _node={0,EPICS_THREAD_ONCE_INIT,#NAME}
 
@@ -116,6 +118,16 @@ static CDRNodeInstance NAME ## _node={0,EPICS_THREAD_ONCE_INIT,#NAME}
 #define PVDATA_REFCOUNT_MONITOR_DECREF(NAME) \
             getNode(&NAME ## _node)->decRef()
 
+
+#else
+
+#define PVDATA_REFCOUNT_MONITOR_DEFINE(NAME)
+#define PVDATA_REFCOUNT_MONITOR_DESTRUCT(NAME)
+#define PVDATA_REFCOUNT_MONITOR_CONSTRUCT(NAME)
+#define PVDATA_REFCOUNT_MONITOR_INCREF(NAME)
+#define PVDATA_REFCOUNT_MONITOR_DECREF(NAME)
+
+#endif
 
 }}
 #endif  /* CDRMONITOR_H */
