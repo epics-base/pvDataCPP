@@ -354,7 +354,7 @@ void DefaultPVArray<T>::deserialize(ByteBuffer *pbuffer, \
         DeserializableControl *pcontrol) { \
     int size = SerializeHelper::readSize(pbuffer, pcontrol); \
     if(size>=0) { \
-        if(size>PVArray::getCapacity()) PVArray::setCapacity(size); \
+        if(size>getCapacity()) setCapacity(size); \
         int i = 0; \
         while(true) { \
             int maxIndex = std::min(size-i, pbuffer->getRemaining())+i; \
@@ -373,7 +373,7 @@ void DefaultPVArray<T>::deserialize(ByteBuffer *pbuffer, \
 template<> \
 void DefaultPVArray<T>::serialize(ByteBuffer *pbuffer, \
         SerializableControl *pflusher, int offset, int count) { \
-    int length = PVArray::getLength(); \
+    int length = getLength(); \
 \
     if(offset<0) \
         offset = 0; \

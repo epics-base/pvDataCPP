@@ -337,12 +337,13 @@ void testArray() {
                             " ",
                             "test",
                             "smile",
-                            "this is a little longer string... maybe a little but longer... this makes test better" };
+                            "this is a little longer string... maybe a little but longer... this makes test better",
+                            String(10000, 'b') };
     PVStringArray* pvString = (PVStringArray*)factory->createPVScalarArray(
             NULL, "pvStringArray", epics::pvData::pvString);
     pvString->put(0, 0, stringEmpty, 0);
     serializationTest(pvString);
-    pvString->put(0, 7, strv, 0);
+    pvString->put(0, 8, strv, 0);
     serializationTest(pvString);
     delete pvString;
 
