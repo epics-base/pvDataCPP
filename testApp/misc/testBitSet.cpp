@@ -19,8 +19,8 @@
 
 using namespace epics::pvData;
 
-void testGetSetClearFlip() {
-    printf("testGetSetClearFlip... ");
+void testGetSetClearFlip(FILE *fd) {
+    fprintf(fd,"testGetSetClearFlip... ");
 
     // empty
     BitSet* b1 = new BitSet();
@@ -75,12 +75,12 @@ void testGetSetClearFlip() {
     assert(str == "{}");
 
     delete b1;
-    printf("PASSED\n");
+    fprintf(fd,"PASSED\n");
 
 }
 
-void testOperators() {
-    printf("testOperators... ");
+void testOperators(FILE *fd) {
+    fprintf(fd,"testOperators... ");
 
     BitSet b1;
     assert(b1 == b1);
@@ -135,7 +135,7 @@ void testOperators() {
     str.clear(); b1.toString(&str);
     assert(str == "{2, 128}");
 
-    printf("PASSED\n");
+    fprintf(fd,"PASSED\n");
 
 }
 
@@ -148,8 +148,8 @@ int main(int argc,char *argv[])
     if(fileName!=0 && fileName[0]!=0) {
         fd = fopen(fileName,"w+");
     }
-    testGetSetClearFlip();
-    testOperators();
+    testGetSetClearFlip(fd);
+    testOperators(fd);
     epicsExitCallAtExits();
     CDRMonitor::get().show(fd);
     return(0);

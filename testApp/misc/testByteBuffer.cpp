@@ -11,6 +11,7 @@
  */
 
 #include <iostream>
+#include <fstream>
 #include <cstring>
 
 #include <epicsAssert.h>
@@ -20,10 +21,9 @@
 #include "pvIntrospect.h"
 
 using namespace epics::pvData;
-using std::cout;
 
-void testBasicOperations() {
-    cout<<"Basic operation tests...\n";
+void testBasicOperations(std::ostream& ofile) {
+    ofile<<"Basic operation tests...\n";
 
     ByteBuffer* buff = new ByteBuffer();
     assert(buff->getSize()==32);
@@ -173,15 +173,15 @@ void testBasicOperations() {
     assert(buff->getPosition()==6);
     assert(strncmp(&src[2],&dst[2],6)==0);
 
-    cout<<"    First 10 characters of destination: >>"<<String(dst, 10)<<"<<\n";
+    ofile<<"    First 10 characters of destination: >>"<<String(dst, 10)<<"<<\n";
 
     delete buff;
 
-    cout<<"!!!  PASSED\n";
+    ofile<<"!!!  PASSED\n";
 }
 
-void testInverseEndianness() {
-    cout<<"Testing inverse endianness...\n";
+void testInverseEndianness(std::ostream& ofile) {
+    ofile<<"Testing inverse endianness...\n";
 
 #if EPICS_BYTE_ORDER==EPICS_ENDIAN_BIG
     ByteBuffer* buff = new ByteBuffer(32,EPICS_ENDIAN_LITTLE);
@@ -204,11 +204,22 @@ void testInverseEndianness() {
     assert(buff->getInt()==0x0A0B0C0D);
 
     delete buff;
-    cout<<"!!!  PASSED\n";
+    ofile<<"!!!  PASSED\n";
 }
 
 int main(int argc, char *argv[]) {
-    testBasicOperations();
-    testInverseEndianness();
+    std::ofstream outfile;
+    std::ostream *out=NULL;
+    if(argc>1) {
+        outfile.open(argv[1]);
+        if(outfile.is_open()){
+            out=&outfile;
+        }else{
+            fprintf(stderr, "Failed to open test output file\n");
+        }
+    }
+    if(!out) out=&std::cout;
+    testBasicOperations(*out);
+    testInverseEndianness(*out);
     return (0);
 }

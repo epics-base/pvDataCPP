@@ -41,13 +41,13 @@ void internalTestBaseException(int unused = 0)
     }
 }
 
-void testBaseException() {
-    printf("testBaseException... ");
+void testBaseException(FILE *fp) {
+    fprintf(fp,"testBaseException... ");
 
     try {
         THROW_BASE_EXCEPTION("all is OK");
     } catch (BaseException& be) {
-        printf("\n\n%s\n\n", be.what());
+        fprintf(fp,"\n\n%s\n\n", be.what());
     }
 
     try {
@@ -57,15 +57,21 @@ void testBaseException() {
             THROW_BASE_EXCEPTION_CAUSE("exception 2", be2);
         }
     } catch (BaseException& be) {
-        printf("\n\n%s\n\n", be.what());
+        fprintf(fp,"\n\n%s\n\n", be.what());
     }
 
-    printf("PASSED\n");
+    fprintf(fp,"PASSED\n");
 }
 
 int main(int argc,char *argv[])
 {
-    testBaseException();
+    FILE *fp=NULL;
+    if(argc>1){
+        fp=fopen(argv[1], "w");
+        if(!fp) fprintf(stderr,"Failed to open test output file\n");
+    }
+    if(!fp) fp=stdout;
+    testBaseException(fp);
     return(0);
 }
 
