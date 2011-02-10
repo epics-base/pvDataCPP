@@ -67,6 +67,8 @@ namespace epics {
              */
             ByteBuffer* rewind();
 
+            template<typename T> inline T get();
+
             /**
              * Relative boolean read, {@code position} is incremented by
              * {@code 1}.
@@ -221,6 +223,7 @@ namespace epics {
 
             //virtual String getString() = 0; // TODO
 
+            template<typename T> inline void put(T);
 
             /**
              * Relative bulk @em put method. It transfers {@code count} bytes
@@ -501,6 +504,40 @@ namespace epics {
             void getWithEndianness(int index, char* dest, size_t size);
 
         };
+
+        template<typename T>
+        inline T ByteBuffer::get(){} // not valid
+        template<>
+        inline bool ByteBuffer::get(){return getBoolean();}
+        template<>
+        inline int8 ByteBuffer::get(){return getByte();}
+        template<>
+        inline int16 ByteBuffer::get(){return getShort();}
+        template<>
+        inline int32 ByteBuffer::get(){return getInt();}
+        template<>
+        inline int64 ByteBuffer::get(){return getLong();}
+        template<>
+        inline float ByteBuffer::get(){return getFloat();}
+        template<>
+        inline double ByteBuffer::get(){return getDouble();}
+
+        template<typename T>
+        inline void ByteBuffer::put(T){} // not valid
+        template<>
+        inline void ByteBuffer::put(bool v){putBoolean(v);}
+        template<>
+        inline void ByteBuffer::put(int8 v){putByte(v);}
+        template<>
+        inline void ByteBuffer::put(int16 v){putShort(v);}
+        template<>
+        inline void ByteBuffer::put(int32 v){putInt(v);}
+        template<>
+        inline void ByteBuffer::put(int64 v){putLong(v);}
+        template<>
+        inline void ByteBuffer::put(float v){putFloat(v);}
+        template<>
+        inline void ByteBuffer::put(double v){putDouble(v);}
 
     }
 }

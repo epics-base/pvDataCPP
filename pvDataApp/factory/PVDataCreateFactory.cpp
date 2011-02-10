@@ -68,7 +68,7 @@ template<typename T>
 void BasePVScalar<T>::serialize(ByteBuffer *pbuffer,
     SerializableControl *pflusher) {
     pflusher->ensureBuffer(1);
-    pbuffer->putBoolean(value);
+    pbuffer->put<T>(value);
 }
 
 template<typename T>
@@ -76,7 +76,7 @@ void BasePVScalar<T>::deserialize(ByteBuffer *pbuffer,
     DeserializableControl *pflusher)
 {
     pflusher->ensureData(1);
-    value = pbuffer->getBoolean();
+    value = pbuffer->get<T>();
 }
 
 template<typename T>
@@ -181,7 +181,7 @@ template<typename T>
 int DefaultPVArray<T>::get(int offset, int len, PVArrayData<T> *data)
 {
     int n = len;
-    int length = PVArray::getLength();
+    int length = this->getLength();
     if(offset+len > length) {
         n = length-offset;
         if(n<0) n = 0;
@@ -201,13 +201,13 @@ int DefaultPVArray<T>::put(int offset,int len,
     }
     if(from==value) return len;
     if(len<1) return 0;
-    int length = PVArray::getLength();
-    int capacity = PVArray::getCapacity();
+    int length = this->getLength();
+    int capacity = this->getCapacity();
     if(offset+len > length) {
         int newlength = offset + len;
         if(newlength>capacity) {
             setCapacity(newlength);
-            newlength = PVArray::getCapacity();
+            newlength = this->getCapacity();
             len = newlength - offset;
             if(len<=0) return 0;
         }
@@ -216,7 +216,7 @@ int DefaultPVArray<T>::put(int offset,int len,
     for(int i=0;i<len;i++) {
        value[i+offset] = from[i+fromOffset];
     }
-    PVArray::setLength(length);
+    this->setLength(length);
     this->postPut();
     return len;
 }
@@ -232,7 +232,7 @@ void DefaultPVArray<T>::shareData(pointer shareValue,int capacity,int length)
 template<typename T>
 void DefaultPVArray<T>::serialize(ByteBuffer *pbuffer,
             SerializableControl *pflusher) {
-    serialize(pbuffer, pflusher, 0, PVArray::getLength());
+    serialize(pbuffer, pflusher, 0, this->getLength());
 }
 
 template<typename T>
@@ -241,20 +241,20 @@ void DefaultPVArray<T>::deserialize(ByteBuffer *pbuffer,
     int size = SerializeHelper::readSize(pbuffer, pcontrol);
     if(size>=0) {
         // prepare array, if necessary
-        if(size>PVArray::getCapacity()) PVArray::setCapacity(size);
+        if(size>this->getCapacity()) this->setCapacity(size);
         // retrieve value from the buffer
         int i = 0;
         while(true) {
             int maxIndex = std::min(size-i, pbuffer->getRemaining())+i;
             for(; i<maxIndex; i++)
-                value[i] = pbuffer->getBoolean();
+                value[i] = pbuffer->get<T>();
             if(i<size)
                 pcontrol->ensureData(1); // // TODO is there a better way to ensureData?
             else
                 break;
         }
         // set new length
-        PVArray::setLength(size);
+        this->setLength(size);
         PVField::postPut();
     }
     // TODO null arrays (size == -1) not supported
@@ -264,7 +264,7 @@ template<typename T>
 void DefaultPVArray<T>::serialize(ByteBuffer *pbuffer,
         SerializableControl *pflusher, int offset, int count) {
     // cache
-    int length = PVArray::getLength();
+    int length = this->getLength();
 
     // check bounds
     if(offset<0)
@@ -282,7 +282,7 @@ void DefaultPVArray<T>::serialize(ByteBuffer *pbuffer,
     while(true) {
         int maxIndex = std::min<int>(end-i, pbuffer->getRemaining())+i;
         for(; i<maxIndex; i++)
-            pbuffer->putBoolean(value[i]);
+            pbuffer->put(value[i]);
         if(i<end)
             pflusher->flushSerializeBuffer();
         else
