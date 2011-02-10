@@ -91,7 +91,7 @@ bool BasePVScalar<T>::operator!=(PVField& pvField)
     return !(getConvert()->equals(this, &pvField));
 }
 
-// Specializations 
+// Specializations for scalar String
 
 template<>
 BasePVScalar<String>::BasePVScalar(PVStructure *parent,ScalarConstPtr scalar)
@@ -108,104 +108,6 @@ template<>
 void BasePVScalar<String>::deserialize(ByteBuffer *pbuffer,
     DeserializableControl *pflusher) {
     value = SerializeHelper::deserializeString(pbuffer, pflusher);
-}
-
-template<>
-void BasePVScalar<bool>::serialize(ByteBuffer *pbuffer,
-    SerializableControl *pflusher) {
-    pflusher->ensureBuffer(1);
-    pbuffer->putBoolean(value);
-}
-
-template<>
-void BasePVScalar<bool>::deserialize(ByteBuffer *pbuffer,
-    DeserializableControl *pflusher) {
-    pflusher->ensureData(1);
-    value = pbuffer->getBoolean();
-}
-
-template<>
-void BasePVScalar<int8>::serialize(ByteBuffer *pbuffer,
-    SerializableControl *pflusher) {
-    pflusher->ensureBuffer(1);
-    pbuffer->putByte(value);
-}
-
-template<>
-void BasePVScalar<int8>::deserialize(ByteBuffer *pbuffer,
-    DeserializableControl *pflusher) {
-    pflusher->ensureData(1);
-    value = pbuffer->getByte();
-}
-
-template<>
-void BasePVScalar<int16>::serialize(ByteBuffer *pbuffer,
-    SerializableControl *pflusher) {
-    pflusher->ensureBuffer(2);
-    pbuffer->putShort(value);
-}
-
-template<>
-void BasePVScalar<int16>::deserialize(ByteBuffer *pbuffer,
-    DeserializableControl *pflusher) {
-    pflusher->ensureData(2);
-    value = pbuffer->getShort();
-}
-
-template<>
-void BasePVScalar<int32>::serialize(ByteBuffer *pbuffer,
-    SerializableControl *pflusher) {
-    pflusher->ensureBuffer(4);
-    pbuffer->putInt(value);
-}
-
-template<>
-void BasePVScalar<int32>::deserialize(ByteBuffer *pbuffer,
-    DeserializableControl *pflusher) {
-    pflusher->ensureData(4);
-    value = pbuffer->getInt();
-}
-
-template<>
-void BasePVScalar<int64>::serialize(ByteBuffer *pbuffer,
-    SerializableControl *pflusher) {
-    pflusher->ensureBuffer(8);
-    pbuffer->putLong(value);
-}
-
-template<>
-void BasePVScalar<int64>::deserialize(ByteBuffer *pbuffer,
-    DeserializableControl *pflusher) {
-    pflusher->ensureData(8);
-    value = pbuffer->getLong();
-}
-
-template<>
-void BasePVScalar<float>::serialize(ByteBuffer *pbuffer,
-    SerializableControl *pflusher) {
-    pflusher->ensureBuffer(4);
-    pbuffer->putFloat(value);
-}
-
-template<>
-void BasePVScalar<float>::deserialize(ByteBuffer *pbuffer,
-    DeserializableControl *pflusher) {
-    pflusher->ensureData(4);
-    value = pbuffer->getFloat();
-}
-
-template<>
-void BasePVScalar<double>::serialize(ByteBuffer *pbuffer,
-    SerializableControl *pflusher) {
-    pflusher->ensureBuffer(8);
-    pbuffer->putDouble(value);
-}
-
-template<>
-void BasePVScalar<double>::deserialize(ByteBuffer *pbuffer,
-    DeserializableControl *pflusher) {
-    pflusher->ensureData(8);
-    value = pbuffer->getDouble();
 }
 
 typedef BasePVScalar<bool> BasePVBoolean;
@@ -334,6 +236,61 @@ void DefaultPVArray<T>::serialize(ByteBuffer *pbuffer,
 }
 
 template<typename T>
+void DefaultPVArray<T>::deserialize(ByteBuffer *pbuffer,
+        DeserializableControl *pcontrol) {
+    int size = SerializeHelper::readSize(pbuffer, pcontrol);
+    if(size>=0) {
+        // prepare array, if necessary
+        if(size>PVArray::getCapacity()) PVArray::setCapacity(size);
+        // retrieve value from the buffer
+        int i = 0;
+        while(true) {
+            int maxIndex = std::min(size-i, pbuffer->getRemaining())+i;
+            for(; i<maxIndex; i++)
+                value[i] = pbuffer->getBoolean();
+            if(i<size)
+                pcontrol->ensureData(1); // // TODO is there a better way to ensureData?
+            else
+                break;
+        }
+        // set new length
+        PVArray::setLength(size);
+        PVField::postPut();
+    }
+    // TODO null arrays (size == -1) not supported
+}
+
+template<typename T>
+void DefaultPVArray<T>::serialize(ByteBuffer *pbuffer,
+        SerializableControl *pflusher, int offset, int count) {
+    // cache
+    int length = PVArray::getLength();
+
+    // check bounds
+    if(offset<0)
+        offset = 0;
+    else if(offset>length) offset = length;
+    if(count<0) count = length;
+
+    int maxCount = length-offset;
+    if(count>maxCount) count = maxCount;
+
+    // write
+    SerializeHelper::writeSize(count, pbuffer, pflusher);
+    int end = offset+count;
+    int i = offset;
+    while(true) {
+        int maxIndex = std::min<int>(end-i, pbuffer->getRemaining())+i;
+        for(; i<maxIndex; i++)
+            pbuffer->putBoolean(value[i]);
+        if(i<end)
+            pflusher->flushSerializeBuffer();
+        else
+            break;
+    }
+}
+
+template<typename T>
 bool DefaultPVArray<T>::operator==(PVField& pv)
 {
     return getConvert()->equals(this, &pv);
@@ -346,70 +303,6 @@ bool DefaultPVArray<T>::operator!=(PVField& pv)
 }
 
 // specializations for String
-
-
-#define DEFAULTPVARRAY_SERIALIZATION(T, NAME) \
-template<> \
-void DefaultPVArray<T>::deserialize(ByteBuffer *pbuffer, \
-        DeserializableControl *pcontrol) { \
-    int size = SerializeHelper::readSize(pbuffer, pcontrol); \
-    if(size>=0) { \
-        if(size>getCapacity()) setCapacity(size); \
-        int i = 0; \
-        while(true) { \
-            int maxIndex = std::min(size-i, pbuffer->getRemaining())+i; \
-            for(; i<maxIndex; i++) \
-                value[i] = pbuffer->get ## NAME (); \
-            if(i<size) \
-                pcontrol->ensureData(sizeof(T)); \
-            else \
-                break; \
-        } \
-        PVArray::setLength(size); \
-        PVField::postPut(); \
-    } \
-} \
-\
-template<> \
-void DefaultPVArray<T>::serialize(ByteBuffer *pbuffer, \
-        SerializableControl *pflusher, int offset, int count) { \
-    int length = getLength(); \
-\
-    if(offset<0) \
-        offset = 0; \
-    else if(offset>length) offset = length; \
-    if(count<0) count = length; \
-\
-    int maxCount = length-offset; \
-    if(count>maxCount) count = maxCount; \
-\
-    SerializeHelper::writeSize(count, pbuffer, pflusher); \
-    int end = offset+count; \
-    int i = offset; \
-    while(true) { \
-        int maxIndex = std::min<int>(end-i, pbuffer->getRemaining())+i; \
-        for(; i<maxIndex; i++) \
-            pbuffer->put ## NAME (value[i]); \
-        if(i<end) \
-            pflusher->flushSerializeBuffer(); \
-        else \
-            break; \
-    } \
-}
-
-
-DEFAULTPVARRAY_SERIALIZATION(bool, Boolean);
-DEFAULTPVARRAY_SERIALIZATION(int8, Byte);
-DEFAULTPVARRAY_SERIALIZATION(int16, Short);
-DEFAULTPVARRAY_SERIALIZATION(int32, Int);
-DEFAULTPVARRAY_SERIALIZATION(int64, Long);
-DEFAULTPVARRAY_SERIALIZATION(float, Float);
-DEFAULTPVARRAY_SERIALIZATION(double, Double);
-
-
-// TODO null arrays (size == -1) not supported
-
-
 
 template<>
 void DefaultPVArray<String>::deserialize(ByteBuffer *pbuffer,
@@ -426,6 +319,7 @@ void DefaultPVArray<String>::deserialize(ByteBuffer *pbuffer,
         setLength(size);
         postPut();
     }
+    // TODO null arrays (size == -1) not supported
 }
 
 template<>
