@@ -1,19 +1,19 @@
 structure value
     double value 0
-    structure alarm
+    alarm alarm
         int severity 0
         string message 
-    structure timeStamp
+    timeStamp timeStamp
         long secondsPastEpoch 0
         int nanoSeconds 0
-    structure display
+    display display
         string description 
         string format 
         string units 
         structure limit
             double low 0
             double high 0
-    structure control
+    control control
         structure limit
             double low 0
             double high 0
@@ -21,11 +21,11 @@ structure value
 structure value
     structure value
         int index 0
-        stringArray choices [0,1,2,3]
-    structure alarm
+        string[] choices [0,1,2,3]
+    alarm alarm
         int severity 0
         string message 
-    structure timeStamp
+    timeStamp timeStamp
         long secondsPastEpoch 0
         int nanoSeconds 0
 testAlarm
@@ -41,20 +41,20 @@ index 2 choice 2
 doubleRecord
 structure value
     double value 0
-    structure alarm
+    alarm alarm
         int severity 2
         string message testMessage
-    structure timeStamp
+    timeStamp timeStamp
         long secondsPastEpoch 0
         int nanoSeconds 0
-    structure display
+    display display
         string description testDescription
         string format %f10.0
         string units volts
         structure limit
             double low -10
             double high -1
-    structure control
+    control control
         structure limit
             double low 1
             double high 10
@@ -63,14 +63,12 @@ enumeratedRecord
 structure value
     structure value
         int index 2
-        stringArray choices [0,1,2,3]
-    structure alarm
+        string[] choices [0,1,2,3]
+    alarm alarm
         int severity 0
         string message 
-    structure timeStamp
+    timeStamp timeStamp
         long secondsPastEpoch 0
         int nanoSeconds 0
-linkedListNode: totalConstruct 5 totalDestruct 0
-linkedList: totalConstruct 1 totalDestruct 0
-field: totalConstruct 127 totalDestruct 34 totalReference 93
-pvField: totalConstruct 30 totalDestruct 30
+pvField:  totalConstruct 30 totalDestruct 30
+field:  totalConstruct 99 totalDestruct 99

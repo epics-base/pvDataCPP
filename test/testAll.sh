@@ -16,3 +16,4 @@
 ./testQueue.sh || exit $?
 ./testMessageQueue.sh || exit $?
 ./testSerialization.sh || exit $?
+./testProperty.sh || exit $?

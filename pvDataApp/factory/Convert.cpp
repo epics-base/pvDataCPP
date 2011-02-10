@@ -621,6 +621,7 @@ void Convert::copyStructureArray(
     toArray = structureArrayData.data;
     for(int i=0; i<length; i++) {
     	if(fromArray[i]==0) {
+            if(toArray[i]!=0) delete toArray[i];
             toArray[i] = 0;
     	} else {
     	    if(toArray[i]==0) {
