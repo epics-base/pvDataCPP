@@ -6,6 +6,7 @@
  */
 #ifndef CDRMONITOR_H
 #define CDRMONITOR_H
+#include <ostream>
 #include <stddef.h>
 #include <stdlib.h>
 #include <stddef.h>
@@ -46,9 +47,10 @@ public:
 
     CDRCount current(); //!< current global count
 
-    CDRNode* first(){return firstNode;}
+    CDRNode* first() const{return firstNode;}
 
     void show(FILE*);
+    void show(std::ostream&) const;
 private:
     // Private ctor for singleton
     CDRMonitor();
@@ -77,6 +79,7 @@ public:
     CDRCount get() const{Lock x(&guard); return current;}
 
     void show(FILE*);
+    void show(std::ostream&) const;
 private:
     const String nodeName;
     CDRCount current;
@@ -130,4 +133,8 @@ static CDRNodeInstance NAME ## _node={0,EPICS_THREAD_ONCE_INIT,#NAME}
 #endif
 
 }}
+
+std::ostream& operator<<(std::ostream&,const epics::pvData::CDRMonitor&);
+std::ostream& operator<<(std::ostream&,const epics::pvData::CDRNode&);
+
 #endif  /* CDRMONITOR_H */

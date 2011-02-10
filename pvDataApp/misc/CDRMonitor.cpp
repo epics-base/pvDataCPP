@@ -68,6 +68,15 @@ CDRMonitor::show(FILE *fd)
 }
 
 void
+CDRMonitor::show(std::ostream& out) const
+{
+    for(CDRNode *cur=first(); !!cur; cur=cur->next())
+    {
+        cur->show(out);
+    }
+}
+
+void
 CDRNode::show(FILE *fd)
 {
     Lock x(&guard);
@@ -87,10 +96,39 @@ CDRNode::show(FILE *fd)
 }
 
 void
+CDRNode::show(std::ostream& out) const
+{
+    Lock x(&guard);
+    if(!current.cons && !current.dtys && !current.refs)
+        return;
+    out<<nodeName<<"  totalConstruct "<<current.cons
+            <<" totalDestruct "<<current.dtys;
+    ssize_t alive=current.cons;
+    alive-=current.dtys;
+    if(current.refs)
+        out<<" totalReference "<<current.refs;
+    if(alive)
+        out<<" ACTIVE "<<alive;
+    out<<"\n";
+}
+
+void
 onceNode(void* raw)
 {
     CDRNodeInstance* inst=static_cast<CDRNodeInstance*>(raw);
     inst->node=new CDRNode(inst->name);
 }
 
-}}
+}} // namespace epics::pvData
+
+std::ostream& operator<<(std::ostream& out,const epics::pvData::CDRMonitor& mon)
+{
+    mon.show(out);
+    return out;
+}
+
+std::ostream& operator<<(std::ostream& out,const epics::pvData::CDRNode& node)
+{
+    node.show(out);
+    return out;
+}
