@@ -18,7 +18,12 @@ structure value
         auxInfo
             string factory factoryName
             double junk 3
-value offset 0 next 15 number 15
+    control control
+        structure limit
+            double low 0
+            double high 0
+        double minStep 0
+value offset 0 next 20 number 20
 value offset 1 next 2 number 1
 alarm offset 2 next 5 number 3
 severity offset 3 next 4 number 1
@@ -33,6 +38,11 @@ units offset 11 next 12 number 1
 limit offset 12 next 15 number 3
 low offset 13 next 14 number 1
 high offset 14 next 15 number 1
+control offset 15 next 20 number 5
+limit offset 16 next 19 number 3
+low offset 17 next 18 number 1
+high offset 18 next 19 number 1
+minStep offset 19 next 20 number 1
 pvAuxInfo:  totalConstruct 1 totalDestruct 1
-pvField:  totalConstruct 17 totalDestruct 17
+pvField:  totalConstruct 22 totalDestruct 22
 field:  totalConstruct 97 totalDestruct 97

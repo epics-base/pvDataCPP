@@ -6,7 +6,6 @@
  */
 #include <string>
 #include <stdexcept>
-#include <map>
 #ifndef PVDATA_H
 #define PVDATA_H
 #include "pvType.h"
@@ -28,8 +27,6 @@ class PVScalarArray;
 class PVStructure;
 class PVStructureArray;
 
-typedef std::map<String,PVScalar * > PVScalarMap;
-typedef PVScalarMap::const_iterator PVScalarMapIter;
 typedef PVStructure * PVStructurePtr;
 typedef PVStructurePtr* PVStructurePtrArray;
 typedef PVField* PVFieldPtr;
@@ -41,12 +38,16 @@ public:
     ~PVAuxInfo();
     PVField * getPVField();
     PVScalar * createInfo(String key,ScalarType scalarType);
-    PVScalarMap getInfos();
-    PVScalar * getInfo(String key);
+    int getNumberInfo();
+    PVScalar * getInfo(String name);
+    PVScalar * getInfo(int index);
     void toString(StringBuilder buf);
     void toString(StringBuilder buf,int indentLevel);
 private:
-    class PVAuxInfoPvt *pImpl;
+    PVField *pvField;
+    int lengthInfo;
+    int numberInfo;
+    PVScalar **pvInfos; // ptr to array of PVscalar *
     friend class PVDataCreate;
 };
 

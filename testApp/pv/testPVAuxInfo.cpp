@@ -58,7 +58,7 @@ static void printOffsets(PVStructure *pvStructure,FILE *fd)
 static void testPVAuxInfo(FILE * fd) {
     fprintf(fd,"\ntestPVAuxInfo\n");
     PVStructure * pvStructure = standardPVField->scalar(
-        0,String("value"),pvDouble,String("alarm,timeStamp,display,conytrol"));
+        0,String("value"),pvDouble,String("alarm,timeStamp,display,control"));
     PVStructure *displayLimit = pvStructure->getStructureField(
         String("display.limit"));
     assert(displayLimit!=0);

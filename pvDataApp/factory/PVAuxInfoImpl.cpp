@@ -19,67 +19,68 @@ namespace epics { namespace pvData {
 
 PVDATA_REFCOUNT_MONITOR_DEFINE(pvAuxInfo);
 
-typedef std::map<String,PVScalar * >::const_iterator map_iterator;
-
-class PVAuxInfoPvt {
-public:
-    PVAuxInfoPvt(PVField *pvField)
-    :  pvField(pvField),
-       theMap(std::map<String, PVScalar * >())
-    {} 
-    PVField *pvField;
-    std::map<String, PVScalar * > theMap;
-};
-
 PVAuxInfo::PVAuxInfo(PVField *pvField)
-: pImpl(new PVAuxInfoPvt(pvField))
+  :  pvField(pvField),lengthInfo(1),numberInfo(0),
+     pvInfos(new PVScalar *[1])
 {
     PVDATA_REFCOUNT_MONITOR_CONSTRUCT(pvAuxInfo);
+} 
+
+PVAuxInfo::~PVAuxInfo()
+{
+    PVDATA_REFCOUNT_MONITOR_DESTRUCT(pvAuxInfo);
+    for(int i=0; i<lengthInfo; i++) delete pvInfos[i];
+    delete[] pvInfos;
 }
 
-PVAuxInfo::~PVAuxInfo() {
-    PVDATA_REFCOUNT_MONITOR_DESTRUCT(pvAuxInfo);
-    map_iterator i = pImpl->theMap.begin();
-    while(i!=pImpl->theMap.end()) {
-         PVScalar *value = i->second;
-         delete value;
-         i++;
-    }
-    delete pImpl;
-}
 
 PVField * PVAuxInfo::getPVField() {
-    return pImpl->pvField;
+    return pvField;
 }
 
 PVScalar * PVAuxInfo::createInfo(String key,ScalarType scalarType)
 {
-    map_iterator i = pImpl->theMap.find(key);
-    while(i!=pImpl->theMap.end()) {
-        String message("AuxoInfo:create key ");
-        message += key.c_str();
-        message += " already exists with scalarType ";
-        ScalarTypeFunc::toString(&message,scalarType);
-        pImpl->pvField->message(message,errorMessage);
-        i++;
+    for(int i=0; i<numberInfo; i++) {
+        PVScalar *pvScalar = pvInfos[i];
+        if(key.compare(pvScalar->getField()->getFieldName())==0) {
+            String message("AuxoInfo:create key ");
+            message += key.c_str();
+            message += " already exists with scalarType ";
+            ScalarTypeFunc::toString(&message,scalarType);
+            pvField->message(message,errorMessage);
+            return 0;
+        }
+    }
+    if(lengthInfo==numberInfo) {
+        int newLength = lengthInfo+4;
+        PVScalar ** newInfos = new PVScalar *[newLength];
+        lengthInfo = newLength;
+        for(int i=0; i<numberInfo; i++) newInfos[i] = pvInfos[i];
+        for(int i= numberInfo; i<lengthInfo; i++) newInfos[i] = 0;
+        delete[] pvInfos;
+        pvInfos = newInfos;
     }
     PVScalar *pvScalar = getPVDataCreate()->createPVScalar(0,key,scalarType);
-    pImpl->theMap.insert(std::pair<String,PVScalar * >(key, pvScalar));
+    pvInfos[numberInfo++] = pvScalar;
     return pvScalar;
-
-}
-
-PVScalarMap PVAuxInfo::getInfos()
-{
-    return pImpl->theMap;
 }
 
 PVScalar * PVAuxInfo::getInfo(String key)
 {
-    map_iterator i = pImpl->theMap.find(key);
-    if(i!=pImpl->theMap.end()) return i->second;
+    for(int i=0; i<numberInfo; i++) {
+        PVScalar *pvScalar = pvInfos[i];
+        if(key.compare(pvScalar->getField()->getFieldName())==0) return pvScalar;
+    }
     return 0;
 }
+
+PVScalar * PVAuxInfo::getInfo(int index)
+{
+    if(index<0 || index>=numberInfo) return 0;
+    return pvInfos[index];
+}
+
+int PVAuxInfo::getNumberInfo() { return numberInfo;}
 
 void PVAuxInfo::toString(StringBuilder buf)
 {
@@ -88,17 +89,14 @@ void PVAuxInfo::toString(StringBuilder buf)
 
 void PVAuxInfo::toString(StringBuilder buf,int indentLevel)
 {
-    if(pImpl->theMap.empty()) return;
+    if(numberInfo==0) return;
     Convert *convert = getConvert();
     convert->newLine(buf,indentLevel);
     *buf += "auxInfo";
-    map_iterator i = pImpl->theMap.begin();
-    while(i!=pImpl->theMap.end()) {
+    for(int i=0; i<numberInfo; i++) {
          convert->newLine(buf,indentLevel+1);
-         String key = i->first;
-         PVScalar *value = i->second;
+         PVScalar *value = pvInfos[i];
          value->toString(buf,indentLevel + 1);
-         i++;
     }
 }
 }}

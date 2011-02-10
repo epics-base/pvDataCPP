@@ -437,15 +437,14 @@ PVScalar *PVDataCreate::createPVScalar(PVStructure *parent,
      PVScalar *pvScalar = createPVScalar(parent,fieldName,
          scalarToClone->getScalar()->getScalarType());
      convert->copyScalar(scalarToClone, pvScalar);
-     PVScalarMap attributes = scalarToClone->getPVAuxInfo()->getInfos();
-     PVAuxInfo *pvAttribute = pvScalar->getPVAuxInfo();
-     PVScalarMapIter p;
-     for(p=attributes.begin(); p!=attributes.end(); p++) {
-          String key = p->first;
-          PVScalar *fromAttribute = p->second;
-          PVScalar *toAttribute = pvAttribute->createInfo(key,
-              fromAttribute->getScalar()->getScalarType());
-          convert->copyScalar(fromAttribute,toAttribute);
+     PVAuxInfo *from = scalarToClone->getPVAuxInfo();
+     PVAuxInfo *to = pvScalar->getPVAuxInfo();
+     int numberInfo = from->getNumberInfo();
+     for(int i=0; i<numberInfo; i++) {
+        PVScalar *pvFrom = from->getInfo(i);
+        ScalarConstPtr scalar = pvFrom->getScalar();
+        PVScalar *pvTo = to->createInfo(scalar->getFieldName(),scalar->getScalarType());
+        convert->copyScalar(pvFrom,pvTo);
      }
      return pvScalar;
 }
@@ -490,15 +489,14 @@ PVScalarArray *PVDataCreate::createPVScalarArray(PVStructure *parent,
      PVScalarArray *pvArray = createPVScalarArray(parent,fieldName,
           arrayToClone->getScalarArray()->getElementType());
      convert->copyScalarArray(arrayToClone,0, pvArray,0,arrayToClone->getLength());
-     PVScalarMap attributes = arrayToClone->getPVAuxInfo()->getInfos();
-     PVAuxInfo *pvAttribute = pvArray->getPVAuxInfo();
-     PVScalarMapIter p;
-     for(p=attributes.begin(); p!=attributes.end(); p++) {
-          String key = p->first;
-          PVScalar *fromAttribute = p->second;
-          PVScalar *toAttribute = pvAttribute->createInfo(key,
-              fromAttribute->getScalar()->getScalarType());
-          convert->copyScalar(fromAttribute,toAttribute);
+     PVAuxInfo *from = arrayToClone->getPVAuxInfo();
+     PVAuxInfo *to = pvArray->getPVAuxInfo();
+     int numberInfo = from->getNumberInfo();
+     for(int i=0; i<numberInfo; i++) {
+        PVScalar *pvFrom = from->getInfo(i);
+        ScalarConstPtr scalar = pvFrom->getScalar();
+        PVScalar *pvTo = to->createInfo(scalar->getFieldName(),scalar->getScalarType());
+        convert->copyScalar(pvFrom,pvTo);
      }
     return pvArray;
 }
