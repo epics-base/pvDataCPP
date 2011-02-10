@@ -10,6 +10,7 @@
  *      Author: Miha Vitorovic
  */
 #include <iostream>
+#include <fstream>
 
 #include <epicsAssert.h>
 
@@ -35,7 +36,6 @@
 #define DOUBLE_MIN_VALUE 4.9E-324
 
 using namespace epics::pvData;
-using std::cout;
 
 namespace epics {
     namespace pvData {
@@ -96,12 +96,12 @@ void serializationTest(PVField* field) {
     delete deserializedField; // clean up
 }
 
-void testScalar() {
-    cout<<"Testing scalars...\n";
+void testScalar(std::ostream& ofile) {
+    ofile<<"Testing scalars...\n";
     PVDataCreate* factory = getPVDataCreate();
     assert(factory!=NULL);
 
-    cout<<"\tPVBoolean\n";
+    ofile<<"\tPVBoolean\n";
     PVBoolean* pvBoolean = (PVBoolean*)factory->createPVScalar(NULL,
             "pvBoolean", epics::pvData::pvBoolean);
     pvBoolean->put(false);
@@ -110,7 +110,7 @@ void testScalar() {
     serializationTest(pvBoolean);
     delete pvBoolean;
 
-    cout<<"\tPVByte\n";
+    ofile<<"\tPVByte\n";
     PVByte* pvByte = (PVByte*)factory->createPVScalar(NULL, "pvByte",
             epics::pvData::pvByte);
     pvByte->put(0);
@@ -123,7 +123,7 @@ void testScalar() {
     serializationTest(pvByte);
     delete pvByte;
 
-    cout<<"\tPVShort\n";
+    ofile<<"\tPVShort\n";
     PVShort* pvShort = (PVShort*)factory->createPVScalar(NULL, "pvShort",
             epics::pvData::pvShort);
     pvShort->put(0);
@@ -140,7 +140,7 @@ void testScalar() {
     serializationTest(pvShort);
     delete pvShort;
 
-    cout<<"\tPVInt\n";
+    ofile<<"\tPVInt\n";
     PVInt* pvInt = (PVInt*)factory->createPVScalar(NULL, "pvInt",
             epics::pvData::pvInt);
     pvInt->put(0);
@@ -161,7 +161,7 @@ void testScalar() {
     serializationTest(pvInt);
     delete pvInt;
 
-    cout<<"\tPVLong\n";
+    ofile<<"\tPVLong\n";
     PVLong* pvLong = (PVLong*)factory->createPVScalar(NULL, "pvLong",
             epics::pvData::pvLong);
     pvLong->put(0);
@@ -186,7 +186,7 @@ void testScalar() {
     serializationTest(pvLong);
     delete pvLong;
 
-    cout<<"\tPVFloat\n";
+    ofile<<"\tPVFloat\n";
     PVFloat* pvFloat = (PVFloat*)factory->createPVScalar(NULL, "pvFloat",
             epics::pvData::pvFloat);
     pvFloat->put(0);
@@ -199,7 +199,7 @@ void testScalar() {
     serializationTest(pvFloat);
     delete pvFloat;
 
-    cout<<"\tPVDouble\n";
+    ofile<<"\tPVDouble\n";
     PVDouble* pvDouble = (PVDouble*)factory->createPVScalar(NULL, "pvDouble",
             epics::pvData::pvDouble);
     pvDouble->put(0);
@@ -212,7 +212,7 @@ void testScalar() {
     serializationTest(pvDouble);
     delete pvDouble;
 
-    cout<<"\tPVString\n";
+    ofile<<"\tPVString\n";
     PVString* pvString = (PVString*)factory->createPVScalar(NULL, "pvString",
             epics::pvData::pvString);
     pvString->put("");
@@ -232,16 +232,16 @@ void testScalar() {
 
     delete pvString;
 
-    cout<<"!!!  PASSED\n\n";
+    ofile<<"!!!  PASSED\n\n";
 }
 
-void testArray() {
-    cout<<"Testing arrays...\n";
+void testArray(std::ostream& ofile) {
+    ofile<<"Testing arrays...\n";
 
     PVDataCreate* factory = getPVDataCreate();
     assert(factory!=NULL);
 
-    cout<<"\tPVBooleanArray\n";
+    ofile<<"\tPVBooleanArray\n";
     bool boolEmpty[] = { };
     bool bv[] = { false, true, false, true, true };
     PVBooleanArray* pvBoolean = (PVBooleanArray*)factory->createPVScalarArray(
@@ -252,7 +252,7 @@ void testArray() {
     serializationTest(pvBoolean);
     delete pvBoolean;
 
-    cout<<"\tPVByteArray\n";
+    ofile<<"\tPVByteArray\n";
     int8 byteEmpty[] = { };
     int8 byv[] = { 0, 1, 2, -1, BYTE_MAX_VALUE, BYTE_MAX_VALUE-1,
             BYTE_MIN_VALUE+1, BYTE_MIN_VALUE };
@@ -264,7 +264,7 @@ void testArray() {
     serializationTest(pvByte);
     delete pvByte;
 
-    cout<<"\tPVShortArray\n";
+    ofile<<"\tPVShortArray\n";
     int16 shortEmpty[] = { };
     int16 sv[] = { 0, 1, 2, -1, SHORT_MAX_VALUE, SHORT_MAX_VALUE-1,
             SHORT_MIN_VALUE+1, SHORT_MIN_VALUE };
@@ -276,7 +276,7 @@ void testArray() {
     serializationTest(pvShort);
     delete pvShort;
 
-    cout<<"\tPVIntArray\n";
+    ofile<<"\tPVIntArray\n";
     int32 intEmpty[] = { };
     int32 iv[] = { 0, 1, 2, -1, INT_MAX_VALUE, INT_MAX_VALUE-1,
             INT_MIN_VALUE+1, INT_MIN_VALUE };
@@ -288,7 +288,7 @@ void testArray() {
     serializationTest(pvInt);
     delete pvInt;
 
-    cout<<"\tPVLongArray\n";
+    ofile<<"\tPVLongArray\n";
     int64 longEmpty[] = { };
     int64 lv[] = { 0, 1, 2, -1, LONG_MAX_VALUE, LONG_MAX_VALUE-1,
             LONG_MIN_VALUE+1, LONG_MIN_VALUE };
@@ -300,7 +300,7 @@ void testArray() {
     serializationTest(pvLong);
     delete pvLong;
 
-    cout<<"\tPVFloatArray\n";
+    ofile<<"\tPVFloatArray\n";
     float floatEmpty[] = { };
     float fv[] = { (float)0.0, (float)1.1, (float)2.3, (float)-1.4,
             FLOAT_MAX_VALUE, FLOAT_MAX_VALUE-(float)123456.789, FLOAT_MIN_VALUE
@@ -313,7 +313,7 @@ void testArray() {
     serializationTest(pvFloat);
     delete pvFloat;
 
-    cout<<"\tPVDoubleArray\n";
+    ofile<<"\tPVDoubleArray\n";
     double doubleEmpty[] = { };
     double dv[] = { (double)0.0, (double)1.1, (double)2.3, (double)-1.4,
             DOUBLE_MAX_VALUE, DOUBLE_MAX_VALUE-(double)123456.789,
@@ -326,7 +326,7 @@ void testArray() {
     serializationTest(pvDouble);
     delete pvDouble;
 
-    cout<<"\tPVStringArray\n";
+    ofile<<"\tPVStringArray\n";
     String stringEmpty[] = { };
     String
             strv[] =
@@ -347,11 +347,11 @@ void testArray() {
     serializationTest(pvString);
     delete pvString;
 
-    cout<<"!!!  PASSED\n\n";
+    ofile<<"!!!  PASSED\n\n";
 }
 
-void testScalarEquals() {
-    cout<<"Testing scalar equals...\n";
+void testScalarEquals(std::ostream& ofile) {
+    ofile<<"Testing scalar equals...\n";
     PVDataCreate* factory = getPVDataCreate();
     assert(factory!=NULL);
 
@@ -427,11 +427,11 @@ void testScalarEquals() {
     delete pvStruct1;
     // 'structure' and 'fields' are deleted implicitly
 
-    cout<<"!!!  PASSED\n\n";
+    ofile<<"!!!  PASSED\n\n";
 }
 
-void testScalarNonInitialized() {
-    cout<<"Testing scalar non-initialized...\n";
+void testScalarNonInitialized(std::ostream& ofile) {
+    ofile<<"Testing scalar non-initialized...\n";
     PVDataCreate* factory = getPVDataCreate();
     assert(factory!=NULL);
 
@@ -482,11 +482,11 @@ void testScalarNonInitialized() {
     serializationTest(pvStruct);
     delete pvStruct; // 'structure' and 'fields' are deleted implicitly
 
-    cout<<"!!!  PASSED\n\n";
+    ofile<<"!!!  PASSED\n\n";
 }
 
-void testArrayNonInitialized() {
-    cout<<"Testing array non-initialized...\n";
+void testArrayNonInitialized(std::ostream& ofile) {
+    ofile<<"Testing array non-initialized...\n";
     PVDataCreate* factory = getPVDataCreate();
     assert(factory!=NULL);
 
@@ -549,18 +549,18 @@ void testArrayNonInitialized() {
     //'structureArray' also deletes 'structure'
     //'structure' also deletes 'fields'
 
-    cout<<"!!!  PASSED\n\n";
+    ofile<<"!!!  PASSED\n\n";
 }
 
-void testStructure() {
-    cout<<"Testing structure...\n";
+void testStructure(std::ostream& ofile) {
+    ofile<<"Testing structure...\n";
 
     FieldCreate* fieldCreate = getFieldCreate();
     PVDataCreate* pvDataCreate = getPVDataCreate();
     assert(fieldCreate!=NULL);
     assert(pvDataCreate!=NULL);
 
-    cout<<"\tSimple structure serialization\n";
+    ofile<<"\tSimple structure serialization\n";
     FieldConstPtrArray fields = new FieldConstPtr[2];
     fields[0] = fieldCreate->createScalar("secondsSinceEpoch",
             epics::pvData::pvLong);
@@ -574,7 +574,7 @@ void testStructure() {
     //serializationTest(pvStructure->getStructure());
     delete pvStructure;
 
-    cout<<"\tComplex structure serialization\n";
+    ofile<<"\tComplex structure serialization\n";
     // and more complex :)
     FieldConstPtrArray fields2 = new FieldConstPtr[4];
     fields2[0] = fieldCreate->createScalar("longVal", epics::pvData::pvLong);
@@ -603,7 +603,7 @@ void testStructure() {
     delete pvStructure2;
 
 
-    cout<<"!!!  PASSED\n\n";
+    ofile<<"!!!  PASSED\n\n";
 }
 
 /*
@@ -625,16 +625,27 @@ void testStructure() {
  */
 
 int main(int argc, char *argv[]) {
+    std::ofstream outfile;
+    std::ostream *out=NULL;
+    if(argc>1) {
+        outfile.open(argv[1]);
+        if(outfile.is_open()){
+            out=&outfile;
+        }else{
+            fprintf(stderr, "Failed to open test output file\n");
+        }
+    }
+    if(!out) out=&std::cout;
     flusher = new SerializableControlImpl();
     control = new DeserializableControlImpl();
     buffer = new ByteBuffer(1<<16);
 
-    testScalarEquals();
-    testScalar();
-    testArray();
-    testScalarNonInitialized();
-    testArrayNonInitialized();
-    testStructure();
+    testScalarEquals(*out);
+    testScalar(*out);
+    testArray(*out);
+    testScalarNonInitialized(*out);
+    testArrayNonInitialized(*out);
+    testStructure(*out);
     //testIntrospectionSerialization();
 
     delete buffer;
@@ -642,9 +653,8 @@ int main(int argc, char *argv[]) {
     delete flusher;
 
     epicsExitCallAtExits();
-    CDRMonitor::get().show(stdout);
-    cout<<"\nDone!\n";
+    (*out)<<"Done.\n"<<CDRMonitor::get();
 
-    return (0);
+    return 0;
 }
 

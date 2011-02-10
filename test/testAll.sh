@@ -12,3 +12,4 @@
 ./testTimer.sh || exit $?
 ./testQueue.sh || exit $?
 ./testMessageQueue.sh || exit $?
+./testSerialization.sh || exit $?
