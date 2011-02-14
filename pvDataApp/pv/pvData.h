@@ -132,12 +132,7 @@ public:
     bool isCapacityMutable() ;
     void setCapacityMutable(bool isMutable);
     virtual void setCapacity(int capacity) = 0;
-    virtual void serialize(ByteBuffer *pbuffer,
-        SerializableControl *pflusher) = 0;
-    virtual void deserialize(ByteBuffer *pbuffer,
-        DeserializableControl *pflusher) = 0;
-    virtual void serialize(ByteBuffer *pbuffer,
-        SerializableControl *pflusher, int offset, int count) = 0;
+
 protected:
     PVArray(PVStructure *parent,FieldConstPtr field);
     void setCapacityLength(int capacity,int length);
@@ -161,13 +156,7 @@ class PVScalarArray : public PVArray {
 public:
     virtual ~PVScalarArray();
     ScalarArrayConstPtr getScalarArray() ;
-    virtual void setCapacity(int capacity) = 0;
-    virtual void serialize(ByteBuffer *pbuffer,
-        SerializableControl *pflusher) = 0;
-    virtual void deserialize(ByteBuffer *pbuffer,
-        DeserializableControl *pflusher) = 0;
-    virtual void serialize(ByteBuffer *pbuffer,
-        SerializableControl *pflusher, int offset, int count) = 0;
+
 protected:
     PVScalarArray(PVStructure *parent,ScalarArrayConstPtr scalarArray);
 private:
@@ -182,18 +171,12 @@ public:
     virtual int append(int number) = 0;
     virtual bool remove(int offset,int number) = 0;
     virtual void compress() = 0;
-    virtual void setCapacity(int capacity) = 0;
     virtual int get(int offset, int length,
         StructureArrayData *data) = 0;
     virtual int put(int offset,int length,
         PVStructurePtrArray from, int fromOffset) = 0;
     virtual void shareData( PVStructurePtrArray value,int capacity,int length) = 0;
-    virtual void serialize(ByteBuffer *pbuffer,
-        SerializableControl *pflusher) = 0 ;
-    virtual void deserialize(ByteBuffer *buffer,
-        DeserializableControl *pflusher) = 0;
-    virtual void serialize(ByteBuffer *pbuffer,
-        SerializableControl *pflusher, int offset, int count) = 0;
+
 protected:
     PVStructureArray(PVStructure *parent, StructureArrayConstPtr structureArray)
     : PVArray(parent,structureArray) {}
@@ -253,12 +236,9 @@ public:
     typedef PVArrayData<T> ArrayDataType;
 
     virtual ~PVValueArray() {}
-    virtual void setCapacity(int capacity) = 0;
     virtual int get(int offset, int length, ArrayDataType *data) = 0;
     virtual int put(int offset,int length, pointer from, int fromOffset) = 0;
     virtual void shareData(pointer value,int capacity,int length) = 0;
-    virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) = 0;
-    virtual void deserialize(ByteBuffer *pbuffer,DeserializableControl *pflusher) = 0;
 protected:
     PVValueArray(PVStructure *parent,ScalarArrayConstPtr scalar)
     : PVScalarArray(parent,scalar) {}
