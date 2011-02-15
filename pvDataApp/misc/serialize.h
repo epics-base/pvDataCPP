@@ -44,7 +44,7 @@ namespace epics { namespace pvData {
     };
 
 
-    class SerializableArray : public Serializable {
+    class SerializableArray : virtual public Serializable {
     public:
         virtual void serialize(ByteBuffer *buffer,
             SerializableControl *flusher, int offset, int count) = 0;

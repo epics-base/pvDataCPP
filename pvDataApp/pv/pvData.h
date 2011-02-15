@@ -58,7 +58,7 @@ public:
 
 class PVField
 : public Requester,
-  public Serializable,
+  virtual public Serializable,
   private NoDefaultMethods
 {
 public:
