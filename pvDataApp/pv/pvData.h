@@ -216,8 +216,6 @@ public:
     virtual void deserialize(
         ByteBuffer *pbuffer,DeserializableControl *pflusher);
     virtual void serialize(ByteBuffer *pbuffer,
-        SerializableControl *pflusher, int offset, int count) ;
-    virtual void serialize(ByteBuffer *pbuffer,
         SerializableControl *pflusher,BitSet *pbitSet) ;
     virtual void deserialize(ByteBuffer *pbuffer,
         DeserializableControl*pflusher,BitSet *pbitSet);

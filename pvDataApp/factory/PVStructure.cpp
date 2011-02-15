@@ -445,11 +445,6 @@ namespace epics { namespace pvData {
     }
 
     void PVStructure::serialize(ByteBuffer *pbuffer,
-            SerializableControl *pflusher, int offset, int count) {
-        throw std::logic_error(notImplemented);
-    }
-
-    void PVStructure::serialize(ByteBuffer *pbuffer,
             SerializableControl *pflusher, BitSet *pbitSet) {
         int offset = getFieldOffset();
         int numberFields = getNumberFields();
