@@ -46,12 +46,12 @@ namespace epics { namespace pvData {
          * Start monitoring.
          * @return completion status.
          */
-        virtual Status* start() = 0;
+        virtual Status start() = 0;
         /**
          * Stop Monitoring.
          * @return completion status.
          */
-        virtual Status* stop() = 0;
+        virtual Status stop() = 0;
         /**
          * If monitor has occurred return data.
          * @return monitorElement for modified data on null if no monitors have occurred.
@@ -77,7 +77,7 @@ namespace epics { namespace pvData {
          * @param monitor The monitor
          * @param structure The structure defining the data.
          */
-        virtual void monitorConnect(Status* status, Monitor* monitor, Structure* structure) = 0;
+        virtual void monitorConnect(const Status &status, Monitor* monitor, Structure* structure) = 0;
         /**
          * A monitor event has occurred. The requester must call Monitor.poll to get data.
          * @param monitor The monitor.

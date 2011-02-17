@@ -40,7 +40,7 @@ public:
     virtual T get();
     virtual void put(T val);
     virtual void serialize(ByteBuffer *pbuffer,
-        SerializableControl *pflusher);
+        SerializableControl *pflusher) const;
     virtual void deserialize(ByteBuffer *pbuffer,
         DeserializableControl *pflusher);
     virtual bool operator==(PVField& pv) ;
@@ -66,7 +66,7 @@ void BasePVScalar<T>::put(T val){value = val;}
 
 template<typename T>
 void BasePVScalar<T>::serialize(ByteBuffer *pbuffer,
-    SerializableControl *pflusher) {
+    SerializableControl *pflusher) const {
     pflusher->ensureBuffer(1);
     pbuffer->put<T>(value);
 }
@@ -100,7 +100,7 @@ BasePVScalar<String>::BasePVScalar(PVStructure *parent,ScalarConstPtr scalar)
 
 template<>
 void BasePVScalar<String>::serialize(ByteBuffer *pbuffer,
-    SerializableControl *pflusher) {
+    SerializableControl *pflusher) const {
     SerializeHelper::serializeString(value, pbuffer, pflusher);
 }
 
@@ -137,10 +137,10 @@ public:
        int fromOffset);
     virtual void shareData(pointer value,int capacity,int length);
     // from Serializable
-    virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) ;
+    virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) const;
     virtual void deserialize(ByteBuffer *pbuffer,DeserializableControl *pflusher);
     virtual void serialize(ByteBuffer *pbuffer,
-         SerializableControl *pflusher, int offset, int count) ;
+         SerializableControl *pflusher, int offset, int count) const;
     virtual bool operator==(PVField& pv) ;
     virtual bool operator!=(PVField& pv) ;
 private:
@@ -231,7 +231,7 @@ void DefaultPVArray<T>::shareData(pointer shareValue,int capacity,int length)
 
 template<typename T>
 void DefaultPVArray<T>::serialize(ByteBuffer *pbuffer,
-            SerializableControl *pflusher) {
+            SerializableControl *pflusher) const {
     serialize(pbuffer, pflusher, 0, this->getLength());
 }
 
@@ -262,7 +262,7 @@ void DefaultPVArray<T>::deserialize(ByteBuffer *pbuffer,
 
 template<typename T>
 void DefaultPVArray<T>::serialize(ByteBuffer *pbuffer,
-        SerializableControl *pflusher, int offset, int count) {
+        SerializableControl *pflusher, int offset, int count) const {
     // cache
     int length = this->getLength();
 
@@ -324,7 +324,7 @@ void DefaultPVArray<String>::deserialize(ByteBuffer *pbuffer,
 
 template<>
 void DefaultPVArray<String>::serialize(ByteBuffer *pbuffer,
-        SerializableControl *pflusher, int offset, int count) {
+        SerializableControl *pflusher, int offset, int count) const {
     int length = getLength();
 
     // check bounds

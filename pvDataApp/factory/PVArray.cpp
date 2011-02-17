@@ -32,9 +32,9 @@ namespace epics { namespace pvData {
         delete pImpl;
     }
 
-     int PVArray::getLength()  {return pImpl->length;}
+     int PVArray::getLength() const {return pImpl->length;}
 
-     int PVArray::getCapacity()  {return pImpl->capacity;}
+     int PVArray::getCapacity() const {return pImpl->capacity;}
 
      static String fieldImmutable("field is immutable");
 

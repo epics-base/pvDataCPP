@@ -341,7 +341,7 @@ namespace epics { namespace pvData {
         *buffer += '}';
     }
 
-    void BitSet::serialize(ByteBuffer* buffer, SerializableControl* flusher) {
+    void BitSet::serialize(ByteBuffer* buffer, SerializableControl* flusher) const {
     
         uint32 n = wordsInUse;
         if (n == 0) {

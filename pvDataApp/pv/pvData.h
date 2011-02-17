@@ -126,10 +126,10 @@ typedef PVScalarValue<String> PVString;
 class PVArray : public PVField, public SerializableArray {
 public:
     virtual ~PVArray();
-    int getLength() ;
+    int getLength() const;
     void setLength(int length);
-    int getCapacity() ;
-    bool isCapacityMutable() ;
+    int getCapacity() const;
+    bool isCapacityMutable();
     void setCapacityMutable(bool isMutable);
     virtual void setCapacity(int capacity) = 0;
 
@@ -212,11 +212,11 @@ public:
     virtual bool operator==(PVField &pv) ;
     virtual bool operator!=(PVField &pv) ;
     virtual void serialize(
-        ByteBuffer *pbuffer,SerializableControl *pflusher) ;
+        ByteBuffer *pbuffer,SerializableControl *pflusher) const;
     virtual void deserialize(
         ByteBuffer *pbuffer,DeserializableControl *pflusher);
     virtual void serialize(ByteBuffer *pbuffer,
-        SerializableControl *pflusher,BitSet *pbitSet) ;
+        SerializableControl *pflusher,BitSet *pbitSet) const;
     virtual void deserialize(ByteBuffer *pbuffer,
         DeserializableControl*pflusher,BitSet *pbitSet);
 protected:

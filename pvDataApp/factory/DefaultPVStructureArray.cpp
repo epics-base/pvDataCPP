@@ -32,11 +32,11 @@ namespace epics { namespace pvData {
         virtual bool operator!=(PVField &pv);
         virtual void shareData( PVStructurePtrArray value,int capacity,int length);
         virtual void serialize(ByteBuffer *pbuffer,
-            SerializableControl *pflusher);
+            SerializableControl *pflusher) const;
         virtual void deserialize(ByteBuffer *buffer,
             DeserializableControl *pflusher);
         virtual void serialize(ByteBuffer *pbuffer,
-            SerializableControl *pflusher, int offset, int count);
+            SerializableControl *pflusher, int offset, int count) const;
     private:
         StructureArrayConstPtr structureArray;
         StructureArrayData *structureArrayData;
@@ -213,7 +213,7 @@ namespace epics { namespace pvData {
     }
 
     void BasePVStructureArray::serialize(ByteBuffer *pbuffer,
-            SerializableControl *pflusher) {
+            SerializableControl *pflusher) const {
         serialize(pbuffer, pflusher, 0, getLength());
     }
 
@@ -247,7 +247,7 @@ namespace epics { namespace pvData {
     }
 
     void BasePVStructureArray::serialize(ByteBuffer *pbuffer,
-            SerializableControl *pflusher, int offset, int count) {
+            SerializableControl *pflusher, int offset, int count) const {
         // cache
         int length = getLength();
 

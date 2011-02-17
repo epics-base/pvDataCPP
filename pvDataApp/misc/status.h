@@ -8,53 +8,69 @@
 #define STATUS_H
 
 #include "serialize.h"
-#include "epicsException.h"
 #include "byteBuffer.h"
-#include "noDefaultMethods.h"
 
 namespace epics { namespace pvData { 
 
-    	/**
-    	 * Status type enum.
-    	 */
-    	enum StatusType { 
-                /** Operation completed successfully. */
-                STATUSTYPE_OK,
-                /** Operation completed successfully, but there is a warning message. */
-                STATUSTYPE_WARNING,
-                /** Operation failed due to an error. */
-                STATUSTYPE_ERROR,
-                /** Operation failed due to an unexpected error. */
-                STATUSTYPE_FATAL
-    	};
-    	
-    	extern const char* StatusTypeName[];
-
         /**
-         * Status interface.
+         * Status.
          * @author mse
          */
         class Status : public epics::pvData::Serializable {
             public:
-            virtual ~Status() {};
+            
+        	/**
+        	 * Status type enum.
+        	 */
+        	enum StatusType { 
+                    /** Operation completed successfully. */
+                    STATUSTYPE_OK,
+                    /** Operation completed successfully, but there is a warning message. */
+                    STATUSTYPE_WARNING,
+                    /** Operation failed due to an error. */
+                    STATUSTYPE_ERROR,
+                    /** Operation failed due to an unexpected error. */
+                    STATUSTYPE_FATAL
+        	};
+        	
+        	static const char* StatusTypeName[];
+        	
+        	static Status OK;
+
+            /**
+             * Creates OK status; STATUSTYPE_OK, empty message and stackDump.
+             */
+            Status();
+        	
+        	/**
+        	 * Create non-OK status.
+        	 */
+            Status(StatusType type, epics::pvData::String message);
+        
+            /**
+             * Create non-OK status.
+             */
+            Status(StatusType type, epics::pvData::String message, epics::pvData::String stackDump);
+        
+            ~Status();
             
             /**
              * Get status type.
              * @return status type, non-<code>null</code>.
              */
-            virtual StatusType getType() = 0;
+            StatusType getType() const;
 
             /**
              * Get error message describing an error. Required if error status.
              * @return error message.
              */
-            virtual epics::pvData::String getMessage() = 0;
+            epics::pvData::String getMessage() const;
 
             /**
              * Get stack dump where error (exception) happened. Optional.
              * @return stack dump.
              */
-            virtual epics::pvData::String getStackDump() = 0;
+            epics::pvData::String getStackDump() const;
 
             /**
              * Convenient OK test. Same as <code>(getType() == StatusType.OK)</code>.
@@ -63,54 +79,28 @@ namespace epics { namespace pvData {
              * @return OK status.
              * @see #isSuccess()
              */
-            virtual bool isOK() = 0;
+            bool isOK() const;
 
             /**
              * Check if operation succeeded.
              * @return operation success status.
              */
-            virtual bool isSuccess() = 0;
+            bool isSuccess() const;
 
-            virtual String toString() = 0;
-            virtual void toString(StringBuilder buffer, int indentLevel = 0) = 0;
+            String toString() const;
+            void toString(StringBuilder buffer, int indentLevel = 0) const;
             
+            void serialize(ByteBuffer *buffer, SerializableControl *flusher) const;
+            void deserialize(ByteBuffer *buffer, DeserializableControl *flusher);
+    
+            private:
+            
+            static epics::pvData::String m_emptyString;
+            
+            StatusType m_type;
+            String m_message;
+            String m_stackDump;
         };
-
-        
-        /**
-         * Interface for creating status.
-         * @author mse
-         */
-        class StatusCreate : private epics::pvData::NoDefaultMethods {
-            public:
-        	/**
-        	 * Get OK status. Static instance should be returned.
-        	 * @return OK <code>Status</code> instance.
-        	 */
-        	virtual Status* getStatusOK() = 0;
-        	
-        	/**
-        	 * Create status.
-        	 * @param type status type, non-<code>null</code>.
-        	 * @param message message describing an error, non-<code>null</code>.
-        	 * 		  NOTE: Do NOT use <code>throwable.getMessage()</code> as message, since it will be supplied with the <code>cause</code>.
-        	 * @param cause exception that caused an error. Optional.
-        	 * @return status instance.
-        	 */
-        	virtual Status* createStatus(StatusType type, String message, BaseException* cause = 0) = 0;
-        	
-        	/**
-        	 * Deserialize status.
-        	 * NOTE: use this method instead of <code>Status.deserialize()</code>, since this allows OK status optimization. 
-        	 * @param buffer deserialization buffer.
-        	 * @param control deserialization control.
-        	 * @return status instance.
-        	 */
-        	virtual Status* deserializeStatus(ByteBuffer* buffer, DeserializableControl* control) = 0;
-        };
-        
-        extern StatusCreate* getStatusCreate();
-        
 
 }}
 #endif  /* STATUS_H */

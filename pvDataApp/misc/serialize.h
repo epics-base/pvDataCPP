@@ -30,7 +30,7 @@ namespace epics { namespace pvData {
     class Serializable {
     public:
         virtual void serialize(ByteBuffer *buffer,
-            SerializableControl *flusher) = 0;
+            SerializableControl *flusher) const = 0;
         virtual void deserialize(ByteBuffer *buffer,
             DeserializableControl *flusher) = 0;
     };
@@ -38,7 +38,7 @@ namespace epics { namespace pvData {
     class BitSetSerializable {
     public:
         virtual void serialize(ByteBuffer *buffer,
-            SerializableControl *flusher,BitSet *bitSet) = 0;
+            SerializableControl *flusher,BitSet *bitSet) const = 0;
         virtual void deserialize(ByteBuffer *buffer,
             DeserializableControl *flusher,BitSet *bitSet) = 0;
     };
@@ -47,7 +47,7 @@ namespace epics { namespace pvData {
     class SerializableArray : virtual public Serializable {
     public:
         virtual void serialize(ByteBuffer *buffer,
-            SerializableControl *flusher, int offset, int count) = 0;
+            SerializableControl *flusher, int offset, int count) const = 0;
     };
 
 }}

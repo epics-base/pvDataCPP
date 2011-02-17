@@ -432,7 +432,7 @@ namespace epics { namespace pvData {
     }
 
     void PVStructure::serialize(ByteBuffer *pbuffer,
-            SerializableControl *pflusher) {
+            SerializableControl *pflusher) const {
         for(int i = 0; i<pImpl->numberFields; i++)
             pImpl->pvFields[i]->serialize(pbuffer, pflusher);
     }
@@ -445,9 +445,9 @@ namespace epics { namespace pvData {
     }
 
     void PVStructure::serialize(ByteBuffer *pbuffer,
-            SerializableControl *pflusher, BitSet *pbitSet) {
-        int offset = getFieldOffset();
-        int numberFields = getNumberFields();
+            SerializableControl *pflusher, BitSet *pbitSet) const {
+        int offset = const_cast<PVStructure*>(this)->getFieldOffset();
+        int numberFields = const_cast<PVStructure*>(this)->getNumberFields();
         int next = pbitSet->nextSetBit(offset);
 
         // no more changes or no changes in this structure
