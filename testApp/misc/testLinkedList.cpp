@@ -35,243 +35,241 @@ typedef LinkedList<Basic> BasicList;
 
 class Basic {
 public:
-    Basic(int i): index(i),node(new BasicListNode(this)) {}
-    ~Basic() { delete node;}
+    Basic(int i): index(i),node(*this) {}
+    ~Basic() { }
     int index;
-    BasicListNode*node;
+    BasicListNode node;
 };
     
 static void testBasic(FILE * fd ) {
-    LinkedList<Basic> *basicList = new BasicList();
+    LinkedList<Basic> basicList;
     Basic *basics[numNodes];
     for(int i=0; i<numNodes; i++) {
         basics[i] = new Basic(i);
-        basicList->addTail(basics[i]->node);
-        assert(basicList->getLength()==i+1);
+        basicList.addTail(basics[i]->node);
+        assert(basicList.getLength()==i+1);
     }
-    BasicListNode *basicNode = basicList->getHead();
+    BasicListNode *basicNode = basicList.getHead();
     fprintf(fd,"basic addTail");
     while(basicNode!=0) {
-        fprintf(fd," %d",basicNode->getObject()->index);
-        basicNode = basicList->getNext(basicNode);
+        fprintf(fd," %d",basicNode->getObject().index);
+        basicNode = basicList.getNext(*basicNode);
     }
-    assert(basicList->isEmpty()==false);
-    basicNode = basicList->getTail();
+    assert(basicList.isEmpty()==false);
+    basicNode = basicList.getTail();
     while(basicNode!=0) {
-        fprintf(fd," %d",basicNode->getObject()->index);
-        assert(basicList->contains(basicNode->getObject()));
-        basicNode = basicList->getPrev(basicNode);
+        fprintf(fd," %d",basicNode->getObject().index);
+        assert(basicNode->isOnList());
+        basicNode = basicList.getPrev(*basicNode);
     }
     fprintf(fd,"\n"); 
     for(int i=0; i<numNodes; i++) {
-        Basic *basic = basicList->getHead()->getObject();
-        assert(basic->index==i);
-        assert(basics[i]->node->isOnList()==true);
-        basicList->remove(basics[i]);
-        assert(basics[i]->node->isOnList()==false);
-        int length = basicList->getLength();
+        basicNode = basicList.getHead();
+        assert(basicNode!=0);
+        Basic &basic = basicNode->getObject();
+        assert(basic.index==i);
+        assert(basics[i]->node.isOnList()==true);
+        basicList.remove(basics[i]->node);
+        assert(basics[i]->node.isOnList()==false);
+        int length = basicList.getLength();
         assert(length==(numNodes-i-1));
     }
-    assert(basicList->isEmpty());
+    assert(basicList.isEmpty());
     for(int i=numNodes-1; i>=0; i--) {
-        basicList->addHead(basics[i]->node);
-        assert(basicList->getLength()==numNodes-i);
+        basicList.addHead(basics[i]->node);
+        assert(basicList.getLength()==numNodes-i);
     }
-    basicNode = basicList->getHead();
+    basicNode = basicList.getHead();
     fprintf(fd,"basic addHead");
     while(basicNode!=0) {
-        fprintf(fd," %d",basicNode->getObject()->index);
-        basicNode = basicList->getNext(basicNode);
+        fprintf(fd," %d",basicNode->getObject().index);
+        basicNode = basicList.getNext(*basicNode);
     }
     fprintf(fd,"\n"); 
     for(int i=0; i<numNodes; i++) {
-        Basic *basic = basicList->getHead()->getObject();
-        assert(basic->index==i);
-        basicList->removeHead();
-        assert(basic->node->isOnList()==false);
-        int length = basicList->getLength();
+        basicNode = basicList.getHead();
+        assert(basicNode!=0);
+        Basic &basic = basicNode->getObject();
+        assert(basic.index==i);
+        basicList.removeHead();
+        assert(basic.node.isOnList()==false);
+        int length = basicList.getLength();
         assert(length==(numNodes-i-1));
     }
-    assert(basicList->isEmpty());
-    basicList->addTail(basics[0]->node);
-    basicNode = basicList->getTail();
-    assert(basicNode->getObject()->index==0);
+    assert(basicList.isEmpty());
+    basicList.addTail(basics[0]->node);
+    basicNode = basicList.getTail();
+    assert(basicNode->getObject().index==0);
     for(int i=1;i<numNodes;i++) {
-        basicList->insertAfter(basicNode,basics[i]->node);
-        basicNode = basicList->getTail();
-        assert(basicList->getLength()==i+1);
+        basicList.insertAfter(*basicNode,basics[i]->node);
+        basicNode = basicList.getTail();
+        assert(basicList.getLength()==i+1);
     }
     fprintf(fd,"basic addTail insertAfter");
-    basicNode = basicList->getHead();
+    basicNode = basicList.getHead();
     while(basicNode!=0) {
-        fprintf(fd," %d",basicNode->getObject()->index);
-        basicNode = basicList->getNext(basicNode);
+        fprintf(fd," %d",basicNode->getObject().index);
+        basicNode = basicList.getNext(*basicNode);
     }
     fprintf(fd,"\n"); 
     for(int i=numNodes-1; i>=0; i--) {
-        Basic *basic = basicList->getTail()->getObject();
-        assert(basic->index==i);
-        basicList->removeTail();
-        assert(basic->node->isOnList()==false);
-        int length = basicList->getLength();
+        Basic &basic = basicList.getTail()->getObject();
+        assert(basic.index==i);
+        basicList.removeTail();
+        assert(basic.node.isOnList()==false);
+        int length = basicList.getLength();
         assert(length==i);
     }
-    assert(basicList->isEmpty());
-    basicList->addHead(basics[numNodes-1]->node);
-    basicNode = basicList->getHead();
-    assert(basicNode->getObject()->index==4);
+    assert(basicList.isEmpty());
+    basicList.addHead(basics[numNodes-1]->node);
+    basicNode = basicList.getHead();
+    assert(basicNode->getObject().index==4);
     for(int i=numNodes-2; i>=0; i--) {
-        basicList->insertBefore(basicNode,basics[i]->node);
-        basicNode = basicList->getHead();
-        assert(basicList->getLength()==numNodes-i);
+        basicList.insertBefore(*basicNode,basics[i]->node);
+        basicNode = basicList.getHead();
+        assert(basicList.getLength()==numNodes-i);
     }
     fprintf(fd,"basic addTail insertBefore");
-    basicNode = basicList->getHead();
+    basicNode = basicList.getHead();
     while(basicNode!=0) {
-        fprintf(fd," %d",basicNode->getObject()->index);
-        basicNode = basicList->getNext(basicNode);
+        fprintf(fd," %d",basicNode->getObject().index);
+        basicNode = basicList.getNext(*basicNode);
     }
     fprintf(fd,"\n"); 
     for(int i=numNodes-1; i>=0; i--) {
-        Basic *basic = basicList->getTail()->getObject();
-        assert(basic->index==i);
-        basicList->remove(basic);
-        assert(basic->node->isOnList()==false);
-        int length = basicList->getLength();
+        Basic &basic = basicList.getTail()->getObject();
+        assert(basic.index==i);
+        basicList.remove(basic.node);
+        assert(basic.node.isOnList()==false);
+        int length = basicList.getLength();
         assert(length==i);
     }
-    assert(basicList->isEmpty());
-    delete basicList;
+    assert(basicList.isEmpty());
     for(int i=0; i<numNodes; i++) delete basics[i];
 }
 
 static void testQueue(FILE * fd ) {
-    LinkedList<Basic> *basicList = new BasicList();
+    LinkedList<Basic> basicList;
     Basic *basics[numNodes];
     for(int i=0; i<numNodes; i++) {
         basics[i] = new Basic(i);
     }
     fprintf(fd,"\nQueue test\n");
     for(int i=0;i<numNodes;i++) {
-        basicList->addTail(basics[i]->node);
-        assert(basicList->getLength()==i+1);
+        basicList.addTail(basics[i]->node);
+        assert(basicList.getLength()==i+1);
     }
-    BasicListNode *basicNode = basicList->removeHead();
-    while(basicNode!=0) basicNode = basicList->removeHead();
-    for(int i=0;i<numNodes;i++) basicList->addTail(basics[i]->node);
-    basicNode = basicList->removeHead();
+    BasicListNode *basicNode = basicList.removeHead();
+    while(basicNode!=0) basicNode = basicList.removeHead();
+    for(int i=0;i<numNodes;i++) basicList.addTail(basics[i]->node);
+    basicNode = basicList.removeHead();
     fprintf(fd,"queue");
     while(basicNode!=0) {
-        fprintf(fd," %d",basicNode->getObject()->index);
-        basicNode = basicList->removeHead();
+        fprintf(fd," %d",basicNode->getObject().index);
+        basicNode = basicList.removeHead();
     }
     fprintf(fd,"\n");
-    assert(basicList->isEmpty());
-    delete basicList;
+    assert(basicList.isEmpty());
     for(int i=0; i<numNodes; i++) delete basics[i];
 }
 
 static void testStack(FILE * fd ) {
-    LinkedList<Basic> *basicList = new BasicList();
+    LinkedList<Basic> basicList;
     Basic *basics[numNodes];
     for(int i=0; i<numNodes; i++) {
         basics[i] = new Basic(i);
     }
     fprintf(fd,"\nStack test\n");
     for(int i=0;i<numNodes;i++) {
-        basicList->addHead(basics[i]->node);
-        assert(basicList->getLength()==i+1);
+        basicList.addHead(basics[i]->node);
+        assert(basicList.getLength()==i+1);
     }
-    BasicListNode *basicNode = basicList->removeHead();
-    while(basicNode!=0) basicNode = basicList->removeHead();
-    for(int i=0;i<numNodes;i++) basicList->addHead(basics[i]->node);
-    basicNode = basicList->removeHead();
+    BasicListNode *basicNode = basicList.removeHead();
+    while(basicNode!=0) basicNode = basicList.removeHead();
+    for(int i=0;i<numNodes;i++) basicList.addHead(basics[i]->node);
+    basicNode = basicList.removeHead();
     fprintf(fd,"stack");
     while(basicNode!=0) {
-        fprintf(fd," %d",basicNode->getObject()->index);
-        basicNode = basicList->removeHead();
+        fprintf(fd," %d",basicNode->getObject().index);
+        basicNode = basicList.removeHead();
     }
     fprintf(fd,"\n");
-    assert(basicList->isEmpty());
-    delete basicList;
+    assert(basicList.isEmpty());
     for(int i=0; i<numNodes; i++) delete basics[i];
 }
 
 static void testList(FILE * fd ) {
-    LinkedList<Basic> *basicList = new BasicList();
+    LinkedList<Basic> basicList;
     Basic *basics[numNodes];
     for(int i=0; i<numNodes; i++) {
         basics[i] = new Basic(i);
     }
     fprintf(fd,"\ntestList\n");
-    for(int i=0;i<numNodes;i++) basicList->addTail(basics[i]->node);
+    for(int i=0;i<numNodes;i++) basicList.addTail(basics[i]->node);
     fprintf(fd,"list");
-    BasicListNode *basicNode = basicList->removeHead();
+    BasicListNode *basicNode = basicList.removeHead();
     while(basicNode!=0) {
-        fprintf(fd," %d",basicNode->getObject()->index);
-        basicNode = basicList->removeHead();
+        fprintf(fd," %d",basicNode->getObject().index);
+        basicNode = basicList.removeHead();
     }
     fprintf(fd,"\n");
-    assert(basicList->isEmpty());
-    delete basicList;
+    assert(basicList.isEmpty());
     for(int i=0; i<numNodes; i++) delete basics[i];
 }
 
 static void testRandomInsertRemove(FILE * fd ) {
-    LinkedList<Basic> *basicList = new BasicList();
+    LinkedList<Basic> basicList;
     Basic *basics[numNodes];
     for(int i=0; i<numNodes; i++) {
         basics[i] = new Basic(i);
     }
     fprintf(fd,"\nRandom insert/remove test\n");
-    basicList->addHead(basics[4]->node);
-    basicList->insertAfter(basics[4]->node,basics[3]->node);
-    basicList->insertAfter(basics[3]->node,basics[2]->node);
-    basicList->addTail(basics[1]->node);
-    basicList->addTail(basics[0]->node);
-    BasicListNode *basicNode = basicList->removeHead();
+    basicList.addHead(basics[4]->node);
+    basicList.insertAfter(basics[4]->node,basics[3]->node);
+    basicList.insertAfter(basics[3]->node,basics[2]->node);
+    basicList.addTail(basics[1]->node);
+    basicList.addTail(basics[0]->node);
+    BasicListNode *basicNode = basicList.removeHead();
     fprintf(fd,"stack");
     while(basicNode!=0) {
-        fprintf(fd," %d",basicNode->getObject()->index);
-        basicNode = basicList->removeHead();
+        fprintf(fd," %d",basicNode->getObject().index);
+        basicNode = basicList.removeHead();
     }
     fprintf(fd,"\n");
-    assert(basicList->isEmpty());
-    delete basicList;
+    assert(basicList.isEmpty());
     for(int i=0; i<numNodes; i++) delete basics[i];
 }
 
 static void testOrderedQueue(FILE * fd ) {
-    LinkedList<Basic> *basicList = new BasicList();
+    LinkedList<Basic> basicList;
     Basic *basics[numNodes];
     for(int i=0; i<numNodes; i++) {
         basics[i] = new Basic(i);
     }
     BasicListNode *basicNode = 0;
     fprintf(fd,"\nOrdered Queue test\n");
-    basicList->addHead(basics[2]->node);
+    basicList.addHead(basics[2]->node);
     for(int i=0;i<numNodes;i++) {
-        if(basicList->contains(basics[i]->node->getObject())) continue;
-        basicNode = basicList->getHead();
+        if(basics[i]->node.isOnList()) continue;
+        basicNode = basicList.getHead();
         while(basicNode!=0) {
-            if(basicNode->getObject()->index>=basics[i]->index) {
-                basicList->insertBefore(basicNode,basics[i]->node);
+            if(basicNode->getObject().index>=basics[i]->index) {
+                basicList.insertBefore(*basicNode,basics[i]->node);
                 break;
             }
-            basicNode = basicList->getNext(basicNode);
+            basicNode = basicList.getNext(*basicNode);
         }
-        if(basicList->contains(basics[i]->node->getObject())) continue;
-        basicList->addTail(basics[i]->node);
+        if(basics[i]->node.isOnList()) continue;
+        basicList.addTail(basics[i]->node);
     }
     fprintf(fd,"list");
-    basicNode = basicList->removeHead();
+    basicNode = basicList.removeHead();
     while(basicNode!=0) {
-        fprintf(fd," %d",basicNode->getObject()->index);
-        basicNode = basicList->removeHead();
+        fprintf(fd," %d",basicNode->getObject().index);
+        basicNode = basicList.removeHead();
     }
     fprintf(fd,"\n");
-    assert(basicList->isEmpty());
-    delete basicList;
+    assert(basicList.isEmpty());
     for(int i=0; i<numNodes; i++) delete basics[i];
 }
 
@@ -280,7 +278,7 @@ static void testTime(FILE *auxFd) {
     TimeStamp endTime;
     int numNodes = 1000;
 
-    LinkedList<Basic> *basicList = new BasicList();
+    LinkedList<Basic> basicList;
     Basic *basics[numNodes];
     for(int i=0; i<numNodes; i++) {
         basics[i] = new Basic(i);
@@ -289,9 +287,9 @@ static void testTime(FILE *auxFd) {
     int ntimes = 1000;
     startTime.getCurrent();
     for(int i=0; i<ntimes; i++) {
-        for(int j=0;j<numNodes;j++) basicList->addTail(basics[j]->node);
-        BasicListNode *basicNode = basicList->removeHead();
-        while(basicNode!=0) basicNode = basicList->removeHead();
+        for(int j=0;j<numNodes;j++) basicList.addTail(basics[j]->node);
+        BasicListNode *basicNode = basicList.removeHead();
+        while(basicNode!=0) basicNode = basicList.removeHead();
     }
     endTime.getCurrent();
     double diff = TimeStamp::diff(endTime,startTime);
@@ -303,18 +301,17 @@ static void testTime(FILE *auxFd) {
     fprintf(auxFd,"time per iteration %f microseconds\n",diff);
     diff = diff/(numNodes*2); // convert to per addTail/removeHead
     fprintf(auxFd,"time per addTail/removeHead %f microseconds\n",diff);
-    assert(basicList->isEmpty());
-    delete basicList;
+    assert(basicList.isEmpty());
     for(int i=0; i<numNodes; i++) delete basics[i];
 }
 
 static void testTimeLocked(FILE *auxFd) {
     TimeStamp startTime;
     TimeStamp endTime;
-    Mutex *mutex = new Mutex();
+    Mutex mutex;
     int numNodes = 1000;
 
-    LinkedList<Basic> *basicList = new BasicList();
+    LinkedList<Basic> basicList;
     Basic *basics[numNodes];
     for(int i=0; i<numNodes; i++) {
         basics[i] = new Basic(i);
@@ -325,16 +322,16 @@ static void testTimeLocked(FILE *auxFd) {
     for(int i=0; i<ntimes; i++) {
         for(int j=0;j<numNodes;j++) {
             Lock xx(mutex);
-            basicList->addTail(basics[j]->node);
+            basicList.addTail(basics[j]->node);
         }
         BasicListNode *basicNode = 0;
         {
             Lock xx(mutex);
-            basicNode = basicList->removeHead();
+            basicNode = basicList.removeHead();
         }
         while(basicNode!=0) {
             Lock xx(mutex);
-           basicNode = basicList->removeHead();
+           basicNode = basicList.removeHead();
         }
     }
     endTime.getCurrent();
@@ -347,10 +344,8 @@ static void testTimeLocked(FILE *auxFd) {
     fprintf(auxFd,"time per iteration %f microseconds\n",diff);
     diff = diff/(numNodes*2); // convert to per addTail/removeHead
     fprintf(auxFd,"time per addTail/removeHead %f microseconds\n",diff);
-    assert(basicList->isEmpty());
-    delete basicList;
+    assert(basicList.isEmpty());
     for(int i=0; i<numNodes; i++) delete basics[i];
-    delete mutex;
 }
 
 typedef std::list<Basic *> stdList;
@@ -391,7 +386,7 @@ static void testStdListTimeLocked(FILE *auxFd) {
     TimeStamp startTime;
     TimeStamp endTime;
     int numNodes = 1000;
-    Mutex *mutex = new Mutex();
+    Mutex mutex;
 
     stdList basicList;
     Basic *basics[numNodes];
@@ -423,7 +418,6 @@ static void testStdListTimeLocked(FILE *auxFd) {
     diff = diff/(numNodes*2); // convert to per addTail/removeHead
     fprintf(auxFd,"time per addTail/removeHead %f microseconds\n",diff);
     for(int i=0; i<numNodes; i++) delete basics[i];
-    delete mutex;
 }
 
 int main(int argc, char *argv[]) {

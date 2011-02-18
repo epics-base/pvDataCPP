@@ -101,7 +101,7 @@ Thread::ThreadPvt::ThreadPvt(Thread *thread,String name,
 : name(name),priority(priority),
   runnable(runnable),
   isReady(false),
-  threadNode(thread),
+  threadNode(*thread),
   waitDone(),
   id(epicsThreadCreate(
         name.c_str(),
@@ -115,8 +115,8 @@ Thread::ThreadPvt::ThreadPvt(Thread *thread,String name,
     epicsThreadOnce(&initOnce, &init, 0);
     assert(threadList);
     PVDATA_REFCOUNT_MONITOR_CONSTRUCT(thread);
-    Lock x(&listGuard);
-    threadList->addTail(&threadNode);
+    Lock x(listGuard);
+    threadList->addTail(threadNode);
 }
 
 Thread::ThreadPvt::~ThreadPvt()
@@ -135,8 +135,8 @@ Thread::ThreadPvt::~ThreadPvt()
         message += " is not on threadlist";
         throw std::logic_error(message);
     }
-    Lock x(&listGuard);
-    threadList->remove(&threadNode);
+    Lock x(listGuard);
+    threadList->remove(threadNode);
     PVDATA_REFCOUNT_MONITOR_DESTRUCT(thread);
 }
 
@@ -165,15 +165,15 @@ ThreadPriority Thread::getPriority()
 
 void Thread::showThreads(StringBuilder buf)
 {
-    Lock x(&listGuard);
+    Lock x(listGuard);
     ThreadListNode *node = threadList->getHead();    
     while(node!=0) {
-        Thread *thread = node->getObject();
-        *buf += thread->getName();
+        Thread &thread = node->getObject();
+        *buf += thread.getName();
         *buf += " ";
-        *buf += threadPriorityNames[thread->getPriority()];
+        *buf += threadPriorityNames[thread.getPriority()];
         *buf += "\n";
-        node = threadList->getNext(node);
+        node = threadList->getNext(*node);
     }
 }
 

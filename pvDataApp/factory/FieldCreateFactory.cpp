@@ -55,7 +55,7 @@ Field::~Field() {
 }
 
 int Field::getReferenceCount() const {
-    Lock xx(&refCountMutex);
+    Lock xx(refCountMutex);
     return pImpl->referenceCount;
 }
 
@@ -70,7 +70,7 @@ void Field::renameField(String  newName)
 
 void Field::incReferenceCount() const {
     PVDATA_REFCOUNT_MONITOR_INCREF(field);
-    Lock xx(&refCountMutex);
+    Lock xx(refCountMutex);
     pImpl->referenceCount++;
     if(pImpl->type!=structure) return;
     StructureConstPtr structure = static_cast<StructureConstPtr>(this);
@@ -83,7 +83,7 @@ void Field::incReferenceCount() const {
 
 void Field::decReferenceCount() const {
     PVDATA_REFCOUNT_MONITOR_DECREF(field);
-    Lock xx(&refCountMutex);
+    Lock xx(refCountMutex);
     if(pImpl->referenceCount<=0) {
           String message("logicError field ");
           message += pImpl->fieldName;
@@ -406,7 +406,7 @@ FieldCreate::FieldCreate()
 
 FieldCreate * getFieldCreate() {
     static Mutex mutex;
-    Lock xx(&mutex);
+    Lock xx(mutex);
 
     if(fieldCreate==0) fieldCreate = new FieldCreate();
     return fieldCreate;

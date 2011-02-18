@@ -79,7 +79,7 @@ CDRMonitor::show(std::ostream& out) const
 void
 CDRNode::show(FILE *fd)
 {
-    Lock x(&guard);
+    Lock x(guard);
     if(!current.cons && !current.dtys && !current.refs)
         return;
     fprintf(fd,"%s:  totalConstruct %lu totalDestruct %lu",
@@ -98,7 +98,7 @@ CDRNode::show(FILE *fd)
 void
 CDRNode::show(std::ostream& out) const
 {
-    Lock x(&guard);
+    Lock x(guard);
     if(!current.cons && !current.dtys && !current.refs)
         return;
     out<<nodeName<<"  totalConstruct "<<current.cons

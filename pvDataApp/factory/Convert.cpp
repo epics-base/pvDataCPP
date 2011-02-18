@@ -3667,7 +3667,7 @@ public:
 
 Convert * getConvert() {
     static Mutex mutex;
-    Lock xx(&mutex);
+    Lock xx(mutex);
 
     if(convert==0){
         convert = new ConvertExt();

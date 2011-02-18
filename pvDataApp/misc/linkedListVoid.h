@@ -36,22 +36,20 @@ class LinkedListVoid {
 public:
     ~LinkedListVoid();
     int getLength();
-    void addTail(LinkedListVoidNode *listNode);
-    void addHead(LinkedListVoidNode *listNode);
-    void insertAfter(LinkedListVoidNode *listNode,
-        LinkedListVoidNode *addNode);
-    void insertBefore(LinkedListVoidNode *listNode,
-        LinkedListVoidNode *addNode);
+    void addTail(LinkedListVoidNode &listNode);
+    void addHead(LinkedListVoidNode &listNode);
+    void insertAfter(LinkedListVoidNode &listNode,
+        LinkedListVoidNode &addNode);
+    void insertBefore(LinkedListVoidNode &listNode,
+        LinkedListVoidNode &addNode);
     LinkedListVoidNode *removeTail();
     LinkedListVoidNode *removeHead();
-    void remove(LinkedListVoidNode *listNode);
-    void remove(void * object);
+    void remove(LinkedListVoidNode &listNode);
     LinkedListVoidNode *getHead();
     LinkedListVoidNode *getTail();
-    LinkedListVoidNode *getNext(LinkedListVoidNode *listNode);
-    LinkedListVoidNode *getPrev(LinkedListVoidNode *listNode);
+    LinkedListVoidNode *getNext(LinkedListVoidNode &listNode);
+    LinkedListVoidNode *getPrev(LinkedListVoidNode &listNode);
     bool isEmpty();
-    bool contains(void * object);
 protected:
     LinkedListVoid();
 private:

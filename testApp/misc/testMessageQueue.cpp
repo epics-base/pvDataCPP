@@ -33,7 +33,6 @@ using namespace epics::pvData;
 
 static void testBasic(FILE * fd,FILE *auxfd ) {
     int queueSize = 3;
-    int numMessages = 5;
     String messages[]= {
         String("1"),String("2"),String("3"),String("4"),String("5")
     };

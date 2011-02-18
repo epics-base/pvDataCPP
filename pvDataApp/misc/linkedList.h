@@ -15,9 +15,9 @@ class LinkedList;
 template <typename T>
 class LinkedListNode : private LinkedListVoidNode {
 public:
-    LinkedListNode(T *object) : LinkedListVoidNode(object){}
+    LinkedListNode(T &object) : LinkedListVoidNode(&object){}
     ~LinkedListNode() {}
-    T *getObject() { return static_cast<T *>(LinkedListVoidNode::getObject());}
+    T &getObject() { return *static_cast<T *>(LinkedListVoidNode::getObject());}
     bool isOnList() {return LinkedListVoidNode::isOnList();}
     friend  class LinkedList<T>;
 };
@@ -28,27 +28,27 @@ public:
     LinkedList() : LinkedListVoid() {}
     ~LinkedList() {}
     int getLength() {return LinkedListVoid::getLength();}
-    void addTail(LinkedListNode<T> *listNode)
+    void addTail(LinkedListNode<T> &listNode)
     {
-        LinkedListVoid::addTail(static_cast<LinkedListVoidNode *>(listNode));
+        LinkedListVoid::addTail(static_cast<LinkedListVoidNode &>(listNode));
     }
-    void addHead(LinkedListNode<T> *listNode)
+    void addHead(LinkedListNode<T> &listNode)
     {
-        LinkedListVoid::addHead(static_cast<LinkedListVoidNode *>(listNode));
+        LinkedListVoid::addHead(static_cast<LinkedListVoidNode &>(listNode));
     }
-    void insertAfter(LinkedListNode<T> *listNode,
-        LinkedListNode<T> *addNode)
+    void insertAfter(LinkedListNode<T> &listNode,
+        LinkedListNode<T> &addNode)
     {
         LinkedListVoid::insertAfter(
-            static_cast<LinkedListVoidNode *>(listNode),
-            static_cast<LinkedListVoidNode *>(addNode));
+            static_cast<LinkedListVoidNode &>(listNode),
+            static_cast<LinkedListVoidNode &>(addNode));
     }
-    void insertBefore(LinkedListNode<T> *listNode,
-        LinkedListNode<T> *addNode)
+    void insertBefore(LinkedListNode<T> &listNode,
+        LinkedListNode<T> &addNode)
     {
         LinkedListVoid::insertBefore(
-            static_cast<LinkedListVoidNode *>(listNode),
-            static_cast<LinkedListVoidNode *>(addNode));
+            static_cast<LinkedListVoidNode &>(listNode),
+            static_cast<LinkedListVoidNode &>(addNode));
     }
     LinkedListNode<T> *removeTail(){
         return static_cast<LinkedListNode<T> *>(LinkedListVoid::removeTail());
@@ -56,11 +56,8 @@ public:
     LinkedListNode<T> *removeHead(){
         return static_cast<LinkedListNode<T> *>(LinkedListVoid::removeHead());
     }
-    void remove(LinkedListNode<T> *listNode){
-        LinkedListVoid::remove(static_cast<LinkedListVoidNode *>(listNode));
-    }
-    void remove(T *object){
-          LinkedListVoid::remove(object);
+    void remove(LinkedListNode<T> &listNode){
+        LinkedListVoid::remove(static_cast<LinkedListVoidNode &>(listNode));
     }
     LinkedListNode<T> *getHead(){
         return static_cast<LinkedListNode<T> *>(LinkedListVoid::getHead());
@@ -68,16 +65,15 @@ public:
     LinkedListNode<T> *getTail(){
         return static_cast<LinkedListNode<T> *>(LinkedListVoid::getTail());
     }
-    LinkedListNode<T> *getNext(LinkedListNode<T> *listNode){
+    LinkedListNode<T> *getNext(LinkedListNode<T> &listNode){
         return static_cast<LinkedListNode<T> *>(LinkedListVoid::getNext(
-            static_cast<LinkedListVoidNode *>(listNode)));
+            static_cast<LinkedListVoidNode &>(listNode)));
     }
-    LinkedListNode<T> *getPrev(LinkedListNode<T> *listNode){
+    LinkedListNode<T> *getPrev(LinkedListNode<T> &listNode){
         return static_cast<LinkedListNode<T> *>(LinkedListVoid::getPrev(
-            static_cast<LinkedListVoidNode *>(listNode)));
+            static_cast<LinkedListVoidNode &>(listNode)));
     }
     bool isEmpty() { return LinkedListVoid::isEmpty();}
-    bool contains(T *object) { return LinkedListVoid::contains(object);}
 };
 
 

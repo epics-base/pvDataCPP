@@ -69,14 +69,14 @@ public:
         ,guard()
         ,nextNode(CDRMonitor::get().addNode(*this))
     {}
-    void construct(){Lock x(&guard); current.cons++;}
-    void destruct(){Lock x(&guard); current.dtys++;}
-    void incRef(){Lock x(&guard); current.refs++;}
-    void decRef(){Lock x(&guard); current.refs--;}
+    void construct(){Lock x(guard); current.cons++;}
+    void destruct(){Lock x(guard); current.dtys++;}
+    void incRef(){Lock x(guard); current.refs++;}
+    void decRef(){Lock x(guard); current.refs--;}
 
     CDRNode* next() const{return nextNode;}
 
-    CDRCount get() const{Lock x(&guard); return current;}
+    CDRCount get() const{Lock x(guard); return current;}
 
     void show(FILE*);
     void show(std::ostream&) const;

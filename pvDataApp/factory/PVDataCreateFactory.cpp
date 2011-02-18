@@ -544,7 +544,7 @@ PVStructure *PVDataCreate::createPVStructure(PVStructure *parent,
 
  PVDataCreate * getPVDataCreate() {
      static Mutex mutex;
-     Lock xx(&mutex);
+     Lock xx(mutex);
 
      if(pvDataCreate==0){
           pvDataCreate = new PVDataCreate();

@@ -46,8 +46,8 @@ public:
 
 ExecutorNode::ExecutorNode(Command *command)
 : command(command),
-  node(this),
-  runNode(this)
+  node(*this),
+  runNode(*this)
 {}
 
 class ExecutorPvt : public Runnable{
@@ -89,13 +89,13 @@ ExecutorPvt::~ExecutorPvt()
 
     ExecutorListNode *node;
     while((node=executorList.removeHead())!=0) {
-        delete node->getObject();
+        delete &node->getObject();
     }
 }
 
 void ExecutorPvt::run()
 {
-    unique_lock<Mutex> xx(mutex);
+    Lock xx(mutex);
     while(true) {
         ExecutorListNode * executorListNode = 0;
         while(runList.isEmpty()) {
@@ -106,13 +106,13 @@ void ExecutorPvt::run()
         executorListNode = runList.removeHead();
 
         if(!executorListNode) continue;
-        Command *cmd=executorListNode->getObject()->command;
+        Command *cmd=executorListNode->getObject().command;
 
         if(cmd==shutdown) break;
 
         xx.unlock();
         try {
-            executorListNode->getObject()->command->command();
+            executorListNode->getObject().command->command();
         }catch(std::exception& e){
             //TODO: feed into logging mechanism
             fprintf(stderr, "Executor: Unhandled exception: %s",e.what());
@@ -128,18 +128,18 @@ void ExecutorPvt::run()
 
 ExecutorNode * ExecutorPvt::createNode(Command *command)
 {
-    Lock xx(&mutex);
+    Lock xx(mutex);
     ExecutorNode *executorNode = new ExecutorNode(command);
-    executorList.addTail(&executorNode->node);
+    executorList.addTail(executorNode->node);
     return executorNode;
 }
 
 void ExecutorPvt::execute(ExecutorNode *node)
 {
-    Lock xx(&mutex);
+    Lock xx(mutex);
     if(node->runNode.isOnList()) return;
     bool isEmpty = runList.isEmpty();
-    runList.addTail(&node->runNode);
+    runList.addTail(node->runNode);
     if(isEmpty) moreWork.signal();
 }
 

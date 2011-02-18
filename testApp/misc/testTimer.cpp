@@ -34,12 +34,11 @@ class MyCallback : public TimerCallback {
 public:
     MyCallback(String name,FILE *fd,FILE *auxfd,Event *wait)
     : name(name),fd(fd),auxfd(auxfd),wait(wait),
-      timerNode(new TimerNode(this)),timeStamp(TimeStamp())
+      timerNode(*this),timeStamp(TimeStamp())
     {
     }
     ~MyCallback()
     {
-        delete timerNode;
     }
     virtual void callback()
     {
@@ -50,14 +49,14 @@ public:
     {
         fprintf(fd,"timerStopped %s\n",name.c_str());
     }
-    TimerNode *getTimerNode() { return timerNode;}
+    TimerNode &getTimerNode() { return timerNode;}
     TimeStamp &getTimeStamp() { return timeStamp;}
 private:
     String name;
     FILE *fd;
     FILE *auxfd;
     Event *wait;
-    TimerNode *timerNode;
+    TimerNode timerNode;
     TimeStamp timeStamp;
 };
 

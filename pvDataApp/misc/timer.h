@@ -27,13 +27,12 @@ public:
     virtual void timerStopped() = 0;
 };
 
-class TimerNode : private NoDefaultMethods {
+class TimerNode {
 public:
-    TimerNode(TimerCallback *timerCallback);
+    TimerNode(TimerCallback &timerCallback);
     ~TimerNode();
     void cancel();
     bool isScheduled();
-
     class Pvt;
 private:
     std::auto_ptr<Pvt> pImpl;
@@ -44,8 +43,8 @@ class Timer : private NoDefaultMethods {
 public:
     Timer(String threadName, ThreadPriority priority);
     ~Timer();
-    void scheduleAfterDelay(TimerNode *timerNode,double delay);
-    void schedulePeriodic(TimerNode *timerNode,double delay,double period);
+    void scheduleAfterDelay(TimerNode &timerNode,double delay);
+    void schedulePeriodic(TimerNode &timerNode,double delay,double period);
 
     class Pvt;
 private:
