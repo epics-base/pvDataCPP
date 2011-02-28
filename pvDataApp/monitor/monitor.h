@@ -69,7 +69,7 @@ namespace epics { namespace pvData {
      * Requester for ChannelMonitor.
      * @author mrk
      */
-    class MonitorRequester : public Requester {
+    class MonitorRequester : public virtual Requester {
         public:
         /**
          * The client and server have both completed the createMonitor request.
