@@ -47,8 +47,8 @@ namespace epics { namespace pvData {
             return;
 
         // Traverse the bitset until a used word is found
-        uint32 i;
-        for (i = wordsInUse-1; i >= 0; i--)
+        int32 i;
+        for (i = (int32)wordsInUse-1; i >= 0; i--)
             if (words[i] != 0)
                 break;
 
