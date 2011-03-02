@@ -35,7 +35,6 @@ LIBSRCS += requester.cpp
 LIBSRCS += serializeHelper.cpp
 LIBSRCS += linkedListVoid.cpp
 LIBSRCS += event.cpp
-LIBSRCS += thread.cpp
 LIBSRCS += executor.cpp
 LIBSRCS += timeFunction.cpp
 LIBSRCS += timer.cpp

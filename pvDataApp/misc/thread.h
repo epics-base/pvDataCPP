@@ -10,42 +10,38 @@
 #include "noDefaultMethods.h"
 #include "pvType.h"
 
-namespace epics { namespace pvData { 
+#include <epicsThread.h>
+
+namespace epics { namespace pvData {
 
 enum ThreadPriority {
-    lowestPriority,
-    lowerPriority,
-    lowPriority,
-    middlePriority,
-    highPriority,
-    higherPriority,
-    highestPriority
-};
-    
-class ThreadPriorityFunc {
-public:
-    static unsigned int const * const getEpicsPriorities();
-    static int getEpicsPriority(ThreadPriority threadPriority);
+    lowestPriority  =epicsThreadPriorityLow,
+    lowerPriority   =epicsThreadPriorityLow + 15,
+    lowPriority     =epicsThreadPriorityMedium - 15,
+    middlePriority  =epicsThreadPriorityMedium,
+    highPriority    =epicsThreadPriorityMedium + 15,
+    higherPriority  =epicsThreadPriorityHigh - 15,
+    highestPriority =epicsThreadPriorityHigh
 };
 
-class Runnable{
-public:
-    virtual void run() = 0;
-};
+typedef epicsThreadRunable Runnable;
 
-class Thread;
-
-class Thread :  private NoDefaultMethods {
+class Thread : public epicsThread, private NoDefaultMethods {
 public:
-    Thread(String name,ThreadPriority priority,Runnable *runnable);
-    ~Thread();
-    String getName();
-    ThreadPriority getPriority();
-    static void showThreads(StringBuilder buf);
-    static void sleep(double seconds);
-private:
-    class ThreadPvt;
-    std::auto_ptr<ThreadPvt> pImpl;
+
+    Thread(String name,ThreadPriority priority,Runnable *runnable)
+        :epicsThread(*runnable,
+                     name.c_str(),
+                     epicsThreadGetStackSize(epicsThreadStackBig),
+                     priority)
+    {
+        this->start();
+    }
+
+    ~Thread()
+    {
+        this->exitWait();
+    }
 };
 
 }}

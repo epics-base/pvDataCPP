@@ -28,6 +28,33 @@
 
 using namespace epics::pvData;
 
+class Action : public Runnable {
+public:
+    FILE *out;
+    bool actuallyRan;
+    Event begin, end;
+    Action(FILE* fp): out(fp), actuallyRan(false) {}
+    virtual void run() {
+        fprintf(out, "Action waiting\n");
+        begin.signal();
+        bool waited=end.wait();
+        actuallyRan=true;
+        fprintf(out, "Action1 %s\n", waited?"true":"false");
+    }
+};
+
+static void testThreadRun(FILE *fd) {
+    // show that we can control thread start and stop
+    Action ax(fd);
+    {
+        Thread tr("Action", lowPriority, &ax);
+        bool w=ax.begin.wait();
+        fprintf(fd, "main1 %s\n", w?"true":"false");
+        fprintf(fd, "Action is %s\n", ax.actuallyRan?"true":"false");
+        ax.end.signal();
+    }
+    fprintf(fd, "Action is %s\n", ax.actuallyRan?"true":"false");
+}
 
 class Basic : public Command {
 public:
@@ -71,8 +98,6 @@ static void testBasic(FILE *fd) {
     basic->run();
     delete basic; 
     String buf("");
-    Thread::showThreads(&buf);
-    fprintf(fd,"threads\n%s\n",buf.c_str());
     delete executor;
 }
 
@@ -114,6 +139,7 @@ int main(int argc, char *argv[]) {
     if(auxFileName!=0 && auxFileName[0]!=0) {
         auxFd = fopen(auxFileName,"w+");
     }
+    testThreadRun(fd);
     testBasic(fd);
     testThreadContext(fd,auxFd);
     epicsExitCallAtExits();
