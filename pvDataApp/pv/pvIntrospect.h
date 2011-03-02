@@ -32,9 +32,8 @@ enum Type {
     structureArray
 };
 
-class TypeFunc {
-public:
-    static void toString(StringBuilder buf,const Type type);
+namespace TypeFunc {
+    void toString(StringBuilder buf,const Type type);
 };
 
 enum ScalarType {
@@ -48,13 +47,12 @@ enum ScalarType {
     pvString
 };
 
-class ScalarTypeFunc {
-public:
-    static bool isInteger(ScalarType type);
-    static bool isNumeric(ScalarType type);
-    static bool isPrimitive(ScalarType type);
-    static ScalarType getScalarType(String value);
-    static void toString(StringBuilder buf,ScalarType scalarType);
+namespace ScalarTypeFunc {
+    bool isInteger(ScalarType type);
+    bool isNumeric(ScalarType type);
+    bool isPrimitive(ScalarType type);
+    ScalarType getScalarType(String value);
+    void toString(StringBuilder buf,ScalarType scalarType);
 };
 
 class Field :  private NoDefaultMethods {

@@ -10,51 +10,55 @@
 #include <cstdio>
 
 #include "pvIntrospect.h"
+#include "epicsException.h"
 
 namespace epics { namespace pvData {
 
-    void TypeFunc::toString(StringBuilder buf,const Type type) {
-        static String unknownString = "logic error unknown Type";
+namespace TypeFunc {
+    void toString(StringBuilder buf,const Type type) {
+        static const String unknownString("logic error unknown Type");
         switch(type) {
         case scalar : *buf += "scalar"; break;
         case scalarArray : *buf += "scalarArray"; break;
         case structure : *buf += "structure"; break;
         case structureArray : *buf += "structureArray"; break;
         default:
-        throw std::invalid_argument(unknownString);
+            THROW_EXCEPTION2(std::invalid_argument, unknownString);
         }
     }
+} // namespace TypeFunc
 
 
-    bool ScalarTypeFunc::isInteger(ScalarType type) {
+namespace ScalarTypeFunc {
+    bool isInteger(ScalarType type) {
         if(type>=pvByte && type<=pvLong) return true;
         return false;
     }
 
-    bool ScalarTypeFunc::isNumeric(ScalarType type) {
+    bool isNumeric(ScalarType type) {
         if(type>=pvByte && type<=pvDouble) return true;
         return false;
     }
 
-    bool ScalarTypeFunc::isPrimitive(ScalarType type) {
+    bool isPrimitive(ScalarType type) {
         if(type>=pvBoolean && type<=pvDouble) return true;
         return false;
     }
 
-    ScalarType ScalarTypeFunc::getScalarType(String pvalue) {
-        static String unknownString = "error unknown ScalarType";
-        if(pvalue.compare("boolean")==0) return pvBoolean;
-        if(pvalue.compare("byte")==0) return pvByte;
-        if(pvalue.compare("short")==0) return pvShort;
-        if(pvalue.compare("int")==0) return pvInt;
-        if(pvalue.compare("long")==0) return pvLong;
-        if(pvalue.compare("float")==0) return pvFloat;
-        if(pvalue.compare("double")==0) return pvDouble;
-        if(pvalue.compare("string")==0) return pvString;
-        throw std::invalid_argument(unknownString);
+    ScalarType getScalarType(String pvalue) {
+        static const String unknownString("error unknown ScalarType");
+        if(pvalue == "boolean") return pvBoolean;
+        if(pvalue == "byte") return pvByte;
+        if(pvalue == "short") return pvShort;
+        if(pvalue == "int") return pvInt;
+        if(pvalue == "long") return pvLong;
+        if(pvalue == "float") return pvFloat;
+        if(pvalue == "double") return pvDouble;
+        if(pvalue == "string") return pvString;
+        THROW_EXCEPTION2(std::invalid_argument, unknownString);
     }
-    void ScalarTypeFunc::toString(StringBuilder buf,const ScalarType scalarType) {
-        static String unknownString = "logic error unknown ScalarType";
+    void toString(StringBuilder buf,const ScalarType scalarType) {
+        static const String unknownString("logic error unknown ScalarType");
         switch(scalarType) {
         case pvBoolean : *buf += "boolean"; return;
         case pvByte : *buf += "byte"; return;;
@@ -65,8 +69,9 @@ namespace epics { namespace pvData {
         case pvDouble : *buf += "double"; return;
         case pvString : *buf += "string"; return;
         }
-        throw std::invalid_argument(unknownString);
+        THROW_EXCEPTION2(std::invalid_argument, unknownString);
     }
 
+} // namespace ScalarTypeFunc
 
 }}
