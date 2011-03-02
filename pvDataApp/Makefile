@@ -26,6 +26,7 @@ INC += queue.h
 INC += messageQueue.h
 INC += destroyable.h
 INC += status.h
+INC += sharedPtr.h
 
 LIBSRCS += CDRMonitor.cpp
 LIBSRCS += byteBuffer.cpp
