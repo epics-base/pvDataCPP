@@ -64,7 +64,7 @@ public: // only used by this source module
 
 Timer::Pvt::Pvt(String threadName,ThreadPriority priority)
 : timerList(),
-  mutex(Mutex()),
+  mutex(),
   waitForWork(false),
   waitForDone(false),
   alive(true),

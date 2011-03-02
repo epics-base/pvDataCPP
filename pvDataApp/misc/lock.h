@@ -15,19 +15,7 @@
 
 namespace epics { namespace pvData { 
 
-class Mutex  {
-public:
-    Mutex() : id(epicsMutexCreate())
-    {if(!id) throw std::bad_alloc();}
-    ~Mutex() { epicsMutexDestroy(id) ;}
-    void lock(){
-        if(epicsMutexLock(id)!=epicsMutexLockOK)
-            throw std::logic_error("Failed to acquire Mutex");
-    }
-    void unlock(){epicsMutexUnlock(id);}
-private:
-    epicsMutexId id;
-};
+typedef epicsMutex Mutex;
 
 class Lock : private NoDefaultMethods {
 public:
