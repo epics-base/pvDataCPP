@@ -30,6 +30,7 @@ INC += status.h
 LIBSRCS += CDRMonitor.cpp
 LIBSRCS += byteBuffer.cpp
 LIBSRCS += bitSet.cpp
+LIBSRCS += epicsException.cpp
 LIBSRCS += requester.cpp
 LIBSRCS += serializeHelper.cpp
 LIBSRCS += linkedListVoid.cpp

@@ -63,6 +63,22 @@ void testBaseException(FILE *fp) {
     fprintf(fp,"PASSED\n");
 }
 
+void testLogicException(FILE *fp) {
+    try {
+        THROW_EXCEPTION(std::logic_error("There is a logic_error"));
+    } catch (std::logic_error& be) {
+        fprintf(fp,"\n\n%s\n\n", be.what());
+        PRINT_EXCEPTION2(be, fp);
+    }
+
+    try {
+        THROW_EXCEPTION2(std::logic_error, "There is another logic_error");
+    } catch (std::logic_error& be) {
+        fprintf(fp,"\n\n%s\n\n", be.what());
+        fprintf(fp,"%s\n", SHOW_EXCEPTION(be).c_str());
+    }
+}
+
 int main(int argc,char *argv[])
 {
     FILE *fp=NULL;
@@ -71,6 +87,7 @@ int main(int argc,char *argv[])
         if(!fp) fprintf(stderr,"Failed to open test output file\n");
     }
     if(!fp) fp=stdout;
+    testLogicException(fp);
     testBaseException(fp);
     return(0);
 }

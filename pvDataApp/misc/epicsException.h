@@ -10,193 +10,207 @@
  *      Author: Matej Sekoranja
  */
 
-#include <cstdio>
+/*
+ * Throwing exceptions w/ file+line# and, when possibly, a stack trace
+ *
+ * THROW_EXCEPTION1( std::bad_alloc );
+ *
+ * THROW_EXCEPTION2( std::logic_error, "my message" );
+ *
+ * THROW_EXCEPTION( mySpecialException("my message", 42, "hello", ...) );
+ *
+ * Catching exceptions
+ *
+ * catch(std::logic_error& e) {
+ *   fprintf(stderr, "%s happened\n", e.what());
+ *   PRINT_EXCEPTION2(e, stderr);
+ *   cout<<SHOW_EXCEPTION(e);
+ * }
+ *
+ * If the exception was not thrown with the above THROW_EXCEPTION*
+ * the nothing will be printed.
+ */
+
 #ifndef EPICSEXCEPTION_H_
 #define EPICSEXCEPTION_H_
 
+
 #include <stdexcept>
 #include <string>
+
+#include <cstdio>
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <execinfo.h>
 #include <cxxabi.h>
 
+// Users may redefine this for a large size if desired
+#ifndef EXCEPT_DEPTH
+#  define EXCEPT_DEPTH 20
+#endif
+
+#if defined(__GLIBC__) /* and possibly some BSDs */
+#  include<execinfo.h>
+#  define EXCEPT_USE_BACKTRACE
+#elif defined(_WIN32) && !defined(__MINGW__) && !defined(SKIP_DBGHELP)
+#  include <windows.h>
+#  include <dbghelp.h>
+#  define EXCEPT_USE_CAPTURE
+#else
+#  define EXCEPT_USE_NONE
+#endif
+
 namespace epics { namespace pvData {
 
 
-class BaseException :
-    public std::exception {
+/* Stores file and line number given, and when possible the call stack
+ * at the point where it was constructed
+ */
+class ExceptionMixin {
+    const char *m_file;
+    int m_line;
+#ifndef EXCEPT_USE_NONE
+    void *m_stack[EXCEPT_DEPTH];
+    int m_depth; // always <= EXCEPT_DEPTH
+#endif
 public:
-    BaseException(const char* message, const char* file, int line)
+    // allow the ctor to be inlined if possible
+    ExceptionMixin(const char* file, int line)
+        :m_file(file)
+        ,m_line(line)
+#if defined(EXCEPT_USE_BACKTRACE)
     {
-        toString(m_what, message, file, line, 0);
+        m_depth=backtrace(m_stack,EXCEPT_DEPTH);
     }
-
-    BaseException(const char* message, const char* file, int line, std::exception& cause)
+#elif defined(EXCEPT_USE_CAPTURE)
     {
-        toString(m_what, message, file, line, cause.what());
+        m_depth=CaptureStackBackTrace(0,EXCEPT_DEPTH.m_stack,0);
     }
-
-    virtual ~BaseException() throw()
-    {
-    }
-
-    virtual const char* what() const throw() { return m_what.c_str(); }
-
-private:
-    static inline void toString(std::string& str, const char* message, const char* file, int line, const char * cause) {
-        str.append(message);
-        str.append("\n\tat ");
-        str.append(file);
-        str.append(":");
-        char sline[10];
-        snprintf(sline, 10, "%d", line);
-        str.append(sline);
-        str.append("\n");
-        getStackTrace(&str);
-        if (cause)
-            str.append(cause);
-    }
-
-    /** Get stack trace, i.e. demangled backtrace of the caller. */
-    static inline void getStackTrace(std::string* trace, unsigned int skip_frames = 0, unsigned int max_frames = 63)
-    {
-#ifdef DISABLE_STACK_TRACE
-        trace += "(stack trace disabled)";
 #else
-        // storage array for stack trace address data
-        void* addrlist[max_frames+1];
-
-        // retrieve current stack addresses
-        int addrlen = backtrace(addrlist, sizeof(addrlist) / sizeof(void*));
-
-        if (addrlen == 0) {
-            trace->append("(stack trace not available)");
-            return;
-        }
-
-        // resolve addresses into strings containing "filename(function+address)",
-        // this array must be free()-ed
-        char** symbollist = backtrace_symbols(addrlist, addrlen);
-
-        // allocate string which will be filled with the demangled function name
-        size_t funcnamesize = 256;
-        char* funcname = (char*)malloc(funcnamesize);
-
-        // iterate over the returned symbol lines. skip the first, it is the
-        // address of this function.
-        for (int i = (1 + skip_frames); i < addrlen; i++)
-        {
-            char *module = 0, *fname = 0, *offset = 0;
-#ifdef __APPLE__
-            int stage = 0;
-            for (char *p = symbollist[i]; *p; ++p)
-            {
-                // find spaces and separate
-                // 0   a.out                               0x0000000100000bbc _Z11print_tracev + 22
-                switch (stage)
-                {
-                case 0: // skip frame index
-                    if (*p == ' ') stage++;
-                    break;
-                case 1: // skip spaces
-                    if (*p != ' ') { module = p; stage++; }
-                    break;
-                  case 2: // module name
-                      if (*p == ' ') { *p = '\0'; stage++; }
-                      break;
-                  case 3: // skip spaces
-                      if (*p != ' ') stage++;
-                      break;
-                  case 4: // address
-                      if (*p == ' ') { fname = p+1; stage++; }
-                      break;
-                  case 5: // function
-                      if (*p == ' ') { *p = '\0'; stage++; }
-                      break;
-                  case 6: // "+ "
-                      if (*p == '+') { p++; offset = p+1; };
-                      break;
-                  }
-            }
-#else
-            // find parentheses and +address offset surrounding the mangled name:
-            // ./module(function+0x15c) [0x8048a6d]
-            module = symbollist[i];
-            for (char *p = symbollist[i]; *p; ++p)
-            {
-                if (*p == '(') {
-                    // terminate module
-                    *p = '\0';
-                    fname = p+1;
-                }
-                else if (*p == '+') {
-                    // terminate fname
-                    *p = '\0';
-                    offset = p+1;
-                }
-                else if (*p == ')' && offset) {
-                    // terminate offset
-                    *p = '\0';
-                    break;
-                }
-            }
+    {}
 #endif
 
-        if (fname && offset && offset && fname < offset)
-        {
+    void print(FILE *fp=stderr) const;
 
-            // mangled name is now in [begin_name, begin_offset) and caller
-            // offset in [begin_offset, end_offset). now apply
-            // __cxa_demangle():
-
-            int status;
-            char* ret = abi::__cxa_demangle(fname,
-                                            funcname, &funcnamesize, &status);
-            if (status == 0) {
-                trace->append("\t   ");
-                *trace += module;
-                trace->append(": ");
-                *trace += ret; // use possibly realloc()-ed string
-                trace->append("+");
-                *trace += offset;
-                trace->append("\n");
-            }
-            else {
-                // demangling failed. Output function name as a C function with
-                // no arguments.
-                trace->append("\t   ");
-                *trace += module;
-                trace->append(": ");
-                *trace += fname;
-                *trace += "()+";
-                *trace += offset;
-                trace->append("\n");
-            }
-        }
-        else
-        {
-            // couldn't parse the line? print the whole line.
-            trace->append("\t   ");
-            *trace += symbollist[i];
-            trace->append("\n");
-        }
-    }
-
-    free(funcname);
-    free(symbollist);
-
-#endif
-    }
-
-private:
-    std::string m_what;
+    std::string show() const;
 };
 
+#ifndef THROW_EXCEPTION_COMPAT
 
-#define THROW_BASE_EXCEPTION(msg) throw ::epics::pvData::BaseException(msg, __FILE__, __LINE__)
-#define THROW_BASE_EXCEPTION_CAUSE(msg, cause) throw ::epics::pvData::BaseException(msg, __FILE__, __LINE__, cause)
+namespace detail {
+    /* Combines user exception type with Mixin
+     *
+     * Takes advantage of the requirement that all exception classes
+     * must be copy constructable.  Of course this also requires
+     * the and extra copy be constructed...
+     */
+    template<typename E>
+    class ExceptionMixed : public E, public ExceptionMixin {
+    public:
+        // construct from copy of E
+        ExceptionMixed(const E& self,const char* file, int line)
+            :E(self), ExceptionMixin(file,line)
+        {}
+        // construct for E w/o arguments
+        ExceptionMixed(const char* file, int line)
+            :E(), ExceptionMixin(file,line)
+        {}
+        // construct for E one argument
+        template<typename A1>
+        ExceptionMixed(A1 arg1,const char* file, int line)
+            :E(arg1), ExceptionMixin(file,line)
+        {}
+        // construct for E two arguments
+        template<typename A1, typename A2>
+        ExceptionMixed(A1 arg1, A2 arg2,const char* file, int line)
+            :E(arg1,arg2), ExceptionMixin(file,line)
+        {}
+    };
+
+    // function template to deduce E from argument
+    template<typename E>
+    static inline
+    ExceptionMixed<E>
+    makeException(const E& self,const char* file, int line)
+    {
+        return ExceptionMixed<E>(self,file,line);
+    }
+
+    template<typename E>
+    static inline
+    std::string
+    showException(const E& ex)
+    {
+        ExceptionMixin *mx=dynamic_cast<ExceptionMixin*>(&ex);
+        if(!mx) return std::string();
+        return mx->show();
+    }
+}
+
+// Throw an exception of a mixed sub-class of the type of E
+// The instance E is copied and discarded
+#define THROW_EXCEPTION(E) \
+do { \
+     throw ::epics::pvData::detail::makeException(E, __FILE__, __LINE__); \
+} while(0)
+
+// Throw an exception of a mixed sub-class of E, passing MSG as an argument
+#define THROW_EXCEPTION1(TYPE) \
+do { \
+     throw ::epics::pvData::detail::ExceptionMixed<TYPE>(__FILE__, __LINE__); \
+ }while(0)
+
+// Throw an exception of a mixed sub-class of E, passing MSG as an argument
+#define THROW_EXCEPTION2(TYPE,MSG) \
+do { \
+    throw ::epics::pvData::detail::ExceptionMixed<TYPE>(MSG, __FILE__, __LINE__); \
+}while(0)
+
+#define PRINT_EXCEPTION2(EI, FP) \
+do { \
+    ExceptionMixin *_em_p=dynamic_cast<ExceptionMixin*>(&EI); \
+    if (_em_p) {_em_p->print(FP);} \
+}while(0)
+
+#define PRINT_EXCEPTION(EI) PRINT_EXCEPTION2(EI,stderr)
+
+#ifndef __GNUC__
+#  define SHOW_EXCEPTION(EI) ::epics::pvData::detail::showException(EI)
+#else
+#  define SHOW_EXCEPTION(EI) \
+    ({ ExceptionMixin *_mx=dynamic_cast<ExceptionMixin*>(&(EI)); \
+                           _mx ? _mx->show() : std::string(); \
+                       })
+#endif
+
+#else // THROW_EXCEPTION_COMPAT
+/* For older compilers which have a problem with the above */
+
+#define PRINT_EXCEPTION(EI) do{}while(0)
+#define PRINT_EXCEPTION2(EI,FP) do{}while(0)
+#define SHOW_EXCEPTION(EI) std::string()
+
+#define THROW_EXCEPTION(E) do{throw (E);}while(0)
+#define THROW_EXCEPTION1(E) do{throw (E)();}while(0)
+#define THROW_EXCEPTION2(E,A) do{throw (E)(A);}while(0)
+
+#endif // THROW_EXCEPTION_COMPAT
+
+class BaseException : public std::logic_error {
+public:
+    explicit BaseException(const std::string msg) : std::logic_error(msg) {}
+
+    virtual ~BaseException() throw(){};
+
+    virtual const char* what() const throw();
+
+private:
+    mutable std::string base_msg;
+};
+
+#define THROW_BASE_EXCEPTION(msg) THROW_EXCEPTION2(::epics::pvData::BaseException, msg)
+#define THROW_BASE_EXCEPTION_CAUSE(msg, cause) THROW_EXCEPTION2(::epics::pvData::BaseException, msg)
 
     }
 }
