@@ -121,7 +121,16 @@ typedef PVScalarValue<int32> PVInt;
 typedef PVScalarValue<int64> PVLong;
 typedef PVScalarValue<float> PVFloat;
 typedef PVScalarValue<double> PVDouble;
-typedef PVScalarValue<String> PVString;
+
+// BasePVString is special case, since it implements SerializableArray
+class PVString : public PVScalarValue<String>, SerializableArray {
+public:
+    virtual ~PVString() {}
+protected:
+    PVString(PVStructure *parent,ScalarConstPtr scalar)
+    : PVScalarValue<String>(parent,scalar) {}
+};
+
 
 class PVArray : public PVField, public SerializableArray {
 public:

@@ -67,7 +67,7 @@ void BasePVScalar<T>::put(T val){value = val;}
 template<typename T>
 void BasePVScalar<T>::serialize(ByteBuffer *pbuffer,
     SerializableControl *pflusher) const {
-    pflusher->ensureBuffer(1);
+    pflusher->ensureBuffer(sizeof(T));
     pbuffer->put<T>(value);
 }
 
@@ -75,7 +75,7 @@ template<typename T>
 void BasePVScalar<T>::deserialize(ByteBuffer *pbuffer,
     DeserializableControl *pflusher)
 {
-    pflusher->ensureData(1);
+    pflusher->ensureData(sizeof(T));
     value = pbuffer->get<T>();
 }
 
@@ -91,25 +91,6 @@ bool BasePVScalar<T>::operator!=(PVField& pvField)
     return !(getConvert()->equals(this, &pvField));
 }
 
-// Specializations for scalar String
-
-template<>
-BasePVScalar<String>::BasePVScalar(PVStructure *parent,ScalarConstPtr scalar)
-: PVScalarValue<String>(parent,scalar),value()
-{}
-
-template<>
-void BasePVScalar<String>::serialize(ByteBuffer *pbuffer,
-    SerializableControl *pflusher) const {
-    SerializeHelper::serializeString(value, pbuffer, pflusher);
-}
-
-template<>
-void BasePVScalar<String>::deserialize(ByteBuffer *pbuffer,
-    DeserializableControl *pflusher) {
-    value = SerializeHelper::deserializeString(pbuffer, pflusher);
-}
-
 typedef BasePVScalar<bool> BasePVBoolean;
 typedef BasePVScalar<int8> BasePVByte;
 typedef BasePVScalar<int16> BasePVShort;
@@ -117,7 +98,83 @@ typedef BasePVScalar<int32> BasePVInt;
 typedef BasePVScalar<int64> BasePVLong;
 typedef BasePVScalar<float> BasePVFloat;
 typedef BasePVScalar<double> BasePVDouble;
-typedef BasePVScalar<String> BasePVString;
+
+// BasePVString is special case, since it implements SerializableArray
+class BasePVString : public PVString {
+public:
+    typedef String value_type;
+    typedef String* pointer;
+    typedef const String* const_pointer;
+
+    BasePVString(PVStructure *parent,ScalarConstPtr scalar);
+    virtual ~BasePVString();
+    virtual String get();
+    virtual void put(String val);
+    virtual void serialize(ByteBuffer *pbuffer,
+        SerializableControl *pflusher) const;
+    virtual void deserialize(ByteBuffer *pbuffer,
+        DeserializableControl *pflusher);
+    virtual void serialize(ByteBuffer *pbuffer,
+        SerializableControl *pflusher, int offset, int count) const;
+    virtual bool operator==(PVField& pv) ;
+    virtual bool operator!=(PVField& pv) ;
+private:
+    String value;
+};
+
+BasePVString::BasePVString(PVStructure *parent,ScalarConstPtr scalar)
+    : PVString(parent,scalar),value()
+{}
+
+BasePVString::~BasePVString() {}
+
+String BasePVString::get() { return value;}
+
+void BasePVString::put(String val){value = val;}
+
+void BasePVString::serialize(ByteBuffer *pbuffer,
+    SerializableControl *pflusher) const
+{
+    SerializeHelper::serializeString(value, pbuffer, pflusher);
+}
+
+void BasePVString::deserialize(ByteBuffer *pbuffer,
+    DeserializableControl *pflusher)
+{
+    value = SerializeHelper::deserializeString(pbuffer, pflusher);
+}
+
+void BasePVString::serialize(ByteBuffer *pbuffer,
+    SerializableControl *pflusher, int offset, int count) const
+{
+	// check bounds
+	const int length = /*(value == null) ? 0 :*/ value.length();
+	if (offset < 0) offset = 0;
+	else if (offset > length) offset = length;
+	if (count < 0) count = length;
+
+	const int maxCount = length - offset;
+	if (count > maxCount)
+		count = maxCount;
+	
+	// write
+	SerializeHelper::serializeSubstring(value, offset, count, pbuffer, pflusher);
+}
+
+bool BasePVString::operator==(PVField& pvField)
+{
+    return getConvert()->equals(this, &pvField);
+}
+
+bool BasePVString::operator!=(PVField& pvField)
+{
+    return !(getConvert()->equals(this, &pvField));
+}
+
+
+
+
+
 
 
 /** Default storage for arrays
