@@ -50,7 +50,7 @@
 #  define EXCEPT_DEPTH 20
 #endif
 
-#if defined(__GLIBC__) /* and possibly some BSDs */
+#if defined(__GLIBC__) || (defined(__APPLE__) && defined(__MACH__)) /* and possibly some BSDs */
 #  include<execinfo.h>
 #  define EXCEPT_USE_BACKTRACE
 #elif defined(_WIN32) && !defined(__MINGW__) && !defined(SKIP_DBGHELP)
