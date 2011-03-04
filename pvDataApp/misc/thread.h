@@ -29,10 +29,25 @@ typedef epicsThreadRunable Runnable;
 class Thread : public epicsThread, private NoDefaultMethods {
 public:
 
-    Thread(String name,ThreadPriority priority,Runnable *runnable)
+    Thread(String name,
+           ThreadPriority priority,
+           Runnable *runnable,
+           epicsThreadStackSizeClass stkcls=epicsThreadStackSmall)
         :epicsThread(*runnable,
                      name.c_str(),
-                     epicsThreadGetStackSize(epicsThreadStackBig),
+                     epicsThreadGetStackSize(stkcls),
+                     priority)
+    {
+        this->start();
+    }
+
+    Thread(Runnable &runnable,
+           String name,
+           unsigned int stksize,
+           unsigned int priority=lowestPriority)
+        :epicsThread(runnable,
+                     name.c_str(),
+                     stksize,
                      priority)
     {
         this->start();
