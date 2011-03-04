@@ -47,7 +47,7 @@ namespace epics {
             else if(b==-2) {
                 control->ensureData(sizeof(int32));
                 int32 s = buffer->getInt();
-                if(s<0) THROW_BASE_EXCEPTION("negative array size");
+                if(s<0) THROW_BASE_EXCEPTION("negative size");
                 return s;
             }
             else
@@ -94,30 +94,41 @@ namespace epics {
         
         static String emptyString;
 
-        // TODO consider by reference !!!
         String SerializeHelper::deserializeString(ByteBuffer* buffer,
                 DeserializableControl* control) {
 
             int size = SerializeHelper::readSize(buffer, control);
-            if(size>=0) {
-                char* retBuffer = new char[size]; // get the return buffer
-                try {
-                    int i = 0;
-                    while(true) {
-                        int toRead = min(size-i, buffer->getRemaining());
-                        buffer->get(retBuffer, i, toRead);
-                        i += toRead;
-                        if(i<size)
-                            control->ensureData(1);
-                        else
-                            break;
+            if(size>0)
+            {
+                if (buffer->getRemaining()>=size)
+                {
+                    // entire string is in buffer, simply create a string out of it (copy)
+                    int pos = buffer->getPosition();
+                    String str(buffer->getArray()+pos, size);
+                    buffer->setPosition(pos+size);
+                    return str;
+                }
+                else
+                {
+                    String str;
+                    str.reserve(size);
+                    try {
+                        int i = 0;
+                        while(true) {
+                            int toRead = min(size-i, buffer->getRemaining());
+                            int pos = buffer->getPosition();
+                            str.append(buffer->getArray()+pos, toRead);
+                            buffer->setPosition(pos+toRead);
+                            i += toRead;
+                            if(i<size)
+                                control->ensureData(1); // at least one
+                            else
+                                break;
+                        }
+                        return str;
+                    } catch(...) {
+                        throw;
                     }
-                    String s = String(retBuffer, size);
-                    delete[] retBuffer;
-                    return s;
-                } catch(...) {
-                    delete[] retBuffer; // remove the buffer
-                    throw;
                 }
             }
             else

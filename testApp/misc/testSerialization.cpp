@@ -624,6 +624,13 @@ void testStructure(std::ostream& ofile) {
  }
  */
 
+void testStringCopy(std::ostream& ofile) {
+    String s1 = "abc";
+    String s2 = s1;
+    if (s1.c_str() != s2.c_str())
+        ofile << "\n!!! implementation of epics::pvData::String assigment operator does not share content !!!\n\n";
+}
+
 int main(int argc, char *argv[]) {
     std::ofstream outfile;
     std::ostream *out=NULL;
@@ -640,6 +647,7 @@ int main(int argc, char *argv[]) {
     control = new DeserializableControlImpl();
     buffer = new ByteBuffer(1<<16);
 
+    testStringCopy(*out);
     testScalarEquals(*out);
     testScalar(*out);
     testArray(*out);
