@@ -223,7 +223,6 @@ PVStructure * StandardPVField::enumeratedValue(PVStructure *parent,
     PVStringArray *pvChoices = static_cast<PVStringArray *>(pvScalarArray);
     pvChoices->put(0,number,choices,0);
     return pvStructure;
-    return pvDataCreate->createPVStructure(parent,field);
 }
 
 PVStructure * StandardPVField::alarm(PVStructure *parent)

@@ -89,6 +89,8 @@ LIBSRCS += bitSetUtil.cpp
 
 SRC_DIRS += $(PVDATA)/monitor
 INC += monitor.h
+INC += monitorQueue.h
+LIBSRCS += monitorQueue.cpp
 
 
 LIBRARY=pvData

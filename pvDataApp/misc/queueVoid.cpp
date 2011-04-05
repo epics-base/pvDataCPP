@@ -92,7 +92,7 @@ QueueElementVoid * QueueVoid::getFree()
 void QueueVoid::setUsed(QueueElementVoid *queueElement)
 {
     if(queueElement!=array[nextSetUsed++]) {
-        throw std::logic_error(String("not correcect queueElement"));
+        throw std::logic_error(String("not correct queueElement"));
     }
     numberUsed++;
     if(nextSetUsed>=number) nextSetUsed = 0;

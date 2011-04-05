@@ -315,49 +315,49 @@ void Convert::copyScalar(PVScalar *from, PVScalar *to)
                 PVBoolean *dataTo = static_cast<PVBoolean*>(to);
                 dataTo->put(value);
             }
-            break;
+            return;
         }
     case pvByte : {
             PVByte *data = static_cast<PVByte*>(from);
             int8 value = data->get();
             convert->fromByte(to,value);
-            break;
+            return;
         }
     case pvShort : {
             PVShort *data = static_cast<PVShort*>(from);
             short value = data->get();
             convert->fromShort(to,value);
-            break;
+            return;
         } 
     case pvInt :{
             PVInt *data = static_cast<PVInt*>(from);
             int value = data->get();
             convert->fromInt(to,value);
-            break;
+            return;
         }    
     case pvLong : {
             PVLong *data = static_cast<PVLong*>(from);
             long value = data->get();
             convert->fromLong(to,value);
-            break;
+            return;
         }  
     case pvFloat : {
             PVFloat *data = static_cast<PVFloat*>(from);
             float value = data->get();
             convert->fromFloat(to,value);
-            break;
+            return;
         }     
     case pvDouble : {
             PVDouble *data = static_cast<PVDouble*>(from);
             double value = data->get();
             convert->fromDouble(to,value);
-            break;
+            return;
         }  
     case pvString: {
             PVString *data = static_cast<PVString*>(from);
             String value = data->get();
             convert->fromString(to,value);
-            break;
+            return;
         }
     }
     String message("Convert::copyScalar should never get here");
