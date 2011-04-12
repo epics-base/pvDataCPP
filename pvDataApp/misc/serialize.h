@@ -18,17 +18,20 @@ namespace epics { namespace pvData {
 
     class SerializableControl {
     public:
+        virtual ~SerializableControl(){}
         virtual void flushSerializeBuffer() =0;
         virtual void ensureBuffer(int size) =0;
     };
 
     class DeserializableControl {
     public:
+        virtual ~DeserializableControl(){}
         virtual void ensureData(int size) =0;
     };
 
     class Serializable {
     public:
+        virtual ~Serializable(){}
         virtual void serialize(ByteBuffer *buffer,
             SerializableControl *flusher) const = 0;
         virtual void deserialize(ByteBuffer *buffer,
@@ -37,6 +40,7 @@ namespace epics { namespace pvData {
 
     class BitSetSerializable {
     public:
+        virtual ~BitSetSerializable(){}
         virtual void serialize(ByteBuffer *buffer,
             SerializableControl *flusher,BitSet *bitSet) const = 0;
         virtual void deserialize(ByteBuffer *buffer,
@@ -46,6 +50,7 @@ namespace epics { namespace pvData {
 
     class SerializableArray : virtual public Serializable {
     public:
+        virtual ~SerializableArray(){}
         virtual void serialize(ByteBuffer *buffer,
             SerializableControl *flusher, int offset, int count) const = 0;
     };

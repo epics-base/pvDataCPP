@@ -416,6 +416,7 @@ int Convert::copyScalarArray(PVScalarArray *from, int offset,
                 length -= n; num -= n; ncopy+=n; offset += n; toOffset += n; 
             }
         }
+        return ncopy;
     } else if(toElementType==pvString && fromElementType==pvString) {
         PVStringArray *pvfrom = static_cast<PVStringArray*>(from);
         PVStringArray *pvto = static_cast<PVStringArray*>(to);
@@ -434,6 +435,7 @@ int Convert::copyScalarArray(PVScalarArray *from, int offset,
                 length -= n; num -= n; ncopy+=n; offset += n; toOffset += n; 
             }
         }
+        return ncopy;
     } else if(toElementType==pvString) {
         PVStringArray *pvto = static_cast<PVStringArray*>(to);
         ncopy = from->getLength();
@@ -463,6 +465,7 @@ int Convert::copyScalarArray(PVScalarArray *from, int offset,
                 length -= n; num -= n; ncopy+=n; offset += n; toOffset += n; 
             }
         }
+        return ncopy;
     }
     String message("Convert::copyScalarArray should not get here");
     throw std::logic_error(message);
@@ -533,7 +536,7 @@ void Convert::copyStructure(PVStructure *from, PVStructure *to)
             FieldConstPtr fieldIndex = fromDatas[0]->getField();
             FieldConstPtr fieldChoices = fromDatas[1]->getField();
             if(fieldIndex->getType()==scalar
-            && fieldChoices->getFieldName().compare("choices")
+            && (fieldChoices->getFieldName().compare("choices")==0)
             && fieldChoices->getType()==scalarArray) {
                 PVScalar *pvScalar = static_cast<PVScalar*>(fromDatas[0]);
                 PVScalarArray *pvArray =
@@ -543,7 +546,7 @@ void Convert::copyStructure(PVStructure *from, PVStructure *to)
                    PVScalarArray* toArray = 
                        static_cast<PVScalarArray*>(toDatas[1]);
                    copyScalarArray(pvArray,0,toArray,0,pvArray->getLength());
-                   PVScalar *toScalar = (PVScalar*)toDatas[0];
+                   PVScalar *toScalar = static_cast<PVScalar*>(toDatas[0]);
                    copyScalar(pvScalar,toScalar);
                    return;
                 }

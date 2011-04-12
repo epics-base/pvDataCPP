@@ -13,6 +13,7 @@ namespace epics { namespace pvData {
 
 class TimeFunctionRequester {
 public:
+    virtual ~TimeFunctionRequester(){}
     virtual void function() = 0;
 };
 

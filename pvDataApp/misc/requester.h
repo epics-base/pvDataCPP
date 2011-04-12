@@ -20,6 +20,7 @@ extern StringArray messageTypeName;
 
 class Requester {
 public:
+    virtual ~Requester(){}
     virtual String getRequesterName() = 0;
     virtual void message(String message,MessageType messageType) = 0;
 };

@@ -19,6 +19,7 @@ class ExecutorNode;
 
 class Command {
 public:
+    virtual ~Command(){}
     virtual void command() = 0;
 };
 

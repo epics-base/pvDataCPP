@@ -23,6 +23,7 @@ class Timer;
 
 class TimerCallback {
 public:
+    virtual ~TimerCallback(){}
     virtual void callback() = 0;
     virtual void timerStopped() = 0;
 };
