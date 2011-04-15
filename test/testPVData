@@ -1,5 +1,26 @@
 structure request
     string fieldList value,timeStamp
+structure top
+    structure value
+        double value 0
+        alarm alarm
+            int severity 0
+            string message 
+        timeStamp timeStamp
+            long secondsPastEpoch 0
+            int nanoSeconds 0
+        structure valueAlarm
+            boolean active false
+            double lowAlarmLimit 0
+            double lowWarningLimit 0
+            double highWarningLimit 0
+            double highAlarmLimit 0
+            int lowAlarmSeverity 0
+            int lowWarningSeverity 0
+            int highWarningSeverity 0
+            int highAlarmSeverity 0
+            double hystersis 0
+    string extra 
 
 testScalar
 boolean boolean true
@@ -283,5 +304,5 @@ structure string
     timeStamp timeStamp
         long secondsPastEpoch 0
         int nanoSeconds 0
-pvField:  totalConstruct 281 totalDestruct 281
-field:  totalConstruct 135 totalDestruct 135
+pvField:  totalConstruct 302 totalDestruct 302
+field:  totalConstruct 139 totalDestruct 139

@@ -50,6 +50,22 @@ static void testAppend(FILE * fd)
     delete pvParent;
 }
 
+static void testCreatePVStructure(FILE * fd)
+{
+    PVStructure * pv0 = standardPVField->scalarValue(
+                 0,pvDouble,alarmTimeStampValueAlarm);
+    PVScalar *pv1 = standardPVField->scalar(0,String("extra"),pvString);
+    PVFieldPtr *pvFields = new PVFieldPtr[2];
+    pvFields[0] = pv0;
+    pvFields[1] = pv1;
+    PVStructure *pvParent = pvDataCreate->createPVStructure(
+        0,String("top"),2,pvFields);
+    builder.clear();
+    pvParent->toString(&builder);
+    fprintf(fd,"%s\n",builder.c_str());
+    delete pvParent;
+}
+
 static void testPVScalarCommon(FILE * fd,String fieldName,ScalarType stype)
 {
     PVScalar *pvScalar = standardPVField->scalar(0,fieldName,stype);
@@ -281,6 +297,7 @@ int main(int argc,char *argv[])
     standardPVField = getStandardPVField();
     convert = getConvert();
     testAppend(fd);
+    testCreatePVStructure(fd);
     testPVScalar(fd);
     testScalarArray(fd);
     epicsExitCallAtExits();

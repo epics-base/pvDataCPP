@@ -83,11 +83,14 @@ public:
     virtual bool operator!=(PVField &pv) = 0;
 protected:
     PVField(PVStructure *parent,FieldConstPtr field);
+    void setParent(PVStructure * parent);
 private:
+    void message(String fieldName,String message,MessageType messageType);
     class PVFieldPvt *pImpl;
     static void computeOffset(PVField *pvField);
     static void computeOffset(PVField *pvField,int offset);
     friend class PVDataCreate;
+    friend class PVStructure;
 };
 
 class PVScalar : public PVField {
@@ -230,7 +233,9 @@ public:
         DeserializableControl*pflusher,BitSet *pbitSet);
 protected:
     PVStructure(PVStructure *parent,StructureConstPtr structure);
+    PVStructure(PVStructure *parent,StructureConstPtr structure,PVFieldPtrArray pvFields);
 private:
+    void setParentPvt(PVField *pvField,PVStructure *parent);
     class PVStructurePvt * pImpl;
 };
 
@@ -300,6 +305,8 @@ public:
        StructureConstPtr structure);
    PVStructure *createPVStructure(PVStructure *parent,
        String fieldName,int numberFields,FieldConstPtrArray fields);
+   PVStructure *createPVStructure(PVStructure *parent,
+       String fieldName,int numberFields,PVFieldPtrArray pvFields);
    PVStructure *createPVStructure(PVStructure *parent,
        String fieldName,PVStructure *structToClone);
 protected:

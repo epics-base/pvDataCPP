@@ -1,6 +1,3 @@
-thread:  totalConstruct 1 totalDestruct 1
-LinkedList:  totalConstruct 1 totalDestruct 1
-LinkedListNode:  totalConstruct 2 totalDestruct 2
-event:  totalConstruct 5 totalDestruct 5
+event:  totalConstruct 4 totalDestruct 4
 queue:  totalConstruct 1 totalDestruct 1
 queueElement:  totalConstruct 5 totalDestruct 5

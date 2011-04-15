@@ -580,6 +580,19 @@ PVStructure *PVDataCreate::createPVStructure(PVStructure *parent,
 }
 
 PVStructure *PVDataCreate::createPVStructure(PVStructure *parent,
+    String fieldName,int numberFields,PVFieldPtrArray pvFields)
+{
+    FieldConstPtrArray fields = new FieldConstPtr[numberFields];
+    for(int i=0; i<numberFields;i++) {
+        fields[i] = pvFields[i]->getField();
+    }
+    StructureConstPtr structure = fieldCreate->createStructure(
+        fieldName,numberFields,fields);
+    PVStructure *pvStructure = new BasePVStructure(parent,structure,pvFields);
+    return pvStructure;
+}
+
+PVStructure *PVDataCreate::createPVStructure(PVStructure *parent,
         String fieldName,PVStructure *structToClone)
 {
     FieldConstPtrArray fields = 0;
@@ -599,7 +612,7 @@ PVStructure *PVDataCreate::createPVStructure(PVStructure *parent,
     return pvStructure;
 }
 
- PVDataCreate * getPVDataCreate() {
+PVDataCreate * getPVDataCreate() {
      static Mutex mutex;
      Lock xx(mutex);
 

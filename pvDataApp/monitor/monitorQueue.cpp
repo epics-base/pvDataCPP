@@ -124,7 +124,6 @@ MonitorElement * MonitorQueue::getFree()
 void MonitorQueue::setUsed(MonitorElement * element)
 {
     MonitorElementImpl *temp = static_cast<MonitorElementImpl*>(element);
-    MonitorQueueElement *queueElement = temp->getQueueElement();
     queue->setUsed(temp->getQueueElement());
 }
 

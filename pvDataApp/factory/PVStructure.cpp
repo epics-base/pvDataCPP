@@ -76,6 +76,34 @@ namespace epics { namespace pvData {
         }
     }
 
+    PVStructure::PVStructure(PVStructure *parent,StructureConstPtr structurePtr,
+        PVFieldPtrArray pvFields
+    )
+    : PVField(parent,structurePtr),pImpl(new PVStructurePvt())
+    {
+        int numberFields = structurePtr->getNumberFields();
+        pImpl->numberFields = numberFields;
+        pImpl->pvFields = pvFields;
+        for(int i=0; i<numberFields; i++) {
+            PVField *pvField = pvFields[i];
+            setParentPvt(pvField,this);
+        }
+    }
+
+    void PVStructure::setParentPvt(PVField *pvField,PVStructure *parent)
+    {
+        pvField->setParent(parent);
+        if(pvField->getField()->getType()==structure) {
+            PVStructure *subStructure = static_cast<PVStructure*>(pvField);
+            PVFieldPtr *subFields = subStructure->getPVFields();
+            int numberFields = subStructure->getStructure()->getNumberFields();
+            for(int i=0; i<numberFields; i++) {
+                PVField *subField = static_cast<PVField*>(subFields[i]);
+                setParentPvt(subField,subStructure);
+            }
+        }
+    }
+
     PVStructure::~PVStructure()
     {
         delete pImpl;
@@ -554,12 +582,18 @@ namespace epics { namespace pvData {
     class BasePVStructure : public PVStructure {
     public:
         BasePVStructure(PVStructure *parent,StructureConstPtr structure);
+        BasePVStructure(PVStructure *parent,StructureConstPtr structure,
+            PVFieldPtrArray pvFields);
         ~BasePVStructure();
     private:
     };
 
     BasePVStructure::BasePVStructure(PVStructure *parent,StructureConstPtr structure)
         : PVStructure(parent,structure) {}
+
+    BasePVStructure::BasePVStructure(PVStructure *parent,StructureConstPtr structure,
+        PVFieldPtrArray pvFields)
+        : PVStructure(parent,structure,pvFields) {}
 
     BasePVStructure::~BasePVStructure() {}
 

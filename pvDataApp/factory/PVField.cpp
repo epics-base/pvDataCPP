@@ -68,26 +68,43 @@ String PVField::getRequesterName()
     return none;
 }
 
-void PVField::message(String message,MessageType messageType)  
+void PVField::message(String fieldName,String message,MessageType messageType)  
 {
+    if(pImpl->parent!=0) {
+        String parentName = pImpl->parent->getField()->getFieldName();
+        if(parentName.length()>0) {
+            fieldName = parentName + "." + fieldName;
+        }
+        pImpl->parent->message(fieldName,message,messageType);
+        return;
+    }
     if(pImpl->requester) {
-        pImpl->requester->message(message,messageType);
+        String mess = fieldName + " " + message;
+        pImpl->requester->message(mess,messageType);
     } else {
         printf("%s %s %s\n",
             messageTypeName[messageType].c_str(),
-            pImpl->field->getFieldName().c_str(),
+            fieldName.c_str(),
             message.c_str());
     }
 }
-void PVField::setRequester(Requester *prequester)
+
+void PVField::message(String message,MessageType messageType)  
 {
-    static String requesterPresent =
-        "Logic Error. requester is already present";
-    if(pImpl->requester==0) {
-        pImpl->requester = prequester;
-        return;
+    PVField::message(pImpl->field->getFieldName(),message,messageType);
+}
+void PVField::setRequester(Requester *requester)
+{
+    if(pImpl->parent!=0) {
+        throw std::logic_error(String(
+            "PVField::setRequester only legal for top level structure"));
     }
-    throw std::logic_error(requesterPresent);
+    if(pImpl->requester!=0) {
+        if(pImpl->requester==requester) return;
+        throw std::logic_error(String(
+            "PVField::setRequester requester is already present"));
+    }
+    pImpl->requester = requester;
 }
 
 int PVField::getFieldOffset() 
@@ -150,6 +167,11 @@ void PVField::setPostHandler(PostHandler *postHandler)
         throw std::logic_error(message);
     }
     pImpl->postHandler = postHandler;
+}
+
+void PVField::setParent(PVStructure * parent)
+{
+    pImpl->parent = parent;
 }
 
 void PVField::toString(StringBuilder buf)  {toString(buf,0);}

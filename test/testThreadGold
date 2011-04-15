@@ -1,8 +1,9 @@
-threads
-basic middle
-
+Action waiting
+main1 true
+Action is false
+Action1 true
+Action is true
 executor:  totalConstruct 2 totalDestruct 2
-thread:  totalConstruct 2 totalDestruct 2
+LinkedList:  totalConstruct 4 totalDestruct 4
+LinkedListNode:  totalConstruct 12 totalDestruct 12
 event:  totalConstruct 8 totalDestruct 8
-LinkedList:  totalConstruct 5 totalDestruct 5
-LinkedListNode:  totalConstruct 15 totalDestruct 15

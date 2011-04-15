@@ -9,7 +9,7 @@
 
 <body>
 <h1 style="text-align: center">EPICS pvDataCPP<br />
-2011.02.18</h1>
+2011.04.14</h1>
 
 <p>TODO</p>
 <ul>
@@ -23,9 +23,9 @@
 
 <div class="toc">
 <ul>
-  <li><a href="#L45">Preface</a>
+  <li><a href="#L45">Preface</a> 
     <ul>
-      <li><a href="#L70">pvData</a>
+      <li><a href="#L70">pvData</a> 
         <ul>
           <li><a href="#L74">Introspection</a></li>
           <li><a href="#L142">Data</a></li>
@@ -37,33 +37,33 @@
     </ul>
   </li>
   <li><a href="#L305">Introduction</a></li>
-  <li><a href="#L397">PVData Meta Language</a>
+  <li><a href="#L397">PVData Meta Language</a> 
     <ul>
       <li><a href="#L403">Definition</a></li>
       <li><a href="#L602">Example</a></li>
     </ul>
   </li>
-  <li><a href="#L614">PV - User Description</a>
+  <li><a href="#L614">PV - User Description</a> 
     <ul>
       <li><a href="#L618">Overview</a></li>
       <li><a href="#L659">pvType</a></li>
-      <li><a href="#L695">Process Variable Reflection</a>
+      <li><a href="#L695">Process Variable Reflection</a> 
         <ul>
           <li><a href="#L703">Type Description</a></li>
           <li><a href="#L823">Reflection Description</a></li>
         </ul>
       </li>
       <li><a href="#L1038">Standard Fields</a></li>
-      <li><a href="#L1122">PVField - Data Interfaces</a>
+      <li><a href="#L1122">PVField - Data Interfaces</a> 
         <ul>
           <li><a href="#L1126">PVField</a></li>
           <li><a href="#L1238">PVAuxInfo</a></li>
-          <li><a href="#L1272">PVScalar and extensions</a>
+          <li><a href="#L1272">PVScalar and extensions</a> 
             <ul>
               <li><a href="#L1276">Primitive PVField types</a></li>
             </ul>
           </li>
-          <li><a href="#L1282">PVArray and Extensions</a>
+          <li><a href="#L1282">PVArray and Extensions</a> 
             <ul>
               <li><a href="#L1321">PVArray Extensions</a></li>
               <li><a href="#L1365">Complete set of PVArray Extensions</a></li>
@@ -78,11 +78,11 @@
       <li><a href="#L1550">Convert</a></li>
     </ul>
   </li>
-  <li><a href="#L1620">Namespace, Typedefs, and Memory Management</a>
+  <li><a href="#L1620">Namespace, Typedefs, and Memory Management</a> 
     <ul>
       <li><a href="#L1624">Namespace</a></li>
       <li><a href="#L1630">typedefs</a></li>
-      <li><a href="#L1677">Memory Managemment</a>
+      <li><a href="#L1677">Memory Managemment</a> 
         <ul>
           <li><a href="#L1679">NoDefaultMethods</a></li>
         </ul>
@@ -92,36 +92,36 @@
       <li><a href="#L1695">Other code in this project</a></li>
     </ul>
   </li>
-  <li><a href="#L1703">Examples</a>
+  <li><a href="#L1703">Examples</a> 
     <ul>
       <li><a href="#L1707">Accessing PVData</a></li>
       <li><a href="#L1726">Creating PVData</a></li>
     </ul>
   </li>
-  <li><a href="#L1746">Property</a>
+  <li><a href="#L1746">Property</a> 
     <ul>
       <li><a href="#L1750">Definition of Property</a></li>
       <li><a href="#L1762">Standard Properties</a></li>
       <li><a href="#L1843">Overview of Property Support</a></li>
-      <li><a href="#L1863">timeStamp</a>
+      <li><a href="#L1863">timeStamp</a> 
         <ul>
           <li><a href="#L1887">timeStamp.h</a></li>
           <li><a href="#L1991">pvTimeStamp.h</a></li>
         </ul>
       </li>
-      <li><a href="#L2031">alarm</a>
+      <li><a href="#L2031">alarm</a> 
         <ul>
           <li><a href="#L2058">alarm.h</a></li>
           <li><a href="#L2105">pvAlarm.h</a></li>
         </ul>
       </li>
-      <li><a href="#L2145">control</a>
+      <li><a href="#L2145">control</a> 
         <ul>
           <li><a href="#L2167">control.h</a></li>
           <li><a href="#L2199">pvControl.h</a></li>
         </ul>
       </li>
-      <li><a href="#L2239">display</a>
+      <li><a href="#L2239">display</a> 
         <ul>
           <li><a href="#L2261">display.h</a></li>
           <li><a href="#L2323">pvDisplay.h</a></li>
@@ -131,7 +131,7 @@
     </ul>
   </li>
   <li><a href="#L2439">PVData Factories</a></li>
-  <li><a href="#L2472">Miscellanous Classes</a>
+  <li><a href="#L2472">Miscellanous Classes</a> 
     <ul>
       <li><a href="#L2476">Overview</a></li>
       <li><a href="#L2568">BitSet</a></li>
@@ -141,7 +141,7 @@
       <li><a href="#L2737">Executor</a></li>
       <li><a href="#L2768">Linked List</a></li>
       <li><a href="#L2882">Lock and Mutex</a></li>
-      <li><a href="#L2898">Message Queue</a>
+      <li><a href="#L2898">Message Queue</a> 
         <ul>
           <li><a href="#L2900">Definitions</a></li>
           <li><a href="#L2904">MessageQueue</a></li>
@@ -153,7 +153,7 @@
       <li><a href="#L3049">CDRMonitor - Monitor and Report Construction and
         Destruction</a></li>
       <li><a href="#L3103">Status</a></li>
-      <li><a href="#L3148">Thread</a>
+      <li><a href="#L3148">Thread</a> 
         <ul>
           <li><a href="#L3150">ThreadPriority</a></li>
           <li><a href="#L3154">Thread</a></li>
@@ -164,7 +164,7 @@
       <li><a href="#L3294">Queue</a></li>
     </ul>
   </li>
-  <li><a href="#L3357">pvMisc</a>
+  <li><a href="#L3357">pvMisc</a> 
     <ul>
       <li><a href="#L3361">BitSetUtil</a></li>
       <li><a href="#L3391">MultiChoice</a></li>
@@ -174,6 +174,7 @@
 </ul>
 </div>
 <hr />
+
 <h2 style="text-align: center" id="L45">Preface</h2>
 <hr />
 
@@ -373,8 +374,8 @@ an existing EPICS IOC.</p>
     <dd>This is a local Channel implementation that privides support for
       attaching to pvIOC records.</dd>
 </dl>
-
 <hr />
+
 <h2 style="text-align: center" id="L305">Introduction</h2>
 <hr />
 
@@ -1239,6 +1240,7 @@ public:
     virtual bool operator!=(PVField &amp;pv) = 0;
 protected:
     PVField(PVStructure *parent,FieldConstPtr field);
+    void setParent(PVStructure *parent);
 private:
 };</pre>
 
@@ -1259,7 +1261,7 @@ are:</p>
       style="font-family: courier;">PVDataCreate</span> </dd>
   <dt style="font-family: courier;">setRequester</dt>
     <dd>Sets a requester to be called when message or getRequesterName are
-      called.</dd>
+      called. This is only legal for the top level PVField. </dd>
   <dt style="font-family: courier;">getFieldOffset</dt>
     <dd>Get offset of the PVField field within top level structure. Every field
       within the PVStructure has a unique offset. The top level structure has
@@ -1797,6 +1799,7 @@ public:
         DeserializableControl*pflusher,BitSet *pbitSet);
 protected:
     PVStructure(PVStructure *parent,StructureConstPtr structure);
+    PVStructure(PVStructure *parent,StructureConstPtr structure,PVFieldPtrArray pvFields);
 private:
     class PVStructurePvt * pImpl;
 };</pre>
@@ -1969,6 +1972,8 @@ public:
    PVStructure *createPVStructure(PVStructure *parent,
        String fieldName,int numberFields,FieldConstPtrArray fields);
    PVStructure *createPVStructure(PVStructure *parent,
+          String fieldName,int numberFields,PVFieldPtrArray pvFields);
+   PVStructure *createPVStructure(PVStructure *parent,
        String fieldName,PVStructure *structToClone);
 protected:
    PVDataCreate();
@@ -2013,8 +2018,10 @@ extern PVDataCreate * getPVDataCreate();</pre>
   <dt style="font-family: courier;">createPVStructure</dt>
     <dd>Create an instance of a PVStructure. Four methods are provided. The
       first method uses a previously created structure introspection interface.
-      The second uses a Field array to initialize the sub-fields. The third
-      initializes the subfields by cloning the fields contained in
+      The second uses a Field array to initialize the sub-fields. For the third
+      the PVField array is the subfields for the PVStructure. The parent of
+      each PVField array element is set to the PVStructure being created. The
+      forth initializes the subfields by cloning the fields contained in
       structToClone. The newly created sub-fields will have the same values and
       auxInfos as the original. If structToClone is null then the new structure
       is initialized to have 0 sub-fields. WARNING If theStructureConstPtr
@@ -3399,8 +3406,7 @@ public:
     LinkedListNode&lt;T&gt; *getNext(LinkedListNode&lt;T&gt; &amp;listNode);
     LinkedListNode&lt;T&gt; *getPrev(LinkedListNode&lt;T&gt; &amp;listNode);
     bool isEmpty();
-};
-</pre>
+};</pre>
 
 <p>LinkedListNode has the methods:</p>
 <dl>
@@ -3725,8 +3731,7 @@ public:
     void show(std::ostream&amp;);
 };
 
-static inline CDRNode* getNode(CDRNodeInstance *inst);
-</pre>
+static inline CDRNode* getNode(CDRNodeInstance *inst);</pre>
 
 <h3 style="text-align: center" id="L3103">Status</h3>
 
@@ -3758,8 +3763,7 @@ static inline CDRNode* getNode(CDRNodeInstance *inst);
     void toString(StringBuilder buffer, int indentLevel = 0) const;
     void serialize(ByteBuffer *buffer, SerializableControl *flusher) const;
     void serialize(ByteBuffer *buffer, SerializableControl *flusher) const;
-};
-</pre>
+};</pre>
 
 <p>The Status methods are:</p>
 <dl>
@@ -4049,6 +4053,7 @@ public:
          queue-&gt;releaseUsed(element);
      }</pre>
 <hr />
+
 <h2 style="text-align: center" id="L3357">pvMisc</h2>
 <hr />
 
