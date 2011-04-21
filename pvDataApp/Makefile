@@ -58,8 +58,15 @@ INC += factory.h
 LIBSRCS += TypeFunc.cpp
 LIBSRCS += PVAuxInfoImpl.cpp
 LIBSRCS += FieldCreateFactory.cpp
+LIBSRCS += PVField.cpp
+LIBSRCS += PVScalar.cpp
+LIBSRCS += PVArray.cpp
+LIBSRCS += PVScalarArray.cpp
+LIBSRCS += PVStructure.cpp
+LIBSRCS += DefaultPVStructureArray.cpp
 LIBSRCS += PVDataCreateFactory.cpp
 LIBSRCS += Convert.cpp
+LIBSRCS += Compare.cpp
 LIBSRCS += StandardField.cpp
 LIBSRCS += StandardPVField.cpp
 

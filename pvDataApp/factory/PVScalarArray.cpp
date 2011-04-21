@@ -11,6 +11,8 @@
 #include "pvData.h"
 #include "factory.h"
 
+using std::tr1::static_pointer_cast;using std::tr1::static_pointer_cast;
+
 namespace epics { namespace pvData {
 
     PVScalarArray::~PVScalarArray() {}
@@ -21,7 +23,7 @@ namespace epics { namespace pvData {
 
     ScalarArrayConstPtr PVScalarArray::getScalarArray() 
     {
-       return (ScalarArrayConstPtr) PVField::getField();
+       return static_pointer_cast<const ScalarArray>(PVField::getField());
     }
 
 }}

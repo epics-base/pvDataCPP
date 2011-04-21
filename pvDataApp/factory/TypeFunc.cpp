@@ -12,19 +12,21 @@
 #include "pvIntrospect.h"
 #include "epicsException.h"
 
+#include "dbDefs.h" // for NELEMENTS
+
 namespace epics { namespace pvData {
 
 namespace TypeFunc {
+    static const char* names[] = {
+        "scalar", "scalarArray", "structure", "structureArray",
+    };
+    const char* name(Type t) {
+        if (t<int(pvBoolean) || t>int(pvString))
+            THROW_EXCEPTION2(std::invalid_argument, "logic error unknown Type");
+        return names[t];
+    }
     void toString(StringBuilder buf,const Type type) {
-        static const String unknownString("logic error unknown Type");
-        switch(type) {
-        case scalar : *buf += "scalar"; break;
-        case scalarArray : *buf += "scalarArray"; break;
-        case structure : *buf += "structure"; break;
-        case structureArray : *buf += "structureArray"; break;
-        default:
-            THROW_EXCEPTION2(std::invalid_argument, unknownString);
-        }
+        *buf += name(type);
     }
 } // namespace TypeFunc
 
@@ -44,32 +46,26 @@ namespace ScalarTypeFunc {
         if(type>=pvBoolean && type<=pvDouble) return true;
         return false;
     }
-
+    
+    static const char* names[] = {
+        "boolean", "byte", "short", "int", "long",
+        "float", "double", "string",
+    };
     ScalarType getScalarType(String pvalue) {
-        static const String unknownString("error unknown ScalarType");
-        if(pvalue == "boolean") return pvBoolean;
-        if(pvalue == "byte") return pvByte;
-        if(pvalue == "short") return pvShort;
-        if(pvalue == "int") return pvInt;
-        if(pvalue == "long") return pvLong;
-        if(pvalue == "float") return pvFloat;
-        if(pvalue == "double") return pvDouble;
-        if(pvalue == "string") return pvString;
-        THROW_EXCEPTION2(std::invalid_argument, unknownString);
+        for(size_t i=0; i<NELEMENTS(names); i++)
+            if(pvalue==names[i])
+                return ScalarType(i);
+        THROW_EXCEPTION2(std::invalid_argument, "error unknown ScalarType");
     }
+
+    const char* name(ScalarType t) {
+        if (t<pvBoolean || t>pvString)
+            THROW_EXCEPTION2(std::invalid_argument, "error unknown ScalarType");
+        return names[t];
+    }
+
     void toString(StringBuilder buf,const ScalarType scalarType) {
-        static const String unknownString("logic error unknown ScalarType");
-        switch(scalarType) {
-        case pvBoolean : *buf += "boolean"; return;
-        case pvByte : *buf += "byte"; return;;
-        case pvShort : *buf += "short"; return;
-        case pvInt : *buf += "int"; return;
-        case pvLong : *buf += "long"; return;
-        case pvFloat : *buf += "float"; return;
-        case pvDouble : *buf += "double"; return;
-        case pvString : *buf += "string"; return;
-        }
-        THROW_EXCEPTION2(std::invalid_argument, unknownString);
+        *buf += name(scalarType);
     }
 
 } // namespace ScalarTypeFunc

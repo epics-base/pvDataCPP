@@ -4,11 +4,13 @@
  * EPICS pvDataCPP is distributed subject to a Software License Agreement found
  * in file LICENSE that is included with this distribution.
  */
-#include <string>
-#include <stdexcept>
 #ifndef PVINTROSPECT_H
 #define PVINTROSPECT_H
+#include <string>
+#include <stdexcept>
+
 #include "noDefaultMethods.h"
+#include "sharedPtr.h"
 #include "pvType.h"
 namespace epics { namespace pvData { 
 
@@ -18,12 +20,12 @@ class ScalarArray;
 class Structure;
 class StructureArray;
 
-typedef Field const * FieldConstPtr;
+typedef std::tr1::shared_ptr<const Field> FieldConstPtr;
 typedef FieldConstPtr * FieldConstPtrArray;
-typedef Scalar const * ScalarConstPtr;
-typedef ScalarArray const * ScalarArrayConstPtr;
-typedef Structure const * StructureConstPtr;
-typedef StructureArray const * StructureArrayConstPtr;
+typedef std::tr1::shared_ptr<const Scalar> ScalarConstPtr;
+typedef std::tr1::shared_ptr<const ScalarArray> ScalarArrayConstPtr;
+typedef std::tr1::shared_ptr<const Structure> StructureConstPtr;
+typedef std::tr1::shared_ptr<const StructureArray> StructureArrayConstPtr;
 
 enum Type {
     scalar,
@@ -33,6 +35,7 @@ enum Type {
 };
 
 namespace TypeFunc {
+    const char* name(Type);
     void toString(StringBuilder buf,const Type type);
 };
 
@@ -52,38 +55,45 @@ namespace ScalarTypeFunc {
     bool isNumeric(ScalarType type);
     bool isPrimitive(ScalarType type);
     ScalarType getScalarType(String value);
+    const char* name(ScalarType);
     void toString(StringBuilder buf,ScalarType scalarType);
 };
 
-class Field :  private NoDefaultMethods {
+class Field :  public std::tr1::enable_shared_from_this<Field> {
 public:
-   int getReferenceCount() const;
-   String getFieldName() const;
-   Type getType() const;
+   typedef std::tr1::shared_ptr<Field> Ptr;
+   typedef std::tr1::shared_ptr<const Field> ConstPtr;
+
+   String getFieldName() const{return m_fieldName;}
+   Type getType() const{return m_type;}
    virtual void toString(StringBuilder buf) const{toString(buf,0);}
    virtual void toString(StringBuilder buf,int indentLevel) const;
    void renameField(String  newName);
-   void incReferenceCount() const;
-   void decReferenceCount() const;
-   void dumpReferenceCount(StringBuilder buf,int indentLevel) const;
-   virtual bool operator==(const Field& field) const;
-   virtual bool operator!=(const Field& field) const;
 protected:
    Field(String fieldName,Type type);
    virtual ~Field();
 private:
-   class FieldPvt *pImpl;
+   String m_fieldName;
+   Type m_type;
+
    friend class StructureArray;
    friend class Structure;
    friend class PVFieldPvt;
    friend class StandardField;
    friend class BasePVStructureArray;
    friend class FieldCreate;
+
+   struct Deleter{void operator()(Field *p){delete p;}};
 };
 
 
 class Scalar : public Field{
 public:
+   typedef std::tr1::shared_ptr<Scalar> Ptr;
+   typedef std::tr1::shared_ptr<const Scalar> ConstPtr;
+   typedef Scalar& reference;
+   typedef const Scalar& const_reference;
+
    ScalarType getScalarType() const {return scalarType;}
    virtual void toString(StringBuilder buf) const{toString(buf,0);}
    virtual void toString(StringBuilder buf,int indentLevel) const;
@@ -97,6 +107,11 @@ private:
 
 class ScalarArray : public Field{
 public:
+   typedef std::tr1::shared_ptr<ScalarArray> Ptr;
+   typedef std::tr1::shared_ptr<const ScalarArray> ConstPtr;
+   typedef ScalarArray& reference;
+   typedef const ScalarArray& const_reference;
+
    ScalarType  getElementType() const {return elementType;}
    virtual void toString(StringBuilder buf) const{toString(buf,0);}
    virtual void toString(StringBuilder buf,int indentLevel) const;
@@ -110,9 +125,15 @@ private:
 
 class StructureArray : public Field{
 public:
+   typedef std::tr1::shared_ptr<StructureArray> Ptr;
+   typedef std::tr1::shared_ptr<const StructureArray> ConstPtr;
+   typedef StructureArray& reference;
+   typedef const StructureArray& const_reference;
+
+   const Structure& structure() const {return *pstructure;}
    StructureConstPtr  getStructure() const {return pstructure;}
-   virtual void toString(StringBuilder buf) const{toString(buf,0);}
-   virtual void toString(StringBuilder buf,int indentLevel) const;
+
+   virtual void toString(StringBuilder buf,int indentLevel=0) const;
 protected:
    StructureArray(String fieldName,StructureConstPtr structure);
    virtual ~StructureArray();
@@ -123,6 +144,11 @@ private:
 
 class Structure : public Field {
 public:
+   typedef std::tr1::shared_ptr<Structure> Ptr;
+   typedef std::tr1::shared_ptr<const Structure> ConstPtr;
+   typedef Structure& reference;
+   typedef const Structure& const_reference;
+
    int getNumberFields() const {return numberFields;}
    FieldConstPtr getField(String fieldName) const;
    int getFieldIndex(String fieldName) const;

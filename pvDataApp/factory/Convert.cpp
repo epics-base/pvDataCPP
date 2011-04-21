@@ -13,6 +13,9 @@
 #include "pvData.h"
 #include "convert.h"
 
+using std::tr1::static_pointer_cast;
+using std::tr1::const_pointer_cast;
+
 namespace epics { namespace pvData { 
 
 static Convert* convert = 0;
@@ -228,20 +231,20 @@ bool Convert::isCopyCompatible(FieldConstPtr from, FieldConstPtr to)
     switch(from->getType()) {
     case scalar: 
         return isCopyScalarCompatible(
-            static_cast<ScalarConstPtr>(from),
-            static_cast<ScalarConstPtr>(to));
+            static_pointer_cast<const Scalar>(from),
+            static_pointer_cast<const Scalar>(to));
     case scalarArray:
         return isCopyScalarArrayCompatible(
-            static_cast<ScalarArrayConstPtr>(from),
-            static_cast<ScalarArrayConstPtr>(to));
+            static_pointer_cast<const ScalarArray>(from),
+            static_pointer_cast<const ScalarArray>(to));
     case structure:
         return isCopyStructureCompatible(
-            static_cast<StructureConstPtr>(from),
-            static_cast<StructureConstPtr>(to));
+            static_pointer_cast<const Structure>(from),
+            static_pointer_cast<const Structure>(to));
     case structureArray:
         return isCopyStructureArrayCompatible(
-            static_cast<StructureArrayConstPtr>(from),
-            static_cast<StructureArrayConstPtr>(to));
+            static_pointer_cast<const StructureArray>(from),
+            static_pointer_cast<const StructureArray>(to));
     }
     String message("Convert::isCopyCompatible should never get here");
     throw std::logic_error(message);
@@ -487,26 +490,26 @@ bool Convert::isCopyStructureCompatible(
         switch(fromType) {
         case scalar:
             if(!convert->isCopyScalarCompatible(
-                static_cast<ScalarConstPtr>(from),
-                static_cast<ScalarConstPtr>(to)))
+                static_pointer_cast<const Scalar>(from),
+                static_pointer_cast<const Scalar>(to)))
                 return false;
             break;
         case scalarArray:
             if(!isCopyScalarArrayCompatible(
-                static_cast<ScalarArrayConstPtr>(from),
-                static_cast<ScalarArrayConstPtr>(to)))
+                static_pointer_cast<const ScalarArray>(from),
+                static_pointer_cast<const ScalarArray>(to)))
                 return false;
             break;
         case structure:
             if(!isCopyStructureCompatible(
-                static_cast<StructureConstPtr>(from),
-                static_cast<StructureConstPtr>(to)))
+                static_pointer_cast<const Structure>(from),
+                static_pointer_cast<const Structure>(to)))
                 return false;
             break;
         case structureArray:
             if(!isCopyStructureArrayCompatible(
-                static_cast<StructureArrayConstPtr>(from),
-                static_cast<StructureArrayConstPtr>(to)))
+                static_pointer_cast<const StructureArray>(from),
+                static_pointer_cast<const StructureArray>(to)))
                 return false;
         }
     }

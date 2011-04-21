@@ -9,40 +9,15 @@
 #include <string>
 #include <cstdio>
 #include "pvData.h"
+#include "convert.h"
 #include "factory.h"
 #include "serializeHelper.h"
+#include "DefaultPVStructureArray.h"
+
+using std::tr1::static_pointer_cast;
+using std::tr1::const_pointer_cast;
 
 namespace epics { namespace pvData {
-
-    class BasePVStructureArray : public PVStructureArray {
-    public:
-        BasePVStructureArray(PVStructure *parent,
-             StructureArrayConstPtr structureArray);
-        virtual ~BasePVStructureArray();
-        virtual StructureArrayConstPtr getStructureArray();
-        virtual int append(int number);
-        virtual bool remove(int offset,int number);
-        virtual void compress();
-        virtual void setCapacity(int capacity);
-        virtual int get(int offset, int length,
-            StructureArrayData *data);
-        virtual int put(int offset,int length,
-            PVStructurePtrArray from, int fromOffset);
-        virtual bool operator==(PVField &pv);
-        virtual bool operator!=(PVField &pv);
-        virtual void shareData( PVStructurePtrArray value,int capacity,int length);
-        virtual void serialize(ByteBuffer *pbuffer,
-            SerializableControl *pflusher) const;
-        virtual void deserialize(ByteBuffer *buffer,
-            DeserializableControl *pflusher);
-        virtual void serialize(ByteBuffer *pbuffer,
-            SerializableControl *pflusher, int offset, int count) const;
-    private:
-        StructureArrayConstPtr structureArray;
-        StructureArrayData *structureArrayData;
-        PVStructurePtrArray value;
-    };
-
 
     BasePVStructureArray::BasePVStructureArray(
         PVStructure *parent,StructureArrayConstPtr structureArray)
@@ -72,7 +47,6 @@ namespace epics { namespace pvData {
         setCapacity(newLength);
         StructureConstPtr structure = structureArray->getStructure();
         for(int i=currentLength; i<newLength; i++) {
-            structure->incReferenceCount();
             value[i] =  getPVDataCreate()->createPVStructure(0,structure);
         }
         return newLength;
@@ -234,7 +208,6 @@ namespace epics { namespace pvData {
                 }
                 else {
                     if(value[i]==NULL) {
-                        structureArray->getStructure()->incReferenceCount();
                         value[i] = getPVDataCreate()->createPVStructure(
                                 NULL, structureArray->getStructure());
                     }

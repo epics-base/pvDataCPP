@@ -29,4 +29,4 @@ structure parent
     structure child2
         string Jane Bad Girl
 pvField:  totalConstruct 15 totalDestruct 14 ACTIVE 1
-field:  totalConstruct 108 totalDestruct 108
+field:  totalConstruct 108 totalDestruct 107 ACTIVE 1

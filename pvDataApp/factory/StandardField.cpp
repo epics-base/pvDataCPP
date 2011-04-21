@@ -14,6 +14,8 @@
 #include "standardField.h"
 #include "CDRMonitor.h"
 
+using std::tr1::static_pointer_cast;
+
 namespace epics { namespace pvData { 
 
 static StandardField* standardField = 0;
@@ -24,18 +26,18 @@ static String valueFieldName("value");
 
 // following are preallocated structures
 
-static StructureConstPtr alarmField = 0;
-static StructureConstPtr timeStampField = 0;
-static StructureConstPtr displayField = 0;
-static StructureConstPtr controlField = 0;
-static StructureConstPtr booleanAlarmField = 0;
-static StructureConstPtr byteAlarmField = 0;
-static StructureConstPtr shortAlarmField = 0;
-static StructureConstPtr intAlarmField = 0;
-static StructureConstPtr longAlarmField = 0;
-static StructureConstPtr floatAlarmField = 0;
-static StructureConstPtr doubleAlarmField = 0;
-static StructureConstPtr enumeratedAlarmField = 0;
+static StructureConstPtr alarmField;
+static StructureConstPtr timeStampField;
+static StructureConstPtr displayField;
+static StructureConstPtr controlField;
+static StructureConstPtr booleanAlarmField;
+static StructureConstPtr byteAlarmField;
+static StructureConstPtr shortAlarmField;
+static StructureConstPtr intAlarmField;
+static StructureConstPtr longAlarmField;
+static StructureConstPtr floatAlarmField;
+static StructureConstPtr doubleAlarmField;
+static StructureConstPtr enumeratedAlarmField;
 
 
 static void createAlarm() {
@@ -200,11 +202,11 @@ static StructureConstPtr createProperties(String fieldName,FieldConstPtr field,S
     if(properties.find("display")!=String::npos) { gotDisplay = true; numProp++; }
     if(properties.find("control")!=String::npos) { gotControl = true; numProp++; }
     if(properties.find("valueAlarm")!=String::npos) { gotValueAlarm = true; numProp++; }
-    StructureConstPtr valueAlarm = 0;
+    StructureConstPtr valueAlarm;
     Type type= field->getType();
     while(gotValueAlarm) {
         if(type==scalar) {
-           ScalarConstPtr scalar = (ScalarConstPtr)field;
+           ScalarConstPtr scalar = static_pointer_cast<const Scalar>(field);
            ScalarType scalarType = scalar->getScalarType();
            switch(scalarType) {
                case pvBoolean: valueAlarm = booleanAlarmField; break;
@@ -220,7 +222,7 @@ static StructureConstPtr createProperties(String fieldName,FieldConstPtr field,S
            break;
         }
         if(type==structure) {
-            StructureConstPtr structurePtr = (StructureConstPtr)field;
+            StructureConstPtr structurePtr = static_pointer_cast<const Structure>(field);
             if(structurePtr->getNumberFields()==2) {
                 FieldConstPtrArray fields = structurePtr->getFields();
                 FieldConstPtr first = fields[0];
@@ -232,9 +234,9 @@ static StructureConstPtr createProperties(String fieldName,FieldConstPtr field,S
                 if(compareFirst==0 && compareSecond==0) {
                     if(first->getType()==scalar
                     && second->getType()==scalarArray) {
-                        ScalarConstPtr scalarFirst = (ScalarConstPtr)first;
+                        ScalarConstPtr scalarFirst = static_pointer_cast<const Scalar>(first);
                         ScalarArrayConstPtr scalarArraySecond = 
-                            (ScalarArrayConstPtr)second;
+                            static_pointer_cast<const ScalarArray>(second);
                         if(scalarFirst->getScalarType()==pvInt
                         && scalarArraySecond->getElementType()==pvString) {
                             valueAlarm = enumeratedAlarmField;
@@ -250,11 +252,11 @@ static StructureConstPtr createProperties(String fieldName,FieldConstPtr field,S
     FieldConstPtrArray fields = new FieldConstPtr[numFields];
     int next = 0;
     fields[next++] = field;
-    if(gotAlarm) {fields[next++] = alarmField; alarmField->incReferenceCount();}
-    if(gotTimeStamp) {fields[next++] = timeStampField; timeStampField->incReferenceCount();}
-    if(gotDisplay) {fields[next++] = displayField; displayField->incReferenceCount();}
-    if(gotControl) {fields[next++] = controlField; controlField->incReferenceCount();}
-    if(gotValueAlarm) {fields[next++] = valueAlarm; valueAlarm->incReferenceCount();}
+    if(gotAlarm) {fields[next++] = alarmField;}
+    if(gotTimeStamp) {fields[next++] = timeStampField;}
+    if(gotDisplay) {fields[next++] = displayField;}
+    if(gotControl) {fields[next++] = controlField;}
+    if(gotValueAlarm) {fields[next++] = valueAlarm;}
     return fieldCreate->createStructure(fieldName,numFields,fields);
 }
 
@@ -464,42 +466,19 @@ StandardField::~StandardField(){
 
 static void myDeleteStatic(void*)
 {
-    int count = alarmField->getReferenceCount();
-    if(count!=1) printf("~StandardField() alarmField reference count %d\n",count);
-    alarmField->decReferenceCount();
-    count = timeStampField->getReferenceCount();
-    if(count!=1) printf("~StandardField() timeStampField reference count %d\n",count);
-    timeStampField->decReferenceCount();
-    count = displayField->getReferenceCount();
-    if(count!=1) printf("~StandardField() displayField reference count %d\n",count);
-    displayField->decReferenceCount();
-    count = controlField->getReferenceCount();
-    if(count!=1) printf("~StandardField() controlField reference count %d\n",count);
-    controlField->decReferenceCount();
-    count = booleanAlarmField->getReferenceCount();
-    if(count!=1) printf("~StandardField() booleanAlarmField reference count %d\n",count);
-    booleanAlarmField->decReferenceCount();
-    count = byteAlarmField->getReferenceCount();
-    if(count!=1) printf("~StandardField() byteAlarmField reference count %d\n",count);
-    byteAlarmField->decReferenceCount();
-    count = shortAlarmField->getReferenceCount();
-    if(count!=1) printf("~StandardField() shortAlarmField reference count %d\n",count);
-    shortAlarmField->decReferenceCount();
-    count = intAlarmField->getReferenceCount();
-    if(count!=1) printf("~StandardField() intAlarmField reference count %d\n",count);
-    intAlarmField->decReferenceCount();
-    count = longAlarmField->getReferenceCount();
-    if(count!=1) printf("~StandardField() longAlarmField reference count %d\n",count);
-    longAlarmField->decReferenceCount();
-    count = floatAlarmField->getReferenceCount();
-    if(count!=1) printf("~StandardField() floatAlarmField reference count %d\n",count);
-    floatAlarmField->decReferenceCount();
-    count = doubleAlarmField->getReferenceCount();
-    if(count!=1) printf("~StandardField() doubleAlarmField reference count %d\n",count);
-    doubleAlarmField->decReferenceCount();
-    count = enumeratedAlarmField->getReferenceCount();
-    if(count!=1) printf("~StandardField() enumeratedAlarmField reference count %d\n",count);
-    enumeratedAlarmField->decReferenceCount();
+    alarmField.reset();
+    timeStampField.reset();
+    displayField.reset();
+    controlField.reset();
+    booleanAlarmField.reset();
+    byteAlarmField.reset();
+    shortAlarmField.reset();
+    intAlarmField.reset();
+    longAlarmField.reset();
+    floatAlarmField.reset();
+    doubleAlarmField.reset();
+    enumeratedAlarmField.reset();
+
 }
 
 static void myInitStatic(void*)

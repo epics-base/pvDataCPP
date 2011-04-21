@@ -14,6 +14,8 @@
 #include "factory.h"
 #include "CDRMonitor.h"
 
+using std::tr1::static_pointer_cast;
+
 namespace epics { namespace pvData {
 
 static DebugLevel debugLevel = lowDebug;
@@ -26,22 +28,9 @@ static void newLine(StringBuilder buffer, int indentLevel)
 
 PVDATA_REFCOUNT_MONITOR_DEFINE(field);
 
-class FieldPvt {
-public :
-    FieldPvt(String fieldName,Type type);
-    String fieldName;
-    Type type;
-    int referenceCount;
-};
-
-FieldPvt::FieldPvt(String fieldName,Type type)
- : fieldName(fieldName),type(type),referenceCount(1)
-{PVDATA_REFCOUNT_MONITOR_INCREF(field);}
-
-static Mutex refCountMutex;
-
 Field::Field(String fieldName,Type type)
-    : pImpl(new FieldPvt(fieldName,type))
+    :m_fieldName(fieldName)
+    ,m_type(type)
 {
     PVDATA_REFCOUNT_MONITOR_CONSTRUCT(field);
 }
@@ -49,157 +38,17 @@ Field::Field(String fieldName,Type type)
 Field::~Field() {
     PVDATA_REFCOUNT_MONITOR_DESTRUCT(field);
     // note that compiler automatically calls destructor for fieldName
-    if(debugLevel==highDebug) printf("~Field %s\n",pImpl->fieldName.c_str());
-    delete pImpl;
-    pImpl = 0;
+    if(debugLevel==highDebug) printf("~Field %s\n",m_fieldName.c_str());
 }
-
-int Field::getReferenceCount() const {
-    Lock xx(refCountMutex);
-    return pImpl->referenceCount;
-}
-
-String Field::getFieldName() const {return pImpl->fieldName;}
-
-Type Field::getType() const {return pImpl->type;}
 
 void Field::renameField(String  newName)
 {
-    pImpl->fieldName = newName;
+    m_fieldName = newName;
 }
 
-void Field::incReferenceCount() const {
-    PVDATA_REFCOUNT_MONITOR_INCREF(field);
-    Lock xx(refCountMutex);
-    pImpl->referenceCount++;
-    if(pImpl->type!=structure) return;
-    StructureConstPtr structure = static_cast<StructureConstPtr>(this);
-    FieldConstPtrArray fields = structure->getFields();
-    int numberFields = structure->getNumberFields();
-    for(int i=0; i<numberFields; i++) {
-        fields[i]->incReferenceCount();
-    }
-}
-
-void Field::decReferenceCount() const {
-    PVDATA_REFCOUNT_MONITOR_DECREF(field);
-    Lock xx(refCountMutex);
-    if(pImpl->referenceCount<=0) {
-          String message("logicError field ");
-          message += pImpl->fieldName;
-          throw std::logic_error(message);
-    }
-    pImpl->referenceCount--;
-    if(pImpl->type!=structure) {
-        if(pImpl->referenceCount==0) {
-             delete this;
-        }
-        return;
-    }
-    StructureConstPtr structure = static_cast<StructureConstPtr>(this);
-    FieldConstPtrArray fields = structure->getFields();
-    int numberFields = structure->getNumberFields();
-    for(int i=0; i<numberFields; i++) {
-        fields[i]->decReferenceCount();
-    }
-    if(pImpl->referenceCount==0) {
-        delete this;
-    }
-}
-
-void Field:: dumpReferenceCount(StringBuilder buffer,int indentLevel) const {
-    *buffer += getFieldName();
-    char buf[40];
-    sprintf(buf," referenceCount %d",getReferenceCount());
-    *buffer += buf;
-    if(pImpl->type!=structure) return;
-    Convert *convert = getConvert();
-    StructureConstPtr structure = static_cast<StructureConstPtr>(this);
-    FieldConstPtrArray fields = structure->getFields();
-    int numberFields = structure->getNumberFields();
-    for(int i=0; i<numberFields; i++) {
-        convert->newLine(buffer,indentLevel+1);
-        fields[i]->dumpReferenceCount(buffer,indentLevel +1);
-    }
-}
- 
 void Field::toString(StringBuilder buffer,int indentLevel) const{
     *buffer += " ";
-    *buffer += pImpl->fieldName.c_str();
-}
-
-static bool fieldEquals(FieldConstPtr a,FieldConstPtr b);
-inline bool scalarFieldEquals(ScalarConstPtr a,ScalarConstPtr b)
-{
-    ScalarType ascalarType = a->getScalarType();
-    ScalarType bscalarType = b->getScalarType();
-    if(ascalarType != bscalarType)
-    {
-    	return false;
-    }
-    return true;
-}
-
-inline bool scalarArrayFieldEquals(ScalarArrayConstPtr a,ScalarArrayConstPtr b)
-{
-	ScalarType aType = a->getElementType();
-	ScalarType bType = b->getElementType();
-	if(aType != bType)
-	{
-		return false;
-	}
-	return true;
-}
-
-inline bool structureFieldEquals(StructureConstPtr a,StructureConstPtr b)
-{
-    int length = a->getNumberFields();
-    if(length != b->getNumberFields()) return false;
-    FieldConstPtrArray aFields = a->getFields();
-    FieldConstPtrArray bFields = b->getFields();
-    for(int i=0; i<length; i++)
-    {
-        if(!fieldEquals(aFields[i],bFields[i])) return false;
-    }
-    return true;
-}
-
-inline bool structureArrayFieldEquals(StructureArrayConstPtr a,StructureArrayConstPtr b)
-{
-    StructureConstPtr aStruct = a->getStructure();
-    StructureConstPtr bStruct = b->getStructure();
-    return fieldEquals(aStruct,bStruct);
-}
-
-static bool fieldEquals(FieldConstPtr a,FieldConstPtr b)
-{
-    const void * avoid = static_cast<const void *>(a);
-    const void * bvoid = static_cast<const void *>(b);
-    if(avoid == bvoid) return true;
-    if(a->getFieldName() != b->getFieldName()) return false;
-    Type atype = a->getType();
-    Type btype = b->getType();
-    if(atype!=btype) return false;
-    if(atype==scalar) return scalarFieldEquals(
-        static_cast<ScalarConstPtr>(a),static_cast<ScalarConstPtr>(b));
-    if(atype==scalarArray) return scalarArrayFieldEquals(
-        static_cast<ScalarArrayConstPtr>(a),static_cast<ScalarArrayConstPtr>(b));
-    if(atype==structureArray) return structureArrayFieldEquals(
-        static_cast<StructureArrayConstPtr>(a),static_cast<StructureArrayConstPtr>(b));
-    if(atype==structure) return structureFieldEquals(
-        static_cast<StructureConstPtr>(a),static_cast<StructureConstPtr>(b));
-    String message("should not get here");
-    throw std::logic_error(message);
-}
-
-bool Field::operator==(const Field& field) const
-{
-    return fieldEquals(this, &field);
-}
-
-bool Field::operator!=(const Field& field) const
-{
-    return !fieldEquals(this, &field);
+    *buffer += m_fieldName.c_str();
 }
 
 Scalar::Scalar(String fieldName,ScalarType scalarType)
@@ -231,7 +80,6 @@ StructureArray::StructureArray(String fieldName,StructureConstPtr structure)
 
 StructureArray::~StructureArray() {
     if(debugLevel==highDebug) printf("~StructureArray\n");
-    pstructure->decReferenceCount();
 }
 
 void StructureArray::toString(StringBuilder buffer,int indentLevel) const {
@@ -248,9 +96,6 @@ Structure::Structure (String fieldName,
       numberFields(numberFields),
       fields(infields)
 {
-    for(int i=0; i<numberFields; i++) {
-        fields[i] = infields[i];
-    }
     for(int i=0; i<numberFields; i++) {
         String name = fields[i]->getFieldName();
         // look for duplicates
@@ -269,9 +114,7 @@ Structure::Structure (String fieldName,
 Structure::~Structure() {
     if(debugLevel==highDebug)
         printf("~Structure %s\n",Field::getFieldName().c_str());
-    for(int i=0; i<numberFields; i++) {
-        fields[i] = 0;
-    }
+
     delete[] fields;
 }
 
@@ -281,7 +124,7 @@ FieldConstPtr  Structure::getField(String fieldName) const {
         int result = fieldName.compare(pfield->getFieldName());
         if(result==0) return pfield;
     }
-    return 0;
+    return FieldConstPtr();
 }
 
 int Structure::getFieldIndex(String fieldName) const {
@@ -320,7 +163,7 @@ void Structure::removeField(int index)
            String("Structure::removeField index out of bounds"));
     }
     FieldConstPtr *newFields = new FieldConstPtr[numberFields-1];
-    fields[index]->decReferenceCount();
+
     int ind=0;
     for(int i=0; i<numberFields; i++) {
         if(i==index) continue;
@@ -346,56 +189,57 @@ void Structure::toString(StringBuilder buffer,int indentLevel) const{
 ScalarConstPtr  FieldCreate::createScalar(String fieldName,
     ScalarType scalarType) const
 {
-     Scalar *scalar = new Scalar(fieldName,scalarType);
+     ScalarConstPtr scalar(new Scalar(fieldName,scalarType), Field::Deleter());
      return scalar;
 }
  
 ScalarArrayConstPtr FieldCreate::createScalarArray(
     String fieldName,ScalarType elementType) const
 {
-      ScalarArray *scalarArray = new ScalarArray(fieldName,elementType);
+      ScalarArrayConstPtr scalarArray(new ScalarArray(fieldName,elementType), Field::Deleter());
       return scalarArray;
 }
 StructureConstPtr FieldCreate::createStructure (
     String fieldName,int numberFields,
     FieldConstPtr fields[]) const
 {
-      Structure *structure = new Structure(
-          fieldName,numberFields,fields);
+      StructureConstPtr structure(new Structure(
+          fieldName,numberFields,fields), Field::Deleter());
       return structure;
 }
 StructureArrayConstPtr FieldCreate::createStructureArray(
     String fieldName,StructureConstPtr structure) const
 {
-     StructureArray *structureArray = new StructureArray(fieldName,structure);
+     StructureArrayConstPtr structureArray(new StructureArray(fieldName,structure), Field::Deleter());
      return structureArray;
 }
 
 FieldConstPtr FieldCreate::create(String fieldName,
     FieldConstPtr pfield) const
 {
+    FieldConstPtr ret;
     Type type = pfield->getType();
     switch(type) {
     case scalar: {
-        ScalarConstPtr pscalar = static_cast<ScalarConstPtr>(pfield);
+        ScalarConstPtr pscalar = static_pointer_cast<const Scalar>(pfield);
         return createScalar(fieldName,pscalar->getScalarType());
     }
     case scalarArray: {
-        ScalarArrayConstPtr pscalarArray = static_cast<ScalarArrayConstPtr>(pfield);
+        ScalarArrayConstPtr pscalarArray = static_pointer_cast<const ScalarArray>(pfield);
         return createScalarArray(fieldName,pscalarArray->getElementType());
     }
     case structure: {
-        StructureConstPtr pstructure = static_cast<StructureConstPtr>(pfield);
+        StructureConstPtr pstructure = static_pointer_cast<const Structure>(pfield);
         return createStructure(fieldName,pstructure->getNumberFields(),pstructure->getFields());
     }
     case structureArray: {
-        StructureArrayConstPtr pstructureArray = static_cast<StructureArrayConstPtr>(pfield);
+        StructureArrayConstPtr pstructureArray = static_pointer_cast<const StructureArray>(pfield);
         return createStructureArray(fieldName,pstructureArray->getStructure());
     }
     }
     String  message("field ");
     message += fieldName;
-    throw std::logic_error(message);
+    THROW_EXCEPTION2(std::logic_error, message);
 }
 
 static FieldCreate* fieldCreate = 0;

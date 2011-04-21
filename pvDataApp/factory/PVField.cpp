@@ -11,7 +11,10 @@
 #include "lock.h"
 #include "pvData.h"
 #include "factory.h"
+#include "convert.h"
 #include "CDRMonitor.h"
+
+using std::tr1::const_pointer_cast;
 
 namespace epics { namespace pvData {
 
@@ -44,7 +47,6 @@ PVFieldPvt::PVFieldPvt(PVStructure *parent,FieldConstPtr field)
 PVFieldPvt::~PVFieldPvt()
 {
     if(pvAuxInfo!=0) delete pvAuxInfo;
-    if(parent==0) field->decReferenceCount();
 }
 
 
@@ -148,7 +150,7 @@ bool PVField::renameField(String  newName)
         int index = structure->getFieldIndex(newName);
         if(index>=0) return false;
     }
-    Field * field = const_cast<Field *>(pImpl->field);
+    Field::Ptr field(const_pointer_cast<Field>(pImpl->field));
     field->renameField(newName);
     return true;
 }

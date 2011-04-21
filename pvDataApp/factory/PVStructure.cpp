@@ -9,8 +9,13 @@
 #include <string>
 #include <cstdio>
 #include "pvData.h"
+#include "pvIntrospect.h"
+#include "convert.h"
 #include "factory.h"
 #include "bitSet.h"
+
+using std::tr1::static_pointer_cast;
+using std::tr1::const_pointer_cast;
 
 namespace epics { namespace pvData {
 
@@ -49,30 +54,7 @@ namespace epics { namespace pvData {
         PVFieldPtrArray pvFields = pImpl->pvFields;
         PVDataCreate *pvDataCreate = getPVDataCreate();
         for(int i=0; i<numberFields; i++) {
-            FieldConstPtr field = fields[i];
-            switch(field->getType()) {
-            case scalar: {
-                ScalarConstPtr scalar = (ScalarConstPtr)field;
-                pvFields[i] = pvDataCreate->createPVScalar(this,scalar);
-                break;
-            }
-            case scalarArray: {
-                ScalarArrayConstPtr array = (ScalarArrayConstPtr)field;
-                pvFields[i] = pvDataCreate->createPVScalarArray(this,array);
-                break;
-            }
-            case structure: {
-                StructureConstPtr structPtr = (StructureConstPtr)field;
-                pvFields[i] = pvDataCreate->createPVStructure(this, structPtr);
-                break;
-            }
-            case structureArray: {
-                StructureArrayConstPtr structArray = (StructureArrayConstPtr)field;
-                pvFields[i] = pvDataCreate->createPVStructureArray(this,
-                    structArray);
-                break;
-            }
-            }
+            pvFields[i] = pvDataCreate->createPVField(this,fields[i]);
         }
     }
 
@@ -111,7 +93,7 @@ namespace epics { namespace pvData {
 
     StructureConstPtr PVStructure::getStructure()
     {
-        return (StructureConstPtr)PVField::getField();
+        return static_pointer_cast<const Structure>(PVField::getField());
     }
 
     PVFieldPtrArray PVStructure::getPVFields()
@@ -147,7 +129,7 @@ namespace epics { namespace pvData {
 
     void PVStructure::appendPVField(PVFieldPtr pvField)
     {
-        Structure *structure = const_cast<Structure *>(getStructure());
+        Structure::Ptr structure = const_pointer_cast<Structure>(getStructure());
         structure->appendField(pvField->getField());
         int origLength = pImpl->numberFields;
         PVFieldPtrArray oldPVFields = pImpl->pvFields;
@@ -164,7 +146,10 @@ namespace epics { namespace pvData {
 
     void PVStructure::appendPVFields(int numberNewFields,PVFieldPtrArray pvFields)
     {
-        Structure *structure = const_cast<Structure *>(getStructure());
+        if (numberNewFields<0)
+            throw std::logic_error("Number of fields must be >=0");
+
+        Structure::Ptr structure = const_pointer_cast<Structure>(getStructure());
         FieldConstPtr fields[numberNewFields];
         for(int i=0; i<numberNewFields; i++) fields[i] = pvFields[i]->getField();
         structure->appendFields(numberNewFields,fields);
@@ -205,7 +190,7 @@ namespace epics { namespace pvData {
                 newPVFields[newIndex++] = origPVFields[i];
             }
         }
-        Structure *structure = const_cast<Structure *>(getStructure());
+        Structure *structure = const_cast<Structure *>(getStructure().get());
         structure->removeField(indRemove);
         delete[] pImpl->pvFields;
         pImpl->pvFields = newPVFields;
@@ -222,8 +207,9 @@ namespace epics { namespace pvData {
             return 0;
         }
         if(pvField->getField()->getType()==scalar) {
-            ScalarConstPtr scalar = (ScalarConstPtr)pvField->getField();
-            if(scalar->getScalarType()==pvBoolean) {
+            ScalarConstPtr pscalar = static_pointer_cast<const Scalar>(
+                pvField->getField());
+            if(pscalar->getScalarType()==pvBoolean) {
                 return (PVBoolean*)pvField;
             }
         }
@@ -243,8 +229,9 @@ namespace epics { namespace pvData {
             return 0;
         }
         if(pvField->getField()->getType()==scalar) {
-            ScalarConstPtr scalar = (ScalarConstPtr)pvField->getField();
-            if(scalar->getScalarType()==pvByte) {
+            ScalarConstPtr pscalar = static_pointer_cast<const Scalar>(
+                pvField->getField());
+            if(pscalar->getScalarType()==pvByte) {
                 return (PVByte*)pvField;
             }
         }
@@ -264,8 +251,9 @@ namespace epics { namespace pvData {
             return 0;
         }
         if(pvField->getField()->getType()==scalar) {
-            ScalarConstPtr scalar = (ScalarConstPtr)pvField->getField();
-            if(scalar->getScalarType()==pvShort) {
+            ScalarConstPtr pscalar = static_pointer_cast<const Scalar>(
+                pvField->getField());
+            if(pscalar->getScalarType()==pvShort) {
                 return (PVShort*)pvField;
             }
         }
@@ -285,8 +273,9 @@ namespace epics { namespace pvData {
             return 0;
         }
         if(pvField->getField()->getType()==scalar) {
-            ScalarConstPtr scalar = (ScalarConstPtr)pvField->getField();
-            if(scalar->getScalarType()==pvInt) {
+            ScalarConstPtr pscalar = static_pointer_cast<const Scalar>(
+                pvField->getField());
+            if(pscalar->getScalarType()==pvInt) {
                 return (PVInt*)pvField;
             }
         }
@@ -306,8 +295,9 @@ namespace epics { namespace pvData {
             return 0;
         }
         if(pvField->getField()->getType()==scalar) {
-            ScalarConstPtr scalar = (ScalarConstPtr)pvField->getField();
-            if(scalar->getScalarType()==pvLong) {
+            ScalarConstPtr pscalar = static_pointer_cast<const Scalar>(
+                pvField->getField());
+            if(pscalar->getScalarType()==pvLong) {
                 return (PVLong*)pvField;
             }
         }
@@ -327,8 +317,9 @@ namespace epics { namespace pvData {
             return 0;
         }
         if(pvField->getField()->getType()==scalar) {
-            ScalarConstPtr scalar = (ScalarConstPtr)pvField->getField();
-            if(scalar->getScalarType()==pvFloat) {
+            ScalarConstPtr pscalar = static_pointer_cast<const Scalar>(
+                pvField->getField());
+            if(pscalar->getScalarType()==pvFloat) {
                 return (PVFloat*)pvField;
             }
         }
@@ -348,8 +339,9 @@ namespace epics { namespace pvData {
             return 0;
         }
         if(pvField->getField()->getType()==scalar) {
-            ScalarConstPtr scalar = (ScalarConstPtr)pvField->getField();
-            if(scalar->getScalarType()==pvDouble) {
+            ScalarConstPtr pscalar = static_pointer_cast<const Scalar>(
+                pvField->getField());
+            if(pscalar->getScalarType()==pvDouble) {
                 return (PVDouble*)pvField;
             }
         }
@@ -369,8 +361,9 @@ namespace epics { namespace pvData {
             return 0;
         }
         if(pvField->getField()->getType()==scalar) {
-            ScalarConstPtr scalar = (ScalarConstPtr)pvField->getField();
-            if(scalar->getScalarType()==pvString) {
+            ScalarConstPtr pscalar = static_pointer_cast<const Scalar>(
+                pvField->getField());
+            if(pscalar->getScalarType()==pvString) {
                 return (PVString*)pvField;
             }
         }
@@ -416,8 +409,9 @@ namespace epics { namespace pvData {
             this->message(message, errorMessage);
             return 0;
         }
-        ScalarArrayConstPtr array = (ScalarArrayConstPtr)field;
-        if(array->getElementType()!=elementType) {
+        ScalarArrayConstPtr pscalarArray
+            = static_pointer_cast<const ScalarArray>(pvField->getField());
+        if(pscalarArray->getElementType()!=elementType) {
             String message("fieldName ");
             message +=  fieldName + " is array but does not have elementType ";
             ScalarTypeFunc::toString(&message,elementType);
@@ -578,23 +572,5 @@ namespace epics { namespace pvData {
         if(pvField->getField()->getType()!=structure) return 0;
         return findSubField(restOfName,(PVStructure*)pvField);
     }
-
-    class BasePVStructure : public PVStructure {
-    public:
-        BasePVStructure(PVStructure *parent,StructureConstPtr structure);
-        BasePVStructure(PVStructure *parent,StructureConstPtr structure,
-            PVFieldPtrArray pvFields);
-        ~BasePVStructure();
-    private:
-    };
-
-    BasePVStructure::BasePVStructure(PVStructure *parent,StructureConstPtr structure)
-        : PVStructure(parent,structure) {}
-
-    BasePVStructure::BasePVStructure(PVStructure *parent,StructureConstPtr structure,
-        PVFieldPtrArray pvFields)
-        : PVStructure(parent,structure,pvFields) {}
-
-    BasePVStructure::~BasePVStructure() {}
 
 }}

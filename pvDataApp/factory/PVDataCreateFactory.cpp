@@ -13,12 +13,11 @@
 #include "pvData.h"
 #include "convert.h"
 #include "factory.h"
-#include "PVField.cpp"
-#include "PVScalar.cpp"
-#include "PVArray.cpp"
-#include "PVScalarArray.cpp"
-#include "PVStructure.cpp"
-#include "DefaultPVStructureArray.cpp"
+#include "serializeHelper.h"
+#include "DefaultPVStructureArray.h"
+
+using std::tr1::static_pointer_cast;
+using std::tr1::const_pointer_cast;
 
 namespace epics { namespace pvData {
 
@@ -417,17 +416,22 @@ PVField *PVDataCreate::createPVField(PVStructure *parent,
         FieldConstPtr field)
 {
      switch(field->getType()) {
-     case scalar:
-         return createPVScalar(parent,(ScalarConstPtr)field);
-     case scalarArray:
-         return (PVField *)createPVScalarArray(parent,
-             (ScalarArrayConstPtr)field);
-     case structure:
-         return (PVField *)createPVStructure(parent,
-             (StructureConstPtr)field);
-     case structureArray:
-         return createPVStructureArray(parent,
-             (StructureArrayConstPtr)field);
+     case scalar: {
+         ScalarConstPtr xx = static_pointer_cast<const Scalar>(field);
+         return createPVScalar(parent,xx);
+     }
+     case scalarArray: {
+         ScalarArrayConstPtr xx = static_pointer_cast<const ScalarArray>(field);
+         return (PVField *)createPVScalarArray(parent,xx);
+     }
+     case structure: {
+         StructureConstPtr xx = static_pointer_cast<const Structure>(field);
+         return (PVField *)createPVStructure(parent,xx);
+     }
+     case structureArray: {
+         StructureArrayConstPtr xx = static_pointer_cast<const StructureArray>(field);
+         return createPVStructureArray(parent,xx);
+     }
      }
      String  message("PVDataCreate::createPVField should never get here");
      throw std::logic_error(message);
@@ -490,7 +494,6 @@ PVScalar *PVDataCreate::createPVScalar(PVStructure *parent,
 PVScalar *PVDataCreate::createPVScalar(PVStructure *parent,
         String fieldName,PVScalar * scalarToClone)
 {
-     scalarToClone->getField()->incReferenceCount();
      PVScalar *pvScalar = createPVScalar(parent,fieldName,
          scalarToClone->getScalar()->getScalarType());
      convert->copyScalar(scalarToClone, pvScalar);
@@ -542,7 +545,6 @@ PVScalarArray *PVDataCreate::createPVScalarArray(PVStructure *parent,
 PVScalarArray *PVDataCreate::createPVScalarArray(PVStructure *parent,
         String fieldName,PVScalarArray * arrayToClone)
 {
-     arrayToClone->getField()->incReferenceCount();
      PVScalarArray *pvArray = createPVScalarArray(parent,fieldName,
           arrayToClone->getScalarArray()->getElementType());
      convert->copyScalarArray(arrayToClone,0, pvArray,0,arrayToClone->getLength());
@@ -567,7 +569,7 @@ PVStructureArray *PVDataCreate::createPVStructureArray(PVStructure *parent,
 PVStructure *PVDataCreate::createPVStructure(PVStructure *parent,
         StructureConstPtr structure)
 {
-     PVStructure *pvStructure = new BasePVStructure(parent,structure);
+     PVStructure *pvStructure = new PVStructure(parent,structure);
      return pvStructure;
 }
 
@@ -576,7 +578,7 @@ PVStructure *PVDataCreate::createPVStructure(PVStructure *parent,
 {
      StructureConstPtr structure = fieldCreate->createStructure(
          fieldName,numberFields, fields);
-     return new BasePVStructure(parent,structure);
+     return new PVStructure(parent,structure);
 }
 
 PVStructure *PVDataCreate::createPVStructure(PVStructure *parent,
@@ -588,7 +590,7 @@ PVStructure *PVDataCreate::createPVStructure(PVStructure *parent,
     }
     StructureConstPtr structure = fieldCreate->createStructure(
         fieldName,numberFields,fields);
-    PVStructure *pvStructure = new BasePVStructure(parent,structure,pvFields);
+    PVStructure *pvStructure = new PVStructure(parent,structure,pvFields);
     return pvStructure;
 }
 
@@ -602,11 +604,10 @@ PVStructure *PVDataCreate::createPVStructure(PVStructure *parent,
         fields = new FieldConstPtr[0];
         StructureConstPtr structure = fieldCreate->createStructure(
             fieldName,numberFields,fields);
-        pvStructure = new BasePVStructure(parent,structure);
+        pvStructure = new PVStructure(parent,structure);
     } else {
        StructureConstPtr structure = structToClone->getStructure();
-       structure->incReferenceCount();
-       pvStructure = new BasePVStructure(parent,structure);
+       pvStructure = new PVStructure(parent,structure);
        convert->copyStructure(structToClone,pvStructure);
     }
     return pvStructure;

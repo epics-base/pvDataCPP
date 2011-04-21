@@ -85,7 +85,6 @@ void serializationTest(PVField* field) {
     buffer->flip();
 
     // create new instance and deserialize
-    field->getField()->incReferenceCount();
     PVField* deserializedField = getPVDataCreate()->createPVField(NULL,
             field->getField());
     deserializedField->deserialize(buffer, control);
@@ -420,7 +419,6 @@ void testScalarEquals(std::ostream& ofile) {
             fields);
 
     PVStructure* pvStruct1 = factory->createPVStructure(NULL, structure);
-    structure->incReferenceCount();
     PVStructure* pvStruct2 = factory->createPVStructure(NULL, structure);
     assert((*pvStruct1)==(*pvStruct2));
     delete pvStruct2;

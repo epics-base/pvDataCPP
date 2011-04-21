@@ -231,7 +231,6 @@ public:
         SerializableControl *pflusher,BitSet *pbitSet) const;
     virtual void deserialize(ByteBuffer *pbuffer,
         DeserializableControl*pflusher,BitSet *pbitSet);
-protected:
     PVStructure(PVStructure *parent,StructureConstPtr structure);
     PVStructure(PVStructure *parent,StructureConstPtr structure,PVFieldPtrArray pvFields);
 private:

@@ -130,7 +130,6 @@ static void testStructureArray(FILE * fd) {
     builder.clear();
     top->toString(&builder);
     fprintf(fd,"%s\n",builder.c_str());
-    top->decReferenceCount();
 }
 
 int main(int argc,char *argv[])
