@@ -10,6 +10,7 @@
 #include <cstdlib>
 #include <cstddef>
 #include <string>
+#include <cstring>
 #include <cstdio>
 
 #include <epicsAssert.h>

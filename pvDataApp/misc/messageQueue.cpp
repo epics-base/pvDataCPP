@@ -30,7 +30,7 @@ typedef Queue<MessageNode> MessageNodeQueue;
 
 
 MessageNode::MessageNode()
-: message(String("")),messageType(infoMessage){}
+: message(String()),messageType(infoMessage){}
 
 MessageNode::~MessageNode() {
 }
@@ -39,6 +39,7 @@ String MessageNode::getMessage() const { return message;};
 
 MessageType MessageNode::getMessageType() const { return messageType;}
 
+void MessageNode::setMessageNull() {message = String();}
 
 class MessageQueuePvt {
 public:

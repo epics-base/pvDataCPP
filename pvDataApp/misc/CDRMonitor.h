@@ -7,11 +7,10 @@
 #ifndef CDRMONITOR_H
 #define CDRMONITOR_H
 #include <ostream>
-#include <stddef.h>
-#include <stdlib.h>
-#include <stddef.h>
-#include <string.h>
-#include <stdio.h>
+#include <cstddef>
+#include <cstdlib>
+#include <string>
+#include <cstdio>
 
 #include <epicsThread.h>
 #include "noDefaultMethods.h"

@@ -3521,6 +3521,7 @@ once. This can be implemented as follows:</p>
 public:
     String getMessage() const;
     MessageType getMessageType() const;
+    void setMessageNull();
 };
 
 class MessageQueue : private NoDefaultMethods {
@@ -3548,6 +3549,8 @@ higher priority threads.</p>
     <dd>The message.</dd>
   <dt style="font-family: courier;">getMessageType</dt>
     <dd>The message type.</dd>
+  <dt style="font-family: courier;">setMessageNull</dt>
+     <dd>Set the message to be a null string.</dd>
 </dl>
 
 <p>A messageQueue is an interface with public methods:</p>

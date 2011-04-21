@@ -16,6 +16,7 @@ class MessageNode {
 public:
     String getMessage() const;
     MessageType getMessageType() const;
+    void setMessageNull();
 private:
     MessageNode();
     ~MessageNode();
