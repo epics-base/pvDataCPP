@@ -9,39 +9,98 @@
 
 #include <status.h>
 #include <destroyable.h>
-#include <sharedPtr.h>
 #include <pvData.h>
+#include <sharedPtr.h>
+#include <bitSet.h>
 
 namespace epics { namespace pvData { 
 
-class MonitorElement {
-public:
-    MonitorElement(){}
-    virtual ~MonitorElement(){}
-    virtual PVStructure* getPVStructure() = 0;
-    virtual BitSet* getChangedBitSet() = 0;
-    virtual BitSet* getOverrunBitSet() = 0;
-};
+    /**
+     * Class instance representing monitor element.
+     * @author mrk
+     */
+    class MonitorElement {
+        public:
+        typedef std::tr1::shared_ptr<MonitorElement> shared_pointer;
+        typedef std::tr1::shared_ptr<const MonitorElement> const_shared_pointer;
 
-class Monitor : public virtual Destroyable{
-    public:
-    Monitor(){}
-    virtual ~Monitor(){}
-    virtual Status start() = 0;
-    virtual Status stop() = 0;
-    virtual MonitorElement* poll() = 0;
-    virtual void release(MonitorElement* monitorElement) = 0;
-};
+        /**
+         * Get the PVStructure.
+         * @return The PVStructure.
+         */
+        virtual PVStructure::shared_pointer getPVStructure() = 0;
+        /**
+         * Get the bitSet showing which fields have changed.
+         * @return The bitSet.
+         */
+        virtual BitSet::shared_pointer getChangedBitSet() = 0;
+        /**
+         * Get the bitSet showing which fields have been changed more than once.
+         * @return The bitSet.
+         */
+        virtual BitSet::shared_pointer getOverrunBitSet() = 0;
+    };
+    
+    
+    /**
+     * Interface for Monitor.
+     * @author mrk
+     */
+    class Monitor : public Destroyable, private NoDefaultMethods {
+        public:
+        typedef std::tr1::shared_ptr<Monitor> shared_pointer;
+        typedef std::tr1::shared_ptr<const Monitor> const_shared_pointer;
 
-class MonitorRequester : public virtual Requester {
-    public:
-    MonitorRequester() {}
-    virtual ~MonitorRequester() {}
-    virtual void monitorConnect(
-        const Status &status, Monitor* monitor, StructureConstPtr structure) = 0;
-    virtual void monitorEvent(Monitor* monitor) = 0;
-    virtual void unlisten(Monitor* monitor) = 0;
-};
+        /**
+         * Start monitoring.
+         * @return completion status.
+         */
+        virtual Status start() = 0;
+        /**
+         * Stop Monitoring.
+         * @return completion status.
+         */
+        virtual Status stop() = 0;
+        /**
+         * If monitor has occurred return data.
+         * @return monitorElement for modified data on null if no monitors have occurred.
+         */
+        virtual MonitorElement::shared_pointer poll() = 0;
+        /**
+         * Release a MonitorElement that was returned by poll.
+         * @param monitorElement
+         */
+        virtual void release(MonitorElement::shared_pointer& monitorElement) = 0;
+    };
+    
+    
+    /**
+     * Requester for ChannelMonitor.
+     * @author mrk
+     */
+    class MonitorRequester : public virtual Requester {
+        public:
+        typedef std::tr1::shared_ptr<MonitorRequester> shared_pointer;
+        typedef std::tr1::shared_ptr<const MonitorRequester> const_shared_pointer;
+
+        /**
+         * The client and server have both completed the createMonitor request.
+         * @param status Completion status.
+         * @param monitor The monitor
+         * @param structure The structure defining the data.
+         */
+        virtual void monitorConnect(const Status &status, Monitor::shared_pointer& monitor, StructureConstPtr& structure) = 0;
+        /**
+         * A monitor event has occurred. The requester must call Monitor.poll to get data.
+         * @param monitor The monitor.
+         */
+        virtual void monitorEvent(Monitor::shared_pointer& monitor) = 0;
+        /**
+         * The data source is no longer available.
+         * @param monitor The monitor.
+         */
+        virtual void unlisten(Monitor::shared_pointer& monitor) = 0;
+    };
 
 }}
 #endif  /* MONITOR_H */

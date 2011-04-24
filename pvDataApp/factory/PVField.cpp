@@ -150,7 +150,7 @@ bool PVField::renameField(String  newName)
         int index = structure->getFieldIndex(newName);
         if(index>=0) return false;
     }
-    Field::Ptr field(const_pointer_cast<Field>(pImpl->field));
+    Field::shared_pointer field(const_pointer_cast<Field>(pImpl->field));
     field->renameField(newName);
     return true;
 }

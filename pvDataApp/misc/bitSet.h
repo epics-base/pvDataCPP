@@ -8,8 +8,8 @@
 #define BITSET_H
 #include <stdexcept>
 #include <pvType.h>
-#include "factory.h"
-#include "serialize.h"
+#include <serialize.h>
+#include <sharedPtr.h>
 
 namespace epics { namespace pvData { 
 
@@ -38,6 +38,8 @@ namespace epics { namespace pvData {
      */
     class BitSet : public Serializable {
     public:
+        typedef std::tr1::shared_ptr<BitSet> shared_pointer;
+        typedef std::tr1::shared_ptr<const BitSet> const_shared_pointer;
 
         /**
          * Creates a new bit set. All bits are initially {@code false}.

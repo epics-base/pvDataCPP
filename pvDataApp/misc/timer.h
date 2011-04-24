@@ -16,6 +16,7 @@
 #include "pvType.h"
 #include "thread.h"
 #include "noDefaultMethods.h"
+#include "sharedPtr.h"
 
 namespace epics { namespace pvData { 
 
@@ -42,6 +43,9 @@ private:
 
 class Timer : private NoDefaultMethods {
 public:
+    typedef std::tr1::shared_ptr<Timer> shared_pointer;
+    typedef std::tr1::shared_ptr<const Timer> const_shared_pointer;
+
     Timer(String threadName, ThreadPriority priority);
     ~Timer();
     void scheduleAfterDelay(TimerNode &timerNode,double delay);

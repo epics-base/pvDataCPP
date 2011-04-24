@@ -62,6 +62,9 @@ class PVField
   private NoDefaultMethods
 {
 public:
+    typedef std::tr1::shared_ptr<PVField> shared_pointer;
+    typedef std::tr1::shared_ptr<const PVField> const_shared_pointer;
+
     virtual ~PVField();
     String getRequesterName() ;
     virtual void message(String message,MessageType messageType) ;
@@ -95,6 +98,9 @@ private:
 
 class PVScalar : public PVField {
 public:
+    typedef std::tr1::shared_ptr<PVScalar> shared_pointer;
+    typedef std::tr1::shared_ptr<const PVScalar> const_shared_pointer;
+
     virtual ~PVScalar();
     ScalarConstPtr getScalar() ;
 protected:
@@ -104,6 +110,9 @@ protected:
 template<typename T>
 class PVScalarValue : public PVScalar {
 public:
+    typedef std::tr1::shared_ptr<PVScalarValue> shared_pointer;
+    typedef std::tr1::shared_ptr<const PVScalarValue> const_shared_pointer;
+
     typedef T value_type;
     typedef T* pointer;
     typedef const T* const_pointer;
@@ -137,6 +146,9 @@ protected:
 
 class PVArray : public PVField, public SerializableArray {
 public:
+    typedef std::tr1::shared_ptr<PVArray> shared_pointer;
+    typedef std::tr1::shared_ptr<const PVArray> const_shared_pointer;
+
     virtual ~PVArray();
     int getLength() const;
     void setLength(int length);
@@ -155,6 +167,9 @@ private:
 template<typename T>
 class PVArrayData {
 public:
+    typedef std::tr1::shared_ptr<PVArrayData> shared_pointer;
+    typedef std::tr1::shared_ptr<const PVArrayData> const_shared_pointer;
+
     typedef T  value_type;
     typedef T* pointer;
     typedef const T* const_pointer;
@@ -166,6 +181,9 @@ public:
 
 class PVScalarArray : public PVArray {
 public:
+    typedef std::tr1::shared_ptr<PVScalarArray> shared_pointer;
+    typedef std::tr1::shared_ptr<const PVScalarArray> const_shared_pointer;
+
     virtual ~PVScalarArray();
     ScalarArrayConstPtr getScalarArray() ;
 
@@ -178,6 +196,9 @@ typedef PVArrayData<PVStructurePtr> StructureArrayData;
 
 class PVStructureArray : public PVArray {
 public:
+    typedef std::tr1::shared_ptr<PVStructureArray> shared_pointer;
+    typedef std::tr1::shared_ptr<const PVStructureArray> const_shared_pointer;
+
     virtual ~PVStructureArray() {}
     virtual StructureArrayConstPtr getStructureArray() = 0;
     virtual int append(int number) = 0;
@@ -198,6 +219,9 @@ private:
 
 class PVStructure : public PVField,public BitSetSerializable {
 public:
+    typedef std::tr1::shared_ptr<PVStructure> shared_pointer;
+    typedef std::tr1::shared_ptr<const PVStructure> const_shared_pointer;
+
     virtual ~PVStructure();
     StructureConstPtr getStructure();
     PVFieldPtrArray getPVFields();
@@ -241,6 +265,9 @@ private:
 template<typename T>
 class PVValueArray : public PVScalarArray {
 public:
+    typedef std::tr1::shared_ptr<PVValueArray> shared_pointer;
+    typedef std::tr1::shared_ptr<const PVValueArray> const_shared_pointer;
+
     typedef T  value_type;
     typedef T* pointer;
     typedef const T* const_pointer;

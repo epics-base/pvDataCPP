@@ -8,6 +8,8 @@
 #ifndef REQUESTER_H
 #define REQUESTER_H
 #include "pvType.h"
+#include "sharedPtr.h"
+
 namespace epics { namespace pvData { 
 
 class Requester;
@@ -20,6 +22,9 @@ extern StringArray messageTypeName;
 
 class Requester {
 public:
+    typedef std::tr1::shared_ptr<Requester> shared_pointer;
+    typedef std::tr1::shared_ptr<const Requester> const_shared_pointer;
+
     virtual ~Requester(){}
     virtual String getRequesterName() = 0;
     virtual void message(String message,MessageType messageType) = 0;

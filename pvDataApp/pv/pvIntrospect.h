@@ -61,8 +61,8 @@ namespace ScalarTypeFunc {
 
 class Field :  public std::tr1::enable_shared_from_this<Field> {
 public:
-   typedef std::tr1::shared_ptr<Field> Ptr;
-   typedef std::tr1::shared_ptr<const Field> ConstPtr;
+   typedef std::tr1::shared_ptr<Field> shared_pointer;
+   typedef std::tr1::shared_ptr<const Field> const_shared_pointer;
 
    String getFieldName() const{return m_fieldName;}
    Type getType() const{return m_type;}
@@ -89,8 +89,8 @@ private:
 
 class Scalar : public Field{
 public:
-   typedef std::tr1::shared_ptr<Scalar> Ptr;
-   typedef std::tr1::shared_ptr<const Scalar> ConstPtr;
+   typedef std::tr1::shared_ptr<Scalar> shared_pointer;
+   typedef std::tr1::shared_ptr<const Scalar> const_shared_pointer;
    typedef Scalar& reference;
    typedef const Scalar& const_reference;
 
@@ -107,8 +107,8 @@ private:
 
 class ScalarArray : public Field{
 public:
-   typedef std::tr1::shared_ptr<ScalarArray> Ptr;
-   typedef std::tr1::shared_ptr<const ScalarArray> ConstPtr;
+   typedef std::tr1::shared_ptr<ScalarArray> shared_pointer;
+   typedef std::tr1::shared_ptr<const ScalarArray> const_shared_pointer;
    typedef ScalarArray& reference;
    typedef const ScalarArray& const_reference;
 
@@ -125,8 +125,8 @@ private:
 
 class StructureArray : public Field{
 public:
-   typedef std::tr1::shared_ptr<StructureArray> Ptr;
-   typedef std::tr1::shared_ptr<const StructureArray> ConstPtr;
+   typedef std::tr1::shared_ptr<StructureArray> shared_pointer;
+   typedef std::tr1::shared_ptr<const StructureArray> const_shared_pointer;
    typedef StructureArray& reference;
    typedef const StructureArray& const_reference;
 
@@ -144,8 +144,8 @@ private:
 
 class Structure : public Field {
 public:
-   typedef std::tr1::shared_ptr<Structure> Ptr;
-   typedef std::tr1::shared_ptr<const Structure> ConstPtr;
+   typedef std::tr1::shared_ptr<Structure> shared_pointer;
+   typedef std::tr1::shared_ptr<const Structure> const_shared_pointer;
    typedef Structure& reference;
    typedef const Structure& const_reference;
 

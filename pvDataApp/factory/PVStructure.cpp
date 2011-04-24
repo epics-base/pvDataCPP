@@ -129,7 +129,7 @@ namespace epics { namespace pvData {
 
     void PVStructure::appendPVField(PVFieldPtr pvField)
     {
-        Structure::Ptr structure = const_pointer_cast<Structure>(getStructure());
+        Structure::shared_pointer structure = const_pointer_cast<Structure>(getStructure());
         structure->appendField(pvField->getField());
         int origLength = pImpl->numberFields;
         PVFieldPtrArray oldPVFields = pImpl->pvFields;
@@ -149,7 +149,7 @@ namespace epics { namespace pvData {
         if (numberNewFields<0)
             throw std::logic_error("Number of fields must be >=0");
 
-        Structure::Ptr structure = const_pointer_cast<Structure>(getStructure());
+        Structure::shared_pointer structure = const_pointer_cast<Structure>(getStructure());
         FieldConstPtr fields[numberNewFields];
         for(int i=0; i<numberNewFields; i++) fields[i] = pvFields[i]->getField();
         structure->appendFields(numberNewFields,fields);
