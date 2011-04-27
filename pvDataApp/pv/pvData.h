@@ -4,10 +4,10 @@
  * EPICS pvDataCPP is distributed subject to a Software License Agreement found
  * in file LICENSE that is included with this distribution.
  */
-#include <string>
-#include <stdexcept>
 #ifndef PVDATA_H
 #define PVDATA_H
+#include <string>
+#include <stdexcept>
 #include "pvType.h"
 #include "pvIntrospect.h"
 #include "noDefaultMethods.h"
@@ -80,10 +80,9 @@ public:
     bool renameField(String  newName);
     void postPut() ;
     void setPostHandler(PostHandler *postHandler);
+    bool equals(PVField &pv);
     virtual void toString(StringBuilder buf) ;
     virtual void toString(StringBuilder buf,int indentLevel) ;
-    virtual bool operator==(PVField &pv) = 0;
-    virtual bool operator!=(PVField &pv) = 0;
 protected:
     PVField(PVStructure *parent,FieldConstPtr field);
     void setParent(PVStructure * parent);
@@ -245,8 +244,6 @@ public:
     String getExtendsStructureName();
     bool putExtendsStructureName(
         String extendsStructureName);
-    virtual bool operator==(PVField &pv) ;
-    virtual bool operator!=(PVField &pv) ;
     virtual void serialize(
         ByteBuffer *pbuffer,SerializableControl *pflusher) const;
     virtual void deserialize(

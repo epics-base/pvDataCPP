@@ -21,20 +21,21 @@ namespace epics { namespace pvData {
 
 class MonitorQueue {
 public:
-    MonitorQueue(MonitorElement** elements,int number);
+    MonitorQueue(PVStructure::shared_pointer* structures,int number);
     ~MonitorQueue();
-    static MonitorElement** createElements(PVStructurePtrArray array,int number);
+    static PVStructure::shared_pointer* createStructures(
+        PVStructurePtrArray array,int number);
     void clear();
     int getNumberFree();
     int capacity();
-    MonitorElement *getFree();
-    void setUsed(MonitorElement * element);
-    MonitorElement * getUsed();
-    void releaseUsed(MonitorElement * element);
+    MonitorElement::shared_pointer getFree();
+    void setUsed(MonitorElement::shared_pointer element);
+    MonitorElement::shared_pointer getUsed();
+    void releaseUsed(MonitorElement::shared_pointer element);
 private:
     int number;
-    MonitorElement ** elements;
-    Queue<MonitorElement> *queue;
+    PVStructure::shared_pointer* structures;
+    Queue<MonitorElement::shared_pointer> *queue;
 };
 
 }}

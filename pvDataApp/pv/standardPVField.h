@@ -4,10 +4,10 @@
  * EPICS pvDataCPP is distributed subject to a Software License Agreement found
  * in file LICENSE that is included with this distribution.
  */
-#include <string>
-#include <stdexcept>
 #ifndef STANDARDPVFIELD_H
 #define STANDARDPVFIELD_H
+#include <string>
+#include <stdexcept>
 #include "pvIntrospect.h"
 #include "pvData.h"
 

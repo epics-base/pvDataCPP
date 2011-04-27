@@ -4,9 +4,9 @@
  * EPICS pvDataCPP is distributed subject to a Software License Agreement found
  * in file LICENSE that is included with this distribution.
  */
-#include <string>
 #ifndef REQUESTER_H
 #define REQUESTER_H
+#include <string>
 #include "pvType.h"
 #include "sharedPtr.h"
 

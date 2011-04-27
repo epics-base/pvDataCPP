@@ -109,9 +109,9 @@ void Convert::getFullName(StringBuilder buf,PVField * pvField)
     }
 }
 
-bool Convert::equals(PVField *a,PVField *b)
+bool Convert::equals(PVField &a,PVField &b)
 {
-    return convertEquals(a,b);
+    return convertEquals(&a,&b);
 }
 
 void Convert::getString(StringBuilder buf,PVField * pvField,int indentLevel)

@@ -534,17 +534,6 @@ namespace epics { namespace pvData {
         }
     }
 
-
-    bool PVStructure::operator==(PVField &obj)
-    {
-        return getConvert()->equals(this,&obj);
-    }
-
-    bool PVStructure::operator!=(PVField  &pv)
-    {
-        return !(getConvert()->equals(this,&pv));
-    }
-
     static PVField *findSubField(String fieldName,PVStructure *pvStructure) {
         if( fieldName.length()<1) return 0;
         String::size_type index = fieldName.find('.');

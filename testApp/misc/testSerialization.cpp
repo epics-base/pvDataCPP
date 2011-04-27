@@ -21,6 +21,7 @@
 #include "noDefaultMethods.h"
 #include "byteBuffer.h"
 #include "CDRMonitor.h"
+#include "convert.h"
 
 #define BYTE_MAX_VALUE 127
 #define BYTE_MIN_VALUE -128
@@ -90,8 +91,8 @@ void serializationTest(PVField* field) {
     deserializedField->deserialize(buffer, control);
 
     // must equal
-    assert((*field)==(*deserializedField));
-
+    bool isEqual = getConvert()->equals(*field,*deserializedField);
+    assert(isEqual);
     delete deserializedField; // clean up
 }
 

@@ -248,14 +248,4 @@ namespace epics { namespace pvData {
         }
     }
 
-    bool BasePVStructureArray::operator==(PVField &pvField)
-    {
-        return getConvert()->equals(this,&pvField);
-    }
-
-    bool BasePVStructureArray::operator!=(PVField &pvField)
-    {
-        return !(getConvert()->equals(this,&pvField));
-    }
-
 }}

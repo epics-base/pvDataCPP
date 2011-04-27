@@ -31,8 +31,6 @@ namespace epics { namespace pvData {
             StructureArrayData *data);
         virtual int put(int offset,int length,
             PVStructurePtrArray from, int fromOffset);
-        virtual bool operator==(PVField &pv);
-        virtual bool operator!=(PVField &pv);
         virtual void shareData( PVStructurePtrArray value,int capacity,int length);
         virtual void serialize(ByteBuffer *pbuffer,
             SerializableControl *pflusher) const;

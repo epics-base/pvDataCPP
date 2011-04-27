@@ -4,21 +4,46 @@
  * EPICS pvDataCPP is distributed subject to a Software License Agreement found
  * in file LICENSE that is included with this distribution.
  */
-#include <string>
-#include <stdexcept>
 #ifndef CONVERT_H
 #define CONVERT_H
+#include <string>
+#include <stdexcept>
+
 #include "pvIntrospect.h"
 #include "pvData.h"
 
 namespace epics { namespace pvData { 
+
+bool operator==(PVField&, PVField&);
+
+static inline bool operator!=(PVField& a, PVField& b)
+{return !(a==b);}
+
+
+bool operator==(const Field&, const Field&);
+bool operator==(const Scalar&, const Scalar&);
+bool operator==(const ScalarArray&, const ScalarArray&);
+bool operator==(const Structure&, const Structure&);
+bool operator==(const StructureArray&, const StructureArray&);
+
+static inline bool operator!=(const Field& a, const Field& b)
+{return !(a==b);}
+static inline bool operator!=(const Scalar& a, const Scalar& b)
+{return !(a==b);}
+static inline bool operator!=(const ScalarArray& a, const ScalarArray& b)
+{return !(a==b);}
+static inline bool operator!=(const Structure& a, const Structure& b)
+{return !(a==b);}
+static inline bool operator!=(const StructureArray& a, const StructureArray& b)
+{return !(a==b);}
+
 
 class Convert : NoDefaultMethods {
 public:
     Convert();
     ~Convert();
     void getFullName(StringBuilder buf,PVField *pvField);
-    bool equals(PVField *a,PVField *b);
+    bool equals(PVField &a,PVField &b);
     void getString(StringBuilder buf,PVField * pvField,int indentLevel);
     void getString(StringBuilder buf,PVField *pvField);
     void fromString(PVScalar *pv, String from);

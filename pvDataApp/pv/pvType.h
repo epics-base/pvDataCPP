@@ -9,10 +9,10 @@
  * It also defines the arrays of the primitive types
  */
 
-#include <string>
-#include <stdint.h>
 #ifndef PVTYPE_H
 #define PVTYPE_H
+#include <string>
+#include <stdint.h>
 
 namespace epics { namespace pvData { 
 

@@ -42,8 +42,6 @@ public:
         SerializableControl *pflusher) const;
     virtual void deserialize(ByteBuffer *pbuffer,
         DeserializableControl *pflusher);
-    virtual bool operator==(PVField& pv) ;
-    virtual bool operator!=(PVField& pv) ;
 private:
     T value;
 };
@@ -78,18 +76,6 @@ void BasePVScalar<T>::deserialize(ByteBuffer *pbuffer,
     value = pbuffer->get<T>();
 }
 
-template<typename T>
-bool BasePVScalar<T>::operator==(PVField& pvField)
-{
-    return getConvert()->equals(this, &pvField);
-}
-
-template<typename T>
-bool BasePVScalar<T>::operator!=(PVField& pvField)
-{
-    return !(getConvert()->equals(this, &pvField));
-}
-
 typedef BasePVScalar<bool> BasePVBoolean;
 typedef BasePVScalar<int8> BasePVByte;
 typedef BasePVScalar<int16> BasePVShort;
@@ -115,8 +101,6 @@ public:
         DeserializableControl *pflusher);
     virtual void serialize(ByteBuffer *pbuffer,
         SerializableControl *pflusher, int offset, int count) const;
-    virtual bool operator==(PVField& pv) ;
-    virtual bool operator!=(PVField& pv) ;
 private:
     String value;
 };
@@ -160,22 +144,6 @@ void BasePVString::serialize(ByteBuffer *pbuffer,
 	SerializeHelper::serializeSubstring(value, offset, count, pbuffer, pflusher);
 }
 
-bool BasePVString::operator==(PVField& pvField)
-{
-    return getConvert()->equals(this, &pvField);
-}
-
-bool BasePVString::operator!=(PVField& pvField)
-{
-    return !(getConvert()->equals(this, &pvField));
-}
-
-
-
-
-
-
-
 /** Default storage for arrays
  */
 template<typename T>
@@ -197,8 +165,6 @@ public:
     virtual void deserialize(ByteBuffer *pbuffer,DeserializableControl *pflusher);
     virtual void serialize(ByteBuffer *pbuffer,
          SerializableControl *pflusher, int offset, int count) const;
-    virtual bool operator==(PVField& pv) ;
-    virtual bool operator!=(PVField& pv) ;
 private:
     pointer value;
 };
@@ -344,18 +310,6 @@ void DefaultPVArray<T>::serialize(ByteBuffer *pbuffer,
         else
             break;
     }
-}
-
-template<typename T>
-bool DefaultPVArray<T>::operator==(PVField& pv)
-{
-    return getConvert()->equals(this, &pv);
-}
-
-template<typename T>
-bool DefaultPVArray<T>::operator!=(PVField& pv)
-{
-    return !(getConvert()->equals(this, &pv));
 }
 
 // specializations for String

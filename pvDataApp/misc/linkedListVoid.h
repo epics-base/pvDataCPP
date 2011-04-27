@@ -5,9 +5,9 @@
  * in file LICENSE that is included with this distribution.
  */
 
-#include "pvType.h"
 #ifndef LINKEDLISTVOID_H
 #define LINKEDLISTVOID_H
+#include "pvType.h"
 namespace epics { namespace pvData { 
 
 class LinkedListVoid;

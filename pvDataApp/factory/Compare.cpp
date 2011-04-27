@@ -7,6 +7,13 @@
 
 namespace epics { namespace pvData {
 
+// PVXXX object comparison
+
+bool operator==(PVField& left, PVField& right)
+{
+ return getConvert()->equals(left,right);
+}
+
 // Introspection object comparision
 
 /** Field equality conditions:
