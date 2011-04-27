@@ -86,30 +86,31 @@ static void append2(PVStructure* pvStructure,
     const char *oneValue,const char *twoValue)
 {
      PVField* array[2];
+    // make parent null to test setParent
      PVString *pvStringField = static_cast<PVString*>(
-        pvDataCreate->createPVScalar(pvStructure,oneName, pvString));
+        pvDataCreate->createPVScalar(0,oneName, pvString));
      pvStringField->put(oneValue);
      array[0] = pvStringField;
      pvStringField = static_cast<PVString*>(
-        pvDataCreate->createPVScalar(pvStructure,twoName, pvString));
+        pvDataCreate->createPVScalar(0,twoName, pvString));
      pvStringField->put(twoValue);
      array[1] = pvStringField;
      pvStructure->appendPVFields(2,array);
 }
 static void testAppends(FILE * fd)
 {
-    PVField* array[2];
-    PVStructure* pvStructure = pvDataCreate->createPVStructure(
-        0,"parent", 0);
+    PVField** array = new PVField*[2];
+    // make parent null to test setParent
     PVStructure* pvChild = pvDataCreate->createPVStructure(
-          pvStructure, "child1", 0);
+          0, "child1", 0);
     append2(pvChild,"Joe","Mary","Good Guy","Good Girl");
     array[0] = pvChild;
     pvChild = pvDataCreate->createPVStructure(
-          pvStructure, "child2", 0);
+          0, "child2", 0);
     append2(pvChild,"Bill","Jane","Bad Guy","Bad Girl");
     array[1] = pvChild;
-    pvStructure->appendPVFields(2,array);
+    PVStructure* pvStructure = pvDataCreate->createPVStructure(
+        0,"parent", 2,array);
     builder.clear();
     pvStructure->toString(&builder);
     fprintf(fd,"%s\n",builder.c_str());

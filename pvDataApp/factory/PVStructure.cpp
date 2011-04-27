@@ -192,6 +192,7 @@ namespace epics { namespace pvData {
         }
         Structure *structure = const_cast<Structure *>(getStructure().get());
         structure->removeField(indRemove);
+        delete origPVFields[indRemove];
         delete[] pImpl->pvFields;
         pImpl->pvFields = newPVFields;
         pImpl->numberFields = newLength;

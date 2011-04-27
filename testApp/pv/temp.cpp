@@ -35,11 +35,32 @@ static String alarmTimeStamp("alarm,timeStamp");
 static String alarmTimeStampValueAlarm("alarm,timeStamp,valueAlarm");
 static String allProperties("alarm,timeStamp,display,control,valueAlarm");
 
+static void testAppendSimple(FILE * fd)
+{
+    FieldConstPtrArray fields = new FieldConstPtr[0];
+    PVStructure *pvParent = pvDataCreate->createPVStructure(
+        0,String("request"),0,fields);
+    PVString* pvStringField = static_cast<PVString*>(
+        pvDataCreate->createPVScalar(pvParent, "fieldList", pvString));
+    pvStringField->put(String("value,timeStamp"));
+    pvParent->appendPVField(pvStringField);
+    builder.clear();
+    pvParent->toString(&builder);
+    fprintf(fd,"%s\n",builder.c_str());
+    pvStringField = static_cast<PVString*>(
+        pvDataCreate->createPVScalar(pvParent, "extra", pvString));
+    pvStringField->put(String("junk"));
+    pvParent->appendPVField(pvStringField);
+    builder.clear();
+    pvParent->toString(&builder);
+    fprintf(fd,"%s\n",builder.c_str());
+    delete pvParent;
+}
 
 static void testAppendMore(FILE * fd)
 {
     PVStructure* pvStructure = pvDataCreate->createPVStructure(
-        0,"top", 0);
+        0,"parent", 0);
     PVStructure* pvChild1 = pvDataCreate->createPVStructure(
           pvStructure, "child1", 0);
     PVString *pvStringField = static_cast<PVString*>(
@@ -57,8 +78,51 @@ static void testAppendMore(FILE * fd)
     builder.clear();
     pvStructure->toString(&builder);
     fprintf(fd,"%s\n",builder.c_str());
-    PVField *pvField = pvStructure->getSubField(String("child1.value"));
-    pvField->message(String("test message"),infoMessage);
+    delete pvStructure;
+}
+
+static void append2(PVStructure* pvStructure,
+    const char *oneName,const char *twoName,
+    const char *oneValue,const char *twoValue)
+{
+     PVField* array[2];
+     PVString *pvStringField = static_cast<PVString*>(
+        pvDataCreate->createPVScalar(0,oneName, pvString));
+     pvStringField->put(oneValue);
+     array[0] = pvStringField;
+     pvStringField = static_cast<PVString*>(
+        pvDataCreate->createPVScalar(0,twoName, pvString));
+     pvStringField->put(twoValue);
+     array[1] = pvStringField;
+     pvStructure->appendPVFields(2,array);
+}
+static void testAppends(FILE * fd)
+{
+    PVField** array = new PVField*[2];
+    PVStructure* pvChild = pvDataCreate->createPVStructure(
+          0, "child1", 0);
+    append2(pvChild,"Joe","Mary","Good Guy","Good Girl");
+    array[0] = pvChild;
+    pvChild = pvDataCreate->createPVStructure(
+          0, "child2", 0);
+    append2(pvChild,"Bill","Jane","Bad Guy","Bad Girl");
+    array[1] = pvChild;
+    PVStructure* pvStructure = pvDataCreate->createPVStructure(
+        0,"parent", 2,array);
+    builder.clear();
+    pvStructure->toString(&builder);
+    fprintf(fd,"%s\n",builder.c_str());
+    PVField *pvField = pvStructure->getSubField("child2.Bill");
+    assert(pvField!=0);
+    bool ok = pvField->renameField("Joe");
+    assert(ok);
+    builder.clear();
+    pvStructure->toString(&builder);
+    fprintf(fd,"%s\n",builder.c_str());
+    pvField->getParent()->removePVField("Joe");
+    builder.clear();
+    pvStructure->toString(&builder);
+    fprintf(fd,"%s\n",builder.c_str());
     delete pvStructure;
 }
 
@@ -75,7 +139,9 @@ int main(int argc,char *argv[])
     standardField = getStandardField();
     standardPVField = getStandardPVField();
     convert = getConvert();
-    testAppendMore(fd);
+    //testAppendSimple(fd);
+    //testAppendMore(fd);
+    testAppends(fd);
     epicsExitCallAtExits();
     CDRMonitor::get().show(fd);
     return(0);
