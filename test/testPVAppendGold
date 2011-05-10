@@ -28,5 +28,5 @@ structure parent
         string Mary Good Girl
     structure child2
         string Jane Bad Girl
-pvField:  totalConstruct 15 totalDestruct 14 ACTIVE 1
+pvField:  totalConstruct 15 totalDestruct 15
 field:  totalConstruct 108 totalDestruct 108

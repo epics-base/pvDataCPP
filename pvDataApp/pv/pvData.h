@@ -57,8 +57,7 @@ public:
 };
 
 class PVField
-: virtual public Requester,
-  virtual public Serializable,
+: virtual public Serializable,
   private NoDefaultMethods
 {
 public:
@@ -66,7 +65,6 @@ public:
     typedef std::tr1::shared_ptr<const PVField> const_shared_pointer;
 
     virtual ~PVField();
-    String getRequesterName() ;
     virtual void message(String message,MessageType messageType) ;
     virtual void setRequester(Requester *prequester);
     int getFieldOffset() ;
@@ -74,13 +72,13 @@ public:
     int getNumberFields() ;
     PVAuxInfo * getPVAuxInfo();
     bool isImmutable() ;
-    void setImmutable();
+    virtual void setImmutable();
     FieldConstPtr getField() ;
     PVStructure * getParent() ;
     bool renameField(String  newName);
     void postPut() ;
     void setPostHandler(PostHandler *postHandler);
-    bool equals(PVField &pv);
+    virtual bool equals(PVField &pv);
     virtual void toString(StringBuilder buf) ;
     virtual void toString(StringBuilder buf,int indentLevel) ;
 protected:

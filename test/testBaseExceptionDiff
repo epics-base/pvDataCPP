@@ -1,5 +1,5 @@
---- testBaseExceptionGold	2011-04-25 13:04:28.000000000 -0400
-+++ testBaseException	2011-04-27 07:53:41.000000000 -0400
+--- testBaseExceptionGold	2011-04-27 13:11:55.000000000 -0400
++++ testBaseException	2011-05-10 07:36:37.000000000 -0400
 @@ -1,37 +1,46 @@
 +
 +

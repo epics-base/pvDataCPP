@@ -34,13 +34,15 @@ public:
    bool immutable;
    Requester *requester;
    PostHandler *postHandler;
+   Convert *convert;
 };
 
 PVFieldPvt::PVFieldPvt(PVStructure *parent,FieldConstPtr field)
 : parent(parent),field(field),
  fieldOffset(0), nextFieldOffset(0),
  pvAuxInfo(0),
- immutable(false),requester(0),postHandler(0)
+ immutable(false),requester(0),postHandler(0),
+ convert(getConvert())
 {
 }
 
@@ -61,13 +63,6 @@ PVField::~PVField()
 {
     PVDATA_REFCOUNT_MONITOR_DESTRUCT(pvField);
    delete pImpl;
-}
-
-String PVField::getRequesterName() 
-{
-    static String none("none");
-    if(pImpl->requester!=0) return pImpl->requester->getRequesterName();
-    return none;
 }
 
 void PVField::message(String fieldName,String message,MessageType messageType)  
@@ -176,11 +171,16 @@ void PVField::setParent(PVStructure * parent)
     pImpl->parent = parent;
 }
 
+bool PVField::equals(PVField &pv)
+{
+    return pImpl->convert->equals(*this,pv);
+}
+
 void PVField::toString(StringBuilder buf)  {toString(buf,0);}
 
 void PVField::toString(StringBuilder buf,int indentLevel) 
 {
-   getConvert()->getString(buf,this,indentLevel);
+   pImpl->convert->getString(buf,this,indentLevel);
    if(pImpl->pvAuxInfo==0) return;
    pImpl->pvAuxInfo->toString(buf,indentLevel);
 }
