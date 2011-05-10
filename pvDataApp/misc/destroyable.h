@@ -6,6 +6,9 @@
  */
 #ifndef DESTROYABLE_H
 #define DESTROYABLE_H
+
+#include <sharedPtr.h>
+
 namespace epics { namespace pvData { 
 
 
@@ -15,6 +18,8 @@ namespace epics { namespace pvData {
          */
         class Destroyable  {
             public:
+            typedef std::tr1::shared_ptr<Destroyable> shared_pointer;
+            typedef std::tr1::shared_ptr<const Destroyable> const_shared_pointer;
             /**
              * Destroy this instance.
              */
