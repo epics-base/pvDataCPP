@@ -35,14 +35,16 @@ public:
     PVScalar * scalarValue(PVStructure *parent,ScalarType type);
     PVStructure * scalarValue(PVStructure *parent,
         ScalarType type,String properties);
-    PVScalarArray * scalarArrayValue(PVStructure *parent,ScalarType elementType);
+    PVScalarArray * scalarArrayValue(
+        PVStructure *parent,ScalarType elementType);
     PVStructure * scalarArrayValue(PVStructure *parent,
         ScalarType elementType, String properties);
     PVStructureArray * structureArrayValue(PVStructure *parent,
         StructureConstPtr structure);
     PVStructure * structureArrayValue(PVStructure *parent,
         StructureConstPtr structure,String properties);
-    PVStructure * enumeratedValue(PVStructure *parent,StringArray choices,int number);
+    PVStructure * enumeratedValue(
+        PVStructure *parent,StringArray choices,int number);
     PVStructure * enumeratedValue(PVStructure *parent,
         StringArray choices,int number, String properties);
     PVStructure * alarm(PVStructure *parent);

@@ -36,6 +36,7 @@ private:
     int number;
     PVStructure::shared_pointer* structures;
     Queue<MonitorElement::shared_pointer> *queue;
+    MonitorElement::shared_pointer nullElement;
 };
 
 }}

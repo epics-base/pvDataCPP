@@ -251,7 +251,10 @@ public:
     virtual void deserialize(ByteBuffer *pbuffer,
         DeserializableControl*pflusher,BitSet *pbitSet);
     PVStructure(PVStructure *parent,StructureConstPtr structure);
-    PVStructure(PVStructure *parent,StructureConstPtr structure,PVFieldPtrArray pvFields);
+    PVStructure(
+        PVStructure *parent,
+        StructureConstPtr structure,
+        PVFieldPtrArray pvFields);
 private:
     void setParentPvt(PVField *pvField,PVStructure *parent);
     class PVStructurePvt * pImpl;

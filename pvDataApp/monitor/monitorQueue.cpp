@@ -67,7 +67,8 @@ MonitorQueueElement *MonitorElementImpl::getQueueElement()
 MonitorQueue::MonitorQueue(PVStructure::shared_pointer* structures,int number)
 : number(number),
   structures(structures),
-  queue(0)
+  queue(0),
+  nullElement(MonitorElement::shared_pointer())
 {
     if(number<2) {
          throw std::logic_error(String("queueSize must be >=2"));
@@ -127,7 +128,7 @@ MonitorElement::shared_pointer MonitorQueue::getFree()
 {
     
     MonitorQueueElement *queueElement = queue->getFree();
-    if(queueElement==0) return MonitorElement::shared_pointer();
+    if(queueElement==0) return nullElement;
     return *queueElement->getObject();
 }
 
@@ -140,7 +141,7 @@ void MonitorQueue::setUsed(MonitorElement::shared_pointer element)
 MonitorElement::shared_pointer MonitorQueue::getUsed()
 {
     MonitorQueueElement *queueElement = queue->getUsed();
-    if(queueElement==0) return MonitorElement::shared_pointer();
+    if(queueElement==0) return nullElement;
     return *queueElement->getObject();
 }
 

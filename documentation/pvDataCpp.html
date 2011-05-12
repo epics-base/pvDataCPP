@@ -9,7 +9,7 @@
 
 <body>
 <h1 style="text-align: center">EPICS pvDataCPP<br />
-2011.04.14</h1>
+2011.05.11</h1>
 
 <p>TODO</p>
 <ul>
@@ -23,54 +23,53 @@
 
 <div class="toc">
 <ul>
-  <li><a href="#L45">Preface</a> 
+  <li><a href="#L45">Preface</a>
     <ul>
-      <li><a href="#L70">pvData</a> 
+      <li><a href="#L72">pvData</a>
         <ul>
-          <li><a href="#L74">Introspection</a></li>
-          <li><a href="#L142">Data</a></li>
-          <li><a href="#L167">Property Structures</a></li>
+          <li><a href="#L76">Introspection</a></li>
+          <li><a href="#L144">Data</a></li>
+          <li><a href="#L169">Property Structures</a></li>
         </ul>
       </li>
-      <li><a href="#L197">pvAccess</a></li>
-      <li><a href="#L258">pvIOC</a></li>
+      <li><a href="#L199">pvAccess</a></li>
+      <li><a href="#L260">pvIOC</a></li>
     </ul>
   </li>
-  <li><a href="#L305">Introduction</a></li>
-  <li><a href="#L397">PVData Meta Language</a> 
+  <li><a href="#L307">Introduction</a></li>
+  <li><a href="#L399">PVData Meta Language</a>
     <ul>
-      <li><a href="#L403">Definition</a></li>
-      <li><a href="#L602">Example</a></li>
+      <li><a href="#L405">Definition</a></li>
+      <li><a href="#L604">Example</a></li>
     </ul>
   </li>
-  <li><a href="#L614">PV - User Description</a> 
+  <li><a href="#L616">PV - User Description</a>
     <ul>
-      <li><a href="#L618">Overview</a></li>
-      <li><a href="#L659">pvType</a></li>
-      <li><a href="#L695">Process Variable Reflection</a> 
+      <li><a href="#L620">Overview</a></li>
+      <li><a href="#L661">pvType</a></li>
+      <li><a href="#L697">Process Variable Reflection</a>
         <ul>
-          <li><a href="#L703">Type Description</a></li>
-          <li><a href="#L823">Reflection Description</a></li>
+          <li><a href="#L705">Type Description</a></li>
+          <li><a href="#L835">Reflection Description</a></li>
         </ul>
       </li>
-      <li><a href="#L1038">Standard Fields</a></li>
-      <li><a href="#L1122">PVField - Data Interfaces</a> 
+      <li><a href="#L1050">Standard Fields</a></li>
+      <li><a href="#L1134">PVField - Data Interfaces</a>
         <ul>
-          <li><a href="#L1126">PVField</a></li>
-          <li><a href="#L1238">PVAuxInfo</a></li>
-          <li><a href="#L1272">PVScalar and extensions</a> 
+          <li><a href="#L1138">PVField</a></li>
+          <li><a href="#L1248">PVAuxInfo</a></li>
+          <li><a href="#L1282">PVScalar and extensions</a>
             <ul>
-              <li><a href="#L1276">Primitive PVField types</a></li>
+              <li><a href="#L1286">Primitive PVField types</a></li>
             </ul>
           </li>
-          <li><a href="#L1282">PVArray and Extensions</a> 
+          <li><a href="#L1292">PVArray and Extensions</a>
             <ul>
-              <li><a href="#L1321">PVArray Extensions</a></li>
-              <li><a href="#L1365">Complete set of PVArray Extensions</a></li>
+              <li><a href="#L1331">PVArray Extensions</a></li>
             </ul>
           </li>
-          <li><a href="#L1369">PVStructure</a></li>
-          <li><a href="#L1473">PVStructureArray</a></li>
+          <li><a href="#L1375">PVStructure</a></li>
+          <li><a href="#L1479">PVStructureArray</a></li>
           <li><a href="#L1510">PVDataCreate</a></li>
         </ul>
       </li>
@@ -78,99 +77,98 @@
       <li><a href="#L1550">Convert</a></li>
     </ul>
   </li>
-  <li><a href="#L1620">Namespace, Typedefs, and Memory Management</a> 
+  <li><a href="#L1620">Namespace and Memory Management</a>
     <ul>
       <li><a href="#L1624">Namespace</a></li>
-      <li><a href="#L1630">typedefs</a></li>
-      <li><a href="#L1677">Memory Managemment</a> 
+      <li><a href="#L1675">Memory Managemment</a>
         <ul>
-          <li><a href="#L1679">NoDefaultMethods</a></li>
+          <li><a href="#L1677">NoDefaultMethods</a></li>
         </ul>
       </li>
-      <li><a href="#L1685">PVData introspection objects</a></li>
-      <li><a href="#L1691">PVData data objects</a></li>
-      <li><a href="#L1695">Other code in this project</a></li>
+      <li><a href="#L1683">PVData introspection objects</a></li>
+      <li><a href="#L1689">PVData data objects</a></li>
+      <li><a href="#L1693">Other code in this project</a></li>
     </ul>
   </li>
-  <li><a href="#L1703">Examples</a> 
+  <li><a href="#L1701">Examples</a>
     <ul>
-      <li><a href="#L1707">Accessing PVData</a></li>
-      <li><a href="#L1726">Creating PVData</a></li>
+      <li><a href="#L1705">Accessing PVData</a></li>
+      <li><a href="#L1724">Creating PVData</a></li>
     </ul>
   </li>
-  <li><a href="#L1746">Property</a> 
+  <li><a href="#L1744">Property</a>
     <ul>
-      <li><a href="#L1750">Definition of Property</a></li>
-      <li><a href="#L1762">Standard Properties</a></li>
-      <li><a href="#L1843">Overview of Property Support</a></li>
-      <li><a href="#L1863">timeStamp</a> 
+      <li><a href="#L1748">Definition of Property</a></li>
+      <li><a href="#L1760">Standard Properties</a></li>
+      <li><a href="#L1841">Overview of Property Support</a></li>
+      <li><a href="#L1861">timeStamp</a>
         <ul>
-          <li><a href="#L1887">timeStamp.h</a></li>
-          <li><a href="#L1991">pvTimeStamp.h</a></li>
+          <li><a href="#L1885">timeStamp.h</a></li>
+          <li><a href="#L1989">pvTimeStamp.h</a></li>
         </ul>
       </li>
-      <li><a href="#L2031">alarm</a> 
+      <li><a href="#L2029">alarm</a>
         <ul>
-          <li><a href="#L2058">alarm.h</a></li>
-          <li><a href="#L2105">pvAlarm.h</a></li>
+          <li><a href="#L2056">alarm.h</a></li>
+          <li><a href="#L2103">pvAlarm.h</a></li>
         </ul>
       </li>
-      <li><a href="#L2145">control</a> 
+      <li><a href="#L2143">control</a>
         <ul>
-          <li><a href="#L2167">control.h</a></li>
-          <li><a href="#L2199">pvControl.h</a></li>
+          <li><a href="#L2165">control.h</a></li>
+          <li><a href="#L2197">pvControl.h</a></li>
         </ul>
       </li>
-      <li><a href="#L2239">display</a> 
+      <li><a href="#L2237">display</a>
         <ul>
-          <li><a href="#L2261">display.h</a></li>
-          <li><a href="#L2323">pvDisplay.h</a></li>
+          <li><a href="#L2259">display.h</a></li>
+          <li><a href="#L2321">pvDisplay.h</a></li>
         </ul>
       </li>
-      <li><a href="#L2363">pvEnumerated</a></li>
+      <li><a href="#L2361">pvEnumerated</a></li>
     </ul>
   </li>
-  <li><a href="#L2439">PVData Factories</a></li>
-  <li><a href="#L2472">Miscellanous Classes</a> 
+  <li><a href="#L2437">PVData Factories</a></li>
+  <li><a href="#L2470">Miscellanous Classes</a>
     <ul>
-      <li><a href="#L2476">Overview</a></li>
-      <li><a href="#L2568">BitSet</a></li>
-      <li><a href="#L2692">ByteBuffer</a></li>
-      <li><a href="#L2700">Event</a></li>
-      <li><a href="#L2729">Exception</a></li>
-      <li><a href="#L2737">Executor</a></li>
-      <li><a href="#L2768">Linked List</a></li>
-      <li><a href="#L2882">Lock and Mutex</a></li>
-      <li><a href="#L2898">Message Queue</a> 
+      <li><a href="#L2474">Overview</a></li>
+      <li><a href="#L2566">BitSet</a></li>
+      <li><a href="#L2690">ByteBuffer</a></li>
+      <li><a href="#L2698">Event</a></li>
+      <li><a href="#L2727">Exception</a></li>
+      <li><a href="#L2735">Executor</a></li>
+      <li><a href="#L2766">Linked List</a></li>
+      <li><a href="#L2880">Lock and Mutex</a></li>
+      <li><a href="#L2896">Message Queue</a>
         <ul>
-          <li><a href="#L2900">Definitions</a></li>
-          <li><a href="#L2904">MessageQueue</a></li>
+          <li><a href="#L2898">Definitions</a></li>
+          <li><a href="#L2902">MessageQueue</a></li>
         </ul>
       </li>
-      <li><a href="#L2972">NoDefaultMethods</a></li>
-      <li><a href="#L2978">Requester</a></li>
-      <li><a href="#L3009">Serialize</a></li>
-      <li><a href="#L3049">CDRMonitor - Monitor and Report Construction and
+      <li><a href="#L2975">NoDefaultMethods</a></li>
+      <li><a href="#L2981">Requester</a></li>
+      <li><a href="#L3012">Serialize</a></li>
+      <li><a href="#L3052">CDRMonitor - Monitor and Report Construction and
         Destruction</a></li>
-      <li><a href="#L3103">Status</a></li>
-      <li><a href="#L3148">Thread</a> 
+      <li><a href="#L3058">Status</a></li>
+      <li><a href="#L3105">Thread</a>
         <ul>
-          <li><a href="#L3150">ThreadPriority</a></li>
-          <li><a href="#L3154">Thread</a></li>
+          <li><a href="#L3107">ThreadPriority</a></li>
+          <li><a href="#L3111">Thread</a></li>
         </ul>
       </li>
-      <li><a href="#L3195">Time Function Call</a></li>
-      <li><a href="#L3227">Timer</a></li>
-      <li><a href="#L3294">Queue</a></li>
+      <li><a href="#L3152">Time Function Call</a></li>
+      <li><a href="#L3184">Timer</a></li>
+      <li><a href="#L3251">Queue</a></li>
     </ul>
   </li>
-  <li><a href="#L3357">pvMisc</a> 
+  <li><a href="#L3314">pvMisc</a>
     <ul>
-      <li><a href="#L3361">BitSetUtil</a></li>
-      <li><a href="#L3391">MultiChoice</a></li>
+      <li><a href="#L3318">BitSetUtil</a></li>
+      <li><a href="#L3348">MultiChoice</a></li>
     </ul>
   </li>
-  <li><a href="#L3399">License Agreement</a></li>
+  <li><a href="#L3356">License Agreement</a></li>
 </ul>
 </div>
 <hr />
@@ -192,13 +190,13 @@ license</a> described at the end of this document.</p>
       record scanning, and extensible support.</dd>
 </dl>
 
-<h3 id="L70">pvData</h3>
+<h3 id="L72">pvData</h3>
 
 <p>pvData describes and implements structured data. Interspection interfaces
 are used to describe the data and for each type of data a data interface
 provides a container to hold the data.</p>
 
-<h4 id="L74">Introspection</h4>
+<h4 id="L76">Introspection</h4>
 
 <p>pvData is modeled as a structured set of fields. A field has a name are a
 type. The type must be one of:</p>
@@ -238,7 +236,7 @@ type. The type must be one of:</p>
 addition each type has an introspection interface: Scalar, ScalarArray,
 Structure, and StructureArray.</p>
 
-<h4 id="L142">Data</h4>
+<h4 id="L144">Data</h4>
 
 <p>Interface PVField provides access to the common information of every data
 container. In addition every possible type has an interface for accessing the
@@ -257,7 +255,7 @@ data:</p>
     <dd>The interface is PVStructureArray.</dd>
 </dl>
 
-<h4 id="L167">Property Structures</h4>
+<h4 id="L169">Property Structures</h4>
 
 <p>pvData provides support, via pvData structures and associated support, for
 the following:</p>
@@ -274,7 +272,7 @@ the following:</p>
     <dd>This is a pvData structure with two field: index and choices.</dd>
 </dl>
 
-<h3 id="L197">pvAccess</h3>
+<h3 id="L199">pvAccess</h3>
 
 <p>pvAccess provides client/server support for transmitting pvData objects. The
 server must provide access to objects identified by name. Each object must have
@@ -329,7 +327,7 @@ features:</p>
       Large objects automatically span network packets.</dd>
 </dl>
 
-<h3 id="L258">pvIOC</h3>
+<h3 id="L260">pvIOC</h3>
 
 <p>IOC means Input/Output Controller, which is an EPICS term. A pvIOC is
 modeled after an EPICS IOC but supports pvData instead of flat record
@@ -376,7 +374,7 @@ an existing EPICS IOC.</p>
 </dl>
 <hr />
 
-<h2 style="text-align: center" id="L305">Introduction</h2>
+<h2 style="text-align: center" id="L307">Introduction</h2>
 <hr />
 
 <p>PVData is one of a set of related projects: pvData, pvAccess, and javaIOC.
@@ -476,7 +474,7 @@ pvDataApp:</p>
 </dl>
 <hr />
 
-<h2 style="text-align: center" id="L397">PVData Meta Language</h2>
+<h2 style="text-align: center" id="L399">PVData Meta Language</h2>
 <hr />
 
 <p>This section describes a meta language for describing pvData. Currently
@@ -484,7 +482,7 @@ there are no plans for a parser for the meta language. It is used for
 documentation. Also the toString introspection and data methods described below
 present data in this format.</p>
 
-<h3 id="L403">Definition</h3>
+<h3 id="L405">Definition</h3>
 
 <p>PVData supports structured data. All data appears as a top level structure.
 A structure has an ordered set of fields where each field has a <span
@@ -594,7 +592,7 @@ scalar data value depending on the type. Thus it is a comma separated set of
 values enclosed in <span style="font-family: courier;">[]</span> White space is
 permitted surrounding each comma.</p>
 
-<h3 id="L602">Example</h3>
+<h3 id="L604">Example</h3>
 
 <p>Define the following top level structure:</p>
 <pre>structure timeStamp
@@ -631,10 +629,10 @@ structure[] structureArrayExample
         double y 10.0</pre>
 <hr />
 
-<h2 style="text-align: center" id="L614">PV - User Description</h2>
+<h2 style="text-align: center" id="L616">PV - User Description</h2>
 <hr />
 
-<h3 style="text-align: center" id="L618">Overview</h3>
+<h3 style="text-align: center" id="L620">Overview</h3>
 
 <p>Directory pvDataApp/pv has header files that completely describe pvData. The
 implementation is provided in directory pvDataApp/factory. Test programs
@@ -668,7 +666,7 @@ converting and copying data between fields.</p>
       alarm, etc.</dd>
 </dl>
 
-<h3 style="text-align: center;" id="L659">pvType</h3>
+<h3 style="text-align: center;" id="L661">pvType</h3>
 
 <p>This provides C/C++ definitions for the pvData primitive types: boolean,
 byte, short, int, long, float, double, and string. Because pvData is network
@@ -726,7 +724,7 @@ typedef std::string * StringBuilder;</pre>
     <dd>A typedef is provided for an array of each of the primitive types.</dd>
 </dl>
 
-<h3 style="text-align: center" id="L695">Process Variable Reflection</h3>
+<h3 style="text-align: center" id="L697">Process Variable Reflection</h3>
 
 <p>This subsection describes <span
 style="font-family: Courier New,Courier,monospace">pvIntrospect.h</span></p>
@@ -741,7 +739,7 @@ especially important for arrays and structures so that a client can discover
 the type without requiring that a large data array or structure be transported
 over the network.</p>
 
-<h4 id="L703">Type Description</h4>
+<h4 id="L705">Type Description</h4>
 
 <p>Types are defined as:</p>
 <pre>enum Type {
@@ -753,6 +751,7 @@ over the network.</p>
 
 class TypeFunc {
 public:
+    const char* name(Type);
     static void toString(StringBuilder buf,const Type type);
 };
 
@@ -770,6 +769,7 @@ public:
     static bool isNumeric(ScalarType type);
     static bool isPrimitive(ScalarType type);
     static ScalarType getScalarType(String value);
+    const char* name(ScalarType);
     static void toString(StringBuilder buf,ScalarType scalarType);
 };</pre>
 
@@ -811,6 +811,8 @@ following:</p>
 <p><span style="font-family: courier;">TypeFunction</span> is a set of
 convenience methods for <span style="font-family: courier;">Type</span></p>
 <dl>
+  <dt style="font-family: courier;">name</dt>
+    <dd>Returns the name of the type.</dd>
   <dt style="font-family: courier;">toString</dt>
     <dd>Convert the type to a string.</dd>
 </dl>
@@ -825,6 +827,8 @@ style="font-family: courier;">ScalarType</span></p>
     <dd>Is the scalarType numeric, i.e. pvByte,...,pvDouble.</dd>
   <dt style="font-family: courier;">isPrimitive</dt>
     <dd>Is the scvalarType primitive, i.e. not pvString</dd>
+  <dt style="font-family: courier;">name</dt>
+    <dd>Returns the name of the scalarType.</dd>
   <dt style="font-family: courier;">getScalarType</dt>
     <dd>Given a string of the form String("boolean"),...,String("string")
       return the scalarType.</dd>
@@ -832,7 +836,7 @@ style="font-family: courier;">ScalarType</span></p>
     <dd>Convert the scalar type to a string.</dd>
 </dl>
 
-<h4 id="L823">Reflection Description</h4>
+<h4 id="L835">Reflection Description</h4>
 
 <p>This section describes the reflection interfaces which provide the
 following: </p>
@@ -864,26 +868,41 @@ following: </p>
     <dd>Gets a pointer to the single instance of FieldCreate.</dd>
 </dl>
 <pre>    
-class Field :  private NoDefaultMethods {
+class Field;
+class Scalar;
+class ScalarArray;
+class Structure;
+class StructureArray;
+
+typedef std::tr1::shared_ptr&lt;const Field&gt; FieldConstPtr;
+typedef FieldConstPtr * FieldConstPtrArray;
+typedef std::tr1::shared_ptr&lt;const Scalar&gt; ScalarConstPtr;
+typedef std::tr1::shared_ptr&lt;const ScalarArray&gt; ScalarArrayConstPtr;
+typedef std::tr1::shared_ptr&lt;const Structure&gt; StructureConstPtr;
+typedef std::tr1::shared_ptr&lt;const StructureArray&gt; StructureArrayConstPtr;
+
+
+protected:class Field :  public std::tr1::enable_shared_from_this&lt;Field&gt; {
 public:
-   int getReferenceCount() const;
-   String getFieldName() const;
-   Type getType() const;
-   virtual void toString(StringBuilder buf) const{toString(buf,0);}
-   virtual void toString(StringBuilder buf,int indentLevel) const;
-   void renameField(String  newName);
-   void incReferenceCount() const;
-   void decReferenceCount() const;
-   void dumpReferenceCount(StringBuilder buf,int indentLevel) const;
-   virtual bool operator==(const Field&amp; field) const;
-   virtual bool operator!=(const Field&amp; field) const;
-protected:
+    typedef std::tr1::shared_ptr&lt;Field&gt; shared_pointer;
+    typedef std::tr1::shared_ptr&lt;const Field&gt; const_shared_pointer;
+
+    String getFieldName() const{return m_fieldName;}
+    Type getType() const{return m_type;}
+    virtual void toString(StringBuilder buf) const{toString(buf,0);}
+    virtual void toString(StringBuilder buf,int indentLevel) const;
+    void renameField(String  newName);
     Field(String fieldName,Type type);
     virtual ~Field();
 };
 
 class Scalar : public Field{
 public:
+   typedef std::tr1::shared_ptr&lt;Scalar&gt; shared_pointer;
+   typedef std::tr1::shared_ptr&lt;const Scalar&gt; const_shared_pointer;
+   typedef Scalar&amp; reference;
+   typedef const Scalar&amp; const_reference;
+
    ScalarType getScalarType() const {return scalarType;}
    virtual void toString(StringBuilder buf) const{toString(buf,0);}
    virtual void toString(StringBuilder buf,int indentLevel) const;
@@ -895,6 +914,11 @@ protected:
 
 class ScalarArray : public Field{
 public:
+   typedef std::tr1::shared_ptr&lt;ScalarArray&gt; shared_pointer;
+   typedef std::tr1::shared_ptr&lt;const ScalarArray&gt; const_shared_pointer;
+   typedef ScalarArray&amp; reference;
+   typedef const ScalarArray&amp; const_reference;
+
    ScalarType  getElementType() const {return elementType;}
    virtual void toString(StringBuilder buf) const{toString(buf,0);}
    virtual void toString(StringBuilder buf,int indentLevel) const;
@@ -906,17 +930,23 @@ protected:
 
 class StructureArray : public Field{
 public:
+  typedef std::tr1::shared_ptr&lt;StructureArray&gt; shared_pointer;
+   typedef std::tr1::shared_ptr&lt;const StructureArray&gt; const_shared_pointer;
+   typedef StructureArray&amp; reference;
+   typedef const StructureArray&amp; const_reference;
+
+   const Structure&amp; structure() const {return *pstructure;}
    StructureConstPtr  getStructure() const {return pstructure;}
-   virtual void toString(StringBuilder buf) const{toString(buf,0);}
-   virtual void toString(StringBuilder buf,int indentLevel) const;
-protected:
-   StructureArray(String fieldName,StructureConstPtr structure);
-   virtual ~StructureArray();
- ...
+   virtual void toString(StringBuilder buf,int indentLevel=0) const;
 };
 
 class Structure : public Field {
 public:
+   typedef std::tr1::shared_ptr&lt;Structure&gt; shared_pointer;
+   typedef std::tr1::shared_ptr&lt;const Structure&gt; const_shared_pointer;
+   typedef Structure&amp; reference;
+   typedef const Structure&amp; const_reference;
+
    int getNumberFields() const {return numberFields;}
    FieldConstPtr getField(String fieldName) const;
    int getFieldIndex(String fieldName) const;
@@ -1061,7 +1091,7 @@ methods:</p>
       structure-&gt;incReferenceCount() must be called before this method.</dd>
 </dl>
 
-<h3 style="text-align: center" id="L1038">Standard Fields</h3>
+<h3 style="text-align: center" id="L1050">Standard Fields</h3>
 
 <p>The file standardField.h has a class description for creating or sharing
 Field objects for standard fields. For each type of standard object two methods
@@ -1109,10 +1139,8 @@ public:
         StructureConstPtr structure,String properties);
     StructureConstPtr structure(String fieldName,
         int numFields,FieldConstPtrArray fields);
-    StructureConstPtr enumerated(String fieldName,
-        StringArray choices);
-    StructureConstPtr enumerated(String fieldName,
-        StringArray choices, String properties);
+    StructureConstPtr enumerated(String fieldName);
+    StructureConstPtr enumerated(String fieldName, String properties);
     ScalarConstPtr scalarValue(ScalarType type);
     StructureConstPtr scalarValue(ScalarType type,String properties);
     ScalarArrayConstPtr scalarArrayValue(ScalarType elementType);
@@ -1199,12 +1227,12 @@ extern StandardField * getStandardField();</pre>
       the section on Properties for a description of how these are defined.</dd>
 </dl>
 
-<h3 style="text-align: center" id="L1122">PVField - Data Interfaces</h3>
+<h3 style="text-align: center" id="L1134">PVField - Data Interfaces</h3>
 
 <p>This section defines the Java Interfaces for accessing the data within a PV
 record.</p>
 
-<h4 id="L1126">PVField</h4>
+<h4 id="L1138">PVField</h4>
 
 <p>PVField is the base interface for accessing data. A data structure consists
 of a top level PVStructure. Every field of every structure of every top level
@@ -1214,30 +1242,28 @@ public:
     virtual void postPut() = 0;
 };
 
-
 class PVField
-: public Requester,
-  public Serializable,
+: public Serializable,
   private NoDefaultMethods
 {
 public:
     virtual ~PVField();
+    virtual void message(String message,MessageType messageType) ;
     virtual void setRequester(Requester *prequester);
     int getFieldOffset() ;
     int getNextFieldOffset() ;
     int getNumberFields() ;
     PVAuxInfo * getPVAuxInfo();
     bool isImmutable() ;
-    void setImmutable();
+    virtual void setImmutable();
     FieldConstPtr getField() ;
     PVStructure * getParent() ;
     bool renameField(String  newName);
     void postPut() ;
     void setPostHandler(PostHandler *postHandler);
+    virtual bool equals(PVField &amp;pv);
     virtual void toString(StringBuilder buf) ;
     virtual void toString(StringBuilder buf,int indentLevel) ;
-    virtual bool operator==(PVField &amp;pv) = 0;
-    virtual bool operator!=(PVField &amp;pv) = 0;
 protected:
     PVField(PVStructure *parent,FieldConstPtr field);
     void setParent(PVStructure *parent);
@@ -1249,7 +1275,7 @@ be implemented by any code that calls setPostHandler. It's single virtual
 method. <span style="font-family: courier;">postPut</span> is called whenever
 <span style="font-family: courier;">PVField::postPut</span> is called.</p>
 
-<p><span style="font-family: courier;">Requester,Serializable, and
+<p><span style="font-family: courier;">Serializable, and
 NoDefaultMethods</span> are described in a later section.</p>
 
 <p>The public methods for <span style="font-family: courier;">PVField</span>
@@ -1259,6 +1285,9 @@ are:</p>
     <dd>destructor which must be called by whatever created the PVfield via a
       call to one of the methods of <span
       style="font-family: courier;">PVDataCreate</span> </dd>
+  <dt style="font-family: courier;">message</dt>
+    <dd>Code attached to this field can call this method to report
+    problems.</dd>
   <dt style="font-family: courier;">setRequester</dt>
     <dd>Sets a requester to be called when message or getRequesterName are
       called. This is only legal for the top level PVField. </dd>
@@ -1300,19 +1329,18 @@ are:</p>
   <dt style="font-family: courier;">setPostHandler</dt>
     <dd>Set the postHandler for the record. Only a single handler can be
       registered.</dd>
-  <dt style="font-family: courier;">toString</dt>
-    <dd>Converts the field data to a string. This is mostly for debugging
-      purposes.</dd>
-  <dt style="font-family: courier;">operator==</dt>
+  <dt style="font-family: courier;">equals</dt>
     <dd>Compare this field with another field. The result will be true only if
       the fields have exactly the same field types and if the data values are
       equal.</dd>
-  <dt style="font-family: courier;">operator!=</dt>
-    <dd>The inverse of <span style="font-family: courier;">operator==</span>
-    .</dd>
+</dl>
+<dl>
+  <dt style="font-family: courier;">toString</dt>
+    <dd>Converts the field data to a string. This is mostly for debugging
+      purposes.</dd>
 </dl>
 
-<h4 id="L1238">PVAuxInfo</h4>
+<h4 id="L1248">PVAuxInfo</h4>
 
 <p>AuxInfo (Auxillary Information) is information about a field that is
 application specific. It will not be available outside the application that
@@ -1349,7 +1377,7 @@ private:
     <dd>Print all the auxInfos</dd>
 </dl>
 
-<h4 id="L1272">PVScalar and extensions</h4>
+<h4 id="L1282">PVScalar and extensions</h4>
 <pre>class PVScalar : public PVField {
 public:
     virtual ~PVScalar();
@@ -1358,96 +1386,46 @@ protected:
     PVScalar(PVStructure *parent,ScalarConstPtr scalar);
 };</pre>
 
-<h5 id="L1276">Primitive PVField types</h5>
+<h5 id="L1286">Primitive PVField types</h5>
 
 <p>The interfaces for primitive data types are:</p>
-<pre>class PVBoolean : public PVScalar {
+<pre>template&lt;typename T&gt;
+class PVScalarValue : public PVScalar {
 public:
-    virtual ~PVBoolean();
-    virtual bool get() = 0;
-    virtual void put(bool value) = 0;
+    typedef std::tr1::shared_ptr&lt;PVScalarValue&gt; shared_pointer;
+    typedef std::tr1::shared_ptr&lt;const PVScalarValue&gt; const_shared_pointer;
+
+    typedef T value_type;
+    typedef T* pointer;
+    typedef const T* const_pointer;
+
+    virtual ~PVScalarValue() {}
+    virtual T get() = 0;
+    virtual void put(T value) = 0;
 protected:
-    PVBoolean(PVStructure *parent,ScalarConstPtr scalar)
+    PVScalarValue(PVStructure *parent,ScalarConstPtr scalar)
     : PVScalar(parent,scalar) {}
 private:
 };
 
-class PVByte : public PVScalar {
-public:
-    virtual ~PVByte();
-    virtual int8 get() = 0;
-    virtual void put(int8 value) = 0;
-protected:
-    PVByte(PVStructure *parent,ScalarConstPtr scalar)
-    : PVScalar(parent,scalar) {}
-private:
-};
+typedef PVScalarValue&lt;bool&gt; PVBoolean;
+typedef PVScalarValue&lt;int8&gt; PVByte;
+typedef PVScalarValue&lt;int16&gt; PVShort;
+typedef PVScalarValue&lt;int32&gt; PVInt;
+typedef PVScalarValue&lt;int64&gt; PVLong;
+typedef PVScalarValue&lt;float&gt; PVFloat;
+typedef PVScalarValue&lt;double&gt; PVDouble;
 
-class PVShort : public PVScalar {
+// PVString is special case, since it implements SerializableArray
+class PVString : public PVScalarValue&lt;String&gt;, SerializableArray {
 public:
-    virtual ~PVShort();
-    virtual int16 get() = 0;
-    virtual void put(int16 value) = 0;
-protected:
-    PVShort(PVStructure *parent,ScalarConstPtr scalar)
-    : PVScalar(parent,scalar) {}
-private:
-};
-class PVInt : public PVScalar{
-public:
-    virtual ~PVInt();
-    virtual int32 get() = 0;
-    virtual void put(int32 value) = 0;
-protected:
-    PVInt(PVStructure *parent,ScalarConstPtr scalar)
-    : PVScalar(parent,scalar) {}
-private:
-};
-
-class PVLong : public PVScalar {
-public:
-    virtual ~PVLong();
-    virtual int64 get() = 0;
-    virtual void put(int64 value) = 0;
-protected:
-    PVLong(PVStructure *parent,ScalarConstPtr scalar)
-    : PVScalar(parent,scalar) {}
-private:
-};
-
-class PVFloat : public PVScalar {
-public:
-    virtual ~PVFloat();
-    virtual float get() = 0;
-    virtual void put(float value) = 0;
-protected:
-    PVFloat(PVStructure *parent,ScalarConstPtr scalar)
-    : PVScalar(parent,scalar) {}
-private:
-};
-class PVDouble : public PVScalar {
-public:
-    virtual ~PVDouble();
-    virtual double get() = 0;
-    virtual void put(double value) = 0;
-protected:
-    PVDouble(PVStructure *parent,ScalarConstPtr scalar)
-    : PVScalar(parent,scalar) {}
-private:
-};
-
-class PVString : public PVScalar {
-public:
-    virtual ~PVString();
-    virtual String get() = 0;
-    virtual void put(String value) = 0;
+    virtual ~PVString() {}
 protected:
     PVString(PVStructure *parent,ScalarConstPtr scalar)
-    : PVScalar(parent,scalar) {}
-private:
+    : PVScalarValue&lt;String&gt;(parent,scalar) {}
 };</pre>
 
-<h4 id="L1282">PVArray and Extensions</h4>
+<h4 id="L1292">PVArray and Extensions</h4>
 
 <p><span style="font-family: courier">PVArray</span> is the base interface for
 all the other PV Array interfaces. It extends PVField and provides the
@@ -1461,17 +1439,9 @@ public:
     bool isCapacityMutable() ;
     void setCapacityMutable(bool isMutable);
     virtual void setCapacity(int capacity) = 0;
-    virtual void serialize(ByteBuffer *pbuffer,
-        SerializableControl *pflusher) = 0;
-    virtual void deserialize(ByteBuffer *pbuffer,
-        DeserializableControl *pflusher) = 0;
-    virtual void serialize(ByteBuffer *pbuffer,
-        SerializableControl *pflusher, int offset, int count) = 0;
 protected:
     PVArray(PVStructure *parent,FieldConstPtr field);
     void setCapacityLength(int capacity,int length);
-private:
-    class PVArrayPvt * pImpl;
 };</pre>
 <dl>
   <dt style="font-family: courier;">getLength</dt>
@@ -1493,31 +1463,81 @@ private:
     <dd>Specify if the capacity can be changed.</dd>
 </dl>
 
-<h5 id="L1321">PVArray Extensions</h5>
+<h5 id="L1331">PVArray Extensions</h5>
 
 <p>The interface for each array type has get and put methods which have the
 same arguments except for the data type. For example PVDoubleArray is:</p>
-<pre>class DoubleArrayData {
+<pre>template&lt;typename T&gt;
+class PVArrayData {
 public:
-    DoubleArrayData(){}
-    ~DoubleArrayData(){};
-    DoubleArray data;
+    typedef std::tr1::shared_ptr&lt;PVArrayData&gt; shared_pointer;
+    typedef std::tr1::shared_ptr&lt;const PVArrayData&gt; const_shared_pointer;
+
+    typedef T  value_type;
+    typedef T* pointer;
+    typedef const T* const_pointer;
+
+    pointer data;
     int offset;
 };
 
-class PVDoubleArray : public PVScalarArray {
+
+class PVScalarArray : public PVArray {
 public:
-    virtual ~PVDoubleArray();
-    virtual void setCapacity(int capacity) = 0;
-    virtual int get(int offset, int length, DoubleArrayData *data) = 0;
-    virtual int put(int offset,int length, DoubleArray  from, int fromOffset) = 0;
-    virtual void shareData(DoubleArray value,int capacity,int length) = 0;
-    virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) = 0;
-    virtual void deserialize(ByteBuffer *pbuffer,DeserializableControl *pflusher) = 0;
+    typedef std::tr1::shared_ptr&lt;PVScalarArray&gt; shared_pointer;
+    typedef std::tr1::shared_ptr&lt;const PVScalarArray&gt; const_shared_pointer;
+
+    virtual ~PVScalarArray();
+    ScalarArrayConstPtr getScalarArray() ;
+
 protected:
-    PVDoubleArray(PVStructure *parent,ScalarArrayConstPtr scalar);
+    PVScalarArray(PVStructure *parent,ScalarArrayConstPtr scalarArray);
 private:
-};</pre>
+};
+template&lt;typename T&gt;
+class PVValueArray : public PVScalarArray {
+public:
+    typedef std::tr1::shared_ptr&lt;PVValueArray&gt; shared_pointer;
+    typedef std::tr1::shared_ptr&lt;const PVValueArray&gt; const_shared_pointer;
+
+    typedef T  value_type;
+    typedef T* pointer;
+    typedef const T* const_pointer;
+    typedef PVArrayData&lt;T&gt; ArrayDataType;
+
+    virtual ~PVValueArray() {}
+    virtual int get(int offset, int length, ArrayDataType *data) = 0;
+    virtual int put(int offset,int length, pointer from, int fromOffset) = 0;
+    virtual void shareData(pointer value,int capacity,int length) = 0;
+protected:
+    PVValueArray(PVStructure *parent,ScalarArrayConstPtr scalar)
+    : PVScalarArray(parent,scalar) {}
+private:
+};
+typedef PVArrayData&lt;bool&gt; BooleanArrayData;
+typedef PVValueArray&lt;bool&gt; PVBooleanArray;
+
+typedef PVArrayData&lt;int8&gt; ByteArrayData;
+typedef PVValueArray&lt;int8&gt; PVByteArray;
+
+typedef PVArrayData&lt;int16&gt; ShortArrayData;
+typedef PVValueArray&lt;int16&gt; PVShortArray;
+
+typedef PVArrayData&lt;int32&gt; IntArrayData;
+typedef PVValueArray&lt;int32&gt; PVIntArray;
+
+typedef PVArrayData&lt;int64&gt; LongArrayData;
+typedef PVValueArray&lt;int64&gt; PVLongArray;
+
+
+typedef PVArrayData&lt;float&gt; FloatArrayData;
+typedef PVValueArray&lt;float&gt; PVFloatArray;
+
+typedef PVArrayData&lt;double&gt; DoubleArrayData;
+typedef PVValueArray&lt;double&gt; PVDoubleArray;
+
+typedef PVArrayData&lt;String&gt; StringArrayData;
+typedef PVValueArray&lt;String&gt; PVStringArray;</pre>
 
 <p>Get "exposes" it's internal array by setting data.data and data.offset. The
 caller is responsible for copying the array elements. This violates the
@@ -1580,189 +1600,13 @@ that directly access the internal data array of a PVArray. This can be required
 for minimizing CPU overhead. In this case it is the applications responsibility
 to coordinate access to the array.</p>
 
-<h5 id="L1365">Complete set of PVArray Extensions</h5>
-<pre>class PVScalarArray : public PVArray {
-public:
-    virtual ~PVScalarArray();
-    ScalarArrayConstPtr getScalarArray() ;
-    virtual void setCapacity(int capacity) = 0;
-    virtual void serialize(ByteBuffer *pbuffer,
-        SerializableControl *pflusher) = 0;
-    virtual void deserialize(ByteBuffer *pbuffer,
-        DeserializableControl *pflusher) = 0;
-    virtual void serialize(ByteBuffer *pbuffer,
-        SerializableControl *pflusher, int offset, int count) = 0;
-protected:
-    PVScalarrray(PVStructure *parent,ScalarArrayConstPtr scalarArray);
-private:
-};
-
-class BooleanArrayData {
-public:
-    BooleanArray data;
-    int offset;
-};
-
-class PVBooleanArray : public PVScalarArray {
-public:
-    virtual ~PVBooleanArray();
-    virtual void setCapacity(int capacity) = 0;
-    virtual int get(int offset, int length, BooleanArrayData *data) = 0;
-    virtual int put(int offset,int length, BooleanArray from, int fromOffset) = 0;
-    virtual void shareData(BooleanArray value,int capacity,int length) = 0;
-    virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) = 0;
-    virtual void deserialize(ByteBuffer *pbuffer,DeserializableControl *pflusher) = 0;
-protected:
-    PVBooleanArrayclass ByteArrayData {
-public:
-    ByteArray data;
-    int offset;
-};
-
-class PVByteArray : public PVScalarArray {
-public:
-    virtual ~PVByteArray();
-    virtual void setCapacity(int capacity) = 0;
-    virtual int get(int offset, int length, ByteArrayData *data) = 0;
-    virtual int put(int offset,int length, ByteArray  from, int fromOffset) = 0;
-    virtual void shareData(ByteArray value,int capacity,int length) = 0;
-    virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) = 0;
-    virtual void deserialize(ByteBuffer *pbuffer,DeserializableControl *pflusher) = 0;
-protected:
-    PVByteArray(PVStructure *parent,ScalarArrayConstPtr scalar);
-private:
-};
-
-class ShortArrayData {
-public:
-    ShortArray data;
-    int offset;
-};
-
-class PVShortArray : public PVScalarArray {
-public:
-    virtual ~PVShortArray();
-    virtual void setCapacity(int capacity) = 0;
-    virtual int get(int offset, int length, ShortArrayData *data) = 0;
-    virtual int put(int offset,int length, ShortArray  from, int fromOffset) = 0;
-    virtual void shareData(ShortArray value,int capacity,int length) = 0;
-    virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) = 0;
-    virtual void deserialize(ByteBuffer *pbuffer,DeserializableControl *pflusher) = 0;
-protected:
-    PVShortArray(PVStructure *parent,ScalarArrayConstPtr scalar);
-private:
-};
-
-
-class IntArrayData {
-public:
-    IntArray data;
-    int offset;
-};
-
-class PVIntArray : public PVScalarArray {
-public:
-    virtual ~PVIntArray();
-    virtual void setCapacity(int capacity) = 0;
-    virtual int get(int offset, int length, IntArrayData *data) = 0;
-    virtual int put(int offset,int length, IntArray  from, int fromOffset)= 0;
-    virtual void shareData(IntArray value,int capacity,int length)= 0;
-    virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) = 0;
-    virtual void deserialize(ByteBuffer *pbuffer,DeserializableControl *pflusher)= 0;
-protected:
-    PVIntArray(PVStructure *parent,ScalarArrayConstPtr scalar);
-private:
-};
-
-class LongArrayData {
-public:
-    LongArray data;
-    int offset;
-};
-
-class PVLongArray : public PVScalarArray {
-public:
-    virtual ~PVLongArray();
-    virtual void setCapacity(int capacity) = 0;
-    virtual int get(int offset, int length, LongArrayData *data) = 0;
-    virtual int put(int offset,int length, LongArray  from, int fromOffset)= 0;
-    virtual void shareData(LongArray value,int capacity,int length)= 0;
-    virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) = 0;
-    virtual void deserialize(ByteBuffer *pbuffer,DeserializableControl *pflusher)= 0;
-protected:
-    PVLongArray(PVStructure *parent,ScalarArrayConstPtr scalar);
-private:
-};
-
-class FloatArrayData {
-public:
-    FloatArray data;
-    int offset;
-};
-
-class PVFloatArray : public PVScalarArray {
-public:
-    virtual ~PVFloatArray();
-    virtual void setCapacity(int capacity) = 0;
-    virtual int get(int offset, int length, FloatArrayData *data) = 0;
-    virtual int put(int offset,int length, FloatArray  from, int fromOffset)= 0;
-    virtual void shareData(FloatArray value,int capacity,int length)= 0;
-    virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) = 0;
-    virtual void deserialize(ByteBuffer *pbuffer,DeserializableControl *pflusher)= 0;
-protected:
-    PVFloatArray(PVStructure *parent,ScalarArrayConstPtr scalar);
-private:
-};
-
-
-class DoubleArrayData {
-public:
-    DoubleArrayData(){}
-    ~DoubleArrayData(){};
-    DoubleArray data;
-    int offset;
-};
-
-class PVDoubleArray : public PVScalarArray {
-public:
-    virtual ~PVDoubleArray();
-    virtual void setCapacity(int capacity) = 0;
-    virtual int get(int offset, int length, DoubleArrayData *data) = 0;
-    virtual int put(int offset,int length, DoubleArray  from, int fromOffset) = 0;
-    virtual void shareData(DoubleArray value,int capacity,int length) = 0;
-    virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) = 0;
-    virtual void deserialize(ByteBuffer *pbuffer,DeserializableControl *pflusher) = 0;
-protected:
-    PVDoubleArray(PVStructure *parent,ScalarArrayConstPtr scalar);
-private:
-};
-
-class StringArrayData {
-public:
-    StringArray data;
-    int offset;
-};
-
-class PVStringArray : public PVScalarArray {
-public:
-    virtual ~PVStringArray();
-    virtual void setCapacity(int capacity) = 0;
-    virtual int get(int offset, int length, StringArrayData *data) = 0;
-    virtual int put(int offset,int length, StringArray  from, int fromOffset)= 0;
-    virtual void shareData(StringArray value,int capacity,int length)= 0;
-    virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) = 0;
-    virtual void deserialize(ByteBuffer *pbuffer,DeserializableControl *pflusher)= 0;
-protected:
-    PVStringArray(PVStructure *parent,ScalarArrayConstPtr scalar);
-private:
-};</pre>
-
-<h4 id="L1369">PVStructure</h4>
+<h4 id="L1375">PVStructure</h4>
 
 <p>The interface for a structure is:</p>
 <pre>class PVStructure : public PVField,public BitSetSerializable {
 public:
-    virtual ~PVStructure();
+    
+};virtual ~PVStructure();
     StructureConstPtr getStructure();
     PVFieldPtrArray getPVFields();
     PVField *getSubField(String fieldName);
@@ -1785,23 +1629,19 @@ public:
     String getExtendsStructureName();
     bool putExtendsStructureName(
         String extendsStructureName);
-    virtual bool operator==(PVField &amp;pv) ;
-    virtual bool operator!=(PVField &amp;pv) ;
     virtual void serialize(
-        ByteBuffer *pbuffer,SerializableControl *pflusher) ;
+        ByteBuffer *pbuffer,SerializableControl *pflusher) const;
     virtual void deserialize(
         ByteBuffer *pbuffer,DeserializableControl *pflusher);
     virtual void serialize(ByteBuffer *pbuffer,
-        SerializableControl *pflusher, int offset, int count) ;
-    virtual void serialize(ByteBuffer *pbuffer,
-        SerializableControl *pflusher,BitSet *pbitSet) ;
+        SerializableControl *pflusher,BitSet *pbitSet) const;
     virtual void deserialize(ByteBuffer *pbuffer,
         DeserializableControl*pflusher,BitSet *pbitSet);
-protected:
     PVStructure(PVStructure *parent,StructureConstPtr structure);
-    PVStructure(PVStructure *parent,StructureConstPtr structure,PVFieldPtrArray pvFields);
-private:
-    class PVStructurePvt * pImpl;
+    PVStructure(
+        PVStructure *parent,
+        StructureConstPtr structure,
+        PVFieldPtrArray pvFields);
 };</pre>
 
 <p>where</p>
@@ -1871,7 +1711,7 @@ private:
     <dd>Specify the structure that this structure extends.</dd>
 </dl>
 
-<h4 id="L1473">PVStructureArray</h4>
+<h4 id="L1479">PVStructureArray</h4>
 
 <p>The interface for an array of structures is:</p>
 <pre>class StructureArrayData {
@@ -1882,9 +1722,8 @@ public:
 
 class PVStructureArray : public PVArray {
 public:
-    virtual ~PVStructureArray();
+    virtual ~PVStructureArray() {}
     virtual StructureArrayConstPtr getStructureArray() = 0;
-    virtual void setCapacity(int capacity) = 0;
     virtual int append(int number) = 0;
     virtual bool remove(int offset,int number) = 0;
     virtual void compress() = 0;
@@ -1893,16 +1732,9 @@ public:
     virtual int put(int offset,int length,
         PVStructurePtrArray from, int fromOffset) = 0;
     virtual void shareData( PVStructurePtrArray value,int capacity,int length) = 0;
-    virtual void serialize(ByteBuffer *pbuffer,
-        SerializableControl *pflusher) = 0 ;
-    virtual void deserialize(ByteBuffer *buffer,
-        DeserializableControl *pflusher) = 0;
-    virtual void serialize(ByteBuffer *pbuffer,
-        SerializableControl *pflusher, int offset, int count) = 0;
 protected:
     PVStructureArray(PVStructure *parent,
         StructureArrayConstPtr structureArray);
-private:
 };</pre>
 
 <p>where</p>
@@ -1924,25 +1756,6 @@ private:
 </dl>
 
 <p>The other methods are similar to the methods for other array types.</p>
-
-<p>Important Note: Code that calls put must be aware of the fact that
-introsection interfaces are shared. When creating array elements the shared
-introspection interface must be used. The following shows an example:</p>
-<pre>void put(PVStructure* powerSupplyArrayStruct)
-{
-    PVStructurePtrArray structureArray = new PVStructurePtr[3];
-    StructureConstPtr structure =
-        powerSupplyArray-&gt;getStructureArray()-&gt;getStructure();
-    structure-&gt;incReferenceCount();
-    structureArray[0] = pvDataCreate-&gt;createPVStructure(0,structure);
-    structure-&gt;incReferenceCount();
-    structureArray[1] = pvDataCreate-&gt;createPVStructure(0,structure);
-    structure-&gt;incReferenceCount();
-    structureArray[2] = pvDataCreate-&gt;createPVStructure(0,structure);
-    powerSupplyArray-&gt;put(0,3,structureArray,0);
-}</pre>
-
-<p>Note that incReferenceCount is called before each element is created.</p>
 
 <h4 id="L1510">PVDataCreate</h4>
 
@@ -1972,7 +1785,7 @@ public:
    PVStructure *createPVStructure(PVStructure *parent,
        String fieldName,int numberFields,FieldConstPtrArray fields);
    PVStructure *createPVStructure(PVStructure *parent,
-          String fieldName,int numberFields,PVFieldPtrArray pvFields);
+       String fieldName,int numberFields,PVFieldPtrArray pvFields);
    PVStructure *createPVStructure(PVStructure *parent,
        String fieldName,PVStructure *structToClone);
 protected:
@@ -2054,9 +1867,9 @@ public:
     PVStructure* structureArray(PVStructure *parent,
         String fieldName,StructureConstPtr structure,String properties);
     PVStructure * enumerated(PVStructure *parent,
-        String fieldName,StringArray choices);
+        String fieldName,StringArray choices, int number);
     PVStructure * enumerated(PVStructure *parent,
-        String fieldName,StringArray choices, String properties);
+        String fieldName,StringArray choices, int number, String properties);
     PVScalar * scalarValue(PVStructure *parent,ScalarType type);
     PVStructure * scalarValue(PVStructure *parent,
         ScalarType type,String properties);
@@ -2118,12 +1931,34 @@ Thus the source and target share the same primitive array.</p>
   <li>Conversion between compatible structures.</li>
   <li>A utility method the returns the full field name of a field</li>
 </ul>
-<pre>class Convert : NoDefaultMethods {
+<pre>bool operator==(PVField&amp;, PVField&amp;);
+
+static inline bool operator!=(PVField&amp; a, PVField&amp; b)
+{return !(a==b);}
+
+bool operator==(const Field&amp;, const Field&amp;);
+bool operator==(const Scalar&amp;, const Scalar&amp;);
+bool operator==(const ScalarArray&amp;, const ScalarArray&amp;);
+bool operator==(const Structure&amp;, const Structure&amp;);
+bool operator==(const StructureArray&amp;, const StructureArray&amp;);
+
+static inline bool operator!=(const Field&amp; a, const Field&amp; b)
+{return !(a==b);}
+static inline bool operator!=(const Scalar&amp; a, const Scalar&amp; b)
+{return !(a==b);}
+static inline bool operator!=(const ScalarArray&amp; a, const ScalarArray&amp; b)
+{return !(a==b);}
+static inline bool operator!=(const Structure&amp; a, const Structure&amp; b)
+{return !(a==b);}
+static inline bool operator!=(const StructureArray&amp; a, const StructureArray&amp; b)
+{return !(a==b);}
+
+class Convert : NoDefaultMethods {
 public:
     Convert();
     ~Convert();
     void getFullName(StringBuilder buf,PVField *pvField);
-    bool equals(PVField *a,PVField *b);
+    bool equals(PVField &amp;a,PVField &amp;b);
     void getString(StringBuilder buf,PVField * pvField,int indentLevel);
     void getString(StringBuilder buf,PVField *pvField);
     void fromString(PVScalar *pv, String from);
@@ -2156,11 +1991,11 @@ public:
     double toDouble(PVScalar *pv);
     String toString(PVScalar *pv);
     void fromByte(PVScalar *pv,int8 from);
-    void  fromShort(PVScalar *pv,int16 from);
-    void  fromInt(PVScalar *pv, int32 from);
-    void  fromLong(PVScalar *pv, int64 from);
-    void  fromFloat(PVScalar* pv, float from);
-    void  fromDouble(PVScalar *pv, double from);
+    void fromShort(PVScalar *pv,int16 from);
+    void fromInt(PVScalar *pv, int32 from);
+    void fromLong(PVScalar *pv, int64 from);
+    void fromFloat(PVScalar* pv, float from);
+    void fromDouble(PVScalar *pv, double from);
     int toByteArray(PVScalarArray *pv, int offset, int length,
         ByteArray to, int toOffset);
     int toShortArray(PVScalarArray *pv, int offset, int length,
@@ -2185,7 +2020,7 @@ public:
         FloatArray from, int fromOffset);
     int fromDoubleArray(PVScalarArray *pv, int offset, int length,
         DoubleArray from, int fromOffset);
-    void newLine(StringBuilder buf, int indentLevel);
+    void newLine(StringBuilder buf, int indentLevel);    
 };
 
 extern Convert * getConvert();</pre>
@@ -2199,8 +2034,7 @@ for code that implements <span style="font-family: courier;">toString</span> It
 generates a newline and inserts blanks at the beginning of the newline.</p>
 <hr />
 
-<h2 style="text-align: center" id="L1620">Namespace, Typedefs, and Memory
-Management</h2>
+<h2 style="text-align: center" id="L1620">Namespace and Memory Management</h2>
 <hr />
 
 <h3 style="text-align: center" id="L1624">Namespace</h3>
@@ -2210,61 +2044,9 @@ Management</h2>
      // ...
 }}</pre>
 
-<h3 style="text-align: center" id="L1630">typedefs</h3>
+<h3 style="text-align: center" id="L1675">Memory Managemment</h3>
 
-<p>As described above pvType.h provides C++ typdefs for the pvData primitive
-types.</p>
-
-<p>File pvInterspect.h, which is described in the next section has the
-typedefs: </p>
-<pre>typedef Field const * FieldConstPtr;
-typedef FieldConstPtr * FieldConstPtrArray;
-typedef Scalar const * ScalarConstPtr;
-typedef ScalarArray const * ScalarArrayConstPtr;
-typedef Structure const * StructureConstPtr;
-typedef StructureArray const * StructureArrayConstPtr;</pre>
-
-<p>These are definitions for introspection objects. All introspecton objects
-are immutable and always accessed via pointers.</p>
-
-<p>File pvData.h has the typedefs: </p>
-<pre>typedef std::map&lt;String,PVScalar * &gt; PVScalarMap;
-typedef PVScalarMap::const_iterator PVScalarMapIter;
-typedef PVStructure * PVStructurePtr;
-typedef PVStructurePtr* PVStructurePtrArray;
-typedef PVField* PVFieldPtr;
-typedef PVFieldPtr * PVFieldPtrArray;
-typedef bool * BooleanArray;
-typedef int8 * ByteArray;
-typedef int16 * ShortArray;
-typedef int32 * IntArray;
-typedef int64 * LongArray;
-typedef float * FloatArray;
-typedef double * DoubleArray;
-typedef String * StringArray;</pre>
-
-<p>where</p>
-<dl>
-  <dt style="font-family: courier;">PVScalarMap and PVScalarMapIter</dt>
-    <dd>A map and iterator that maps field names to PVScalars.</dd>
-  <dt style="font-family: courier;">PVStructurePtr</dt>
-    <dd>A pointer to a PVStructure.</dd>
-  <dt style="font-family: courier;">PVStructurePtrArray</dt>
-    <dd>A pointer to PVStructurePtr[], e. g. an array of pointers to a
-      PVStructure.</dd>
-  <dt style="font-family: courier;">PVFieldPtr</dt>
-    <dd>A pointer to a PVField</dd>
-  <dt style="font-family: courier;">PVFieldPtrArray</dt>
-    <dd>A pointer to a PVFieldPtr[], e. g. an array of pointers to a
-    PVField.</dd>
-  <dt style="font-family: courier;">BooleanArray, ByteArray, ...,
-  StringArray</dt>
-    <dd>An array of the specified type NOT a pointer to the type.</dd>
-</dl>
-
-<h3 style="text-align: center" id="L1677">Memory Managemment</h3>
-
-<h4 id="L1679">NoDefaultMethods</h4>
+<h4 id="L1677">NoDefaultMethods</h4>
 
 <p>Any class that does not want the compiler to generate default methods can
 privately extend the following class which is defined in file
@@ -2280,27 +2062,12 @@ private:
     NoDefaultMethods &amp; operator=(const NoDefaultMethods &amp;);
 };</pre>
 
-<h3 id="L1685">PVData introspection objects</h3>
+<h3 id="L1683">PVData introspection objects</h3>
 
-<p>Introspection objects are meant to be shared. The constructors and
-destructors are all private or protected so that an introspection object can
-only be created via a call to one of the FieldCreate methods described abofe.
-The introspection implementation, together with PVField keeps reference counts
-and automatically deletes objects when the reference count goes to 0. Code that
-uses introspection objects always accesses introspection objects via pointers
-never via references or direct access to the object. When an introspection
-interface is created via one of the methods of class FieldCreate the reference
-count is set to 1. When any code wants to get an introspection interface from
-an existing data object and use it for another data object, i.e. share the
-interface, then incReferenceCount MUST be called.</p>
+<p>Introspection objects are meant to be shared. They are all made available
+via std::tri::shared_pointer.</p>
 
-<p>The introspection destructors are all private. When code, normally ~PVField,
-is done using an intrispection interface it calls decReferenceCount. If the
-field is a structure then it is a recursive call. When the reference count for
-a field becomes 0 the field is deleted. Note than user code should never call
-decReferenceCount since the destructor for PVField calls it.</p>
-
-<h3 id="L1691">PVData data objects</h3>
+<h3 id="L1689">PVData data objects</h3>
 
 <p>All PVData data objects must publically extend PVField, which does not allow
 default methods but does have a virtual destructor. It is expected that each
@@ -2313,7 +2080,7 @@ After deletion all pointers to data in the record are invalid. Similarly
 pvAccess creates and destroys PVData objects and notifies clients before
 destroying PVData data objects.</p>
 
-<h3 id="L1695">Other code in this project</h3>
+<h3 id="L1693">Other code in this project</h3>
 
 <p>The classes in property, i.e. alarm, timeStamp, display, and control are all
 meant to be free copied and shared. They can be created on the stack. In most
@@ -2324,10 +2091,10 @@ be extended. Thus they can only be created via "new" and must be destroyed via
 "delete".</p>
 <hr />
 
-<h2 style="text-align: center" id="L1703">Examples</h2>
+<h2 style="text-align: center" id="L1701">Examples</h2>
 <hr />
 
-<h3 id="L1707">Accessing PVData</h3>
+<h3 id="L1705">Accessing PVData</h3>
 
 <p>Assume that code wants to print two fields from a PVStructure:</p>
 <dl>
@@ -2355,7 +2122,7 @@ be extended. Thus they can only be created via "new" and must be destroyed via
    timeStampPV-&gt;toString(buf);
 }</pre>
 
-<h3 id="L1726">Creating PVData</h3>
+<h3 id="L1724">Creating PVData</h3>
 
 <p>Example of creating a scalar field.</p>
 <pre>    PVDataCreate *pvDataCreate = getPVDataCreate();
@@ -2385,10 +2152,10 @@ and a timeStamp and alarm. Do it the easy way.</p>
         String("timeStamp,alarm"))</pre>
 <hr />
 
-<h2 style="text-align: center" id="L1746">Property</h2>
+<h2 style="text-align: center" id="L1744">Property</h2>
 <hr />
 
-<h3 style="text-align: center" id="L1750">Definition of Property</h3>
+<h3 style="text-align: center" id="L1748">Definition of Property</h3>
 
 <p>Only fields named "value" have properties. A record can have multiple value
 fields, which can appear in the top level structure of a record or in a
@@ -2428,7 +2195,7 @@ structure powerSupplySimple
     powerSupplyValueStructure power
     powerSupplyValueStructure current</pre>
 
-<h3 style="text-align: center" id="L1762">Standard Properties</h3>
+<h3 style="text-align: center" id="L1760">Standard Properties</h3>
 
 <p>The following field names have special meaning, i.e. support properties for
 general purpose clients.</p>
@@ -2496,7 +2263,7 @@ examples are:</p>
 that support the PVData data model. For example a powerSupport record can have
 fields power, voltage, current that each support the PVData data model. </p>
 
-<h3 style="text-align: center" id="L1843">Overview of Property Support</h3>
+<h3 style="text-align: center" id="L1841">Overview of Property Support</h3>
 
 <p>Except for enumerated, each property has two files: a property.h and a
 pvProperty.h . For example: <span style="text-align: center">timeStamp.h</span>
@@ -2525,7 +2292,7 @@ stack. For example the following is permitted:</p>
      ...
 }</pre>
 
-<h3 style="text-align: center" id="L1863">timeStamp</h3>
+<h3 style="text-align: center" id="L1861">timeStamp</h3>
 
 <p>A timeStamp is represented by the following structure</p>
 <pre>structure timeStamp
@@ -2551,7 +2318,7 @@ that can be attached to a time stamp pvData structure. It provides get and set
 methods to get/set a TimeStamp as defined by <span
 style="font-family: courier;">timeStamp.h</span></p>
 
-<h4 id="L1887">timeStamp.h</h4>
+<h4 id="L1885">timeStamp.h</h4>
 
 <p>This provides </p>
 <pre>extern int32 milliSecPerSec;
@@ -2653,7 +2420,7 @@ execute. This is done as follows:</p>
     endTime.getCurrent();
     double time = TimeStamp::diff(endTime,startTime);</pre>
 
-<h4 id="L1991">pvTimeStamp.h</h4>
+<h4 id="L1989">pvTimeStamp.h</h4>
 <pre>class PVTimeStamp {
 public:
     PVTimeStamp();
@@ -2692,7 +2459,7 @@ public:
       thrown if not attached to a pvData structure. </dd>
 </dl>
 
-<h3 style="text-align: center" id="L2031">alarm</h3>
+<h3 style="text-align: center" id="L2029">alarm</h3>
 
 <p>An alarm structure is defined as follows:</p>
 <pre>structure alarm
@@ -2714,7 +2481,7 @@ style="font-family: courier;">pvAlarm.h</span> is a class that can be attached
 to a time stamp pvData structure. It provides get and set methods to get/set a
 Alarm as defined by <span style="font-family: courier;">alarm.h</span></p>
 
-<h4 id="L2058">alarm.h</h4>
+<h4 id="L2056">alarm.h</h4>
 <pre>enum AlarmSeverity {
  noAlarm,minorAlarm,majorAlarm,invalidAlarm
 };
@@ -2760,7 +2527,7 @@ public:
     <dd>Set the severity.</dd>
 </dl>
 
-<h4 id="L2105">pvAlarm.h</h4>
+<h4 id="L2103">pvAlarm.h</h4>
 <pre>class PVAlarm {
 public:
     PVAlarm() : pvSeverity(0),pvMessage(0) {}
@@ -2800,7 +2567,7 @@ public:
       if not attached to a pvData structure. </dd>
 </dl>
 
-<h3 style="text-align: center" id="L2145">control</h3>
+<h3 style="text-align: center" id="L2143">control</h3>
 
 <p>Control information is represented by the following structure</p>
 <pre>structure control
@@ -2818,7 +2585,7 @@ attached to a time stamp pvData structure. It provides get and set methods to
 get/set a Control as defined by <span
 style="font-family: courier;">control.h</span></p>
 
-<h4 id="L2167">control.h</h4>
+<h4 id="L2165">control.h</h4>
 <pre>class Control {
 public:
     Control();
@@ -2843,7 +2610,7 @@ public:
     <dd>Set the high limit.</dd>
 </dl>
 
-<h4 id="L2199">pvControl.h</h4>
+<h4 id="L2197">pvControl.h</h4>
 <pre>class PVControl {
 public:
     PVControl();
@@ -2883,7 +2650,7 @@ public:
       thrown if not attached to a pvData structure. </dd>
 </dl>
 
-<h3 style="text-align: center" id="L2239">display</h3>
+<h3 style="text-align: center" id="L2237">display</h3>
 
 <p>Display information is represented by the following structure</p>
 <pre>structure display
@@ -2904,7 +2671,7 @@ class that can be attached to a display pvData structure. It provides get and
 set methods to get/set a Diaplay as defined by <span
 style="font-family: courier;">diaplay.h</span></p>
 
-<h4 id="L2261">display.h</h4>
+<h4 id="L2259">display.h</h4>
 <pre>class Display {
 public:
     Display();
@@ -2947,7 +2714,7 @@ public:
     <dd>Set the units.</dd>
 </dl>
 
-<h4 id="L2323">pvDisplay.h</h4>
+<h4 id="L2321">pvDisplay.h</h4>
 <pre>class PVDisplay {
 public:
     PVDisplay()
@@ -2987,7 +2754,7 @@ public:
       thrown if not attached to a pvData structure. </dd>
 </dl>
 
-<h3 style="text-align: center" id="L2363">pvEnumerated</h3>
+<h3 style="text-align: center" id="L2361">pvEnumerated</h3>
 
 <p>An enumerated structure is a structure that has fields:</p>
 <pre>structure
@@ -3054,7 +2821,7 @@ public:
 </dl>
 <hr />
 
-<h2 style="text-align: center" id="L2439">PVData Factories</h2>
+<h2 style="text-align: center" id="L2437">PVData Factories</h2>
 <hr />
 
 <p>Directory factory has code that implements everything described by the files
@@ -3074,25 +2841,13 @@ PVDataCreate and implements getPVDataCreate.</p>
 <p>Convert.cpp automatically creates a single instance of Convert and
 implements getConvert.</p>
 
-<p>The following are included by PVDataCreateFactory and implement the
-corresponding class described in pvData.h:</p>
-<dl>
-  <dt>PVField.cpp</dt>
-  <dt>PVScalar.cpp</dt>
-  <dt>PVArray.cpp</dt>
-  <dt>PVScalarArray.cpp</dt>
-  <dt>PVStructure.cpp</dt>
-</dl>
-
-<p>There is a large set of files named "DefaultXXX.cpp" that implement each of
-the other classes described in pvData.cpp. Each is included and used by
-PVDataCreate.</p>
+<p>Other files implement PVData base classes</p>
 <hr />
 
-<h2 style="text-align: center" id="L2472">Miscellanous Classes</h2>
+<h2 style="text-align: center" id="L2470">Miscellanous Classes</h2>
 <hr />
 
-<h3 style="text-align: center" id="L2476">Overview</h3>
+<h3 style="text-align: center" id="L2474">Overview</h3>
 
 <p>This package provides utility code:</p>
 <dl>
@@ -3140,7 +2895,7 @@ PVDataCreate.</p>
 <p>Note that directory testApp/misc has test code for all the classes in misc.
 The test code also can be used as examples.</p>
 
-<h3 style="text-align: center;" id="L2568">BitSet</h3>
+<h3 style="text-align: center;" id="L2566">BitSet</h3>
 
 <p>This is adapted from the java.util.BitSet. bitSet.h is:</p>
 <pre>class BitSet /*: public Serializable*/ {
@@ -3234,7 +2989,7 @@ private:
     <dd>Show the current values of the bitSet.</dd>
 </dl>
 
-<h3 style="text-align: center;" id="L2692">ByteBuffer</h3>
+<h3 style="text-align: center;" id="L2690">ByteBuffer</h3>
 
 <p>A ByteBuffer is used to serialize and deserialize primitive data. File
 byteBuffer.h is:</p>
@@ -3274,7 +3029,7 @@ private:
 
 <p>x</p>
 
-<h3 style="text-align: center;" id="L2700">Event</h3>
+<h3 style="text-align: center;" id="L2698">Event</h3>
 
 <p>This class provides coordinates activity between threads. One thread can
 wait for the event and the other signals the event.</p>
@@ -3306,7 +3061,7 @@ private:
     <dd>returns (false,true) if the event is (empty,full)</dd>
 </dl>
 
-<h3 style="text-align: center;" id="L2729">Exception</h3>
+<h3 style="text-align: center;" id="L2727">Exception</h3>
 
 <p>File epicsException.h describes:</p>
 <pre>class BaseException : public std::exception {
@@ -3324,7 +3079,7 @@ private:
 
 <p>x</p>
 
-<h3 style="text-align: center;" id="L2737">Executor</h3>
+<h3 style="text-align: center;" id="L2735">Executor</h3>
 
 <p>An Executor is a thread that can execute commands. The user can request that
 a single command be executed.</p>
@@ -3363,7 +3118,7 @@ execute.</p>
       nothing is done.</dd>
 </dl>
 
-<h3 style="text-align: center;" id="L2768">Linked List</h3>
+<h3 style="text-align: center;" id="L2766">Linked List</h3>
 
 <p>LinkedList implements a double linked list that requires a user to allocate
 the nodes. It is more efficent that std::list. linkedList.h is a template that
@@ -3465,7 +3220,7 @@ public:
     <dd>Does the list contain the specified object?</dd>
 </dl>
 
-<h3 style="text-align: center;" id="L2882">Lock and Mutex</h3>
+<h3 style="text-align: center;" id="L2880">Lock and Mutex</h3>
 
 <p>lock.h is:</p>
 <pre>class Mutex  {
@@ -3514,9 +3269,9 @@ once. This can be implemented as follows:</p>
         // initialization
     }</pre>
 
-<h3 style="text-align: center;" id="L2898">Message Queue</h3>
+<h3 style="text-align: center;" id="L2896">Message Queue</h3>
 
-<h4 id="L2900">Definitions</h4>
+<h4 id="L2898">Definitions</h4>
 <pre>class MessageNode {
 public:
     String getMessage() const;
@@ -3538,7 +3293,7 @@ public:
     int getClearOverrun();
 };</pre>
 
-<h4 id="L2904">MessageQueue</h4>
+<h4 id="L2902">MessageQueue</h4>
 
 <p>This is for use by code that wants to handle messages without blocking
 higher priority threads.</p>
@@ -3550,7 +3305,7 @@ higher priority threads.</p>
   <dt style="font-family: courier;">getMessageType</dt>
     <dd>The message type.</dd>
   <dt style="font-family: courier;">setMessageNull</dt>
-     <dd>Set the message to be a null string.</dd>
+    <dd>Set the message to be a null string.</dd>
 </dl>
 
 <p>A messageQueue is an interface with public methods:</p>
@@ -3581,7 +3336,7 @@ higher priority threads.</p>
 
 <p>Look at miscTest/testMessageQueue.cpp for an example.</p>
 
-<h3 style="text-align: center;" id="L2972">NoDefaultMethods</h3>
+<h3 style="text-align: center;" id="L2975">NoDefaultMethods</h3>
 
 <p>If a class privately extends this class then the compiler can not create any
 of the following: default constructor, default copy constructror, or default
@@ -3600,7 +3355,7 @@ assignment contructor.</p>
     NoDefaultMethods &amp; operator=(const NoDefaultMethods &amp;);
     };</pre>
 
-<h3 style="text-align: center;" id="L2978">Requester</h3>
+<h3 style="text-align: center;" id="L2981">Requester</h3>
 
 <p>A PVField extends Requester. Requester is present so that when database
 errors are found there is someplace to send a message.</p>
@@ -3630,7 +3385,7 @@ public:
     <dd>Gives a message to the requester.</dd>
 </dl>
 
-<h3 style="text-align: center" id="L3009">Serialize</h3>
+<h3 style="text-align: center" id="L3012">Serialize</h3>
 
 <p>This is a helper class for serialization, which is required for sending and
 receiving pvData over the nerwork.</p>
@@ -3701,7 +3456,7 @@ properly implemented. </p>
 
 <p>x</p>
 
-<h3 style="text-align: center;" id="L3049">CDRMonitor - Monitor and Report
+<h3 style="text-align: center;" id="L3052">CDRMonitor - Monitor and Report
 Construction and Destruction</h3>
 
 <p>This is a facility that allows a class to report how many objects of that
@@ -3736,7 +3491,7 @@ public:
 
 static inline CDRNode* getNode(CDRNodeInstance *inst);</pre>
 
-<h3 style="text-align: center" id="L3103">Status</h3>
+<h3 style="text-align: center" id="L3058">Status</h3>
 
 <p>Status provides a way to pass status back to client code:</p>
 <pre>class Status : public epics::pvData::Serializable {
@@ -3792,9 +3547,9 @@ static inline CDRNode* getNode(CDRNodeInstance *inst);</pre>
       status optimization.</dd>
 </dl>
 
-<h3 style="text-align: center;" id="L3148">Thread</h3>
+<h3 style="text-align: center;" id="L3105">Thread</h3>
 
-<h4 id="L3150">ThreadPriority</h4>
+<h4 id="L3107">ThreadPriority</h4>
 <pre>enum ThreadPriority {
     lowestPriority,
     lowerPriority,
@@ -3811,7 +3566,7 @@ public:
     static int getEpicsPriority(ThreadPriority threadPriority);
 };</pre>
 
-<h4 id="L3154">Thread</h4>
+<h4 id="L3111">Thread</h4>
 <pre>class Runnable {
 public:
     virtual void run() = 0;
@@ -3858,7 +3613,7 @@ exception is thrown if run remains active when delete is called. </p>
     <dd>Make the current thread sleep for the specified number of seconds.</dd>
 </dl>
 
-<h3 style="text-align: center;" id="L3195">Time Function Call</h3>
+<h3 style="text-align: center;" id="L3152">Time Function Call</h3>
 
 <p>TimeFunction is a facility that measures the average number of seconds a
 function call requires. When timeCall is called, it calls function in a loop.
@@ -3900,7 +3655,7 @@ long a function takes. It has the single method:</p>
       one second to call it ntimes.</dd>
 </dl>
 
-<h3 style="text-align: center;" id="L3227">Timer</h3>
+<h3 style="text-align: center;" id="L3184">Timer</h3>
 
 <p>This provides a general purpose timer. It allows a user callback to be
 called after a delay or periodically. </p>
@@ -3975,7 +3730,7 @@ be used to schedule multiple callbacks. It has the methods:</p>
     <dd>Schedule a periodic callback.</dd>
 </dl>
 
-<h3 style="text-align: center;" id="L3294">Queue</h3>
+<h3 style="text-align: center;" id="L3251">Queue</h3>
 
 <p>This provides a queue which has an immutable capacity. When the queue is
 full the user code is expected to keep using the current element until a new
@@ -4057,10 +3812,10 @@ public:
      }</pre>
 <hr />
 
-<h2 style="text-align: center" id="L3357">pvMisc</h2>
+<h2 style="text-align: center" id="L3314">pvMisc</h2>
 <hr />
 
-<h3 id="L3361">BitSetUtil</h3>
+<h3 id="L3318">BitSetUtil</h3>
 
 <p>The following is also provided:</p>
 <pre>class BitSetUtil : private NoDefaultMethods {
@@ -4089,7 +3844,7 @@ currently has only one method:</p>
       entire structures if the structure offset bit is set. </dd>
 </dl>
 
-<h3 style="text-align: center;" id="L3391">MultiChoice</h3>
+<h3 style="text-align: center;" id="L3348">MultiChoice</h3>
 
 <p>MultiChoice defines an array of strings and a bit set that selects an
 arbitrary set of the choices. This will be implemented if the java version is
@@ -4097,7 +3852,7 @@ accepted.</p>
 <pre>NOT DONE</pre>
 <hr />
 
-<h2 style="text-align: center" id="L3399">License Agreement</h2>
+<h2 style="text-align: center" id="L3356">License Agreement</h2>
 <hr />
 <pre>Copyright (c) 2008 Martin R. Kraimer
 Copyright (c) 2007 Control System Laboratory,
