@@ -18,7 +18,7 @@ class MonitorElementImpl : public MonitorElement {
 public:
     MonitorElementImpl(PVStructure::shared_pointer pvStructure);
     ~MonitorElementImpl(){}
-    virtual PVStructure::shared_pointer getPVStructure();
+    virtual PVStructure::shared_pointer  getPVStructure();
     virtual BitSet::shared_pointer getChangedBitSet();
     virtual BitSet::shared_pointer getOverrunBitSet();
     void setQueueElement(MonitorQueueElement *queueElement);

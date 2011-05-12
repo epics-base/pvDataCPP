@@ -66,13 +66,12 @@ namespace epics { namespace pvData {
          * @return monitorElement for modified data.
          * Must call get to determine if data is available.
          */
-        virtual MonitorElement::shared_pointer poll() = 0;
+        virtual MonitorElement::shared_pointer const & poll() = 0;
         /**
          * Release a MonitorElement that was returned by poll.
          * @param monitorElement
          */
-        virtual void release(
-            MonitorElement::shared_pointer monitorElement) = 0;
+        virtual void release(MonitorElement::shared_pointer const & monitorElement) = 0;
     };
     
     
@@ -92,18 +91,18 @@ namespace epics { namespace pvData {
          * @param structure The structure defining the data.
          */
         virtual void monitorConnect(const Status &status,
-            Monitor &monitor, StructureConstPtr structure) = 0;
+            Monitor::shared_pointer const & monitor, StructureConstPtr const & structure) = 0;
         /**
          * A monitor event has occurred.
          * The requester must call Monitor.poll to get data.
          * @param monitor The monitor.
          */
-        virtual void monitorEvent(Monitor &monitor) = 0;
+        virtual void monitorEvent(Monitor::shared_pointer const &monitor) = 0;
         /**
          * The data source is no longer available.
          * @param monitor The monitor.
          */
-        virtual void unlisten(Monitor &monitor) = 0;
+        virtual void unlisten(Monitor::shared_pointer const &monitor) = 0;
     };
 
 }}
