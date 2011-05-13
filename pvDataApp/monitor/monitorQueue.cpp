@@ -18,9 +18,9 @@ class MonitorElementImpl : public MonitorElement {
 public:
     MonitorElementImpl(PVStructure::shared_pointer pvStructure);
     ~MonitorElementImpl(){}
-    virtual PVStructure::shared_pointer  getPVStructure();
-    virtual BitSet::shared_pointer getChangedBitSet();
-    virtual BitSet::shared_pointer getOverrunBitSet();
+    virtual PVStructure::shared_pointer const &  getPVStructure();
+    virtual BitSet::shared_pointer const & getChangedBitSet();
+    virtual BitSet::shared_pointer const & getOverrunBitSet();
     void setQueueElement(MonitorQueueElement *queueElement);
     MonitorQueueElement *getQueueElement();
 private:
@@ -39,17 +39,17 @@ MonitorElementImpl::MonitorElementImpl(PVStructure::shared_pointer pvStructure)
   queueElement(0)
 {}
 
-PVStructure::shared_pointer MonitorElementImpl::getPVStructure()
+PVStructure::shared_pointer const & MonitorElementImpl::getPVStructure()
 {
     return pvStructure;
 }
 
-BitSet::shared_pointer MonitorElementImpl::getChangedBitSet()
+BitSet::shared_pointer const & MonitorElementImpl::getChangedBitSet()
 {
     return changedBitSet;
 }
 
-BitSet::shared_pointer MonitorElementImpl::getOverrunBitSet()
+BitSet::shared_pointer const & MonitorElementImpl::getOverrunBitSet()
 {
     return overrunBitSet;
 }
@@ -64,7 +64,7 @@ MonitorQueueElement *MonitorElementImpl::getQueueElement()
     return queueElement;
 }
 
-MonitorQueue::MonitorQueue(PVStructure::shared_pointer* structures,int number)
+MonitorQueue::MonitorQueue(PVStructureSharedPointerPtrArray structures,int number)
 : number(number),
   structures(structures),
   queue(0),
@@ -78,7 +78,7 @@ MonitorQueue::MonitorQueue(PVStructure::shared_pointer* structures,int number)
         = new MonitorElement::shared_pointer*[number];
     for(int i=0; i<number; i++) {
         queueElements[i] = new MonitorElement::shared_pointer(
-               new MonitorElementImpl(structures[i]));
+               new MonitorElementImpl(*structures[i]));
     }
     queue = new Queue<MonitorElement::shared_pointer>(queueElements,number);
     MonitorQueueElement *queueElement;
@@ -98,13 +98,13 @@ MonitorQueue::~MonitorQueue()
     delete[] structures;
 }
 
-PVStructure::shared_pointer* MonitorQueue::createStructures(
+PVStructureSharedPointerPtrArray MonitorQueue::createStructures(
     PVStructurePtrArray array,int number)
 {
-    PVStructure::shared_pointer* elements =
-        new PVStructure::shared_pointer[number];
+    PVStructureSharedPointerPtrArray elements =
+        new PVStructureSharedPointerPtr[number];
     for(int i=0; i<number; i++){
-        elements[i] = PVStructure::shared_pointer(array[i]);
+        elements[i] =  new PVStructure::shared_pointer(array[i]);
     }
     return elements;
 }
@@ -124,28 +124,27 @@ int MonitorQueue::capacity()
     return number;
 }
 
-MonitorElement::shared_pointer MonitorQueue::getFree()
-{
-    
-    MonitorQueueElement *queueElement = queue->getFree();
-    if(queueElement==0) return nullElement;
-    return *queueElement->getObject();
-}
-
-void MonitorQueue::setUsed(MonitorElement::shared_pointer element)
-{
-    MonitorElementImpl *impl = static_cast<MonitorElementImpl *>(element.get());
-    queue->setUsed(impl->getQueueElement());
-}
-
-MonitorElement::shared_pointer MonitorQueue::getUsed()
+MonitorElement::shared_pointer const & MonitorQueue::getFree()
 {
     MonitorQueueElement *queueElement = queue->getUsed();
     if(queueElement==0) return nullElement;
     return *queueElement->getObject();
 }
 
-void MonitorQueue::releaseUsed(MonitorElement::shared_pointer element)
+void MonitorQueue::setUsed(MonitorElement::shared_pointer const & element)
+{
+    MonitorElementImpl *impl = static_cast<MonitorElementImpl *>(element.get());
+    queue->setUsed(impl->getQueueElement());
+}
+
+MonitorElement::shared_pointer const & MonitorQueue::getUsed()
+{
+    MonitorQueueElement *queueElement = queue->getUsed();
+    if(queueElement==0) return nullElement;
+    return *queueElement->getObject();
+}
+
+void MonitorQueue::releaseUsed(MonitorElement::shared_pointer const & element)
 {
     MonitorElementImpl *impl = static_cast<MonitorElementImpl *>(element.get());
     queue->releaseUsed(impl->getQueueElement());

@@ -28,17 +28,17 @@ namespace epics { namespace pvData {
          * Get the PVStructure.
          * @return The PVStructure.
          */
-        virtual PVStructure::shared_pointer getPVStructure() = 0;
+        virtual PVStructure::shared_pointer const & getPVStructure() = 0;
         /**
          * Get the bitSet showing which fields have changed.
          * @return The bitSet.
          */
-        virtual BitSet::shared_pointer getChangedBitSet() = 0;
+        virtual BitSet::shared_pointer const & getChangedBitSet() = 0;
         /**
          * Get the bitSet showing which fields have been changed more than once.
          * @return The bitSet.
          */
-        virtual BitSet::shared_pointer getOverrunBitSet() = 0;
+        virtual BitSet::shared_pointer const & getOverrunBitSet() = 0;
     };
     
     
@@ -90,7 +90,7 @@ namespace epics { namespace pvData {
          * @param monitor The monitor
          * @param structure The structure defining the data.
          */
-        virtual void monitorConnect(const Status &status,
+        virtual void monitorConnect(Status const &status,
             Monitor::shared_pointer const & monitor, StructureConstPtr const & structure) = 0;
         /**
          * A monitor event has occurred.

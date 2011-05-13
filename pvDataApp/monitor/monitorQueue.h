@@ -19,22 +19,25 @@
 
 namespace epics { namespace pvData { 
 
+typedef PVStructure::shared_pointer* PVStructureSharedPointerPtr;
+typedef PVStructureSharedPointerPtr* PVStructureSharedPointerPtrArray;
+
 class MonitorQueue {
 public:
-    MonitorQueue(PVStructure::shared_pointer* structures,int number);
+    MonitorQueue(PVStructureSharedPointerPtrArray structures,int number);
     ~MonitorQueue();
-    static PVStructure::shared_pointer* createStructures(
+    static PVStructureSharedPointerPtrArray createStructures(
         PVStructurePtrArray array,int number);
     void clear();
     int getNumberFree();
     int capacity();
-    MonitorElement::shared_pointer getFree();
-    void setUsed(MonitorElement::shared_pointer element);
-    MonitorElement::shared_pointer getUsed();
-    void releaseUsed(MonitorElement::shared_pointer element);
+    MonitorElement::shared_pointer const & getFree();
+    void setUsed(MonitorElement::shared_pointer const & element);
+    MonitorElement::shared_pointer const & getUsed();
+    void releaseUsed(MonitorElement::shared_pointer const & element);
 private:
     int number;
-    PVStructure::shared_pointer* structures;
+    PVStructureSharedPointerPtrArray structures;
     Queue<MonitorElement::shared_pointer> *queue;
     MonitorElement::shared_pointer nullElement;
 };
