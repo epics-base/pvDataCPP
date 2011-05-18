@@ -105,6 +105,7 @@ Structure::Structure (String fieldName,
             if(result==0) {
                 String  message("duplicate fieldName ");
                 message += name;
+                delete[] fields;
                 throw std::invalid_argument(message);
             }
         }
