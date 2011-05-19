@@ -95,6 +95,7 @@ MonitorQueue::MonitorQueue(PVStructureSharedPointerPtrArray structures,int numbe
 MonitorQueue::~MonitorQueue()
 {
     delete queue;
+    for(int i=0; i<number; i++) delete structures[i];
     delete[] structures;
 }
 
@@ -126,7 +127,7 @@ int MonitorQueue::capacity()
 
 MonitorElement::shared_pointer const & MonitorQueue::getFree()
 {
-    MonitorQueueElement *queueElement = queue->getUsed();
+    MonitorQueueElement *queueElement = queue->getFree();
     if(queueElement==0) return nullElement;
     return *queueElement->getObject();
 }
