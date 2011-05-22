@@ -18,8 +18,7 @@ bool operator==(PVField& left, PVField& right)
 
 /** Field equality conditions:
  * 1) same instance
- * 2) same type (field and scalar/element)
- * Note: not the same name
+ * 2) same type (field and scalar/element), same name, same subfields (if any)
  */
 bool operator==(const Field& a, const Field& b)
 {
@@ -57,14 +56,14 @@ bool operator==(const Scalar& a, const Scalar& b)
 {
     if(&a==&b)
         return true;
-    return a.getScalarType()==b.getScalarType();
+    return a.getScalarType()==b.getScalarType() && a.getFieldName()==b.getFieldName();
 }
 
 bool operator==(const ScalarArray& a, const ScalarArray& b)
 {
     if(&a==&b)
         return true;
-    return a.getElementType()==b.getElementType();
+    return a.getElementType()==b.getElementType() && a.getFieldName()==b.getFieldName();
 }
 
 bool operator==(const Structure& a, const Structure& b)
@@ -74,8 +73,16 @@ bool operator==(const Structure& a, const Structure& b)
     int nflds=a.getNumberFields();
     if (b.getNumberFields()!=nflds)
         return false;
-    return std::equal(a.getFields(), a.getFields()+nflds,
-                      b.getFields());
+    if (a.getFieldName()!=b.getFieldName())
+        return false;
+
+    // std::equals does not work, since FieldConstPtrArray is an array of shared_pointers
+    FieldConstPtrArray af = a.getFields();
+    FieldConstPtrArray bf = b.getFields();
+    for (int i = 0; i < nflds; i++)
+        if (*(af[i].get()) != *(bf[i].get()))
+            return false;
+     return true;
 }
 
 bool operator==(const StructureArray& a, const StructureArray& b)
