@@ -11,6 +11,7 @@
 
 #include "pvIntrospect.h"
 #include "pvData.h"
+#include <vector>
 
 namespace epics { namespace pvData { 
 
@@ -46,6 +47,7 @@ public:
     bool equals(PVField &a,PVField &b);
     void getString(StringBuilder buf,PVField * pvField,int indentLevel);
     void getString(StringBuilder buf,PVField *pvField);
+    int fromString(PVStructure *pv, std::vector<String>& from, int fromStartIndex = 0);    
     void fromString(PVScalar *pv, String from);
     int fromString(PVScalarArray *pv, String from);
     int fromStringArray(PVScalarArray *pv, int offset, int length,

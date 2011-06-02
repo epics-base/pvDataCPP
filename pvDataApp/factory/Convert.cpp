@@ -124,6 +124,44 @@ void Convert::getString(StringBuilder buf,PVField * pvField)
     convertToString(buf,pvField,0);
 }
 
+int Convert::fromString(PVStructure *pvStructure, std::vector<String>& from, int fromStartIndex)
+{
+    int processed = 0;
+    
+    PVFieldPtrArray fieldsData = pvStructure->getPVFields();
+    if (fieldsData != 0) {
+        int length = pvStructure->getStructure()->getNumberFields();
+        for(int i=0; i<length; i++) {
+            PVField *fieldField = fieldsData[i];
+
+            Type type = fieldField->getField()->getType();
+            if(type==structure) {
+                int count = fromString(static_cast<PVStructure*>(fieldField), from, fromStartIndex);
+                processed += count;
+                fromStartIndex += count;
+            }
+            else if(type==scalarArray) {
+                int count = fromString(static_cast<PVScalarArray*>(fieldField), from.at(fromStartIndex));
+                processed += count;
+                fromStartIndex += count;
+            }
+            else if(type==scalar) {
+                fromString(static_cast<PVScalar*>(fieldField), from.at(fromStartIndex++));
+                processed++;
+            }
+            else {
+                // structureArray not supported
+                String message("Convert::fromString unsupported fieldType ");
+                TypeFunc::toString(&message,type);
+                throw std::logic_error(message);
+            }
+        }
+    }
+    
+    return processed;
+}
+
+
 void Convert::fromString(PVScalar *pvScalar, String from)
 {
     ScalarConstPtr scalar = pvScalar->getScalar();
