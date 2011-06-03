@@ -68,14 +68,13 @@ MonitorQueue::MonitorQueue(PVStructureSharedPointerPtrArray structures,int numbe
 : number(number),
   structures(structures),
   queue(0),
+  queueElements(new MonitorElement::shared_pointer*[number]),
   nullElement(MonitorElement::shared_pointer())
 {
     if(number<2) {
          throw std::logic_error(String("queueSize must be >=2"));
     }
     
-    MonitorElement::shared_pointer ** queueElements 
-        = new MonitorElement::shared_pointer*[number];
     for(int i=0; i<number; i++) {
         queueElements[i] = new MonitorElement::shared_pointer(
                new MonitorElementImpl(*structures[i]));
@@ -95,6 +94,10 @@ MonitorQueue::MonitorQueue(PVStructureSharedPointerPtrArray structures,int numbe
 MonitorQueue::~MonitorQueue()
 {
     delete queue;
+    for(int i=0; i<number; i++) {
+          delete queueElements[i];
+    }
+    delete[] queueElements;
     for(int i=0; i<number; i++) delete structures[i];
     delete[] structures;
 }
@@ -107,6 +110,7 @@ PVStructureSharedPointerPtrArray MonitorQueue::createStructures(
     for(int i=0; i<number; i++){
         elements[i] =  new PVStructure::shared_pointer(array[i]);
     }
+    delete[] array;
     return elements;
 }
 
