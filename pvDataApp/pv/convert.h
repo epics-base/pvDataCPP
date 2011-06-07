@@ -9,8 +9,8 @@
 #include <string>
 #include <stdexcept>
 
-#include "pvIntrospect.h"
-#include "pvData.h"
+#include <pv/pvIntrospect.h>
+#include <pv/pvData.h>
 #include <vector>
 
 namespace epics { namespace pvData { 

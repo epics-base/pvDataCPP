@@ -16,11 +16,11 @@
 #include <epicsThread.h>
 #include <epicsMutex.h>
 #include <epicsEvent.h>
-#include "noDefaultMethods.h"
-#include "pvType.h"
-#include "lock.h"
-#include "event.h"
-#include "CDRMonitor.h"
+#include <pv/noDefaultMethods.h>
+#include <pv/pvType.h>
+#include <pv/lock.h>
+#include <pv/event.h>
+#include <pv/CDRMonitor.h>
 
 namespace epics { namespace pvData { 
 

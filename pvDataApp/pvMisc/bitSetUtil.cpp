@@ -4,9 +4,9 @@
  * EPICS pvDataCPP is distributed subject to a Software License Agreement found
  * in file LICENSE that is included with this distribution.
  */
-#include "noDefaultMethods.h"
-#include "pvData.h"
-#include "bitSetUtil.h"
+#include <pv/noDefaultMethods.h>
+#include <pv/pvData.h>
+#include <pv/bitSetUtil.h>
 
 namespace epics { namespace pvData {
 

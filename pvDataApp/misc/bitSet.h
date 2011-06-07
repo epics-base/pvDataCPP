@@ -7,9 +7,9 @@
 #ifndef BITSET_H
 #define BITSET_H
 #include <stdexcept>
-#include <pvType.h>
-#include <serialize.h>
-#include <sharedPtr.h>
+#include <pv/pvType.h>
+#include <pv/serialize.h>
+#include <pv/sharedPtr.h>
 
 namespace epics { namespace pvData { 
 

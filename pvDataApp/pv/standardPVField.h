@@ -8,8 +8,8 @@
 #define STANDARDPVFIELD_H
 #include <string>
 #include <stdexcept>
-#include "pvIntrospect.h"
-#include "pvData.h"
+#include <pv/pvIntrospect.h>
+#include <pv/pvData.h>
 
 namespace epics { namespace pvData { 
 

@@ -19,14 +19,14 @@
 #include <epicsAssert.h>
 #include <epicsExit.h>
 
-#include "lock.h"
-#include "timeStamp.h"
-#include "requester.h"
-#include "messageQueue.h"
-#include "CDRMonitor.h"
-#include "event.h"
-#include "thread.h"
-#include "executor.h"
+#include <pv/lock.h>
+#include <pv/timeStamp.h>
+#include <pv/requester.h>
+#include <pv/messageQueue.h>
+#include <pv/CDRMonitor.h>
+#include <pv/event.h>
+#include <pv/thread.h>
+#include <pv/executor.h>
 
 
 using namespace epics::pvData;

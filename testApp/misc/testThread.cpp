@@ -20,11 +20,11 @@
 #include <epicsAssert.h>
 #include <epicsExit.h>
 
-#include "event.h"
-#include "thread.h"
-#include "executor.h"
-#include "CDRMonitor.h"
-#include "timeFunction.h"
+#include <pv/event.h>
+#include <pv/thread.h>
+#include <pv/executor.h>
+#include <pv/CDRMonitor.h>
+#include <pv/timeFunction.h>
 
 using namespace epics::pvData;
 

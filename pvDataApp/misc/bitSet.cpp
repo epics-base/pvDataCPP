@@ -6,10 +6,10 @@
  */
 #include "string.h"
 #include "stdio.h"
-#include "bitSet.h"
-#include "lock.h"
-#include "CDRMonitor.h"
-#include "serializeHelper.h"
+#include <pv/bitSet.h>
+#include <pv/lock.h>
+#include <pv/CDRMonitor.h>
+#include <pv/serializeHelper.h>
 
 namespace epics { namespace pvData {
  

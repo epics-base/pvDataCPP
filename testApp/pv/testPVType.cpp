@@ -14,8 +14,8 @@
 
 #include <epicsAssert.h>
 
-#include "requester.h"
-#include "pvType.h"
+#include <pv/requester.h>
+#include <pv/pvType.h>
 
 using namespace epics::pvData;
 

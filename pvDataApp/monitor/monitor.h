@@ -7,11 +7,11 @@
 #ifndef MONITOR_H
 #define MONITOR_H
 
-#include <status.h>
-#include <destroyable.h>
-#include <pvData.h>
-#include <sharedPtr.h>
-#include <bitSet.h>
+#include <pv/status.h>
+#include <pv/destroyable.h>
+#include <pv/pvData.h>
+#include <pv/sharedPtr.h>
+#include <pv/bitSet.h>
 
 namespace epics { namespace pvData { 
 

@@ -13,9 +13,9 @@
 #include <cstdio>
 
 #include <epicsThread.h>
-#include "noDefaultMethods.h"
-#include "lock.h"
-#include "pvType.h"
+#include <pv/noDefaultMethods.h>
+#include <pv/lock.h>
+#include <pv/pvType.h>
 
 namespace epics { namespace pvData { 
 

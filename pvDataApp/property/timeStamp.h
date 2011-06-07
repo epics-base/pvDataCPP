@@ -8,7 +8,7 @@
 #define TIMESTAMP_H
 #include <ctime>
 #include "epicsTime.h"
-#include "pvType.h"
+#include <pv/pvType.h>
 
 namespace epics { namespace pvData { 
 

@@ -8,12 +8,12 @@
 #include <cstdlib>
 #include <string>
 #include <cstdio>
-#include "lock.h"
-#include "pvIntrospect.h"
-#include "pvData.h"
-#include "convert.h"
-#include "factory.h"
-#include "serializeHelper.h"
+#include <pv/lock.h>
+#include <pv/pvIntrospect.h>
+#include <pv/pvData.h>
+#include <pv/convert.h>
+#include <pv/factory.h>
+#include <pv/serializeHelper.h>
 #include "DefaultPVStructureArray.h"
 
 using std::tr1::static_pointer_cast;

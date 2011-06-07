@@ -8,11 +8,11 @@
 #include <cstdlib>
 #include <string>
 #include <cstdio>
-#include "pvData.h"
-#include "pvIntrospect.h"
-#include "convert.h"
-#include "factory.h"
-#include "bitSet.h"
+#include <pv/pvData.h>
+#include <pv/pvIntrospect.h>
+#include <pv/convert.h>
+#include <pv/factory.h>
+#include <pv/bitSet.h>
 
 using std::tr1::static_pointer_cast;
 using std::tr1::const_pointer_cast;

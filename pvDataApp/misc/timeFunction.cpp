@@ -4,9 +4,9 @@
  * EPICS pvDataCPP is distributed subject to a Software License Agreement found
  * in file LICENSE that is included with this distribution.
  */
-#include "noDefaultMethods.h"
-#include "pvType.h"
-#include "timeStamp.h"
+#include <pv/noDefaultMethods.h>
+#include <pv/pvType.h>
+#include <pv/timeStamp.h>
 
 namespace epics { namespace pvData { 
 

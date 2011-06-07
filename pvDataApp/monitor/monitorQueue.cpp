@@ -5,9 +5,9 @@
  * in file LICENSE that is included with this distribution.
  */
 /* Marty Kraimer 2011.03 */
-#include <bitSet.h>
+#include <pv/bitSet.h>
 
-#include "monitorQueue.h"
+#include <pv/monitorQueue.h>
 
 
 namespace epics { namespace pvData { 

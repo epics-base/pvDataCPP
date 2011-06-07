@@ -6,9 +6,9 @@
  */
 #include <string>
 #include <stdexcept>
-#include "pvType.h"
-#include "timeStamp.h"
-#include "pvData.h"
+#include <pv/pvType.h>
+#include <pv/timeStamp.h>
+#include <pv/pvData.h>
 #ifndef PVTIMESTAMP_H
 #define PVTIMESTAMP_H
 namespace epics { namespace pvData { 

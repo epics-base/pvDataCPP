@@ -7,7 +7,7 @@
 
 #ifndef LINKEDLISTVOID_H
 #define LINKEDLISTVOID_H
-#include "pvType.h"
+#include <pv/pvType.h>
 namespace epics { namespace pvData { 
 
 class LinkedListVoid;

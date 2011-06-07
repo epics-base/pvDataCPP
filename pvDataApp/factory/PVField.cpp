@@ -8,11 +8,11 @@
 #include <cstdlib>
 #include <string>
 #include <cstdio>
-#include "lock.h"
-#include "pvData.h"
-#include "factory.h"
-#include "convert.h"
-#include "CDRMonitor.h"
+#include <pv/lock.h>
+#include <pv/pvData.h>
+#include <pv/factory.h>
+#include <pv/convert.h>
+#include <pv/CDRMonitor.h>
 
 using std::tr1::const_pointer_cast;
 

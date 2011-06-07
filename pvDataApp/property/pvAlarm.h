@@ -5,8 +5,8 @@
  * in file LICENSE that is included with this distribution.
  */
 #include <string>
-#include "pvType.h"
-#include "alarm.h"
+#include <pv/pvType.h>
+#include <pv/alarm.h>
 #ifndef PVALARM_H
 #define PVALARM_H
 namespace epics { namespace pvData { 

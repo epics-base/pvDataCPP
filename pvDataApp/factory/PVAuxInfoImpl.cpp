@@ -8,12 +8,12 @@
 #include <cstdlib>
 #include <string>
 #include <cstdio>
-#include "noDefaultMethods.h"
-#include "pvData.h"
-#include "convert.h"
-#include "factory.h"
-#include "lock.h"
-#include "CDRMonitor.h"
+#include <pv/noDefaultMethods.h>
+#include <pv/pvData.h>
+#include <pv/convert.h>
+#include <pv/factory.h>
+#include <pv/lock.h>
+#include <pv/CDRMonitor.h>
 
 namespace epics { namespace pvData {
 

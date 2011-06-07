@@ -7,7 +7,7 @@
 #ifndef DESTROYABLE_H
 #define DESTROYABLE_H
 
-#include <sharedPtr.h>
+#include <pv/sharedPtr.h>
 
 namespace epics { namespace pvData { 
 

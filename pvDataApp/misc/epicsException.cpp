@@ -4,7 +4,7 @@
  * in file LICENSE that is included with this distribution.
  */
 
-#include "epicsException.h"
+#include <pv/epicsException.h>
 
 #include <sstream>
 

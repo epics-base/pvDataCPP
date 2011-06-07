@@ -6,9 +6,9 @@
  */
 #ifndef BITSETUTIL_H
 #define BITSETUTIL_H
-#include "noDefaultMethods.h"
-#include "pvData.h"
-#include "bitSet.h"
+#include <pv/noDefaultMethods.h>
+#include <pv/pvData.h>
+#include <pv/bitSet.h>
 
 namespace epics { namespace pvData {
 

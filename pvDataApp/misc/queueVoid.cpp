@@ -11,10 +11,10 @@
 #include <cstdio>
 #include <stdexcept>
 
-#include "lock.h"
-#include "pvType.h"
-#include "queueVoid.h"
-#include "CDRMonitor.h"
+#include <pv/lock.h>
+#include <pv/pvType.h>
+#include <pv/queueVoid.h>
+#include <pv/CDRMonitor.h>
 
 namespace epics { namespace pvData { 
 

@@ -6,10 +6,10 @@
  */
 #include <string>
 #include <stdexcept>
-#include "pvType.h"
-#include "timeStamp.h"
-#include "pvData.h"
-#include "pvTimeStamp.h"
+#include <pv/pvType.h>
+#include <pv/timeStamp.h>
+#include <pv/pvData.h>
+#include <pv/pvTimeStamp.h>
 namespace epics { namespace pvData { 
 
 static String noTimeStamp("No timeStamp structure found");

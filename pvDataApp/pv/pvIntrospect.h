@@ -9,9 +9,9 @@
 #include <string>
 #include <stdexcept>
 
-#include "noDefaultMethods.h"
-#include "sharedPtr.h"
-#include "pvType.h"
+#include <pv/noDefaultMethods.h>
+#include <pv/sharedPtr.h>
+#include <pv/pvType.h>
 namespace epics { namespace pvData { 
 
 class Field;

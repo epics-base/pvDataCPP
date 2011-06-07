@@ -8,10 +8,10 @@
 #define BYTEBUFFER_H
 
 #include <string>
-#include <pvType.h>
+#include <pv/pvType.h>
 #include <epicsEndian.h>
 
-#include "epicsException.h"
+#include <pv/epicsException.h>
 
 namespace epics {
     namespace pvData {

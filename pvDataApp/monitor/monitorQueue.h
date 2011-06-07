@@ -12,10 +12,10 @@
 #include <memory>
 #include <vector>
 
-#include <pvData.h>
-#include <monitor.h>
-#include <queue.h>
-#include <sharedPtr.h>
+#include <pv/pvData.h>
+#include <pv/monitor.h>
+#include <pv/queue.h>
+#include <pv/sharedPtr.h>
 
 namespace epics { namespace pvData { 
 

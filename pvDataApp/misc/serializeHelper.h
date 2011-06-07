@@ -13,10 +13,10 @@
 #ifndef SERIALIZEHELPER_H_
 #define SERIALIZEHELPER_H_
 
-#include "serialize.h"
-#include "byteBuffer.h"
-#include "noDefaultMethods.h"
-#include <pvIntrospect.h>
+#include <pv/serialize.h>
+#include <pv/byteBuffer.h>
+#include <pv/noDefaultMethods.h>
+#include <pv/pvIntrospect.h>
 
 namespace epics {
     namespace pvData {

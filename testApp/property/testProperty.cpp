@@ -16,22 +16,22 @@
 #include <epicsAssert.h>
 #include <epicsExit.h>
 
-#include "requester.h"
-#include "pvIntrospect.h"
-#include "pvData.h"
-#include "convert.h"
-#include "standardField.h"
-#include "standardPVField.h"
-#include "alarm.h"
-#include "control.h"
-#include "display.h"
-#include "timeStamp.h"
-#include "pvAlarm.h"
-#include "pvControl.h"
-#include "pvDisplay.h"
-#include "pvEnumerated.h"
-#include "pvTimeStamp.h"
-#include "CDRMonitor.h"
+#include <pv/requester.h>
+#include <pv/pvIntrospect.h>
+#include <pv/pvData.h>
+#include <pv/convert.h>
+#include <pv/standardField.h>
+#include <pv/standardPVField.h>
+#include <pv/alarm.h>
+#include <pv/control.h>
+#include <pv/display.h>
+#include <pv/timeStamp.h>
+#include <pv/pvAlarm.h>
+#include <pv/pvControl.h>
+#include <pv/pvDisplay.h>
+#include <pv/pvEnumerated.h>
+#include <pv/pvTimeStamp.h>
+#include <pv/CDRMonitor.h>
 
 using namespace epics::pvData;
 

@@ -5,7 +5,7 @@
  * in file LICENSE that is included with this distribution.
  */
 #include <string>
-#include "requester.h"
+#include <pv/requester.h>
 namespace epics { namespace pvData { 
 
 static std::string typeName[] = {

@@ -7,8 +7,8 @@
 #ifndef THREAD_H
 #define THREAD_H
 #include <memory>
-#include "noDefaultMethods.h"
-#include "pvType.h"
+#include <pv/noDefaultMethods.h>
+#include <pv/pvType.h>
 
 #include <epicsThread.h>
 

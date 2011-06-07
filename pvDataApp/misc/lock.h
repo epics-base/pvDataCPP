@@ -8,7 +8,7 @@
 #define LOCK_H
 #include <stdexcept>
 #include <epicsMutex.h>
-#include "noDefaultMethods.h"
+#include <pv/noDefaultMethods.h>
 /* This is based on item 14 of 
  * Effective C++, Third Edition, Scott Meyers
  */

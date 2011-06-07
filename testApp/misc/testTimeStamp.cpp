@@ -21,7 +21,7 @@
 
 #include <epicsAssert.h>
 
-#include "timeStamp.h"
+#include <pv/timeStamp.h>
 
 using namespace epics::pvData;
 

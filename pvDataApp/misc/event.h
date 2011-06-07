@@ -9,8 +9,8 @@
 #include <memory>
 #include <vector>
 #include <epicsEvent.h>
-#include "noDefaultMethods.h"
-#include "pvType.h"
+#include <pv/noDefaultMethods.h>
+#include <pv/pvType.h>
 
 namespace epics { namespace pvData { 
 

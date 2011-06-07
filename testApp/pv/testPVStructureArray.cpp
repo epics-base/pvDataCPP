@@ -15,12 +15,12 @@
 #include <epicsAssert.h>
 #include <epicsExit.h>
 
-#include "requester.h"
-#include "pvIntrospect.h"
-#include "pvData.h"
-#include "standardField.h"
-#include "standardPVField.h"
-#include "CDRMonitor.h"
+#include <pv/requester.h>
+#include <pv/pvIntrospect.h>
+#include <pv/pvData.h>
+#include <pv/standardField.h>
+#include <pv/standardPVField.h>
+#include <pv/CDRMonitor.h>
 
 using namespace epics::pvData;
 

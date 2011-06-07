@@ -8,7 +8,7 @@
 #define STANDARDFIELD_H
 #include <string>
 #include <stdexcept>
-#include "pvIntrospect.h"
+#include <pv/pvIntrospect.h>
 
 namespace epics { namespace pvData { 
 

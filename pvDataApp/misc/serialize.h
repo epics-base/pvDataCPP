@@ -6,7 +6,7 @@
  */
 #ifndef SERIALIZE_H
 #define SERIALIZE_H
-#include "byteBuffer.h"
+#include <pv/byteBuffer.h>
 namespace epics { namespace pvData { 
 
     class SerializableControl;

@@ -8,8 +8,8 @@
 #include <cstdlib>
 #include <string>
 #include <cstdio>
-#include "pvData.h"
-#include "factory.h"
+#include <pv/pvData.h>
+#include <pv/factory.h>
 
 using std::tr1::static_pointer_cast;
 

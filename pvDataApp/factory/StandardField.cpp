@@ -9,10 +9,10 @@
 #include <stdexcept>
 #include <epicsThread.h>
 #include <epicsExit.h>
-#include <lock.h>
-#include "pvIntrospect.h"
-#include "standardField.h"
-#include "CDRMonitor.h"
+#include <pv/lock.h>
+#include <pv/pvIntrospect.h>
+#include <pv/standardField.h>
+#include <pv/CDRMonitor.h>
 
 using std::tr1::static_pointer_cast;
 

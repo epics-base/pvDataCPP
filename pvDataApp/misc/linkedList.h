@@ -6,7 +6,7 @@
  */
 #ifndef LINKEDLIST_H
 #define LINKEDLIST_H
-#include "linkedListVoid.h"
+#include <pv/linkedListVoid.h>
 namespace epics { namespace pvData { 
 
 template <typename T>

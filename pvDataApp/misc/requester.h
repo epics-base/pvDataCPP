@@ -7,8 +7,8 @@
 #ifndef REQUESTER_H
 #define REQUESTER_H
 #include <string>
-#include "pvType.h"
-#include "sharedPtr.h"
+#include <pv/pvType.h>
+#include <pv/sharedPtr.h>
 
 namespace epics { namespace pvData { 
 

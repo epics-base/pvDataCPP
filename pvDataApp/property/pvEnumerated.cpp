@@ -6,10 +6,10 @@
  */
 #include <string>
 #include <stdexcept>
-#include "pvType.h"
-#include "pvIntrospect.h"
-#include "pvData.h"
-#include "pvEnumerated.h"
+#include <pv/pvType.h>
+#include <pv/pvIntrospect.h>
+#include <pv/pvData.h>
+#include <pv/pvEnumerated.h>
 namespace epics { namespace pvData { 
 
 

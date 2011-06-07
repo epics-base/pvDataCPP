@@ -10,8 +10,8 @@
  *      Author: Miha Vitorovic
  */
 #include <cstring>
-#include "byteBuffer.h"
-#include "epicsException.h"
+#include <pv/byteBuffer.h>
+#include <pv/epicsException.h>
 
 // TODO optimize, avoid so many checks (endianness, positions), allow wrapping of external buffer, chance of endianess
 namespace epics {

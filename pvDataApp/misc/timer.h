@@ -13,10 +13,10 @@
 #include <string.h>
 #include <stdio.h>
 
-#include "pvType.h"
-#include "thread.h"
-#include "noDefaultMethods.h"
-#include "sharedPtr.h"
+#include <pv/pvType.h>
+#include <pv/thread.h>
+#include <pv/noDefaultMethods.h>
+#include <pv/sharedPtr.h>
 
 namespace epics { namespace pvData { 
 

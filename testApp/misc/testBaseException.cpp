@@ -11,7 +11,7 @@
 #include <stddef.h>
 #include <string.h>
 #include <stdio.h>
-#include "epicsException.h"
+#include <pv/epicsException.h>
 
 
 #include <epicsAssert.h>

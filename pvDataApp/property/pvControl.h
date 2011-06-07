@@ -4,8 +4,8 @@
  * EPICS pvDataCPP is distributed subject to a Software License Agreement found
  * in file LICENSE that is included with this distribution.
  */
-#include "control.h"
-#include "pvData.h"
+#include <pv/control.h>
+#include <pv/pvData.h>
 #ifndef PVCONTROL_H
 #define PVCONTROL_H
 namespace epics { namespace pvData { 

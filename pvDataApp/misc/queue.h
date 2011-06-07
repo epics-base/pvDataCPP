@@ -6,7 +6,7 @@
  */
 #ifndef QUEUE_H
 #define QUEUE_H
-#include "queueVoid.h"
+#include <pv/queueVoid.h>
 namespace epics { namespace pvData { 
 
 template <typename T>

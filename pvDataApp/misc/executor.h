@@ -8,9 +8,9 @@
 #define EXECUTOR_H
 #include <memory>
 #include <vector>
-#include "noDefaultMethods.h"
-#include "pvType.h"
-#include "thread.h"
+#include <pv/noDefaultMethods.h>
+#include <pv/pvType.h>
+#include <pv/thread.h>
 
 namespace epics { namespace pvData { 
 

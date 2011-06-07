@@ -8,13 +8,13 @@
 #include <stdexcept>
 #include <epicsThread.h>
 #include <epicsExit.h>
-#include <lock.h>
-#include "pvIntrospect.h"
-#include "pvData.h"
-#include "convert.h"
-#include "standardField.h"
-#include "standardPVField.h"
-#include "CDRMonitor.h"
+#include <pv/lock.h>
+#include <pv/pvIntrospect.h>
+#include <pv/pvData.h>
+#include <pv/convert.h>
+#include <pv/standardField.h>
+#include <pv/standardPVField.h>
+#include <pv/CDRMonitor.h>
 
 namespace epics { namespace pvData { 
 

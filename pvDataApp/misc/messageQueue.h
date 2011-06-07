@@ -6,9 +6,9 @@
  */
 #ifndef MESSAGEQUEUE_H
 #define MESSAGEQUEUE_H
-#include "pvType.h"
-#include "requester.h"
-#include "noDefaultMethods.h"
+#include <pv/pvType.h>
+#include <pv/requester.h>
+#include <pv/noDefaultMethods.h>
 
 namespace epics { namespace pvData { 
 

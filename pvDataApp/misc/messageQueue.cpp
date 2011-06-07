@@ -11,13 +11,13 @@
 #include <cstdio>
 #include <stdexcept>
 
-#include "pvType.h"
-#include "lock.h"
-#include "requester.h"
-#include "noDefaultMethods.h"
-#include "CDRMonitor.h"
-#include "queue.h"
-#include "messageQueue.h"
+#include <pv/pvType.h>
+#include <pv/lock.h>
+#include <pv/requester.h>
+#include <pv/noDefaultMethods.h>
+#include <pv/CDRMonitor.h>
+#include <pv/queue.h>
+#include <pv/messageQueue.h>
 
 namespace epics { namespace pvData { 
 

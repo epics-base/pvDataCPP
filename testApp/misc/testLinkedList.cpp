@@ -20,10 +20,10 @@
 #include <epicsAssert.h>
 #include <epicsExit.h>
 
-#include "lock.h"
-#include "timeStamp.h"
-#include "linkedList.h"
-#include "CDRMonitor.h"
+#include <pv/lock.h>
+#include <pv/timeStamp.h>
+#include <pv/linkedList.h>
+#include <pv/CDRMonitor.h>
 
 
 using namespace epics::pvData;

@@ -6,10 +6,10 @@
  */
 #include <string>
 #include <stdexcept>
-#include "pvType.h"
-#include "pvIntrospect.h"
-#include "pvData.h"
-#include "pvDisplay.h"
+#include <pv/pvType.h>
+#include <pv/pvIntrospect.h>
+#include <pv/pvData.h>
+#include <pv/pvDisplay.h>
 namespace epics { namespace pvData { 
 
 static String noDisplayFound("No display structure found");

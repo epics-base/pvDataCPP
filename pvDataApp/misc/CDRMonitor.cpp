@@ -13,11 +13,11 @@
 
 #include <epicsThread.h>
 
-#include "noDefaultMethods.h"
-#include "lock.h"
-#include "pvType.h"
-#include "linkedList.h"
-#include "CDRMonitor.h"
+#include <pv/noDefaultMethods.h>
+#include <pv/lock.h>
+#include <pv/pvType.h>
+#include <pv/linkedList.h>
+#include <pv/CDRMonitor.h>
 
 namespace epics { namespace pvData {
 

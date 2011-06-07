@@ -12,12 +12,12 @@
 
 #include <memory>
 #include <vector>
-#include "linkedList.h"
-#include "lock.h"
-#include "thread.h"
-#include "event.h"
-#include "executor.h"
-#include "CDRMonitor.h"
+#include <pv/linkedList.h>
+#include <pv/lock.h>
+#include <pv/thread.h>
+#include <pv/event.h>
+#include <pv/executor.h>
+#include <pv/CDRMonitor.h>
 
 namespace epics { namespace pvData {
 

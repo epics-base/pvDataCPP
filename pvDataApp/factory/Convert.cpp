@@ -8,10 +8,10 @@
 #include <string>
 #include <vector>
 #include <stdexcept>
-#include "lock.h"
-#include "pvIntrospect.h"
-#include "pvData.h"
-#include "convert.h"
+#include <pv/lock.h>
+#include <pv/pvIntrospect.h>
+#include <pv/pvData.h>
+#include <pv/convert.h>
 
 using std::tr1::static_pointer_cast;
 using std::tr1::const_pointer_cast;

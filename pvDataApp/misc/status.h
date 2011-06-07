@@ -7,8 +7,8 @@
 #ifndef STATUS_H
 #define STATUS_H
 
-#include "serialize.h"
-#include "byteBuffer.h"
+#include <pv/serialize.h>
+#include <pv/byteBuffer.h>
 
 namespace epics { namespace pvData { 
 

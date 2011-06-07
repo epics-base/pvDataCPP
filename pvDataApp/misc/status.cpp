@@ -4,9 +4,9 @@
  * EPICS pvDataCPP is distributed subject to a Software License Agreement found
  * in file LICENSE that is included with this distribution.
  */
-#include "status.h"
-#include "epicsException.h"
-#include "serializeHelper.h"
+#include <pv/status.h>
+#include <pv/epicsException.h>
+#include <pv/serializeHelper.h>
 
 namespace epics { namespace pvData {
 

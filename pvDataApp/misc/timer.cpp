@@ -11,15 +11,15 @@
 #include <stdio.h>
 #include <stdexcept>
 
-#include "pvType.h"
-#include "lock.h"
-#include "noDefaultMethods.h"
-#include "CDRMonitor.h"
-#include "linkedList.h"
-#include "thread.h"
-#include "timeStamp.h"
-#include "timer.h"
-#include "event.h"
+#include <pv/pvType.h>
+#include <pv/lock.h>
+#include <pv/noDefaultMethods.h>
+#include <pv/CDRMonitor.h>
+#include <pv/linkedList.h>
+#include <pv/thread.h>
+#include <pv/timeStamp.h>
+#include <pv/timer.h>
+#include <pv/event.h>
 
 namespace epics { namespace pvData { 
 

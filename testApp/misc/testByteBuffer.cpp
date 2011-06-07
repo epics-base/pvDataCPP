@@ -17,8 +17,8 @@
 #include <epicsAssert.h>
 #include <epicsEndian.h>
 
-#include "byteBuffer.h"
-#include "pvIntrospect.h"
+#include <pv/byteBuffer.h>
+#include <pv/pvIntrospect.h>
 
 using namespace epics::pvData;
 

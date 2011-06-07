@@ -8,12 +8,12 @@
 #define PVDATA_H
 #include <string>
 #include <stdexcept>
-#include "pvType.h"
-#include "pvIntrospect.h"
-#include "noDefaultMethods.h"
-#include "requester.h"
-#include "byteBuffer.h"
-#include "serialize.h"
+#include <pv/pvType.h>
+#include <pv/pvIntrospect.h>
+#include <pv/noDefaultMethods.h>
+#include <pv/requester.h>
+#include <pv/byteBuffer.h>
+#include <pv/serialize.h>
 namespace epics { namespace pvData { 
 
 class PVAuxInfo;

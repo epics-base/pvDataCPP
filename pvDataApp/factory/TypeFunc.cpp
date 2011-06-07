@@ -9,8 +9,8 @@
 #include <string>
 #include <cstdio>
 
-#include "pvIntrospect.h"
-#include "epicsException.h"
+#include <pv/pvIntrospect.h>
+#include <pv/epicsException.h>
 
 #include "dbDefs.h" // for NELEMENTS
 

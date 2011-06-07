@@ -11,9 +11,9 @@
 #include <cstdio>
 
 #include <epicsTime.h>
-#include "noDefaultMethods.h"
-#include "pvType.h"
-#include "timeStamp.h"
+#include <pv/noDefaultMethods.h>
+#include <pv/pvType.h>
+#include <pv/timeStamp.h>
 
 namespace epics { namespace pvData { 
 

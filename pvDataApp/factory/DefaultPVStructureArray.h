@@ -10,10 +10,10 @@
 #include <cstdlib>
 #include <string>
 #include <cstdio>
-#include "pvData.h"
-#include "convert.h"
-#include "factory.h"
-#include "serializeHelper.h"
+#include <pv/pvData.h>
+#include <pv/convert.h>
+#include <pv/factory.h>
+#include <pv/serializeHelper.h>
 
 namespace epics { namespace pvData {
 

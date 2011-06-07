@@ -6,8 +6,8 @@
  */
 #ifndef TIMEFUNCTION_H
 #define TIMEFUNCTION_H
-#include "noDefaultMethods.h"
-#include "pvType.h"
+#include <pv/noDefaultMethods.h>
+#include <pv/pvType.h>
 
 namespace epics { namespace pvData { 
 

@@ -11,11 +11,11 @@
  */
 
 #include <algorithm>
-#include <pvType.h>
+#include <pv/pvType.h>
 
-#include "epicsException.h"
-#include "byteBuffer.h"
-#include "serializeHelper.h"
+#include <pv/epicsException.h>
+#include <pv/byteBuffer.h>
+#include <pv/serializeHelper.h>
 
 
 using namespace std;
