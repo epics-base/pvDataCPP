@@ -9,6 +9,7 @@
 
 #include <pv/serialize.h>
 #include <pv/byteBuffer.h>
+#include <pv/sharedPtr.h>
 
 namespace epics { namespace pvData { 
 
@@ -18,7 +19,7 @@ namespace epics { namespace pvData {
          */
         class Status : public epics::pvData::Serializable {
             public:
-            
+                POINTER_DEFINITIONS(Status);
         	/**
         	 * Status type enum.
         	 */
