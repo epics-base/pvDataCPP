@@ -38,9 +38,7 @@ namespace epics { namespace pvData {
      */
     class BitSet : public Serializable {
     public:
-        typedef std::tr1::shared_ptr<BitSet> shared_pointer;
-        typedef std::tr1::shared_ptr<const BitSet> const_shared_pointer;
-
+        POINTER_DEFINITIONS(BitSet);
         /**
          * Creates a new bit set. All bits are initially {@code false}.
          */

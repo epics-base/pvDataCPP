@@ -43,8 +43,7 @@ private:
 
 class Timer : private NoDefaultMethods {
 public:
-    typedef std::tr1::shared_ptr<Timer> shared_pointer;
-    typedef std::tr1::shared_ptr<const Timer> const_shared_pointer;
+    POINTER_DEFINITIONS(Timer);
 
     Timer(String threadName, ThreadPriority priority);
     ~Timer();

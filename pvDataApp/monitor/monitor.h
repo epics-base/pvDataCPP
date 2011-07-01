@@ -21,9 +21,7 @@ namespace epics { namespace pvData {
      */
     class MonitorElement {
         public:
-        typedef std::tr1::shared_ptr<MonitorElement> shared_pointer;
-        typedef std::tr1::shared_ptr<const MonitorElement> const_shared_pointer;
-
+        POINTER_DEFINITIONS(MonitorElement);
         /**
          * Get the PVStructure.
          * @return The PVStructure.
@@ -48,9 +46,7 @@ namespace epics { namespace pvData {
      */
     class Monitor : public Destroyable, private NoDefaultMethods {
         public:
-        typedef std::tr1::shared_ptr<Monitor> shared_pointer;
-        typedef std::tr1::shared_ptr<const Monitor> const_shared_pointer;
-
+        POINTER_DEFINITIONS(Monitor);
         /**
          * Start monitoring.
          * @return completion status.
@@ -81,9 +77,7 @@ namespace epics { namespace pvData {
      */
     class MonitorRequester : public virtual Requester {
         public:
-        typedef std::tr1::shared_ptr<MonitorRequester> shared_pointer;
-        typedef std::tr1::shared_ptr<const MonitorRequester> const_shared_pointer;
-
+        POINTER_DEFINITIONS(MonitorRequester);
         /**
          * The client and server have both completed the createMonitor request.
          * @param status Completion status.

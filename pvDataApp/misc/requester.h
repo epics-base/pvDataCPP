@@ -22,8 +22,7 @@ extern StringArray messageTypeName;
 
 class Requester {
 public:
-    typedef std::tr1::shared_ptr<Requester> shared_pointer;
-    typedef std::tr1::shared_ptr<const Requester> const_shared_pointer;
+    POINTER_DEFINITIONS(Requester);
 
     virtual ~Requester(){}
     virtual String getRequesterName() = 0;

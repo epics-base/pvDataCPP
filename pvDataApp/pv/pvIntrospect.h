@@ -61,9 +61,7 @@ namespace ScalarTypeFunc {
 
 class Field :  public std::tr1::enable_shared_from_this<Field> {
 public:
-   typedef std::tr1::shared_ptr<Field> shared_pointer;
-   typedef std::tr1::shared_ptr<const Field> const_shared_pointer;
-
+   POINTER_DEFINITIONS(Field);
    String getFieldName() const{return m_fieldName;}
    Type getType() const{return m_type;}
    virtual void toString(StringBuilder buf) const{toString(buf,0);}
@@ -89,8 +87,7 @@ private:
 
 class Scalar : public Field{
 public:
-   typedef std::tr1::shared_ptr<Scalar> shared_pointer;
-   typedef std::tr1::shared_ptr<const Scalar> const_shared_pointer;
+   POINTER_DEFINITIONS(Scalar);
    typedef Scalar& reference;
    typedef const Scalar& const_reference;
 
@@ -107,8 +104,7 @@ private:
 
 class ScalarArray : public Field{
 public:
-   typedef std::tr1::shared_ptr<ScalarArray> shared_pointer;
-   typedef std::tr1::shared_ptr<const ScalarArray> const_shared_pointer;
+   POINTER_DEFINITIONS(ScalarArray);
    typedef ScalarArray& reference;
    typedef const ScalarArray& const_reference;
 
@@ -125,8 +121,7 @@ private:
 
 class StructureArray : public Field{
 public:
-   typedef std::tr1::shared_ptr<StructureArray> shared_pointer;
-   typedef std::tr1::shared_ptr<const StructureArray> const_shared_pointer;
+   POINTER_DEFINITIONS(StructureArray);
    typedef StructureArray& reference;
    typedef const StructureArray& const_reference;
 
@@ -144,8 +139,7 @@ private:
 
 class Structure : public Field {
 public:
-   typedef std::tr1::shared_ptr<Structure> shared_pointer;
-   typedef std::tr1::shared_ptr<const Structure> const_shared_pointer;
+   POINTER_DEFINITIONS(Structure);
    typedef Structure& reference;
    typedef const Structure& const_reference;
 

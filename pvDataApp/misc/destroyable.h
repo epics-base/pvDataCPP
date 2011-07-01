@@ -18,8 +18,7 @@ namespace epics { namespace pvData {
          */
         class Destroyable  {
             public:
-            typedef std::tr1::shared_ptr<Destroyable> shared_pointer;
-            typedef std::tr1::shared_ptr<const Destroyable> const_shared_pointer;
+            POINTER_DEFINITIONS(Destroyable);
             /**
              * Destroy this instance.
              */
