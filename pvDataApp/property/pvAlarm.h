@@ -4,12 +4,14 @@
  * EPICS pvDataCPP is distributed subject to a Software License Agreement found
  * in file LICENSE that is included with this distribution.
  */
+#ifndef PVALARM_H
+#define PVALARM_H
 #include <string>
 #include <pv/pvType.h>
 #include <pv/alarm.h>
-#ifndef PVALARM_H
-#define PVALARM_H
-namespace epics { namespace pvData { 
+#include <pv/pvData.h>
+
+namespace epics { namespace pvData {
 
 class PVAlarm {
 public:

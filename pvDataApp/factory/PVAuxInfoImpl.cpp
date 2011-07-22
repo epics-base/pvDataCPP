@@ -29,7 +29,7 @@ PVAuxInfo::PVAuxInfo(PVField *pvField)
 PVAuxInfo::~PVAuxInfo()
 {
     PVDATA_REFCOUNT_MONITOR_DESTRUCT(pvAuxInfo);
-    for(int i=0; i<lengthInfo; i++) delete pvInfos[i];
+    for(int i=0; i<numberInfo; i++) delete pvInfos[i];
     delete[] pvInfos;
 }
 
