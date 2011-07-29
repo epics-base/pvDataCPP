@@ -18,12 +18,12 @@ Status Status::OK;
 //PVDATA_REFCOUNT_MONITOR_DEFINE(status);
 
 Status::Status() :
-    m_type(STATUSTYPE_OK), m_message(m_emptyString), m_stackDump(m_emptyString)
+    m_type(STATUSTYPE_OK)
 {
 }
 
 Status::Status(StatusType type, String message) :
-    m_type(type), m_message(message), m_stackDump(m_emptyString)
+    m_type(type), m_message(message)
 {
     if (type == STATUSTYPE_OK)
         throw std::invalid_argument("type == STATUSTYPE_OK");
