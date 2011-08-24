@@ -53,6 +53,7 @@ private:
 
 class PostHandler {
 public:
+    virtual ~PostHandler(){}
     virtual void postPut() = 0;
 };
 

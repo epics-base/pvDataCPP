@@ -22,6 +22,7 @@ namespace epics { namespace pvData {
     class MonitorElement {
         public:
         POINTER_DEFINITIONS(MonitorElement);
+        virtual ~MonitorElement(){}
         /**
          * Get the PVStructure.
          * @return The PVStructure.
@@ -47,6 +48,7 @@ namespace epics { namespace pvData {
     class Monitor : public Destroyable, private NoDefaultMethods {
         public:
         POINTER_DEFINITIONS(Monitor);
+        virtual ~Monitor(){}
         /**
          * Start monitoring.
          * @return completion status.
@@ -78,6 +80,7 @@ namespace epics { namespace pvData {
     class MonitorRequester : public virtual Requester {
         public:
         POINTER_DEFINITIONS(MonitorRequester);
+        virtual ~MonitorRequester(){}
         /**
          * The client and server have both completed the createMonitor request.
          * @param status Completion status.
