@@ -5,7 +5,7 @@ There is a logic_error
 On line 68 of ../testBaseException.cpp
 ../bin/linux-x86/testBaseException[0x80497b9]
 ../bin/linux-x86/testBaseException[0x8049a54]
-/lib/libc.so.6(__libc_start_main+0xe6)[0x126e36]
+/lib/libc.so.6(__libc_start_main+0xe6)[0x3aae36]
 ../bin/linux-x86/testBaseException[0x80490e1]
 To translate run 'addr2line -e execname 0xXXXXXXX ...'
   Note: Must be compiled with debug symbols
@@ -17,7 +17,7 @@ On line 75 of ../testBaseException.cpp
 ../bin/linux-x86/testBaseException() [0x8049cec]
 ../bin/linux-x86/testBaseException() [0x8049923]
 ../bin/linux-x86/testBaseException() [0x8049a54]
-/lib/libc.so.6(__libc_start_main+0xe6) [0x126e36]
+/lib/libc.so.6(__libc_start_main+0xe6) [0x3aae36]
 ../bin/linux-x86/testBaseException() [0x80490e1]
 
 testBaseException... 
@@ -26,7 +26,7 @@ all is OK
 On line 48 of ../testBaseException.cpp
 ../bin/linux-x86/testBaseException() [0x8049581]
 ../bin/linux-x86/testBaseException() [0x8049a5c]
-/lib/libc.so.6(__libc_start_main+0xe6) [0x126e36]
+/lib/libc.so.6(__libc_start_main+0xe6) [0x3aae36]
 ../bin/linux-x86/testBaseException() [0x80490e1]
 
 
@@ -38,7 +38,7 @@ On line 57 of ../testBaseException.cpp
 ../bin/linux-x86/testBaseException() [0x80491ec]
 ../bin/linux-x86/testBaseException() [0x80496f9]
 ../bin/linux-x86/testBaseException() [0x8049a5c]
-/lib/libc.so.6(__libc_start_main+0xe6) [0x126e36]
+/lib/libc.so.6(__libc_start_main+0xe6) [0x3aae36]
 ../bin/linux-x86/testBaseException() [0x80490e1]
 
 

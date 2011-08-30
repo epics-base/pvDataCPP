@@ -156,8 +156,8 @@ TimeStamp & TimeStamp::operator-=(int64 seconds)
 
 TimeStamp & TimeStamp::operator+=(double seconds)
 {
-    int64 secs = seconds;
-    int64 nano = (seconds - secs)*1e9;
+    int64 secs = static_cast<int64>(seconds);
+    int64 nano = static_cast<int64>((seconds - secs)*1e9);
     nanoSeconds += nano;
     if(nanoSeconds>nanoSecPerSec) {
         nanoSeconds -= nanoSecPerSec;
