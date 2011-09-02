@@ -35,7 +35,10 @@ namespace epics {
             else if(s<254)
                 buffer->putByte(s);
             else
-                buffer->putByte(-2)->putInt(s); // (byte)-2 + size
+            {
+                buffer->putByte(-2);
+                buffer->putInt(s); // (byte)-2 + size
+            }
         }
 
         int SerializeHelper::readSize(ByteBuffer* buffer,
