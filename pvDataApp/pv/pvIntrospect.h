@@ -62,6 +62,7 @@ namespace ScalarTypeFunc {
 class Field :  public std::tr1::enable_shared_from_this<Field> {
 public:
    POINTER_DEFINITIONS(Field);
+   virtual ~Field();
    String getFieldName() const{return m_fieldName;}
    Type getType() const{return m_type;}
    virtual void toString(StringBuilder buf) const{toString(buf,0);}
@@ -69,7 +70,6 @@ public:
    void renameField(String  newName);
 protected:
    Field(String fieldName,Type type);
-   virtual ~Field();
 private:
    String m_fieldName;
    Type m_type;
@@ -88,6 +88,7 @@ private:
 class Scalar : public Field{
 public:
    POINTER_DEFINITIONS(Scalar);
+   virtual ~Scalar();
    typedef Scalar& reference;
    typedef const Scalar& const_reference;
 
@@ -96,7 +97,6 @@ public:
    virtual void toString(StringBuilder buf,int indentLevel) const;
 protected:
    Scalar(String fieldName,ScalarType scalarType);
-   virtual ~Scalar();
 private:
    ScalarType scalarType;
    friend class FieldCreate;
@@ -105,6 +105,7 @@ private:
 class ScalarArray : public Field{
 public:
    POINTER_DEFINITIONS(ScalarArray);
+   ScalarArray(String fieldName,ScalarType scalarType);
    typedef ScalarArray& reference;
    typedef const ScalarArray& const_reference;
 
@@ -112,7 +113,6 @@ public:
    virtual void toString(StringBuilder buf) const{toString(buf,0);}
    virtual void toString(StringBuilder buf,int indentLevel) const;
 protected:
-   ScalarArray(String fieldName,ScalarType scalarType);
    virtual ~ScalarArray();
 private:
    ScalarType elementType;
@@ -133,13 +133,14 @@ protected:
    StructureArray(String fieldName,StructureConstPtr structure);
    virtual ~StructureArray();
 private:
-    StructureConstPtr pstructure;
+   StructureConstPtr pstructure;
    friend class FieldCreate;
 };
 
 class Structure : public Field {
 public:
    POINTER_DEFINITIONS(Structure);
+   virtual ~Structure();
    typedef Structure& reference;
    typedef const Structure& const_reference;
 
@@ -154,7 +155,6 @@ public:
    virtual void toString(StringBuilder buf,int indentLevel) const;
 protected:
    Structure(String fieldName, int numberFields,FieldConstPtrArray fields);
-   virtual ~Structure();
 private:
     int numberFields;
     FieldConstPtrArray  fields;
