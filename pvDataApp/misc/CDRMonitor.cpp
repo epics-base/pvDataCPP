@@ -43,6 +43,23 @@ CDRMonitor::init(void *)
     theone=new CDRMonitor;
 }
 
+void
+CDRMonitor::destroy()
+{
+    if (theone)
+    {
+        CDRNode *node = theone->first();
+        while (node)
+        {
+            CDRNode* tmp = node;
+            node = node->next();
+            delete tmp;
+        }
+        delete theone;
+        theone = 0;
+    }
+}
+
 CDRMonitor::CDRMonitor()
     :firstNode(0)
 {}
@@ -59,21 +76,25 @@ CDRMonitor::current()
 }
 
 void
-CDRMonitor::show(FILE *fd)
+CDRMonitor::show(FILE *fd, bool destroy)
 {
     for(CDRNode *cur=first(); !!cur; cur=cur->next())
     {
         cur->show(fd);
     }
+    if (destroy)
+        CDRMonitor::destroy();
 }
 
 void
-CDRMonitor::show(std::ostream& out) const
+CDRMonitor::show(std::ostream& out, bool destroy) const
 {
     for(CDRNode *cur=first(); !!cur; cur=cur->next())
     {
         cur->show(out);
     }
+    if (destroy)
+        CDRMonitor::destroy();
 }
 
 void

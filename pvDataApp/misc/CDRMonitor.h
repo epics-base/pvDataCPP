@@ -36,6 +36,7 @@ class CDRNode;
 class CDRMonitor : private NoDefaultMethods {
 public:
     static CDRMonitor& get();
+    static void destroy();
 
     CDRNode* addNode(CDRNode& next)
     {
@@ -48,8 +49,8 @@ public:
 
     CDRNode* first() const{return firstNode;}
 
-    void show(FILE*);
-    void show(std::ostream&) const;
+    void show(FILE*, bool destroy = false);
+    void show(std::ostream&, bool destroy = false) const;
 private:
     // Private ctor for singleton
     CDRMonitor();
