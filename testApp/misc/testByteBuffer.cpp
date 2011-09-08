@@ -25,9 +25,9 @@ using namespace epics::pvData;
 void testBasicOperations(std::ostream& ofile) {
     ofile<<"Basic operation tests...\n";
 
-    ByteBuffer* buff = new ByteBuffer();
+    ByteBuffer* buff = new ByteBuffer(32);
     assert(buff->getSize()==32);
-    assert(buff->getByteOrder()==EPICS_BYTE_ORDER);
+//    assert(buff->getByteOrder()==EPICS_BYTE_ORDER);
     assert(buff->getPosition()==0);
     assert(buff->getLimit()==32);
     assert(buff->getRemaining()==32);
@@ -70,6 +70,18 @@ void testBasicOperations(std::ostream& ofile) {
     assert(buff->getLong(8)==2345678123LL);
     assert(buff->getFloat(16)==testFloat);
     assert(buff->getDouble(20)==testDouble);
+/*
+    uintptr_t sp = buff->getPosition();
+    buff->setPosition(0);
+    assert(buff->getBoolean()==true);
+    assert(buff->getByte()==-12);
+    assert(buff->getShort()==10516);
+    assert(buff->getInt()==0x1937628B);
+    assert(buff->getLong()==2345678123LL);
+    assert(buff->getFloat()==testFloat);
+    assert(buff->getDouble()==testDouble);
+    buff->setPosition(sp);
+*/
 
     buff->flip();
     assert(buff->getLimit()==28);
@@ -122,7 +134,19 @@ void testBasicOperations(std::ostream& ofile) {
     buff->putLong(8, 2345678123LL);
     buff->putFloat(16, testFloat);
     buff->putDouble(20, testDouble);
-
+/*
+    buff->clear();
+    buff->setPosition(28);
+    sp = buff->getPosition();
+    buff->putBoolean(true);
+    buff->putByte(-12);
+    buff->putShort(10516);
+    buff->putInt(0x1937628B);
+    buff->putLong(2345678123LL);
+    buff->putFloat(testFloat);
+    buff->putDouble(testDouble);
+    buff->setPosition(sp);
+*/
     buff->flip();
     assert(buff->getLimit()==28);
     assert(buff->getPosition()==0);

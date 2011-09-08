@@ -63,7 +63,7 @@ namespace epics {
             SerializeHelper::writeSize(len, buffer, flusher);
             int i = 0;
             while(true) {
-                int maxToWrite = min(len-i, buffer->getRemaining());
+                int maxToWrite = min(len-i, (int)buffer->getRemaining());
                 buffer->put(value.data(), i, maxToWrite); // UTF-8
                 i += maxToWrite;
                 if(i<len)
@@ -85,7 +85,7 @@ namespace epics {
             SerializeHelper::writeSize(count, buffer, flusher);
             int i = 0;
             while(true) {
-                int maxToWrite = min(count-i, buffer->getRemaining());
+                int maxToWrite = min(count-i, (int)buffer->getRemaining());
                 buffer->put(value.data(), offset+i, maxToWrite); // UTF-8
                 i += maxToWrite;
                 if(i<count)
@@ -103,7 +103,7 @@ namespace epics {
             int size = SerializeHelper::readSize(buffer, control);
             if(size>0)
             {
-                if (buffer->getRemaining()>=size)
+                if ((int)buffer->getRemaining()>=size)
                 {
                     // entire string is in buffer, simply create a string out of it (copy)
                     int pos = buffer->getPosition();
@@ -118,7 +118,7 @@ namespace epics {
                     try {
                         int i = 0;
                         while(true) {
-                            int toRead = min(size-i, buffer->getRemaining());
+                            int toRead = min(size-i, (int)buffer->getRemaining());
                             int pos = buffer->getPosition();
                             str.append(buffer->getArray()+pos, toRead);
                             buffer->setPosition(pos+toRead);

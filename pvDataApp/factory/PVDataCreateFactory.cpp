@@ -261,17 +261,24 @@ template<typename T>
 void DefaultPVArray<T>::deserialize(ByteBuffer *pbuffer,
         DeserializableControl *pcontrol) {
     int size = SerializeHelper::readSize(pbuffer, pcontrol);
+    // if (size>0) { pcontrol->ensureData(sizeof(T)-1); pbuffer->align(sizeof(T)); }
     if(size>=0) {
         // prepare array, if necessary
         if(size>this->getCapacity()) this->setCapacity(size);
         // retrieve value from the buffer
         int i = 0;
         while(true) {
-            int maxIndex = std::min(size-i, pbuffer->getRemaining())+i;
+            /*
+            int maxIndex = std::min(size-i, (int)(pbuffer->getRemaining()/sizeof(T)))+i;
             for(; i<maxIndex; i++)
                 value[i] = pbuffer->get<T>();
+              */  
+            int maxCount = std::min(size-i, (int)(pbuffer->getRemaining()/sizeof(T)));
+            pbuffer->getArray<T>(&value[i], maxCount);
+            i += maxCount;
+            
             if(i<size)
-                pcontrol->ensureData(1); // // TODO is there a better way to ensureData?
+                pcontrol->ensureData(sizeof(T)); // this is not OK since can exceen max local buffer (size-i)*sizeof(T));
             else
                 break;
         }
@@ -299,12 +306,21 @@ void DefaultPVArray<T>::serialize(ByteBuffer *pbuffer,
 
     // write
     SerializeHelper::writeSize(count, pbuffer, pflusher);
+    //if (count == 0) return; pcontrol->ensureData(sizeof(T)-1); pbuffer->align(sizeof(T));
     int end = offset+count;
     int i = offset;
     while(true) {
-        int maxIndex = std::min<int>(end-i, pbuffer->getRemaining())+i;
+        
+        /*
+        int maxIndex = std::min<int>(end-i, (int)(pbuffer->getRemaining()/sizeof(T)))+i;
         for(; i<maxIndex; i++)
-            pbuffer->put(value[i]);
+            pbuffer->put<T>(value[i]);
+        */
+        
+        int maxCount = std::min<int>(end-i, (int)(pbuffer->getRemaining()/sizeof(T)));
+        pbuffer->putArray<T>(&value[i], maxCount);
+        i += maxCount;
+        
         if(i<end)
             pflusher->flushSerializeBuffer();
         else

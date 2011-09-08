@@ -29,7 +29,7 @@ INC += status.h
 INC += sharedPtr.h
 
 LIBSRCS += CDRMonitor.cpp
-LIBSRCS += byteBuffer.cpp
+#LIBSRCS += byteBuffer.cpp
 LIBSRCS += bitSet.cpp
 LIBSRCS += epicsException.cpp
 LIBSRCS += requester.cpp
