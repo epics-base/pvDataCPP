@@ -37,7 +37,7 @@ namespace epics { namespace pvData {
         uint32 length = (nbits <= 0) ? 1 : wordIndex(nbits-1) + 1;
         if (words) delete[] words;
         words = new uint64[length];
-        bzero(words, sizeof(uint64)*length);
+        memset(words, 0, sizeof(uint64)*length);
         wordsLength = length;
     }
 
@@ -60,7 +60,7 @@ namespace epics { namespace pvData {
 
             // create and copy
             uint64* newwords = new uint64[wordsRequired];
-            bzero(newwords, sizeof(uint64)*wordsRequired);
+            memset(newwords, 0, sizeof(uint64)*wordsRequired);
             memcpy(newwords, words, sizeof(uint64)*wordsLength);
             if (words) delete[] words;
             words = newwords;

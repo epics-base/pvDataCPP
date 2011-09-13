@@ -10,6 +10,7 @@
 #include <string>
 #include <pv/pvType.h>
 #include <epicsEndian.h>
+#include <string.h>
 
 #include <pv/epicsException.h>
 
