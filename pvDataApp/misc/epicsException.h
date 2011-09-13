@@ -42,8 +42,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <execinfo.h>
-#include <cxxabi.h>
 
 // Users may redefine this for a large size if desired
 #ifndef EXCEPT_DEPTH
@@ -51,7 +49,8 @@
 #endif
 
 #if defined(__GLIBC__) || (defined(__APPLE__) && defined(__MACH__)) /* and possibly some BSDs */
-#  include<execinfo.h>
+#  include <execinfo.h>
+#  include <cxxabi.h>
 #  define EXCEPT_USE_BACKTRACE
 #elif defined(_WIN32) && !defined(__MINGW__) && !defined(SKIP_DBGHELP)
 #  include <windows.h>
