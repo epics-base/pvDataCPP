@@ -30,6 +30,10 @@ PROD_HOST += testBitSet
 testBitSet_SRCS += testBitSet.cpp
 testBitSet_LIBS += pvData Com
 
+PROD_HOST += testByteOrder
+testByteOrder_SRCS += testByteOrder.cpp
+testByteOrder_LIBS += Com
+
 PROD_HOST += testByteBuffer
 testByteBuffer_SRCS += testByteBuffer.cpp
 testByteBuffer_LIBS += pvData Com
