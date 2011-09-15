@@ -131,17 +131,25 @@ inline int64 swap(int64 val)
 template<>
 inline float swap(float val)
 {
-    int32* pval = (int32*)&val;
-     *pval = swap32(*pval);
-    return val;
+    union {
+        int32 i;
+        float f;
+    } conv;
+    conv.f = val;
+    conv.i = swap32(conv.i);
+    return conv.f;
 }
 
 template<>
 inline double swap(double val)
 {
-    int64* pval = (int64*)&val;
-     *pval = swap64(*pval);
-    return val;
+    union {
+        int64 i;
+        double d;
+    } conv;
+    conv.d = val;
+    conv.i = swap64(conv.i);
+    return conv.d;
 }
 
 #define is_aligned(POINTER, BYTE_COUNT) \
