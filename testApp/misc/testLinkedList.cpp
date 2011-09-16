@@ -28,7 +28,7 @@
 
 using namespace epics::pvData;
 
-static int numNodes = 5;
+static const int numNodes = 5;
 class Basic;
 typedef LinkedListNode<Basic> BasicListNode;
 typedef LinkedList<Basic> BasicList;
@@ -276,7 +276,7 @@ static void testOrderedQueue(FILE * fd ) {
 static void testTime(FILE *auxFd) {
     TimeStamp startTime;
     TimeStamp endTime;
-    int numNodes = 1000;
+    const int numNodes = 1000;
 
     LinkedList<Basic> basicList;
     Basic *basics[numNodes];
@@ -309,7 +309,7 @@ static void testTimeLocked(FILE *auxFd) {
     TimeStamp startTime;
     TimeStamp endTime;
     Mutex mutex;
-    int numNodes = 1000;
+    const int numNodes = 1000;
 
     LinkedList<Basic> basicList;
     Basic *basics[numNodes];
@@ -352,7 +352,7 @@ typedef std::list<Basic *> stdList;
 static void testStdListTime(FILE *auxFd) {
     TimeStamp startTime;
     TimeStamp endTime;
-    int numNodes = 1000;
+    const int numNodes = 1000;
 
     stdList basicList;
     Basic *basics[numNodes];
@@ -385,7 +385,7 @@ static void testStdListTime(FILE *auxFd) {
 static void testStdListTimeLocked(FILE *auxFd) {
     TimeStamp startTime;
     TimeStamp endTime;
-    int numNodes = 1000;
+    const int numNodes = 1000;
     Mutex mutex;
 
     stdList basicList;

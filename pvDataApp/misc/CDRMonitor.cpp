@@ -19,6 +19,11 @@
 #include <pv/linkedList.h>
 #include <pv/CDRMonitor.h>
 
+#ifdef _WIN32
+#include <BaseTsd.h>
+typedef SSIZE_T ssize_t;
+#endif
+
 namespace epics { namespace pvData {
 
 static

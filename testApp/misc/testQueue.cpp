@@ -36,7 +36,7 @@ struct Data {
 };
 
 
-static int numElements = 5;
+static const int numElements = 5;
 typedef QueueElement<Data> DataElement;
 typedef Queue<Data> DataQueue;
 

@@ -242,7 +242,7 @@ void testArray(std::ostream& ofile) {
     assert(factory!=NULL);
 
     ofile<<"\tPVBooleanArray\n";
-    bool boolEmpty[] = { };
+    bool boolEmpty[] = { false };
     bool bv[] = { false, true, false, true, true };
     PVBooleanArray* pvBoolean = (PVBooleanArray*)factory->createPVScalarArray(
             NULL, "pvBooleanArray", epics::pvData::pvBoolean);
@@ -253,7 +253,7 @@ void testArray(std::ostream& ofile) {
     delete pvBoolean;
 
     ofile<<"\tPVByteArray\n";
-    int8 byteEmpty[] = { };
+    int8 byteEmpty[] = { 0 };
     int8 byv[] = { 0, 1, 2, -1, BYTE_MAX_VALUE, BYTE_MAX_VALUE-1,
             BYTE_MIN_VALUE+1, BYTE_MIN_VALUE };
     PVByteArray* pvByte = (PVByteArray*)factory->createPVScalarArray(NULL,
@@ -265,7 +265,7 @@ void testArray(std::ostream& ofile) {
     delete pvByte;
 
     ofile<<"\tPVShortArray\n";
-    int16 shortEmpty[] = { };
+    int16 shortEmpty[] = { 0 };
     int16 sv[] = { 0, 1, 2, -1, SHORT_MAX_VALUE, SHORT_MAX_VALUE-1,
             SHORT_MIN_VALUE+1, SHORT_MIN_VALUE };
     PVShortArray* pvShort = (PVShortArray*)factory->createPVScalarArray(NULL,
@@ -277,7 +277,7 @@ void testArray(std::ostream& ofile) {
     delete pvShort;
 
     ofile<<"\tPVIntArray\n";
-    int32 intEmpty[] = { };
+    int32 intEmpty[] = { 0 };
     int32 iv[] = { 0, 1, 2, -1, INT_MAX_VALUE, INT_MAX_VALUE-1,
             INT_MIN_VALUE+1, INT_MIN_VALUE };
     PVIntArray* pvInt = (PVIntArray*)factory->createPVScalarArray(NULL,
@@ -289,7 +289,7 @@ void testArray(std::ostream& ofile) {
     delete pvInt;
 
     ofile<<"\tPVLongArray\n";
-    int64 longEmpty[] = { };
+    int64 longEmpty[] = { 0 };
     int64 lv[] = { 0, 1, 2, -1, LONG_MAX_VALUE, LONG_MAX_VALUE-1,
             LONG_MIN_VALUE+1, LONG_MIN_VALUE };
     PVLongArray* pvLong = (PVLongArray*)factory->createPVScalarArray(NULL,
@@ -301,7 +301,7 @@ void testArray(std::ostream& ofile) {
     delete pvLong;
 
     ofile<<"\tPVFloatArray\n";
-    float floatEmpty[] = { };
+    float floatEmpty[] = { (float)0.0 };
     float fv[] = { (float)0.0, (float)1.1, (float)2.3, (float)-1.4,
             FLOAT_MAX_VALUE, FLOAT_MAX_VALUE-(float)123456.789, FLOAT_MIN_VALUE
                     +(float)1.1, FLOAT_MIN_VALUE };
@@ -314,7 +314,7 @@ void testArray(std::ostream& ofile) {
     delete pvFloat;
 
     ofile<<"\tPVDoubleArray\n";
-    double doubleEmpty[] = { };
+    double doubleEmpty[] = { (double)0.0 };
     double dv[] = { (double)0.0, (double)1.1, (double)2.3, (double)-1.4,
             DOUBLE_MAX_VALUE, DOUBLE_MAX_VALUE-(double)123456.789,
             DOUBLE_MIN_VALUE+(double)1.1, DOUBLE_MIN_VALUE };
@@ -327,7 +327,7 @@ void testArray(std::ostream& ofile) {
     delete pvDouble;
 
     ofile<<"\tPVStringArray\n";
-    String stringEmpty[] = { };
+    String stringEmpty[] = { "" };
     String
             strv[] =
                     {
