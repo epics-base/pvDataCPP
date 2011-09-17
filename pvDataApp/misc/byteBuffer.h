@@ -169,7 +169,9 @@ class ByteBuffer
 {
 public:
     ByteBuffer(uintptr_t size, int byteOrder = EPICS_BYTE_ORDER) :
-        _buffer(0), _size(size), _reverseEndianess(byteOrder != EPICS_BYTE_ORDER)
+        _buffer(0), _size(size),
+        _reverseEndianess(byteOrder != EPICS_BYTE_ORDER),
+        _reverseFloatEndianess(byteOrder != EPICS_FLOAT_WORD_ORDER)
     {
         _buffer = (char*)malloc(size);
         clear();
@@ -183,6 +185,7 @@ public:
     inline void setEndianess(int byteOrder)
     {
         _reverseEndianess = (byteOrder != EPICS_BYTE_ORDER);
+        _reverseFloatEndianess = (byteOrder != EPICS_FLOAT_WORD_ORDER);
     }
     
     inline const char* getBuffer()
@@ -248,7 +251,7 @@ public:
             return;
         }
         
-        if (ENDIANESS_SUPPORT && _reverseEndianess)
+        if (ENDIANESS_SUPPORT && reverse<T>())
         {
             value = swap<T>(value);
         }
@@ -299,7 +302,7 @@ public:
             return;
         }
         
-        if (ENDIANESS_SUPPORT && _reverseEndianess)
+        if (ENDIANESS_SUPPORT && reverse<T>())
         {
             value = swap<T>(value);
         }
@@ -382,7 +385,7 @@ public:
             }
         }
         
-        if (ENDIANESS_SUPPORT && _reverseEndianess)
+        if (ENDIANESS_SUPPORT && reverse<T>())
         {
             value = swap<T>(value);
         }
@@ -434,7 +437,7 @@ public:
             }
         }
         
-        if (ENDIANESS_SUPPORT && _reverseEndianess)
+        if (ENDIANESS_SUPPORT && reverse<T>())
         {
             value = swap<T>(value);
         }
@@ -476,7 +479,7 @@ public:
         _position += n;
         
         // ... so that we can be fast changing endianess
-        if (ENDIANESS_SUPPORT && _reverseEndianess) 
+        if (ENDIANESS_SUPPORT && reverse<T>()) 
         {
             for (uintptr_t i = 0; i < count; i++)
             {
@@ -509,7 +512,7 @@ public:
         _position += n;
         
         // ... so that we can be fast changing endianess
-        if (ENDIANESS_SUPPORT && _reverseEndianess) 
+        if (ENDIANESS_SUPPORT && reverse<T>()) 
         {
             for (uintptr_t i = 0; i < count; i++)
             {
@@ -519,6 +522,15 @@ public:
         }
     }
     
+    
+    template<typename T>
+    inline bool reverse()
+    {
+        return _reverseEndianess;
+    }
+    
+    
+
     // NOTE: size must be power of 2
     inline void align(int size)
     {
@@ -574,7 +586,21 @@ private:
     char* _limit;
     uintptr_t _size;
     bool _reverseEndianess; 
+    bool _reverseFloatEndianess; 
 };
+
+    template<>
+    inline bool ByteBuffer::reverse<float>()
+    {
+        return _reverseFloatEndianess;
+    }
+
+    template<>
+    inline bool ByteBuffer::reverse<double>()
+    {
+        return _reverseFloatEndianess;
+    }
+
 
     }
 }
