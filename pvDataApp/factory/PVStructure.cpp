@@ -8,6 +8,7 @@
 #include <cstdlib>
 #include <string>
 #include <cstdio>
+#include <vector>
 #include <pv/pvData.h>
 #include <pv/pvIntrospect.h>
 #include <pv/convert.h>
@@ -150,9 +151,9 @@ namespace epics { namespace pvData {
             throw std::logic_error("Number of fields must be >=0");
 
         Structure::shared_pointer structure = const_pointer_cast<Structure>(getStructure());
-        FieldConstPtr fields[numberNewFields];
+        std::vector<FieldConstPtr> fields(numberNewFields);
         for(int i=0; i<numberNewFields; i++) fields[i] = pvFields[i]->getField();
-        structure->appendFields(numberNewFields,fields);
+        structure->appendFields(numberNewFields,&fields[0]);
         int origLength = pImpl->numberFields;
         PVFieldPtrArray oldPVFields = pImpl->pvFields;
         int numberFields = origLength + numberNewFields;

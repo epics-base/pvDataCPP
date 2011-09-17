@@ -35,6 +35,12 @@
 #  define SHARED_FROM_BOOST
 #endif
 
+#if defined(_MSC_VER) && (_MSC_VER>=1600)
+// MSVC 2010 has it in <memory>
+#  undef SHARED_FROM_BOOST
+#  undef SHARED_FROM_TR1
+#endif
+
 // go and get it
 
 #if defined(SHARED_FROM_TR1)

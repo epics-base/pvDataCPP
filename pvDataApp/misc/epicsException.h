@@ -53,6 +53,7 @@
 #  include <cxxabi.h>
 #  define EXCEPT_USE_BACKTRACE
 #elif defined(_WIN32) && !defined(__MINGW__) && !defined(SKIP_DBGHELP)
+#  define _WINSOCKAPI_
 #  include <windows.h>
 #  include <dbghelp.h>
 #  define EXCEPT_USE_CAPTURE
@@ -84,7 +85,7 @@ public:
     }
 #elif defined(EXCEPT_USE_CAPTURE)
     {
-        m_depth=CaptureStackBackTrace(0,EXCEPT_DEPTH.m_stack,0);
+        m_depth=CaptureStackBackTrace(0,EXCEPT_DEPTH,m_stack,0);
     }
 #else
     {}
@@ -141,7 +142,7 @@ namespace detail {
     std::string
     showException(const E& ex)
     {
-        ExceptionMixin *mx=dynamic_cast<ExceptionMixin*>(&ex);
+        const ExceptionMixin *mx=dynamic_cast<const ExceptionMixin*>(&ex);
         if(!mx) return std::string();
         return mx->show();
     }

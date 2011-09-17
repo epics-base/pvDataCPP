@@ -7,23 +7,10 @@
 #include <pv/noDefaultMethods.h>
 #include <pv/pvType.h>
 #include <pv/timeStamp.h>
+#include <pv/timeFunction.h>
 
 namespace epics { namespace pvData { 
 
-class TimeFunctionRequester {
-public:
-    virtual void function() = 0;
-};
-
-class TimeFunction : private NoDefaultMethods {
-public:
-    TimeFunction(TimeFunctionRequester *requester);
-    ~TimeFunction();
-    double timeCall();
-private:
-    TimeFunctionRequester *requester;
-};
-  
 TimeFunction::TimeFunction(TimeFunctionRequester *requester)
 : requester(requester) {}
 
