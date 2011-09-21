@@ -38,44 +38,48 @@
 
 using namespace epics::pvData;
 
-namespace epics {
-    namespace pvData {
-
-        class SerializableControlImpl : public SerializableControl,
-                public NoDefaultMethods {
-        public:
-            virtual void flushSerializeBuffer() {
-            }
-
-            virtual void ensureBuffer(int size) {
-            }
-
-            SerializableControlImpl() {
-            }
-
-            virtual ~SerializableControlImpl() {
-            }
-        };
-
-        class DeserializableControlImpl : public DeserializableControl,
-                public NoDefaultMethods {
-        public:
-            virtual void ensureData(int size) {
-            }
-
-            DeserializableControlImpl() {
-            }
-
-            virtual ~DeserializableControlImpl() {
-            }
-        };
-
-    }
-}
-
 static SerializableControl* flusher;
 static DeserializableControl* control;
 static ByteBuffer* buffer;
+
+
+class SerializableControlImpl : public SerializableControl,
+        public NoDefaultMethods {
+public:
+    virtual void flushSerializeBuffer() {
+    }
+
+    virtual void ensureBuffer(int size) {
+    }
+
+    virtual void alignBuffer(int alignment) {
+        buffer->align(alignment);
+    }
+
+    SerializableControlImpl() {
+    }
+
+    virtual ~SerializableControlImpl() {
+    }
+};
+
+class DeserializableControlImpl : public DeserializableControl,
+        public NoDefaultMethods {
+public:
+    virtual void ensureData(int size) {
+    }
+
+    virtual void alignData(int alignment) {
+        buffer->align(alignment);
+    }
+
+    DeserializableControlImpl() {
+    }
+
+    virtual ~DeserializableControlImpl() {
+    }
+};
+
 
 void serializationTest(PVField* field) {
     buffer->clear();

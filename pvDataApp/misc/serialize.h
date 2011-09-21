@@ -21,12 +21,14 @@ namespace epics { namespace pvData {
         virtual ~SerializableControl(){}
         virtual void flushSerializeBuffer() =0;
         virtual void ensureBuffer(int size) =0;
+        virtual void alignBuffer(int alignment) =0;
     };
 
     class DeserializableControl {
     public:
         virtual ~DeserializableControl(){}
         virtual void ensureData(int size) =0;
+        virtual void alignData(int alignment) =0;
     };
 
     class Serializable {

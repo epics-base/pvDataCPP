@@ -61,10 +61,11 @@ namespace epics {
                 ByteBuffer* buffer, SerializableControl* flusher) {
             int len = value.length();
             SerializeHelper::writeSize(len, buffer, flusher);
+            if (len<=0) return;
             int i = 0;
             while(true) {
                 int maxToWrite = min(len-i, (int)buffer->getRemaining());
-                buffer->put(value.data(), i, maxToWrite); // UTF-8
+                buffer->put(value.data(), i, maxToWrite); // ASCII
                 i += maxToWrite;
                 if(i<len)
                     flusher->flushSerializeBuffer();
@@ -83,10 +84,11 @@ namespace epics {
             if(offset+count>(int)value.length()) count = value.length()-offset;
 
             SerializeHelper::writeSize(count, buffer, flusher);
+            if (count<=0) return;
             int i = 0;
             while(true) {
                 int maxToWrite = min(count-i, (int)buffer->getRemaining());
-                buffer->put(value.data(), offset+i, maxToWrite); // UTF-8
+                buffer->put(value.data(), offset+i, maxToWrite); // ASCII
                 i += maxToWrite;
                 if(i<count)
                     flusher->flushSerializeBuffer();
