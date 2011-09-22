@@ -534,7 +534,8 @@ public:
     // NOTE: size must be power of 2
     inline void align(int size)
     {
-        _position = (char*)((((uintptr_t)(const void *)_position) + size - 1) & ~((uintptr_t)(size - 1)));
+        const uintptr_t k = size - 1;
+        _position = (char*)((((uintptr_t)(const void *)_position) + k) & ~(k));
     }
     
     
