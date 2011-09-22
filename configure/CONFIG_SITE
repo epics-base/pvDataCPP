@@ -24,7 +24,6 @@
 # define INSTALL_LOCATION here
 #INSTALL_LOCATION=<fullpathname>
 
-USR_INCLUDES += -I/usr/include/boost/tr1 
 INSTALL_INCLUDE = $(INSTALL_LOCATION)/include/pv
 USR_INCLUDES += -I $(INSTALL_LOCATION)/include
 

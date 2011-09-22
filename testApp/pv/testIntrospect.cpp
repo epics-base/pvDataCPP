@@ -148,7 +148,7 @@ int main(int argc,char *argv[])
     testSimpleStructure(fd);
     testStructureArray(fd);
     epicsExitCallAtExits();
-    CDRMonitor::get().show(fd);
+    CDRMonitor::get().show(fd,true);
     return(0);
 }
 

@@ -145,7 +145,7 @@ int main(int argc,char *argv[])
     testAppendMore(fd);
     testAppends(fd);
     epicsExitCallAtExits();
-    CDRMonitor::get().show(fd);
+    CDRMonitor::get().show(fd,true);
     return(0);
 }
 
