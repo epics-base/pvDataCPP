@@ -14,6 +14,7 @@ enum AlarmSeverity {
  noAlarm,minorAlarm,majorAlarm,invalidAlarm
 };
 
+extern const size_t severityCount;
 class AlarmSeverityFunc {
 public:
     static AlarmSeverity getSeverity(int value);
