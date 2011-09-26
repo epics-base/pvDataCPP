@@ -19,7 +19,7 @@ enum MessageType {
 };
 
 extern StringArray messageTypeName;
-
+extern const size_t messageTypeCount;
 class Requester {
 public:
     POINTER_DEFINITIONS(Requester);

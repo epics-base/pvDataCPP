@@ -8,7 +8,8 @@
 #include <pv/requester.h>
 namespace epics { namespace pvData { 
 
-static std::string typeName[] = {
+const size_t messageTypeCount = 4; 
+static std::string typeName[messageTypeCount] = {
     String("info"),
     String("warning"),
     String("error"),
@@ -16,5 +17,4 @@ static std::string typeName[] = {
 };
 
 StringArray messageTypeName = typeName;
-    
 }}
