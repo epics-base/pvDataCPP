@@ -301,7 +301,7 @@ int main(int argc,char *argv[])
     testPVScalar(fd);
     testScalarArray(fd);
     epicsExitCallAtExits();
-    CDRMonitor::get().show(fd);
+    CDRMonitor::get().show(fd,true);
     return(0);
 }
 

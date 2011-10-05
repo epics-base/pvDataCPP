@@ -81,7 +81,7 @@ int main(int argc,char *argv[])
     standardPVField = getStandardPVField();
     testPowerSupplyArray(fd);
     epicsExitCallAtExits();
-    CDRMonitor::get().show(fd);
+    CDRMonitor::get().show(fd,true);
     return(0);
 }
 

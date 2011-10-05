@@ -12,7 +12,8 @@
 #include <pv/alarm.h>
 namespace epics { namespace pvData { 
 
-static String severityNames[4] =
+const size_t severityCount = 4;
+static String severityNames[severityCount] =
 {
      String("none"),
      String("minor"),

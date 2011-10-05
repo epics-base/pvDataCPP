@@ -94,7 +94,7 @@ int main(int argc,char *argv[])
     convert = getConvert();
     testPVAuxInfo(fd);
     epicsExitCallAtExits();
-    CDRMonitor::get().show(fd);
+    CDRMonitor::get().show(fd,true);
     return(0);
 }
 
