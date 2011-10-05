@@ -57,7 +57,7 @@ public: // only used by this source module
     Mutex mutex;
     Event waitForWork;
     Event waitForDone;
-    volatile bool alive;
+    bool alive;
     Thread thread;
     void addElement(TimerNode::Pvt &node);
 };
@@ -128,13 +128,14 @@ bool TimerNode::isScheduled()
 void Timer::Pvt::run()
 {
     TimeStamp currentTime;
-    while(alive) {
+    while(true) {
          currentTime.getCurrent();
          TimeStamp *timeToRun = 0;
          double period = 0.0;
          TimerNode::Pvt *nodeToCall = 0;
          {
              Lock xx(mutex);
+             if (!alive) break;
              TimerListNode *timerListNode = timerList.getHead();
              if(timerListNode!=0) {
                  TimerNode::Pvt *timerNodePvt = &timerListNode->getObject();
@@ -164,7 +165,10 @@ void Timer::Pvt::run()
          if(nodeToCall!=0) {
              nodeToCall->callback->callback();
          }
-         if(!alive) break;
+         {
+             Lock xx(mutex);
+             if(!alive) break;
+         }
          if(timeToRun==0) {
             waitForWork.wait();
          } else {
@@ -205,9 +209,12 @@ void Timer::schedulePeriodic(TimerNode &timerNode,double delay,double period)
     if(timerNodePvt->timerListNode.isOnList()) {
         throw std::logic_error(String("already queued"));
     }
-    if(!pImpl->alive) {
-        timerNodePvt->callback->timerStopped();
-        return;
+    {
+        Lock xx(pImpl->mutex);
+        if(!pImpl->alive) {
+            timerNodePvt->callback->timerStopped();
+            return;
+        }
     }
     TimeStamp *timeStamp = &timerNodePvt->timeToRun;
     timeStamp->getCurrent();

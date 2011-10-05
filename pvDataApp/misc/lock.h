@@ -13,6 +13,8 @@
  * Effective C++, Third Edition, Scott Meyers
  */
 
+// TODO reference counting lock to allow recursions
+
 namespace epics { namespace pvData { 
 
 typedef epicsMutex Mutex;
@@ -25,14 +27,19 @@ public:
     ~Lock(){unlock();}
     void lock()
     {
-        if(!locked) mutexPtr.lock();
-        locked = true;
+        if(!locked) 
+        {
+            mutexPtr.lock();
+            locked = true;
+        }
     }
     void unlock()
     {
         if(locked)
+        {
             mutexPtr.unlock();
-        locked=false;
+            locked=false;
+        }
     }
     bool ownsLock() const{return locked;}
 private:
