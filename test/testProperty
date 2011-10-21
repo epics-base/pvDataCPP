@@ -2,10 +2,12 @@ structure value
     double value 0
     alarm alarm
         int severity 0
+        int status 0
         string message 
     timeStamp timeStamp
         long secondsPastEpoch 0
         int nanoSeconds 0
+        int userTag 0
     display display
         string description 
         string format 
@@ -24,12 +26,14 @@ structure value
         string[] choices [0,1,2,3]
     alarm alarm
         int severity 0
+        int status 0
         string message 
     timeStamp timeStamp
         long secondsPastEpoch 0
         int nanoSeconds 0
+        int userTag 0
 testAlarm
- message testMessage severity major
+ message testMessage severity MAJOR status CLIENT
 testTimeStamp
 testControl
  low 1.000000 high 10.000000
@@ -43,10 +47,12 @@ structure value
     double value 0
     alarm alarm
         int severity 2
+        int status 7
         string message testMessage
     timeStamp timeStamp
         long secondsPastEpoch 0
         int nanoSeconds 0
+        int userTag 32
     display display
         string description testDescription
         string format %f10.0
@@ -66,9 +72,11 @@ structure value
         string[] choices [0,1,2,3]
     alarm alarm
         int severity 0
+        int status 0
         string message 
     timeStamp timeStamp
         long secondsPastEpoch 0
         int nanoSeconds 0
-pvField:  totalConstruct 30 totalDestruct 30
-field:  totalConstruct 99 totalDestruct 99
+        int userTag 0
+pvField:  totalConstruct 34 totalDestruct 34
+field:  totalConstruct 101 totalDestruct 101

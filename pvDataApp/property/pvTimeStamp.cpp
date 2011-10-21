@@ -53,19 +53,26 @@ bool PVTimeStamp::attach(PVField *pvField)
             pvField->message(noTimeStamp,errorMessage);
             return false;
     }
+    pvSecs = pvLong;
     PVInt *pvInt = pvStructure->getIntField(String("nanoSeconds"));
     if(pvLong==0) {
             pvField->message(noTimeStamp,errorMessage);
             return false;
     }
-    pvSecs = pvLong;
     pvNano = pvInt;
+    pvInt = pvStructure->getIntField(String("userTag"));
+    if(pvInt==0) {
+            pvField->message(noTimeStamp,errorMessage);
+            return false;
+    }
+    pvUserTag = pvInt;
     return true;
 }
 
 void PVTimeStamp::detach()
 {
     pvSecs = 0;
+    pvUserTag = 0;
     pvNano = 0;
 }
 
@@ -80,15 +87,17 @@ void PVTimeStamp::get(TimeStamp & timeStamp) const
         throw std::logic_error(notAttached);
     }
     timeStamp.put(pvSecs->get(),pvNano->get());
+    timeStamp.setUserTag(pvUserTag->get());
 }
 
 bool PVTimeStamp::set(TimeStamp const & timeStamp)
 {
-    if(pvSecs==0 || pvNano==0) {
+    if(pvSecs==0 || pvNano==0 || pvUserTag==0) {
         throw std::logic_error(notAttached);
     }
     if(pvSecs->isImmutable() || pvNano->isImmutable()) return false;
     pvSecs->put(timeStamp.getSecondsPastEpoch());
+    pvUserTag->put(timeStamp.getUserTag());
     pvNano->put(timeStamp.getNanoSeconds());
     return true;
 }

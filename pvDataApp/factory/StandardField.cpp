@@ -41,17 +41,19 @@ static StructureConstPtr enumeratedAlarmField;
 
 
 static void createAlarm() {
-    FieldConstPtrArray fields = new FieldConstPtr[2];
+    FieldConstPtrArray fields = new FieldConstPtr[3];
     fields[0] = fieldCreate->createScalar(String("severity"),pvInt);
-    fields[1] = fieldCreate->createScalar(String("message"),pvString);
-    alarmField = fieldCreate->createStructure(String("alarm"),2,fields);
+    fields[1] = fieldCreate->createScalar(String("status"),pvInt);
+    fields[2] = fieldCreate->createScalar(String("message"),pvString);
+    alarmField = fieldCreate->createStructure(String("alarm"),3,fields);
 }
 
 static void createTimeStamp() {
-    FieldConstPtrArray fields = new FieldConstPtr[2];
+    FieldConstPtrArray fields = new FieldConstPtr[3];
     fields[0] = fieldCreate->createScalar(String("secondsPastEpoch"),pvLong);
     fields[1] = fieldCreate->createScalar(String("nanoSeconds"),pvInt);
-    timeStampField = fieldCreate->createStructure(String("timeStamp"),2,fields);
+    fields[2] = fieldCreate->createScalar(String("userTag"),pvInt);
+    timeStampField = fieldCreate->createStructure(String("timeStamp"),3,fields);
 }
 
 static void createDisplay() {

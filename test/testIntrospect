@@ -24,10 +24,12 @@ structure value
     double value
     structure alarm
         int severity
+        int status
         string message
     structure timeStamp
         long secondsPastEpoch
         int nanoSeconds
+        int userTag
     structure display
         string description
         string format
@@ -60,22 +62,27 @@ structure value
                 double value
                 structure alarm
                     int severity
+                    int status
                     string message
             structure power
                 double value
                 structure alarm
                     int severity
+                    int status
                     string message
             structure current
                 double value
                 structure alarm
                     int severity
+                    int status
                     string message
     structure alarm
         int severity
+        int status
         string message
     structure timeStamp
         long secondsPastEpoch
         int nanoSeconds
-pvField:  totalConstruct 47 totalDestruct 47
-field:  totalConstruct 120 totalDestruct 120
+        int userTag
+pvField:  totalConstruct 49 totalDestruct 49
+field:  totalConstruct 122 totalDestruct 122

@@ -15,7 +15,7 @@ namespace epics { namespace pvData {
 
 class PVTimeStamp {
 public:
-    PVTimeStamp() : pvSecs(0),pvNano(0) {}
+    PVTimeStamp() : pvSecs(0),pvUserTag(0), pvNano(0) {}
     //default constructors and destructor are OK
     //This class should not be extended
     
@@ -29,6 +29,7 @@ public:
     bool set(TimeStamp const & timeStamp);
 private:
     PVLong* pvSecs;
+    PVInt* pvUserTag;
     PVInt* pvNano;
 };
     

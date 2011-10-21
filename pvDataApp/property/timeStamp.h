@@ -20,8 +20,8 @@ extern int64 posixEpochAtEpicsEpoch;
 class TimeStamp {
 public:
     TimeStamp() 
-    :secondsPastEpoch(0),nanoSeconds(0) {}
-    TimeStamp(int64 secondsPastEpoch,int32 nanoSeconds = 0);
+    :secondsPastEpoch(0), nanoSeconds(0), userTag(0) {}
+    TimeStamp(int64 secondsPastEpoch,int32 nanoSeconds = 0,int32 userTag = 0);
     //default constructors and destructor are OK
     //This class should not be extended
     void normalize();
@@ -32,6 +32,8 @@ public:
         return secondsPastEpoch - posixEpochAtEpicsEpoch;
     }
     int32 getNanoSeconds() const  {return nanoSeconds;}
+    int32 getUserTag() const {return userTag;}
+    void setUserTag(int userTag) {this->userTag = userTag;}
     void put(int64 secondsPastEpoch,int32 nanoSeconds = 0) {
         this->secondsPastEpoch = secondsPastEpoch;
         this->nanoSeconds = nanoSeconds;
@@ -56,6 +58,7 @@ private:
     static int64 diffInt(TimeStamp const &left,TimeStamp const  &right );
     int64 secondsPastEpoch;
     int32 nanoSeconds;
+    int32 userTag;
 };
   
 

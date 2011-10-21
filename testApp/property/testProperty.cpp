@@ -92,14 +92,17 @@ static void testAlarm(FILE * fd,FILE *auxfd)
     Alarm al;
     al.setMessage(String("testMessage"));
     al.setSeverity(majorAlarm);
+    al.setStatus(clientStatus);
     result = pvAlarm.set(al);
     assert(result);
     pvAlarm.get(alarm);
     assert(al.getMessage().compare(alarm.getMessage())==0);
     assert(al.getSeverity()==alarm.getSeverity());
+    assert(al.getStatus()==alarm.getStatus());
     String message = alarm.getMessage();
     String severity = AlarmSeverityFunc::getSeverityNames()[alarm.getSeverity()];
-    fprintf(fd," message %s severity %s\n",message.c_str(),severity.c_str());
+    String status = AlarmStatusFunc::getStatusNames()[alarm.getStatus()];
+    fprintf(fd," message %s severity %s status %s\n",message.c_str(),severity.c_str(),status.c_str());
 }
 
 static void testTimeStamp(FILE * fd,FILE *auxfd)
@@ -117,21 +120,24 @@ static void testTimeStamp(FILE * fd,FILE *auxfd)
     assert(result);
     TimeStamp ts;
     ts.getCurrent();
+    ts.setUserTag(32);
     result = pvTimeStamp.set(ts);
     assert(result);
     pvTimeStamp.get(timeStamp);
     assert(ts.getSecondsPastEpoch()==timeStamp.getSecondsPastEpoch());
     assert(ts.getNanoSeconds()==timeStamp.getNanoSeconds());
+    assert(ts.getUserTag()==timeStamp.getUserTag());
     time_t tt;
     timeStamp.toTime_t(tt);
     struct tm ctm;
     memcpy(&ctm,localtime(&tt),sizeof(struct tm));
     fprintf(auxfd,
-        "%4.4d.%2.2d.%2.2d %2.2d:%2.2d:%2.2d %d nanoSeconds isDst %s\n",
+        "%4.4d.%2.2d.%2.2d %2.2d:%2.2d:%2.2d %d nanoSeconds isDst %s userTag %d\n",
         ctm.tm_year+1900,ctm.tm_mon + 1,ctm.tm_mday,
         ctm.tm_hour,ctm.tm_min,ctm.tm_sec,
         timeStamp.getNanoSeconds(),
-        (ctm.tm_isdst==0) ? "false" : "true");
+        (ctm.tm_isdst==0) ? "false" : "true",
+        timeStamp.getUserTag());
     timeStamp.put(0,0);
     pvTimeStamp.set(timeStamp);
 }

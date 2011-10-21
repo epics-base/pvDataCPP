@@ -11,8 +11,14 @@
 namespace epics { namespace pvData { 
 
 enum AlarmSeverity {
- noAlarm,minorAlarm,majorAlarm,invalidAlarm
+ noAlarm,minorAlarm,majorAlarm,invalidAlarm,undefinedAlarm
 };
+
+enum AlarmStatus {
+    noStatus,deviceStatus,driverStatus,recordStatus,
+    dbStatus,confStatus,undefinedStatus,clientStatus
+};
+
 
 extern const size_t severityCount;
 class AlarmSeverityFunc {
@@ -21,16 +27,26 @@ public:
     static StringArray getSeverityNames();
 };
 
+extern const size_t statusCount;
+class AlarmStatusFunc {
+public:
+    static AlarmStatus getStatus(int value);
+    static StringArray getStatusNames();
+};
+
 class Alarm {
 public:
-    Alarm() : severity(0), message(String("")) {}
+    Alarm() : severity(0),status(0), message(String("")) {}
     //default constructors and destructor are OK
     String getMessage() const {return message;}
     void setMessage(String value) {message = value;}
     AlarmSeverity getSeverity() const;
     void setSeverity(AlarmSeverity value) {severity = value;}
+    AlarmStatus getStatus() const;
+    void setStatus(AlarmStatus value) { status = value;}
 private:
     int32 severity;
+    int32 status;
     String message;
 };
     

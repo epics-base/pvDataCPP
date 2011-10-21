@@ -5,10 +5,12 @@ structure top
         double value 0
         alarm alarm
             int severity 0
+            int status 0
             string message 
         timeStamp timeStamp
             long secondsPastEpoch 0
             int nanoSeconds 0
+            int userTag 0
         structure valueAlarm
             boolean active false
             double lowAlarmLimit 0
@@ -35,10 +37,12 @@ structure boolean
     boolean value true
     alarm alarm
         int severity 2
+        int status 0
         string message messageForAlarm
     timeStamp timeStamp
         long secondsPastEpoch 123456789
         int nanoSeconds 1000000
+        int userTag 0
     structure valueAlarm
         boolean active false
         int falseSeverity 0
@@ -48,10 +52,12 @@ structure byte
     byte value 127
     alarm alarm
         int severity 2
+        int status 0
         string message messageForAlarm
     timeStamp timeStamp
         long secondsPastEpoch 123456789
         int nanoSeconds 1000000
+        int userTag 0
     display display
         string description this is a description
         string format f10.2
@@ -79,10 +85,12 @@ structure short
     short value 32767
     alarm alarm
         int severity 2
+        int status 0
         string message messageForAlarm
     timeStamp timeStamp
         long secondsPastEpoch 123456789
         int nanoSeconds 1000000
+        int userTag 0
     display display
         string description this is a description
         string format f10.2
@@ -110,10 +118,12 @@ structure int
     int value -2147483648
     alarm alarm
         int severity 2
+        int status 0
         string message messageForAlarm
     timeStamp timeStamp
         long secondsPastEpoch 123456789
         int nanoSeconds 1000000
+        int userTag 0
     display display
         string description this is a description
         string format f10.2
@@ -141,10 +151,12 @@ structure long
     long value -9223372032559808513
     alarm alarm
         int severity 2
+        int status 0
         string message messageForAlarm
     timeStamp timeStamp
         long secondsPastEpoch 123456789
         int nanoSeconds 1000000
+        int userTag 0
     display display
         string description this is a description
         string format f10.2
@@ -172,10 +184,12 @@ structure float
     float value 1.123e+08
     alarm alarm
         int severity 2
+        int status 0
         string message messageForAlarm
     timeStamp timeStamp
         long secondsPastEpoch 123456789
         int nanoSeconds 1000000
+        int userTag 0
     display display
         string description this is a description
         string format f10.2
@@ -203,10 +217,12 @@ structure double
     double value 1.123e+35
     alarm alarm
         int severity 2
+        int status 0
         string message messageForAlarm
     timeStamp timeStamp
         long secondsPastEpoch 123456789
         int nanoSeconds 1000000
+        int userTag 0
     display display
         string description this is a description
         string format f10.2
@@ -234,75 +250,93 @@ structure string
     string value this is a string
     alarm alarm
         int severity 2
+        int status 0
         string message messageForAlarm
     timeStamp timeStamp
         long secondsPastEpoch 123456789
         int nanoSeconds 1000000
+        int userTag 0
 
 testScalarArray
 structure boolean
     boolean[] value [true,false,true]
     alarm alarm
         int severity 0
+        int status 0
         string message 
     timeStamp timeStamp
         long secondsPastEpoch 0
         int nanoSeconds 0
+        int userTag 0
 structure byte
     byte[] value [0,1,2]
     alarm alarm
         int severity 0
+        int status 0
         string message 
     timeStamp timeStamp
         long secondsPastEpoch 0
         int nanoSeconds 0
+        int userTag 0
 structure short
     short[] value [0,1,2]
     alarm alarm
         int severity 0
+        int status 0
         string message 
     timeStamp timeStamp
         long secondsPastEpoch 0
         int nanoSeconds 0
+        int userTag 0
 structure int
     int[] value [0,1,2]
     alarm alarm
         int severity 0
+        int status 0
         string message 
     timeStamp timeStamp
         long secondsPastEpoch 0
         int nanoSeconds 0
+        int userTag 0
 structure long
     long[] value [0,1,2]
     alarm alarm
         int severity 0
+        int status 0
         string message 
     timeStamp timeStamp
         long secondsPastEpoch 0
         int nanoSeconds 0
+        int userTag 0
 structure float
     float[] value [0,1,2]
     alarm alarm
         int severity 0
+        int status 0
         string message 
     timeStamp timeStamp
         long secondsPastEpoch 0
         int nanoSeconds 0
+        int userTag 0
 structure double
     double[] value [0,1,2]
     alarm alarm
         int severity 0
+        int status 0
         string message 
     timeStamp timeStamp
         long secondsPastEpoch 0
         int nanoSeconds 0
+        int userTag 0
 structure string
     string[] value [0,1,2]
     alarm alarm
         int severity 0
+        int status 0
         string message 
     timeStamp timeStamp
         long secondsPastEpoch 0
         int nanoSeconds 0
-pvField:  totalConstruct 302 totalDestruct 302
-field:  totalConstruct 139 totalDestruct 139
+        int userTag 0
+pvField:  totalConstruct 336 totalDestruct 336
+field:  totalConstruct 141 totalDestruct 141

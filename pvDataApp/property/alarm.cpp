@@ -12,18 +12,19 @@
 #include <pv/alarm.h>
 namespace epics { namespace pvData { 
 
-const size_t severityCount = 4;
+const size_t severityCount = 5;
 static String severityNames[severityCount] =
 {
-     String("none"),
-     String("minor"),
-     String("major"),
-     String("invalid")
+     String("NONE"),
+     String("MINOR"),
+     String("MAJOR"),
+     String("INVALID"),
+     String("UNDEFINED")
 };
 
 AlarmSeverity AlarmSeverityFunc::getSeverity(int value)
 {
-    if(value<0 || value>3) {
+    if(value<0 || value>4) {
          throw std::logic_error(String("getSeverity value is illegal"));
     }
     switch (value) {
@@ -31,6 +32,7 @@ AlarmSeverity AlarmSeverityFunc::getSeverity(int value)
     case 1: return minorAlarm;
     case 2: return majorAlarm;
     case 3: return invalidAlarm;
+    case 4: return undefinedAlarm;
     }
     throw std::logic_error(String("should never get here"));
 }
@@ -47,6 +49,58 @@ AlarmSeverity Alarm::getSeverity() const
     case 1: return minorAlarm;
     case 2: return majorAlarm;
     case 3: return invalidAlarm;
+    case 4: return undefinedAlarm;
+    }
+    throw std::logic_error(String("should never get here"));
+}
+
+const size_t statusCount = 8;
+static String statusNames[statusCount] =
+{
+     String("NONE"),
+     String("DEVICE"),
+     String("DRIVER"),
+     String("RECORD"),
+     String("DB"),
+     String("CONF"),
+     String("UNDEFINED"),
+     String("CLIENT")
+};
+
+AlarmStatus AlarmStatusFunc::getStatus(int value)
+{
+    if(value<0 || value>7) {
+         throw std::logic_error(String("getStatus value is illegal"));
+    }
+    switch (value) {
+    case 0: return noStatus;
+    case 1: return deviceStatus;
+    case 2: return driverStatus;
+    case 3: return recordStatus;
+    case 4: return dbStatus;
+    case 5: return confStatus;
+    case 6: return undefinedStatus;
+    case 7: return clientStatus;
+    }
+    throw std::logic_error(String("should never get here"));
+}
+
+StringArray AlarmStatusFunc::getStatusNames()
+{
+    return statusNames;
+}
+
+AlarmStatus Alarm::getStatus() const
+{
+    switch(status) {
+    case 0: return noStatus;
+    case 1: return deviceStatus;
+    case 2: return driverStatus;
+    case 3: return recordStatus;
+    case 4: return dbStatus;
+    case 5: return confStatus;
+    case 6: return undefinedStatus;
+    case 7: return clientStatus;
     }
     throw std::logic_error(String("should never get here"));
 }

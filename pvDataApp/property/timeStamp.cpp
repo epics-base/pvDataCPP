@@ -22,8 +22,8 @@ int32 microSecPerSec = milliSecPerSec*milliSecPerSec;
 int32 nanoSecPerSec = milliSecPerSec*microSecPerSec;
 int64 posixEpochAtEpicsEpoch = POSIX_TIME_AT_EPICS_EPOCH;
 
-TimeStamp::TimeStamp(int64 secondsPastEpoch,int32 nanoSeconds)
-: secondsPastEpoch(secondsPastEpoch),nanoSeconds(nanoSeconds)
+TimeStamp::TimeStamp(int64 secondsPastEpoch,int32 nanoSeconds,int32 userTag)
+: secondsPastEpoch(secondsPastEpoch),nanoSeconds(nanoSeconds),userTag(userTag)
 {
     normalize();
 }

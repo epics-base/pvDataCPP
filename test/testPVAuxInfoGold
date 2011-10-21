@@ -4,10 +4,12 @@ structure value
     double value 0
     alarm alarm
         int severity 0
+        int status 0
         string message 
     timeStamp timeStamp
         long secondsPastEpoch 0
         int nanoSeconds 0
+        int userTag 0
     display display
         string description 
         string format 
@@ -23,26 +25,28 @@ structure value
             double low 0
             double high 0
         double minStep 0
-value offset 0 next 20 number 20
+value offset 0 next 22 number 22
 value offset 1 next 2 number 1
-alarm offset 2 next 5 number 3
+alarm offset 2 next 6 number 4
 severity offset 3 next 4 number 1
-message offset 4 next 5 number 1
-timeStamp offset 5 next 8 number 3
-secondsPastEpoch offset 6 next 7 number 1
-nanoSeconds offset 7 next 8 number 1
-display offset 8 next 15 number 7
-description offset 9 next 10 number 1
-format offset 10 next 11 number 1
-units offset 11 next 12 number 1
-limit offset 12 next 15 number 3
-low offset 13 next 14 number 1
-high offset 14 next 15 number 1
-control offset 15 next 20 number 5
-limit offset 16 next 19 number 3
-low offset 17 next 18 number 1
-high offset 18 next 19 number 1
-minStep offset 19 next 20 number 1
+status offset 4 next 5 number 1
+message offset 5 next 6 number 1
+timeStamp offset 6 next 10 number 4
+secondsPastEpoch offset 7 next 8 number 1
+nanoSeconds offset 8 next 9 number 1
+userTag offset 9 next 10 number 1
+display offset 10 next 17 number 7
+description offset 11 next 12 number 1
+format offset 12 next 13 number 1
+units offset 13 next 14 number 1
+limit offset 14 next 17 number 3
+low offset 15 next 16 number 1
+high offset 16 next 17 number 1
+control offset 17 next 22 number 5
+limit offset 18 next 21 number 3
+low offset 19 next 20 number 1
+high offset 20 next 21 number 1
+minStep offset 21 next 22 number 1
 pvAuxInfo:  totalConstruct 1 totalDestruct 1
-pvField:  totalConstruct 22 totalDestruct 22
-field:  totalConstruct 97 totalDestruct 97
+pvField:  totalConstruct 24 totalDestruct 24
+field:  totalConstruct 99 totalDestruct 99

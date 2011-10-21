@@ -15,7 +15,7 @@ namespace epics { namespace pvData {
 
 class PVAlarm {
 public:
-    PVAlarm() : pvSeverity(0),pvMessage(0) {}
+    PVAlarm() : pvSeverity(0),pvStatus(0),pvMessage(0) {}
     //default constructors and destructor are OK
     //returns (false,true) if pvField(isNot, is valid enumerated structure
     //An automatic detach is issued if already attached.
@@ -28,6 +28,7 @@ public:
     bool set(Alarm const & alarm);
 private:
     PVInt *pvSeverity;
+    PVInt *pvStatus;
     PVString *pvMessage;
 };
     
