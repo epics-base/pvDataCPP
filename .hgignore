@@ -2,4 +2,5 @@ QtC-pvData.creator.user
 bin
 lib
 include
+documentation/html
 ./O.*
