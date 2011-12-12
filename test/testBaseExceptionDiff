@@ -1,5 +1,5 @@
 --- testBaseExceptionGold	2011-04-27 13:11:55.000000000 -0400
-+++ testBaseException	2011-10-21 08:41:54.000000000 -0400
++++ testBaseException	2011-12-12 08:58:22.000000000 -0500
 @@ -1,37 +1,46 @@
 +
 +
@@ -8,7 +8,7 @@
 +On line 68 of ../testBaseException.cpp
 +../bin/linux-x86/testBaseException[0x80497b9]
 +../bin/linux-x86/testBaseException[0x8049a54]
-+/lib/libc.so.6(__libc_start_main+0xe6)[0x3aae36]
++/lib/libc.so.6(__libc_start_main+0xe6)[0x126e36]
 +../bin/linux-x86/testBaseException[0x80490e1]
 +To translate run 'addr2line -e execname 0xXXXXXXX ...'
 +  Note: Must be compiled with debug symbols
@@ -20,7 +20,7 @@
 +../bin/linux-x86/testBaseException() [0x8049cec]
 +../bin/linux-x86/testBaseException() [0x8049923]
 +../bin/linux-x86/testBaseException() [0x8049a54]
-+/lib/libc.so.6(__libc_start_main+0xe6) [0x3aae36]
++/lib/libc.so.6(__libc_start_main+0xe6) [0x126e36]
 +../bin/linux-x86/testBaseException() [0x80490e1]
 +
  testBaseException... 
@@ -34,7 +34,7 @@
 +On line 48 of ../testBaseException.cpp
 +../bin/linux-x86/testBaseException() [0x8049581]
 +../bin/linux-x86/testBaseException() [0x8049a5c]
-+/lib/libc.so.6(__libc_start_main+0xe6) [0x3aae36]
++/lib/libc.so.6(__libc_start_main+0xe6) [0x126e36]
 +../bin/linux-x86/testBaseException() [0x80490e1]
 +
  
@@ -67,7 +67,7 @@
 +../bin/linux-x86/testBaseException() [0x80491ec]
 +../bin/linux-x86/testBaseException() [0x80496f9]
 +../bin/linux-x86/testBaseException() [0x8049a5c]
-+/lib/libc.so.6(__libc_start_main+0xe6) [0x3aae36]
++/lib/libc.so.6(__libc_start_main+0xe6) [0x126e36]
 +../bin/linux-x86/testBaseException() [0x80490e1]
 +
  

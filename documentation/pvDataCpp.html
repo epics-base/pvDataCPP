@@ -5,11 +5,23 @@
 <head>
   <meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
   <title>EPICS pvDataCPP</title>
+  <link rel="stylesheet" type="text/css"
+  href="http://epics-pvdata.sourceforge.net/base.css" />
+  <link rel="stylesheet" type="text/css"
+  href="http://epics-pvdata.sourceforge.net/epicsv4.css" />
+  <style type="text/css">
+/*<![CDATA[*/
+     .about { margin-left: 3em; margin-right: 3em; font-size: .83em}
+     table { margin-left: auto; margin-right: auto }
+     .diagram { text-align: center; margin: 2.5em 0 }
+     body { margin-right: 10% }
+/*]]>*/</style>
+
 </head>
 
 <body>
 <h1 style="text-align: center">EPICS pvDataCPP<br />
-2011.10.26</h1>
+2011.12.26</h1>
 
 <p>TODO</p>
 <ul>
@@ -168,7 +180,6 @@
       <li><a href="#L3352">MultiChoice</a></li>
     </ul>
   </li>
-  <li><a href="#L3360">License Agreement</a></li>
 </ul>
 </div>
 <hr />
@@ -176,8 +187,11 @@
 <h2 style="text-align: center" id="L45">Preface</h2>
 <hr />
 
-<p>This product is available via the <a href="#LicenseAgreement">open source
-license</a> described at the end of this document.</p>
+<p>This product is available via an <a href="http://epics-pvdata.sourceforge.net/LICENSE.html">open source license</a></p>
+
+<p>This is the overview for pvDataCPP.
+Doxygen documentation is available at <a href="./html/index.html">doxygenDoc</a></p>
+
 
 <p>pvData is one of a set of related projects:</p>
 <dl>
@@ -1913,8 +1927,8 @@ extern PVDataCreate * getPVDataCreate();</pre>
 class StandardField it has two forms of the methods which create a field, one
 without properties and one with properties. Again the properties is some
 combination of alarm, timeStamp, control, display, and valueAlarm. And just
-like StandardField there are methods to create thye standard properties. The
-meythods are:</p>
+like StandardField there are methods to create the standard properties. The
+methods are:</p>
 <pre>class StandardPVField : private NoDefaultMethods {
 public:
     StandardPVField();
@@ -3952,83 +3966,5 @@ currently has only one method:</p>
 arbitrary set of the choices. This will be implemented if the java version is
 accepted.</p>
 <pre>NOT DONE</pre>
-<hr />
-
-<h2 style="text-align: center" id="L3360">License Agreement</h2>
-<hr />
-<pre>Copyright (c) 2008 Martin R. Kraimer
-Copyright (c) 2007 Control System Laboratory,
-    (COSYLAB) Ljubljana Slovenia
-Copyright (c) 2010 Brookhaven National Laboratory
-
-
-Permission is hereby granted, free of charge, to any person
-obtaining a copy of this software and associated documentation
-files (the "Software"), to deal in the Software without
-restriction, including without limitation the rights to use,
-copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the
-Software is furnished to do so, subject to the following
-conditions:
-
-The above copyright notice and this permission notice shall be
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
-OTHER DEALINGS IN THE SOFTWARE.
-
-________________________________________________________________________
-
-This software is in part copyrighted by Brookhaven National Laboratory(BNL)
-
-In no event shall BNL be liable to any party for direct, indirect,
-special, incidental, or consequential damages arising out of the use of
-this software, its documentation, or any derivatives thereof, even if
-BNL has been advised of the possibility of such damage.
-
-BNL specifically disclaims any warranties, including, but not limited
-to, the implied warranties of merchantability, fitness for a particular
-purpose, and non-infringement.  This software is provided on an "as is"
-basis, and BNL has no obligation to provide maintenance, support,
-updates, enhancements, or modifications.
-
-________________________________________________________________________
-
-This software is in part copyrighted by the BERLINER SPEICHERRING
-GESELLSCHAFT FUER SYNCHROTRONSTRAHLUNG M.B.H. (BESSY), BERLIN, GERMANY.
-
-In no event shall BESSY be liable to any party for direct, indirect,
-special, incidental, or consequential damages arising out of the use of
-this software, its documentation, or any derivatives thereof, even if
-BESSY has been advised of the possibility of such damage.
-
-BESSY specifically disclaims any warranties, including, but not limited
-to, the implied warranties of merchantability, fitness for a particular
-purpose, and non-infringement.  This software is provided on an "as is"
-basis, and BESSY has no obligation to provide maintenance, support,
-updates, enhancements, or modifications.
-
-________________________________________________________________________
-
-This software is in part copyrighted by the Deutsches Elektronen-Synchroton,
-    Member of the Helmholtz Association, (DESY), HAMBURG, GERMANY.
-
-In no event shall DESY be liable to any party for direct, indirect,
-special, incidental, or consequential damages arising out of the use of
-this software, its documentation, or any derivatives thereof, even if
-DESY has been advised of the possibility of such damage.
-
-DESY specifically disclaims any warranties, including, but not limited
-to, the implied warranties of merchantability, fitness for a particular
-purpose, and non-infringement.  This software is provided on an "as is"
-basis, and DESY has no obligation to provide maintenance, support,
-updates, enhancements, or modifications.
-________________________________________________________________________</pre>
 </body>
 </html>

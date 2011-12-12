@@ -164,10 +164,24 @@ inline double swap(double val)
 #define UNALIGNED_ACCESS true
 #define ADAPTIVE_ACCESS true
 #define USE_INLINE_MEMCPY true
-          
+
+/**
+ * This class implements {@code Bytebuffer} that is like the {@code java.nio.ByteBuffer}.
+ * <p>A {@code BitSet} is not safe for multithreaded use without
+ * external synchronization.
+ *
+ * Based on Java implementation.
+ */
 class ByteBuffer 
 {
 public:
+    /**
+     * Constructor.
+     *
+     * @param  size      The number of bytes.
+     * @param  byteOrder The byte order.
+     * Must be one of EPICS_BYTE_ORDER,EPICS_ENDIAN_LITTLE,EPICS_ENDIAN_BIG,
+     */
     ByteBuffer(uintptr_t size, int byteOrder = EPICS_BYTE_ORDER) :
         _buffer(0), _size(size),
         _reverseEndianess(byteOrder != EPICS_BYTE_ORDER),
@@ -176,71 +190,120 @@ public:
         _buffer = (char*)malloc(size);
         clear();
     }
-    
+    /**
+     * Destructor
+     */
     ~ByteBuffer()
     {
         if (_buffer) free(_buffer);
     }
-    
+    /**
+     * Set the byte order.
+     *
+     * @param  byteOrder The byte order.
+     * Must be one of EPICS_BYTE_ORDER,EPICS_ENDIAN_LITTLE,EPICS_ENDIAN_BIG,
+     */
     inline void setEndianess(int byteOrder)
     {
         _reverseEndianess = (byteOrder != EPICS_BYTE_ORDER);
         _reverseFloatEndianess = (byteOrder != EPICS_FLOAT_WORD_ORDER);
     }
-    
+    /**
+     * Get the raw buffer data.
+     * @return the raw buffer data.
+     */
     inline const char* getBuffer()
     {
         return _buffer;
     }
-
+    /**
+     * Makes a buffer ready for a new sequence of channel-read or relative put operations:
+     * It sets the limit to the capacity and the position to zero.
+     */
     inline void clear()
     {
         _position = _buffer;
         _limit = _buffer + _size;
     }
-    
+    /**
+     * Makes a buffer ready for a new sequence of channel-write or relative get operations:
+     * It sets the limit to the current position and then sets the position to zero. 
+     */
     inline void flip() {
         _limit = _position;
         _position = _buffer;
     }
-
+    /**
+     * Makes a buffer ready for re-reading the data that it already contains:
+     * It leaves the limit unchanged and sets the position to zero.
+     */
     inline void rewind() {
         _position = _buffer;
     }
-
+    /**
+     * Returns the current position.
+     * @return The current position in the raw data.
+     */
     inline uintptr_t getPosition()
     {
         return (((uintptr_t)(const void *)_position) - ((uintptr_t)(const void *)_buffer));
     }
-    
+    /**
+     * Sets the buffer position.
+     * If the mark is defined and larger than the new position then it is discarded.
+     *
+     * @param  pos The offset into the raw buffer.
+     * The new position value; must be no larger than the current limit
+     */
     inline void setPosition(uintptr_t pos)
     {
         _position = _buffer + pos;
     }
-    
+    /**
+     * Returns this buffer's limit. 
+     *
+     * @return The offset into the raw buffer.
+     */
     inline uintptr_t getLimit()
     {
         return (((uintptr_t)(const void *)_limit) - ((uintptr_t)(const void *)_buffer));
     }
-
+    /**
+     * Sets this buffer's limit.
+     * If the position is larger than the new limit then it is set to the new limit.s
+     * If the mark is defined and larger than the new limit then it is discarded. 
+     *
+     * @param  limit The new position value;
+     * must be no larger than the current limit 
+     */
     inline void setLimit(uintptr_t limit)
     {
         _limit = _buffer + limit;
     }
-
+    /**
+     * Returns the number of elements between the current position and the limit.
+     *
+     * @return The number of elements remaining in this buffer.
+     */
     inline uintptr_t getRemaining()
     {
         return (((uintptr_t)(const void *)_limit) - ((uintptr_t)(const void *)_position));
     }
-    
+    /**
+     * Returns The size, i.e. capacity of the raw data buffer in bytes.
+     *
+     * @return The size of the raw data buffer.
+     */
     inline uintptr_t getSize()
     {
         return _size;
     }
-    
-    
-   
-   
+
+    /**
+     * Put the value into the raw buffer as a byte stream in the current byte order.
+     *
+     * @param  value The value to be put into the byte buffer.
+     */
     template<typename T>
     inline void put(T value)
     {
@@ -258,7 +321,7 @@ public:
            
         if (UNALIGNED_ACCESS)
         {
-            // NOTE: some CPU handle unaligned access preety good (e.g. x86)
+            // NOTE: some CPU handle unaligned access pretty good (e.g. x86)
             *((T*)_position) = value;
             _position += sizeof(T);
         }
@@ -289,9 +352,12 @@ public:
         }
         
     }
-
-
-
+    /**
+     * Put the value into the raw buffer at the specified index  as a byte stream in the current byte order.
+     *
+     * @param  index Offset in the byte buffer.
+     * @param  value The value to be put into the byte buffer.
+     */
     template<typename T>
     inline void put(uintptr_t index, T value)
     {
@@ -337,10 +403,12 @@ public:
         }
         
     }
-
-
-
-
+    /**
+     * Get the new object from  the byte buffer. The item MUST have type {@code T}.
+     * The position is adjusted based on the type.
+     *
+     * @return The object.
+     */
     template<typename T>
     inline T get()
     {
@@ -393,9 +461,14 @@ public:
         return value;        
     }
 
-
-
-
+    /**
+     * Get the new object from  the byte buffer at the specified index.
+     * The item MUST have type {@code T}.
+     * The position is adjusted based on the type.
+     *
+     * @param index The location in the byte buffer.
+     * @return The object.
+     */
     template<typename T>
     inline T get(uintptr_t index)
     {
@@ -444,23 +517,39 @@ public:
            
         return value;        
     }
-
-
-
-
+    /**
+     * Put a sub-array of bytes into the byte buffer.
+     * The position is increased by the count.
+     *
+     * @param  src    The source array.
+     * @param  offset The starting position within src.
+     * @param  count  The number of bytes to put into the byte buffer,
+     */
     inline void put(const char* src, uintptr_t src_offset, uintptr_t count) {
         //if(count>getRemaining()) THROW_BASE_EXCEPTION("buffer overflow");
         memcpy(_position, src + src_offset, count);
         _position += count;
     }
-
-
+    /**
+     * Get a sub-array of bytes from the byte buffer.
+     * The position is increased by the count.
+     *
+     * @param  dest    The destination array.
+     * @param  offset The starting position within src.
+     * @param  count  The number of bytes to put into the byte buffer,
+     */
     inline void get(char* dest, uintptr_t dest_offset, uintptr_t count) {
         //if(count>getRemaining()) THROW_BASE_EXCEPTION("buffer overflow");
         memcpy(dest + dest_offset, _position, count);
         _position += count;
     }
-
+    /**
+     * Put an array of type {@code T} into the byte buffer.
+     * The position is adjusted.
+     *
+     * @param  values The input array.
+     * @param  count  The number of elements.
+     */
     template<typename T>
     inline void putArray(T* values, uintptr_t count)
     {
@@ -488,12 +577,13 @@ public:
             }   
         }
     }
-
-
-
-
-
-
+    /**
+     * Get an array of type {@code T} from the byte buffer.
+     * The position is adjusted.
+     *
+     * @param  values The destination array.
+     * @param  count  The number of elements.
+     */
     template<typename T>
     inline void getArray(T* values, uintptr_t count)
     {
@@ -521,57 +611,209 @@ public:
             }   
         }
     }
-    
-    
+    /**
+     * Is the byte order the EPICS_BYTE_ORDER
+     * @return (false,true) if (is, is not) the EPICS_BYTE_ORDER
+     */
     template<typename T>
     inline bool reverse()
     {
         return _reverseEndianess;
     }
-    
-    
-
-    // NOTE: size must be power of 2
+    /**
+     * Adjust position so that it is aligned to the specified size.
+     * Size MUST be a power of 2.
+     * @param  size The alignment requirement.
+     */
     inline void align(int size)
     {
         const uintptr_t k = size - 1;
         _position = (char*)((((uintptr_t)(const void *)_position) + k) & ~(k));
     }
-    
-    
-    
-    
-    
+    /**
+     * Put a boolean value into the byte buffer.
+     *
+     * @param  value The value.
+     */
     inline void putBoolean(  bool value) { put<  int8>(value ? 1 : 0); }
+    /**
+     * Put a byte value into the byte buffer.
+     *
+     * @param  value The value.
+     */
     inline void putByte   (  int8 value) { put<  int8>(value); }
+    /**
+     * Put a short value into the byte buffer.
+     *
+     * @param  value The value.
+     */
     inline void putShort  ( int16 value) { put< int16>(value); }
+    /**
+     * Put an int value into the byte buffer.
+     *
+     * @param  value The value.
+     */
     inline void putInt    ( int32 value) { put< int32>(value); }
+    /**
+     * Put a long value into the byte buffer.
+     *
+     * @param  value The value.
+     */
     inline void putLong   ( int64 value) { put< int64>(value); }
+    /**
+     * Put a float value into the byte buffer.
+     *
+     * @param  value The value.
+     */
     inline void putFloat  ( float value) { put< float>(value); }
+    /**
+     * Put a double value into the byte buffer.
+     *
+     * @param  value The value.
+     */
     inline void putDouble (double value) { put<double>(value); }
 
+    /**
+     * Put a boolean value into the byte buffer at the specified index.
+     *
+     * @param  index The offset in the byte buffer,
+     * @param  value The value.
+     */
     inline void putBoolean(uintptr_t index,  bool value) { put<  int8>(index, value); }
+    /**
+     * Put a byte value into the byte buffer at the specified index.
+     *
+     * @param  index The offset in the byte buffer,
+     * @param  value The value.
+     */
     inline void putByte   (uintptr_t index,  int8 value) { put<  int8>(index, value); }
+    /**
+     * Put a short value into the byte buffer at the specified index.
+     *
+     * @param  index The offset in the byte buffer,
+     * @param  value The value.
+     */
     inline void putShort  (uintptr_t index, int16 value) { put< int16>(index, value); }
+    /**
+     * Put an int value into the byte buffer at the specified index.
+     *
+     * @param  index The offset in the byte buffer,
+     * @param  value The value.
+     */
     inline void putInt    (uintptr_t index, int32 value) { put< int32>(index, value); }
+    /**
+     * Put a long value into the byte buffer at the specified index.
+     *
+     * @param  index The offset in the byte buffer,
+     * @param  value The value.
+     */
     inline void putLong   (uintptr_t index, int64 value) { put< int64>(index, value); }
+    /**
+     * Put a float value into the byte buffer at the specified index.
+     *
+     * @param  index The offset in the byte buffer,
+     * @param  value The value.
+     */
     inline void putFloat  (uintptr_t index, float value) { put< float>(index, value); }
+    /**
+     * Put a double value into the byte buffer at the specified index.
+     *
+     * @param  index The offset in the byte buffer,
+     * @param  value The value.
+     */
     inline void putDouble (uintptr_t index,double value) { put<double>(index, value); }
 
+    /**
+     * Get a boolean value from the byte buffer.
+     *
+     * @return The value.
+     */
     inline   bool getBoolean() { return get<  int8>() != 0; }
+    /**
+     * Get a byte value from the byte buffer.
+     *
+     * @return The value.
+     */
     inline   int8 getByte   () { return get<  int8>(); }
+    /**
+     * Get a short value from the byte buffer.
+     *
+     * @return The value.
+     */
     inline  int16 getShort  () { return get< int16>(); }
+    /**
+     * Get a int value from the byte buffer.
+     *
+     * @return The value.
+     */
     inline  int32 getInt    () { return get< int32>(); }
+    /**
+     * Get a long value from the byte buffer.
+     *
+     * @return The value.
+     */
     inline  int64 getLong   () { return get< int64>(); }
+    /**
+     * Get a float value from the byte buffer.
+     *
+     * @return The value.
+     */
     inline  float getFloat  () { return get< float>(); }
+    /**
+     * Get a double value from the byte buffer.
+     *
+     * @return The value.
+     */
     inline double getDouble () { return get<double>(); }
 
+    /**
+     * Get a boolean value from the byte buffer at the specified index.
+     *
+     * @param  index The offset in the byte buffer.
+     * @return The value.
+     */
     inline   bool getBoolean(uintptr_t index) { return get<  int8>(index) != 0; }
+    /**
+     * Get a byte value from the byte buffer at the specified index.
+     *
+     * @param  index The offset in the byte buffer.
+     * @return The value.
+     */
     inline   int8 getByte   (uintptr_t index) { return get<  int8>(index); }
+    /**
+     * Get a short value from the byte buffer at the specified index.
+     *
+     * @param  index The offset in the byte buffer.
+     * @return The value.
+     */
     inline  int16 getShort  (uintptr_t index) { return get< int16>(index); }
+    /**
+     * Get an int value from the byte buffer at the specified index.
+     *
+     * @param  index The offset in the byte buffer.
+     * @return The value.
+     */
     inline  int32 getInt    (uintptr_t index) { return get< int32>(index); }
+    /**
+     * Get a long value from the byte buffer at the specified index.
+     *
+     * @param  index The offset in the byte buffer.
+     * @return The value.
+     */
     inline  int64 getLong   (uintptr_t index) { return get< int64>(index); }
+    /**
+     * Get a float value from the byte buffer at the specified index.
+     *
+     * @param  index The offset in the byte buffer.
+     * @return The value.
+     */
     inline  float getFloat  (uintptr_t index) { return get< float>(index); }
+    /**
+     * Get a boolean value from the byte buffer at the specified index.
+     *
+     * @param  double The offset in the byte buffer.
+     * @return The value.
+     */
     inline double getDouble (uintptr_t index) { return get<double>(index); }
 
     // TODO remove
