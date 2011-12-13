@@ -30,3 +30,4 @@ EPICS_BASE=/home/install/epics/base
 #CAPFAST_TEMPLATES=
 #SCH2EDIF_PATH=
 
+-include $(TOP)/configure/RELEASE.local
