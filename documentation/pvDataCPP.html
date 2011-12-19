@@ -25,11 +25,11 @@
 <!-- Maturity: Working Draft or Request for Comments, or Recommendation, and date.  -->
 
 <h2 class="nocount" id="L50">EPICS v4 Working Group, Working Draft,
-14-Dec-2011</h2>
+19-Dec-2011</h2>
 <dl>
   <dt>This version:</dt>
     <dd><a
-      href="http://epics-pvdata.sourceforge.net/pvDataCPP_20111214.html">pvDataCPP_20111214.html</a></dd>
+      href="http://epics-pvdata.sourceforge.net/pvDataCPP_20111219.html">pvDataCPP_20111219.html</a></dd>
   <dt>Latest version:</dt>
     <dd><a
       href="http://epics-pvdata.sourceforge.net/pvDataCPP.html">pvDataCPP.html</a></dd>
@@ -41,6 +41,9 @@
 
 <h2 class="nocount" id="L72">Abstract</h2>
 
+<p>pvData (Process Variable Data) defines and implements an efficent way to
+store, access, and transmit memory resident structured data.</p>
+
 <p>This document describes the C++ implementation of EPICS v4 pvData.</p>
 
 <p>For more information about the EPICS, please refer to the home page of the
@@ -49,7 +52,7 @@ Control System.</a></p>
 
 <h2 class="nocount" id="L80">Status of this Document</h2>
 
-<p>This is the 14-Dec-2011 version of the C++ implementation of pvData. It is a
+<p>This is the 19-Dec-2011 version of the C++ implementation of pvData. It is a
 complete implementation of pvData as currently defined. </p>
 
 <p>TODO</p>
@@ -64,12 +67,12 @@ complete implementation of pvData as currently defined. </p>
 
 <div class="toc">
 <ul>
-  <li><a href="#L50">EPICS v4 Working Group, Working Draft, 14-Dec-2011</a></li>
+  <li><a href="#L50">EPICS v4 Working Group, Working Draft, 19-Dec-2011</a></li>
   <li><a href="#L72">Abstract</a></li>
   <li><a href="#L80">Status of this Document</a></li>
-  <li><a href="#L100">Preface</a>
+  <li><a href="#L100">Preface</a> 
     <ul>
-      <li><a href="#L130">pvData</a>
+      <li><a href="#L130">pvData</a> 
         <ul>
           <li><a href="#L134">Introspection</a></li>
           <li><a href="#L202">Data</a></li>
@@ -81,33 +84,33 @@ complete implementation of pvData as currently defined. </p>
     </ul>
   </li>
   <li><a href="#L365">Introduction</a></li>
-  <li><a href="#L457">PVData Meta Language</a>
+  <li><a href="#L457">PVData Meta Language</a> 
     <ul>
       <li><a href="#L463">Definition</a></li>
       <li><a href="#L657">Examples</a></li>
     </ul>
   </li>
-  <li><a href="#L701">PV - User Description</a>
+  <li><a href="#L701">PV - User Description</a> 
     <ul>
       <li><a href="#L705">Overview</a></li>
       <li><a href="#L746">pvType</a></li>
-      <li><a href="#L782">Process Variable Reflection</a>
+      <li><a href="#L782">Process Variable Reflection</a> 
         <ul>
           <li><a href="#L790">Type Description</a></li>
           <li><a href="#L920">Reflection Description</a></li>
         </ul>
       </li>
       <li><a href="#L1135">Standard Fields</a></li>
-      <li><a href="#L1219">PVField - Data Interfaces</a>
+      <li><a href="#L1219">PVField - Data Interfaces</a> 
         <ul>
           <li><a href="#L1223">PVField</a></li>
           <li><a href="#L1333">PVAuxInfo</a></li>
-          <li><a href="#L1367">PVScalar and extensions</a>
+          <li><a href="#L1367">PVScalar and extensions</a> 
             <ul>
               <li><a href="#L1371">Primitive PVField types</a></li>
             </ul>
           </li>
-          <li><a href="#L1377">PVArray and Extensions</a>
+          <li><a href="#L1377">PVArray and Extensions</a> 
             <ul>
               <li><a href="#L1416">PVArray Extensions</a></li>
             </ul>
@@ -121,10 +124,10 @@ complete implementation of pvData as currently defined. </p>
       <li><a href="#L1635">Convert</a></li>
     </ul>
   </li>
-  <li><a href="#L1705">Namespace and Memory Management</a>
+  <li><a href="#L1705">Namespace and Memory Management</a> 
     <ul>
       <li><a href="#L1709">Namespace</a></li>
-      <li><a href="#L1715">Memory Managemment</a>
+      <li><a href="#L1715">Memory Managemment</a> 
         <ul>
           <li><a href="#L1717">NoDefaultMethods</a></li>
         </ul>
@@ -134,36 +137,36 @@ complete implementation of pvData as currently defined. </p>
       <li><a href="#L1731">Other code in this project</a></li>
     </ul>
   </li>
-  <li><a href="#L1739">Examples</a>
+  <li><a href="#L1739">Examples</a> 
     <ul>
       <li><a href="#L1743">Accessing PVData</a></li>
       <li><a href="#L1762">Creating PVData</a></li>
     </ul>
   </li>
-  <li><a href="#L1782">Property</a>
+  <li><a href="#L1782">Property</a> 
     <ul>
       <li><a href="#L1786">Definition of Property</a></li>
       <li><a href="#L1798">Standard Properties</a></li>
       <li><a href="#L1879">Overview of Property Support</a></li>
-      <li><a href="#L1899">timeStamp</a>
+      <li><a href="#L1899">timeStamp</a> 
         <ul>
           <li><a href="#L1923">timeStamp.h</a></li>
           <li><a href="#L2039">pvTimeStamp.h</a></li>
         </ul>
       </li>
-      <li><a href="#L2079">alarm</a>
+      <li><a href="#L2079">alarm</a> 
         <ul>
           <li><a href="#L2106">alarm.h</a></li>
           <li><a href="#L2178">pvAlarm.h</a></li>
         </ul>
       </li>
-      <li><a href="#L2218">control</a>
+      <li><a href="#L2218">control</a> 
         <ul>
           <li><a href="#L2240">control.h</a></li>
           <li><a href="#L2272">pvControl.h</a></li>
         </ul>
       </li>
-      <li><a href="#L2312">display</a>
+      <li><a href="#L2312">display</a> 
         <ul>
           <li><a href="#L2334">display.h</a></li>
           <li><a href="#L2396">pvDisplay.h</a></li>
@@ -173,7 +176,7 @@ complete implementation of pvData as currently defined. </p>
     </ul>
   </li>
   <li><a href="#L2512">PVData Factories</a></li>
-  <li><a href="#L2532">Miscellanous Classes</a>
+  <li><a href="#L2532">Miscellanous Classes</a> 
     <ul>
       <li><a href="#L2536">Overview</a></li>
       <li><a href="#L2628">BitSet</a></li>
@@ -183,7 +186,7 @@ complete implementation of pvData as currently defined. </p>
       <li><a href="#L2797">Executor</a></li>
       <li><a href="#L2828">Linked List</a></li>
       <li><a href="#L2942">Lock and Mutex</a></li>
-      <li><a href="#L2958">Message Queue</a>
+      <li><a href="#L2958">Message Queue</a> 
         <ul>
           <li><a href="#L2960">Definitions</a></li>
           <li><a href="#L2964">MessageQueue</a></li>
@@ -195,7 +198,7 @@ complete implementation of pvData as currently defined. </p>
       <li><a href="#L3114">CDRMonitor - Monitor and Report Construction and
         Destruction</a></li>
       <li><a href="#L3120">Status</a></li>
-      <li><a href="#L3167">Thread</a>
+      <li><a href="#L3167">Thread</a> 
         <ul>
           <li><a href="#L3169">ThreadPriority</a></li>
           <li><a href="#L3173">Thread</a></li>
@@ -206,7 +209,7 @@ complete implementation of pvData as currently defined. </p>
       <li><a href="#L3313">Queue</a></li>
     </ul>
   </li>
-  <li><a href="#L3376">pvMisc</a>
+  <li><a href="#L3376">pvMisc</a> 
     <ul>
       <li><a href="#L3380">BitSetUtil</a></li>
       <li><a href="#L3410">MultiChoice</a></li>
