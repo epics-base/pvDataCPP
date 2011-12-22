@@ -17,8 +17,9 @@
 #  RELEASE.$(EPICS_HOST_ARCH).$(T_A)
 
 TEMPLATE_TOP=$(EPICS_BASE)/templates/makeBaseApp/top
+EPICS_BASE=/home/install/epics/base
 
-# Create a file RELEASE.local containing the 
+# Create a file RELEASE.local containing the
 # location of your EPICS_BASE, e.g.
 # EPICS_BASE=/home/install/epics/base
 
