@@ -13,6 +13,7 @@
 #include <pv/convert.h>
 #include <pv/factory.h>
 #include <pv/CDRMonitor.h>
+#include <pv/serializeHelper.h>
 
 using std::tr1::static_pointer_cast;
 
@@ -61,6 +62,53 @@ void Scalar::toString(StringBuilder buffer,int indentLevel) const{
     Field::toString(buffer,indentLevel);
 }
 
+void Scalar::serialize(ByteBuffer *buffer, SerializableControl *control) const {
+    control->ensureBuffer(1);
+    buffer->putByte((int8)(epics::pvData::scalar << 4 | getScalarType()));
+    SerializeHelper::serializeString(getFieldName(), buffer, control);
+}
+
+void Scalar::deserialize(ByteBuffer *buffer, DeserializableControl *control) {
+}
+
+
+
+static void serializeStructureField(const Structure* structure, ByteBuffer* buffer, SerializableControl* control)
+{
+	SerializeHelper::serializeString(structure->getFieldName(), buffer, control);
+	FieldConstPtrArray fields = structure->getFields();
+	SerializeHelper::writeSize(structure->getNumberFields(), buffer, control);
+	for (int i = 0; i < structure->getNumberFields(); i++)
+	{
+		control->cachedSerialize(fields[i], buffer);
+	}
+}
+
+static StructureConstPtr deserializeStructureField(const FieldCreate* fieldCreate, ByteBuffer* buffer, DeserializableControl* control)
+{
+	const String structureFieldName = SerializeHelper::deserializeString(buffer, control);
+	const int32 size = SerializeHelper::readSize(buffer, control);
+	FieldConstPtrArray fields = NULL;
+	if (size > 0)
+	{
+		fields = new FieldConstPtr[size];
+		for(int i = 0; i < size; i++)
+		{
+		  try {
+			fields[i] = control->cachedDeserialize(buffer);
+		  } catch (...) {
+		      delete[] fields;
+		      throw;
+		  }
+		}
+	}
+
+	StructureConstPtr structure = fieldCreate->createStructure(structureFieldName, size, fields);
+	return structure;
+}
+
+
+
 
 ScalarArray::ScalarArray(String fieldName,ScalarType elementType)
 : Field(fieldName,scalarArray),elementType(elementType){}
@@ -71,6 +119,15 @@ void ScalarArray::toString(StringBuilder buffer,int indentLevel) const{
     ScalarTypeFunc::toString(buffer,elementType);
     *buffer += "[]";
     Field::toString(buffer,indentLevel);
+}
+
+void ScalarArray::serialize(ByteBuffer *buffer, SerializableControl *control) const {
+    control->ensureBuffer(1);
+	buffer->putByte((int8)(epics::pvData::scalarArray << 4 | getElementType()));
+    SerializeHelper::serializeString(getFieldName(), buffer, control);
+}
+
+void ScalarArray::deserialize(ByteBuffer *buffer, DeserializableControl *control) {
 }
 
 StructureArray::StructureArray(String fieldName,StructureConstPtr structure)
@@ -87,6 +144,17 @@ void StructureArray::toString(StringBuilder buffer,int indentLevel) const {
     Field::toString(buffer,indentLevel);
     newLine(buffer,indentLevel + 1);
     pstructure->toString(buffer,indentLevel + 1);
+}
+
+void StructureArray::serialize(ByteBuffer *buffer, SerializableControl *control) const {
+    control->ensureBuffer(1);
+    buffer->putByte((int8)(epics::pvData::structureArray << 4));
+    SerializeHelper::serializeString(getFieldName(), buffer, control);
+    // we also need to serialize structure field...
+    serializeStructureField(getStructure().get(), buffer, control);
+}
+
+void StructureArray::deserialize(ByteBuffer *buffer, DeserializableControl *control) {
 }
 
 
@@ -186,6 +254,14 @@ void Structure::toString(StringBuilder buffer,int indentLevel) const{
     }
 }
 
+void Structure::serialize(ByteBuffer *buffer, SerializableControl *control) const {
+    control->ensureBuffer(1);
+    buffer->putByte((int8)(epics::pvData::structure << 4));
+    serializeStructureField(this, buffer, control);
+}
+
+void Structure::deserialize(ByteBuffer *buffer, DeserializableControl *control) {
+}
 
 ScalarConstPtr  FieldCreate::createScalar(String fieldName,
     ScalarType scalarType) const
@@ -241,6 +317,45 @@ FieldConstPtr FieldCreate::create(String fieldName,
     String  message("field ");
     message += fieldName;
     THROW_EXCEPTION2(std::logic_error, message);
+}
+
+FieldConstPtr FieldCreate::deserialize(ByteBuffer* buffer, DeserializableControl* control) const
+{
+	control->ensureData(1);
+	const int8 typeCode = buffer->getByte();
+
+	// high nibble means scalar/array/structure
+	const Type type = (Type)(typeCode >> 4);
+	switch (type)
+	{
+	case scalar:
+	{
+		const ScalarType scalar = (ScalarType)(typeCode & 0x0F);
+		const String scalarFieldName = SerializeHelper::deserializeString(buffer, control);
+		return static_cast<FieldConstPtr>(createScalar(scalarFieldName,scalar));
+	}
+	case scalarArray:
+	{
+		const ScalarType element = (ScalarType)(typeCode & 0x0F);
+		const String arrayFieldName = SerializeHelper::deserializeString(buffer, control);
+		return static_cast<FieldConstPtr>(createScalarArray(arrayFieldName,element));
+	}
+	case structure:
+	{
+		return static_cast<FieldConstPtr>(deserializeStructureField(this, buffer, control));
+	}
+	case structureArray:
+	{
+		const String structureArrayFieldName = SerializeHelper::deserializeString(buffer, control);
+		const StructureConstPtr arrayElement = deserializeStructureField(this, buffer, control);
+		return  static_cast<FieldConstPtr>(createStructureArray(structureArrayFieldName, arrayElement));
+	}
+	default:
+	{
+	   // TODO log
+       return FieldConstPtr();
+	}
+	}
 }
 
 static FieldCreate* fieldCreate = 0;

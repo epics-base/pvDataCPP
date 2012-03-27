@@ -13,6 +13,9 @@
 #include <pv/noDefaultMethods.h>
 #include <pv/sharedPtr.h>
 #include <pv/pvType.h>
+#include <pv/byteBuffer.h>
+#include <pv/serialize.h>
+
 namespace epics { namespace pvData { 
 
 class Field;
@@ -170,7 +173,9 @@ namespace ScalarTypeFunc {
 /**
  * This class implements introspection object for field.
  */
-class Field :  public std::tr1::enable_shared_from_this<Field> {
+class Field : 
+    virtual public Serializable,
+    public std::tr1::enable_shared_from_this<Field> {
 public:
    POINTER_DEFINITIONS(Field);
     /**
@@ -254,6 +259,10 @@ public:
      * @param  indentLevel The number of blanks at the beginning of new lines.
      */
     virtual void toString(StringBuilder buf,int indentLevel) const;
+    
+    virtual void serialize(ByteBuffer *buffer, SerializableControl *flusher) const;
+    virtual void deserialize(ByteBuffer *buffer, DeserializableControl *flusher);
+    
 protected:
     Scalar(String fieldName,ScalarType scalarType);
 private:
@@ -287,6 +296,10 @@ public:
      * @param  indentLevel The number of blanks at the beginning of new lines.
      */
     virtual void toString(StringBuilder buf,int indentLevel) const;
+    
+    virtual void serialize(ByteBuffer *buffer, SerializableControl *flusher) const;
+    virtual void deserialize(ByteBuffer *buffer, DeserializableControl *flusher);
+    
 protected:
     /**
      * Destructor.
@@ -319,6 +332,10 @@ public:
      * @param  indentLevel The number of blanks at the beginning of new lines.
      */
     virtual void toString(StringBuilder buf,int indentLevel=0) const;
+    
+    virtual void serialize(ByteBuffer *buffer, SerializableControl *flusher) const;
+    virtual void deserialize(ByteBuffer *buffer, DeserializableControl *flusher);
+
 protected:
     /**
      * Constructor.
@@ -398,6 +415,10 @@ public:
      * @param  indentLevel The number of blanks at the beginning of new lines.
      */
     virtual void toString(StringBuilder buf,int indentLevel) const;
+    
+    virtual void serialize(ByteBuffer *buffer, SerializableControl *flusher) const;
+    virtual void deserialize(ByteBuffer *buffer, DeserializableControl *flusher);
+    
 protected:
    Structure(String fieldName, int numberFields,FieldConstPtrArray fields);
 private:
@@ -450,6 +471,15 @@ public:
      */
     StructureArrayConstPtr createStructureArray(String fieldName,
         StructureConstPtr structure) const;
+        
+	/**
+	 * Deserialize {@code Field} instance from given byte buffer.
+	 * @param buffer Buffer containing serialized {@code Field} instance. 
+	 * @param control Deserialization control instance.
+	 * @return a deserialized {@code Field} instance.
+	 */
+	FieldConstPtr deserialize(ByteBuffer* buffer, DeserializableControl* control) const;
+        
 private:
    FieldCreate();
    friend FieldCreate * getFieldCreate();

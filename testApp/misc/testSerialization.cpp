@@ -55,6 +55,11 @@ public:
     virtual void alignBuffer(int alignment) {
         buffer->align(alignment);
     }
+    
+    virtual void cachedSerialize(std::tr1::shared_ptr<const Field> const & field, ByteBuffer* buffer)
+    {
+        field->serialize(buffer, this);
+    }
 
     SerializableControlImpl() {
     }
@@ -71,6 +76,11 @@ public:
 
     virtual void alignData(int alignment) {
         buffer->align(alignment);
+    }
+
+    virtual std::tr1::shared_ptr<const Field> cachedDeserialize(ByteBuffer* buffer)
+    {
+        return getFieldCreate()->deserialize(buffer, this);
     }
 
     DeserializableControlImpl() {
