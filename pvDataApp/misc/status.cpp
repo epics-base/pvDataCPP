@@ -18,12 +18,12 @@ Status Status::OK;
 //PVDATA_REFCOUNT_MONITOR_DEFINE(status);
 
 Status::Status() :
-    m_type(STATUSTYPE_OK)
+    m_statusType(STATUSTYPE_OK)
 {
 }
 
 Status::Status(StatusType type, String message) :
-    m_type(type), m_message(message)
+    m_statusType(type), m_message(message)
 {
     if (type == STATUSTYPE_OK)
         throw std::invalid_argument("type == STATUSTYPE_OK");
@@ -32,7 +32,7 @@ Status::Status(StatusType type, String message) :
 }
 
 Status::Status(StatusType type, String message, String stackDump) :
-    m_type(type), m_message(message), m_stackDump(stackDump)
+    m_statusType(type), m_message(message), m_stackDump(stackDump)
 {
     if (type == STATUSTYPE_OK)
         throw std::invalid_argument("type == STATUSTYPE_OK");
@@ -46,7 +46,7 @@ Status::~Status() {
     
 Status::StatusType Status::getType() const
 {
-    return m_type;    
+    return m_statusType;    
 }
     
 
@@ -62,25 +62,25 @@ epics::pvData::String Status::getStackDump() const
     
 bool Status::isOK() const
 {
-    return (m_type == STATUSTYPE_OK);
+    return (m_statusType == STATUSTYPE_OK);
 }
     
 bool Status::isSuccess() const
 {
-    return (m_type == STATUSTYPE_OK || m_type == STATUSTYPE_WARNING);
+    return (m_statusType == STATUSTYPE_OK || m_statusType == STATUSTYPE_WARNING);
 }
 
 void Status::serialize(ByteBuffer *buffer, SerializableControl *flusher) const
 {
 	flusher->ensureBuffer(1);
-	if (m_type == STATUSTYPE_OK)
+	if (m_statusType == STATUSTYPE_OK)
 	{
 		// special code for okStatus (optimization)
 		buffer->putByte((int8)-1);
 	}
 	else
 	{
-		buffer->putByte((int8)m_type);
+		buffer->putByte((int8)m_statusType);
 		SerializeHelper::serializeString(m_message, buffer, flusher);
 		SerializeHelper::serializeString(m_stackDump, buffer, flusher);
 	}
@@ -93,15 +93,15 @@ void Status::deserialize(ByteBuffer *buffer, DeserializableControl *flusher)
 	if (typeCode == (int8)-1)
 	{
 	   // in most of the cases status will be OK, we statistically optimize
-	   if (m_type != STATUSTYPE_OK)
+	   if (m_statusType != STATUSTYPE_OK)
 	   {
-	       m_type = STATUSTYPE_OK;
+	       m_statusType = STATUSTYPE_OK;
 	       m_message = m_stackDump = m_emptyString;
 	   }
 	}
 	else
 	{
-	    m_type = (StatusType)typeCode;
+	    m_statusType = (StatusType)typeCode;
 		m_message = SerializeHelper::deserializeString(buffer, flusher);
 		m_stackDump = SerializeHelper::deserializeString(buffer, flusher);
 	}
@@ -117,7 +117,7 @@ String Status::toString() const
 void Status::toString(StringBuilder buffer, int indentLevel) const
 {
     *buffer += "Status [type=";
-    *buffer += StatusTypeName[m_type];
+    *buffer += StatusTypeName[m_statusType];
     if (!m_message.empty())
     {
         *buffer += ", message=";

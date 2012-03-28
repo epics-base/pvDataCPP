@@ -31,7 +31,7 @@ PVDATA_REFCOUNT_MONITOR_DEFINE(field);
 
 Field::Field(String fieldName,Type type)
     :m_fieldName(fieldName)
-    ,m_type(type)
+    ,m_fieldType(type)
 {
     PVDATA_REFCOUNT_MONITOR_CONSTRUCT(field);
 }

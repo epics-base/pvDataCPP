@@ -191,7 +191,7 @@ public:
      * Get the field type.
      * @return The type.
      */
-   Type getType() const{return m_type;}
+   Type getType() const{return m_fieldType;}
     /**
      * Convert the scalarType to a string and add it to builder.
      * @param  builder The string builder.
@@ -218,7 +218,7 @@ protected:
    Field(String fieldName,Type type);
 private:
    String m_fieldName;
-   Type m_type;
+   Type m_fieldType;
 
    friend class StructureArray;
    friend class Structure;

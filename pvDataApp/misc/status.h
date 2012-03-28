@@ -98,7 +98,7 @@ namespace epics { namespace pvData {
             
             static epics::pvData::String m_emptyString;
             
-            StatusType m_type;
+            StatusType m_statusType;
             String m_message;
             String m_stackDump;
         };
