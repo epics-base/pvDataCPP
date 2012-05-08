@@ -31,7 +31,7 @@ typedef std::tr1::shared_ptr<const Field> FieldConstPtr;
 /**
  * typedef for an array of shared pointer to an immutable Field.
  */
-typedef FieldConstPtr * FieldConstPtrArray;
+typedef std::vector<FieldConstPtr> FieldConstPtrArray;
 /**
  * typedef for a shared pointer to an immutable Scalar.
  */
@@ -114,6 +114,22 @@ enum ScalarType {
      */
     pvLong,
     /**
+     * The type is unsigned byte, i. e. a 8 bit unsigned integer.
+     */
+    pvUByte,
+    /**
+     * The type is unsigned short, i. e. a 16 bit unsigned integer.
+     */
+    pvUShort,
+    /**
+     * The type is unsigned int, i. e. a 32 bit unsigned integer.
+     */
+    pvUInt,
+    /**
+     * The type is unsigned long, i. e. a 64 bit unsigned integer.
+     */
+    pvULong,
+    /**
      * The type is float, i. e. 32 bit IEEE floating point,
      */
     pvFloat,
@@ -132,11 +148,17 @@ enum ScalarType {
  */
 namespace ScalarTypeFunc {
     /**
-     * Is the type an integer, i. e. is it one of byte,...long
+     * Is the type an integer, i. e. is it one of byte,...ulong
      * @param  scalarType The type.
      * @return (false,true) if the scalarType is an integer.
      */
     bool isInteger(ScalarType scalarType);
+    /**
+     * Is the type an unsigned integer, i. e. is it one of ubyte,...ulong
+     * @param  scalarType The type.
+     * @return (false,true) if the scalarType is an integer.
+     */
+    bool isUInteger(ScalarType scalarType);
     /**
      * Is the type numeric, i. e. is it one of byte,...,double
      * @param  scalarType The type.
@@ -183,11 +205,6 @@ public:
      */
    virtual ~Field();
     /**
-     * Get the name of the field.
-     * @return The field name.
-     */
-   String getFieldName() const{return m_fieldName;}
-    /**
      * Get the field type.
      * @return The type.
      */
@@ -203,21 +220,13 @@ public:
      * @param  indentLevel The number of blanks at the beginning of new lines.
      */
    virtual void toString(StringBuilder builder,int indentLevel) const;
-    /**
-     * Rename the field.
-     * @param  newName The new name.
-     * This MUST not be called after the field is put into use!!!
-     */
-   void renameField(String  newName);
 protected:
     /**
      * Constructor
-     * @param  fieldName The field name.
      * @param  fieldName The field type.
      */
-   Field(String fieldName,Type type);
+   Field(Type type);
 private:
-   String m_fieldName;
    Type m_fieldType;
 
    friend class StructureArray;
@@ -264,7 +273,7 @@ public:
     virtual void deserialize(ByteBuffer *buffer, DeserializableControl *flusher);
     
 protected:
-    Scalar(String fieldName,ScalarType scalarType);
+    Scalar(ScalarType scalarType);
 private:
     ScalarType scalarType;
     friend class FieldCreate;
@@ -276,10 +285,14 @@ private:
 class ScalarArray : public Field{
 public:
     POINTER_DEFINITIONS(ScalarArray);
-    ScalarArray(String fieldName,ScalarType scalarType);
     typedef ScalarArray& reference;
     typedef const ScalarArray& const_reference;
 
+    /**
+     * Constructor
+     * @param scalarType The scalarType for the field.
+     */
+    ScalarArray(ScalarType scalarType);
     /**
      * Get the scalarType for the elements.
      * @return the scalarType
@@ -339,10 +352,9 @@ public:
 protected:
     /**
      * Constructor.
-     * @param fieldName The name for the field.
      * @param structure The introspection interface for the elements.
      */
-    StructureArray(String fieldName,StructureConstPtr structure);
+    StructureArray(StructureConstPtr structure);
     /**
      * Destructor.
      */
@@ -369,41 +381,45 @@ public:
      * Get the number of immediate subfields in the structure/
      * @return The number of fields.
      */
-    int getNumberFields() const {return numberFields;}
+    std::size_t getNumberFields() const {return fieldNames.size();}
     /**
      * Get the field for the specified fieldName.
+     * @param fieldName The name of the field to get;
      * @return The introspection interface.
      * This will hold a null pointer if the field is not in the structure.
      */
     FieldConstPtr getField(String fieldName) const;
     /**
+     * Get the field for the specified fieldName.
+     * @param fieldName The index of the field to get;
+     * @return The introspection interface.
+     * This will hold a null pointer if the field is not in the structure.
+     */
+    FieldConstPtr getField(std::size_t index) {return fields[index];}
+    /**
      * Get the field index for the specified fieldName.
      * @return The introspection interface.
      * This will be -1 if the field is not in the structure.
      */
-    int getFieldIndex(String fieldName) const;
+    std::size_t getFieldIndex(String fieldName) const;
     /**
      * Get the fields in the structure.
      * @return The array of fields.
      */
-    FieldConstPtrArray getFields() const {return fields;}
+    FieldConstPtrArray const & getFields() const {return fields;}
     /**
-     * Append a field to the structure.
-     * @param field The field to append.
+     * Get the names of the fields in the structure.
+     * @return The array of fieldNames.
      */
-    void appendField(FieldConstPtr field);
+    StringArray const & getFieldNames() const {return fieldNames;}
+    void renameField(std::size_t fieldIndex,String newName)
+        {fieldNames[fieldIndex] = newName;}
     /**
-     * Append an array of  fields to the structure.
-     * @param field The fields to append.
-     * The array MUST be allocated on the heap.
-     * The structure takes ownership of the field array.
+     * Get the name of the field with the specified index;
+     * @param fieldIndex The index of the desired field.
+     * @return The fieldName.
      */
-    void appendFields(int numberFields,FieldConstPtrArray fields);
-    /**
-     * Remove a field from the structure.
-     * @param field The field to remove.
-     */
-    void removeField(int index);
+    String getFieldName(std::size_t fieldIndex){return fieldNames[fieldIndex];}
     /**
      * Convert the structure to a string and add it to builder.
      * @param  builder The string builder.
@@ -420,76 +436,90 @@ public:
     virtual void deserialize(ByteBuffer *buffer, DeserializableControl *flusher);
     
 protected:
-   Structure(String fieldName, int numberFields,FieldConstPtrArray fields);
+   Structure(StringArray fieldNames,FieldConstPtrArray fields);
 private:
-    int numberFields;
-    FieldConstPtrArray  fields;
+    void toStringCommon(StringBuilder buf,int indentLevel) const;
+    StringArray fieldNames;
+    FieldConstPtrArray fields;
    friend class FieldCreate;
 };
 
 /**
  * This is a singlton class for creating introspection interfaces.
  */
-class FieldCreate : NoDefaultMethods {
+class FieldCreate;
+typedef std::tr1::shared_ptr<FieldCreate> FieldCreatePtr;
+
+class FieldCreate {
 public:
-    /**
-     * Create a new Field like an existing field but with a different name.
-     * @param fieldName The field name.
-     * @param field An existing field
-     * @return a {@code Field} interface for the newly created object.
-     */
-    FieldConstPtr  create(String fieldName,FieldConstPtr  field) const;
+     static FieldCreatePtr getFieldCreate();
     /**
      * Create a {@code ScalarField}.
-     * @param fieldName The field name.
      * @param scalarType The scalar type.
      * @return a {@code Scalar} interface for the newly created object.
      * @throws An {@code IllegalArgumentException} if an illegal type is specified.
      */
-    ScalarConstPtr  createScalar(String fieldName,ScalarType scalarType) const;
+    ScalarConstPtr  createScalar(ScalarType scalarType) const;
     /**
      * Create an {@code Array} field.
-     * @param fieldName The field name
      * @param elementType The {@code scalarType} for array elements
      * @return An {@code Array} Interface for the newly created object.
      */
-    ScalarArrayConstPtr createScalarArray(String fieldName,
-        ScalarType elementType) const;
+    ScalarArrayConstPtr createScalarArray(ScalarType elementType) const;
      /**
       * Create an {@code Array} field that is has element type <i>Structure</i>
       * @param fieldName The field name
       * @param elementStructure The {@code Structure} for each array element.
       * @return An {@code Array} Interface for the newly created object.
       */
-    StructureConstPtr createStructure (String fieldName,
-        int numberFields,FieldConstPtrArray fields) const;
+    StructureArrayConstPtr createStructureArray(StructureConstPtr structure) const;
     /**
      * Create a {@code Structure} field.
-     * @param fieldName The field name
-     * @param fields The array of {@code Field}s for the structure.
+     * @param fieldNames The array of {@code fieldNames} for the structure
+     * @param fields The array of {@code fields} for the structure.
      * @return a {@code Structure} interface for the newly created object.
      */
-    StructureArrayConstPtr createStructureArray(String fieldName,
-        StructureConstPtr structure) const;
-        
-	/**
-	 * Deserialize {@code Field} instance from given byte buffer.
-	 * @param buffer Buffer containing serialized {@code Field} instance. 
-	 * @param control Deserialization control instance.
-	 * @return a deserialized {@code Field} instance.
-	 */
-	FieldConstPtr deserialize(ByteBuffer* buffer, DeserializableControl* control) const;
+    StructureConstPtr createStructure (
+        StringArray const & fieldNames,
+        FieldConstPtrArray const & fields) const;
+    /**
+     * Append a field to a structure.
+     * @param structure The structure to which the field is appended.
+     * @param fieldName The name of the field.
+     * @param field The field.
+     * @return a {@code Structure} interface for the newly created object.
+     */
+    StructureConstPtr appendField(
+        StructureConstPtr structure,
+        String fieldName, FieldConstPtr field) const;
+    /**
+     * Append fields to a structure.
+     * @param structure The structure to which the fields appended.
+     * @param fieldName The names of the fields.
+     * @param field The fields.
+     * @return a {@code Structure} interface for the newly created object.
+     */
+    StructureConstPtr appendFields(
+        StructureConstPtr structure,
+        StringArray const & fieldNames,
+        FieldConstPtrArray const & fields) const;
+    /**
+     * Deserialize {@code Field} instance from given byte buffer.
+     * @param buffer Buffer containing serialized {@code Field} instance. 
+     * @param control Deserialization control instance.
+     * @return a deserialized {@code Field} instance.
+     */
+    FieldConstPtr deserialize(ByteBuffer* buffer, DeserializableControl* control) const;
         
 private:
    FieldCreate();
-   friend FieldCreate * getFieldCreate();
 };
 
 /**
  * Get the single class that implemnents FieldCreate,
  * @param The fieldCreate factory.
  */
-extern FieldCreate * getFieldCreate();
+extern FieldCreatePtr getFieldCreate();
 
 }}
 #endif  /* PVINTROSPECT_H */

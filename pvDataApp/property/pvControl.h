@@ -12,11 +12,11 @@ namespace epics { namespace pvData {
 
 class PVControl {
 public:
-    PVControl() : pvLow(0),pvHigh(0) {}
+    PVControl(){}
     //default constructors and destructor are OK
     //returns (false,true) if pvField(isNot, is valid enumerated structure
     //An automatic detach is issued if already attached.
-    bool attach(PVField *pvField);
+    bool attach(PVFieldPtr pvField);
     void detach();
     bool isAttached();
     // each of the following throws logic_error is not attached to PVField
@@ -24,8 +24,8 @@ public:
     void get(Control &) const;
     bool set(Control const & control);
 private:
-    PVDouble *pvLow;
-    PVDouble *pvHigh;
+    PVDoublePtr pvLow;
+    PVDoublePtr pvHigh;
 };
     
 }}

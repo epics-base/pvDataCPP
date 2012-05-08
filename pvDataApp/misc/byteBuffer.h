@@ -153,7 +153,7 @@ inline double swap(double val)
 }
 
 #define is_aligned(POINTER, BYTE_COUNT) \
-    (((uintptr_t)(const void *)(POINTER)) % (BYTE_COUNT) == 0)
+    (((std::ptrdiff_t)(const void *)(POINTER)) % (BYTE_COUNT) == 0)
 
 /*template <bool ENDIANESS_SUPPORT = false,
           bool UNALIGNED_ACCESS = false,
@@ -182,7 +182,7 @@ public:
      * @param  byteOrder The byte order.
      * Must be one of EPICS_BYTE_ORDER,EPICS_ENDIAN_LITTLE,EPICS_ENDIAN_BIG,
      */
-    ByteBuffer(uintptr_t size, int byteOrder = EPICS_BYTE_ORDER) :
+    ByteBuffer(std::size_t size, int byteOrder = EPICS_BYTE_ORDER) :
         _buffer(0), _size(size),
         _reverseEndianess(byteOrder != EPICS_BYTE_ORDER),
         _reverseFloatEndianess(byteOrder != EPICS_FLOAT_WORD_ORDER)
@@ -244,9 +244,9 @@ public:
      * Returns the current position.
      * @return The current position in the raw data.
      */
-    inline uintptr_t getPosition()
+    inline std::ptrdiff_t getPosition()
     {
-        return (((uintptr_t)(const void *)_position) - ((uintptr_t)(const void *)_buffer));
+        return (((std::ptrdiff_t)(const void *)_position) - ((std::ptrdiff_t)(const void *)_buffer));
     }
     /**
      * Sets the buffer position.
@@ -255,7 +255,7 @@ public:
      * @param  pos The offset into the raw buffer.
      * The new position value; must be no larger than the current limit
      */
-    inline void setPosition(uintptr_t pos)
+    inline void setPosition(std::ptrdiff_t pos)
     {
         _position = _buffer + pos;
     }
@@ -264,9 +264,9 @@ public:
      *
      * @return The offset into the raw buffer.
      */
-    inline uintptr_t getLimit()
+    inline std::ptrdiff_t getLimit()
     {
-        return (((uintptr_t)(const void *)_limit) - ((uintptr_t)(const void *)_buffer));
+        return (((std::ptrdiff_t)(const void *)_limit) - ((std::ptrdiff_t)(const void *)_buffer));
     }
     /**
      * Sets this buffer's limit.
@@ -276,7 +276,7 @@ public:
      * @param  limit The new position value;
      * must be no larger than the current limit 
      */
-    inline void setLimit(uintptr_t limit)
+    inline void setLimit(std::ptrdiff_t limit)
     {
         _limit = _buffer + limit;
     }
@@ -285,16 +285,16 @@ public:
      *
      * @return The number of elements remaining in this buffer.
      */
-    inline uintptr_t getRemaining()
+    inline std::size_t getRemaining()
     {
-        return (((uintptr_t)(const void *)_limit) - ((uintptr_t)(const void *)_position));
+        return (((std::ptrdiff_t)(const void *)_limit) - ((std::ptrdiff_t)(const void *)_position));
     }
     /**
      * Returns The size, i.e. capacity of the raw data buffer in bytes.
      *
      * @return The size of the raw data buffer.
      */
-    inline uintptr_t getSize()
+    inline std::size_t getSize()
     {
         return _size;
     }
@@ -359,7 +359,7 @@ public:
      * @param  value The value to be put into the byte buffer.
      */
     template<typename T>
-    inline void put(uintptr_t index, T value)
+    inline void put(std::size_t index, T value)
     {
         // this avoids int8 specialization, compiler will take care if optimization, -O2 or more
         if (sizeof(T) == 1)
@@ -470,7 +470,7 @@ public:
      * @return The object.
      */
     template<typename T>
-    inline T get(uintptr_t index)
+    inline T get(std::size_t index)
     {
         // this avoids int8 specialization, compiler will take care if optimization, -O2 or more
         if (sizeof(T) == 1)
@@ -525,7 +525,7 @@ public:
      * @param  offset The starting position within src.
      * @param  count  The number of bytes to put into the byte buffer,
      */
-    inline void put(const char* src, uintptr_t src_offset, uintptr_t count) {
+    inline void put(const char* src, std::size_t src_offset, std::size_t count) {
         //if(count>getRemaining()) THROW_BASE_EXCEPTION("buffer overflow");
         memcpy(_position, src + src_offset, count);
         _position += count;
@@ -538,7 +538,7 @@ public:
      * @param  offset The starting position within src.
      * @param  count  The number of bytes to put into the byte buffer,
      */
-    inline void get(char* dest, uintptr_t dest_offset, uintptr_t count) {
+    inline void get(char* dest, std::size_t dest_offset, std::size_t count) {
         //if(count>getRemaining()) THROW_BASE_EXCEPTION("buffer overflow");
         memcpy(dest + dest_offset, _position, count);
         _position += count;
@@ -551,7 +551,7 @@ public:
      * @param  count  The number of elements.
      */
     template<typename T>
-    inline void putArray(T* values, uintptr_t count)
+    inline void putArray(T* values, std::size_t count)
     {
         // this avoids int8 specialization, compiler will take care if optimization, -O2 or more
         if (sizeof(T) == 1)
@@ -570,7 +570,7 @@ public:
         // ... so that we can be fast changing endianess
         if (ENDIANESS_SUPPORT && reverse<T>()) 
         {
-            for (uintptr_t i = 0; i < count; i++)
+            for (std::size_t i = 0; i < count; i++)
             {
                 *start = swap<T>(*start);
                 start++;            
@@ -585,7 +585,7 @@ public:
      * @param  count  The number of elements.
      */
     template<typename T>
-    inline void getArray(T* values, uintptr_t count)
+    inline void getArray(T* values, std::size_t count)
     {
         // this avoids int8 specialization, compiler will take care if optimization, -O2 or more
         if (sizeof(T) == 1)
@@ -604,7 +604,7 @@ public:
         // ... so that we can be fast changing endianess
         if (ENDIANESS_SUPPORT && reverse<T>()) 
         {
-            for (uintptr_t i = 0; i < count; i++)
+            for (std::size_t i = 0; i < count; i++)
             {
                 *start = swap<T>(*start);
                 start++;            
@@ -627,8 +627,8 @@ public:
      */
     inline void align(int size)
     {
-        const uintptr_t k = size - 1;
-        _position = (char*)((((uintptr_t)(const void *)_position) + k) & ~(k));
+        const std::size_t  k = size - 1;
+        _position = (char*)((((std::ptrdiff_t)(const void *)_position) + k) & ~(k));
     }
     /**
      * Put a boolean value into the byte buffer.
@@ -679,49 +679,49 @@ public:
      * @param  index The offset in the byte buffer,
      * @param  value The value.
      */
-    inline void putBoolean(uintptr_t index,  bool value) { put<  int8>(index, value); }
+    inline void putBoolean(std::size_t  index,  bool value) { put<  int8>(index, value); }
     /**
      * Put a byte value into the byte buffer at the specified index.
      *
      * @param  index The offset in the byte buffer,
      * @param  value The value.
      */
-    inline void putByte   (uintptr_t index,  int8 value) { put<  int8>(index, value); }
+    inline void putByte   (std::size_t  index,  int8 value) { put<  int8>(index, value); }
     /**
      * Put a short value into the byte buffer at the specified index.
      *
      * @param  index The offset in the byte buffer,
      * @param  value The value.
      */
-    inline void putShort  (uintptr_t index, int16 value) { put< int16>(index, value); }
+    inline void putShort  (std::size_t  index, int16 value) { put< int16>(index, value); }
     /**
      * Put an int value into the byte buffer at the specified index.
      *
      * @param  index The offset in the byte buffer,
      * @param  value The value.
      */
-    inline void putInt    (uintptr_t index, int32 value) { put< int32>(index, value); }
+    inline void putInt    (std::size_t  index, int32 value) { put< int32>(index, value); }
     /**
      * Put a long value into the byte buffer at the specified index.
      *
      * @param  index The offset in the byte buffer,
      * @param  value The value.
      */
-    inline void putLong   (uintptr_t index, int64 value) { put< int64>(index, value); }
+    inline void putLong   (std::size_t  index, int64 value) { put< int64>(index, value); }
     /**
      * Put a float value into the byte buffer at the specified index.
      *
      * @param  index The offset in the byte buffer,
      * @param  value The value.
      */
-    inline void putFloat  (uintptr_t index, float value) { put< float>(index, value); }
+    inline void putFloat  (std::size_t  index, float value) { put< float>(index, value); }
     /**
      * Put a double value into the byte buffer at the specified index.
      *
      * @param  index The offset in the byte buffer,
      * @param  value The value.
      */
-    inline void putDouble (uintptr_t index,double value) { put<double>(index, value); }
+    inline void putDouble (std::size_t  index,double value) { put<double>(index, value); }
 
     /**
      * Get a boolean value from the byte buffer.
@@ -772,49 +772,49 @@ public:
      * @param  index The offset in the byte buffer.
      * @return The value.
      */
-    inline   bool getBoolean(uintptr_t index) { return get<  int8>(index) != 0; }
+    inline   bool getBoolean(std::size_t  index) { return get<  int8>(index) != 0; }
     /**
      * Get a byte value from the byte buffer at the specified index.
      *
      * @param  index The offset in the byte buffer.
      * @return The value.
      */
-    inline   int8 getByte   (uintptr_t index) { return get<  int8>(index); }
+    inline   int8 getByte   (std::size_t  index) { return get<  int8>(index); }
     /**
      * Get a short value from the byte buffer at the specified index.
      *
      * @param  index The offset in the byte buffer.
      * @return The value.
      */
-    inline  int16 getShort  (uintptr_t index) { return get< int16>(index); }
+    inline  int16 getShort  (std::size_t  index) { return get< int16>(index); }
     /**
      * Get an int value from the byte buffer at the specified index.
      *
      * @param  index The offset in the byte buffer.
      * @return The value.
      */
-    inline  int32 getInt    (uintptr_t index) { return get< int32>(index); }
+    inline  int32 getInt    (std::size_t  index) { return get< int32>(index); }
     /**
      * Get a long value from the byte buffer at the specified index.
      *
      * @param  index The offset in the byte buffer.
      * @return The value.
      */
-    inline  int64 getLong   (uintptr_t index) { return get< int64>(index); }
+    inline  int64 getLong   (std::size_t  index) { return get< int64>(index); }
     /**
      * Get a float value from the byte buffer at the specified index.
      *
      * @param  index The offset in the byte buffer.
      * @return The value.
      */
-    inline  float getFloat  (uintptr_t index) { return get< float>(index); }
+    inline  float getFloat  (std::size_t  index) { return get< float>(index); }
     /**
      * Get a boolean value from the byte buffer at the specified index.
      *
      * @param  double The offset in the byte buffer.
      * @return The value.
      */
-    inline double getDouble (uintptr_t index) { return get<double>(index); }
+    inline double getDouble (std::size_t  index) { return get<double>(index); }
 
     // TODO remove
     inline const char* getArray()
@@ -827,7 +827,7 @@ private:
     char* _buffer;
     char* _position;
     char* _limit;
-    uintptr_t _size;
+    std::size_t  _size;
     bool _reverseEndianess; 
     bool _reverseFloatEndianess; 
 };

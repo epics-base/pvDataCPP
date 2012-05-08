@@ -20,36 +20,38 @@
 #include <pv/pvData.h>
 #include <pv/standardField.h>
 #include <pv/standardPVField.h>
-#include <pv/CDRMonitor.h>
 
 using namespace epics::pvData;
 
-static FieldCreate * fieldCreate = 0;
-static PVDataCreate * pvDataCreate = 0;
-static StandardField *standardField = 0;
-static StandardPVField *standardPVField = 0;
-static String buffer("");
+static FieldCreatePtr fieldCreate;
+static PVDataCreatePtr pvDataCreate;
+static StandardFieldPtr standardField;
+static StandardPVFieldPtr standardPVField;
+static String buffer;
 
 StructureConstPtr getPowerSupplyStructure() {
     String properties("alarm");
-    FieldConstPtrArray powerSupply = new FieldConstPtr[3];
-    powerSupply[0] = standardField->scalar(
-        String("voltage"),pvDouble,properties);
-    powerSupply[1] = standardField->scalar(
-        String("power"),pvDouble,properties);
-    powerSupply[2] = standardField->scalar(
-        String("current"),pvDouble,properties);
-    StructureConstPtr structure = standardField->structure(
-        String("powerSupply"),3,powerSupply);
+    FieldConstPtrArray  fields;
+    StringArray fieldNames;
+    fields.reserve(3);
+    fieldNames.reserve(3);
+    fieldNames.push_back("voltage");
+    fieldNames.push_back("power");
+    fieldNames.push_back("current");
+    fields.push_back(standardField->scalar(pvDouble,properties));
+    fields.push_back(standardField->scalar(pvDouble,properties));
+    fields.push_back(standardField->scalar(pvDouble,properties));
+    StructureConstPtr structure = fieldCreate->createStructure(
+        fieldNames,fields);
     return structure;
 }
 
 void testPowerSupplyArray(FILE * fd) {
-    PVStructure* powerSupplyArrayStruct = standardPVField->structureArray(
-        0,"powerSupply",getPowerSupplyStructure(),String("alarm,timeStamp"));
-    PVStructureArray * powerSupplyArray =
+    PVStructurePtr powerSupplyArrayStruct = standardPVField->structureArray(
+        getPowerSupplyStructure(),String("alarm,timeStamp"));
+    PVStructureArrayPtr powerSupplyArray =
         powerSupplyArrayStruct->getStructureArrayField(String("value"));
-    assert(powerSupplyArray!=0);
+    assert(powerSupplyArray.get()!=NULL);
     int offset = powerSupplyArray->append(5);
     powerSupplyArray->setLength(offset);
     buffer.clear();
@@ -64,7 +66,6 @@ void testPowerSupplyArray(FILE * fd) {
     buffer.clear();
     powerSupplyArrayStruct->toString(&buffer);
     fprintf(fd,"after compress%s\n",buffer.c_str());
-    delete powerSupplyArrayStruct;
 }
 
 int main(int argc,char *argv[])
@@ -80,8 +81,6 @@ int main(int argc,char *argv[])
     standardField = getStandardField();
     standardPVField = getStandardPVField();
     testPowerSupplyArray(fd);
-    epicsExitCallAtExits();
-    CDRMonitor::get().show(fd,true);
     return(0);
 }
 

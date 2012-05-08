@@ -31,38 +31,40 @@
 #include <pv/pvDisplay.h>
 #include <pv/pvEnumerated.h>
 #include <pv/pvTimeStamp.h>
-#include <pv/CDRMonitor.h>
 
 using namespace epics::pvData;
 
-static FieldCreate * fieldCreate = 0;
-static PVDataCreate * pvDataCreate = 0;
-static StandardField *standardField = 0;
-static StandardPVField *standardPVField = 0;
-static Convert *convert = 0;
-static String builder("");
+static FieldCreatePtr fieldCreate;
+static PVDataCreatePtr pvDataCreate;
+static StandardFieldPtr standardField;
+static StandardPVFieldPtr standardPVField;
+static ConvertPtr convert;
+static String builder;
 static String alarmTimeStamp("alarm,timeStamp");
 static String allProperties("alarm,timeStamp,display,control");
 
-static PVStructure *doubleRecord = 0;
-static PVStructure *enumeratedRecord = 0;
+static PVStructurePtr doubleRecord;
+static PVStructurePtr enumeratedRecord;
 
 static void createRecords(FILE * fd,FILE *auxfd)
 {
-    doubleRecord = standardPVField->scalarValue(0,pvDouble,allProperties);
+    doubleRecord = standardPVField->scalar(pvDouble,allProperties);
     builder.clear();
     doubleRecord->toString(&builder);
     fprintf(fd,"%s\n",builder.c_str());
-    String choices[4] = {
-        String("0"),String("1"),String("2"),String("3")
-    };
-    enumeratedRecord = standardPVField->enumeratedValue(0,choices,4,alarmTimeStamp);
+    StringArray choices;
+    choices.reserve(4);
+    choices.push_back("1");
+    choices.push_back("2");
+    choices.push_back("3");
+    choices.push_back("4");
+    enumeratedRecord = standardPVField->enumerated(choices,alarmTimeStamp);
     builder.clear();
     enumeratedRecord->toString(&builder);
     fprintf(fd,"%s\n",builder.c_str());
 }
 
-static void deleteRecords(FILE * fd,FILE *auxfd)
+static void printRecords(FILE * fd,FILE *auxfd)
 {
     fprintf(fd,"doubleRecord\n");
     builder.clear();
@@ -72,8 +74,6 @@ static void deleteRecords(FILE * fd,FILE *auxfd)
     builder.clear();
     enumeratedRecord->toString(&builder);
     fprintf(fd,"%s\n",builder.c_str());
-    delete doubleRecord;
-    delete enumeratedRecord;
 }
 
 static void testAlarm(FILE * fd,FILE *auxfd)
@@ -82,8 +82,8 @@ static void testAlarm(FILE * fd,FILE *auxfd)
     Alarm alarm;
     PVAlarm pvAlarm; 
     bool result;
-    PVField *pvField = doubleRecord->getSubField(String("alarm"));
-    if(pvField==0) {
+    PVFieldPtr pvField = doubleRecord->getSubField(String("alarm"));
+    if(pvField.get()==0) {
         printf("testAlarm ERROR did not find field alarm\n");
         return;
     }
@@ -250,9 +250,7 @@ int main(int argc,char *argv[])
     testControl(fd,auxfd);
     testDisplay(fd,auxfd);
     testEnumerated(fd,auxfd);
-    deleteRecords(fd,auxfd);
-    epicsExitCallAtExits();
-    CDRMonitor::get().show(fd);
+    printRecords(fd,auxfd);
     return(0);
 }
 

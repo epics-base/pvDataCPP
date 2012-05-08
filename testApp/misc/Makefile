@@ -2,22 +2,6 @@ TOP=../..
 
 include $(TOP)/configure/CONFIG
 
-PROD_HOST += testTimeStamp
-testTimeStamp_SRCS += testTimeStamp.cpp
-testTimeStamp_LIBS += pvData Com
-
-PROD_HOST += testLinkedList
-testLinkedList_SRCS += testLinkedList.cpp
-testLinkedList_LIBS += pvData Com
-
-PROD_HOST += testQueue
-testQueue_SRCS += testQueue.cpp
-testQueue_LIBS += pvData Com
-
-PROD_HOST += testMessageQueue
-testMessageQueue_SRCS += testMessageQueue.cpp
-testMessageQueue_LIBS += pvData Com
-
 PROD_HOST += testThread
 testThread_SRCS += testThread.cpp
 testThread_LIBS += pvData Com
@@ -42,9 +26,21 @@ PROD_HOST += testBaseException
 testBaseException_SRCS += testBaseException.cpp
 testBaseException_LIBS += pvData
 
-PROD_HOST += testSerialization
-testSerialization_SRCS += testSerialization.cpp
-testSerialization_LIBS += pvData Com
+#PROD_HOST += testSerialization
+#testSerialization_SRCS += testSerialization.cpp
+#testSerialization_LIBS += pvData Com
+
+PROD_HOST += testTimeStamp
+testTimeStamp_SRCS += testTimeStamp.cpp
+testTimeStamp_LIBS += pvData Com
+
+PROD_HOST += testQueue
+testQueue_SRCS += testQueue.cpp
+testQueue_LIBS += pvData Com
+
+#PROD_HOST += testMessageQueue
+#testMessageQueue_SRCS += testMessageQueue.cpp
+#testMessageQueue_LIBS += pvData Com
 
 include $(TOP)/configure/RULES
 #----------------------------------------

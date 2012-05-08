@@ -12,59 +12,43 @@
 #include <pv/pvDisplay.h>
 namespace epics { namespace pvData { 
 
+using std::tr1::static_pointer_cast;
+
 static String noDisplayFound("No display structure found");
 static String notAttached("Not attached to an display structure");
 
-bool PVDisplay::attach(PVField *pvField)
+bool PVDisplay::attach(PVFieldPtr pvField)
 {
-    PVStructure *pvStructure = 0;
-    if(pvField->getField()->getFieldName().compare("display")!=0) {
-        if(pvField->getField()->getFieldName().compare("value")!=0) {
+    if(pvField->getField()->getType()!=structure) {
             pvField->message(noDisplayFound,errorMessage);
             return false;
-        }
-        PVStructure *pvParent = pvField->getParent();
-        if(pvParent==0) {
-            pvField->message(noDisplayFound,errorMessage);
-            return false;
-        }
-        pvStructure = pvParent->getStructureField(String("display"));
-        if(pvStructure==0) {
-            pvField->message(noDisplayFound,errorMessage);
-            return false;
-        }
-    } else {
-        if(pvField->getField()->getType()!=structure) {
-            pvField->message(noDisplayFound,errorMessage);
-            return false;
-        }
-        pvStructure = static_cast<PVStructure*>(pvField);
     }
-    pvDescription = pvStructure->getStringField(String("description"));
-    if(pvDescription==0) {
+    PVStructurePtr pvStructure = static_pointer_cast<PVStructure>(pvField);
+    pvDescription = pvStructure->getStringField("description");
+    if(pvDescription.get()==NULL) {
         pvField->message(noDisplayFound,errorMessage);
         return false;
     }
-    pvFormat = pvStructure->getStringField(String("format"));
-    if(pvFormat==0) {
+    pvFormat = pvStructure->getStringField("format");
+    if(pvFormat.get()==NULL) {
         pvField->message(noDisplayFound,errorMessage);
         detach();
         return false;
     }
-    pvUnits = pvStructure->getStringField(String("units"));
-    if(pvUnits==0) {
+    pvUnits = pvStructure->getStringField("units");
+    if(pvUnits.get()==NULL) {
         pvField->message(noDisplayFound,errorMessage);
         detach();
         return false;
     }
-    pvLow = pvStructure->getDoubleField(String("limit.low"));
-    if(pvLow==0) {
+    pvLow = pvStructure->getDoubleField(String("limitLow"));
+    if(pvLow.get()==NULL) {
         pvField->message(noDisplayFound,errorMessage);
         detach();
         return false;
     }
-    pvHigh = pvStructure->getDoubleField(String("limit.high"));
-    if(pvHigh==0) {
+    pvHigh = pvStructure->getDoubleField(String("limitHigh"));
+    if(pvHigh.get()==NULL) {
         pvField->message(noDisplayFound,errorMessage);
         detach();
         return false;
@@ -74,22 +58,21 @@ bool PVDisplay::attach(PVField *pvField)
 
 void PVDisplay::detach()
 {
-    pvDescription = 0;
-    pvFormat = 0;
-    pvUnits = 0;
-    pvLow = 0;
-    pvHigh = 0;
+    pvDescription.reset();
+    pvFormat.reset();
+    pvUnits.reset();
+    pvLow.reset();
+    pvHigh.reset();
 }
 
 bool PVDisplay::isAttached() {
-    if(pvDescription==0 || pvFormat==0 || pvUnits==0 || pvLow==0 || pvHigh==0)
-        return false;
+    if(pvDescription.get()) return false;
     return true;
 }
 
 void PVDisplay::get(Display & display) const
 {
-    if(pvDescription==0 || pvFormat==0 || pvUnits==0 || pvLow==0 || pvHigh==0) {
+    if(pvDescription.get()==NULL) {
         throw std::logic_error(notAttached);
     }
     display.setDescription(pvDescription->get());
@@ -101,13 +84,12 @@ void PVDisplay::get(Display & display) const
 
 bool PVDisplay::set(Display const & display)
 {
-    if(pvDescription==0 || pvFormat==0 || pvUnits==0 || pvLow==0 || pvHigh==0) {
+    if(pvDescription.get()==NULL) {
         throw std::logic_error(notAttached);
     }
     if(pvDescription->isImmutable() || pvFormat->isImmutable()) return false;
     if(pvUnits->isImmutable() || pvLow->isImmutable() || pvHigh->isImmutable())
          return false;
-
     pvDescription->put(display.getDescription());
     pvFormat->put(display.getFormat());
     pvUnits->put(display.getUnits());

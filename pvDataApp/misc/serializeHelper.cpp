@@ -23,13 +23,13 @@ using namespace std;
 namespace epics {
     namespace pvData {
 
-        void SerializeHelper::writeSize(int s, ByteBuffer* buffer,
+        void SerializeHelper::writeSize(std::size_t s, ByteBuffer* buffer,
                 SerializableControl* flusher) {
             flusher->ensureBuffer(sizeof(int64)+1);
             SerializeHelper::writeSize(s, buffer);
         }
 
-        void SerializeHelper::writeSize(int s, ByteBuffer* buffer) {
+        void SerializeHelper::writeSize(std::size_t s, ByteBuffer* buffer) {
             if(s==-1) // null
                 buffer->putByte(-1);
             else if(s<254)
@@ -41,7 +41,7 @@ namespace epics {
             }
         }
 
-        int SerializeHelper::readSize(ByteBuffer* buffer,
+        std::size_t SerializeHelper::readSize(ByteBuffer* buffer,
                 DeserializableControl* control) {
             control->ensureData(1);
             int8 b = buffer->getByte();
@@ -54,17 +54,17 @@ namespace epics {
                 return s;
             }
             else
-                return (int)(b<0 ? b+256 : b);
+                return (std::size_t)(b<0 ? b+256 : b);
         }
 
         void SerializeHelper::serializeString(const String& value,
                 ByteBuffer* buffer, SerializableControl* flusher) {
-            int len = value.length();
+            std::size_t len = value.length();
             SerializeHelper::writeSize(len, buffer, flusher);
             if (len<=0) return;
-            int i = 0;
+            std::size_t i = 0;
             while(true) {
-                int maxToWrite = min(len-i, (int)buffer->getRemaining());
+                std::size_t maxToWrite = min(len-i, buffer->getRemaining());
                 buffer->put(value.data(), i, maxToWrite); // ASCII
                 i += maxToWrite;
                 if(i<len)
@@ -75,19 +75,19 @@ namespace epics {
         }
 
         void SerializeHelper::serializeSubstring(const String& value,
-                int offset, int count, ByteBuffer* buffer,
+                std::size_t offset, std::size_t count, ByteBuffer* buffer,
                 SerializableControl* flusher) {
             if(offset<0)
                 offset = 0;
-            else if(offset>(int)value.length()) offset = value.length();
+            else if(offset>(std::size_t)value.length()) offset = value.length();
 
-            if(offset+count>(int)value.length()) count = value.length()-offset;
+            if(offset+count>(std::size_t)value.length()) count = value.length()-offset;
 
             SerializeHelper::writeSize(count, buffer, flusher);
             if (count<=0) return;
-            int i = 0;
+            std::size_t i = 0;
             while(true) {
-                int maxToWrite = min(count-i, (int)buffer->getRemaining());
+                std::size_t maxToWrite = min(count-i, buffer->getRemaining());
                 buffer->put(value.data(), offset+i, maxToWrite); // ASCII
                 i += maxToWrite;
                 if(i<count)
@@ -102,13 +102,13 @@ namespace epics {
         String SerializeHelper::deserializeString(ByteBuffer* buffer,
                 DeserializableControl* control) {
 
-            int size = SerializeHelper::readSize(buffer, control);
+            std::size_t size = SerializeHelper::readSize(buffer, control);
             if(size>0)
             {
-                if ((int)buffer->getRemaining()>=size)
+                if (buffer->getRemaining()>=size)
                 {
                     // entire string is in buffer, simply create a string out of it (copy)
-                    int pos = buffer->getPosition();
+                    std::size_t pos = buffer->getPosition();
                     String str(buffer->getArray()+pos, size);
                     buffer->setPosition(pos+size);
                     return str;
@@ -118,10 +118,10 @@ namespace epics {
                     String str;
                     str.reserve(size);
                     try {
-                        int i = 0;
+                        std::size_t i = 0;
                         while(true) {
-                            int toRead = min(size-i, (int)buffer->getRemaining());
-                            int pos = buffer->getPosition();
+                            std::size_t toRead = min(size-i, buffer->getRemaining());
+                            std::size_t pos = buffer->getPosition();
                             str.append(buffer->getArray()+pos, toRead);
                             buffer->setPosition(pos+toRead);
                             i += toRead;

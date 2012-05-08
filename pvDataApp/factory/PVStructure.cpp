@@ -17,551 +17,625 @@
 
 using std::tr1::static_pointer_cast;
 using std::tr1::const_pointer_cast;
+using std::size_t;
 
 namespace epics { namespace pvData {
 
-    class PVStructurePvt {
-    public:
-        PVStructurePvt();
-        ~PVStructurePvt();
+static PVFieldPtr nullPVField;
+static PVBooleanPtr nullPVBoolean;
+static PVBytePtr nullPVByte;
+static PVShortPtr nullPVShort;
+static PVIntPtr nullPVInt;
+static PVLongPtr nullPVLong;
+static PVUBytePtr nullPVUByte;
+static PVUShortPtr nullPVUShort;
+static PVUIntPtr nullPVUInt;
+static PVULongPtr nullPVULong;
+static PVFloatPtr nullPVFloat;
+static PVDoublePtr nullPVDouble;
+static PVStringPtr nullPVString;
+static PVStructurePtr nullPVStructure;
+static PVStructureArrayPtr nullPVStructureArray;
+static PVScalarArrayPtr nullPVScalarArray;
 
-        int numberFields;
-        PVFieldPtrArray pvFields;
-        String extendsStructureName;
-    };
+static PVFieldPtr &findSubField(String fieldName,PVStructure *pvStructure);
 
-    PVStructurePvt::PVStructurePvt()
-    : numberFields(0), pvFields(0),extendsStructureName("")
-    {
+PVStructure::PVStructure(StructureConstPtr& structurePtr)
+: PVField(structurePtr),
+  structurePtr(structurePtr),
+  extendsStructureName("")
+{
+    size_t numberFields = structurePtr->getNumberFields();
+    FieldConstPtrArray fields = structurePtr->getFields();
+    pvFields.reserve(numberFields);
+    PVDataCreatePtr pvDataCreate = getPVDataCreate();
+    for(size_t i=0; i<numberFields; i++) {
+        pvFields.push_back(pvDataCreate->createPVField(fields[i]));
     }
-
-    PVStructurePvt::~PVStructurePvt()
-    {
-        for(int i=0; i<numberFields; i++) {
-            delete pvFields[i];
-        }
-        if (pvFields) delete[] pvFields;
+    for(size_t i=0; i<numberFields; i++) {
+        pvFields[i]->setParent(this);
     }
+}
 
-    static PVField *findSubField(String fieldName,PVStructure *pvStructure);
-
-    PVStructure::PVStructure(PVStructure *parent,StructureConstPtr structurePtr)
-    : PVField(parent,structurePtr),pImpl(new PVStructurePvt())
-    {
-        int numberFields = structurePtr->getNumberFields();
-        FieldConstPtrArray fields = structurePtr->getFields();
-        pImpl->numberFields = numberFields;
-        pImpl->pvFields = new PVFieldPtr[numberFields];
-        PVFieldPtrArray pvFields = pImpl->pvFields;
-        PVDataCreate *pvDataCreate = getPVDataCreate();
-        for(int i=0; i<numberFields; i++) {
-            pvFields[i] = pvDataCreate->createPVField(this,fields[i]);
-        }
+PVStructure::PVStructure(StructureConstPtr structurePtr,
+    PVFieldPtrArray & pvs
+)
+: PVField(structurePtr),
+  structurePtr(structurePtr),
+  extendsStructureName("")
+{
+    size_t numberFields = structurePtr->getNumberFields();
+    pvFields = pvs;
+    for(size_t i=0; i<numberFields; i++) {
+        pvFields[i]->setParent(this);
     }
+}
 
-    PVStructure::PVStructure(PVStructure *parent,StructureConstPtr structurePtr,
-        PVFieldPtrArray pvFields
-    )
-    : PVField(parent,structurePtr),pImpl(new PVStructurePvt())
-    {
-        int numberFields = structurePtr->getNumberFields();
-        pImpl->numberFields = numberFields;
-        pImpl->pvFields = pvFields;
-        for(int i=0; i<numberFields; i++) {
-            PVField *pvField = pvFields[i];
-            setParentPvt(pvField,this);
-        }
+PVStructure::~PVStructure()
+{
+}
+
+StructureConstPtr  &PVStructure::getStructure()
+{
+    return structurePtr;
+}
+
+PVFieldPtrArray & PVStructure::getPVFields()
+{
+    return pvFields;
+}
+
+PVFieldPtr  &PVStructure::getSubField(String fieldName)
+{
+    return findSubField(fieldName,this);
+}
+
+
+PVFieldPtr  &PVStructure::getSubField(size_t fieldOffset)
+{
+    if(fieldOffset<=getFieldOffset()) {
+        return nullPVField;
     }
-
-    void PVStructure::setParentPvt(PVField *pvField,PVStructure *parent)
-    {
-        pvField->setParent(parent);
+    if(fieldOffset>getNextFieldOffset()) return nullPVField;
+    size_t numFields = pvFields.size();
+    for(size_t i=0; i<numFields; i++) {
+        PVFieldPtr pvField  = pvFields[i];
+        if(pvField->getFieldOffset()==fieldOffset) return pvFields[i];
+        if(pvField->getNextFieldOffset()<=fieldOffset) continue;
         if(pvField->getField()->getType()==structure) {
-            PVStructure *subStructure = static_cast<PVStructure*>(pvField);
-            PVFieldPtr *subFields = subStructure->getPVFields();
-            int numberFields = subStructure->getStructure()->getNumberFields();
-            for(int i=0; i<numberFields; i++) {
-                PVField *subField = static_cast<PVField*>(subFields[i]);
-                setParentPvt(subField,subStructure);
-            }
+            PVStructure *pvStructure = static_cast<PVStructure *>(pvField.get());
+            return pvStructure->getSubField(fieldOffset);
         }
     }
+    throw std::logic_error("PVStructure.getSubField: Logic error");
+}
 
-    PVStructure::~PVStructure()
-    {
-        delete pImpl;
+void PVStructure::appendPVField(String fieldName,PVFieldPtr & pvField )
+{
+    size_t origLength = pvFields.size();
+    size_t newLength = origLength+1;
+    PVFieldPtrArray newPVFields;
+    newPVFields.reserve(newLength);
+    for(size_t i=0; i<origLength; i++) {
+        newPVFields.push_back(pvFields[i]);
     }
+    newPVFields.push_back(pvField);
+    pvFields.swap(newPVFields);
+    FieldConstPtr field = getFieldCreate()->appendField(structurePtr,fieldName,pvField->getField());
+    replaceField(field);
+    structurePtr = static_pointer_cast<const Structure>(field);
+    for(size_t i=0; i<newLength; i++) pvFields[i]->setParent(this);
+}
 
-    StructureConstPtr PVStructure::getStructure()
-    {
-        return static_pointer_cast<const Structure>(PVField::getField());
+void PVStructure::appendPVFields(StringArray &fieldNames,PVFieldPtrArray &pvFields)
+{
+    size_t origLength = this->pvFields.size();
+    size_t extra = fieldNames.size();
+    if(extra==0) return;
+    size_t newLength = origLength + extra;
+    PVFieldPtrArray newPVFields;
+    newPVFields.reserve(newLength);
+    for(size_t i=0; i<origLength; i++) {
+        newPVFields.push_back(this->pvFields[i]);
     }
-
-    PVFieldPtrArray PVStructure::getPVFields()
-    {
-        return pImpl->pvFields;
+    for(size_t i=0; i<extra; i++) {
+        newPVFields.push_back(pvFields[i]);
     }
+    this->pvFields.swap(newPVFields);
+    FieldConstPtrArray fields;
+    fields.reserve(extra);
+    for(size_t i=0; i<extra; i++) fields.push_back(pvFields[i]->getField());
+    FieldConstPtr field = getFieldCreate()->appendFields(structurePtr,fieldNames,fields);
+    replaceField(field);
+    structurePtr = static_pointer_cast<const Structure>(field);
+    for(size_t i=0; i<newLength; i++) pvFields[i]->setParent(this);
+}
 
-    PVFieldPtr PVStructure::getSubField(String fieldName)
-    {
-        return findSubField(fieldName,this);
-    }
-
-    PVFieldPtr PVStructure::getSubField(int fieldOffset)
-    {
-        if(fieldOffset<=getFieldOffset()) {
-            if(fieldOffset==getFieldOffset()) return this;
-            return 0;
-        }
-        if(fieldOffset>getNextFieldOffset()) return 0;
-        int numFields = pImpl->numberFields;
-        PVFieldPtrArray pvFields = pImpl->pvFields;
-        for(int i=0; i<numFields; i++) {
-            PVField *pvField = pvFields[i];
-            if(pvField->getFieldOffset()==fieldOffset) return pvField;
-            if(pvField->getNextFieldOffset()<=fieldOffset) continue;
-            if(pvField->getField()->getType()==structure) {
-                return ((PVStructure*)pvField)->getSubField(fieldOffset);
-            }
-        }
-        String message("PVStructure.getSubField: Logic error");
-        throw std::logic_error(message);
-    }
-
-    void PVStructure::appendPVField(PVFieldPtr pvField)
-    {
-        Structure::shared_pointer structure = const_pointer_cast<Structure>(getStructure());
-        structure->appendField(pvField->getField());
-        int origLength = pImpl->numberFields;
-        PVFieldPtrArray oldPVFields = pImpl->pvFields;
-        PVFieldPtrArray newPVFields = new PVFieldPtr[origLength + 1];
-        for(int i=0; i<origLength; i++) {
-            newPVFields[i] = oldPVFields[i];
-        }
-        // note that origLength IS new element
-        newPVFields[origLength] = pvField;
-        delete[] pImpl->pvFields;
-        pImpl->pvFields = newPVFields;
-        pImpl->numberFields = origLength + 1;
-    }
-
-    void PVStructure::appendPVFields(int numberNewFields,PVFieldPtrArray pvFields)
-    {
-        if (numberNewFields<0)
-            throw std::logic_error("Number of fields must be >=0");
-
-        Structure::shared_pointer structure = const_pointer_cast<Structure>(getStructure());
-        std::vector<FieldConstPtr> fields(numberNewFields);
-        for(int i=0; i<numberNewFields; i++) fields[i] = pvFields[i]->getField();
-        structure->appendFields(numberNewFields,&fields[0]);
-        int origLength = pImpl->numberFields;
-        PVFieldPtrArray oldPVFields = pImpl->pvFields;
-        int numberFields = origLength + numberNewFields;
-        PVFieldPtrArray newPVFields = new PVFieldPtr[numberFields];
-        for(int i=0; i<origLength; i++) {
-            newPVFields[i] = oldPVFields[i];
-        }
-        for(int i=0; i<numberNewFields; i++) {
-            newPVFields[i+origLength] = pvFields[i];
-        }
-        delete[] pImpl->pvFields;
-        pImpl->pvFields = newPVFields;
-        pImpl->numberFields = numberFields;
-    }
-
-    void PVStructure::removePVField(String fieldName)
-    {
-        PVField *pvField = getSubField(fieldName);
-        if(pvField==0) {
-            String message("removePVField ");
-            message +=  fieldName + " does not exist";
-            this->message(message, errorMessage);
-            return;
-        }
-        int origLength = pImpl->numberFields;
-        int newLength = origLength - 1;
-        PVFieldPtrArray origPVFields = pImpl->pvFields;
-        PVFieldPtrArray newPVFields = new PVFieldPtr[newLength];
-        int newIndex = 0;
-        int indRemove = -1;
-        for(int i=0; i<origLength; i++) {
-            if(origPVFields[i]==pvField) {
-                indRemove = i;
-            } else {
-                newPVFields[newIndex++] = origPVFields[i];
-            }
-        }
-        Structure *structure = const_cast<Structure *>(getStructure().get());
-        structure->removeField(indRemove);
-        delete origPVFields[indRemove];
-        delete[] pImpl->pvFields;
-        pImpl->pvFields = newPVFields;
-        pImpl->numberFields = newLength;
-    }
-
-    PVBoolean *PVStructure::getBooleanField(String fieldName)
-    {
-        PVField *pvField = findSubField(fieldName,this);
-        if(pvField==0) {
-            String message("fieldName ");
-            message +=  fieldName + " does not exist";
-            this->message(message, errorMessage);
-            return 0;
-        }
-        if(pvField->getField()->getType()==scalar) {
-            ScalarConstPtr pscalar = static_pointer_cast<const Scalar>(
-                pvField->getField());
-            if(pscalar->getScalarType()==pvBoolean) {
-                return (PVBoolean*)pvField;
-            }
-        }
-        String message("fieldName ");
-        message +=  fieldName + " does not have type boolean ";
+void PVStructure::removePVField(String fieldName)
+{
+    PVFieldPtr pvField = getSubField(fieldName);
+    if(pvField.get()==NULL) {
+        String message("removePVField ");
+        message +=  fieldName + " does not exist";
         this->message(message, errorMessage);
-        return 0;
+        return;
     }
+    size_t origLength = pvFields.size();
+    size_t newLength = origLength - 1;
+    PVFieldPtrArray const & origPVFields = pvFields;
+    FieldConstPtrArray origFields = structurePtr->getFields();
+    PVFieldPtrArray newPVFields;
+    newPVFields.reserve(newLength);
+    StringArray newFieldNames;
+    newFieldNames.reserve(newLength);
+    FieldConstPtrArray fields;
+    fields.reserve(newLength);
+    for(size_t i=0; i<origLength; i++) {
+        if(origPVFields[i]!=pvField) {
+            newFieldNames.push_back(origPVFields[i]->getFieldName());
+            newPVFields.push_back(origPVFields[i]);
+            fields.push_back(origFields[i]);
+        }
+    }
+    pvFields.swap(newPVFields);
+    FieldConstPtr field = getFieldCreate()->createStructure(newFieldNames,fields);
+    replaceField(field);
+    structurePtr = static_pointer_cast<const Structure>(field);
+    for(size_t i=0; i<newLength; i++) pvFields[i]->setParent(this);
+}
 
-    PVByte *PVStructure::getByteField(String fieldName)
-    {
-        PVField *pvField = findSubField(fieldName,this);
-        if(pvField==0) {
-            String message("fieldName ");
-            message +=  fieldName + " does not exist";
-            this->message(message, errorMessage);
-            return 0;
-        }
-        if(pvField->getField()->getType()==scalar) {
-            ScalarConstPtr pscalar = static_pointer_cast<const Scalar>(
-                pvField->getField());
-            if(pscalar->getScalarType()==pvByte) {
-                return (PVByte*)pvField;
-            }
-        }
+PVBooleanPtr PVStructure::getBooleanField(String fieldName)
+{
+    PVFieldPtr pvField = findSubField(fieldName,this);
+    if(pvField.get()==NULL) {
         String message("fieldName ");
-        message +=  fieldName + " does not have type byte ";
+        message +=  fieldName + " does not exist";
         this->message(message, errorMessage);
-        return 0;
+        return nullPVBoolean;
     }
+    if(pvField->getField()->getType()==scalar) {
+        ScalarConstPtr pscalar = static_pointer_cast<const Scalar>(
+            pvField->getField());
+        if(pscalar->getScalarType()==pvBoolean) {
+            return std::tr1::static_pointer_cast<PVBoolean>(pvField);
+        }
+    }
+    String message("fieldName ");
+    message +=  fieldName + " does not have type boolean ";
+    this->message(message, errorMessage);
+    return nullPVBoolean;
+}
 
-    PVShort *PVStructure::getShortField(String fieldName)
-    {
-        PVField *pvField = findSubField(fieldName,this);
-        if(pvField==0) {
-            String message("fieldName ");
-            message +=  fieldName + " does not exist";
-            this->message(message, errorMessage);
-            return 0;
-        }
-        if(pvField->getField()->getType()==scalar) {
-            ScalarConstPtr pscalar = static_pointer_cast<const Scalar>(
-                pvField->getField());
-            if(pscalar->getScalarType()==pvShort) {
-                return (PVShort*)pvField;
-            }
-        }
+PVBytePtr PVStructure::getByteField(String fieldName)
+{
+    PVFieldPtr pvField = findSubField(fieldName,this);
+    if(pvField.get()==NULL) {
         String message("fieldName ");
-        message +=  fieldName + " does not have type short ";
+        message +=  fieldName + " does not exist";
         this->message(message, errorMessage);
-        return 0;
+        return nullPVByte;
     }
+    if(pvField->getField()->getType()==scalar) {
+        ScalarConstPtr pscalar = static_pointer_cast<const Scalar>(
+            pvField->getField());
+        if(pscalar->getScalarType()==pvByte) {
+            return std::tr1::static_pointer_cast<PVByte>(pvField);
+        }
+    }
+    String message("fieldName ");
+    message +=  fieldName + " does not have type byte ";
+    this->message(message, errorMessage);
+    return nullPVByte;
+}
 
-    PVInt *PVStructure::getIntField(String fieldName)
-    {
-        PVField *pvField = findSubField(fieldName,this);
-        if(pvField==0) {
-            String message("fieldName ");
-            message +=  fieldName + " does not exist";
-            this->message(message, errorMessage);
-            return 0;
-        }
-        if(pvField->getField()->getType()==scalar) {
-            ScalarConstPtr pscalar = static_pointer_cast<const Scalar>(
-                pvField->getField());
-            if(pscalar->getScalarType()==pvInt) {
-                return (PVInt*)pvField;
-            }
-        }
+PVShortPtr PVStructure::getShortField(String fieldName)
+{
+    PVFieldPtr pvField  = findSubField(fieldName,this);
+    if(pvField.get()==NULL) {
         String message("fieldName ");
-        message +=  fieldName + " does not have type int ";
+        message +=  fieldName + " does not exist";
         this->message(message, errorMessage);
-        return 0;
+        return nullPVShort;
     }
+    if(pvField->getField()->getType()==scalar) {
+        ScalarConstPtr pscalar = static_pointer_cast<const Scalar>(
+            pvField->getField());
+        if(pscalar->getScalarType()==pvShort) {
+            return std::tr1::static_pointer_cast<PVShort>(pvField);
+        }
+    }
+    String message("fieldName ");
+    message +=  fieldName + " does not have type short ";
+    this->message(message, errorMessage);
+    return nullPVShort;
+}
 
-    PVLong *PVStructure::getLongField(String fieldName)
-    {
-        PVField *pvField = findSubField(fieldName,this);
-        if(pvField==0) {
-            String message("fieldName ");
-            message +=  fieldName + " does not exist";
-            this->message(message, errorMessage);
-            return 0;
-        }
-        if(pvField->getField()->getType()==scalar) {
-            ScalarConstPtr pscalar = static_pointer_cast<const Scalar>(
-                pvField->getField());
-            if(pscalar->getScalarType()==pvLong) {
-                return (PVLong*)pvField;
-            }
-        }
+PVIntPtr PVStructure::getIntField(String fieldName)
+{
+    PVFieldPtr pvField  = findSubField(fieldName,this);
+    if(pvField.get()==NULL) {
         String message("fieldName ");
-        message +=  fieldName + " does not have type long ";
+        message +=  fieldName + " does not exist";
         this->message(message, errorMessage);
-        return 0;
+        return nullPVInt;
     }
+    if(pvField->getField()->getType()==scalar) {
+        ScalarConstPtr pscalar = static_pointer_cast<const Scalar>(
+            pvField->getField());
+        if(pscalar->getScalarType()==pvInt) {
+            return std::tr1::static_pointer_cast<PVInt>(pvField);
+        }
+    }
+    String message("fieldName ");
+    message +=  fieldName + " does not have type int ";
+    this->message(message, errorMessage);
+    return nullPVInt;
+}
 
-    PVFloat *PVStructure::getFloatField(String fieldName)
-    {
-        PVField *pvField = findSubField(fieldName,this);
-        if(pvField==0) {
-            String message("fieldName ");
-            message +=  fieldName + " does not exist";
-            this->message(message, errorMessage);
-            return 0;
-        }
-        if(pvField->getField()->getType()==scalar) {
-            ScalarConstPtr pscalar = static_pointer_cast<const Scalar>(
-                pvField->getField());
-            if(pscalar->getScalarType()==pvFloat) {
-                return (PVFloat*)pvField;
-            }
-        }
+PVLongPtr PVStructure::getLongField(String fieldName)
+{
+    PVFieldPtr pvField  = findSubField(fieldName,this);
+    if(pvField.get()==NULL) {
         String message("fieldName ");
-        message +=  fieldName + " does not have type float ";
+        message +=  fieldName + " does not exist";
         this->message(message, errorMessage);
-        return 0;
+        return nullPVLong;
     }
+    if(pvField->getField()->getType()==scalar) {
+        ScalarConstPtr pscalar = static_pointer_cast<const Scalar>(
+            pvField->getField());
+        if(pscalar->getScalarType()==pvLong) {
+            return std::tr1::static_pointer_cast<PVLong>(pvField);
+        }
+    }
+    String message("fieldName ");
+    message +=  fieldName + " does not have type long ";
+    this->message(message, errorMessage);
+    return nullPVLong;
+}
 
-    PVDouble *PVStructure::getDoubleField(String fieldName)
-    {
-        PVField *pvField = findSubField(fieldName,this);
-        if(pvField==0) {
-            String message("fieldName ");
-            message +=  fieldName + " does not exist";
-            this->message(message, errorMessage);
-            return 0;
-        }
-        if(pvField->getField()->getType()==scalar) {
-            ScalarConstPtr pscalar = static_pointer_cast<const Scalar>(
-                pvField->getField());
-            if(pscalar->getScalarType()==pvDouble) {
-                return (PVDouble*)pvField;
-            }
-        }
+PVUBytePtr PVStructure::getUByteField(String fieldName)
+{
+    PVFieldPtr pvField  = findSubField(fieldName,this);
+    if(pvField.get()==NULL) {
         String message("fieldName ");
-        message +=  fieldName + " does not have type double ";
+        message +=  fieldName + " does not exist";
         this->message(message, errorMessage);
-        return 0;
+        return nullPVUByte;
     }
+    if(pvField->getField()->getType()==scalar) {
+        ScalarConstPtr pscalar = static_pointer_cast<const Scalar>(
+            pvField->getField());
+        if(pscalar->getScalarType()==pvUByte) {
+            return std::tr1::static_pointer_cast<PVUByte>(pvField);
+        }
+    }
+    String message("fieldName ");
+    message +=  fieldName + " does not have type byte ";
+    this->message(message, errorMessage);
+    return nullPVUByte;
+}
 
-    PVString *PVStructure::getStringField(String fieldName)
-    {
-        PVField *pvField = findSubField(fieldName,this);
-        if(pvField==0) {
-            String message("fieldName ");
-            message +=  fieldName + " does not exist";
-            this->message(message, errorMessage);
-            return 0;
-        }
-        if(pvField->getField()->getType()==scalar) {
-            ScalarConstPtr pscalar = static_pointer_cast<const Scalar>(
-                pvField->getField());
-            if(pscalar->getScalarType()==pvString) {
-                return (PVString*)pvField;
-            }
-        }
+PVUShortPtr PVStructure::getUShortField(String fieldName)
+{
+    PVFieldPtr pvField  = findSubField(fieldName,this);
+    if(pvField.get()==NULL) {
         String message("fieldName ");
-        message +=  fieldName + " does not have type string ";
+        message +=  fieldName + " does not exist";
         this->message(message, errorMessage);
-        return 0;
+        return nullPVUShort;
     }
+    if(pvField->getField()->getType()==scalar) {
+        ScalarConstPtr pscalar = static_pointer_cast<const Scalar>(
+            pvField->getField());
+        if(pscalar->getScalarType()==pvUShort) {
+            return std::tr1::static_pointer_cast<PVUShort>(pvField);
+        }
+    }
+    String message("fieldName ");
+    message +=  fieldName + " does not have type short ";
+    this->message(message, errorMessage);
+    return nullPVUShort;
+}
 
-    PVStructure *PVStructure::getStructureField(String fieldName)
-    {
-        PVField *pvField = findSubField(fieldName,this);
-        if(pvField==0) {
-            String message("fieldName ");
-            message +=  fieldName + " does not exist";
-            this->message(message, errorMessage);
-            return 0;
-        }
-        if(pvField->getField()->getType()==structure) {
-            return((PVStructure *)pvField);
-        }
+PVUIntPtr PVStructure::getUIntField(String fieldName)
+{
+    PVFieldPtr pvField  = findSubField(fieldName,this);
+    if(pvField.get()==NULL) {
         String message("fieldName ");
-        message +=  fieldName + " does not have type structure ";
+        message +=  fieldName + " does not exist";
         this->message(message, errorMessage);
-        return 0;
+        return nullPVUInt;
     }
-
-    PVScalarArray *PVStructure::getScalarArrayField(
-        String fieldName,ScalarType elementType)
-    {
-        PVField *pvField = findSubField(fieldName,this);
-        if(pvField==0) {
-            String message("fieldName ");
-            message +=  fieldName + " does not exist";
-            this->message(message, errorMessage);
-            return 0;
+    if(pvField->getField()->getType()==scalar) {
+        ScalarConstPtr pscalar = static_pointer_cast<const Scalar>(
+            pvField->getField());
+        if(pscalar->getScalarType()==pvUInt) {
+            return std::tr1::static_pointer_cast<PVUInt>(pvField);
         }
-        FieldConstPtr field = pvField->getField();
-        Type type = field->getType();
-        if(type!=scalarArray) {
-            String message("fieldName ");
-            message +=  fieldName + " does not have type array ";
-            this->message(message, errorMessage);
-            return 0;
-        }
-        ScalarArrayConstPtr pscalarArray
-            = static_pointer_cast<const ScalarArray>(pvField->getField());
-        if(pscalarArray->getElementType()!=elementType) {
-            String message("fieldName ");
-            message +=  fieldName + " is array but does not have elementType ";
-            ScalarTypeFunc::toString(&message,elementType);
-            this->message(message, errorMessage);
-            return 0;
-        }
-        return (PVScalarArray*)pvField;
     }
+    String message("fieldName ");
+    message +=  fieldName + " does not have type int ";
+    this->message(message, errorMessage);
+    return nullPVUInt;
+}
 
-    PVStructureArray *PVStructure::getStructureArrayField(
-        String fieldName)
-    {
-        PVField *pvField = findSubField(fieldName,this);
-        if(pvField==0) {
-            String message("fieldName ");
-            message +=  fieldName + " does not exist";
-            this->message(message, errorMessage);
-            return 0;
-        }
-        if(pvField->getField()->getType()==structureArray) {
-            return((PVStructureArray *)pvField);
-        }
+PVULongPtr PVStructure::getULongField(String fieldName)
+{
+    PVFieldPtr pvField  = findSubField(fieldName,this);
+    if(pvField.get()==NULL) {
         String message("fieldName ");
-        message +=  fieldName + " does not have type structureArray ";
+        message +=  fieldName + " does not exist";
         this->message(message, errorMessage);
-        return 0;
+        return nullPVULong;
     }
-
-    String PVStructure::getExtendsStructureName()
-    {
-        return pImpl->extendsStructureName;
-    }
-
-    bool PVStructure::putExtendsStructureName(
-        String extendsStructureName)
-    {
-        if(pImpl->extendsStructureName.length()!=0) return false;
-        pImpl->extendsStructureName = extendsStructureName;
-        return true;
-    }
-
-    void PVStructure::serialize(ByteBuffer *pbuffer,
-            SerializableControl *pflusher) const {
-        for(int i = 0; i<pImpl->numberFields; i++)
-            pImpl->pvFields[i]->serialize(pbuffer, pflusher);
-    }
-
-    void PVStructure::deserialize(ByteBuffer *pbuffer,
-            DeserializableControl *pcontrol) {
-        for(int i = 0; i<pImpl->numberFields; i++)
-            pImpl->pvFields[i]->deserialize(pbuffer, pcontrol);
-
-    }
-
-    void PVStructure::serialize(ByteBuffer *pbuffer,
-            SerializableControl *pflusher, BitSet *pbitSet) const {
-        int offset = const_cast<PVStructure*>(this)->getFieldOffset();
-        int numberFields = const_cast<PVStructure*>(this)->getNumberFields();
-        int next = pbitSet->nextSetBit(offset);
-
-        // no more changes or no changes in this structure
-        if(next<0||next>=offset+numberFields) return;
-
-        // entire structure
-        if(offset==next) {
-            serialize(pbuffer, pflusher);
-            return;
-        }
-
-        for(int i = 0; i<pImpl->numberFields; i++) {
-            PVField* pvField = pImpl->pvFields[i];
-            offset = pvField->getFieldOffset();
-            numberFields = pvField->getNumberFields();
-            next = pbitSet->nextSetBit(offset);
-            // no more changes
-            if(next<0) return;
-            //  no change in this pvField
-            if(next>=offset+numberFields) continue;
-
-            // serialize field or fields
-            if(numberFields==1)
-                pvField->serialize(pbuffer, pflusher);
-            else
-                ((PVStructure*)pvField)->serialize(pbuffer, pflusher,
-                        pbitSet);
+    if(pvField->getField()->getType()==scalar) {
+        ScalarConstPtr pscalar = static_pointer_cast<const Scalar>(
+            pvField->getField());
+        if(pscalar->getScalarType()==pvULong) {
+            return std::tr1::static_pointer_cast<PVULong>(pvField);
         }
     }
+    String message("fieldName ");
+    message +=  fieldName + " does not have type long ";
+    this->message(message, errorMessage);
+    return nullPVULong;
+}
 
-    void PVStructure::deserialize(ByteBuffer *pbuffer,
-            DeserializableControl *pcontrol, BitSet *pbitSet) {
-        int offset = getFieldOffset();
-        int numberFields = getNumberFields();
-        int next = pbitSet->nextSetBit(offset);
-
-        // no more changes or no changes in this structure
-        if(next<0||next>=offset+numberFields) return;
-
-        // entire structure
-        if(offset==next) {
-            deserialize(pbuffer, pcontrol);
-            return;
-        }
-
-        for(int i = 0; i<pImpl->numberFields; i++) {
-            PVField* pvField = pImpl->pvFields[i];
-            offset = pvField->getFieldOffset();
-            numberFields = pvField->getNumberFields();
-            next = pbitSet->nextSetBit(offset);
-            // no more changes
-            if(next<0) return;
-            //  no change in this pvField
-            if(next>=offset+numberFields) continue;
-
-            // deserialize field or fields
-            if(numberFields==1)
-                pvField->deserialize(pbuffer, pcontrol);
-            else
-                ((PVStructure*)pvField)->deserialize(pbuffer, pcontrol,
-                        pbitSet);
+PVFloatPtr PVStructure::getFloatField(String fieldName)
+{
+    PVFieldPtr pvField  = findSubField(fieldName,this);
+    if(pvField.get()==NULL) {
+        String message("fieldName ");
+        message +=  fieldName + " does not exist";
+        this->message(message, errorMessage);
+        return nullPVFloat;
+    }
+    if(pvField->getField()->getType()==scalar) {
+        ScalarConstPtr pscalar = static_pointer_cast<const Scalar>(
+            pvField->getField());
+        if(pscalar->getScalarType()==pvFloat) {
+            return std::tr1::static_pointer_cast<PVFloat>(pvField);
         }
     }
+    String message("fieldName ");
+    message +=  fieldName + " does not have type float ";
+    this->message(message, errorMessage);
+    return nullPVFloat;
+}
 
-    static PVField *findSubField(String fieldName,PVStructure *pvStructure) {
-        if( fieldName.length()<1) return 0;
-        String::size_type index = fieldName.find('.');
-        String name = fieldName;
-        String restOfName = String();
-        if(index>0) {
-            name = fieldName.substr(0, index);
-            if(fieldName.length()>index) {
-                restOfName = fieldName.substr(index+1);
-            }
-        }
-        PVFieldPtrArray pvFields = pvStructure->getPVFields();
-        PVField *pvField = 0;
-        int numFields = pvStructure->getStructure()->getNumberFields();
-        for(int i=0; i<numFields; i++) {
-            PVField *pvf = pvFields[i];
-            int result = pvf->getField()->getFieldName().compare(name);
-            if(result==0) {
-                pvField = pvf;
-                break;
-            }
-        }
-        if(pvField==0) return 0;
-        if(restOfName.length()==0) return pvField;
-        if(pvField->getField()->getType()!=structure) return 0;
-        return findSubField(restOfName,(PVStructure*)pvField);
+PVDoublePtr PVStructure::getDoubleField(String fieldName)
+{
+    PVFieldPtr pvField  = findSubField(fieldName,this);
+    if(pvField.get()==NULL) {
+        String message("fieldName ");
+        message +=  fieldName + " does not exist";
+        this->message(message, errorMessage);
+        return nullPVDouble;
     }
+    if(pvField->getField()->getType()==scalar) {
+        ScalarConstPtr pscalar = static_pointer_cast<const Scalar>(
+            pvField->getField());
+        if(pscalar->getScalarType()==pvDouble) {
+            return std::tr1::static_pointer_cast<PVDouble>(pvField);
+        }
+    }
+    String message("fieldName ");
+    message +=  fieldName + " does not have type double ";
+    this->message(message, errorMessage);
+    return nullPVDouble;
+}
+
+PVStringPtr PVStructure::getStringField(String fieldName)
+{
+    PVFieldPtr pvField  = findSubField(fieldName,this);
+    if(pvField.get()==NULL) {
+        String message("fieldName ");
+        message +=  fieldName + " does not exist";
+        this->message(message, errorMessage);
+        return nullPVString;
+    }
+    if(pvField->getField()->getType()==scalar) {
+        ScalarConstPtr pscalar = static_pointer_cast<const Scalar>(
+            pvField->getField());
+        if(pscalar->getScalarType()==pvString) {
+            return std::tr1::static_pointer_cast<PVString>(pvField);
+        }
+    }
+    String message("fieldName ");
+    message +=  fieldName + " does not have type string ";
+    this->message(message, errorMessage);
+    return nullPVString;
+}
+
+PVStructurePtr PVStructure::getStructureField(String fieldName)
+{
+    PVFieldPtr pvField  = findSubField(fieldName,this);
+    if(pvField.get()==NULL) {
+        String message("fieldName ");
+        message +=  fieldName + " does not exist";
+        this->message(message, errorMessage);
+        return nullPVStructure;
+    }
+    if(pvField->getField()->getType()==structure) {
+        return std::tr1::static_pointer_cast<PVStructure>(pvField);
+    }
+    String message("fieldName ");
+    message +=  fieldName + " does not have type structure ";
+    this->message(message, errorMessage);
+    return nullPVStructure;
+}
+
+PVScalarArrayPtr PVStructure::getScalarArrayField(
+    String fieldName,ScalarType elementType)
+{
+    PVFieldPtr pvField  = findSubField(fieldName,this);
+    if(pvField.get()==NULL) {
+        String message("fieldName ");
+        message +=  fieldName + " does not exist";
+        this->message(message, errorMessage);
+        return nullPVScalarArray;
+    }
+    FieldConstPtr field = pvField->getField();
+    Type type = field->getType();
+    if(type!=scalarArray) {
+        String message("fieldName ");
+        message +=  fieldName + " does not have type array ";
+        this->message(message, errorMessage);
+        return nullPVScalarArray;
+    }
+    ScalarArrayConstPtr pscalarArray
+        = static_pointer_cast<const ScalarArray>(pvField->getField());
+    if(pscalarArray->getElementType()!=elementType) {
+        String message("fieldName ");
+        message +=  fieldName + " is array but does not have elementType ";
+        ScalarTypeFunc::toString(&message,elementType);
+        this->message(message, errorMessage);
+        return nullPVScalarArray;
+    }
+    return std::tr1::static_pointer_cast<PVScalarArray>(pvField);
+}
+
+PVStructureArrayPtr PVStructure::getStructureArrayField(
+    String fieldName)
+{
+    PVFieldPtr pvField  = findSubField(fieldName,this);
+    if(pvField.get()==NULL) {
+        String message("fieldName ");
+        message +=  fieldName + " does not exist";
+        this->message(message, errorMessage);
+        return nullPVStructureArray;
+    }
+    if(pvField->getField()->getType()==structureArray) {
+        return std::tr1::static_pointer_cast<PVStructureArray>(pvField);
+    }
+    String message("fieldName ");
+    message +=  fieldName + " does not have type structureArray ";
+    this->message(message, errorMessage);
+    return nullPVStructureArray;
+}
+
+String PVStructure::getExtendsStructureName()
+{
+    return extendsStructureName;
+}
+
+bool PVStructure::putExtendsStructureName(
+    String extendsStructureName)
+{
+    if(extendsStructureName.length()!=0) return false;
+    extendsStructureName = extendsStructureName;
+    return true;
+}
+
+void PVStructure::serialize(ByteBuffer *pbuffer,
+        SerializableControl *pflusher) const {
+    for(size_t i = 0; i<pvFields.size(); i++)
+        pvFields[i]->serialize(pbuffer, pflusher);
+}
+
+void PVStructure::deserialize(ByteBuffer *pbuffer,
+        DeserializableControl *pcontrol) {
+    for(size_t i = 0; i<pvFields.size(); i++)
+        pvFields[i]->deserialize(pbuffer, pcontrol);
+
+}
+
+void PVStructure::serialize(ByteBuffer *pbuffer,
+        SerializableControl *pflusher, BitSet *pbitSet) const {
+    size_t offset = const_cast<PVStructure*>(this)->getFieldOffset();
+    size_t numberFields = const_cast<PVStructure*>(this)->getNumberFields();
+    size_t next = pbitSet->nextSetBit(offset);
+
+    // no more changes or no changes in this structure
+    if(next<0||next>=offset+numberFields) return;
+
+    // entire structure
+    if(offset==next) {
+        serialize(pbuffer, pflusher);
+        return;
+    }
+
+    for(size_t i = 0; i<numberFields; i++) {
+        PVFieldPtr pvField  = pvFields[i];
+        offset = pvField->getFieldOffset();
+        numberFields = pvField->getNumberFields();
+        next = pbitSet->nextSetBit(offset);
+        // no more changes
+        if(next<0) return;
+        //  no change in this pvField
+        if(next>=offset+numberFields) continue;
+
+        // serialize field or fields
+        if(numberFields==1) {
+            pvField->serialize(pbuffer, pflusher);
+        } else {
+            PVStructurePtr pvStructure = std::tr1::static_pointer_cast<PVStructure>(pvField);
+            pvStructure->serialize(pbuffer, pflusher, pbitSet);
+       }
+    }
+}
+
+void PVStructure::deserialize(ByteBuffer *pbuffer,
+        DeserializableControl *pcontrol, BitSet *pbitSet) {
+    size_t offset = getFieldOffset();
+    size_t numberFields = getNumberFields();
+    size_t next = pbitSet->nextSetBit(offset);
+
+    // no more changes or no changes in this structure
+    if(next<0||next>=offset+numberFields) return;
+
+    // entire structure
+    if(offset==next) {
+        deserialize(pbuffer, pcontrol);
+        return;
+    }
+
+    for(size_t i = 0; i<numberFields; i++) {
+        PVFieldPtr pvField  = pvFields[i];
+        offset = pvField->getFieldOffset();
+        numberFields = pvField->getNumberFields();
+        next = pbitSet->nextSetBit(offset);
+        // no more changes
+        if(next<0) return;
+        //  no change in this pvField
+        if(next>=offset+numberFields) continue;
+
+        // deserialize field or fields
+        if(numberFields==1) {
+            pvField->deserialize(pbuffer, pcontrol);
+        } else {
+            PVStructurePtr pvStructure = std::tr1::static_pointer_cast<PVStructure>(pvField);
+            pvStructure->deserialize(pbuffer, pcontrol, pbitSet);
+        }
+    }
+}
+
+static PVFieldPtr &findSubField(String fieldName,PVStructure *pvStructure) {
+    if( fieldName.length()<1) return nullPVField;
+    String::size_type index = fieldName.find('.');
+    String name = fieldName;
+    String restOfName = String();
+    if(index>0) {
+        name = fieldName.substr(0, index);
+        if(fieldName.length()>index) {
+            restOfName = fieldName.substr(index+1);
+        }
+    }
+    PVFieldPtrArray  pvFields = pvStructure->getPVFields();
+    PVFieldPtr pvField;
+    size_t numFields = pvStructure->getStructure()->getNumberFields();
+    for(size_t i=0; i<numFields; i++) {
+        PVFieldPtr pvField = pvFields[i];
+        size_t result = pvField->getFieldName().compare(name);
+        if(result==0) {
+            if(restOfName.length()==0) return pvField;
+            if(pvField->getField()->getType()!=structure) return nullPVField;
+            PVStructurePtr pvStructure = std::tr1::static_pointer_cast<PVStructure>(pvField);
+            return findSubField(restOfName,pvStructure.get());
+        }
+    }
+    return nullPVField;
+}
 
 }}

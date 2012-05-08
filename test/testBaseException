@@ -3,10 +3,10 @@
 There is a logic_error
 
 On line 68 of ../testBaseException.cpp
-../bin/linux-x86/testBaseException[0x80497b9]
-../bin/linux-x86/testBaseException[0x8049a54]
-/lib/libc.so.6(__libc_start_main+0xe6)[0x126e36]
-../bin/linux-x86/testBaseException[0x80490e1]
+../bin/linux-x86_64/testBaseException[0x401cdb]
+../bin/linux-x86_64/testBaseException[0x4016d4]
+/lib64/libc.so.6(__libc_start_main+0xed)[0x366dc2169d]
+../bin/linux-x86_64/testBaseException[0x40172d]
 To translate run 'addr2line -e execname 0xXXXXXXX ...'
   Note: Must be compiled with debug symbols
 
@@ -14,20 +14,19 @@ To translate run 'addr2line -e execname 0xXXXXXXX ...'
 There is another logic_error
 
 On line 75 of ../testBaseException.cpp
-../bin/linux-x86/testBaseException() [0x8049cec]
-../bin/linux-x86/testBaseException() [0x8049923]
-../bin/linux-x86/testBaseException() [0x8049a54]
-/lib/libc.so.6(__libc_start_main+0xe6) [0x126e36]
-../bin/linux-x86/testBaseException() [0x80490e1]
+../bin/linux-x86_64/testBaseException() [0x401e99]
+../bin/linux-x86_64/testBaseException() [0x4016d4]
+/lib64/libc.so.6(__libc_start_main+0xed) [0x366dc2169d]
+../bin/linux-x86_64/testBaseException() [0x40172d]
 
 testBaseException... 
 
 all is OK
 On line 48 of ../testBaseException.cpp
-../bin/linux-x86/testBaseException() [0x8049581]
-../bin/linux-x86/testBaseException() [0x8049a5c]
-/lib/libc.so.6(__libc_start_main+0xe6) [0x126e36]
-../bin/linux-x86/testBaseException() [0x80490e1]
+../bin/linux-x86_64/testBaseException() [0x401a79]
+../bin/linux-x86_64/testBaseException() [0x4016dc]
+/lib64/libc.so.6(__libc_start_main+0xed) [0x366dc2169d]
+../bin/linux-x86_64/testBaseException() [0x40172d]
 
 
 
@@ -35,11 +34,11 @@ On line 48 of ../testBaseException.cpp
 
 exception 2
 On line 57 of ../testBaseException.cpp
-../bin/linux-x86/testBaseException() [0x80491ec]
-../bin/linux-x86/testBaseException() [0x80496f9]
-../bin/linux-x86/testBaseException() [0x8049a5c]
-/lib/libc.so.6(__libc_start_main+0xe6) [0x126e36]
-../bin/linux-x86/testBaseException() [0x80490e1]
+../bin/linux-x86_64/testBaseException() [0x40184c]
+../bin/linux-x86_64/testBaseException() [0x401c30]
+../bin/linux-x86_64/testBaseException() [0x4016dc]
+/lib64/libc.so.6(__libc_start_main+0xed) [0x366dc2169d]
+../bin/linux-x86_64/testBaseException() [0x40172d]
 
 
 

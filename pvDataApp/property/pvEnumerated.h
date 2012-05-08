@@ -13,12 +13,12 @@ namespace epics { namespace pvData {
 
 class PVEnumerated {
 public:
-    PVEnumerated() : pvIndex(0), pvChoices(0) {}
+    PVEnumerated() {}
     //default constructors and destructor are OK
     //This class should not be extended
     //returns (false,true) if pvField(isNot, is valid enumerated structure
     //An automatic detach is issued if already attached.
-    bool attach(PVField *pvField);
+    bool attach(PVFieldPtr pvField);
     void detach();
     bool isAttached();
     // each of the following throws logic_error is not attached to PVField
@@ -27,12 +27,12 @@ public:
     int32 getIndex();
     String getChoice();
     bool choicesMutable();
-    StringArray getChoices();
+    StringArray & getChoices();
     int32 getNumberChoices();
-    bool setChoices(StringArray choices,int32 numberChoices);
+    bool setChoices(StringArray & choices);
 private:
-    PVInt *pvIndex;
-    PVStringArray *pvChoices;
+    PVIntPtr pvIndex;
+    PVStringArrayPtr pvChoices;
 };
     
 }}

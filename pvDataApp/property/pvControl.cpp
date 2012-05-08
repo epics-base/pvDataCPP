@@ -12,64 +12,46 @@
 #include <pv/pvControl.h>
 namespace epics { namespace pvData { 
 
+using std::tr1::static_pointer_cast;
+
 static String noControlFound("No control structure found");
 static String notAttached("Not attached to an control structure");
 
-bool PVControl::attach(PVField *pvField)
+bool PVControl::attach(PVFieldPtr pvField)
 {
-    PVStructure *pvStructure = 0;
-    if(pvField->getField()->getFieldName().compare("control")!=0) {
-        if(pvField->getField()->getFieldName().compare("value")!=0) {
+    if(pvField->getField()->getType()!=structure) {
             pvField->message(noControlFound,errorMessage);
             return false;
-        }
-        PVStructure *pvParent = pvField->getParent();
-        if(pvParent==0) {
-            pvField->message(noControlFound,errorMessage);
-            return false;
-        }
-        pvStructure = pvParent->getStructureField(String("control"));
-        if(pvStructure==0) {
-            pvField->message(noControlFound,errorMessage);
-            return false;
-        }
-    } else {
-        if(pvField->getField()->getType()!=structure) {
-            pvField->message(noControlFound,errorMessage);
-            return false;
-        }
-        pvStructure = static_cast<PVStructure*>(pvField);
     }
-    PVDouble *pvDouble = pvStructure->getDoubleField(String("limit.low"));
-    if(pvDouble==0) {
+    PVStructurePtr pvStructure = static_pointer_cast<PVStructure>(pvField);
+    pvLow = pvStructure->getDoubleField("limitLow");
+    if(pvLow.get()==NULL) {
         pvField->message(noControlFound,errorMessage);
         return false;
     }
-    pvLow = pvDouble;
-    pvDouble = pvStructure->getDoubleField(String("limit.high"));
-    if(pvDouble==0) {
-        pvLow = 0;
+    pvHigh = pvStructure->getDoubleField(String("limitHigh"));
+    if(pvHigh.get()==NULL) {
+        pvLow.reset();
         pvField->message(noControlFound,errorMessage);
         return false;
     }
-    pvHigh = pvDouble;
     return true;
 }
 
 void PVControl::detach()
 {
-    pvLow = 0;
-    pvHigh = 0;
+    pvLow.reset();
+    pvHigh.reset();
 }
 
 bool PVControl::isAttached(){
-    if(pvLow==0 || pvHigh==0) return false;
+    if(pvLow.get()==NULL) return false;
     return true;
 }
 
 void PVControl::get(Control &control) const
 {
-    if(pvLow==0 || pvHigh==0) {
+    if(pvLow.get()==NULL) {
         throw std::logic_error(notAttached);
     }
     control.setLow(pvLow->get());
@@ -78,7 +60,7 @@ void PVControl::get(Control &control) const
 
 bool PVControl::set(Control const & control)
 {
-    if(pvLow==0 || pvHigh==0) {
+    if(pvLow.get()==NULL) {
         throw std::logic_error(notAttached);
     }
     if(pvLow->isImmutable() || pvHigh->isImmutable()) return false;

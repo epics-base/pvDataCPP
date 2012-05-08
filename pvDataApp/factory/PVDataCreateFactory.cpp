@@ -17,16 +17,15 @@
 #include <pv/convert.h>
 #include <pv/factory.h>
 #include <pv/serializeHelper.h>
-#include "DefaultPVStructureArray.h"
 
 using std::tr1::static_pointer_cast;
 using std::tr1::const_pointer_cast;
+using std::size_t;
 
 namespace epics { namespace pvData {
 
 static Convert* convert = 0;
 static FieldCreate * fieldCreate = 0;
-static PVDataCreate* pvDataCreate = 0;
 
 /** Default storage for scalar values
  */
@@ -37,7 +36,7 @@ public:
     typedef T* pointer;
     typedef const T* const_pointer;
 
-    BasePVScalar(PVStructure *parent,ScalarConstPtr scalar);
+    BasePVScalar(ScalarConstPtr &scalar);
     virtual ~BasePVScalar();
     virtual T get();
     virtual void put(T val);
@@ -50,8 +49,8 @@ private:
 };
 
 template<typename T>
-BasePVScalar<T>::BasePVScalar(PVStructure *parent,ScalarConstPtr scalar)
-    : PVScalarValue<T>(parent,scalar),value(0)
+BasePVScalar<T>::BasePVScalar(ScalarConstPtr &scalar)
+    : PVScalarValue<T>(scalar),value(0)
 {}
 //Note: '0' is a suitable default for all POD types (not String)
 
@@ -79,11 +78,15 @@ void BasePVScalar<T>::deserialize(ByteBuffer *pbuffer,
     value = pbuffer->get<T>();
 }
 
-typedef BasePVScalar<bool> BasePVBoolean;
+typedef BasePVScalar<boolean> BasePVBoolean;
 typedef BasePVScalar<int8> BasePVByte;
 typedef BasePVScalar<int16> BasePVShort;
 typedef BasePVScalar<int32> BasePVInt;
 typedef BasePVScalar<int64> BasePVLong;
+typedef BasePVScalar<uint8> BasePVUByte;
+typedef BasePVScalar<uint16> BasePVUShort;
+typedef BasePVScalar<uint32> BasePVUInt;
+typedef BasePVScalar<uint64> BasePVULong;
 typedef BasePVScalar<float> BasePVFloat;
 typedef BasePVScalar<double> BasePVDouble;
 
@@ -94,7 +97,7 @@ public:
     typedef String* pointer;
     typedef const String* const_pointer;
 
-    BasePVString(PVStructure *parent,ScalarConstPtr scalar);
+    BasePVString(ScalarConstPtr &scalar);
     virtual ~BasePVString();
     virtual String get();
     virtual void put(String val);
@@ -103,13 +106,13 @@ public:
     virtual void deserialize(ByteBuffer *pbuffer,
         DeserializableControl *pflusher);
     virtual void serialize(ByteBuffer *pbuffer,
-        SerializableControl *pflusher, int offset, int count) const;
+        SerializableControl *pflusher, size_t offset, size_t count) const;
 private:
     String value;
 };
 
-BasePVString::BasePVString(PVStructure *parent,ScalarConstPtr scalar)
-    : PVString(parent,scalar),value()
+BasePVString::BasePVString(ScalarConstPtr &scalar)
+    : PVString(scalar),value()
 {}
 
 BasePVString::~BasePVString() {}
@@ -131,15 +134,15 @@ void BasePVString::deserialize(ByteBuffer *pbuffer,
 }
 
 void BasePVString::serialize(ByteBuffer *pbuffer,
-    SerializableControl *pflusher, int offset, int count) const
+    SerializableControl *pflusher, size_t offset, size_t count) const
 {
 	// check bounds
-	const int length = /*(value == null) ? 0 :*/ value.length();
+	const size_t length = /*(value == null) ? 0 :*/ value.length();
 	if (offset < 0) offset = 0;
 	else if (offset > length) offset = length;
 	if (count < 0) count = length;
 
-	const int maxCount = length - offset;
+	const size_t maxCount = length - offset;
 	if (count > maxCount)
 		count = maxCount;
 	
@@ -152,40 +155,63 @@ void BasePVString::serialize(ByteBuffer *pbuffer,
 template<typename T>
 class DefaultPVArray : public PVValueArray<T> {
 public:
-    typedef T  value_type;
     typedef T* pointer;
-    typedef const T* const_pointer;
+    typedef std::vector<T> vector;
+    typedef std::tr1::shared_ptr<vector> shared_vector;
 
-    DefaultPVArray(PVStructure *parent,ScalarArrayConstPtr scalarArray);
+    DefaultPVArray(ScalarArrayConstPtr &scalarArray);
     virtual ~DefaultPVArray();
-    virtual void setCapacity(int capacity);
-    virtual int get(int offset, int length, PVArrayData<T> *data) ;
-    virtual int put(int offset,int length, pointer from,
-       int fromOffset);
-    virtual void shareData(pointer value,int capacity,int length);
+    virtual void setCapacity(size_t capacity);
+    virtual size_t get(size_t offset, size_t length, PVArrayData<T> &data) ;
+    virtual size_t put(size_t offset,size_t length, pointer const  from,
+       size_t fromOffset);
+    virtual void shareData(
+        std::tr1::shared_ptr<std::vector<T> > const & value,
+         std::size_t capacity,
+         std::size_t length);
+    virtual pointer get() ;
+    virtual pointer get() const ;
+    virtual vector const & getVector() { return *value.get(); }
+    virtual shared_vector const & getSharedVector(){return value;};
     // from Serializable
     virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) const;
     virtual void deserialize(ByteBuffer *pbuffer,DeserializableControl *pflusher);
     virtual void serialize(ByteBuffer *pbuffer,
-         SerializableControl *pflusher, int offset, int count) const;
+         SerializableControl *pflusher, size_t offset, size_t count) const;
 private:
-    pointer value;
+    shared_vector value;
 };
 
 template<typename T>
-DefaultPVArray<T>::DefaultPVArray(PVStructure *parent,
-    ScalarArrayConstPtr scalarArray)
-: PVValueArray<T>(parent,scalarArray),value(new T[0])
+T *DefaultPVArray<T>::get() 
+{
+     std::vector<T> *vec = value.get();
+     T *praw = &((*vec)[0]);
+     return praw;
+}
+
+template<typename T>
+T *DefaultPVArray<T>::get() const
+{
+     std::vector<T> *vec = value.get();
+     T *praw = &((*vec)[0]);
+     return praw;
+}
+
+
+template<typename T>
+DefaultPVArray<T>::DefaultPVArray(ScalarArrayConstPtr &scalarArray)
+: PVValueArray<T>(scalarArray),
+    value(std::tr1::shared_ptr<std::vector<T> >(new std::vector<T>()))
+  
 { }
 
 template<typename T>
 DefaultPVArray<T>::~DefaultPVArray()
-{
-    delete[] value;
-}
+{ }
 
 template<typename T>
-void DefaultPVArray<T>::setCapacity(int capacity)
+void DefaultPVArray<T>::setCapacity(size_t capacity)
 {
     if(PVArray::getCapacity()==capacity) return;
     if(!PVArray::isCapacityMutable()) {
@@ -193,43 +219,45 @@ void DefaultPVArray<T>::setCapacity(int capacity)
         PVField::message(message, errorMessage);
         return;
     }
-    int length = PVArray::getLength();
-    if(length>capacity) length = capacity;
-    T *newValue = new T[capacity];
-    for(int i=0; i<length; i++) newValue[i] = value[i];
-    delete[]value;
-    value = newValue;
+    size_t length = PVArray::getLength();
+    std::vector<T> array(capacity);
+    size_t num = PVArray::getLength();
+    if(num>capacity) num = capacity;
+    T * from = get();
+    for (size_t i=0; i<num; i++) array[i] = from[i];
+    value->swap(array);
     PVArray::setCapacityLength(capacity,length);
 }
 
 template<typename T>
-int DefaultPVArray<T>::get(int offset, int len, PVArrayData<T> *data)
+size_t DefaultPVArray<T>::get(size_t offset, size_t len, PVArrayData<T> &data)
 {
-    int n = len;
-    int length = this->getLength();
+    size_t n = len;
+    size_t length = this->getLength();
     if(offset+len > length) {
         n = length-offset;
         if(n<0) n = 0;
     }
-    data->data = value;
-    data->offset = offset;
+    data.data = *value.get();
+    data.offset = offset;
     return n;
 }
 
 template<typename T>
-int DefaultPVArray<T>::put(int offset,int len,
-    pointer from,int fromOffset)
+size_t DefaultPVArray<T>::put(size_t offset,size_t len,
+    pointer  const from,size_t fromOffset)
 {
     if(PVField::isImmutable()) {
         PVField::message("field is immutable",errorMessage);
         return 0;
     }
-    if(from==value) return len;
+    T * pvalue = get();
+    if(from==pvalue) return len;
     if(len<1) return 0;
-    int length = this->getLength();
-    int capacity = this->getCapacity();
+    size_t length = this->getLength();
+    size_t capacity = this->getCapacity();
     if(offset+len > length) {
-        int newlength = offset + len;
+        size_t newlength = offset + len;
         if(newlength>capacity) {
             setCapacity(newlength);
             newlength = this->getCapacity();
@@ -238,8 +266,9 @@ int DefaultPVArray<T>::put(int offset,int len,
         }
         length = newlength;
     }
-    for(int i=0;i<len;i++) {
-       value[i+offset] = from[i+fromOffset];
+    pvalue = get();
+    for(size_t i=0;i<len;i++) {
+       pvalue[i+offset] = from[i+fromOffset];
     }
     this->setLength(length);
     this->postPut();
@@ -247,10 +276,12 @@ int DefaultPVArray<T>::put(int offset,int len,
 }
 
 template<typename T>
-void DefaultPVArray<T>::shareData(pointer shareValue,int capacity,int length)
+void DefaultPVArray<T>::shareData(
+         std::tr1::shared_ptr<std::vector<T> > const & sharedValue,
+         std::size_t capacity,
+         std::size_t length)
 {
-    delete[] value;
-    value = shareValue;
+    value = sharedValue;
     PVArray::setCapacityLength(capacity,length);
 }
 
@@ -263,21 +294,21 @@ void DefaultPVArray<T>::serialize(ByteBuffer *pbuffer,
 template<typename T>
 void DefaultPVArray<T>::deserialize(ByteBuffer *pbuffer,
         DeserializableControl *pcontrol) {
-    int size = SerializeHelper::readSize(pbuffer, pcontrol);
+    size_t size = SerializeHelper::readSize(pbuffer, pcontrol);
     // if (size>0) { pcontrol->ensureData(sizeof(T)-1); pbuffer->align(sizeof(T)); }
     if(size>=0) {
         // prepare array, if necessary
         if(size>this->getCapacity()) this->setCapacity(size);
         // retrieve value from the buffer
-        int i = 0;
+        size_t i = 0;
         while(true) {
             /*
-            int maxIndex = std::min(size-i, (int)(pbuffer->getRemaining()/sizeof(T)))+i;
+            size_t maxIndex = std::min(size-i, (int)(pbuffer->getRemaining()/sizeof(T)))+i;
             for(; i<maxIndex; i++)
                 value[i] = pbuffer->get<T>();
               */  
-            int maxCount = std::min(size-i, (int)(pbuffer->getRemaining()/sizeof(T)));
-            pbuffer->getArray<T>(&value[i], maxCount);
+            size_t maxCount = std::min(size-i, (pbuffer->getRemaining()/sizeof(T)));
+            pbuffer->getArray<T>(get(), maxCount);
             i += maxCount;
             
             if(i<size)
@@ -294,9 +325,9 @@ void DefaultPVArray<T>::deserialize(ByteBuffer *pbuffer,
 
 template<typename T>
 void DefaultPVArray<T>::serialize(ByteBuffer *pbuffer,
-        SerializableControl *pflusher, int offset, int count) const {
+        SerializableControl *pflusher, size_t offset, size_t count) const {
     // cache
-    int length = this->getLength();
+    size_t length = this->getLength();
 
     // check bounds
     if(offset<0)
@@ -304,24 +335,25 @@ void DefaultPVArray<T>::serialize(ByteBuffer *pbuffer,
     else if(offset>length) offset = length;
     if(count<0) count = length;
 
-    int maxCount = length-offset;
+    size_t maxCount = length-offset;
     if(count>maxCount) count = maxCount;
 
     // write
     SerializeHelper::writeSize(count, pbuffer, pflusher);
     //if (count == 0) return; pcontrol->ensureData(sizeof(T)-1); pbuffer->align(sizeof(T));
-    int end = offset+count;
-    int i = offset;
+    size_t end = offset+count;
+    size_t i = offset;
     while(true) {
         
         /*
-        int maxIndex = std::min<int>(end-i, (int)(pbuffer->getRemaining()/sizeof(T)))+i;
+        size_t maxIndex = std::min<int>(end-i, (int)(pbuffer->getRemaining()/sizeof(T)))+i;
         for(; i<maxIndex; i++)
             pbuffer->put<T>(value[i]);
         */
         
-        int maxCount = std::min<int>(end-i, (int)(pbuffer->getRemaining()/sizeof(T)));
-        pbuffer->putArray<T>(&value[i], maxCount);
+        size_t maxCount = std::min<int>(end-i, (int)(pbuffer->getRemaining()/sizeof(T)));
+        T * pvalue = const_cast<T *>(get());
+        pbuffer->putArray<T>(pvalue, maxCount);
         i += maxCount;
         
         if(i<end)
@@ -336,14 +368,16 @@ void DefaultPVArray<T>::serialize(ByteBuffer *pbuffer,
 template<>
 void DefaultPVArray<String>::deserialize(ByteBuffer *pbuffer,
         DeserializableControl *pcontrol) {
-    int size = SerializeHelper::readSize(pbuffer, pcontrol);
+    size_t size = SerializeHelper::readSize(pbuffer, pcontrol);
     if(size>=0) {
         // prepare array, if necessary
         if(size>getCapacity()) setCapacity(size);
         // retrieve value from the buffer
-        for(int i = 0; i<size; i++)
-            value[i] = SerializeHelper::deserializeString(pbuffer,
+        String * pvalue = get();
+        for(size_t i = 0; i<size; i++) {
+            pvalue[i] = SerializeHelper::deserializeString(pbuffer,
                     pcontrol);
+        }
         // set new length
         setLength(size);
         postPut();
@@ -353,8 +387,8 @@ void DefaultPVArray<String>::deserialize(ByteBuffer *pbuffer,
 
 template<>
 void DefaultPVArray<String>::serialize(ByteBuffer *pbuffer,
-        SerializableControl *pflusher, int offset, int count) const {
-    int length = getLength();
+        SerializableControl *pflusher, size_t offset, size_t count) const {
+    size_t length = getLength();
 
     // check bounds
     if(offset<0)
@@ -362,21 +396,27 @@ void DefaultPVArray<String>::serialize(ByteBuffer *pbuffer,
     else if(offset>length) offset = length;
     if(count<0) count = length;
 
-    int maxCount = length-offset;
+    size_t maxCount = length-offset;
     if(count>maxCount) count = maxCount;
 
     // write
     SerializeHelper::writeSize(count, pbuffer, pflusher);
-    int end = offset+count;
-    for(int i = offset; i<end; i++)
-        SerializeHelper::serializeString(value[i], pbuffer, pflusher);
+    size_t end = offset+count;
+    String * pvalue = get();
+    for(size_t i = offset; i<end; i++) {
+        SerializeHelper::serializeString(pvalue[i], pbuffer, pflusher);
+    }
 }
 
-typedef DefaultPVArray<bool> DefaultPVBooleanArray;
+typedef DefaultPVArray<boolean> DefaultPVBooleanArray;
 typedef DefaultPVArray<int8> BasePVByteArray;
 typedef DefaultPVArray<int16> BasePVShortArray;
 typedef DefaultPVArray<int32> BasePVIntArray;
 typedef DefaultPVArray<int64> BasePVLongArray;
+typedef DefaultPVArray<uint8> BasePVUByteArray;
+typedef DefaultPVArray<uint16> BasePVUShortArray;
+typedef DefaultPVArray<uint32> BasePVUIntArray;
+typedef DefaultPVArray<uint64> BasePVULongArray;
 typedef DefaultPVArray<float> BasePVFloatArray;
 typedef DefaultPVArray<double> BasePVDoubleArray;
 typedef DefaultPVArray<String> BasePVStringArray;
@@ -385,217 +425,230 @@ typedef DefaultPVArray<String> BasePVStringArray;
 
 PVDataCreate::PVDataCreate(){ }
 
-PVField *PVDataCreate::createPVField(PVStructure *parent,
-        FieldConstPtr field)
+PVFieldPtr PVDataCreate::createPVField(FieldConstPtr & field)
 {
      switch(field->getType()) {
      case scalar: {
          ScalarConstPtr xx = static_pointer_cast<const Scalar>(field);
-         return createPVScalar(parent,xx);
+         return createPVScalar(xx);
      }
      case scalarArray: {
          ScalarArrayConstPtr xx = static_pointer_cast<const ScalarArray>(field);
-         return (PVField *)createPVScalarArray(parent,xx);
+         return createPVScalarArray(xx);
      }
      case structure: {
          StructureConstPtr xx = static_pointer_cast<const Structure>(field);
-         return (PVField *)createPVStructure(parent,xx);
+         return createPVStructure(xx);
      }
      case structureArray: {
          StructureArrayConstPtr xx = static_pointer_cast<const StructureArray>(field);
-         return createPVStructureArray(parent,xx);
+         return createPVStructureArray(xx);
      }
      }
-     String  message("PVDataCreate::createPVField should never get here");
-     throw std::logic_error(message);
+     throw std::logic_error("PVDataCreate::createPVField should never get here");
 }
 
-PVField *PVDataCreate::createPVField(PVStructure *parent,
-        String fieldName,PVField * fieldToClone)
+PVFieldPtr PVDataCreate::createPVField(PVFieldPtr & fieldToClone)
 {
      switch(fieldToClone->getField()->getType()) {
      case scalar:
-         return createPVScalar(parent,fieldName,(PVScalar*)fieldToClone);
+        {
+            PVScalarPtr pvScalar = static_pointer_cast<PVScalar>(fieldToClone);
+            return createPVScalar(pvScalar);
+        }
      case scalarArray:
-         return (PVField *)createPVScalarArray(parent,fieldName,
-             (PVScalarArray *)fieldToClone);
+        {
+             PVScalarArrayPtr pvScalarArray
+                 = static_pointer_cast<PVScalarArray>(fieldToClone);
+             return createPVScalarArray(pvScalarArray);
+        }
      case structure:
-         return (PVField *)createPVStructure(parent,fieldName,
-             (PVStructure *)fieldToClone);
+         {
+             PVStructurePtr pvStructure
+                   = static_pointer_cast<PVStructure>(fieldToClone);
+             StringArray fieldNames = pvStructure->getStructure()->getFieldNames();
+             PVFieldPtrArray pvFieldPtrArray = pvStructure->getPVFields();
+             return createPVStructure(fieldNames,pvFieldPtrArray);
+         }
      case structureArray:
-        String message(
-        "PVDataCreate::createPVField structureArray not valid fieldToClone");
-        throw std::invalid_argument(message);
+         {
+             PVStructureArrayPtr from
+                 = static_pointer_cast<PVStructureArray>(fieldToClone);
+             StructureArrayConstPtr structureArray = from->getStructureArray();
+             PVStructureArrayPtr to = createPVStructureArray(
+                 structureArray);
+             convert->copyStructureArray(from, to);
+             return to;
+         }
      }
-     String  message("PVDataCreate::createPVField should never get here");
-     throw std::logic_error(message);
+     throw std::logic_error("PVDataCreate::createPVField should never get here");
 }
 
-PVScalar *PVDataCreate::createPVScalar(PVStructure *parent,ScalarConstPtr scalar)
+PVScalarPtr PVDataCreate::createPVScalar(ScalarConstPtr & scalar)
 {
      ScalarType scalarType = scalar->getScalarType();
      switch(scalarType) {
      case pvBoolean:
-         return new BasePVBoolean(parent,scalar);
+         return PVScalarPtr(new BasePVBoolean(scalar));
      case pvByte:
-         return new BasePVByte(parent,scalar);
+         return PVScalarPtr(new BasePVByte(scalar));
      case pvShort:
-         return new BasePVShort(parent,scalar);
+         return PVScalarPtr(new BasePVShort(scalar));
      case pvInt:
-         return new BasePVInt(parent,scalar);
+         return PVScalarPtr(new BasePVInt(scalar));
      case pvLong:
-         return new BasePVLong(parent,scalar);
+         return PVScalarPtr(new BasePVLong(scalar));
+     case pvUByte:
+         return PVScalarPtr(new BasePVUByte(scalar));
+     case pvUShort:
+         return PVScalarPtr(new BasePVUShort(scalar));
+     case pvUInt:
+         return PVScalarPtr(new BasePVUInt(scalar));
+     case pvULong:
+         return PVScalarPtr(new BasePVULong(scalar));
      case pvFloat:
-         return new BasePVFloat(parent,scalar);
+         return PVScalarPtr(new BasePVFloat(scalar));
      case pvDouble:
-         return new BasePVDouble(parent,scalar);
+         return PVScalarPtr(new BasePVDouble(scalar));
      case pvString:
-         return new BasePVString(parent,scalar);
+         return PVScalarPtr(new BasePVString(scalar));
      }
-     String  message("PVDataCreate::createPVScalar should never get here");
-     throw std::logic_error(message);
+     throw std::logic_error("PVDataCreate::createPVScalar should never get here");
 }
 
-PVScalar *PVDataCreate::createPVScalar(PVStructure *parent,
-        String fieldName,ScalarType scalarType)
+PVScalarPtr PVDataCreate::createPVScalar(ScalarType scalarType)
 {
-     ScalarConstPtr scalar = fieldCreate->createScalar(fieldName,scalarType);
-     return createPVScalar(parent,scalar);
+     ScalarConstPtr scalar = fieldCreate->createScalar(scalarType);
+     return createPVScalar(scalar);
 }
 
 
-PVScalar *PVDataCreate::createPVScalar(PVStructure *parent,
-        String fieldName,PVScalar * scalarToClone)
+PVScalarPtr PVDataCreate::createPVScalar(PVScalarPtr & scalarToClone)
 {
-     PVScalar *pvScalar = createPVScalar(parent,fieldName,
-         scalarToClone->getScalar()->getScalarType());
+     ScalarType scalarType = scalarToClone->getScalar()->getScalarType();
+     PVScalarPtr pvScalar = createPVScalar(scalarType);
      convert->copyScalar(scalarToClone, pvScalar);
-     PVAuxInfo *from = scalarToClone->getPVAuxInfo();
-     PVAuxInfo *to = pvScalar->getPVAuxInfo();
-     int numberInfo = from->getNumberInfo();
-     for(int i=0; i<numberInfo; i++) {
-        PVScalar *pvFrom = from->getInfo(i);
-        ScalarConstPtr scalar = pvFrom->getScalar();
-        PVScalar *pvTo = to->createInfo(scalar->getFieldName(),scalar->getScalarType());
-        convert->copyScalar(pvFrom,pvTo);
+     PVAuxInfoPtr from = scalarToClone->getPVAuxInfo();
+     PVAuxInfoPtr to = pvScalar->getPVAuxInfo();
+     PVAuxInfo::PVInfoMap & map = from->getInfoMap();
+     for(PVAuxInfo::PVInfoIter iter = map.begin(); iter!= map.end(); ++iter) {
+         String key = iter->first;
+         PVScalarPtr pvFrom = iter->second;
+         ScalarConstPtr scalar = pvFrom->getScalar();
+         PVScalarPtr pvTo = to->createInfo(key,scalar->getScalarType());
+         convert->copyScalar(pvFrom,pvTo);
      }
      return pvScalar;
 }
 
-PVScalarArray *PVDataCreate::createPVScalarArray(PVStructure *parent,
-        ScalarArrayConstPtr scalarArray)
+PVScalarArrayPtr PVDataCreate::createPVScalarArray(
+        ScalarArrayConstPtr & scalarArray)
 {
      switch(scalarArray->getElementType()) {
      case pvBoolean:
-           return new DefaultPVBooleanArray(parent,scalarArray);
+           return PVScalarArrayPtr(new DefaultPVBooleanArray(scalarArray));
      case pvByte:
-           return new BasePVByteArray(parent,scalarArray);
+           return PVScalarArrayPtr(new BasePVByteArray(scalarArray));
      case pvShort:
-           return new BasePVShortArray(parent,scalarArray);
+           return PVScalarArrayPtr(new BasePVShortArray(scalarArray));
      case pvInt:
-           return new BasePVIntArray(parent,scalarArray);
+           return PVScalarArrayPtr(new BasePVIntArray(scalarArray));
      case pvLong:
-           return new BasePVLongArray(parent,scalarArray);
+           return PVScalarArrayPtr(new BasePVLongArray(scalarArray));
+     case pvUByte:
+           return PVScalarArrayPtr(new BasePVUByteArray(scalarArray));
+     case pvUShort:
+           return PVScalarArrayPtr(new BasePVUShortArray(scalarArray));
+     case pvUInt:
+           return PVScalarArrayPtr(new BasePVUIntArray(scalarArray));
+     case pvULong:
+           return PVScalarArrayPtr(new BasePVULongArray(scalarArray));
      case pvFloat:
-           return new BasePVFloatArray(parent,scalarArray);
+           return PVScalarArrayPtr(new BasePVFloatArray(scalarArray));
      case pvDouble:
-           return new BasePVDoubleArray(parent,scalarArray);
+           return PVScalarArrayPtr(new BasePVDoubleArray(scalarArray));
      case pvString:
-           return new BasePVStringArray(parent,scalarArray);
+           return PVScalarArrayPtr(new BasePVStringArray(scalarArray));
      }
-     String  message("PVDataCreate::createPVScalarArray should never get here");
-     throw std::logic_error(message);
+     throw std::logic_error("PVDataCreate::createPVScalarArray should never get here");
      
 }
 
-PVScalarArray *PVDataCreate::createPVScalarArray(PVStructure *parent,
-        String fieldName,ScalarType elementType)
+PVScalarArrayPtr PVDataCreate::createPVScalarArray(
+        ScalarType elementType)
 {
-     return createPVScalarArray(parent,
-         fieldCreate->createScalarArray(fieldName, elementType));
+     ScalarArrayConstPtr scalarArray = fieldCreate->createScalarArray(elementType);
+     return createPVScalarArray(scalarArray);
 }
 
-PVScalarArray *PVDataCreate::createPVScalarArray(PVStructure *parent,
-        String fieldName,PVScalarArray * arrayToClone)
+PVScalarArrayPtr PVDataCreate::createPVScalarArray(
+        PVScalarArrayPtr &arrayToClone)
 {
-     PVScalarArray *pvArray = createPVScalarArray(parent,fieldName,
+     PVScalarArrayPtr pvArray = createPVScalarArray(
           arrayToClone->getScalarArray()->getElementType());
      convert->copyScalarArray(arrayToClone,0, pvArray,0,arrayToClone->getLength());
-     PVAuxInfo *from = arrayToClone->getPVAuxInfo();
-     PVAuxInfo *to = pvArray->getPVAuxInfo();
-     int numberInfo = from->getNumberInfo();
-     for(int i=0; i<numberInfo; i++) {
-        PVScalar *pvFrom = from->getInfo(i);
-        ScalarConstPtr scalar = pvFrom->getScalar();
-        PVScalar *pvTo = to->createInfo(scalar->getFieldName(),scalar->getScalarType());
-        convert->copyScalar(pvFrom,pvTo);
+     PVAuxInfoPtr from = arrayToClone->getPVAuxInfo();
+     PVAuxInfoPtr to = pvArray->getPVAuxInfo();
+     PVAuxInfo::PVInfoMap & map = from->getInfoMap();
+     for(PVAuxInfo::PVInfoIter iter = map.begin(); iter!= map.end(); ++iter) {
+         String key = iter->first;
+         PVScalarPtr pvFrom = iter->second;
+         ScalarConstPtr scalar = pvFrom->getScalar();
+         PVScalarPtr pvTo = to->createInfo(key,scalar->getScalarType());
+         convert->copyScalar(pvFrom,pvTo);
      }
     return pvArray;
 }
 
-PVStructureArray *PVDataCreate::createPVStructureArray(PVStructure *parent,
-        StructureArrayConstPtr structureArray)
+PVStructureArrayPtr PVDataCreate::createPVStructureArray(
+        StructureArrayConstPtr & structureArray)
 {
-     return new BasePVStructureArray(parent,structureArray);
+     return PVStructureArrayPtr(new PVStructureArray(structureArray));
 }
 
-PVStructure *PVDataCreate::createPVStructure(PVStructure *parent,
-        StructureConstPtr structure)
+PVStructurePtr PVDataCreate::createPVStructure(
+        StructureConstPtr &structure)
 {
-     PVStructure *pvStructure = new PVStructure(parent,structure);
-     return pvStructure;
+     return PVStructurePtr(new PVStructure(structure));
 }
 
-PVStructure *PVDataCreate::createPVStructure(PVStructure *parent,
-        String fieldName,int numberFields,FieldConstPtrArray fields)
+PVStructurePtr PVDataCreate::createPVStructure(
+        StringArray & fieldNames,PVFieldPtrArray & pvFields)
 {
-     StructureConstPtr structure = fieldCreate->createStructure(
-         fieldName,numberFields, fields);
-     return new PVStructure(parent,structure);
+     size_t num = fieldNames.size();
+     FieldConstPtrArray fields(num);
+     for (size_t i=0;i<num;i++) fields[i] = pvFields[i]->getField();
+     StructureConstPtr structure = fieldCreate->createStructure(fieldNames,fields);
+     return PVStructurePtr(new PVStructure(structure,pvFields));
 }
 
-PVStructure *PVDataCreate::createPVStructure(PVStructure *parent,
-    String fieldName,int numberFields,PVFieldPtrArray pvFields)
+PVStructurePtr PVDataCreate::createPVStructure(PVStructurePtr &structToClone)
 {
-    FieldConstPtrArray fields = new FieldConstPtr[numberFields];
-    for(int i=0; i<numberFields;i++) {
-        fields[i] = pvFields[i]->getField();
-    }
-    StructureConstPtr structure = fieldCreate->createStructure(
-        fieldName,numberFields,fields);
-    PVStructure *pvStructure = new PVStructure(parent,structure,pvFields);
-    return pvStructure;
-}
-
-PVStructure *PVDataCreate::createPVStructure(PVStructure *parent,
-        String fieldName,PVStructure *structToClone)
-{
-    FieldConstPtrArray fields = 0;
-    int numberFields = 0;
-    PVStructure *pvStructure = 0;;
+    FieldConstPtrArray field;
     if(structToClone==0) {
-        fields = new FieldConstPtr[0];
-        StructureConstPtr structure = fieldCreate->createStructure(
-            fieldName,numberFields,fields);
-        pvStructure = new PVStructure(parent,structure);
-    } else {
-       StructureConstPtr structure = structToClone->getStructure();
-       pvStructure = new PVStructure(parent,structure);
-       convert->copyStructure(structToClone,pvStructure);
+        FieldConstPtrArray fields(0);
+        StringArray fieldNames(0);
+        StructureConstPtr structure = fieldCreate->createStructure(fieldNames,fields);
+        return PVStructurePtr(new PVStructure(structure));
     }
+    StructureConstPtr structure = structToClone->getStructure();
+    PVStructurePtr pvStructure(new PVStructure(structure));
+    convert->copyStructure(structToClone,pvStructure);
     return pvStructure;
 }
 
-PVDataCreate * getPVDataCreate() {
-     static Mutex mutex;
-     Lock xx(mutex);
+PVDataCreatePtr PVDataCreate::getPVDataCreate()
+{
+    static PVDataCreatePtr pvDataCreate;
+    static Mutex mutex;
+    Lock xx(mutex);
 
-     if(pvDataCreate==0){
-          pvDataCreate = new PVDataCreate();
-          convert = getConvert();
-          fieldCreate = getFieldCreate();
-     }
-     return pvDataCreate;
- }
+    if(pvDataCreate.get()==0) pvDataCreate = PVDataCreatePtr(new PVDataCreate());
+    return pvDataCreate;
+}
+
+PVDataCreatePtr getPVDataCreate() {
+     return PVDataCreate::getPVDataCreate();
+}
 
 }}

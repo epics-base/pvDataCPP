@@ -8,13 +8,10 @@
 #ifndef PVDATA_H
 #define PVDATA_H
 #include <string>
+#include <map>
 #include <stdexcept>
-#include <pv/pvType.h>
 #include <pv/pvIntrospect.h>
-#include <pv/noDefaultMethods.h>
 #include <pv/requester.h>
-#include <pv/byteBuffer.h>
-#include <pv/serialize.h>
 namespace epics { namespace pvData { 
 
 class PVAuxInfo;
@@ -31,19 +28,39 @@ class PVStructureArray;
 /**
  * typedef for a pointer to a PVStructure.
  */
-typedef PVStructure * PVStructurePtr;
+typedef std::tr1::shared_ptr<PVStructure> PVStructurePtr;
 /**
  * typedef for a pointer to a array of pointer to PVStructure.
  */
-typedef PVStructurePtr* PVStructurePtrArray;
+typedef std::vector<PVStructurePtr> PVStructurePtrArray;
+typedef std::vector<PVStructurePtr>::iterator PVStructurePtrArray_iterator;
+typedef std::vector<PVStructurePtr>::const_iterator PVStructurePtrArray_const__iterator;
 /**
  * typedef for a pointer to a PVField.
  */
-typedef PVField* PVFieldPtr;
+typedef std::tr1::shared_ptr<PVField> PVFieldPtr;
+/**
+ * typedef for a pointer to a PVScalar.
+ */
+typedef std::tr1::shared_ptr<PVScalar> PVScalarPtr;
+/**
+ * typedef for a pointer to a PVScalarArray.
+ */
+typedef std::tr1::shared_ptr<PVScalarArray> PVScalarArrayPtr;
+/**
+ * typedef for a pointer to a PVStructureArray.
+ */
+typedef std::tr1::shared_ptr<PVStructureArray> PVStructureArrayPtr;
 /**
  * typedef for a pointer to a array of pointer to PVField.
  */
-typedef PVFieldPtr * PVFieldPtrArray;
+typedef std::vector<PVFieldPtr> PVFieldPtrArray;
+typedef std::vector<PVFieldPtr>::iterator PVFieldPtrArray_iterator;
+typedef std::vector<PVFieldPtr>::const_iterator PVFieldPtrArray_const__iterator;
+/**
+ * typedef for a pointer to a PVAuxInfo.
+ */
+typedef std::tr1::shared_ptr<PVAuxInfo> PVAuxInfoPtr;
 
 /**
  * This class provides auxillary information about a PVField.
@@ -52,6 +69,10 @@ typedef PVFieldPtr * PVFieldPtrArray;
  */
 class PVAuxInfo : private NoDefaultMethods {
 public:
+    typedef std::map<String,PVScalarPtr> PVInfoMap;
+    typedef std::map<String,PVScalarPtr>::iterator PVInfoIter;
+    typedef std::pair<String,PVScalarPtr> PVInfoPair;
+
     /**
      * Constructor
      * @param The fields to which the Auxinfo is attached.
@@ -70,25 +91,20 @@ public:
      * Add a new auxiliary item or retrieve the interface to an existing item. 
      *
      * @param key The key.
-     * @param scalarType The scalrType for the new item being added/
+     * @param scalarType The scalarType for the new item being added/
      * @return The new PVScalar that has been added to the Auxinfo.
      */
-    PVScalar * createInfo(String key,ScalarType scalarType);
-    /**
-     * Get the number of PVScalars in the Auxinfo.
-     * @return The number.
-     */
-    int getNumberInfo();
+    PVScalarPtr createInfo(String key,ScalarType scalarType);
     /**
      * Get the Auxinfo with the specified key.
      * @return The PVScalar or null if it does not exist.
      */
-    PVScalar * getInfo(String key);
+    PVScalarPtr & getInfo(String key);
     /**
-     * Get the Auxinfo with the specified index.
-     * @return The PVScalar or null if it does not exist.
+     * Get the map for the info.
+     * @return The map;
      */
-    PVScalar * getInfo(int index);
+    PVInfoMap & getInfoMap();
     /**
      * Convert the Auxinfo to a string and add it to builder.
      * @param  builder The string builder.
@@ -101,10 +117,8 @@ public:
      */
     void toString(StringBuilder buf,int indentLevel);
 private:
-    PVField *pvField;
-    int lengthInfo;
-    int numberInfo;
-    PVScalar **pvInfos; // ptr to array of PVscalar *
+    PVField * pvField;
+    PVInfoMap pvInfos;
     friend class PVDataCreate;
 };
 
@@ -129,7 +143,7 @@ public:
  */
 class PVField
 : virtual public Serializable,
-  private NoDefaultMethods
+  public std::tr1::enable_shared_from_this<PVField>
 {
 public:
     POINTER_DEFINITIONS(PVField);
@@ -144,6 +158,11 @@ public:
      */
     virtual void message(String message,MessageType messageType) ;
     /**
+     * Get the fieldName for this field.
+     * @return The name or empty string if top level field.
+     */
+    String getFieldName();
+    /**
      * Register the message requester.
      * At most one requester can be registered.
      * @param prequester The requester.
@@ -157,24 +176,24 @@ public:
      * The other offsets are determined by recursively traversing each structure of the tree.
      * @return The offset.
      */
-    int getFieldOffset() ;
+    std::size_t getFieldOffset() ;
     /**
      * Get the next offset. If the field is a scalar or array field then this is just offset + 1.
      * If the field is a structure it is the offset of the next field after this structure.
      * Thus (nextOffset - offset) is always equal to the number of fields within the field.
      * @return The offset.
      */
-    int getNextFieldOffset() ;
+    std::size_t getNextFieldOffset() ;
     /**
      * Get the total number of fields in this field.
      * This is equal to nextFieldOffset - fieldOffset.
      */
-    int getNumberFields() ;
+    std::size_t getNumberFields() ;
     /**
      * Get the PVAuxInfo interface for the PVField.
      * @return The PVAuxInfo interface.
      */
-    PVAuxInfo * getPVAuxInfo();
+    PVAuxInfoPtr & getPVAuxInfo();
     /**
      * Is the field immutable, i.e. does it not allow changes.
      * @return (false,true) if it (is not, is) immutable.
@@ -189,17 +208,22 @@ public:
      * Get the <i>Field</i> that describes the field.
      * @return Field, which is the reflection interface.
      */
-    FieldConstPtr getField() ;
+    FieldConstPtr & getField() ;
     /**
      * Get the parent of this field.
      * @return The parent interface or null if this is PVRecord
      */
     PVStructure * getParent() ;
     /**
+     * Replace the data implementation for the field.
+     * @param newPVField The new implementation
+     */
+    void replacePVField(PVFieldPtr&  newPVField);
+    /**
      * Rename the field name.
      * @param newName The new name.
      */
-    bool renameField(String  newName);
+    void renameField(String newName);
     /**
      * postPut. Called when the field is updated by the implementation.
      */
@@ -229,13 +253,23 @@ public:
      */
     virtual void toString(StringBuilder buf,int indentLevel) ;
 protected:
-    PVField(PVStructure *parent,FieldConstPtr field);
-    void setParent(PVStructure * parent);
+    PVField(FieldConstPtr field);
+    void setParent(PVStructure *parent);
+    void replaceField(FieldConstPtr &field);
 private:
     void message(String fieldName,String message,MessageType messageType);
-    class PVFieldPvt *pImpl;
     static void computeOffset(PVField *pvField);
-    static void computeOffset(PVField *pvField,int offset);
+    static void computeOffset(PVField *pvField,std::size_t offset);
+    PVAuxInfoPtr pvAuxInfo;
+    String fieldName;
+    PVStructure *parent;
+    FieldConstPtr field;
+    size_t fieldOffset;
+    size_t nextFieldOffset;
+    bool immutable;
+    Requester *requester;
+    PostHandler *postHandler;
+    std::tr1::shared_ptr<class Convert> convert;
     friend class PVDataCreate;
     friend class PVStructure;
 };
@@ -250,13 +284,15 @@ public:
      * Destructor
      */
     virtual ~PVScalar();
+    typedef PVScalar &reference;
+    typedef const PVScalar& const_reference;
     /**
      * Get the Scalar introspection interface for the PVScalar.
      * @return the interface.
      */
     ScalarConstPtr getScalar() ;
 protected:
-    PVScalar(PVStructure *parent,ScalarConstPtr scalar);
+    PVScalar(ScalarConstPtr  scalar);
 };
 
 /**
@@ -284,21 +320,37 @@ public:
      */
     virtual void put(T value) = 0;
 protected:
-    PVScalarValue(PVStructure *parent,ScalarConstPtr scalar)
-    : PVScalar(parent,scalar) {}
+    PVScalarValue(ScalarConstPtr  scalar)
+    : PVScalar(scalar) {}
 private:
+    friend class PVDataCreate;
 };
 
 /**
  * typedefs for the various possible scalar types.
  */
-typedef PVScalarValue<bool> PVBoolean;
+typedef PVScalarValue<boolean> PVBoolean;
 typedef PVScalarValue<int8> PVByte;
 typedef PVScalarValue<int16> PVShort;
 typedef PVScalarValue<int32> PVInt;
 typedef PVScalarValue<int64> PVLong;
+typedef PVScalarValue<uint8> PVUByte;
+typedef PVScalarValue<uint16> PVUShort;
+typedef PVScalarValue<uint32> PVUInt;
+typedef PVScalarValue<uint64> PVULong;
 typedef PVScalarValue<float> PVFloat;
 typedef PVScalarValue<double> PVDouble;
+typedef std::tr1::shared_ptr<PVBoolean> PVBooleanPtr;
+typedef std::tr1::shared_ptr<PVByte> PVBytePtr;
+typedef std::tr1::shared_ptr<PVShort> PVShortPtr;
+typedef std::tr1::shared_ptr<PVInt> PVIntPtr;
+typedef std::tr1::shared_ptr<PVLong> PVLongPtr;
+typedef std::tr1::shared_ptr<PVUByte> PVUBytePtr;
+typedef std::tr1::shared_ptr<PVUShort> PVUShortPtr;
+typedef std::tr1::shared_ptr<PVUInt> PVUIntPtr;
+typedef std::tr1::shared_ptr<PVULong> PVULongPtr;
+typedef std::tr1::shared_ptr<PVFloat> PVFloatPtr;
+typedef std::tr1::shared_ptr<PVDouble> PVDoublePtr;
 
 /**
  * PVString is special case, since it implements SerializableArray
@@ -310,9 +362,10 @@ public:
      */
     virtual ~PVString() {}
 protected:
-    PVString(PVStructure *parent,ScalarConstPtr scalar)
-    : PVScalarValue<String>(parent,scalar) {}
+    PVString(ScalarConstPtr & scalar)
+    : PVScalarValue<String>(scalar) {}
 };
+typedef std::tr1::shared_ptr<PVString> PVStringPtr;
 
 
 /**
@@ -329,17 +382,17 @@ public:
      * Get the array length.
      * @return The length.
      */
-    int getLength() const;
+    std::size_t getLength() const;
     /**
      * Set the array length.
      * @param The length.
      */
-    void setLength(int length);
+    void setLength(std::size_t length);
     /**
      * Get the array capacity.
      * @return The capacity.
      */
-    int getCapacity() const;
+    std::size_t getCapacity() const;
     /**
      * Can the capacity be changed.
      * @return (false,true) if (can not, can) be changed.
@@ -354,12 +407,13 @@ public:
      * Set the array capacity.
      * @param The capacity.
      */
-    virtual void setCapacity(int capacity) = 0;
+    virtual void setCapacity(std::size_t capacity) = 0;
 protected:
-    PVArray(PVStructure *parent,FieldConstPtr field);
-    void setCapacityLength(int capacity,int length);
+    PVArray(FieldConstPtr  field);
+    void setCapacityLength(std::size_t capacity,std::size_t length);
 private:
     class PVArrayPvt * pImpl;
+    friend class PVDataCreate;
 };
 
 /**
@@ -367,6 +421,8 @@ private:
  */
 template<typename T>
 class PVArrayData {
+private:
+    std::vector<T> init;
 public:
     POINTER_DEFINITIONS(PVArrayData);
     typedef T  value_type;
@@ -375,11 +431,14 @@ public:
     /**
      * The data array.
      */
-    pointer data;
+    std::vector<T> & data;
     /**
      * The offset. This is the offset into the actual array of the first element in data,
      */
-    int offset;
+    std::size_t offset;
+    PVArrayData()
+    : data(init)
+    {}
 };
 
 
@@ -393,6 +452,8 @@ public:
      * Destructor
      */
     virtual ~PVScalarArray();
+    typedef PVScalarArray &reference;
+    typedef const PVScalarArray& const_reference;
     /**
      * Get the introspection interface
      * @return The interface.
@@ -400,8 +461,9 @@ public:
     ScalarArrayConstPtr getScalarArray() ;
 
 protected:
-    PVScalarArray(PVStructure *parent,ScalarArrayConstPtr scalarArray);
+    PVScalarArray(ScalarArrayConstPtr scalarArray);
 private:
+    friend class PVDataCreate;
 };
 
 /**
@@ -412,43 +474,53 @@ typedef PVArrayData<PVStructurePtr> StructureArrayData;
 /**
  * Data class for a structureArray
  */
-class PVStructureArray : public PVArray {
+class PVStructureArray : public PVArray
+{
 public:
     POINTER_DEFINITIONS(PVStructureArray);
+    typedef PVStructurePtr  value_type;
+    typedef PVStructurePtr* pointer;
+    typedef const PVStructurePtr* const_pointer;
+    typedef PVArrayData<PVStructurePtr> ArrayDataType;
+    typedef std::vector<PVStructurePtr> vector;
+    typedef std::tr1::shared_ptr<vector> shared_vector;
+    typedef PVStructureArray &reference;
+    typedef const PVStructureArray& const_reference;
     /**
      * Destructor
      */
     virtual ~PVStructureArray() {}
+    virtual void setCapacity(size_t capacity);
     /**
      * Get the introspection interface
      * @return The interface.
      */
-    virtual StructureArrayConstPtr getStructureArray() = 0;
+    virtual StructureArrayConstPtr getStructureArray();
     /**
      * Append new elements to the end of the array.
      * @param number The number of elements to add.
      * @return the new length of the array.
      */
-    virtual int append(int number) = 0;
+    virtual std::size_t append(std::size_t number);
     /**
      * Remove elements from the array.
      * @param offset The offset of the first element to remove.
      * @param number The number of elements to remove.
      * @return (false,true) if the elements were removed.
      */
-    virtual bool remove(int offset,int number) = 0;
+    virtual bool remove(std::size_t offset,std::size_t number);
     /**
      * Compress. This removes all null elements from the array.
      */
-    virtual void compress() = 0;
+    virtual void compress();
     /**
      * Get array elements
      * @param offset The offset of the first element,
      * @param length The number of elements to get.
      * @param data The place where the data is placed.
      */
-    virtual int get(int offset, int length,
-        StructureArrayData *data) = 0;
+    virtual std::size_t get(std::size_t offset, std::size_t length,
+        StructureArrayData &data);
     /**
      * Put data into the array.
      * @param offset The offset of the first element,
@@ -457,64 +529,82 @@ public:
      * @param fromOffset The offset in from.
      * @return The number of elements put into the array.
      */
-    virtual int put(int offset,int length,
-        PVStructurePtrArray from, int fromOffset) = 0;
+    virtual std::size_t put(std::size_t offset,std::size_t length,
+        pointer const  from, std::size_t fromOffset);
     /**
      * Share data from another source.
      * @param value The data to share.
      * @param capacity The capacity of the array.
      * @param length The length of the array.
      */
-    virtual void shareData( PVStructurePtrArray value,int capacity,int length) = 0;
-
+    virtual void shareData(
+         shared_vector const & value,
+         std::size_t capacity,
+         std::size_t length);
+    virtual void serialize(ByteBuffer *pbuffer,
+        SerializableControl *pflusher) const;
+    virtual void deserialize(ByteBuffer *buffer,
+        DeserializableControl *pflusher);
+    virtual void serialize(ByteBuffer *pbuffer,
+        SerializableControl *pflusher, std::size_t offset, std::size_t count) const ;
+    virtual pointer get() { return &((*value.get())[0]); }
+    virtual pointer get() const { return &((*value.get())[0]); }
+    virtual vector const & getVector() {return *value;}
+    virtual shared_vector const & getSharedVector() {return value;}
 protected:
-    PVStructureArray(PVStructure *parent, StructureArrayConstPtr structureArray)
-    : PVArray(parent,structureArray) {}
+    PVStructureArray( StructureArrayConstPtr structureArray);
 private:
+    StructureArrayConstPtr structureArray;
+    shared_vector value;
+    friend class PVDataCreate;
 };
 
 
-class PVStructure : public PVField,public BitSetSerializable {
+class PVStructure : public PVField, public BitSetSerializable
+{
 public:
     POINTER_DEFINITIONS(PVStructure);
     /**
      * Destructor
      */
     virtual ~PVStructure();
+    typedef PVStructure & reference;
+    typedef const PVStructure & const_reference;
     /**
      * Get the introspection interface
      * @return The interface.
      */
-    StructureConstPtr getStructure();
+    StructureConstPtr &  getStructure();
     /**
      * Get the array of pointers to the subfields in the structure.
      * @return The array.
      */
-    PVFieldPtrArray getPVFields();
+    PVFieldPtrArray & getPVFields();
     /**
      * Get the subfield with the specified name.
      * @param fieldName The name of the field.
      * @return Pointer to the field or null if field does not exist.
      */
-    PVField *getSubField(String fieldName);
+    PVFieldPtr &  getSubField(String fieldName);
     /**
      * Get the subfield with the specified offset.
      * @param fieldOffset The offset.
      * @return Pointer to the field or null if field does not exist.
      */
-    PVField *getSubField(int fieldOffset);
+    PVFieldPtr &  getSubField(std::size_t fieldOffset);
     /**
      * Append a field to the structure.
+     * @param fieldName The name of the field to append.
      * @param pvField The field to append.
      */
-    void appendPVField(PVField *pvField);
+    void appendPVField(String fieldName,PVFieldPtr & pvField);
     /**
      * Append fields to the structure.
-     * @param numberFields The number of fields.
+     * @param fieldNames The names of the fields to add.
      * @param pvFields The fields to append.
      * @return Pointer to the field or null if field does not exist.
      */
-    void appendPVFields(int numberFields,PVFieldPtrArray pvFields);
+    void appendPVFields(StringArray & fieldNames,PVFieldPtrArray & pvFields);
     /**
      * Remove a field from the structure.
      * @param fieldName The name of the field to remove.
@@ -525,69 +615,93 @@ public:
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
-    PVBoolean *getBooleanField(String fieldName);
+    PVBooleanPtr getBooleanField(String fieldName);
     /**
      * Get a byte field with the specified name.
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
-    PVByte *getByteField(String fieldName);
+    PVBytePtr getByteField(String fieldName);
     /**
      * Get a short field with the specified name.
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
-    PVShort *getShortField(String fieldName);
+    PVShortPtr getShortField(String fieldName);
     /**
      * Get a int field with the specified name.
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
-    PVInt *getIntField(String fieldName);
+    PVIntPtr getIntField(String fieldName);
     /**
      * Get a long field with the specified name.
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
-    PVLong *getLongField(String fieldName);
+    PVLongPtr getLongField(String fieldName);
+    /**
+     * Get an unsigned byte field with the specified name.
+     * @param fieldName The name of the field to get.
+     * @return Pointer to the field of null if a field with that name and type does not exist.
+     */
+    PVUBytePtr getUByteField(String fieldName);
+    /**
+     * Get an unsigned short field with the specified name.
+     * @param fieldName The name of the field to get.
+     * @return Pointer to the field of null if a field with that name and type does not exist.
+     */
+    PVUShortPtr getUShortField(String fieldName);
+    /**
+     * Get an unsigned int field with the specified name.
+     * @param fieldName The name of the field to get.
+     * @return Pointer to the field of null if a field with that name and type does not exist.
+     */
+    PVUIntPtr getUIntField(String fieldName);
+    /**
+     * Get an unsigned long field with the specified name.
+     * @param fieldName The name of the field to get.
+     * @return Pointer to the field of null if a field with that name and type does not exist.
+     */
+    PVULongPtr getULongField(String fieldName);
     /**
      * Get a float field with the specified name.
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
-    PVFloat *getFloatField(String fieldName);
+    PVFloatPtr getFloatField(String fieldName);
     /**
      * Get a double field with the specified name.
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
-    PVDouble *getDoubleField(String fieldName);
+    PVDoublePtr getDoubleField(String fieldName);
     /**
      * Get a string field with the specified name.
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
-    PVString *getStringField(String fieldName);
+    PVStringPtr getStringField(String fieldName);
     /**
      * Get a structure field with the specified name.
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
-    PVStructure *getStructureField(String fieldName);
+    PVStructurePtr getStructureField(String fieldName);
     /**
      * Get a scalarArray field with the specified name.
      * @param fieldName The name of the field to get.
      * @param elementType The element type.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
-    PVScalarArray *getScalarArrayField(
+    PVScalarArrayPtr getScalarArrayField(
         String fieldName,ScalarType elementType);
     /**
      * Get a structureArray field with the specified name.
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
-    PVStructureArray *getStructureArrayField(String fieldName);
+    PVStructureArrayPtr getStructureArrayField(String fieldName);
     /**
      * Get the name if this structure extends another structure.
      * @return The string which may be null.
@@ -605,7 +719,7 @@ public:
      * @param pflusher Interface to call when buffer is full.
      */
     virtual void serialize(
-        ByteBuffer *pbuffer,SerializableControl *pflusher) const;
+        ByteBuffer *pbuffer,SerializableControl *pflusher) const ;
     /**
      * Deserialize
      * @param pbuffer The byte buffer.
@@ -631,23 +745,20 @@ public:
         DeserializableControl*pflusher,BitSet *pbitSet);
     /**
      * Constructor
-     * @param parent The parent structure.
      * @param structure The introspection interface.
      */
-    PVStructure(PVStructure *parent,StructureConstPtr structure);
+    PVStructure(StructureConstPtr & structure);
     /**
      * Constructor
-     * @param parent The parent structure.
      * @param structure The introspection interface.
      * @param pvFields The array of fields for the structure.
      */
-    PVStructure(
-        PVStructure *parent,
-        StructureConstPtr structure,
-        PVFieldPtrArray pvFields);
+    PVStructure(StructureConstPtr structure,PVFieldPtrArray & pvFields);
 private:
-    void setParentPvt(PVField *pvField,PVStructure *parent);
-    class PVStructurePvt * pImpl;
+    PVFieldPtrArray pvFields;
+    StructureConstPtr structurePtr;
+    String extendsStructureName;
+    friend class PVDataCreate;
 };
 
 template<typename T>
@@ -658,6 +769,10 @@ public:
     typedef T* pointer;
     typedef const T* const_pointer;
     typedef PVArrayData<T> ArrayDataType;
+    typedef std::vector<T> vector;
+    typedef std::tr1::shared_ptr<vector> shared_vector;
+    typedef PVValueArray & reference;
+    typedef const PVValueArray & const_reference;
 
     /**
      * Destructor
@@ -669,7 +784,8 @@ public:
      * @param length The number of elements to get.
      * @param data The place where the data is placed.
      */
-    virtual int get(int offset, int length, ArrayDataType *data) = 0;
+    virtual std::size_t get(
+         std::size_t offset, std::size_t length, ArrayDataType &data) = 0;
     /**
      * Put data into the array.
      * @param offset The offset of the first element,
@@ -678,170 +794,169 @@ public:
      * @param fromOffset The offset in from.
      * @return The number of elements put into the array.
      */
-    virtual int put(int offset,int length, pointer from, int fromOffset) = 0;
+    virtual std::size_t put(std::size_t offset,
+        std::size_t length, pointer const from, std::size_t fromOffset) = 0;
     /**
      * Share data from another source.
      * @param value The data to share.
      * @param capacity The capacity of the array.
      * @param length The length of the array.
      */
-    virtual void shareData(pointer value,int capacity,int length) = 0;
+    virtual void shareData(
+         shared_vector const & value,
+         std::size_t capacity,
+         std::size_t length) = 0;
+    virtual pointer get() = 0;
+    virtual pointer get() const = 0;
+    virtual vector const & getVector() = 0;
+    virtual shared_vector const & getSharedVector() = 0;
 protected:
-    PVValueArray(PVStructure *parent,ScalarArrayConstPtr scalar)
-    : PVScalarArray(parent,scalar) {}
-private:
+    PVValueArray(ScalarArrayConstPtr scalar)
+    : PVScalarArray(scalar) {}
+    friend class PVDataCreate;
 };
 
 /**
  * Definitions for the various scalarArray types.
  */
-typedef PVArrayData<bool> BooleanArrayData;
-typedef PVValueArray<bool> PVBooleanArray;
+typedef PVArrayData<boolean> BooleanArrayData;
+typedef PVValueArray<boolean> PVBooleanArray;
+typedef std::tr1::shared_ptr<PVBooleanArray> PVBooleanArrayPtr;
 
 typedef PVArrayData<int8> ByteArrayData;
 typedef PVValueArray<int8> PVByteArray;
+typedef std::tr1::shared_ptr<PVByteArray> PVByteArrayPtr;
 
 typedef PVArrayData<int16> ShortArrayData;
 typedef PVValueArray<int16> PVShortArray;
+typedef std::tr1::shared_ptr<PVShortArray> PVShortArrayPtr;
 
 typedef PVArrayData<int32> IntArrayData;
 typedef PVValueArray<int32> PVIntArray;
+typedef std::tr1::shared_ptr<PVIntArray> PVIntArrayPtr;
 
 typedef PVArrayData<int64> LongArrayData;
 typedef PVValueArray<int64> PVLongArray;
+typedef std::tr1::shared_ptr<PVLongArray> PVLongArrayPtr;
 
+typedef PVArrayData<uint8> UByteArrayData;
+typedef PVValueArray<uint8> PVUByteArray;
+typedef std::tr1::shared_ptr<PVUByteArray> PVUByteArrayPtr;
+
+typedef PVArrayData<uint16> UShortArrayData;
+typedef PVValueArray<uint16> PVUShortArray;
+typedef std::tr1::shared_ptr<PVUShortArray> PVUShortArrayPtr;
+
+typedef PVArrayData<uint32> UIntArrayData;
+typedef PVValueArray<uint32> PVUIntArray;
+typedef std::tr1::shared_ptr<PVUIntArray> PVUIntArrayPtr;
+
+typedef PVArrayData<uint64> ULongArrayData;
+typedef PVValueArray<uint64> PVULongArray;
+typedef std::tr1::shared_ptr<PVULongArray> PVULongArrayPtr;
 
 typedef PVArrayData<float> FloatArrayData;
 typedef PVValueArray<float> PVFloatArray;
+typedef std::tr1::shared_ptr<PVFloatArray> PVFloatArrayPtr;
 
 typedef PVArrayData<double> DoubleArrayData;
 typedef PVValueArray<double> PVDoubleArray;
+typedef std::tr1::shared_ptr<PVDoubleArray> PVDoubleArrayPtr;
 
 typedef PVArrayData<String> StringArrayData;
 typedef PVValueArray<String> PVStringArray;
+typedef std::tr1::shared_ptr<PVStringArray> PVStringArrayPtr;
 
+class PVDataCreate;
+typedef std::tr1::shared_ptr<PVDataCreate> PVDataCreatePtr;
 /**
  * This is a singlton class for creating data instances.
  */
 class PVDataCreate {
 public:
+    static PVDataCreatePtr getPVDataCreate();
     /**
      * Create a PVField using given Field introspection data.
-     * @param parent The parent interface.
      * @param field The introspection data to be used to create PVField.
      * @return The PVField implementation.
      */
-    PVField *createPVField(PVStructure *parent,
-        FieldConstPtr field);
+    PVFieldPtr createPVField(FieldConstPtr & field);
     /**
      * Create a PVField using given a PVField to clone.
      * This method calls the appropriate createPVScalar, createPVArray, or createPVStructure.
-     * @param parent The parent interface.
      * @param fieldToClone The field to clone.
      * @return The PVField implementation
      */
-    PVField *createPVField(PVStructure *parent,
-        String fieldName,PVField * fieldToClone);
+    PVFieldPtr createPVField(PVFieldPtr & fieldToClone);
     /**
      * Create an implementation of a scalar field reusing the Scalar introspection interface.
-     * @param parent The parent.
      * @param scalar The introspection interface.
      * @return The PVScalar implementation.
      */
-    PVScalar *createPVScalar(PVStructure *parent,ScalarConstPtr scalar);
+    PVScalarPtr createPVScalar(ScalarConstPtr & scalar);
     /**
      * Create an implementation of a scalar field. A Scalar introspection interface is created.
-     * @param parent The parent interface.
-     * @param fieldName The field name.
      * @param fieldType The field type.
      * @return The PVScalar implementation.
      */
-    PVScalar *createPVScalar(PVStructure *parent,
-        String fieldName,ScalarType scalarType);
+    PVScalarPtr createPVScalar(ScalarType  scalarType);
     /**
      * Create an implementation of a scalar field by cloning an existing PVScalar.
      * The new PVScalar will have the same value and auxInfo as the original.
-     * @param parent The parent interface.
-     * @param fieldName The field name.
      * @param scalarToClone The PVScalar to clone.
      * @return The PVScalar implementation.
      */
-    PVScalar *createPVScalar(PVStructure *parent,
-        String fieldName,PVScalar * scalarToClone);
+    PVScalarPtr createPVScalar(PVScalarPtr &  scalarToClone);
     /**
      * Create an implementation of an array field reusing the Array introspection interface.
-     * @param parent The parent interface.
      * @param array The introspection interface.
      * @return The PVScalarArray implementation.
      */
-    PVScalarArray *createPVScalarArray(PVStructure *parent,
-        ScalarArrayConstPtr scalarArray);
+    PVScalarArrayPtr createPVScalarArray(ScalarArrayConstPtr & scalarArray);
     /**
      * Create an implementation for an array field. An Array introspection interface is created.
      * @param parent The parent interface.
-     * @param fieldName The field name.
      * @param elementType The element type.
      * @return The PVScalarArray implementation.
      */
-    PVScalarArray *createPVScalarArray(PVStructure *parent,
-        String fieldName,ScalarType elementType);
+    PVScalarArrayPtr createPVScalarArray(
+        ScalarType elementType);
     /**
      * Create an implementation of an array field by cloning an existing PVArray.
      * The new PVArray will have the same value and auxInfo as the original.
-     * @param parent The parent interface.
-     * @param fieldName The field name.
      * @param arrayToClone The PVScalarArray to clone.
      * @return The PVScalarArray implementation.
      */
-    PVScalarArray *createPVScalarArray(PVStructure *parent,
-        String fieldName,PVScalarArray * scalarArrayToClone);
+    PVScalarArrayPtr createPVScalarArray(PVScalarArrayPtr &  scalarArrayToClone);
     /**
      * Create an implementation of an array with structure elements.
-     * @param parent The parent interface.
      * @param structureArray The introspection interface.
      * All elements share the same introspection interface.
      * @return The PVStructureArray implementation.
      */
-    PVStructureArray *createPVStructureArray(PVStructure *parent,
-        StructureArrayConstPtr structureArray);
+    PVStructureArrayPtr createPVStructureArray(StructureArrayConstPtr & structureArray);
     /**
      * Create implementation for PVStructure.
-     * @param parent The parent interface.
      * @param structure The introspection interface.
      * @return The PVStructure implementation
      */
-    PVStructure *createPVStructure(PVStructure *parent,
-        StructureConstPtr structure);
+    PVStructurePtr createPVStructure(StructureConstPtr & structure);
     /**
      * Create implementation for PVStructure.
-     * @param parent The parent interface.
-     * @param fieldName The field name.
-     * @param fields Array of reflection interfaces for the subFields.
-     * @return The PVStructure implementation
-     */
-    PVStructure *createPVStructure(PVStructure *parent,
-        String fieldName,int numberFields,FieldConstPtrArray fields);
-    /**
-     * Create implementation for PVStructure.
-     * @param parent The parent interface.
-     * @param fieldName The field name.
+     * @param fieldNames The field names.
      * @param pvFields Array of PVFields
      * @return The PVStructure implementation
      */
-    PVStructure *createPVStructure(PVStructure *parent,
-        String fieldName,int numberFields,PVFieldPtrArray pvFields);
+    PVStructurePtr createPVStructure(
+        StringArray & fieldNames,PVFieldPtrArray & pvFields);
      /**
       * Create implementation for PVStructure.
-      * @param parent The parent interface.
-      * @param fieldName The field name.
       * @param structToClone A structure. Each subfield and any auxInfo is cloned and added to the newly created structure.
       * @return The PVStructure implementation.
       */
-   PVStructure *createPVStructure(PVStructure *parent,
-       String fieldName,PVStructure *structToClone);
-protected:
+   PVStructurePtr createPVStructure(PVStructurePtr & structToClone);
+private:
    PVDataCreate();
-   friend PVDataCreate * getPVDataCreate();
 };
 
 /**
@@ -849,7 +964,7 @@ protected:
  * @param The PVDataCreate factory.
  */
 
-extern PVDataCreate * getPVDataCreate();
+extern PVDataCreatePtr getPVDataCreate();
     
 }}
 #endif  /* PVDATA_H */

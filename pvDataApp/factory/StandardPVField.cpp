@@ -14,16 +14,15 @@
 #include <pv/convert.h>
 #include <pv/standardField.h>
 #include <pv/standardPVField.h>
-#include <pv/CDRMonitor.h>
 
 namespace epics { namespace pvData { 
 
-static StandardField *standardField = 0;
+static StandardFieldPtr standardField;
+static FieldCreatePtr fieldCreate;
+static PVDataCreatePtr pvDataCreate;
+
 
 static String notImplemented("not implemented");
-static FieldCreate* fieldCreate = 0;
-static PVDataCreate* pvDataCreate = 0;
-static StandardPVField *standardPVField = 0;
 
 static void addExtendsStructureName(PVStructure *pvStructure,String properties)
 {
@@ -36,20 +35,20 @@ static void addExtendsStructureName(PVStructure *pvStructure,String properties)
     if(properties.find("display")!=String::npos) gotDisplay = true;
     if(properties.find("control")!=String::npos) gotControl = true;
     if(gotAlarm) {
-        PVStructure *pv = pvStructure->getStructureField(String("alarm"));
-        if(pv!=0) pv->putExtendsStructureName(String("alarm"));
+        PVStructure *pv = pvStructure->getStructureField("alarm").get();
+        if(pv!=NULL) pv->putExtendsStructureName("alarm");
     }
     if(gotTimeStamp) {
-        PVStructure *pv = pvStructure->getStructureField(String("timeStamp"));
-        if(pv!=0) pv->putExtendsStructureName(String("timeStamp"));
+        PVStructure *pv = pvStructure->getStructureField("timeStamp").get();
+        if(pv!=NULL) pv->putExtendsStructureName("timeStamp");
     }
     if(gotDisplay) {
-        PVStructure *pv = pvStructure->getStructureField(String("display"));
-        if(pv!=0) pv->putExtendsStructureName(String("display"));
+        PVStructure *pv = pvStructure->getStructureField("display").get();
+        if(pv!=NULL) pv->putExtendsStructureName("display");
     }
     if(gotControl) {
-        PVStructure *pv = pvStructure->getStructureField(String("control"));
-        if(pv!=0) pv->putExtendsStructureName(String("control"));
+        PVStructure *pv = pvStructure->getStructureField("control").get();
+        if(pv!=NULL) pv->putExtendsStructureName(String("control"));
     }
 }
 
@@ -57,297 +56,75 @@ StandardPVField::StandardPVField(){}
 
 StandardPVField::~StandardPVField(){}
 
-
-PVScalar * StandardPVField::scalar(PVStructure *parent,
-    String fieldName,ScalarType type)
+PVStructurePtr StandardPVField::scalar(ScalarType type,String properties)
 {
-    ScalarConstPtr field = standardField->scalar(fieldName,type);
-    return pvDataCreate->createPVScalar(parent,field);
-}
-
-PVStructure * StandardPVField::scalar(PVStructure *parent,
-    String fieldName,ScalarType type,String properties)
-{
-    StructureConstPtr field = standardField->scalar(fieldName,type,properties);
-    PVStructure * pvStructure = pvDataCreate->createPVStructure(parent,field);
-    addExtendsStructureName(pvStructure,properties);
+    StructureConstPtr field = standardField->scalar(type,properties);
+    PVStructurePtr pvStructure = pvDataCreate->createPVStructure(field);
+    addExtendsStructureName(pvStructure.get(),properties);
     return pvStructure;
 }
 
-PVScalarArray * StandardPVField::scalarArray(PVStructure *parent,
-    String fieldName,ScalarType elementType)
+PVStructurePtr StandardPVField::scalarArray(ScalarType elementType, String properties)
 {
-    ScalarArrayConstPtr field = standardField->scalarArray(
-        fieldName,elementType);
-    return pvDataCreate->createPVScalarArray(parent,field);
-}
-
-PVStructure * StandardPVField::scalarArray(PVStructure *parent,
-    String fieldName,ScalarType elementType, String properties)
-{
-    StructureConstPtr field = standardField->scalarArray(
-        fieldName,elementType,properties);
-    PVStructure * pvStructure = pvDataCreate->createPVStructure(parent,field);
-    addExtendsStructureName(pvStructure,properties);
+    StructureConstPtr field = standardField->scalarArray(elementType,properties);
+    PVStructurePtr pvStructure = pvDataCreate->createPVStructure(field);
+    addExtendsStructureName(pvStructure.get(),properties);
     return pvStructure;
 }
 
-PVStructureArray * StandardPVField::structureArray(PVStructure *parent,
-    String fieldName,StructureConstPtr structure)
+PVStructurePtr StandardPVField::structureArray(StructureConstPtr structure,String properties)
 {
-    StructureArrayConstPtr field = standardField->structureArray(
-        fieldName,structure);
-    return pvDataCreate->createPVStructureArray(parent,field);
-}
-
-PVStructure* StandardPVField::structureArray(PVStructure *parent,
-    String fieldName,StructureConstPtr structure,String properties)
-{
-    StructureConstPtr field = standardField->structureArray(
-        fieldName,structure,properties);
-    PVStructure * pvStructure = pvDataCreate->createPVStructure(parent,field);
-    addExtendsStructureName(pvStructure,properties);
+    StructureConstPtr field = standardField->structureArray(structure,properties);
+    PVStructurePtr pvStructure = pvDataCreate->createPVStructure(field);
+    addExtendsStructureName(pvStructure.get(),properties);
     return pvStructure;
 }
 
-PVStructure * StandardPVField::enumerated(PVStructure *parent,
-    String fieldName,StringArray choices,int number)
+PVStructurePtr StandardPVField::enumerated(StringArray choices)
 {
-    StructureConstPtr field = standardField->enumerated(fieldName);
-    PVStructure *pvStructure = pvDataCreate->createPVStructure(parent,field);
-    PVScalarArray *pvScalarArray = pvStructure->getScalarArrayField(
+    StructureConstPtr field = standardField->enumerated();
+    PVStructurePtr pvStructure = pvDataCreate->createPVStructure(field);
+    PVScalarArrayPtr pvScalarArray = pvStructure->getScalarArrayField(
         "choices",pvString);
-    if(pvScalarArray==0) {
+    if(pvScalarArray.get()==NULL) {
         throw std::logic_error(String("StandardPVField::enumerated"));
     }
-    PVStringArray *pvChoices = static_cast<PVStringArray *>(pvScalarArray);
-    pvChoices->put(0,number,choices,0);
+    PVStringArray * pvChoices = static_cast<PVStringArray *>(pvScalarArray.get());
+    pvChoices->put(0,choices.size(),get(choices),0);
     return pvStructure;
 }
 
-PVStructure * StandardPVField::enumerated(PVStructure *parent,
-    String fieldName,StringArray choices,int number, String properties)
+PVStructurePtr StandardPVField::enumerated(StringArray choices,String properties)
 {
-    StructureConstPtr field = standardField->enumerated(
-        fieldName,properties);
-    PVStructure *pvStructure =  pvDataCreate->createPVStructure(parent,field);
-    addExtendsStructureName(pvStructure,properties);
-    PVScalarArray *pvScalarArray = pvStructure->getScalarArrayField(
-        fieldName += ".choices",pvString);
-    if(pvScalarArray==0) {
+    StructureConstPtr field = standardField->enumerated(properties);
+    PVStructurePtr pvStructure =  pvDataCreate->createPVStructure(field);
+    addExtendsStructureName(pvStructure.get(),properties);
+    PVScalarArrayPtr pvScalarArray = pvStructure->getScalarArrayField("value.choices",pvString);
+    if(pvScalarArray.get()==NULL) {
         throw std::logic_error(String("StandardPVField::enumerated"));
     }
-    PVStringArray *pvChoices = static_cast<PVStringArray *>(pvScalarArray);
-    pvChoices->put(0,number,choices,0);
+    PVStringArray * pvChoices = static_cast<PVStringArray *>(pvScalarArray.get());
+    pvChoices->put(0,choices.size(),get(choices),0);
     return pvStructure;
 }
 
-PVScalar * StandardPVField::scalarValue(PVStructure *parent,
-    ScalarType scalarType)
+StandardPVFieldPtr StandardPVField::getStandardPVField()
 {
-    ScalarConstPtr field = standardField->scalarValue(scalarType);
-    return pvDataCreate->createPVScalar(parent,field);
-}
+    static StandardPVFieldPtr standardPVField;
+    static Mutex mutex;
+    Lock xx(mutex);
 
-PVStructure * StandardPVField::scalarValue(PVStructure *parent,
-    ScalarType type,String properties)
-{
-    StructureConstPtr field = standardField->scalarValue(type,properties);
-    PVStructure * pvStructure = pvDataCreate->createPVStructure(parent,field);
-    addExtendsStructureName(pvStructure,properties);
-    return pvStructure;
-}
-
-PVScalarArray * StandardPVField::scalarArrayValue(PVStructure *parent,
-    ScalarType elementType)
-{
-    ScalarArrayConstPtr scalarArray =
-        standardField->scalarArrayValue(elementType);
-    return pvDataCreate->createPVScalarArray(0,scalarArray);
-}
-
-PVStructure * StandardPVField::scalarArrayValue(PVStructure *parent,
-    ScalarType elementType, String properties)
-{
-    StructureConstPtr field = standardField->scalarArrayValue(
-        elementType,properties);
-    PVStructure * pvStructure = pvDataCreate->createPVStructure(parent,field);
-    addExtendsStructureName(pvStructure,properties);
-    return pvStructure;
-}
-
-PVStructureArray * StandardPVField::structureArrayValue(PVStructure *parent,
-    StructureConstPtr structure)
-{
-    StructureArrayConstPtr field = standardField->structureArrayValue(
-        structure);
-    return pvDataCreate->createPVStructureArray(parent,field);
-}
-
-PVStructure * StandardPVField::structureArrayValue(PVStructure *parent,
-    StructureConstPtr structure,String properties)
-{
-    StructureConstPtr field = standardField->structureArrayValue(
-        structure,properties);
-    PVStructure * pvStructure = pvDataCreate->createPVStructure(parent,field);
-    addExtendsStructureName(pvStructure,properties);
-    return pvStructure;
-}
-
-PVStructure * StandardPVField::enumeratedValue(PVStructure *parent,
-    StringArray choices,int number)
-{
-    StructureConstPtr field = standardField->enumeratedValue();
-    PVStructure *pvStructure = pvDataCreate->createPVStructure(parent,field);
-    PVScalarArray *pvScalarArray = pvStructure->getScalarArrayField(
-        "choices",pvString);
-    if(pvScalarArray==0) {
-        throw std::logic_error(String("StandardPVField::enumerated"));
+    if(standardPVField.get()==NULL) {
+        standardField = getStandardField();
+        fieldCreate = getFieldCreate();
+        pvDataCreate = getPVDataCreate();
+        standardPVField= StandardPVFieldPtr(new StandardPVField());
     }
-    PVStringArray *pvChoices = static_cast<PVStringArray *>(pvScalarArray);
-    pvChoices->put(0,number,choices,0);
-    return pvStructure;
-}
-
-PVStructure * StandardPVField::enumeratedValue(PVStructure *parent,
-    StringArray choices, int number,String properties)
-{
-    StructureConstPtr field = standardField->enumeratedValue( properties);
-    PVStructure *pvStructure =  pvDataCreate->createPVStructure(parent,field);
-    addExtendsStructureName(pvStructure,properties);
-    PVScalarArray *pvScalarArray = pvStructure->getScalarArrayField(
-        String("value.choices"),pvString);
-    if(pvScalarArray==0) {
-        throw std::logic_error(String("StandardPVField::enumerated"));
-    }
-    PVStringArray *pvChoices = static_cast<PVStringArray *>(pvScalarArray);
-    pvChoices->put(0,number,choices,0);
-    return pvStructure;
-}
-
-PVStructure * StandardPVField::alarm(PVStructure *parent)
-{
-    StructureConstPtr field = standardField->alarm();
-    return pvDataCreate->createPVStructure(parent,field);
-}
-
-PVStructure * StandardPVField::timeStamp(PVStructure *parent)
-{
-    StructureConstPtr field = standardField->timeStamp();
-    return pvDataCreate->createPVStructure(parent,field);
-}
-
-PVStructure * StandardPVField::display(PVStructure *parent)
-{
-    StructureConstPtr field = standardField->display();
-    return pvDataCreate->createPVStructure(parent,field);
-}
-
-PVStructure * StandardPVField::control(PVStructure *parent)
-{
-    StructureConstPtr field = standardField->control();
-    return pvDataCreate->createPVStructure(parent,field);
-}
-
-PVStructure * StandardPVField::booleanAlarm(PVStructure *parent)
-{
-    StructureConstPtr field = standardField->booleanAlarm();
-    return pvDataCreate->createPVStructure(parent,field);
-}
-
-PVStructure * StandardPVField::byteAlarm(PVStructure *parent)
-{
-    StructureConstPtr field = standardField->byteAlarm();
-    return pvDataCreate->createPVStructure(parent,field);
-}
-
-PVStructure * StandardPVField::shortAlarm(PVStructure *parent)
-{
-    StructureConstPtr field = standardField->shortAlarm();
-    return pvDataCreate->createPVStructure(parent,field);
-}
-
-PVStructure * StandardPVField::intAlarm(PVStructure *parent)
-{
-    StructureConstPtr field = standardField->intAlarm();
-    return pvDataCreate->createPVStructure(parent,field);
-}
-
-PVStructure * StandardPVField::longAlarm(PVStructure *parent)
-{
-    StructureConstPtr field = standardField->longAlarm();
-    return pvDataCreate->createPVStructure(parent,field);
-}
-
-PVStructure * StandardPVField::floatAlarm(PVStructure *parent)
-{
-    StructureConstPtr field = standardField->floatAlarm();
-    return pvDataCreate->createPVStructure(parent,field);
-}
-
-PVStructure * StandardPVField::doubleAlarm(PVStructure *parent)
-{
-    StructureConstPtr field = standardField->doubleAlarm();
-    return pvDataCreate->createPVStructure(parent,field);
-}
-
-PVStructure * StandardPVField::enumeratedAlarm(PVStructure *parent)
-{
-    StructureConstPtr field = standardField->enumeratedAlarm();
-    return pvDataCreate->createPVStructure(parent,field);
-}
-
-PVStructure * StandardPVField::powerSupply(PVStructure *parent)
-{
-    StructureConstPtr alarmField = standardField->alarm();
-    StructureConstPtr timeStampField = standardField->timeStamp();
-    StructureConstPtr voltageField = standardField->scalar(
-        String("voltage"),pvDouble,String("alarm"));
-    StructureConstPtr powerField = standardField->scalar(
-        String("power"),pvDouble,String("alarm"));
-    StructureConstPtr currentField = standardField->scalar(
-        String("current"),pvDouble,String("alarm"));
-    FieldConstPtr fields[3];
-    fields[0] = voltageField;
-    fields[1] = powerField;
-    fields[2] = currentField;
-    StructureConstPtr valueField = standardField->structureValue( 3,fields);
-    fields[0] = alarmField;
-    fields[1] = timeStampField;
-    fields[2] = valueField;
-    StructureConstPtr structureField = standardField->structureValue(3,fields);
-    return pvDataCreate->createPVStructure(parent,structureField);
-}
-
-
-
-
-
-class StandardPVFieldExt : public StandardPVField {
-public:
-    StandardPVFieldExt(): StandardPVField(){};
-};
-
-static void myDeleteStatic(void*)
-{
-    delete standardPVField;
-}
-
-static void myInitStatic(void*)
-{
-    fieldCreate = getFieldCreate();
-    pvDataCreate = getPVDataCreate();
-    standardField = getStandardField();
-    standardPVField = new StandardPVFieldExt();
-    epicsAtExit(&myDeleteStatic, 0);
-}
-
-static
-epicsThreadOnceId myInitOnce = EPICS_THREAD_ONCE_INIT;
-
-StandardPVField * getStandardPVField() {
-    epicsThreadOnce(&myInitOnce, &myInitStatic, 0);
     return standardPVField;
+}
+
+StandardPVFieldPtr getStandardPVField() {
+    return StandardPVField::getStandardPVField();
 }
 
 }}

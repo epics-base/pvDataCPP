@@ -12,78 +12,52 @@
 #include <pv/pvTimeStamp.h>
 namespace epics { namespace pvData { 
 
+using std::tr1::static_pointer_cast;
+
 static String noTimeStamp("No timeStamp structure found");
 static String notAttached("Not attached to a timeStamp structure");
 
-bool PVTimeStamp::attach(PVField *pvField)
+bool PVTimeStamp::attach(PVFieldPtr pvField)
 {
-    PVStructure *pvStructure = 0;
-    if(pvField->getField()->getFieldName().compare("timeStamp")!=0) {
-        PVStructure *pvParent = pvField->getParent();
-        if(pvParent==0) {
+    if(pvField->getField()->getType()!=structure) {
             pvField->message(noTimeStamp,errorMessage);
             return false;
+    }
+    PVStructurePtr xxx = static_pointer_cast<PVStructure>(pvField);
+    PVStructure* pvStructure = xxx.get();
+    while(true) {
+        PVLongPtr pvLong = pvStructure->getLongField("secondsPastEpoch");
+        if(pvLong.get()!=NULL) {
+            pvSecs = pvLong;
+            pvNano = pvStructure->getIntField("nanoSeconds");
+            pvUserTag = pvStructure->getIntField("userTag");
         }
-        if(pvField->getField()->getFieldName().compare("value")!=0) {
-            pvField->message(noTimeStamp,errorMessage);
-            return false;
-        }
+        if(pvSecs.get()!=NULL
+        && pvNano.get()!=NULL
+        && pvUserTag.get()!=NULL) return true;
+        detach();
         // look up the tree for a timeSyamp
-        while(pvParent!=0) {
-            PVStructure *pvs = pvParent->getStructureField(String("timeStamp"));
-            if(pvs!=0) {
-                pvStructure = pvs;
-                break;
-            }
-            pvParent = pvParent->getParent();
-        }
-        if(pvStructure==0) {
-            pvField->message(noTimeStamp,errorMessage);
-            return false;
-        }
-    } else {
-        if(pvField->getField()->getType()!=structure) {
-            pvField->message(noTimeStamp,errorMessage);
-            return false;
-        }
-        pvStructure = static_cast<PVStructure*>(pvField);
+        pvStructure = pvStructure->getParent();
+        if(pvStructure==NULL) break;
     }
-    PVLong *pvLong = pvStructure->getLongField(String("secondsPastEpoch"));
-    if(pvLong==0) {
-            pvField->message(noTimeStamp,errorMessage);
-            return false;
-    }
-    pvSecs = pvLong;
-    PVInt *pvInt = pvStructure->getIntField(String("nanoSeconds"));
-    if(pvLong==0) {
-            pvField->message(noTimeStamp,errorMessage);
-            return false;
-    }
-    pvNano = pvInt;
-    pvInt = pvStructure->getIntField(String("userTag"));
-    if(pvInt==0) {
-            pvField->message(noTimeStamp,errorMessage);
-            return false;
-    }
-    pvUserTag = pvInt;
-    return true;
+    return false;
 }
 
 void PVTimeStamp::detach()
 {
-    pvSecs = 0;
-    pvUserTag = 0;
-    pvNano = 0;
+    pvSecs.reset();
+    pvUserTag.reset();
+    pvNano.reset();
 }
 
 bool PVTimeStamp::isAttached() {
-    if(pvSecs==0 || pvNano==0) return false;
+    if(pvSecs.get()==NULL) return false;
     return true;
 }
 
 void PVTimeStamp::get(TimeStamp & timeStamp) const
 {
-    if(pvSecs==0 || pvNano==0) {
+    if(pvSecs.get()==NULL) {
         throw std::logic_error(notAttached);
     }
     timeStamp.put(pvSecs->get(),pvNano->get());
@@ -92,7 +66,7 @@ void PVTimeStamp::get(TimeStamp & timeStamp) const
 
 bool PVTimeStamp::set(TimeStamp const & timeStamp)
 {
-    if(pvSecs==0 || pvNano==0 || pvUserTag==0) {
+    if(pvSecs.get()==NULL) {
         throw std::logic_error(notAttached);
     }
     if(pvSecs->isImmutable() || pvNano->isImmutable()) return false;

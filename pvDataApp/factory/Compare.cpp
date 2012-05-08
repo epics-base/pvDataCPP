@@ -56,30 +56,28 @@ bool operator==(const Scalar& a, const Scalar& b)
 {
     if(&a==&b)
         return true;
-    return a.getScalarType()==b.getScalarType() && a.getFieldName()==b.getFieldName();
+    return a.getScalarType()==b.getScalarType();
 }
 
 bool operator==(const ScalarArray& a, const ScalarArray& b)
 {
     if(&a==&b)
         return true;
-    return a.getElementType()==b.getElementType() && a.getFieldName()==b.getFieldName();
+    return a.getElementType()==b.getElementType();
 }
 
 bool operator==(const Structure& a, const Structure& b)
 {
     if(&a==&b)
         return true;
-    int nflds=a.getNumberFields();
+    size_t nflds=a.getNumberFields();
     if (b.getNumberFields()!=nflds)
-        return false;
-    if (a.getFieldName()!=b.getFieldName())
         return false;
 
     // std::equals does not work, since FieldConstPtrArray is an array of shared_pointers
     FieldConstPtrArray af = a.getFields();
     FieldConstPtrArray bf = b.getFields();
-    for (int i = 0; i < nflds; i++)
+    for (size_t i = 0; i < nflds; i++)
         if (*(af[i].get()) != *(bf[i].get()))
             return false;
      return true;

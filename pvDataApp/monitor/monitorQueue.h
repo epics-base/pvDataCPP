@@ -31,16 +31,16 @@ public:
     void clear();
     int getNumberFree();
     int capacity();
-    MonitorElement::shared_pointer const & getFree();
-    void setUsed(MonitorElement::shared_pointer const & element);
-    MonitorElement::shared_pointer const & getUsed();
-    void releaseUsed(MonitorElement::shared_pointer const & element);
+    MonitorElementPtr & getFree();
+    void setUsed(MonitorElementPtr & element);
+    MonitorElementPtr getUsed();
+    void releaseUsed(MonitorElementPtr & element);
 private:
     int number;
     PVStructureSharedPointerPtrArray structures;
-    Queue<MonitorElement::shared_pointer> *queue;
-    MonitorElement::shared_pointer **queueElements;
-    MonitorElement::shared_pointer nullElement;
+    Queue<MonitorElementPtr> *queue;
+    MonitorElementPtr **queueElements;
+    MonitorElementPtr nullElement;
 };
 
 }}

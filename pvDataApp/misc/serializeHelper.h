@@ -31,7 +31,7 @@ namespace epics {
              * @param[in] buffer serialization buffer
              * @param[in] flusher flusher
              */
-            static void writeSize(int s, ByteBuffer* buffer,
+            static void writeSize(std::size_t s, ByteBuffer* buffer,
                     SerializableControl* flusher);
 
             /**
@@ -40,7 +40,7 @@ namespace epics {
              * @param[in] buffer deserialization buffer.
              * @returns array size.
              */
-            static int readSize(ByteBuffer* buffer,
+            static std::size_t readSize(ByteBuffer* buffer,
                     DeserializableControl* control);
 
             /**
@@ -62,8 +62,8 @@ namespace epics {
              * @param[in] buffer serialization buffer
              * @param[in] flusher flusher
              */
-            static void serializeSubstring(const String& value, int offset,
-                    int count, ByteBuffer* buffer,
+            static void serializeSubstring(const String& value, std::size_t offset,
+                    std::size_t count, ByteBuffer* buffer,
                     SerializableControl* flusher);
 
             /**
@@ -93,7 +93,7 @@ namespace epics {
              * @param[in] s size to encode
              * @param[in] buffer serialization buffer
              */
-            static void writeSize(int s, ByteBuffer* buffer);
+            static void writeSize(std::size_t s, ByteBuffer* buffer);
 
         };
 

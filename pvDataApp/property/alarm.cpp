@@ -6,21 +6,13 @@
  */
 #include <string>
 #include <stdexcept>
+#include <pv/lock.h>
 #include <pv/pvType.h>
 #include <pv/pvIntrospect.h>
 #include <pv/pvData.h>
 #include <pv/alarm.h>
 namespace epics { namespace pvData { 
 
-const size_t severityCount = 5;
-static String severityNames[severityCount] =
-{
-     String("NONE"),
-     String("MINOR"),
-     String("MAJOR"),
-     String("INVALID"),
-     String("UNDEFINED")
-};
 
 AlarmSeverity AlarmSeverityFunc::getSeverity(int value)
 {
@@ -39,6 +31,18 @@ AlarmSeverity AlarmSeverityFunc::getSeverity(int value)
 
 StringArray AlarmSeverityFunc::getSeverityNames()
 {
+    static  size_t severityCount = 5;
+    static StringArray severityNames;
+    static Mutex mutex;
+    Lock xx(mutex);
+    if(severityNames.size()==0) {
+        severityNames.reserve(severityCount);
+        severityNames.push_back("NONE");
+        severityNames.push_back("MINOR");
+        severityNames.push_back("MAJOR");
+        severityNames.push_back("INVALID");
+        severityNames.push_back("UNDEFINED");
+    }
     return severityNames;
 }
 
@@ -53,19 +57,6 @@ AlarmSeverity Alarm::getSeverity() const
     }
     throw std::logic_error(String("should never get here"));
 }
-
-const size_t statusCount = 8;
-static String statusNames[statusCount] =
-{
-     String("NONE"),
-     String("DEVICE"),
-     String("DRIVER"),
-     String("RECORD"),
-     String("DB"),
-     String("CONF"),
-     String("UNDEFINED"),
-     String("CLIENT")
-};
 
 AlarmStatus AlarmStatusFunc::getStatus(int value)
 {
@@ -87,6 +78,21 @@ AlarmStatus AlarmStatusFunc::getStatus(int value)
 
 StringArray AlarmStatusFunc::getStatusNames()
 {
+    static  size_t statusCount = 8;
+    static StringArray statusNames;
+    static Mutex mutex;
+    Lock xx(mutex);
+    if(statusNames.size()==0) {
+        statusNames.reserve(statusCount);
+        statusNames.push_back("NONE");
+        statusNames.push_back("DEVICE");
+        statusNames.push_back("DRIVER");
+        statusNames.push_back("RECORD");
+        statusNames.push_back("DB");
+        statusNames.push_back("CONF");
+        statusNames.push_back("UNDEFINED");
+        statusNames.push_back("CLIENT");
+    }
     return statusNames;
 }
 

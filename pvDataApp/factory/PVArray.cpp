@@ -12,19 +12,21 @@
 #include <pv/pvData.h>
 #include <pv/factory.h>
 
+using std::size_t;
+
 namespace epics { namespace pvData {
 
     class PVArrayPvt {
     public:
         PVArrayPvt() : length(0),capacity(0),capacityMutable(true)
         {}
-        int length;
-        int capacity;
+        size_t length;
+        size_t capacity;
         bool capacityMutable;
     };
 
-    PVArray::PVArray(PVStructure *parent,FieldConstPtr field)
-    : PVField(parent,field),pImpl(new PVArrayPvt())
+    PVArray::PVArray(FieldConstPtr field)
+    : PVField(field),pImpl(new PVArrayPvt())
     { }
 
     PVArray::~PVArray()
@@ -32,13 +34,13 @@ namespace epics { namespace pvData {
         delete pImpl;
     }
 
-     int PVArray::getLength() const {return pImpl->length;}
+     size_t PVArray::getLength() const {return pImpl->length;}
 
-     int PVArray::getCapacity() const {return pImpl->capacity;}
+     size_t PVArray::getCapacity() const {return pImpl->capacity;}
 
      static String fieldImmutable("field is immutable");
 
-     void PVArray::setLength(int length) {
+     void PVArray::setLength(size_t length) {
         if(length==pImpl->length) return;
         if(PVField::isImmutable()) {
            PVField::message(fieldImmutable,errorMessage);
@@ -49,7 +51,7 @@ namespace epics { namespace pvData {
         pImpl->length = length;
      }
 
-     void PVArray::setCapacityLength(int capacity,int length) {
+     void PVArray::setCapacityLength(size_t capacity,size_t length) {
         pImpl->capacity = capacity;
         pImpl->length = length;
      }
@@ -74,7 +76,7 @@ namespace epics { namespace pvData {
 
      static String capacityImmutable("capacity is immutable");
 
-     void PVArray::setCapacity(int capacity) {
+     void PVArray::setCapacity(size_t capacity) {
         if(PVField::isImmutable()) {
            PVField::message(fieldImmutable,errorMessage);
            return;

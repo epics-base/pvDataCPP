@@ -15,11 +15,11 @@ namespace epics { namespace pvData {
 
 class PVAlarm {
 public:
-    PVAlarm() : pvSeverity(0),pvStatus(0),pvMessage(0) {}
+    PVAlarm() {}
     //default constructors and destructor are OK
     //returns (false,true) if pvField(isNot, is valid enumerated structure
     //An automatic detach is issued if already attached.
-    bool attach(PVField *pvField);
+    bool attach(PVFieldPtr pvField);
     void detach();
     bool isAttached();
     // each of the following throws logic_error is not attached to PVField
@@ -27,9 +27,9 @@ public:
     void get(Alarm & alarm) const;
     bool set(Alarm const & alarm);
 private:
-    PVInt *pvSeverity;
-    PVInt *pvStatus;
-    PVString *pvMessage;
+    PVIntPtr pvSeverity;
+    PVIntPtr pvStatus;
+    PVStringPtr pvMessage;
 };
     
 }}

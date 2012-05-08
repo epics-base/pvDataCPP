@@ -37,18 +37,17 @@ struct Data {
 
 
 static const int numElements = 5;
-typedef QueueElement<Data> DataElement;
 typedef Queue<Data> DataQueue;
 
 class Sink : public Runnable {
 public:
-    Sink(DataQueue *queue,FILE *auxfd);
+    Sink(DataQueue &queue,FILE *auxfd);
     ~Sink();
     void stop();
     void look();
     virtual void run();
 private:
-    DataQueue *queue;
+    DataQueue queue;
     FILE *auxfd;
     bool isStopped;
     Event *wait;
@@ -58,7 +57,7 @@ private:
     Thread *thread;
 };
 
-Sink::Sink(DataQueue *queue,FILE *auxfd)
+Sink::Sink(DataQueue &queue,FILE *auxfd)
 : queue(queue),
   auxfd(auxfd),
   isStopped(false),
@@ -97,49 +96,51 @@ void Sink::run()
         wait->wait();
         if(isStopped) break;
         while(true) {
-            DataElement *element = queue->getUsed();
-            if(element==0) {
+            Data *data = queue.getUsed();
+            if(data==NULL) {
                  waitEmpty->signal();
                  break;
             }
-            Data *data = element->getObject();
             fprintf(auxfd,"  sink a %d b %d\n",data->a,data->b);
-            queue->releaseUsed(element);
+            queue.releaseUsed(data);
         }
     }
     stopped->signal();
 }
 
 static void testBasic(FILE * fd,FILE *auxfd ) {
-    Data *dataArray[numElements];
-    for(int i=0; i<numElements; i++) {
-        dataArray[i] = new Data();
-        dataArray[i]->a = i;
-        dataArray[i]->b = i*10;
+    std::vector<std::tr1::shared_ptr<Data> >dataArray;
+    dataArray.reserve(numElements);
+    for(int i=0; i<numElements; i++)  {
+        dataArray.push_back(std::tr1::shared_ptr<Data>(new Data()));
     }
-    DataQueue *queue = new DataQueue(dataArray,numElements);
-    Sink *sink = new Sink(queue,auxfd);
+    DataQueue queue(dataArray);
+    Data *pdata = queue.getFree();
+    int value = 0;
+    while(pdata!=NULL) {
+         pdata->a = value;
+         pdata->b = value*10;
+         value++;
+         queue.setUsed(pdata);
+         pdata = queue.getFree();
+    }
+    std::tr1::shared_ptr<Sink> sink = std::tr1::shared_ptr<Sink>(new Sink(queue,auxfd));
     while(true) {
-        DataElement *element = queue->getFree();
-        if(element==0) break;
-        Data *data = element->getObject();
+        Data * data = queue.getFree();
+        if(data==NULL) break;
         fprintf(auxfd,"source a %d b %d\n",data->a,data->b);
-        queue->setUsed(element);
+        queue.setUsed(data);
     }
     sink->look();
     // now alternate 
     for(int i=0; i<numElements; i++) {
-        DataElement *element = queue->getFree();
-        assert(element!=0);
-        Data *data = element->getObject();
+        Data *data = queue.getFree();
+        assert(data!=NULL);
         fprintf(auxfd,"source a %d b %d\n",data->a,data->b);
-        queue->setUsed(element);
+        queue.setUsed(data);
         sink->look();
     }
     sink->stop();
-    delete sink;
-    delete queue;
-    for(int i=0; i<numElements; i++) delete dataArray[i];
 }
 
 int main(int argc, char *argv[]) {

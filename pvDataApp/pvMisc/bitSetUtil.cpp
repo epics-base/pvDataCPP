@@ -28,7 +28,7 @@ static bool checkBitSetPVField(
     }
     PVStructure *pvStructure = static_cast<PVStructure *>(pvField);
     while(offset<initialOffset + nbits) {
-        PVField *pvSubField = pvStructure->getSubField(offset);
+        PVField *pvSubField = pvStructure->getSubField(offset).get();
         int nbitsNow = pvSubField->getNumberFields();
         if(nbitsNow==1) {
             if(bitSet->get(offset)) {
@@ -44,7 +44,7 @@ static bool checkBitSetPVField(
                 pvSubStructure->getPVFields();
             int num = pvSubStructure->getStructure()->getNumberFields();
             for(int i=0; i<num; i++) {
-                PVField *pvSubSubField = pvSubStructureFields[i];
+                PVField *pvSubSubField = pvSubStructureFields[i].get();
                 bool result = checkBitSetPVField(pvSubSubField,bitSet,offset);
                 if(result) {
                     atLeastOneBitSet = true;

@@ -12,48 +12,48 @@
 #include <pv/pvEnumerated.h>
 namespace epics { namespace pvData { 
 
+using std::tr1::static_pointer_cast;
 
-static String notStructure("field is not a structure");
-static String notEnumerated("field is not an enumerated structure");
+static String notFound("No enumerated structure found");
 static String notAttached("Not attached to an enumerated structure");
 
-bool PVEnumerated::attach(PVField *pvField)
+bool PVEnumerated::attach(PVFieldPtr pvField)
 {
     if(pvField->getField()->getType()!=structure) {
-        pvField->message(notStructure,errorMessage);
+            pvField->message(notFound,errorMessage);
+            return false;
+    }
+    PVStructurePtr pvStructure = static_pointer_cast<PVStructure>(pvField);
+    pvIndex = pvStructure->getIntField("index");
+    if(pvIndex.get()==NULL) {
+        pvField->message(notFound,errorMessage);
         return false;
     }
-    PVStructure *pvStructure = static_cast<PVStructure*>(pvField);
-    PVInt *pvInt = pvStructure->getIntField(String("index"));
-    if(pvInt==0) {
-        pvField->message(notEnumerated,errorMessage);
+    PVScalarArrayPtr pvScalarArray = pvStructure->getScalarArrayField(
+        "choices",pvString);
+    if(pvScalarArray.get()==NULL) {
+        pvIndex.reset();
+        pvField->message(notFound,errorMessage);
         return false;
     }
-    PVScalarArray *pvScalarArray = pvStructure->getScalarArrayField(
-        String("choices"),pvString);
-    if(pvScalarArray==0) {
-        pvField->message(notEnumerated,errorMessage);
-        return false;
-    }
-    pvIndex = pvInt;
-    pvChoices = static_cast<PVStringArray *>(pvScalarArray);
+    pvChoices = static_pointer_cast<PVStringArray>(pvScalarArray);
     return true;
 }
 
 void PVEnumerated::detach()
 {
-    pvIndex = 0;
-    pvChoices = 0;
+    pvIndex.reset();
+    pvChoices.reset();
 }
 
 bool PVEnumerated::isAttached() {
-    if(pvIndex==0 || pvChoices==0) return false;
+    if(pvIndex.get()==NULL) return false;
     return true;
 }
 
 bool PVEnumerated::setIndex(int32 index)
 {
-    if(pvIndex==0 || pvChoices==0) {
+    if(pvIndex.get()==NULL ) {
          throw std::logic_error(notAttached);
     }
     if(pvIndex->isImmutable()) return false;
@@ -63,7 +63,7 @@ bool PVEnumerated::setIndex(int32 index)
 
 int32 PVEnumerated::getIndex()
 {
-    if(pvIndex==0 || pvChoices==0) {
+    if(pvIndex.get()==NULL ) {
          throw std::logic_error(notAttached);
     }
     return pvIndex->get();
@@ -71,48 +71,48 @@ int32 PVEnumerated::getIndex()
 
 String PVEnumerated::getChoice()
 {
-    if(pvIndex==0 || pvChoices==0) {
+    if(pvIndex.get()==NULL ) {
          throw std::logic_error(notAttached);
     }
     int index = pvIndex->get();
     StringArrayData data;
-    pvChoices->get(0,pvChoices->getLength(),&data);
+    pvChoices->get(0,pvChoices->getLength(),data);
     return data.data[index];
 }
 
 bool PVEnumerated::choicesMutable()
 {
-    if(pvIndex==0 || pvChoices==0) {
+    if(pvIndex.get()==NULL ) {
          throw std::logic_error(notAttached);
     }
     return pvChoices->isImmutable();
 }
 
-StringArray PVEnumerated:: getChoices()
+StringArray&  PVEnumerated:: getChoices()
 {
-    if(pvIndex==0 || pvChoices==0) {
+    if(pvIndex.get()==NULL ) {
          throw std::logic_error(notAttached);
     }
     StringArrayData data;
-    pvChoices->get(0,pvChoices->getLength(),&data);
+    pvChoices->get(0,pvChoices->getLength(),data);
     return data.data;
 }
 
 int32 PVEnumerated::getNumberChoices()
 {
-    if(pvIndex==0 || pvChoices==0) {
+    if(pvIndex.get()==NULL ) {
          throw std::logic_error(notAttached);
     }
     return pvChoices->getLength();
 }
 
-bool PVEnumerated:: setChoices(StringArray choices,int32 numberChoices)
+bool PVEnumerated:: setChoices(StringArray & choices)
 {
-    if(pvIndex==0 || pvChoices==0) {
+    if(pvIndex.get()==NULL ) {
          throw std::logic_error(notAttached);
     }
     if(pvChoices->isImmutable()) return false;
-    pvChoices->put(0,numberChoices,choices,0);
+    pvChoices->put(0,choices.size(),get(choices),0);
     return true;
 }
 

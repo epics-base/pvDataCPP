@@ -27,6 +27,8 @@ public:
     virtual ~Requester(){}
     virtual String getRequesterName() = 0;
     virtual void message(String message,MessageType messageType) = 0;
+private:
+    static void init();
 };
 
 }}

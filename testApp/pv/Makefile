@@ -2,9 +2,9 @@ TOP=../..
 
 include $(TOP)/configure/CONFIG
 
-PROD_HOST += temp
-temp_SRCS += temp.cpp
-temp_LIBS += pvData Com
+PROD_HOST += testIntrospect
+testIntrospect_SRCS += testIntrospect.cpp
+testIntrospect_LIBS += pvData Com
 
 PROD_HOST += testPVAppend
 testPVAppend_SRCS += testPVAppend.cpp
@@ -17,10 +17,6 @@ testPVType_LIBS += pvData Com
 PROD_HOST += testPVAuxInfo
 testPVAuxInfo_SRCS += testPVAuxInfo.cpp
 testPVAuxInfo_LIBS += pvData Com
-
-PROD_HOST += testIntrospect
-testIntrospect_SRCS += testIntrospect.cpp
-testIntrospect_LIBS += pvData Com
 
 PROD_HOST += testPVData
 testPVData_SRCS += testPVData.cpp

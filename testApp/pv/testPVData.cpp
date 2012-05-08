@@ -21,15 +21,15 @@
 #include <pv/convert.h>
 #include <pv/standardField.h>
 #include <pv/standardPVField.h>
-#include <pv/CDRMonitor.h>
 
 using namespace epics::pvData;
+using std::tr1::static_pointer_cast;
 
-static FieldCreate * fieldCreate = 0;
-static PVDataCreate * pvDataCreate = 0;
-static StandardField *standardField = 0;
-static StandardPVField *standardPVField = 0;
-static Convert *convert = 0;
+static FieldCreatePtr fieldCreate;
+static PVDataCreatePtr pvDataCreate;
+static StandardFieldPtr standardField;
+static StandardPVFieldPtr standardPVField;
+static ConvertPtr convert;
 static String builder("");
 static String alarmTimeStamp("alarm,timeStamp");
 static String alarmTimeStampValueAlarm("alarm,timeStamp,valueAlarm");
@@ -37,38 +37,43 @@ static String allProperties("alarm,timeStamp,display,control,valueAlarm");
 
 static void testAppend(FILE * fd)
 {
-    FieldConstPtrArray fields = new FieldConstPtr[0];
-    PVStructure *pvParent = pvDataCreate->createPVStructure(
-        0,String("request"),0,fields);
-    PVString* pvStringField = static_cast<PVString*>(
-        pvDataCreate->createPVScalar(pvParent, "fieldList", pvString));
+    PVFieldPtrArray pvFields;
+    StringArray fieldNames;
+    PVStructurePtr pvParent = pvDataCreate->createPVStructure(
+        fieldNames,pvFields);
+    PVStringPtr pvStringField = static_pointer_cast<PVString>(
+        pvDataCreate->createPVScalar(pvString));
     pvStringField->put(String("value,timeStamp"));
-    pvParent->appendPVField(pvStringField);
+    PVFieldPtr pvField = pvStringField;
+    pvParent->appendPVField("request",pvField);
     builder.clear();
     pvParent->toString(&builder);
     fprintf(fd,"%s\n",builder.c_str());
-    delete pvParent;
 }
 
 static void testCreatePVStructure(FILE * fd)
 {
-    PVStructure * pv0 = standardPVField->scalarValue(
-                 0,pvDouble,alarmTimeStampValueAlarm);
-    PVScalar *pv1 = standardPVField->scalar(0,String("extra"),pvString);
-    PVFieldPtr *pvFields = new PVFieldPtr[2];
-    pvFields[0] = pv0;
-    pvFields[1] = pv1;
-    PVStructure *pvParent = pvDataCreate->createPVStructure(
-        0,String("top"),2,pvFields);
+    PVStructurePtr pv0 = standardPVField->scalar(
+         pvDouble,alarmTimeStampValueAlarm);
+    PVScalarPtr pv1 = pvDataCreate->createPVScalar(pvString);
+    PVFieldPtrArray pvFields;
+    StringArray fieldNames;
+    pvFields.reserve(2);
+    fieldNames.reserve(2);
+    fieldNames.push_back("value");
+    fieldNames.push_back("extra");
+    pvFields.push_back(pv0);
+    pvFields.push_back(pv1);
+    PVStructurePtr pvParent = pvDataCreate->createPVStructure(
+        fieldNames,pvFields);
     builder.clear();
     pvParent->toString(&builder);
     fprintf(fd,"%s\n",builder.c_str());
-    delete pvParent;
 }
 
 static void testPVScalarCommon(FILE * fd,String fieldName,ScalarType stype)
 {
-    PVScalar *pvScalar = standardPVField->scalar(0,fieldName,stype);
+    PVScalarPtr pvScalar = pvDataCreate->createPVScalar(stype);
     if(stype==pvBoolean) {
         convert->fromString(pvScalar,String("true"));
     } else {
@@ -77,57 +82,56 @@ static void testPVScalarCommon(FILE * fd,String fieldName,ScalarType stype)
     builder.clear();
     pvScalar->toString(&builder);
     fprintf(fd,"%s\n",builder.c_str());
-    delete pvScalar;
 }
 
 static void testPVScalarWithProperties(
     FILE * fd,String fieldName,ScalarType stype)
 {
-    PVStructure *pvStructure = 0;
+    PVStructurePtr pvStructure;
     bool hasValueAlarm = false;
     bool hasDisplayControl = false;
     switch(stype) {
         case pvBoolean: {
              pvStructure = standardPVField->scalar(
-                 0,fieldName,stype,alarmTimeStampValueAlarm);
+                 stype,alarmTimeStampValueAlarm);
              hasValueAlarm = true;
-             PVBoolean *pvField = pvStructure->getBooleanField(String("value"));
+             PVBooleanPtr pvField = pvStructure->getBooleanField("value");
              pvField->put(true);
              break;
         }
         case pvByte: {
              pvStructure = standardPVField->scalar(
-                 0,fieldName,stype,allProperties);
+                 stype,allProperties);
              hasValueAlarm = true;
              hasDisplayControl = true;
-             PVByte *pvField = pvStructure->getByteField(String("value"));
+             PVBytePtr pvField = pvStructure->getByteField("value");
              pvField->put(127);
              break;
         }
         case pvShort: {
              pvStructure = standardPVField->scalar(
-                 0,fieldName,stype,allProperties);
+                 stype,allProperties);
              hasValueAlarm = true;
              hasDisplayControl = true;
-             PVShort *pvField = pvStructure->getShortField(String("value"));
+             PVShortPtr pvField = pvStructure->getShortField("value");
              pvField->put(32767);
              break;
         }
         case pvInt: {
              pvStructure = standardPVField->scalar(
-                 0,fieldName,stype,allProperties);
+                 stype,allProperties);
              hasValueAlarm = true;
              hasDisplayControl = true;
-             PVInt *pvField = pvStructure->getIntField(String("value"));
+             PVIntPtr pvField = pvStructure->getIntField("value");
              pvField->put((int)0x80000000);
              break;
         }
         case pvLong: {
              pvStructure = standardPVField->scalar(
-                 0,fieldName,stype,allProperties);
+                 stype,allProperties);
              hasValueAlarm = true;
              hasDisplayControl = true;
-             PVLong *pvField = pvStructure->getLongField(String("value"));
+             PVLongPtr pvField = pvStructure->getLongField("value");
              int64 value = 0x80000000;
              value <<= 32;
              value |= 0xffffffff;
@@ -136,79 +140,81 @@ static void testPVScalarWithProperties(
         }
         case pvFloat: {
              pvStructure = standardPVField->scalar(
-                 0,fieldName,stype,allProperties);
+                 stype,allProperties);
              hasValueAlarm = true;
              hasDisplayControl = true;
-             PVFloat *pvField = pvStructure->getFloatField(String("value"));
+             PVFloatPtr pvField = pvStructure->getFloatField("value");
              pvField->put(1.123e8);
              break;
         }
         case pvDouble: {
              pvStructure = standardPVField->scalar(
-                 0,fieldName,stype,allProperties);
+                 stype,allProperties);
              hasValueAlarm = true;
              hasDisplayControl = true;
-             PVDouble *pvField = pvStructure->getDoubleField(String("value"));
+             PVDoublePtr pvField = pvStructure->getDoubleField("value");
              pvField->put(1.123e35);
              break;
         }
         case pvString: {
              pvStructure = standardPVField->scalar(
-                 0,fieldName,stype,alarmTimeStamp);
-             PVString *pvField = pvStructure->getStringField(String("value"));
+                 stype,allProperties);
+             PVStringPtr pvField = pvStructure->getStringField("value");
              pvField->put(String("this is a string"));
              break;
         }
     }
-    PVLong *seconds = pvStructure->getLongField(
+    PVLongPtr seconds = pvStructure->getLongField(
         String("timeStamp.secondsPastEpoch"));
     assert(seconds!=0);
     seconds->put(123456789);
-    PVInt *nano = pvStructure->getIntField(String("timeStamp.nanoSeconds"));
+    PVIntPtr nano = pvStructure->getIntField(String("timeStamp.nanoSeconds"));
     assert(nano!=0);
     nano->put(1000000);
-    PVInt *severity = pvStructure->getIntField(String("alarm.severity"));
+    PVIntPtr severity = pvStructure->getIntField(String("alarm.severity"));
     assert(severity!=0);
     severity->put(2);
-    PVString *message = pvStructure->getStringField(String("alarm.message"));
+    PVStringPtr message = pvStructure->getStringField(String("alarm.message"));
     assert(message!=0);
     message->put(String("messageForAlarm"));
     if(hasDisplayControl) {
-        PVString *desc = pvStructure->getStringField(
+        PVStringPtr desc = pvStructure->getStringField(
             String("display.description"));
         assert(desc!=0);
         desc->put(String("this is a description"));
-        PVString *format = pvStructure->getStringField(
+        PVStringPtr format = pvStructure->getStringField(
             String("display.format"));
         assert(format!=0);
         format->put(String("f10.2"));
-        PVString *units = pvStructure->getStringField(
+        PVStringPtr units = pvStructure->getStringField(
             String("display.units"));
         assert(units!=0);
         units->put(String("SomeUnits"));
-        PVDouble *limit = pvStructure->getDoubleField(
-            String("display.limit.low"));
+        PVDoublePtr limit = pvStructure->getDoubleField(
+            String("display.limitLow"));
         assert(limit!=0);
         limit->put(0.0);
         limit = pvStructure->getDoubleField(
-            String("display.limit.high"));
+            String("display.limitHigh"));
         assert(limit!=0);
         limit->put(10.0);
         limit = pvStructure->getDoubleField(
-            String("control.limit.low"));
+            String("control.limitLow"));
         assert(limit!=0);
         limit->put(1.0);
         limit = pvStructure->getDoubleField(
-            String("control.limit.high"));
+            String("control.limitHigh"));
         assert(limit!=0);
         limit->put(9.0);
-        PVScalar *pvtemp = (PVScalar *)pvStructure->getSubField(
+        PVFieldPtr  pvField = pvStructure->getSubField(
             String("valueAlarm.lowAlarmLimit"));
-        assert(pvtemp!=0);
+        PVScalarPtr pvtemp = static_pointer_cast<PVScalar>(pvField);
+        assert(pvtemp.get()!=0);
         convert->fromDouble(pvtemp,1.0);
-        pvtemp = (PVScalar *)pvStructure->getSubField(
+        pvField = pvStructure->getSubField(
             String("valueAlarm.highAlarmLimit"));
-        assert(pvtemp!=0);
+        pvtemp = static_pointer_cast<PVScalar>(pvField);
+        assert(pvtemp.get()!=0);
         convert->fromDouble(pvtemp,9.0);
         severity = pvStructure->getIntField(
             String("valueAlarm.lowAlarmSeverity"));
@@ -218,7 +224,7 @@ static void testPVScalarWithProperties(
             String("valueAlarm.highAlarmSeverity"));
         assert(severity!=0);
         severity->put(2);
-        PVBoolean *active = pvStructure->getBooleanField(
+        PVBooleanPtr active = pvStructure->getBooleanField(
             String("valueAlarm.active"));
         assert(active!=0);
         active->put(true);
@@ -226,7 +232,6 @@ static void testPVScalarWithProperties(
     builder.clear();
     pvStructure->toString(&builder);
     fprintf(fd,"%s\n",builder.c_str());
-    delete pvStructure;
 }
 
 static void testPVScalar(FILE * fd) {
@@ -250,24 +255,30 @@ static void testPVScalar(FILE * fd) {
     testPVScalarWithProperties(fd,String("string"),pvString);
 }
 
+
 static void testScalarArrayCommon(FILE * fd,String fieldName,ScalarType stype)
 {
-    PVStructure *pvStructure = standardPVField->scalarArray(
-        0,fieldName,stype,alarmTimeStamp);
-    PVScalarArray *scalarArray = pvStructure->getScalarArrayField(
-        String("value"),stype);
-    assert(scalarArray!=0);
+    PVStructurePtr pvStructure = standardPVField->scalarArray(
+        stype,alarmTimeStamp);
+    PVScalarArrayPtr scalarArray = pvStructure->getScalarArrayField(
+        "value",stype);
+    assert(scalarArray.get()!=0);
     if(stype==pvBoolean) {
-        String values[] = {String("true"),String("false"),String("true")};
+        StringArray values(3);
+        values[0] = "true";
+        values[1] = "false";
+        values[2] = "true";
         convert->fromStringArray(scalarArray, 0,3,values,0);
     } else {
-        String values[] = {String("0"),String("1"),String("2")};
+        StringArray values(3);
+        values[0] = "0";
+        values[1] = "1";
+        values[2] = "2";
         convert->fromStringArray(scalarArray, 0,3,values,0);
     }
     builder.clear();
     pvStructure->toString(&builder);
     fprintf(fd,"%s\n",builder.c_str());
-    delete pvStructure;
 }
 
 static void testScalarArray(FILE * fd) {
@@ -281,7 +292,6 @@ static void testScalarArray(FILE * fd) {
     testScalarArrayCommon(fd,String("double"),pvDouble);
     testScalarArrayCommon(fd,String("string"),pvString);
 }
-
 
 int main(int argc,char *argv[])
 {
@@ -300,8 +310,6 @@ int main(int argc,char *argv[])
     testCreatePVStructure(fd);
     testPVScalar(fd);
     testScalarArray(fd);
-    epicsExitCallAtExits();
-    CDRMonitor::get().show(fd,true);
     return(0);
 }
 

@@ -9,12 +9,14 @@
 namespace epics { namespace pvData { 
 
 const size_t messageTypeCount = 4; 
-static std::string typeName[messageTypeCount] = {
-    String("info"),
-    String("warning"),
-    String("error"),
-    String("fatalError")
-};
 
-StringArray messageTypeName = typeName;
+StringArray messageTypeName(messageTypeCount);
+void Requester::init()
+{
+    messageTypeName[0] = "info";
+    messageTypeName[1] = "warning";
+    messageTypeName[2] = "error";
+    messageTypeName[3] = "fatalError";
+}
+
 }}

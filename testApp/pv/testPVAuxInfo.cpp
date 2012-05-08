@@ -21,34 +21,35 @@
 #include <pv/convert.h>
 #include <pv/standardField.h>
 #include <pv/standardPVField.h>
-#include <pv/CDRMonitor.h>
 
 using namespace epics::pvData;
+using std::tr1::static_pointer_cast;
 
-static FieldCreate * fieldCreate = 0;
-static PVDataCreate * pvDataCreate = 0;
-static StandardField *standardField = 0;
-static StandardPVField *standardPVField = 0;
-static Convert *convert = 0;
-static String buffer("");
+static FieldCreatePtr fieldCreate;
+static PVDataCreatePtr pvDataCreate;
+static StandardFieldPtr standardField;
+static StandardPVFieldPtr standardPVField;
+static ConvertPtr convert;
+static String buffer;
 
-static void printOffsets(PVStructure *pvStructure,FILE *fd)
+static void printOffsets(PVStructurePtr pvStructure,FILE *fd)
 {
-    fprintf(fd,"%s offset %d next %d number %d\n",
-        pvStructure->getField()->getFieldName().c_str(),
-        pvStructure->getFieldOffset(),
-        pvStructure->getNextFieldOffset(),
-        pvStructure->getNumberFields());
+    fprintf(fd,"%s offset %lu next %lu number %lu\n",
+        pvStructure->getFieldName().c_str(),
+        (long unsigned)pvStructure->getFieldOffset(),
+        (long unsigned)pvStructure->getNextFieldOffset(),
+        (long unsigned)pvStructure->getNumberFields());
     PVFieldPtrArray fields = pvStructure->getPVFields();
     int number = pvStructure->getStructure()->getNumberFields();
     for(int i=0; i<number; i++) {
-        PVField *pvField = fields[i];
+        PVFieldPtr pvField = fields[i];
         if(pvField->getField()->getType()==structure) {
-             printOffsets((PVStructure *)pvField,fd);
+             PVStructurePtr xxx = static_pointer_cast<PVStructure>(pvField);
+             printOffsets(xxx,fd);
              continue;
         }
         fprintf(fd,"%s offset %d next %d number %d\n",
-            pvField->getField()->getFieldName().c_str(),
+            pvField->getFieldName().c_str(),
             pvField->getFieldOffset(),
             pvField->getNextFieldOffset(),
             pvField->getNumberFields());
@@ -57,26 +58,25 @@ static void printOffsets(PVStructure *pvStructure,FILE *fd)
 
 static void testPVAuxInfo(FILE * fd) {
     fprintf(fd,"\ntestPVAuxInfo\n");
-    PVStructure * pvStructure = standardPVField->scalar(
-        0,String("value"),pvDouble,String("alarm,timeStamp,display,control"));
-    PVStructure *displayLimit = pvStructure->getStructureField(
-        String("display.limit"));
-    assert(displayLimit!=0);
-    PVAuxInfo *auxInfo = displayLimit->getPVAuxInfo();
-    auxInfo->createInfo(String("factory"),pvString);
-    auxInfo->createInfo(String("junk"),pvDouble);
-    PVScalar *pscalar = auxInfo->getInfo(String("factory"));
-    assert(pscalar!=0);
-    convert->fromString(pscalar,String("factoryName"));
-    pscalar = auxInfo->getInfo(String("junk"));
-    assert(pscalar!=0);
-    convert->fromString(pscalar,String("3.0"));
+    PVStructurePtr pvStructure = standardPVField->scalar(
+        pvDouble,"alarm,timeStamp,display,control");
+    PVStructurePtr display
+        = pvStructure->getStructureField("display");
+    assert(display.get()!=NULL);
+    PVAuxInfoPtr auxInfo = display->getPVAuxInfo();
+    auxInfo->createInfo("factory",pvString);
+    auxInfo->createInfo("junk",pvDouble);
+    PVScalarPtr pscalar = auxInfo->getInfo(String("factory"));
+    assert(pscalar.get()!=0);
+    convert->fromString(pscalar,"factoryName");
+    pscalar = auxInfo->getInfo("junk");
+    assert(pscalar.get()!=0);
+    convert->fromString(pscalar,"3.0");
     buffer.clear();
     pvStructure->toString(&buffer);
     fprintf(fd,"%s\n",buffer.c_str());
     // now show field offsets
     printOffsets(pvStructure,fd);
-    delete pvStructure;
 }
 
 int main(int argc,char *argv[])
@@ -93,8 +93,6 @@ int main(int argc,char *argv[])
     standardPVField = getStandardPVField();
     convert = getConvert();
     testPVAuxInfo(fd);
-    epicsExitCallAtExits();
-    CDRMonitor::get().show(fd,true);
     return(0);
 }
 

@@ -15,12 +15,12 @@ namespace epics { namespace pvData {
 
 class PVTimeStamp {
 public:
-    PVTimeStamp() : pvSecs(0),pvUserTag(0), pvNano(0) {}
+    PVTimeStamp(){}
     //default constructors and destructor are OK
     //This class should not be extended
     
     //returns (false,true) if pvField(isNot, is valid timeStamp structure
-    bool attach(PVField *pvField);
+    bool attach(PVFieldPtr pvField);
     void detach();
     bool isAttached();
     // following throw logic_error is not attached to PVField
@@ -28,9 +28,9 @@ public:
     void get(TimeStamp &) const;
     bool set(TimeStamp const & timeStamp);
 private:
-    PVLong* pvSecs;
-    PVInt* pvUserTag;
-    PVInt* pvNano;
+    PVLongPtr pvSecs;
+    PVIntPtr pvUserTag;
+    PVIntPtr pvNano;
 };
     
 }}

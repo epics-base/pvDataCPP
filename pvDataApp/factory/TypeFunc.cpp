@@ -33,7 +33,12 @@ namespace TypeFunc {
 
 namespace ScalarTypeFunc {
     bool isInteger(ScalarType type) {
-        if(type>=pvByte && type<=pvLong) return true;
+        if(type>=pvByte && type<=pvULong) return true;
+        return false;
+    }
+
+    bool isUInteger(ScalarType type) {
+        if(type>=pvUByte && type<=pvULong) return true;
         return false;
     }
 
@@ -48,7 +53,9 @@ namespace ScalarTypeFunc {
     }
     
     static const char* names[] = {
-        "boolean", "byte", "short", "int", "long",
+        "boolean",
+        "byte", "short", "int", "long",
+        "ubyte", "ushort", "uint", "ulong",
         "float", "double", "string",
     };
     ScalarType getScalarType(String pvalue) {

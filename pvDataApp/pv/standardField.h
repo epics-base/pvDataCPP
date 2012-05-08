@@ -48,37 +48,18 @@ namespace epics { namespace pvData {
  * }
  */
 
-class StandardField : private NoDefaultMethods {
+class StandardField;
+typedef std::tr1::shared_ptr<StandardField> StandardFieldPtr;
+
+class StandardField {
 public:
-    StandardField();
+    static StandardFieldPtr getStandardField();
     ~StandardField();
-    ScalarConstPtr scalar(String fieldName,ScalarType type);
-    StructureConstPtr scalar(String fieldName,
-        ScalarType type,String properties);
-    ScalarArrayConstPtr scalarArray(String fieldName,
-        ScalarType elementType);
-    StructureConstPtr scalarArray(String fieldName,
-        ScalarType elementType, String properties);
-    StructureArrayConstPtr structureArray(String fieldName,
-        StructureConstPtr structure);
-    StructureConstPtr structureArray(String fieldName,
-        StructureConstPtr structure,String properties);
-    StructureConstPtr structure(String fieldName,
-        int numFields,FieldConstPtrArray fields);
-    StructureConstPtr enumerated(String fieldName);
-    StructureConstPtr enumerated(String fieldName, String properties);
-    ScalarConstPtr scalarValue(ScalarType type);
-    StructureConstPtr scalarValue(ScalarType type,String properties);
-    ScalarArrayConstPtr scalarArrayValue(ScalarType elementType);
-    StructureConstPtr scalarArrayValue(ScalarType elementType,
-        String properties);
-    StructureArrayConstPtr structureArrayValue(StructureConstPtr structure);
-    StructureConstPtr structureArrayValue(StructureConstPtr structure,
-        String properties);
-    StructureConstPtr structureValue(
-        int numFields,FieldConstPtrArray fields);
-    StructureConstPtr enumeratedValue();
-    StructureConstPtr enumeratedValue(String properties);
+    StructureConstPtr scalar(ScalarType type,String properties);
+    StructureConstPtr scalarArray(ScalarType elementType, String properties);
+    StructureConstPtr structureArray(StructureConstPtr & structure,String properties);
+    StructureConstPtr enumerated();
+    StructureConstPtr enumerated(String properties);
     StructureConstPtr alarm();
     StructureConstPtr timeStamp();
     StructureConstPtr display();
@@ -92,10 +73,10 @@ public:
     StructureConstPtr doubleAlarm();
     StructureConstPtr enumeratedAlarm();
 private:
-    static void init();
+    StandardField();
 };
 
-extern StandardField * getStandardField();
+extern StandardFieldPtr getStandardField();
     
 }}
 #endif  /* STANDARDFIELD_H */

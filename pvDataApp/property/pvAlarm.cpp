@@ -12,71 +12,55 @@
 #include <pv/pvAlarm.h>
 namespace epics { namespace pvData { 
 
+using std::tr1::static_pointer_cast;
+
 static String noAlarmFound("No alarm structure found");
 static String notAttached("Not attached to an alarm structure");
 
-bool PVAlarm::attach(PVField *pvField)
+bool PVAlarm::attach(PVFieldPtr pvField)
 {
-    PVStructure *pvStructure = 0;
-    if(pvField->getField()->getFieldName().compare("alarm")!=0) {
-        if(pvField->getField()->getFieldName().compare("value")!=0) {
-            pvField->message(noAlarmFound,errorMessage);
-            return false;
-        }
-        PVStructure *pvParent = pvField->getParent();
-        if(pvParent==0) {
-            pvField->message(noAlarmFound,errorMessage);
-            return false;
-        }
-        pvStructure = pvParent->getStructureField(String("alarm"));
-        if(pvStructure==0) {
-            pvField->message(noAlarmFound,errorMessage);
-            return false;
-        }
-    } else {
-        if(pvField->getField()->getType()!=structure) {
-            pvField->message(noAlarmFound,errorMessage);
-            return false;
-        }
-        pvStructure = static_cast<PVStructure*>(pvField);
-    }
-    PVInt *pvInt = pvStructure->getIntField(String("severity"));
-    if(pvInt==0) {
+    if(pvField->getField()->getType()!=structure) {
         pvField->message(noAlarmFound,errorMessage);
         return false;
     }
-    pvSeverity = pvInt;
-    pvInt = pvStructure->getIntField(String("status"));
-    if(pvInt==0) {
+    PVStructurePtr pvStructure = static_pointer_cast<PVStructure>(pvField);
+    pvSeverity = pvStructure->getIntField("severity");
+    if(pvSeverity.get()==NULL) {
         pvField->message(noAlarmFound,errorMessage);
         return false;
     }
-    pvStatus = pvInt;
-    PVString *pvString = pvStructure->getStringField(String("message"));
-    if(pvInt==0) {
+    pvStatus = pvStructure->getIntField("status");
+    if(pvStatus.get()==NULL) {
         pvField->message(noAlarmFound,errorMessage);
+        pvSeverity.reset();
         return false;
     }
-    pvMessage = pvString;
+    pvMessage = pvStructure->getStringField("message");
+    if(pvMessage.get()==NULL) {
+        pvField->message(noAlarmFound,errorMessage);
+        pvSeverity.reset();
+        pvStatus.reset();
+        return false;
+    }
     return true;
 }
 
 void PVAlarm::detach()
 {
-    pvSeverity = 0;
-    pvStatus = 0;
-    pvMessage = 0;
+    pvSeverity.reset();
+    pvStatus.reset();
+    pvMessage.reset();
 }
 
 bool PVAlarm::isAttached()
 {
-    if(pvSeverity==0 || pvMessage==0) return false;
+    if(pvSeverity.get()==NULL) return false;
     return true;
 }
 
 void PVAlarm::get(Alarm & alarm) const
 {
-    if(pvSeverity==0 || pvMessage==0) {
+    if(pvSeverity.get()==NULL) {
         throw std::logic_error(notAttached);
     }
     alarm.setSeverity(AlarmSeverityFunc::getSeverity(pvSeverity->get()));
@@ -86,7 +70,7 @@ void PVAlarm::get(Alarm & alarm) const
 
 bool PVAlarm::set(Alarm const & alarm)
 {
-    if(pvSeverity==0 || pvMessage==0) {
+    if(pvSeverity.get()==NULL) {
         throw std::logic_error(notAttached);
     }
     if(pvSeverity->isImmutable() || pvMessage->isImmutable()) return false;

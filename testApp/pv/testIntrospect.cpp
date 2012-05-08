@@ -24,15 +24,15 @@
 
 using namespace epics::pvData;
 
-static FieldCreate * fieldCreate = 0;
-static PVDataCreate * pvDataCreate = 0;
-static StandardField *standardField = 0;
+static FieldCreatePtr fieldCreate;
+static PVDataCreatePtr pvDataCreate;
+static StandardFieldPtr standardField;
 static String builder("");
 
-static void testScalarCommon(FILE * fd,String fieldName,ScalarType stype,
+static void testScalarCommon(FILE * fd,ScalarType stype,
     bool isInteger,bool isNumeric,bool isPrimitive)
 {
-    ScalarConstPtr pscalar = standardField->scalar(fieldName,stype);
+    ScalarConstPtr pscalar = fieldCreate->createScalar(stype);
     Type type = pscalar->getType();
     assert(type==scalar);
     builder.clear();
@@ -47,26 +47,25 @@ static void testScalarCommon(FILE * fd,String fieldName,ScalarType stype,
     pscalar->toString(&builder);
     fprintf(fd,"%s\n",builder.c_str());
     // create tempory PVField so that memory can be released
-    PVField *pvField = pvDataCreate->createPVField(0,pscalar);
-    delete pvField;
+    PVFieldPtr pvField = pvDataCreate->createPVScalar(pscalar);
 }
 
 static void testScalar(FILE * fd) {
     fprintf(fd,"\ntestScalar\n");
-    testScalarCommon(fd,String("boolean"),pvBoolean,false,false,true);
-    testScalarCommon(fd,String("byte"),pvByte,true,true,true);
-    testScalarCommon(fd,String("short"),pvShort,true,true,true);
-    testScalarCommon(fd,String("int"),pvInt,true,true,true);
-    testScalarCommon(fd,String("long"),pvLong,true,true,true);
-    testScalarCommon(fd,String("float"),pvFloat,false,true,true);
-    testScalarCommon(fd,String("double"),pvDouble,false,true,true);
-    testScalarCommon(fd,String("string"),pvString,false,false,false);
+    testScalarCommon(fd,pvBoolean,false,false,true);
+    testScalarCommon(fd,pvByte,true,true,true);
+    testScalarCommon(fd,pvShort,true,true,true);
+    testScalarCommon(fd,pvInt,true,true,true);
+    testScalarCommon(fd,pvLong,true,true,true);
+    testScalarCommon(fd,pvFloat,false,true,true);
+    testScalarCommon(fd,pvDouble,false,true,true);
+    testScalarCommon(fd,pvString,false,false,false);
 }
 
-static void testScalarArrayCommon(FILE * fd,String fieldName,ScalarType stype,
+static void testScalarArrayCommon(FILE * fd,ScalarType stype,
     bool isInteger,bool isNumeric,bool isPrimitive)
 {
-    ScalarArrayConstPtr pscalar = standardField->scalarArray(fieldName,stype);
+    ScalarArrayConstPtr pscalar = fieldCreate->createScalarArray(stype);
     Type type = pscalar->getType();
     assert(type==scalarArray);
     builder.clear();
@@ -81,51 +80,53 @@ static void testScalarArrayCommon(FILE * fd,String fieldName,ScalarType stype,
     pscalar->toString(&builder);
     fprintf(fd,"%s\n",builder.c_str());
     // create tempory PVField so that memory can be released
-    PVField *pvField = pvDataCreate->createPVField(0,pscalar);
-    delete pvField;
+    PVFieldPtr pvField = pvDataCreate->createPVScalarArray(pscalar);
 }
 
 static void testScalarArray(FILE * fd) {
     fprintf(fd,"\ntestScalarArray\n");
-    testScalarArrayCommon(fd,String("boolean"),pvBoolean,false,false,true);
-    testScalarArrayCommon(fd,String("byte"),pvByte,true,true,true);
-    testScalarArrayCommon(fd,String("short"),pvShort,true,true,true);
-    testScalarArrayCommon(fd,String("int"),pvInt,true,true,true);
-    testScalarArrayCommon(fd,String("long"),pvLong,true,true,true);
-    testScalarArrayCommon(fd,String("float"),pvFloat,false,true,true);
-    testScalarArrayCommon(fd,String("double"),pvDouble,false,true,true);
-    testScalarArrayCommon(fd,String("string"),pvString,false,false,false);
+    testScalarArrayCommon(fd,pvBoolean,false,false,true);
+    testScalarArrayCommon(fd,pvByte,true,true,true);
+    testScalarArrayCommon(fd,pvShort,true,true,true);
+    testScalarArrayCommon(fd,pvInt,true,true,true);
+    testScalarArrayCommon(fd,pvLong,true,true,true);
+    testScalarArrayCommon(fd,pvFloat,false,true,true);
+    testScalarArrayCommon(fd,pvDouble,false,true,true);
+    testScalarArrayCommon(fd,pvString,false,false,false);
 }
 
 static void testSimpleStructure(FILE * fd) {
     fprintf(fd,"\ntestSimpleStructure\n");
     String properties("alarm,timeStamp,display,control,valueAlarm");
-    StructureConstPtr ptop = standardField->scalarValue(pvDouble,properties);
+    StructureConstPtr ptop = standardField->scalar(pvDouble,properties);
     builder.clear();
     ptop->toString(&builder);
     fprintf(fd,"%s\n",builder.c_str());
     // create tempory PVField so that memory can be released
-    PVField *pvField = pvDataCreate->createPVField(0,ptop);
-    delete pvField;
+    PVStructurePtr pvStructure = pvDataCreate->createPVStructure(ptop);
 }
 
 static StructureConstPtr createPowerSupply() {
+    size_t nfields = 3;
     String properties("alarm");
-   FieldConstPtrArray powerSupply = new FieldConstPtr[3];
-    powerSupply[0] = standardField->scalar(
-        String("voltage"),pvDouble,properties);
-    powerSupply[1] = standardField->scalar(
-        String("power"),pvDouble,properties);
-    powerSupply[2] = standardField->scalar(
-        String("current"),pvDouble,properties);
-    return standardField->structure( String("powerSupply"),3,powerSupply);
+    StringArray names;
+    names.reserve(nfields);
+    FieldConstPtrArray powerSupply;
+    powerSupply.reserve(nfields);
+    names.push_back("voltage");
+    powerSupply.push_back(standardField->scalar(pvDouble,properties));
+    names.push_back("power");
+    powerSupply.push_back(standardField->scalar(pvDouble,properties));
+    names.push_back("current");
+    powerSupply.push_back(standardField->scalar(pvDouble,properties));
+    return fieldCreate->createStructure(names,powerSupply);
 }
 
 static void testStructureArray(FILE * fd) {
     fprintf(fd,"\ntestStructureArray\n");
     String properties("alarm,timeStamp");
     StructureConstPtr powerSupply = createPowerSupply();
-    StructureConstPtr top = standardField->structureArrayValue(
+    StructureConstPtr top = standardField->structureArray(
          powerSupply,properties);
     builder.clear();
     top->toString(&builder);
@@ -147,8 +148,6 @@ int main(int argc,char *argv[])
     testScalarArray(fd);
     testSimpleStructure(fd);
     testStructureArray(fd);
-    epicsExitCallAtExits();
-    CDRMonitor::get().show(fd,true);
     return(0);
 }
 

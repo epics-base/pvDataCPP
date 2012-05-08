@@ -14,11 +14,10 @@ namespace epics { namespace pvData {
 
 class PVDisplay {
 public:
-    PVDisplay()
-    : pvDescription(0),pvFormat(),pvUnits(),pvLow(),pvHigh() {}
+    PVDisplay() {}
     //default constructors and destructor are OK
     //An automatic detach is issued if already attached.
-    bool attach(PVField *pvField);
+    bool attach(PVFieldPtr pvField);
     void detach();
     bool isAttached();
     // each of the following throws logic_error is not attached to PVField
@@ -26,11 +25,11 @@ public:
     void get(Display &) const;
     bool set(Display const & display);
 private:
-    PVString *pvDescription;
-    PVString *pvFormat;
-    PVString *pvUnits;
-    PVDouble *pvLow;
-    PVDouble *pvHigh;
+    PVStringPtr pvDescription;
+    PVStringPtr pvFormat;
+    PVStringPtr pvUnits;
+    PVDoublePtr pvLow;
+    PVDoublePtr pvHigh;
 };
     
 }}

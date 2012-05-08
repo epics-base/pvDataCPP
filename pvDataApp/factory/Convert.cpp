@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 #include <stdexcept>
+#include <typeinfo>
 #include <pv/lock.h>
 #include <pv/pvIntrospect.h>
 #include <pv/pvData.h>
@@ -15,58 +16,377 @@
 
 using std::tr1::static_pointer_cast;
 using std::tr1::const_pointer_cast;
+using std::size_t;
 
 namespace epics { namespace pvData { 
 
-static Convert* convert = 0;
-static PVDataCreate* pvDataCreate = 0;
+static PVDataCreatePtr pvDataCreate;
 
 static String trueString("true");
 static String falseString("false");
 static String logicError("Logic error. Should never get here.");
 static String illegalScalarType("Illegal ScalarType");
 
+static ConvertPtr convert;
+
+template<typename T>
+T toScalar(PVScalarPtr &pv)
+{
+    ScalarConstPtr scalar = pv->getScalar();
+    ScalarType scalarType = scalar->getScalarType();
+    switch(scalarType) {
+        case pvBoolean:
+           throw std::logic_error(String("boolean can not be converted to scalar"));
+        case pvByte: {
+            PVBytePtr value = static_pointer_cast<PVByte>(pv);
+            return value->get();
+        }
+        case pvShort: {
+            PVShortPtr value = static_pointer_cast<PVShort>(pv);
+            return value->get();
+        }
+        case pvInt: {
+            PVIntPtr value = static_pointer_cast<PVInt>(pv);
+            return value->get();
+        }
+        case pvLong: {
+            PVLongPtr value = static_pointer_cast<PVLong>(pv);
+            return value->get();
+        }
+        case pvUByte: {
+            PVUBytePtr value = static_pointer_cast<PVUByte>(pv);
+            return value->get();
+        }
+        case pvUShort: {
+            PVUShortPtr value = static_pointer_cast<PVUShort>(pv);
+            return value->get();
+        }
+        case pvUInt: {
+            PVUIntPtr value = static_pointer_cast<PVUInt>(pv);
+            return value->get();
+        }
+        case pvULong: {
+            PVULongPtr value = static_pointer_cast<PVULong>(pv);
+            return value->get();
+        }
+        case pvFloat: {
+            PVFloatPtr value = static_pointer_cast<PVFloat>(pv);
+            return static_cast<T>(value->get());
+        }
+        case pvDouble: {
+            PVDoublePtr value = static_pointer_cast<PVDouble>(pv);
+            return static_cast<T>(value->get());
+        }
+        case pvString:
+           throw std::logic_error(String("string can not be converted to byte"));
+    }
+    throw std::logic_error(logicError);
+}
+
+int8 Convert::toByte(PVScalarPtr & pv)
+{
+     return toScalar<int8>(pv);
+}
+
+int16 Convert::toShort(PVScalarPtr & pv)
+{
+     return toScalar<int16>(pv);
+}
+
+int32 Convert::toInt(PVScalarPtr & pv)
+{
+     return toScalar<int32>(pv);
+}
+
+int64 Convert::toLong(PVScalarPtr & pv)
+{
+     return toScalar<int64>(pv);
+}
+
+uint8 Convert::toUByte(PVScalarPtr & pv)
+{
+     return toScalar<uint8>(pv);
+}
+
+uint16 Convert::toUShort(PVScalarPtr & pv)
+{
+     return toScalar<uint16>(pv);
+}
+
+uint32 Convert::toUInt(PVScalarPtr & pv)
+{
+     return toScalar<uint32>(pv);
+}
+
+uint64 Convert::toULong(PVScalarPtr &pv)
+{
+     return toScalar<uint64>(pv);
+}
+
+float Convert::toFloat(PVScalarPtr &pv)
+{
+     return toScalar<float>(pv);
+}
+
+double Convert::toDouble(PVScalarPtr& pv)
+{
+     return toScalar<double>(pv);
+}
+
+template<typename T>
+String scalarToString(T);
+
+template<>
+String scalarToString<int8>(int8 value)
+{
+    char buffer[20];
+    int ival = value;
+    sprintf(buffer,"%d",ival);
+    return String(buffer);
+}
+
+template<>
+String scalarToString<int16>(int16 value)
+{
+    char buffer[20];
+    int ival = value;
+    sprintf(buffer,"%d",ival);
+    return String(buffer);
+}
+
+template<>
+String scalarToString<int32>(int32 value)
+{
+    char buffer[20];
+    int ival = value;
+    sprintf(buffer,"%d",ival);
+    return String(buffer);
+}
+
+template<>
+String scalarToString<int64>(int64 value)
+{
+    char buffer[30];
+    sprintf(buffer,"%lld",(long long)value);
+    return String(buffer);
+}
+
+template<>
+String scalarToString<uint8>(uint8 value)
+{
+    char buffer[20];
+    unsigned int ival = value;
+    sprintf(buffer,"%ud",ival);
+    return String(buffer);
+}
+
+template<>
+String scalarToString<uint16>(uint16 value)
+{
+    char buffer[20];
+    unsigned int ival = value;
+    sprintf(buffer,"%iud",ival);
+    return String(buffer);
+}
+
+template<>
+String scalarToString<uint32>(uint32 value)
+{
+    char buffer[20];
+    sprintf(buffer,"%ud",value);
+    return String(buffer);
+}
+
+template<>
+String scalarToString<uint64>(uint64 value)
+{
+    char buffer[30];
+    sprintf(buffer,"%llu",(unsigned long long)value);
+    return String(buffer);
+}
+
+template<>
+String scalarToString<float>(float value)
+{
+    char buffer[40];
+    sprintf(buffer,"%g",value);
+    return String(buffer);
+}
+
+template<>
+String scalarToString<double>(double value)
+{
+    char buffer[40];
+    sprintf(buffer,"%g",value);
+    return String(buffer);
+}
+
+template<typename T>
+void fromScalar(PVScalarPtr &pv,T from)
+{
+    ScalarConstPtr scalar = pv->getScalar();
+    ScalarType scalarType = scalar->getScalarType();
+    switch(scalarType) {
+        case pvBoolean:
+           throw std::logic_error("byte can not be converted to boolean");
+        case pvByte: {
+            PVBytePtr value = static_pointer_cast<PVByte>(pv);
+            value->put(from); return;
+        }
+        case pvShort: {
+            PVShortPtr value = static_pointer_cast<PVShort>(pv);
+            value->put(from); return;
+        }
+        case pvInt: {
+            PVIntPtr value = static_pointer_cast<PVInt>(pv);
+            value->put(from); return;
+        }
+        case pvLong: {
+            PVLongPtr value = static_pointer_cast<PVLong>(pv);
+            value->put(from); return;
+        }
+        case pvUByte: {
+            PVUBytePtr value = static_pointer_cast<PVUByte>(pv);
+            value->put(from); return;
+        }
+        case pvUShort: {
+            PVUShortPtr value = static_pointer_cast<PVUShort>(pv);
+            value->put(from); return;
+        }
+        case pvUInt: {
+            PVUIntPtr value = static_pointer_cast<PVUInt>(pv);
+            value->put(from); return;
+        }
+        case pvULong: {
+            PVULongPtr value = static_pointer_cast<PVULong>(pv);
+            value->put(from); return;
+        }
+        case pvFloat: {
+            PVFloatPtr value = static_pointer_cast<PVFloat>(pv);
+            value->put(from); return;
+        }
+        case pvDouble: {
+            PVDoublePtr value = static_pointer_cast<PVDouble>(pv);
+            value->put(from); return;
+        }
+        case pvString: {
+            PVStringPtr pvvalue = static_pointer_cast<PVString>(pv);
+            String value = scalarToString<T>(from);
+            pvvalue->put(value);
+            return;
+        }
+    }
+    throw std::logic_error(logicError);
+}
+
+void Convert::fromByte(PVScalarPtr &pv,int8 from)
+{
+     fromScalar<int8>(pv,from);
+}
+
+void  Convert::fromShort(PVScalarPtr &pv,int16 from)
+{
+    fromScalar<int16>(pv,from);
+}
+
+void  Convert::fromInt(PVScalarPtr &pv, int32 from)
+{
+    fromScalar<int32>(pv,from);
+}
+
+void  Convert::fromLong(PVScalarPtr &pv, int64 from)
+{
+    fromScalar<int64>(pv,from);
+}
+
+void Convert::fromUByte(PVScalarPtr &pv,uint8 from)
+{
+     fromScalar<uint8>(pv,from);
+}
+
+void  Convert::fromUShort(PVScalarPtr &pv,uint16 from)
+{
+    fromScalar<uint16>(pv,from);
+}
+
+void  Convert::fromUInt(PVScalarPtr &pv, uint32 from)
+{
+    fromScalar<uint32>(pv,from);
+}
+
+void  Convert::fromULong(PVScalarPtr &pv, uint64 from)
+{
+    fromScalar<uint64>(pv,from);
+}
+
+void  Convert::fromFloat(PVScalarPtr &pv, float from)
+{
+    fromScalar<float>(pv,from);
+}
+
+void  Convert::fromDouble(PVScalarPtr &pv, double from)
+{
+    fromScalar<double>(pv,from);
+}
+
+
 static bool convertEquals(PVField *a,PVField *b);
-static int convertFromByteArray(PVScalarArray *pv, int offset,
-    int len,int8 from[], int fromOffset);
-static int convertToByteArray(PVScalarArray *pv, int offset,
-    int len,int8 to[], int toOffset);
-static int convertFromShortArray(PVScalarArray *pv, int offset,
-    int len,int16 from[], int fromOffset);
-static int convertToShortArray(PVScalarArray *pv, int offset,
-    int len,int16 to[], int toOffset);
-static int convertFromIntArray(PVScalarArray *pv, int offset,
-    int len,int32 from[], int fromOffset);
-static int convertToIntArray(PVScalarArray *pv, int offset,
-    int len,int32 to[], int toOffset);
-static int convertFromLongArray(PVScalarArray *pv, int offset,
-    int len,int64 from[], int fromOffset);
-static int convertToLongArray(PVScalarArray * pv, int offset,
-    int len,int64 to[], int toOffset);
-static int convertFromFloatArray(PVScalarArray *pv, int offset,
-    int len,float from[], int fromOffset);
-static int convertToFloatArray(PVScalarArray * pv, int offset,
-    int len,float to[], int toOffset);
-static int convertFromDoubleArray(PVScalarArray *pv, int offset,
-    int len,double from[], int fromOffset);
-static int convertToDoubleArray(PVScalarArray * pv, int offset,
-    int len,double to[], int toOffset);
-static int convertFromStringArray(PVScalarArray *pv, int offset,
-    int len,String from[], int fromOffset);
-static int convertToStringArray(PVScalarArray * pv, int offset,
-    int len,String to[], int toOffset);
+static size_t convertFromByteArray(PVScalarArray * pv, size_t offset,
+    size_t len,int8 from[], size_t fromOffset);
+static size_t convertToByteArray(PVScalarArray *pv, size_t offset,
+    size_t len,int8 to[], size_t toOffset);
+static size_t convertFromShortArray(PVScalarArray *pv, size_t offset,
+    size_t len,int16 from[], size_t fromOffset);
+static size_t convertToShortArray(PVScalarArray *pv, size_t offset,
+    size_t len,int16 to[], size_t toOffset);
+static size_t convertFromIntArray(PVScalarArray *pv, size_t offset,
+    size_t len,int32 from[], size_t fromOffset);
+static size_t convertToIntArray(PVScalarArray *pv, size_t offset,
+    size_t len,int32 to[], size_t toOffset);
+static size_t convertFromLongArray(PVScalarArray *pv, size_t offset,
+    size_t len,int64 from[], size_t fromOffset);
+static size_t convertToLongArray(PVScalarArray * pv, size_t offset,
+    size_t len,int64 to[], size_t toOffset);
+static size_t convertFromUByteArray(PVScalarArray * pv, size_t offset,
+    size_t len,uint8 from[], size_t fromOffset);
+static size_t convertToUByteArray(PVScalarArray *pv, size_t offset,
+    size_t len,uint8 to[], size_t toOffset);
+static size_t convertFromUShortArray(PVScalarArray *pv, size_t offset,
+    size_t len,uint16 from[], size_t fromOffset);
+static size_t convertToUShortArray(PVScalarArray *pv, size_t offset,
+    size_t len,uint16 to[], size_t toOffset);
+static size_t convertFromUIntArray(PVScalarArray *pv, size_t offset,
+    size_t len,uint32 from[], size_t fromOffset);
+static size_t convertToUIntArray(PVScalarArray *pv, size_t offset,
+    size_t len,uint32 to[], size_t toOffset);
+static size_t convertFromULongArray(PVScalarArray *pv, size_t offset,
+    size_t len,uint64 from[], size_t fromOffset);
+static size_t convertToULongArray(PVScalarArray * pv, size_t offset,
+    size_t len,uint64 to[], size_t toOffset);
+static size_t convertFromFloatArray(PVScalarArray *pv, size_t offset,
+    size_t len,float from[], size_t fromOffset);
+static size_t convertToFloatArray(PVScalarArray * pv, size_t offset,
+    size_t len,float to[], size_t toOffset);
+static size_t convertFromDoubleArray(PVScalarArray *pv, size_t offset,
+    size_t len,double from[], size_t fromOffset);
+static size_t convertToDoubleArray(PVScalarArray *pv, size_t offset,
+    size_t len,double to[], size_t toOffset);
+static size_t convertFromStringArray(PVScalarArray *pv, size_t offset,
+    size_t len,StringArray const & from, size_t fromOffset);
+static size_t convertToStringArray(PVScalarArray *pv, size_t offset,
+    size_t len,StringArray const & to, size_t toOffset);
 
 static void convertToString(StringBuilder buffer,
-    PVField * pv,int indentLevel);
+    PVField *pv,int indentLevel);
 static void convertStructure(StringBuilder buffer,
     PVStructure *data,int indentLevel);
 static void convertArray(StringBuilder buffer,
     PVScalarArray * pv,int indentLevel);
 static void convertStructureArray(StringBuilder buffer,
     PVStructureArray * pvdata,int indentLevel);
-static int copyArrayDataReference(PVScalarArray *from,PVArray *to);
-static int copyNumericArray(PVScalarArray *from,
-    int offset, PVScalarArray *to, int toOffset, int len);
+static size_t copyArrayDataReference(PVScalarArray *from,PVArray *to);
+static size_t copyNumericArray(PVScalarArray *from,
+    size_t offset, PVScalarArray *to, size_t toOffset, size_t len);
 
 static std::vector<String> split(String commaSeparatedList);
 
@@ -82,7 +402,7 @@ static std::vector<String> split(String commaSeparatedList) {
     std::vector<String> valueList(numValues,"");
     index=0;
     for(size_t i=0; i<numValues; i++) {
-        int pos = commaSeparatedList.find(',',index);
+        size_t pos = commaSeparatedList.find(',',index);
         String value = commaSeparatedList.substr(index,pos);
         valueList[i] = value;
         index = pos +1;
@@ -94,14 +414,14 @@ Convert::Convert(){}
 
 Convert::~Convert(){}
 
-void Convert::getFullName(StringBuilder buf,PVField * pvField)
+void Convert::getFullName(StringBuilder buf,PVFieldPtr & pvField)
 {
     buf->empty();
-    *buf += pvField->getField()->getFieldName();
+    *buf += pvField->getFieldName();
     PVStructure *parent;
     while((parent=pvField->getParent())!=0) {
-         pvField = pvField->getParent();
-         String name = pvField->getField()->getFieldName();
+         parent = pvField->getParent();
+         String name = parent->getFieldName();
          if(name.length()>0) {
              buf->insert(0,".");
              buf->insert(0,name);
@@ -109,44 +429,62 @@ void Convert::getFullName(StringBuilder buf,PVField * pvField)
     }
 }
 
+bool Convert::equals(PVFieldPtr &a,PVFieldPtr &b)
+{
+    return convertEquals(a.get(),b.get());
+}
+
 bool Convert::equals(PVField &a,PVField &b)
 {
     return convertEquals(&a,&b);
 }
 
-void Convert::getString(StringBuilder buf,PVField * pvField,int indentLevel)
+void Convert::getString(StringBuilder buf,PVFieldPtr & pvField,int indentLevel)
+{
+    convertToString(buf,pvField.get(),indentLevel);
+}
+
+void Convert::getString(StringBuilder buf,PVFieldPtr & pvField)
+{
+    convertToString(buf,pvField.get(),0);
+}
+
+void Convert::getString(StringBuilder buf,PVField *pvField,int indentLevel)
 {
     convertToString(buf,pvField,indentLevel);
 }
 
-void Convert::getString(StringBuilder buf,PVField * pvField)
+void Convert::getString(StringBuilder buf,PVField *pvField)
 {
     convertToString(buf,pvField,0);
 }
 
-int Convert::fromString(PVStructure *pvStructure, std::vector<String>& from, int fromStartIndex)
+size_t Convert::fromString(PVStructurePtr &pvStructure, StringArray const & from, size_t fromStartIndex)
 {
-    int processed = 0;
+    size_t processed = 0;
     
-    PVFieldPtrArray fieldsData = pvStructure->getPVFields();
-    if (fieldsData != 0) {
-        int length = pvStructure->getStructure()->getNumberFields();
-        for(int i=0; i<length; i++) {
-            PVField *fieldField = fieldsData[i];
+    PVFieldPtrArray const & fieldsData = pvStructure->getPVFields();
+    if (fieldsData.size() != 0) {
+        size_t length = pvStructure->getStructure()->getNumberFields();
+        for(size_t i=0; i<length; i++) {
+            PVFieldPtr fieldField = fieldsData[i];
 
             Type type = fieldField->getField()->getType();
             if(type==structure) {
-                int count = fromString(static_cast<PVStructure*>(fieldField), from, fromStartIndex);
+                PVStructurePtr pv = static_pointer_cast<PVStructure>(fieldField);
+                size_t count = fromString(pv, from, fromStartIndex);
                 processed += count;
                 fromStartIndex += count;
             }
             else if(type==scalarArray) {
-                int count = fromString(static_cast<PVScalarArray*>(fieldField), from.at(fromStartIndex));
+                PVScalarArrayPtr pv = static_pointer_cast<PVScalarArray>(fieldField);
+                size_t count = fromString(pv, from.at(fromStartIndex));
                 processed += count;
                 fromStartIndex += count;
             }
             else if(type==scalar) {
-                fromString(static_cast<PVScalar*>(fieldField), from.at(fromStartIndex++));
+                PVScalarPtr pv = static_pointer_cast<PVScalar>(fieldField);
+                fromString(pv, from.at(fromStartIndex++));
                 processed++;
             }
             else {
@@ -162,20 +500,20 @@ int Convert::fromString(PVStructure *pvStructure, std::vector<String>& from, int
 }
 
 
-void Convert::fromString(PVScalar *pvScalar, String from)
+void Convert::fromString(PVScalarPtr &pvScalar, String from)
 {
     ScalarConstPtr scalar = pvScalar->getScalar();
     ScalarType scalarType = scalar->getScalarType();
     switch(scalarType) {
         case pvBoolean: {
-                PVBoolean *pv = static_cast<PVBoolean *>(pvScalar);
+                PVBooleanPtr pv = static_pointer_cast<PVBoolean>(pvScalar);
                 bool value = 
                   ((from.compare("true")==0) ? true : false);
                 pv->put(value);
                 return;
             }
         case pvByte : {
-                PVByte *pv = static_cast<PVByte*>(pvScalar);
+                PVBytePtr pv = static_pointer_cast<PVByte>(pvScalar);
                 int ival;
                 sscanf(from.c_str(),"%d",&ival);
                 int8 value = ival;
@@ -183,7 +521,7 @@ void Convert::fromString(PVScalar *pvScalar, String from)
                 return;
             }
         case pvShort : {
-                PVShort *pv = static_cast<PVShort*>(pvScalar);
+                PVShortPtr pv = static_pointer_cast<PVShort>(pvScalar);
                 int ival;
                 sscanf(from.c_str(),"%d",&ival);
                 int16 value = ival;
@@ -191,7 +529,7 @@ void Convert::fromString(PVScalar *pvScalar, String from)
                 return;
             }
         case pvInt : {
-                PVInt *pv = static_cast<PVInt*>(pvScalar);
+                PVIntPtr pv = static_pointer_cast<PVInt>(pvScalar);
                 int ival;
                 sscanf(from.c_str(),"%d",&ival);
                 int32 value = ival;
@@ -199,29 +537,61 @@ void Convert::fromString(PVScalar *pvScalar, String from)
                 return;
             }
         case pvLong : {
-                PVLong *pv = static_cast<PVLong*>(pvScalar);
+                PVLongPtr pv = static_pointer_cast<PVLong>(pvScalar);
                 int64 ival;
-                sscanf(from.c_str(),"%lld",&ival);
+                sscanf(from.c_str(),"%lld",(long long *)&ival);
                 int64 value = ival;
                 pv->put(value);
                 return;
             }
+        case pvUByte : {
+                PVUBytePtr pv = static_pointer_cast<PVUByte>(pvScalar);
+                unsigned int ival;
+                sscanf(from.c_str(),"%u",&ival);
+                uint8 value = ival;
+                pv->put(value);
+                return;
+            }
+        case pvUShort : {
+                PVUShortPtr pv = static_pointer_cast<PVUShort>(pvScalar);
+                unsigned int ival;
+                sscanf(from.c_str(),"%u",&ival);
+                uint16 value = ival;
+                pv->put(value);
+                return;
+            }
+        case pvUInt : {
+                PVUIntPtr pv = static_pointer_cast<PVUInt>(pvScalar);
+                unsigned int ival;
+                sscanf(from.c_str(),"%u",&ival);
+                uint32 value = ival;
+                pv->put(value);
+                return;
+            }
+        case pvULong : {
+                PVULongPtr pv = static_pointer_cast<PVULong>(pvScalar);
+                unsigned long long ival;
+                sscanf(from.c_str(),"%llu",(long long unsigned int *)&ival);
+                uint64 value = ival;
+                pv->put(value);
+                return;
+            }
         case pvFloat : {
-                PVFloat *pv = static_cast<PVFloat*>(pvScalar);
+                PVFloatPtr pv = static_pointer_cast<PVFloat>(pvScalar);
                 float value;
                 sscanf(from.c_str(),"%f",&value);
                 pv->put(value);
                 return;
             }
         case pvDouble : {
-                PVDouble*pv = static_cast<PVDouble*>(pvScalar);
+                PVDoublePtr pv = static_pointer_cast<PVDouble>(pvScalar);
                 double value;
                 sscanf(from.c_str(),"%lf",&value);
                 pv->put(value);
                 return;
             }
         case pvString: {
-                PVString *value = static_cast<PVString*>(pvScalar);
+                PVStringPtr value = static_pointer_cast<PVString>(pvScalar);
                 value->put(from);
                 return;
             }
@@ -231,92 +601,106 @@ void Convert::fromString(PVScalar *pvScalar, String from)
     throw std::logic_error(message);
 }
 
-int Convert::fromString(PVScalarArray *pv, String from)
+size_t Convert::fromString(PVScalarArrayPtr &pv, String from)
 {
    if(from[0]=='[' && from[from.length()]==']') {
-        int offset = from.rfind(']');
+        size_t offset = from.rfind(']');
         from = from.substr(1, offset);
     }
     std::vector<String> valueList = split(from);
-    int length = valueList.size();
-    StringArray valueArray = new String[length];
-    for(int i=0; i<length; i++) {
+    size_t length = valueList.size();
+    StringArray valueArray = StringArray(length);
+    for(size_t i=0; i<length; i++) {
         String value = valueList[i];
         valueArray[i] = value;
     }
-    int num = fromStringArray(pv,0,length,valueArray,0);
+    size_t num = fromStringArray(pv,0,length,valueArray,0);
     if(num<length) length = num;
     pv->setLength(length);
-    delete[] valueArray;
     return length;
 }
 
-int Convert::fromStringArray(PVScalarArray *pv, int offset, int length,
-    String from[], int fromOffset)
+size_t Convert::fromStringArray(PVScalarArrayPtr &pv, size_t offset, size_t length,
+    StringArray const & from, size_t fromOffset)
 {
-    return convertFromStringArray(pv,offset,length,from,fromOffset);
+    return convertFromStringArray(pv.get(),offset,length,from,fromOffset);
 }
 
-int Convert::toStringArray(PVScalarArray * pv, int offset, int length,
-    String to[], int toOffset)
+size_t Convert::toStringArray(PVScalarArrayPtr & pv, size_t offset, size_t length,
+    StringArray  const &to, size_t toOffset)
 {
-    return convertToStringArray(pv,offset,length,to,toOffset);
+    return convertToStringArray(pv.get(),offset,length,to,toOffset);
 }
 
-bool Convert::isCopyCompatible(FieldConstPtr from, FieldConstPtr to)
+bool Convert::isCopyCompatible(FieldConstPtr &from, FieldConstPtr &to)
 {
     if(from->getType()!=to->getType()) return false;
     switch(from->getType()) {
-    case scalar: 
-        return isCopyScalarCompatible(
-            static_pointer_cast<const Scalar>(from),
-            static_pointer_cast<const Scalar>(to));
+    case scalar:
+        {
+             ScalarConstPtr xxx = static_pointer_cast<const Scalar>(from);
+             ScalarConstPtr yyy = static_pointer_cast<const Scalar>(to);
+             return isCopyScalarCompatible(xxx,yyy);
+        }
     case scalarArray:
-        return isCopyScalarArrayCompatible(
-            static_pointer_cast<const ScalarArray>(from),
-            static_pointer_cast<const ScalarArray>(to));
+        {
+             ScalarArrayConstPtr xxx = static_pointer_cast<const ScalarArray>(from);
+             ScalarArrayConstPtr yyy = static_pointer_cast<const ScalarArray>(to);
+             return isCopyScalarArrayCompatible(xxx,yyy);
+        }
     case structure:
-        return isCopyStructureCompatible(
-            static_pointer_cast<const Structure>(from),
-            static_pointer_cast<const Structure>(to));
+        {
+             StructureConstPtr xxx = static_pointer_cast<const Structure>(from);
+             StructureConstPtr yyy = static_pointer_cast<const Structure>(to);
+             return isCopyStructureCompatible(xxx,yyy);
+        }
     case structureArray:
-        return isCopyStructureArrayCompatible(
-            static_pointer_cast<const StructureArray>(from),
-            static_pointer_cast<const StructureArray>(to));
+        {
+             StructureArrayConstPtr xxx = static_pointer_cast<const StructureArray>(from);
+             StructureArrayConstPtr yyy = static_pointer_cast<const StructureArray>(to);
+             return isCopyStructureArrayCompatible(xxx,yyy);
+        }
     }
     String message("Convert::isCopyCompatible should never get here");
     throw std::logic_error(message);
 }
 
-void Convert::copy(PVField *from,PVField *to)
+void Convert::copy(PVFieldPtr &from,PVFieldPtr &to)
 {
     switch(from->getField()->getType()) {
     case scalar: 
-        copyScalar(
-            static_cast<PVScalar *>(from),static_cast<PVScalar *>(to));
-        return;
-    case scalarArray: {
-        PVScalarArray  *fromArray = static_cast<PVScalarArray *>(from);
-        PVScalarArray  *toArray = static_cast<PVScalarArray *>(to);
-        int length = copyScalarArray(fromArray,0,toArray,0,fromArray->getLength());
-        if(toArray->getLength()!=length) toArray->setLength(length);
-        return;
-    }
+        {
+             PVScalarPtr xxx = static_pointer_cast<PVScalar>(from);
+             PVScalarPtr yyy = static_pointer_cast<PVScalar>(to);
+             copyScalar(xxx,yyy);
+             return;
+        }
+    case scalarArray:
+        {
+             PVScalarArrayPtr fromArray = static_pointer_cast<PVScalarArray>(from);
+             PVScalarArrayPtr toArray = static_pointer_cast<PVScalarArray>(to);
+             size_t length = copyScalarArray(fromArray,0,toArray,0,fromArray->getLength());
+             if(toArray->getLength()!=length) toArray->setLength(length);
+             return;
+        }
     case structure:
-        copyStructure(static_cast<PVStructure *>(from) ,
-             static_cast<PVStructure *>(to));
-        return;
+        {
+             PVStructurePtr xxx = static_pointer_cast<PVStructure>(from);
+             PVStructurePtr yyy = static_pointer_cast<PVStructure>(to);
+             copyStructure(xxx,yyy);
+             return;
+        }
     case structureArray: {
-    	PVStructureArray  *fromArray = static_cast<PVStructureArray *>(from);
-        PVStructureArray  *toArray = static_cast<PVStructureArray *>(to);
-        copyStructureArray(fromArray,toArray);
-        return;
-    }
+            PVStructureArrayPtr fromArray = static_pointer_cast<PVStructureArray>(from);
+            PVStructureArrayPtr toArray = static_pointer_cast<PVStructureArray>(to);
+            copyStructureArray(fromArray,toArray);
+            return;
+        }
     }
 }
 
 bool Convert::isCopyScalarCompatible(
-     ScalarConstPtr fromField, ScalarConstPtr toField)
+     ScalarConstPtr& fromField, ScalarConstPtr& toField)
 {
     ScalarType fromScalarType = fromField->getScalarType();
     ScalarType toScalarType = toField->getScalarType();
@@ -328,7 +712,7 @@ bool Convert::isCopyScalarCompatible(
     return false;
 }
 
-void Convert::copyScalar(PVScalar *from, PVScalar *to)
+void Convert::copyScalar(PVScalarPtr &from, PVScalarPtr &to)
 {
     if(to->isImmutable()) {
         if(from==to) return;
@@ -345,59 +729,83 @@ void Convert::copyScalar(PVScalar *from, PVScalar *to)
                     throw std::invalid_argument(message);
                 }
             }
-            PVBoolean *data = static_cast<PVBoolean*>(from);
+            PVBooleanPtr data = static_pointer_cast<PVBoolean>(from);
             if(toType==pvString) {
-                PVString *dataTo = static_cast<PVString*>(to);
+                PVStringPtr dataTo = static_pointer_cast<PVString>(to);
                 String buf("");
                 data->toString(&buf);
                 dataTo->put(buf);
             } else {
                 bool value = data->get();
-                PVBoolean *dataTo = static_cast<PVBoolean*>(to);
+                PVBooleanPtr dataTo = static_pointer_cast<PVBoolean>(to);
                 dataTo->put(value);
             }
             return;
         }
     case pvByte : {
-            PVByte *data = static_cast<PVByte*>(from);
+            PVBytePtr data = static_pointer_cast<PVByte>(from);
             int8 value = data->get();
-            convert->fromByte(to,value);
+            fromByte(to,value);
             return;
         }
     case pvShort : {
-            PVShort *data = static_cast<PVShort*>(from);
-            short value = data->get();
-            convert->fromShort(to,value);
+            PVShortPtr data = static_pointer_cast<PVShort>(from);
+            int16 value = data->get();
+            fromShort(to,value);
             return;
         } 
     case pvInt :{
-            PVInt *data = static_cast<PVInt*>(from);
-            int value = data->get();
-            convert->fromInt(to,value);
+            PVIntPtr data = static_pointer_cast<PVInt>(from);
+            int32 value = data->get();
+            fromInt(to,value);
             return;
         }    
     case pvLong : {
-            PVLong *data = static_cast<PVLong*>(from);
-            long value = data->get();
-            convert->fromLong(to,value);
+            PVLongPtr data = static_pointer_cast<PVLong>(from);
+            int64 value = data->get();
+            fromLong(to,value);
+            return;
+        }  
+    case pvUByte : {
+            PVUBytePtr data = static_pointer_cast<PVUByte>(from);
+            uint8 value = data->get();
+            fromUByte(to,value);
+            return;
+        }
+    case pvUShort : {
+            PVUShortPtr data = static_pointer_cast<PVUShort>(from);
+            uint16 value = data->get();
+            fromUShort(to,value);
+            return;
+        } 
+    case pvUInt :{
+            PVUIntPtr data = static_pointer_cast<PVUInt>(from);
+            uint32 value = data->get();
+            fromUInt(to,value);
+            return;
+        }    
+    case pvULong : {
+            PVULongPtr data = static_pointer_cast<PVULong>(from);
+            uint64 value = data->get();
+            fromULong(to,value);
             return;
         }  
     case pvFloat : {
-            PVFloat *data = static_cast<PVFloat*>(from);
+            PVFloatPtr data = static_pointer_cast<PVFloat>(from);
             float value = data->get();
-            convert->fromFloat(to,value);
+            fromFloat(to,value);
             return;
         }     
     case pvDouble : {
-            PVDouble *data = static_cast<PVDouble*>(from);
+            PVDoublePtr data = static_pointer_cast<PVDouble>(from);
             double value = data->get();
-            convert->fromDouble(to,value);
+            fromDouble(to,value);
             return;
         }  
     case pvString: {
-            PVString *data = static_cast<PVString*>(from);
+            PVStringPtr data = static_pointer_cast<PVString>(from);
             String value = data->get();
-            convert->fromString(to,value);
+            fromString(to,value);
             return;
         }
     }
@@ -405,8 +813,8 @@ void Convert::copyScalar(PVScalar *from, PVScalar *to)
     throw std::logic_error(message);
 }
 
-bool Convert::isCopyScalarArrayCompatible(ScalarArrayConstPtr fromArray,
-    ScalarArrayConstPtr toArray)
+bool Convert::isCopyScalarArrayCompatible(ScalarArrayConstPtr &fromArray,
+    ScalarArrayConstPtr &toArray)
 {
     ScalarType fromType = fromArray->getElementType();
     ScalarType toType = toArray->getElementType();
@@ -418,9 +826,10 @@ bool Convert::isCopyScalarArrayCompatible(ScalarArrayConstPtr fromArray,
     return false;
 }
 
-int Convert::copyScalarArray(PVScalarArray *from, int offset,
-    PVScalarArray *to, int toOffset, int length)
+size_t Convert::copyScalarArray(PVScalarArrayPtr &from, size_t offset,
+    PVScalarArrayPtr &to, size_t toOffset, size_t length)
 {
+    
     if(to->isImmutable()) {
         if(from==to) return from->getLength();
         String message("Convert.copyArray destination is immutable");
@@ -431,77 +840,75 @@ int Convert::copyScalarArray(PVScalarArray *from, int offset,
     
     if(from->isImmutable() && (fromElementType==toElementType)) {
         if(offset==0 && toOffset==0 && length==from->getLength()) {
-            return copyArrayDataReference(from,to);
+            return copyArrayDataReference(from.get(),to.get());
         }
     }
     
-    int ncopy = 0;
+    size_t ncopy = 0;
     if(ScalarTypeFunc::isNumeric(fromElementType)
     && ScalarTypeFunc::isNumeric(toElementType)) {
-        return copyNumericArray(from,offset,to,toOffset,length);
+        return copyNumericArray(from.get(),offset,to.get(),toOffset,length);
     } else if(toElementType==pvBoolean && fromElementType==pvBoolean) {
-        PVBooleanArray *pvfrom = static_cast<PVBooleanArray*>(from);
-        PVBooleanArray *pvto = static_cast<PVBooleanArray*>(to);
+        PVBooleanArray *pvfrom = static_cast<PVBooleanArray*>(from.get());
+        PVBooleanArray *pvto = static_cast<PVBooleanArray*>(to.get());
         while(length>0) {
-            int num = 0;
-            BooleanArray data = 0;
-            int fromOffset = 0;
-            BooleanArrayData booleanArrayData = BooleanArrayData();
-            num = pvfrom->get(offset,length,&booleanArrayData);
-            data = booleanArrayData.data;
+            size_t num = 0;
+            size_t fromOffset = 0;
+            BooleanArrayData booleanArrayData;
+            num = pvfrom->get(offset,length,booleanArrayData);
+            boolean * data = pvfrom->get();
             fromOffset = booleanArrayData.offset;
             if(num<=0) return ncopy;
             while(num>0) {
-                int n = pvto->put(toOffset,num,data,fromOffset);
+                size_t n = pvto->put(toOffset,num,data,fromOffset);
                 if(n<=0) return ncopy;
                 length -= n; num -= n; ncopy+=n; offset += n; toOffset += n; 
             }
         }
         return ncopy;
     } else if(toElementType==pvString && fromElementType==pvString) {
-        PVStringArray *pvfrom = static_cast<PVStringArray*>(from);
-        PVStringArray *pvto = static_cast<PVStringArray*>(to);
+        PVStringArray *pvfrom = static_cast<PVStringArray*>(from.get());
+        PVStringArray *pvto = static_cast<PVStringArray*>(to.get());
         while(length>0) {
-            int num = 0;
+            size_t num = 0;
             String *data;
-            int fromOffset = 0;
-            StringArrayData stringArrayData = StringArrayData();
-            num = pvfrom->get(offset,length,&stringArrayData);
-            data = stringArrayData.data;
+            size_t fromOffset = 0;
+            StringArrayData stringArrayData;
+            num = pvfrom->get(offset,length,stringArrayData);
+            data = pvfrom->get();
             fromOffset = stringArrayData.offset;
             if(num<=0) return ncopy;
             while(num>0) {
-                int n = pvto->put(toOffset,num,data,fromOffset);
+                size_t n = pvto->put(toOffset,num,data,fromOffset);
                 if(n<=0) return ncopy;
                 length -= n; num -= n; ncopy+=n; offset += n; toOffset += n; 
             }
         }
         return ncopy;
     } else if(toElementType==pvString) {
-        PVStringArray *pvto = static_cast<PVStringArray*>(to);
+        PVStringArray *pvto = static_cast<PVStringArray*>(to.get());
         ncopy = from->getLength();
         if(ncopy>length) ncopy = length;
-        int num = ncopy;
-        String toData[1];
+        size_t num = ncopy;
+        StringArray toData(1);
         while(num>0) {
-            convert->toStringArray(from,offset,1,toData,0);
-            if(pvto->put(toOffset,1,toData,0)<=0) break;
+            toStringArray(from,offset,1,toData,0);
+            if(pvto->put(toOffset,1,&toData[0],0)<=0) break;
             num--; offset++; toOffset++;
         }
         return ncopy;
     } else if(fromElementType==pvString) {
-        PVStringArray *pvfrom = static_cast<PVStringArray*>(from);
+        PVStringArray *pvfrom = static_cast<PVStringArray*>(from.get());
         while(length>0) {
-            int num = 0;
-            String *data = 0;
-            int fromOffset = 0;
-            StringArrayData stringArrayData = StringArrayData();
-            num = pvfrom->get(offset,length,&stringArrayData);
-            data = stringArrayData.data;
+            size_t num = 0;
+            size_t fromOffset = 0;
+            StringArrayData stringArrayData;
+            num = pvfrom->get(offset,length,stringArrayData);
+            StringArray const & data = stringArrayData.data;
             fromOffset = stringArrayData.offset;
             if(num<=0) return ncopy;
             while(num>0) {
-                int n = fromStringArray(to,toOffset,num,data,fromOffset);
+                size_t n = fromStringArray(to,toOffset,num,data,fromOffset);
                 if(n<=0) return ncopy;
                 length -= n; num -= n; ncopy+=n; offset += n; toOffset += n; 
             }
@@ -513,13 +920,13 @@ int Convert::copyScalarArray(PVScalarArray *from, int offset,
 }
 
 bool Convert::isCopyStructureCompatible(
-    StructureConstPtr fromStruct, StructureConstPtr toStruct)
+    StructureConstPtr &fromStruct, StructureConstPtr &toStruct)
 {
     FieldConstPtrArray fromFields = fromStruct->getFields();
     FieldConstPtrArray toFields = toStruct->getFields();
-    int length = fromStruct->getNumberFields();
+    size_t length = fromStruct->getNumberFields();
     if(length!=toStruct->getNumberFields()) return false;
-    for(int i=0; i<length; i++) {
+    for(size_t i=0; i<length; i++) {
         FieldConstPtr from = fromFields[i];
         FieldConstPtr to = toFields[i];
         Type fromType = from->getType();
@@ -527,34 +934,39 @@ bool Convert::isCopyStructureCompatible(
         if(fromType!=toType) return false;
         switch(fromType) {
         case scalar:
-            if(!convert->isCopyScalarCompatible(
-                static_pointer_cast<const Scalar>(from),
-                static_pointer_cast<const Scalar>(to)))
-                return false;
+            {
+		ScalarConstPtr xxx = static_pointer_cast<const Scalar>(from);
+                ScalarConstPtr yyy = static_pointer_cast<const Scalar>(to);
+                if(!isCopyScalarCompatible(xxx,yyy)) return false;
+            }
             break;
         case scalarArray:
-            if(!isCopyScalarArrayCompatible(
-                static_pointer_cast<const ScalarArray>(from),
-                static_pointer_cast<const ScalarArray>(to)))
-                return false;
+            {
+		ScalarArrayConstPtr xxx = static_pointer_cast<const ScalarArray>(from);
+                ScalarArrayConstPtr yyy = static_pointer_cast<const ScalarArray>(to);
+                if(!isCopyScalarArrayCompatible(xxx,yyy)) return false;
+            }
             break;
         case structure:
-            if(!isCopyStructureCompatible(
-                static_pointer_cast<const Structure>(from),
-                static_pointer_cast<const Structure>(to)))
-                return false;
+            {
+		StructureConstPtr xxx = static_pointer_cast<const Structure>(from);
+                StructureConstPtr yyy = static_pointer_cast<const Structure>(to);
+                if(!isCopyStructureCompatible(xxx,yyy)) return false;
+            }
             break;
         case structureArray:
-            if(!isCopyStructureArrayCompatible(
-                static_pointer_cast<const StructureArray>(from),
-                static_pointer_cast<const StructureArray>(to)))
-                return false;
+            {
+		StructureArrayConstPtr xxx = static_pointer_cast<const StructureArray>(from);
+                StructureArrayConstPtr yyy = static_pointer_cast<const StructureArray>(to);
+                if(!isCopyStructureArrayCompatible(xxx,yyy)) return false;
+            }
+            break;
         }
     }
     return true;
 }
 
-void Convert::copyStructure(PVStructure *from, PVStructure *to)
+void Convert::copyStructure(PVStructurePtr &from, PVStructurePtr &to)
 {
     if(to->isImmutable()) {
         if(from==to) return;
@@ -562,41 +974,41 @@ void Convert::copyStructure(PVStructure *from, PVStructure *to)
         throw std::invalid_argument(message);
     }
     if(from==to) return;
-    PVFieldPtrArray fromDatas = from->getPVFields();
-    PVFieldPtrArray toDatas = to->getPVFields();
+    PVFieldPtrArray const & fromDatas = from->getPVFields();
+    PVFieldPtrArray const & toDatas = to->getPVFields();
     if(from->getStructure()->getNumberFields() 
     != to->getStructure()->getNumberFields()) {
         String message("Convert.copyStructure Illegal copyStructure");
         throw std::invalid_argument(message);
     }
-    int numberFields = from->getStructure()->getNumberFields();
-    if(numberFields==2) {
+    size_t numberFields = from->getStructure()->getNumberFields();
+    if(numberFields>=2) {
+        String name0 = fromDatas[0]->getFieldName();
+        String name1 = fromDatas[1]->getFieldName();
         // look for enumerated structure and copy choices first
-        String fieldName = fromDatas[0]->getField()->getFieldName();
-        if(fieldName.compare("index")==0) {
+        if(name0.compare("index")==0 && name1.compare("choices")==0) {
             FieldConstPtr fieldIndex = fromDatas[0]->getField();
             FieldConstPtr fieldChoices = fromDatas[1]->getField();
             if(fieldIndex->getType()==scalar
-            && (fieldChoices->getFieldName().compare("choices")==0)
             && fieldChoices->getType()==scalarArray) {
-                PVScalar *pvScalar = static_cast<PVScalar*>(fromDatas[0]);
-                PVScalarArray *pvArray =
-                    static_cast<PVScalarArray*>(fromDatas[1]);
+                PVScalarPtr pvScalar = static_pointer_cast<PVScalar>(fromDatas[0]);
+                PVScalarArrayPtr pvArray =
+                    static_pointer_cast<PVScalarArray>(fromDatas[1]);
                 if((pvScalar->getScalar()->getScalarType()==pvInt)
                 && (pvArray->getScalarArray()->getElementType()==pvString)) {
-                   PVScalarArray* toArray = 
-                       static_cast<PVScalarArray*>(toDatas[1]);
+                   PVScalarArrayPtr toArray = 
+                       static_pointer_cast<PVScalarArray>(toDatas[1]);
                    copyScalarArray(pvArray,0,toArray,0,pvArray->getLength());
-                   PVScalar *toScalar = static_cast<PVScalar*>(toDatas[0]);
+                   PVScalarPtr toScalar = static_pointer_cast<PVScalar>(toDatas[0]);
                    copyScalar(pvScalar,toScalar);
                    return;
                 }
             }
         }
     }
-    for(int i=0; i < numberFields; i++) {
-        PVField *fromData = fromDatas[i];
-        PVField *toData = toDatas[i];
+    for(size_t i=0; i < numberFields; i++) {
+        PVFieldPtr fromData = fromDatas[i];
+        PVFieldPtr toData = toDatas[i];
         Type fromType = fromData->getField()->getType();
         Type toType = toData->getField()->getType();
         if(fromType!=toType) {
@@ -605,72 +1017,74 @@ void Convert::copyStructure(PVStructure *from, PVStructure *to)
         }
         switch(fromType) {
         case scalar:
-            copyScalar(
-                static_cast<PVScalar*>(fromData),
-                static_cast<PVScalar*>(toData));
-            break;
-        case scalarArray: {
-            PVScalarArray *fromArray = static_cast<PVScalarArray*>(fromData);
-            PVScalarArray *toArray = static_cast<PVScalarArray*>(toData);
-            int length = copyScalarArray(
-                fromArray,0,toArray,0,fromArray->getLength());
-            if(toArray->getLength()!=length) toArray->setLength(length);
-            break;
-        }
+            {
+                PVScalarPtr xxx = static_pointer_cast<PVScalar>(fromData);
+                PVScalarPtr yyy = static_pointer_cast<PVScalar>(toData);
+                copyScalar(xxx,yyy);
+                break;
+            }
+        case scalarArray:
+            {
+                PVScalarArrayPtr fromArray = static_pointer_cast<PVScalarArray>(fromData);
+                PVScalarArrayPtr toArray = static_pointer_cast<PVScalarArray>(toData);
+                size_t length = copyScalarArray(
+                    fromArray,0,toArray,0,fromArray->getLength());
+                if(toArray->getLength()!=length) toArray->setLength(length);
+                break;
+            }
         case structure:
-            copyStructure(
-                static_cast<PVStructure*>(fromData),
-                static_cast<PVStructure*>(toData));
-            break;
-        case structureArray: {
-            PVStructureArray *fromArray = 
-                static_cast<PVStructureArray*>(fromData);
-            PVStructureArray *toArray = 
-                static_cast<PVStructureArray*>(toData);
-            copyStructureArray(fromArray,toArray);
-            break;
-        }
+            {
+                PVStructurePtr xxx = static_pointer_cast<PVStructure>(fromData);
+                PVStructurePtr yyy = static_pointer_cast<PVStructure>(toData);
+                copyStructure(xxx,yyy);
+                break;
+            }
+        case structureArray:
+            {
+                PVStructureArrayPtr fromArray = 
+                    static_pointer_cast<PVStructureArray>(fromData);
+                PVStructureArrayPtr toArray = 
+                    static_pointer_cast<PVStructureArray>(toData);
+                copyStructureArray(fromArray,toArray);
+                break;
+            }
         }
     }
 }
 
 bool Convert::isCopyStructureArrayCompatible(
-    StructureArrayConstPtr from, StructureArrayConstPtr to)
+    StructureArrayConstPtr &from, StructureArrayConstPtr &to)
 {
-    return isCopyStructureCompatible(from->getStructure(),to->getStructure());
+    StructureConstPtr xxx = from->getStructure();
+    StructureConstPtr yyy = to->getStructure();
+    return isCopyStructureCompatible(xxx,yyy);
 }
 
 void Convert::copyStructureArray(
-    PVStructureArray *from, PVStructureArray *to)
+    PVStructureArrayPtr &from, PVStructureArrayPtr &to)
 {
     if(to->isImmutable()) {
         if(from==to) return;
         String message("Convert.copyStructureArray destination is immutable");
         throw std::invalid_argument(message);
     }
-    if(!isCopyStructureCompatible(
-    from->getStructureArray()->getStructure(),
-    to->getStructureArray()->getStructure())) {
+    StructureConstPtr xxx = from->getStructureArray()->getStructure();
+    StructureConstPtr yyy = to->getStructureArray()->getStructure();
+    if(!isCopyStructureCompatible(xxx,yyy)) {
         String message("Convert.copyStructureArray from and to are not compatible");
         throw std::invalid_argument(message);
     }
-    PVStructurePtrArray fromArray = 0;
-    int length = from->getLength();
-    StructureArrayData structureArrayData = StructureArrayData();
-    from->get(0, length,&structureArrayData);
-    fromArray = structureArrayData.data;
-    PVStructurePtrArray toArray = 0;
+    size_t length = from->getLength();
     if(to->getCapacity()<length) to->setCapacity(length);
-    to->get(0, length,&structureArrayData);
-    toArray = structureArrayData.data;
-    for(int i=0; i<length; i++) {
-    	if(fromArray[i]==0) {
-            if(toArray[i]!=0) delete toArray[i];
-            toArray[i] = 0;
+    PVStructurePtr * fromArray = from->get();
+    PVStructurePtr * toArray = to->get();
+    for(size_t i=0; i<length; i++) {
+    	if(fromArray[i].get()==NULL) {
+            toArray[i] = PVStructurePtr();
     	} else {
-    	    if(toArray[i]==0) {
+    	    if(toArray[i].get()==0) {
     		StructureConstPtr structure = to->getStructureArray()->getStructure();
-    		toArray[i] = pvDataCreate->createPVStructure(0,structure);
+    		toArray[i] = pvDataCreate->createPVStructure(structure);
     	    }
     	    copyStructure(fromArray[i],toArray[i]);
     	}
@@ -679,229 +1093,7 @@ void Convert::copyStructureArray(
     to->postPut();
 }
 
-int8 Convert::toByte(PVScalar * pv)
-{
-    ScalarConstPtr scalar = pv->getScalar();
-    ScalarType scalarType = scalar->getScalarType();
-    switch(scalarType) {
-        case pvBoolean:
-           throw std::logic_error(String("boolean can not be converted to byte"));
-        case pvByte: {
-            PVByte *value = static_cast<PVByte *>(pv);
-            return value->get();
-        }
-        case pvShort: {
-            PVShort *value = static_cast<PVShort *>(pv);
-            return value->get();
-        }
-        case pvInt: {
-            PVInt *value = static_cast<PVInt *>(pv);
-            return value->get();
-        }
-        case pvLong: {
-            PVLong *value = static_cast<PVLong *>(pv);
-            return value->get();
-        }
-        case pvFloat: {
-            PVFloat *value = static_cast<PVFloat *>(pv);
-            return static_cast<int8>(value->get());
-        }
-        case pvDouble: {
-            PVDouble *value = static_cast<PVDouble *>(pv);
-            return static_cast<int8>(value->get());
-        }
-        case pvString:
-           throw std::logic_error(String("string can not be converted to byte"));
-    }
-    throw std::logic_error(logicError);
-}
-
-int16 Convert::toShort(PVScalar * pv)
-{
-    ScalarConstPtr scalar = pv->getScalar();
-    ScalarType scalarType = scalar->getScalarType();
-    switch(scalarType) {
-        case pvBoolean:
-           throw std::logic_error(String("boolean can not be converted to short"));
-        case pvByte: {
-            PVByte *value = static_cast<PVByte *>(pv);
-            return value->get();
-        }
-        case pvShort: {
-            PVShort *value = static_cast<PVShort *>(pv);
-            return value->get();
-        }
-        case pvInt: {
-            PVInt *value = static_cast<PVInt *>(pv);
-            return value->get();
-        }
-        case pvLong: {
-            PVLong *value = static_cast<PVLong *>(pv);
-            return value->get();
-        }
-        case pvFloat: {
-            PVFloat *value = static_cast<PVFloat *>(pv);
-            return static_cast<int16>(value->get());
-        }
-        case pvDouble: {
-            PVDouble *value = static_cast<PVDouble *>(pv);
-            return static_cast<int16>(value->get());
-        }
-        case pvString:
-           throw std::logic_error(String("string can not be converted to short"));
-    }
-    throw std::logic_error(logicError);
-}
-
-int32 Convert::toInt(PVScalar * pv)
-{
-    ScalarConstPtr scalar = pv->getScalar();
-    ScalarType scalarType = scalar->getScalarType();
-    switch(scalarType) {
-        case pvBoolean:
-           throw std::logic_error(String("boolean can not be converted to int"));
-        case pvByte: {
-            PVByte *value = static_cast<PVByte *>(pv);
-            return value->get();
-        }
-        case pvShort: {
-            PVShort *value = static_cast<PVShort *>(pv);
-            return value->get();
-        }
-        case pvInt: {
-            PVInt *value = static_cast<PVInt *>(pv);
-            return value->get();
-        }
-        case pvLong: {
-            PVLong *value = static_cast<PVLong *>(pv);
-            return value->get();
-        }
-        case pvFloat: {
-            PVFloat *value = static_cast<PVFloat *>(pv);
-            return static_cast<int32>(value->get());
-        }
-        case pvDouble: {
-            PVDouble *value = static_cast<PVDouble *>(pv);
-            return static_cast<int32>(value->get());
-        }
-        case pvString:
-           throw std::logic_error(String("string can not be converted to int"));
-    }
-    throw std::logic_error(logicError);
-}
-
-int64 Convert::toLong(PVScalar * pv)
-{
-    ScalarConstPtr scalar = pv->getScalar();
-    ScalarType scalarType = scalar->getScalarType();
-    switch(scalarType) {
-        case pvBoolean:
-           throw std::logic_error(String("boolean can not be converted to long"));
-        case pvByte: {
-            PVByte *value = static_cast<PVByte *>(pv);
-            return value->get();
-        }
-        case pvShort: {
-            PVShort *value = static_cast<PVShort *>(pv);
-            return value->get();
-        }
-        case pvInt: {
-            PVInt *value = static_cast<PVInt *>(pv);
-            return value->get();
-        }
-        case pvLong: {
-            PVLong *value = static_cast<PVLong *>(pv);
-            return value->get();
-        }
-        case pvFloat: {
-            PVFloat *value = static_cast<PVFloat *>(pv);
-            return static_cast<int64>(value->get());
-        }
-        case pvDouble: {
-            PVDouble *value = static_cast<PVDouble *>(pv);
-            return static_cast<int64>(value->get());
-        }
-        case pvString:
-           throw std::logic_error(String("string can not be converted to long"));
-    }
-    throw std::logic_error(logicError);
-}
-
-float Convert::toFloat(PVScalar * pv)
-{
-    ScalarConstPtr scalar = pv->getScalar();
-    ScalarType scalarType = scalar->getScalarType();
-    switch(scalarType) {
-        case pvBoolean:
-           throw std::logic_error(String("boolean can not be converted to float"));
-        case pvByte: {
-            PVByte *value = static_cast<PVByte *>(pv);
-            return value->get();
-        }
-        case pvShort: {
-            PVShort *value = static_cast<PVShort *>(pv);
-            return value->get();
-        }
-        case pvInt: {
-            PVInt *value = static_cast<PVInt *>(pv);
-            return value->get();
-        }
-        case pvLong: {
-            PVLong *value = static_cast<PVLong *>(pv);
-            return value->get();
-        }
-        case pvFloat: {
-            PVFloat *value = static_cast<PVFloat *>(pv);
-            return value->get();
-        }
-        case pvDouble: {
-            PVDouble *value = static_cast<PVDouble *>(pv);
-            return value->get();
-        }
-        case pvString:
-           throw std::logic_error(String("string can not be converted to float"));
-    }
-    throw std::logic_error(logicError);
-}
-
-double Convert::toDouble(PVScalar * pv)
-{
-    ScalarConstPtr scalar = pv->getScalar();
-    ScalarType scalarType = scalar->getScalarType();
-    switch(scalarType) {
-        case pvBoolean:
-           throw std::logic_error(String("boolean can not be converted to double"));
-        case pvByte: {
-            PVByte *value = static_cast<PVByte *>(pv);
-            return value->get();
-        }
-        case pvShort: {
-            PVShort *value = static_cast<PVShort *>(pv);
-            return value->get();
-        }
-        case pvInt: {
-            PVInt *value = static_cast<PVInt *>(pv);
-            return value->get();
-        }
-        case pvLong: {
-            PVLong *value = static_cast<PVLong *>(pv);
-            return value->get();
-        }
-        case pvFloat: {
-            PVFloat *value = static_cast<PVFloat *>(pv);
-            return value->get();
-        }
-        case pvDouble: {
-            PVDouble *value = static_cast<PVDouble *>(pv);
-            return value->get();
-        }
-        case pvString:
-           throw std::logic_error(String("string can not be converted to double"));
-    }
-    throw std::logic_error(logicError);
-}
-
-String Convert::toString(PVScalar * pv)
+String Convert::toString(PVScalarPtr & pv)
 {
     static String trueString("true");
     static String falseString("false");
@@ -910,388 +1102,196 @@ String Convert::toString(PVScalar * pv)
     ScalarType scalarType = scalar->getScalarType();
     switch(scalarType) {
         case pvBoolean: {
-            PVBoolean *pvalue = static_cast<PVBoolean *>(pv);
-            bool value = pvalue->get();
+            PVBooleanPtr pvalue = static_pointer_cast<PVBoolean>(pv);
+            boolean value = pvalue->get();
             return value ? trueString : falseString;
         }
         case pvByte: {
-            PVByte *value = static_cast<PVByte *>(pv);
+            PVBytePtr value = static_pointer_cast<PVByte>(pv);
             char buffer[30];
-            sprintf(buffer,"%d",(int)value->get());
+            sprintf(buffer,"%d",(int32)value->get());
             return String(buffer);
         }
         case pvShort: {
-            PVShort *value = static_cast<PVShort *>(pv);
+            PVShortPtr value = static_pointer_cast<PVShort>(pv);
             char buffer[30];
-            sprintf(buffer,"%d",(int)value->get());
+            sprintf(buffer,"%d",(int32)value->get());
             return String(buffer);
         }
         case pvInt: {
-            PVInt *value = static_cast<PVInt *>(pv);
+            PVIntPtr value = static_pointer_cast<PVInt>(pv);
             char buffer[30];
-            sprintf(buffer,"%d",value->get());
+            sprintf(buffer,"%d",(int32)value->get());
             return String(buffer);
         }
         case pvLong: {
-            PVLong *value = static_cast<PVLong *>(pv);
+            PVLongPtr value = static_pointer_cast<PVLong>(pv);
             char buffer[30];
-            sprintf(buffer,"%lli",value->get());
+            sprintf(buffer,"%lli",(long long int)value->get());
+            return String(buffer);
+        }
+        case pvUByte: {
+            PVUBytePtr value = static_pointer_cast<PVUByte>(pv);
+            char buffer[30];
+            sprintf(buffer,"%u",(uint32)value->get());
+            return String(buffer);
+        }
+        case pvUShort: {
+            PVUShortPtr value = static_pointer_cast<PVUShort>(pv);
+            char buffer[30];
+            sprintf(buffer,"%u",(uint32)value->get());
+            return String(buffer);
+        }
+        case pvUInt: {
+            PVUIntPtr value = static_pointer_cast<PVUInt>(pv);
+            char buffer[30];
+            sprintf(buffer,"%u",value->get());
+            return String(buffer);
+        }
+        case pvULong: {
+            PVULongPtr value = static_pointer_cast<PVULong>(pv);
+            char buffer[30];
+            sprintf(buffer,"%llu",(unsigned long long int)value->get());
             return String(buffer);
         }
         case pvFloat: {
-            PVFloat *value = static_cast<PVFloat *>(pv);
+            PVFloatPtr value = static_pointer_cast<PVFloat>(pv);
             char buffer[30];
             sprintf(buffer,"%g",value->get());
             return String(buffer);
         }
         case pvDouble: {
-            PVDouble *value = static_cast<PVDouble *>(pv);
+            PVDoublePtr value = static_pointer_cast<PVDouble>(pv);
             char buffer[30];
             sprintf(buffer,"%lg",value->get());
             return String(buffer);
         }
         case pvString: {
-            PVString *value = static_cast<PVString *>(pv);
+            PVStringPtr value = static_pointer_cast<PVString>(pv);
             return value->get();
         }
     }
     throw std::logic_error(logicError);
 }
 
-void Convert::fromByte(PVScalar *pv,int8 from)
+size_t Convert::toByteArray(PVScalarArrayPtr  &pv, size_t offset, size_t length,
+    int8 to[], size_t toOffset)
 {
-    ScalarConstPtr scalar = pv->getScalar();
-    ScalarType scalarType = scalar->getScalarType();
-    switch(scalarType) {
-        case pvBoolean:
-           throw std::logic_error(String("byte can not be converted to boolean"));
-        case pvByte: {
-            PVByte *value = static_cast<PVByte *>(pv);
-            value->put(from); return;
-        }
-        case pvShort: {
-            PVShort *value = static_cast<PVShort *>(pv);
-            value->put(from); return;
-        }
-        case pvInt: {
-            PVInt *value = static_cast<PVInt *>(pv);
-            value->put(from); return;
-        }
-        case pvLong: {
-            PVLong *value = static_cast<PVLong *>(pv);
-            value->put(from); return;
-        }
-        case pvFloat: {
-            PVFloat *value = static_cast<PVFloat *>(pv);
-            value->put(from); return;
-        }
-        case pvDouble: {
-            PVDouble *value = static_cast<PVDouble *>(pv);
-            value->put(from); return;
-        }
-        case pvString: {
-            PVString *value = static_cast<PVString *>(pv);
-            char buffer[20];
-            int ival = from;
-            sprintf(buffer,"%d",ival);
-            String xxx(buffer);
-            value->put(xxx);
-            return;
-        }
-    }
-    throw std::logic_error(logicError);
+    return convertToByteArray(pv.get(), offset, length, to, toOffset);
 }
 
-void  Convert::fromShort(PVScalar *pv,int16 from)
+size_t Convert::toShortArray(PVScalarArrayPtr &pv, size_t offset, size_t length,
+    int16 to[], size_t toOffset)
 {
-    ScalarConstPtr scalar = pv->getScalar();
-    ScalarType scalarType = scalar->getScalarType();
-    switch(scalarType) {
-        case pvBoolean:
-           throw std::logic_error(String("short can not be converted to boolean"));
-        case pvByte: {
-            PVByte *value = static_cast<PVByte *>(pv);
-            value->put(from); return;
-        }
-        case pvShort: {
-            PVShort *value = static_cast<PVShort *>(pv);
-            value->put(from); return;
-        }
-        case pvInt: {
-            PVInt *value = static_cast<PVInt *>(pv);
-            value->put(from); return;
-        }
-        case pvLong: {
-            PVLong *value = static_cast<PVLong *>(pv);
-            value->put(from); return;
-        }
-        case pvFloat: {
-            PVFloat *value = static_cast<PVFloat *>(pv);
-            value->put(from); return;
-        }
-        case pvDouble: {
-            PVDouble *value = static_cast<PVDouble *>(pv);
-            value->put(from); return;
-        }
-        case pvString: {
-            PVString *value = static_cast<PVString *>(pv);
-            char buffer[20];
-            int ival = from;
-            sprintf(buffer,"%d",ival);
-            String xxx(buffer);
-            value->put(xxx);
-            return;
-        }
-    }
-    throw std::logic_error(logicError);
+    return convertToShortArray(pv.get(), offset, length, to, toOffset);
 }
 
-void  Convert::fromInt(PVScalar *pv, int32 from)
+size_t Convert::toIntArray(PVScalarArrayPtr &pv, size_t offset, size_t length,
+    int32 to[], size_t toOffset)
 {
-    ScalarConstPtr scalar = pv->getScalar();
-    ScalarType scalarType = scalar->getScalarType();
-    switch(scalarType) {
-        case pvBoolean:
-           throw std::logic_error(String("int can not be converted to boolean"));
-        case pvByte: {
-            PVByte *value = static_cast<PVByte *>(pv);
-            value->put(from); return;
-        }
-        case pvShort: {
-            PVShort *value = static_cast<PVShort *>(pv);
-            value->put(from); return;
-        }
-        case pvInt: {
-            PVInt *value = static_cast<PVInt *>(pv);
-            value->put(from); return;
-        }
-        case pvLong: {
-            PVLong *value = static_cast<PVLong *>(pv);
-            value->put(from); return;
-        }
-        case pvFloat: {
-            PVFloat *value = static_cast<PVFloat *>(pv);
-            value->put(from); return;
-        }
-        case pvDouble: {
-            PVDouble *value = static_cast<PVDouble *>(pv);
-            value->put(from); return;
-        }
-        case pvString: {
-            PVString *value = static_cast<PVString *>(pv);
-            char buffer[20];
-            int ival = from;
-            sprintf(buffer,"%d",ival);
-            String xxx(buffer);
-            value->put(xxx);
-            return;
-        }
-    }
-    throw std::logic_error(logicError);
+    return convertToIntArray(pv.get(), offset, length, to, toOffset);
 }
 
-void  Convert::fromLong(PVScalar *pv, int64 from)
+size_t Convert::toLongArray(PVScalarArrayPtr &pv, size_t offset, size_t length,
+    int64 to[], size_t toOffset)
 {
-    ScalarConstPtr scalar = pv->getScalar();
-    ScalarType scalarType = scalar->getScalarType();
-    switch(scalarType) {
-        case pvBoolean:
-           throw std::logic_error(String("long can not be converted to boolean"));
-        case pvByte: {
-            PVByte *value = static_cast<PVByte *>(pv);
-            value->put(from); return;
-        }
-        case pvShort: {
-            PVShort *value = static_cast<PVShort *>(pv);
-            value->put(from); return;
-        }
-        case pvInt: {
-            PVInt *value = static_cast<PVInt *>(pv);
-            value->put(from); return;
-        }
-        case pvLong: {
-            PVLong *value = static_cast<PVLong *>(pv);
-            value->put(from); return;
-        }
-        case pvFloat: {
-            PVFloat *value = static_cast<PVFloat *>(pv);
-            value->put(from); return;
-        }
-        case pvDouble: {
-            PVDouble *value = static_cast<PVDouble *>(pv);
-            value->put(from); return;
-        }
-        case pvString: {
-            PVString *value = static_cast<PVString *>(pv);
-            char buffer[20];
-            int64 ival = from;
-            sprintf(buffer,"%lld",ival);
-            String xxx(buffer);
-            value->put(xxx);
-            return;
-        }
-    }
-    throw std::logic_error(logicError);
+    return convertToLongArray(pv.get(), offset, length, to, toOffset);
 }
 
-void  Convert::fromFloat(PVScalar* pv, float from)
+size_t Convert::toUByteArray(PVScalarArrayPtr  &pv, size_t offset, size_t length,
+    uint8 to[], size_t toOffset)
 {
-    ScalarConstPtr scalar = pv->getScalar();
-    ScalarType scalarType = scalar->getScalarType();
-    switch(scalarType) {
-        case pvBoolean:
-           throw std::logic_error(String("float can not be converted to boolean"));
-        case pvByte: {
-            PVByte *value = static_cast<PVByte *>(pv);
-            value->put(static_cast<int8>(from)); return;
-        }
-        case pvShort: {
-            PVShort *value = static_cast<PVShort *>(pv);
-            value->put(static_cast<int16>(from)); return;
-        }
-        case pvInt: {
-            PVInt *value = static_cast<PVInt *>(pv);
-            value->put(static_cast<int32>(from)); return;
-        }
-        case pvLong: {
-            PVLong *value = static_cast<PVLong *>(pv);
-            value->put(static_cast<int64>(from)); return;
-        }
-        case pvFloat: {
-            PVFloat *value = static_cast<PVFloat *>(pv);
-            value->put(from); return;
-        }
-        case pvDouble: {
-            PVDouble *value = static_cast<PVDouble *>(pv);
-            value->put(from); return;
-        }
-        case pvString: {
-            PVString *value = static_cast<PVString *>(pv);
-            char buffer[20];
-            double dval = from;
-            sprintf(buffer,"%g",dval);
-            String xxx(buffer);
-            value->put(xxx);
-            return;
-        }
-    }
-    throw std::logic_error(logicError);
+    return convertToUByteArray(pv.get(), offset, length, to, toOffset);
 }
 
-void  Convert::fromDouble(PVScalar *pv, double from)
+size_t Convert::toUShortArray(PVScalarArrayPtr &pv, size_t offset, size_t length,
+    uint16 to[], size_t toOffset)
 {
-    ScalarConstPtr scalar = pv->getScalar();
-    ScalarType scalarType = scalar->getScalarType();
-    switch(scalarType) {
-        case pvBoolean:
-           throw std::logic_error(String("double can not be converted to boolean"));
-        case pvByte: {
-            PVByte *value = static_cast<PVByte *>(pv);
-            value->put(static_cast<int8>(from)); return;
-        }
-        case pvShort: {
-            PVShort *value = static_cast<PVShort *>(pv);
-            value->put(static_cast<int16>(from)); return;
-        }
-        case pvInt: {
-            PVInt *value = static_cast<PVInt *>(pv);
-            value->put(static_cast<int32>(from)); return;
-        }
-        case pvLong: {
-            PVLong *value = static_cast<PVLong *>(pv);
-            value->put(static_cast<int64>(from)); return;
-        }
-        case pvFloat: {
-            PVFloat *value = static_cast<PVFloat *>(pv);
-            value->put(from); return;
-        }
-        case pvDouble: {
-            PVDouble *value = static_cast<PVDouble *>(pv);
-            value->put(from); return;
-        }
-        case pvString: {
-            PVString *value = static_cast<PVString *>(pv);
-            char buffer[20];
-            double dval = from;
-            sprintf(buffer,"%g",dval);
-            String xxx(buffer);
-            value->put(xxx);
-            return;
-        }
-    }
-    throw std::logic_error(logicError);
+    return convertToUShortArray(pv.get(), offset, length, to, toOffset);
 }
 
-int Convert::toByteArray(PVScalarArray * pv, int offset, int length,
-    int8 to[], int toOffset)
+size_t Convert::toUIntArray(PVScalarArrayPtr &pv, size_t offset, size_t length,
+    uint32 to[], size_t toOffset)
 {
-    return convertToByteArray(pv, offset, length, to, toOffset);
+    return convertToUIntArray(pv.get(), offset, length, to, toOffset);
 }
 
-int Convert::toShortArray(PVScalarArray * pv, int offset, int length,
-    int16 to[], int toOffset)
+size_t Convert::toULongArray(PVScalarArrayPtr &pv, size_t offset, size_t length,
+    uint64 to[], size_t toOffset)
 {
-    return convertToShortArray(pv, offset, length, to, toOffset);
+    return convertToULongArray(pv.get(), offset, length, to, toOffset);
 }
 
-int Convert::toIntArray(PVScalarArray * pv, int offset, int length,
-    int32 to[], int toOffset)
+size_t Convert::toFloatArray(PVScalarArrayPtr &pv, size_t offset, size_t length,
+    float to[], size_t toOffset)
 {
-    return convertToIntArray(pv, offset, length, to, toOffset);
+    return convertToFloatArray(pv.get(), offset, length, to, toOffset);
 }
 
-int Convert::toLongArray(PVScalarArray * pv, int offset, int length,
-    int64 to[], int toOffset)
+size_t Convert::toDoubleArray(PVScalarArrayPtr &pv, size_t offset, size_t length,
+    double to[], size_t toOffset)
 {
-    return convertToLongArray(pv, offset, length, to, toOffset);
+    return convertToDoubleArray(pv.get(), offset, length, to, toOffset);
 }
 
-int Convert::toFloatArray(PVScalarArray * pv, int offset, int length,
-    float to[], int toOffset)
+size_t Convert::fromByteArray(PVScalarArrayPtr &pv, size_t offset, size_t length,
+    int8 from[], size_t fromOffset)
 {
-    return convertToFloatArray(pv, offset, length, to, toOffset);
+    return convertFromByteArray(pv.get(), offset, length, from, fromOffset);
 }
 
-int Convert::toDoubleArray(PVScalarArray * pv, int offset, int length,
-    double to[], int toOffset)
+size_t Convert::fromShortArray(PVScalarArrayPtr &pv, size_t offset, size_t length,
+    int16 from[], size_t fromOffset)
 {
-    return convertToDoubleArray(pv, offset, length, to, toOffset);
+    return convertFromShortArray(pv.get(), offset, length, from, fromOffset);
 }
 
-int Convert::fromByteArray(PVScalarArray *pv, int offset, int length,
-    int8 from[], int fromOffset)
+size_t Convert::fromIntArray(PVScalarArrayPtr &pv, size_t offset, size_t length,
+    int32 from[], size_t fromOffset)
 {
-    return convertFromByteArray(pv, offset, length, from, fromOffset);
+    return convertFromIntArray(pv.get(), offset, length, from, fromOffset);
 }
 
-int Convert::fromShortArray(PVScalarArray *pv, int offset, int length,
-    int16 from[], int fromOffset)
+size_t Convert::fromLongArray(PVScalarArrayPtr &pv, size_t offset, size_t length,
+    int64 from[], size_t fromOffset)
 {
-    return convertFromShortArray(pv, offset, length, from, fromOffset);
+    return convertFromLongArray(pv.get(), offset, length, from, fromOffset);
 }
 
-int Convert::fromIntArray(PVScalarArray *pv, int offset, int length,
-    int32 from[], int fromOffset)
+size_t Convert::fromUByteArray(PVScalarArrayPtr &pv, size_t offset, size_t length,
+    uint8 from[], size_t fromOffset)
 {
-    return convertFromIntArray(pv, offset, length, from, fromOffset);
+    return convertFromUByteArray(pv.get(), offset, length, from, fromOffset);
 }
 
-int Convert::fromLongArray(PVScalarArray *pv, int offset, int length,
-    int64 from[], int fromOffset)
+size_t Convert::fromUShortArray(PVScalarArrayPtr &pv, size_t offset, size_t length,
+    uint16 from[], size_t fromOffset)
 {
-    return convertFromLongArray(pv, offset, length, from, fromOffset);
+    return convertFromUShortArray(pv.get(), offset, length, from, fromOffset);
 }
 
-int Convert::fromFloatArray(PVScalarArray *pv, int offset, int length,
-    float from[], int fromOffset)
+size_t Convert::fromUIntArray(PVScalarArrayPtr &pv, size_t offset, size_t length,
+    uint32 from[], size_t fromOffset)
 {
-    return convertFromFloatArray(pv, offset, length, from, fromOffset);
+    return convertFromUIntArray(pv.get(), offset, length, from, fromOffset);
 }
 
-int Convert::fromDoubleArray(PVScalarArray *pv, int offset, int length,
-    double from[], int fromOffset)
+size_t Convert::fromULongArray(PVScalarArrayPtr &pv, size_t offset, size_t length,
+    uint64 from[], size_t fromOffset)
 {
-    return convertFromDoubleArray(pv, offset, length, from, fromOffset);
+    return convertFromULongArray(pv.get(), offset, length, from, fromOffset);
+}
+
+size_t Convert::fromFloatArray(PVScalarArrayPtr &pv, size_t offset, size_t length,
+    float from[], size_t fromOffset)
+{
+    return convertFromFloatArray(pv.get(), offset, length, from, fromOffset);
+}
+
+size_t Convert::fromDoubleArray(PVScalarArrayPtr &pv, size_t offset, size_t length,
+    double from[], size_t fromOffset)
+{
+    return convertFromDoubleArray(pv.get(), offset, length, from, fromOffset);
 }
 
 void Convert::newLine(StringBuilder buffer, int indentLevel)
@@ -1341,6 +1341,34 @@ static bool scalarEquals(PVScalar *a,PVScalar *b)
             int64 bvalue = pb->get();
             return ((avalue==bvalue) ? true : false);
         }
+        case pvUByte: {
+            PVUByte *pa = static_cast<PVUByte *>(a);
+            PVUByte *pb = static_cast<PVUByte *>(b);
+            uint8 avalue = pa->get();
+            uint8 bvalue = pb->get();
+            return ((avalue==bvalue) ? true : false);
+        }
+        case pvUShort: {
+            PVUShort *pa = static_cast<PVUShort *>(a);
+            PVUShort *pb = static_cast<PVUShort *>(b);
+            uint16 avalue = pa->get();
+            uint16 bvalue = pb->get();
+            return ((avalue==bvalue) ? true : false);
+        }
+        case pvUInt: {
+            PVUInt *pa = static_cast<PVUInt *>(a);
+            PVUInt *pb = static_cast<PVUInt *>(b);
+            uint32 avalue = pa->get();
+            uint32 bvalue = pb->get();
+            return ((avalue==bvalue) ? true : false);
+        }
+        case pvULong: {
+            PVULong *pa = static_cast<PVULong *>(a);
+            PVULong *pb = static_cast<PVULong *>(b);
+            uint64 avalue = pa->get();
+            uint64 bvalue = pb->get();
+            return ((avalue==bvalue) ? true : false);
+        }
         case pvFloat: {
             PVFloat *pa = static_cast<PVFloat *>(a);
             PVFloat *pb = static_cast<PVFloat *>(b);
@@ -1374,18 +1402,18 @@ static bool arrayEquals(PVScalarArray *a,PVScalarArray *b)
     ScalarType bType = b->getScalarArray()->getElementType();
     if(aType!=bType) return false;
     if(a->getLength()!=b->getLength()) return false;
-    int length = a->getLength();
+    size_t length = a->getLength();
     switch(aType) {
         case pvBoolean: {
             PVBooleanArray *aarray = static_cast<PVBooleanArray *>(a);
             PVBooleanArray *barray = static_cast<PVBooleanArray *>(b);
-            BooleanArrayData adata = BooleanArrayData();
-            BooleanArrayData bdata = BooleanArrayData();
-            aarray->get(0,length,&adata);
-            barray->get(0,length,&bdata);
+            BooleanArrayData adata;
+            BooleanArrayData bdata;
+            aarray->get(0,length,adata);
+            barray->get(0,length,bdata);
             BooleanArray avalue = adata.data;
             BooleanArray bvalue = bdata.data;
-            for(int i=0; i<length; i++) {
+            for(size_t i=0; i<length; i++) {
                 if(avalue[i]!=bvalue[i]) return false;
             }
             return true;
@@ -1393,13 +1421,13 @@ static bool arrayEquals(PVScalarArray *a,PVScalarArray *b)
         case pvByte: {
             PVByteArray *aarray = static_cast<PVByteArray *>(a);
             PVByteArray *barray = static_cast<PVByteArray *>(b);
-            ByteArrayData adata = ByteArrayData();
-            ByteArrayData bdata = ByteArrayData();
-            aarray->get(0,length,&adata);
-            barray->get(0,length,&bdata);
+            ByteArrayData adata;
+            ByteArrayData bdata;
+            aarray->get(0,length,adata);
+            barray->get(0,length,bdata);
             ByteArray avalue = adata.data;
             ByteArray bvalue = bdata.data;
-            for(int i=0; i<length; i++) {
+            for(size_t i=0; i<length; i++) {
                 if(avalue[i]!=bvalue[i]) return false;
             }
             return true;
@@ -1407,13 +1435,13 @@ static bool arrayEquals(PVScalarArray *a,PVScalarArray *b)
         case pvShort: {
             PVShortArray *aarray = static_cast<PVShortArray *>(a);
             PVShortArray *barray = static_cast<PVShortArray *>(b);
-            ShortArrayData adata = ShortArrayData();
-            ShortArrayData bdata = ShortArrayData();
-            aarray->get(0,length,&adata);
-            barray->get(0,length,&bdata);
+            ShortArrayData adata;
+            ShortArrayData bdata;
+            aarray->get(0,length,adata);
+            barray->get(0,length,bdata);
             ShortArray avalue = adata.data;
             ShortArray bvalue = bdata.data;
-            for(int i=0; i<length; i++) {
+            for(size_t i=0; i<length; i++) {
                 if(avalue[i]!=bvalue[i]) return false;
             }
             return true;
@@ -1421,13 +1449,13 @@ static bool arrayEquals(PVScalarArray *a,PVScalarArray *b)
         case pvInt: {
             PVIntArray *aarray = static_cast<PVIntArray *>(a);
             PVIntArray *barray = static_cast<PVIntArray *>(b);
-            IntArrayData adata = IntArrayData();
-            IntArrayData bdata = IntArrayData();
-            aarray->get(0,length,&adata);
-            barray->get(0,length,&bdata);
+            IntArrayData adata;
+            IntArrayData bdata;
+            aarray->get(0,length,adata);
+            barray->get(0,length,bdata);
             IntArray avalue = adata.data;
             IntArray bvalue = bdata.data;
-            for(int i=0; i<length; i++) {
+            for(size_t i=0; i<length; i++) {
                 if(avalue[i]!=bvalue[i]) return false;
             }
             return true;
@@ -1435,13 +1463,69 @@ static bool arrayEquals(PVScalarArray *a,PVScalarArray *b)
         case pvLong: {
             PVLongArray *aarray = static_cast<PVLongArray *>(a);
             PVLongArray *barray = static_cast<PVLongArray *>(b);
-            LongArrayData adata = LongArrayData();
-            LongArrayData bdata = LongArrayData();
-            aarray->get(0,length,&adata);
-            barray->get(0,length,&bdata);
+            LongArrayData adata;
+            LongArrayData bdata;
+            aarray->get(0,length,adata);
+            barray->get(0,length,bdata);
             LongArray avalue = adata.data;
             LongArray bvalue = bdata.data;
-            for(int i=0; i<length; i++) {
+            for(size_t i=0; i<length; i++) {
+                if(avalue[i]!=bvalue[i]) return false;
+            }
+            return true;
+        }
+        case pvUByte: {
+            PVUByteArray *aarray = static_cast<PVUByteArray *>(a);
+            PVUByteArray *barray = static_cast<PVUByteArray *>(b);
+            UByteArrayData adata;
+            UByteArrayData bdata;
+            aarray->get(0,length,adata);
+            barray->get(0,length,bdata);
+            UByteArray avalue = adata.data;
+            UByteArray bvalue = bdata.data;
+            for(size_t i=0; i<length; i++) {
+                if(avalue[i]!=bvalue[i]) return false;
+            }
+            return true;
+        }
+        case pvUShort: {
+            PVUShortArray *aarray = static_cast<PVUShortArray *>(a);
+            PVUShortArray *barray = static_cast<PVUShortArray *>(b);
+            UShortArrayData adata;
+            UShortArrayData bdata;
+            aarray->get(0,length,adata);
+            barray->get(0,length,bdata);
+            UShortArray avalue = adata.data;
+            UShortArray bvalue = bdata.data;
+            for(size_t i=0; i<length; i++) {
+                if(avalue[i]!=bvalue[i]) return false;
+            }
+            return true;
+        }
+        case pvUInt: {
+            PVUIntArray *aarray = static_cast<PVUIntArray *>(a);
+            PVUIntArray *barray = static_cast<PVUIntArray *>(b);
+            UIntArrayData adata;
+            UIntArrayData bdata;
+            aarray->get(0,length,adata);
+            barray->get(0,length,bdata);
+            UIntArray avalue = adata.data;
+            UIntArray bvalue = bdata.data;
+            for(size_t i=0; i<length; i++) {
+                if(avalue[i]!=bvalue[i]) return false;
+            }
+            return true;
+        }
+        case pvULong: {
+            PVULongArray *aarray = static_cast<PVULongArray *>(a);
+            PVULongArray *barray = static_cast<PVULongArray *>(b);
+            ULongArrayData adata;
+            ULongArrayData bdata;
+            aarray->get(0,length,adata);
+            barray->get(0,length,bdata);
+            ULongArray avalue = adata.data;
+            ULongArray bvalue = bdata.data;
+            for(size_t i=0; i<length; i++) {
                 if(avalue[i]!=bvalue[i]) return false;
             }
             return true;
@@ -1449,13 +1533,13 @@ static bool arrayEquals(PVScalarArray *a,PVScalarArray *b)
         case pvFloat: {
             PVFloatArray *aarray = static_cast<PVFloatArray *>(a);
             PVFloatArray *barray = static_cast<PVFloatArray *>(b);
-            FloatArrayData adata = FloatArrayData();
-            FloatArrayData bdata = FloatArrayData();
-            aarray->get(0,length,&adata);
-            barray->get(0,length,&bdata);
+            FloatArrayData adata;
+            FloatArrayData bdata;
+            aarray->get(0,length,adata);
+            barray->get(0,length,bdata);
             FloatArray avalue = adata.data;
             FloatArray bvalue = bdata.data;
-            for(int i=0; i<length; i++) {
+            for(size_t i=0; i<length; i++) {
                 if(avalue[i]!=bvalue[i]) return false;
             }
             return true;
@@ -1463,13 +1547,13 @@ static bool arrayEquals(PVScalarArray *a,PVScalarArray *b)
         case pvDouble: {
             PVDoubleArray *aarray = static_cast<PVDoubleArray *>(a);
             PVDoubleArray *barray = static_cast<PVDoubleArray *>(b);
-            DoubleArrayData adata = DoubleArrayData();
-            DoubleArrayData bdata = DoubleArrayData();
-            aarray->get(0,length,&adata);
-            barray->get(0,length,&bdata);
+            DoubleArrayData adata;
+            DoubleArrayData bdata;
+            aarray->get(0,length,adata);
+            barray->get(0,length,bdata);
             DoubleArray avalue = adata.data;
             DoubleArray bvalue = bdata.data;
-            for(int i=0; i<length; i++) {
+            for(size_t i=0; i<length; i++) {
                 if(avalue[i]!=bvalue[i]) return false;
             }
             return true;
@@ -1477,13 +1561,13 @@ static bool arrayEquals(PVScalarArray *a,PVScalarArray *b)
         case pvString: {
             PVStringArray *aarray = static_cast<PVStringArray *>(a);
             PVStringArray *barray = static_cast<PVStringArray *>(b);
-            StringArrayData adata = StringArrayData();
-            StringArrayData bdata = StringArrayData();
-            aarray->get(0,length,&adata);
-            barray->get(0,length,&bdata);
-            String *avalue = adata.data;
-            String *bvalue = bdata.data;
-            for(int i=0; i<length; i++) {
+            StringArrayData adata;
+            StringArrayData bdata;
+            aarray->get(0,length,adata);
+            barray->get(0,length,bdata);
+            StringArray avalue = adata.data;
+            StringArray bvalue = bdata.data;
+            for(size_t i=0; i<length; i++) {
                 if(avalue[i]!=bvalue[i]) return false;
             }
             return true;
@@ -1501,11 +1585,11 @@ static bool structureArrayEquals(PVStructureArray *a,PVStructureArray *b)
     if(a->getLength()!=b->getLength()) return false;
     StructureArrayData aData = StructureArrayData();
     StructureArrayData bData = StructureArrayData();
-    int length = a->getLength();
+    size_t length = a->getLength();
     PVStructurePtrArray aArray = aData.data;
     PVStructurePtrArray bArray = bData.data;
     if(aArray==bArray) return true;
-    for(int i=0; i<length; i++) {
+    for(size_t i=0; i<length; i++) {
         if(aArray[i]==0) {
             if(bArray[i]==0) continue;
             return false;
@@ -1521,11 +1605,11 @@ static bool structureEquals(PVStructure *a,PVStructure *b)
 {
     StructureConstPtr aStructure = a->getStructure();
     StructureConstPtr bStructure = a->getStructure();
-    int length = aStructure->getNumberFields();
+    size_t length = aStructure->getNumberFields();
     if(length!=bStructure->getNumberFields()) return false;
-    PVFieldPtrArray aFields = a->getPVFields();
-    PVFieldPtrArray bFields = b->getPVFields();
-    for(int i=0; i<length; i++) {
+    PVFieldPtrArray const & aFields = a->getPVFields();
+    PVFieldPtrArray const & bFields = b->getPVFields();
+    for(size_t i=0; i<length; i++) {
         if(*aFields[i]!=*bFields[i]) return false;
     }
     return true;
@@ -1542,7 +1626,7 @@ bool convertEquals(PVField *a,PVField *b)
     if(atype==scalar) return scalarEquals(
         static_cast<PVScalar *>(a),static_cast<PVScalar *>(b));
     if(atype==scalarArray) return arrayEquals(
-        static_cast<PVScalarArray *>(a),static_cast<PVScalarArray *>(b));
+        static_cast<PVScalarArray*>(a),static_cast<PVScalarArray *>(b));
     if(atype==structureArray) return structureArrayEquals(
         static_cast<PVStructureArray *>(a),static_cast<PVStructureArray *>(b));
     if(atype==structure) return structureEquals(
@@ -1551,25 +1635,43 @@ bool convertEquals(PVField *a,PVField *b)
     throw std::logic_error(message);
 }
 
-int convertFromByteArray(PVScalarArray *pv, int offset, int len,int8 from[], int fromOffset)
+template<typename PVT,typename T>
+size_t convertFromScalarArray(PVScalarArray *pv,
+    size_t offset, size_t len,T from[], size_t fromOffset)
 {
     ScalarType elemType = pv->getScalarArray()->getElementType();
-    int ntransfered = 0;
-    switch (elemType) {
-    case pvBoolean: {
-         String message("convert from byte[] to BooleanArray not legal");
-         throw std::invalid_argument(message);
-    }
-    case pvByte: {
-        PVByteArray *pvdata = static_cast<PVByteArray*>(pv);
+    size_t ntransfered = 0;
+    String xx = typeid(PVT).name();
+    String yy = typeid(T).name();
+    if(xx.compare(yy)== 0) {
+        PVT *pvdata = static_cast<PVT*>(pv);
         while (len > 0) {
-            int n = pvdata->put(offset, len, from, fromOffset);
+            size_t n = pvdata->put(offset, len, from, fromOffset);
             if (n == 0)
                 break;
             len -= n;
             offset += n;
             fromOffset += n;
             ntransfered += n;
+        }
+        return ntransfered;
+    }
+    switch (elemType) {
+    case pvBoolean: {
+         String message("convert from numeric array to BooleanArray not legal");
+         throw std::invalid_argument(message);
+    }
+    case pvByte: {
+        PVByteArray *pvdata = static_cast<PVByteArray*>(pv);
+        int8 data[1];
+        while (len > 0) {
+            data[0] = from[fromOffset];
+            if (pvdata->put(offset, 1, data, 0) == 0)
+                return ntransfered;
+            --len;
+            ++ntransfered;
+            ++offset;
+            ++fromOffset;
         }
         return ntransfered;
     }
@@ -1604,6 +1706,62 @@ int convertFromByteArray(PVScalarArray *pv, int offset, int len,int8 from[], int
     case pvLong: {
         PVLongArray *pvdata = static_cast<PVLongArray*>(pv);
         int64 data[1];
+        while (len > 0) {
+            data[0] = from[fromOffset];
+            if (pvdata->put(offset, 1, data, 0) == 0)
+                return ntransfered;
+            --len;
+            ++ntransfered;
+            ++offset;
+            ++fromOffset;
+        }
+        return ntransfered;
+    }
+    case pvUByte: {
+        PVUByteArray *pvdata = static_cast<PVUByteArray*>(pv);
+        uint8 data[1];
+        while (len > 0) {
+            data[0] = from[fromOffset];
+            if (pvdata->put(offset, 1, data, 0) == 0)
+                return ntransfered;
+            --len;
+            ++ntransfered;
+            ++offset;
+            ++fromOffset;
+        }
+        return ntransfered;
+    }
+    case pvUShort: {
+        PVUShortArray *pvdata = static_cast<PVUShortArray*>(pv);
+        uint16 data[1];
+        while (len > 0) {
+            data[0] = from[fromOffset];
+            if (pvdata->put(offset, 1, data, 0) == 0)
+                return ntransfered;
+            --len;
+            ++ntransfered;
+            ++offset;
+            ++fromOffset;
+        }
+        return ntransfered;
+    }
+    case pvUInt: {
+        PVUIntArray *pvdata = static_cast<PVUIntArray*>(pv);
+        uint32 data[1];
+        while (len > 0) {
+            data[0] = from[fromOffset];
+            if (pvdata->put(offset, 1, data, 0) == 0)
+                return ntransfered;
+            --len;
+            ++ntransfered;
+            ++offset;
+            ++fromOffset;
+        }
+        return ntransfered;
+    }
+    case pvULong: {
+        PVULongArray *pvdata = static_cast<PVULongArray*>(pv);
+        uint64 data[1];
         while (len > 0) {
             data[0] = from[fromOffset];
             if (pvdata->put(offset, 1, data, 0) == 0)
@@ -1652,10 +1810,12 @@ int convertFromByteArray(PVScalarArray *pv, int offset, int len,int8 from[], int
     throw std::logic_error(message);
 }
 
-int convertToByteArray(PVScalarArray * pv, int offset, int len,int8 to[], int toOffset)
+template<typename T>
+size_t convertToScalarArray(PVScalarArray *pv,
+    size_t offset, size_t len,T to[], size_t toOffset)
 {
     ScalarType elemType = pv->getScalarArray()->getElementType();
-    int ntransfered = 0;
+    size_t ntransfered = 0;
     switch (elemType) {
     case pvBoolean: {
         String message("convert BooleanArray to byte[]] not legal");
@@ -1663,14 +1823,14 @@ int convertToByteArray(PVScalarArray * pv, int offset, int len,int8 to[], int to
     }
     case pvByte: {
         PVByteArray *pvdata = static_cast<PVByteArray*>(pv);
-        ByteArrayData data = ByteArrayData();
+        ByteArrayData data;
         while (len > 0) {
-            int num = 0;
-            num = pvdata->get(offset,len,&data);
+            size_t num = 0;
+            num = pvdata->get(offset,len,data);
             if (num <= 0) break;
             ByteArray dataArray = data.data;
-            int dataOffset = data.offset;
-            for(int i=0;i<num;i++) to[toOffset+i] = dataArray[dataOffset+1];
+            size_t dataOffset = data.offset;
+            for(size_t i=0;i<num;i++) to[toOffset+i] = dataArray[dataOffset+1];
             len -= num;
             offset += num;
             toOffset += num;
@@ -1680,13 +1840,13 @@ int convertToByteArray(PVScalarArray * pv, int offset, int len,int8 to[], int to
     }
     case pvShort: {
         PVShortArray *pvdata = static_cast<PVShortArray*>(pv);
-        ShortArrayData data = ShortArrayData();
+        ShortArrayData data;
         while (len > 0) {
-            int num = pvdata->get(offset, len, &data);
+            size_t num = pvdata->get(offset, len, data);
             if (num == 0) break;
             ShortArray dataArray = data.data;
-            int dataOffset = data.offset;
-            for (int i = 0; i < num; i++)
+            size_t dataOffset = data.offset;
+            for (size_t i = 0; i < num; i++)
                 to[i + toOffset] =  dataArray[i + dataOffset];
             len -= num;
             offset += num;
@@ -1697,13 +1857,13 @@ int convertToByteArray(PVScalarArray * pv, int offset, int len,int8 to[], int to
     }
     case pvInt: {
         PVIntArray *pvdata = static_cast<PVIntArray*>(pv);
-        IntArrayData data = IntArrayData();
+        IntArrayData data;
         while (len > 0) {
-            int num = pvdata->get(offset, len, &data);
+            size_t num = pvdata->get(offset, len, data);
             if (num == 0) break;
             IntArray dataArray = data.data;
-            int dataOffset = data.offset;
-            for (int i = 0; i < num; i++)
+            size_t dataOffset = data.offset;
+            for (size_t i = 0; i < num; i++)
                 to[i + toOffset] =  dataArray[i + dataOffset];
             len -= num;
             offset += num;
@@ -1714,14 +1874,14 @@ int convertToByteArray(PVScalarArray * pv, int offset, int len,int8 to[], int to
     }
     case pvLong: {
         PVLongArray *pvdata = static_cast<PVLongArray*>(pv);
-        LongArrayData data = LongArrayData();
+        LongArrayData data;
         while (len > 0) {
-            int num = pvdata->get(offset, len, &data);
+            size_t num = pvdata->get(offset, len, data);
             if (num == 0)
                 break;
             LongArray dataArray = data.data;
-            int dataOffset = data.offset;
-            for (int i = 0; i < num; i++)
+            size_t dataOffset = data.offset;
+            for (size_t i = 0; i < num; i++)
                 to[i + toOffset] = dataArray[i + dataOffset];
             len -= num;
             offset += num;
@@ -1730,170 +1890,16 @@ int convertToByteArray(PVScalarArray * pv, int offset, int len,int8 to[], int to
         }
         return ntransfered;
     }
-    case pvFloat: {
-        PVFloatArray *pvdata = static_cast<PVFloatArray*>(pv);
-        FloatArrayData data = FloatArrayData();
+    case pvUByte: {
+        PVUByteArray *pvdata = static_cast<PVUByteArray*>(pv);
+        UByteArrayData data;
         while (len > 0) {
-            int num = pvdata->get(offset, len, &data);
-            if (num == 0) break;
-            FloatArray dataArray = data.data;
-            int dataOffset = data.offset;
-            for (int i = 0; i < num; i++)
-                to[i + toOffset] = static_cast<int8>(dataArray[i + dataOffset]);
-            len -= num;
-            offset += num;
-            toOffset += num;
-            ntransfered += num;
-        }
-        return ntransfered;
-    }
-    case pvDouble: {
-        PVDoubleArray *pvdata = static_cast<PVDoubleArray*>(pv);
-        DoubleArrayData data = DoubleArrayData();
-        while (len > 0) {
-            int num = pvdata->get(offset, len, &data);
-            if (num == 0)
-                break;
-            DoubleArray dataArray = data.data;
-            int dataOffset = data.offset;
-            for (int i = 0; i < num; i++)
-                to[i + toOffset] = static_cast<int8>(dataArray[i + dataOffset]);
-            len -= num;
-            offset += num;
-            toOffset += num;
-            ntransfered += num;
-        }
-        return ntransfered;
-    }
-    case pvString: {
-        String message("convert StringArray to byte[]] not legal");
-        throw std::invalid_argument(message);
-    }
-    }
-     String message("Convert::convertToByteArray should never get here");
-    throw std::logic_error(message);
-}
-
-int convertFromShortArray(PVScalarArray *pv, int offset, int len,int16 from[], int fromOffset)
-{
-    ScalarType elemType = pv->getScalarArray()->getElementType();
-    int ntransfered = 0;
-    switch (elemType) {
-    case pvBoolean: {
-         String message("convert from short[] to BooleanArray not legal");
-         throw std::invalid_argument(message);
-    }
-    case pvByte: {
-        PVByteArray *pvdata = static_cast<PVByteArray*>(pv);
-        int8 data[1];
-        while (len > 0) {
-            data[0] =  from[fromOffset];
-            if (pvdata->put(offset, 1, data, 0) == 0)
-                return ntransfered;
-            --len;
-            ++ntransfered;
-            ++offset;
-            ++fromOffset;
-        }
-        return ntransfered;
-    }
-    case pvShort: {
-        PVShortArray *pvdata = static_cast<PVShortArray*>(pv);
-        while (len > 0) {
-            int n = pvdata->put(offset, len, from, fromOffset);
-            if (n == 0)
-                break;
-            len -= n;
-            offset += n;
-            fromOffset += n;
-            ntransfered += n;
-        }
-        return ntransfered;
-    }
-    case pvInt: {
-        PVIntArray *pvdata = static_cast<PVIntArray*>(pv);
-        int32 data[1];
-        while (len > 0) {
-            data[0] =  from[fromOffset];
-            if (pvdata->put(offset, 1, data, 0) == 0)
-                return ntransfered;
-            --len;
-            ++ntransfered;
-            ++offset;
-            ++fromOffset;
-        }
-        return ntransfered;
-    }
-    case pvLong: {
-        PVLongArray *pvdata = static_cast<PVLongArray*>(pv);
-        int64 data[1];
-        while (len > 0) {
-            data[0] =  from[fromOffset];
-            if (pvdata->put(offset, 1, data, 0) == 0)
-                return ntransfered;
-            --len;
-            ++ntransfered;
-            ++offset;
-            ++fromOffset;
-        }
-        return ntransfered;
-    }
-    case pvFloat: {
-        PVFloatArray *pvdata = static_cast<PVFloatArray*>(pv);
-        float data[1];
-        while (len > 0) {
-            data[0] =  from[fromOffset];
-            if (pvdata->put(offset, 1, data, 0) == 0)
-                return ntransfered;
-            --len;
-            ++ntransfered;
-            ++offset;
-            ++fromOffset;
-        }
-        return ntransfered;
-    }
-    case pvDouble: {
-        PVDoubleArray *pvdata = static_cast<PVDoubleArray*>(pv);
-        double data[1];
-        while (len > 0) {
-            data[0] =  from[fromOffset];
-            if (pvdata->put(offset, 1, data, 0) == 0)
-                return ntransfered;
-            --len;
-            ++ntransfered;
-            ++offset;
-            ++fromOffset;
-        }
-        return ntransfered;
-    }
-    case pvString: {
-         String message("convert from short[] to StringArray not legal");
-         throw std::invalid_argument(message);
-    }
-    }
-    String message("Convert::convertFromShortArray should never get here");
-    throw std::logic_error(message);
-}
-
-int convertToShortArray(PVScalarArray * pv, int offset, int len,int16 to[], int toOffset)
-{
-    ScalarType elemType = pv->getScalarArray()->getElementType();
-    int ntransfered = 0;
-    switch (elemType) {
-    case pvBoolean: {
-        String message("convert BooleanArray to short[]] not legal");
-        throw std::invalid_argument(message);
-    }
-    case pvByte: {
-        PVByteArray *pvdata = static_cast<PVByteArray*>(pv);
-        ByteArrayData data = ByteArrayData();
-        while (len > 0) {
-            int num = 0;
-            num = pvdata->get(offset,len,&data);
+            size_t num = 0;
+            num = pvdata->get(offset,len,data);
             if (num <= 0) break;
-            ByteArray dataArray = data.data;
-            int dataOffset = data.offset;
-            for(int i=0;i<num;i++) to[toOffset+i] = dataArray[dataOffset+1];
+            UByteArray dataArray = data.data;
+            size_t dataOffset = data.offset;
+            for(size_t i=0;i<num;i++) to[toOffset+i] = dataArray[dataOffset+1];
             len -= num;
             offset += num;
             toOffset += num;
@@ -1901,15 +1907,15 @@ int convertToShortArray(PVScalarArray * pv, int offset, int len,int16 to[], int 
         }
         return ntransfered;
     }
-    case pvShort: {
-        PVShortArray *pvdata = static_cast<PVShortArray*>(pv);
-        ShortArrayData data = ShortArrayData();
+    case pvUShort: {
+        PVUShortArray *pvdata = static_cast<PVUShortArray*>(pv);
+        UShortArrayData data;
         while (len > 0) {
-            int num = pvdata->get(offset, len, &data);
+            size_t num = pvdata->get(offset, len, data);
             if (num == 0) break;
-            ShortArray dataArray = data.data;
-            int dataOffset = data.offset;
-            for (int i = 0; i < num; i++)
+            UShortArray dataArray = data.data;
+            size_t dataOffset = data.offset;
+            for (size_t i = 0; i < num; i++)
                 to[i + toOffset] =  dataArray[i + dataOffset];
             len -= num;
             offset += num;
@@ -1918,33 +1924,15 @@ int convertToShortArray(PVScalarArray * pv, int offset, int len,int16 to[], int 
         }
         return ntransfered;
     }
-    case pvInt: {
-        PVIntArray *pvdata = static_cast<PVIntArray*>(pv);
-        IntArrayData data = IntArrayData();
+    case pvUInt: {
+        PVUIntArray *pvdata = static_cast<PVUIntArray*>(pv);
+        UIntArrayData data;
         while (len > 0) {
-            int num = pvdata->get(offset, len, &data);
+            size_t num = pvdata->get(offset, len, data);
             if (num == 0) break;
-            IntArray dataArray = data.data;
-            int dataOffset = data.offset;
-            for (int i = 0; i < num; i++)
-                to[i + toOffset] = dataArray[i + dataOffset];
-            len -= num;
-            offset += num;
-            toOffset += num;
-            ntransfered += num;
-        }
-        return ntransfered;
-    }
-    case pvLong: {
-        PVLongArray *pvdata = static_cast<PVLongArray*>(pv);
-        LongArrayData data = LongArrayData();
-        while (len > 0) {
-            int num = pvdata->get(offset, len, &data);
-            if (num == 0)
-                break;
-            LongArray dataArray = data.data;
-            int dataOffset = data.offset;
-            for (int i = 0; i < num; i++)
+            UIntArray dataArray = data.data;
+            size_t dataOffset = data.offset;
+            for (size_t i = 0; i < num; i++)
                 to[i + toOffset] =  dataArray[i + dataOffset];
             len -= num;
             offset += num;
@@ -1953,16 +1941,34 @@ int convertToShortArray(PVScalarArray * pv, int offset, int len,int16 to[], int 
         }
         return ntransfered;
     }
+    case pvULong: {
+        PVULongArray *pvdata = static_cast<PVULongArray*>(pv);
+        ULongArrayData data;
+        while (len > 0) {
+            size_t num = pvdata->get(offset, len, data);
+            if (num == 0)
+                break;
+            ULongArray dataArray = data.data;
+            size_t dataOffset = data.offset;
+            for (size_t i = 0; i < num; i++)
+                to[i + toOffset] = dataArray[i + dataOffset];
+            len -= num;
+            offset += num;
+            toOffset += num;
+            ntransfered += num;
+        }
+        return ntransfered;
+    }
     case pvFloat: {
         PVFloatArray *pvdata = static_cast<PVFloatArray*>(pv);
-        FloatArrayData data = FloatArrayData();
+        FloatArrayData data;
         while (len > 0) {
-            int num = pvdata->get(offset, len, &data);
+            size_t num = pvdata->get(offset, len, data);
             if (num == 0) break;
             FloatArray dataArray = data.data;
-            int dataOffset = data.offset;
-            for (int i = 0; i < num; i++)
-                to[i + toOffset] =  static_cast<int16>(dataArray[i + dataOffset]);
+            size_t dataOffset = data.offset;
+            for (size_t i = 0; i < num; i++)
+                to[i + toOffset] = dataArray[i + dataOffset];
             len -= num;
             offset += num;
             toOffset += num;
@@ -1972,683 +1978,14 @@ int convertToShortArray(PVScalarArray * pv, int offset, int len,int16 to[], int 
     }
     case pvDouble: {
         PVDoubleArray *pvdata = static_cast<PVDoubleArray*>(pv);
-        DoubleArrayData data = DoubleArrayData();
+        DoubleArrayData data;
         while (len > 0) {
-            int num = pvdata->get(offset, len, &data);
+            size_t num = pvdata->get(offset, len, data);
             if (num == 0)
                 break;
             DoubleArray dataArray = data.data;
-            int dataOffset = data.offset;
-            for (int i = 0; i < num; i++)
-                to[i + toOffset] =  static_cast<int16>(dataArray[i + dataOffset]);
-            len -= num;
-            offset += num;
-            toOffset += num;
-            ntransfered += num;
-        }
-        return ntransfered;
-    }
-    case pvString: {
-        String message("convert StringArray to short[]] not legal");
-        throw std::invalid_argument(message);
-    }
-    }
-     String message("Convert::convertToShortArray should never get here");
-    throw std::logic_error(message);
-}
-
-int convertFromIntArray(PVScalarArray *pv, int offset, int len,int32 from[], int fromOffset)
-{
-    ScalarType elemType = pv->getScalarArray()->getElementType();
-    int ntransfered = 0;
-    switch (elemType) {
-    case pvBoolean: {
-         String message("convert from int[] to BooleanArray not legal");
-         throw std::invalid_argument(message);
-    }
-    case pvByte: {
-        PVByteArray *pvdata = static_cast<PVByteArray*>(pv);
-        int8 data[1];
-        while (len > 0) {
-            data[0] =  from[fromOffset];
-            if (pvdata->put(offset, 1, data, 0) == 0)
-                return ntransfered;
-            --len;
-            ++ntransfered;
-            ++offset;
-            ++fromOffset;
-        }
-        return ntransfered;
-    }
-    case pvShort: {
-        PVShortArray *pvdata = static_cast<PVShortArray*>(pv);
-        int16 data[1];
-        while (len > 0) {
-            data[0] = from[fromOffset];
-            if (pvdata->put(offset, 1, data, 0) == 0)
-                return ntransfered;
-            --len;
-            ++ntransfered;
-            ++offset;
-            ++fromOffset;
-        }
-        return ntransfered;
-    }
-    case pvInt: {
-        PVIntArray *pvdata = static_cast<PVIntArray*>(pv);
-        while (len > 0) {
-            int n = pvdata->put(offset, len, from, fromOffset);
-            if (n == 0)
-                break;
-            len -= n;
-            offset += n;
-            fromOffset += n;
-            ntransfered += n;
-        }
-        return ntransfered;
-    }
-    case pvLong: {
-        PVLongArray *pvdata = static_cast<PVLongArray*>(pv);
-        int64 data[1];
-        while (len > 0) {
-            data[0] = from[fromOffset];
-            if (pvdata->put(offset, 1, data, 0) == 0)
-                return ntransfered;
-            --len;
-            ++ntransfered;
-            ++offset;
-            ++fromOffset;
-        }
-        return ntransfered;
-    }
-    case pvFloat: {
-        PVFloatArray *pvdata = static_cast<PVFloatArray*>(pv);
-        float data[1];
-        while (len > 0) {
-            data[0] = from[fromOffset];
-            if (pvdata->put(offset, 1, data, 0) == 0)
-                return ntransfered;
-            --len;
-            ++ntransfered;
-            ++offset;
-            ++fromOffset;
-        }
-        return ntransfered;
-    }
-    case pvDouble: {
-        PVDoubleArray *pvdata = static_cast<PVDoubleArray*>(pv);
-        double data[1];
-        while (len > 0) {
-            data[0] =  from[fromOffset];
-            if (pvdata->put(offset, 1, data, 0) == 0)
-                return ntransfered;
-            --len;
-            ++ntransfered;
-            ++offset;
-            ++fromOffset;
-        }
-        return ntransfered;
-    }
-    case pvString: {
-         String message("convert from int[] to StringArray not legal");
-         throw std::invalid_argument(message);
-    }
-    }
-    String message("Convert::convertFromIntArray should never get here");
-    throw std::logic_error(message);
-}
-
-int convertToIntArray(PVScalarArray * pv, int offset, int len,int32 to[], int toOffset)
-{
-    ScalarType elemType = pv->getScalarArray()->getElementType();
-    int ntransfered = 0;
-    switch (elemType) {
-    case pvBoolean: {
-        String message("convert BooleanArray to byte[]] not legal");
-        throw std::invalid_argument(message);
-    }
-    case pvByte: {
-        PVByteArray *pvdata = static_cast<PVByteArray*>(pv);
-        ByteArrayData data = ByteArrayData();
-        while (len > 0) {
-            int num = 0;
-            num = pvdata->get(offset,len,&data);
-            if (num <= 0) break;
-            ByteArray dataArray = data.data;
-            int dataOffset = data.offset;
-            for(int i=0;i<num;i++) to[toOffset+i] = dataArray[dataOffset+1];
-            len -= num;
-            offset += num;
-            toOffset += num;
-            ntransfered += num;
-        }
-        return ntransfered;
-    }
-    case pvShort: {
-        PVShortArray *pvdata = static_cast<PVShortArray*>(pv);
-        ShortArrayData data = ShortArrayData();
-        while (len > 0) {
-            int num = pvdata->get(offset, len, &data);
-            if (num == 0) break;
-            ShortArray dataArray = data.data;
-            int dataOffset = data.offset;
-            for (int i = 0; i < num; i++)
-                to[i + toOffset] = dataArray[i + dataOffset];
-            len -= num;
-            offset += num;
-            toOffset += num;
-            ntransfered += num;
-        }
-        return ntransfered;
-    }
-    case pvInt: {
-        PVIntArray *pvdata = static_cast<PVIntArray*>(pv);
-        IntArrayData data = IntArrayData();
-        while (len > 0) {
-            int num = pvdata->get(offset, len, &data);
-            if (num == 0) break;
-            IntArray dataArray = data.data;
-            int dataOffset = data.offset;
-            for (int i = 0; i < num; i++)
-                to[i + toOffset] =  dataArray[i + dataOffset];
-            len -= num;
-            offset += num;
-            toOffset += num;
-            ntransfered += num;
-        }
-        return ntransfered;
-    }
-    case pvLong: {
-        PVLongArray *pvdata = static_cast<PVLongArray*>(pv);
-        LongArrayData data = LongArrayData();
-        while (len > 0) {
-            int num = pvdata->get(offset, len, &data);
-            if (num == 0)
-                break;
-            LongArray dataArray = data.data;
-            int dataOffset = data.offset;
-            for (int i = 0; i < num; i++)
-                to[i + toOffset] = dataArray[i + dataOffset];
-            len -= num;
-            offset += num;
-            toOffset += num;
-            ntransfered += num;
-        }
-        return ntransfered;
-    }
-    case pvFloat: {
-        PVFloatArray *pvdata = static_cast<PVFloatArray*>(pv);
-        FloatArrayData data = FloatArrayData();
-        while (len > 0) {
-            int num = pvdata->get(offset, len, &data);
-            if (num == 0) break;
-            FloatArray dataArray = data.data;
-            int dataOffset = data.offset;
-            for (int i = 0; i < num; i++)
-                to[i + toOffset] =  static_cast<int32>(dataArray[i + dataOffset]);
-            len -= num;
-            offset += num;
-            toOffset += num;
-            ntransfered += num;
-        }
-        return ntransfered;
-    }
-    case pvDouble: {
-        PVDoubleArray *pvdata = static_cast<PVDoubleArray*>(pv);
-        DoubleArrayData data = DoubleArrayData();
-        while (len > 0) {
-            int num = pvdata->get(offset, len, &data);
-            if (num == 0)
-                break;
-            DoubleArray dataArray = data.data;
-            int dataOffset = data.offset;
-            for (int i = 0; i < num; i++)
-                to[i + toOffset] =  static_cast<int32>(dataArray[i + dataOffset]);
-            len -= num;
-            offset += num;
-            toOffset += num;
-            ntransfered += num;
-        }
-        return ntransfered;
-    }
-    case pvString: {
-        String message("convert StringArray to int[]] not legal");
-        throw std::invalid_argument(message);
-    }
-    }
-     String message("Convert::convertToIntArray should never get here");
-    throw std::logic_error(message);
-}
-
-int convertFromLongArray(PVScalarArray *pv, int offset, int len,int64 from[], int fromOffset)
-{
-    ScalarType elemType = pv->getScalarArray()->getElementType();
-    int ntransfered = 0;
-    switch (elemType) {
-    case pvBoolean: {
-         String message("convert from long[] to BooleanArray not legal");
-         throw std::invalid_argument(message);
-    }
-    case pvByte: {
-        PVByteArray *pvdata = static_cast<PVByteArray*>(pv);
-        int8 data[1];
-        while (len > 0) {
-            data[0] = from[fromOffset];
-            if (pvdata->put(offset, 1, data, 0) == 0)
-                return ntransfered;
-            --len;
-            ++ntransfered;
-            ++offset;
-            ++fromOffset;
-        }
-        return ntransfered;
-    }
-    case pvShort: {
-        PVShortArray *pvdata = static_cast<PVShortArray*>(pv);
-        int16 data[1];
-        while (len > 0) {
-            data[0] = from[fromOffset];
-            if (pvdata->put(offset, 1, data, 0) == 0)
-                return ntransfered;
-            --len;
-            ++ntransfered;
-            ++offset;
-            ++fromOffset;
-        }
-        return ntransfered;
-    }
-    case pvInt: {
-        PVIntArray *pvdata = static_cast<PVIntArray*>(pv);
-        int32 data[1];
-        while (len > 0) {
-            data[0] =  from[fromOffset];
-            if (pvdata->put(offset, 1, data, 0) == 0)
-                return ntransfered;
-            --len;
-            ++ntransfered;
-            ++offset;
-            ++fromOffset;
-        }
-        return ntransfered;
-    }
-    case pvLong: {
-        PVLongArray *pvdata = static_cast<PVLongArray*>(pv);
-        while (len > 0) {
-            int n = pvdata->put(offset, len, from, fromOffset);
-            if (n == 0)
-                break;
-            len -= n;
-            offset += n;
-            fromOffset += n;
-            ntransfered += n;
-        }
-        return ntransfered;
-    }
-    case pvFloat: {
-        PVFloatArray *pvdata = static_cast<PVFloatArray*>(pv);
-        float data[1];
-        while (len > 0) {
-            data[0] = from[fromOffset];
-            if (pvdata->put(offset, 1, data, 0) == 0)
-                return ntransfered;
-            --len;
-            ++ntransfered;
-            ++offset;
-            ++fromOffset;
-        }
-        return ntransfered;
-    }
-    case pvDouble: {
-        PVDoubleArray *pvdata = static_cast<PVDoubleArray*>(pv);
-        double data[1];
-        while (len > 0) {
-            data[0] = from[fromOffset];
-            if (pvdata->put(offset, 1, data, 0) == 0)
-                return ntransfered;
-            --len;
-            ++ntransfered;
-            ++offset;
-            ++fromOffset;
-        }
-        return ntransfered;
-    }
-    case pvString: {
-         String message("convert from long[] to StringArray not legal");
-         throw std::invalid_argument(message);
-    }
-    }
-    String message("Convert::convertFromLongArray should never get here");
-    throw std::logic_error(message);
-}
-
-int convertToLongArray(PVScalarArray * pv, int offset, int len,int64 to[], int toOffset)
-{
-    ScalarType elemType = pv->getScalarArray()->getElementType();
-    int ntransfered = 0;
-    switch (elemType) {
-    case pvBoolean: {
-        String message("convert BooleanArray to long[]] not legal");
-        throw std::invalid_argument(message);
-    }
-    case pvByte: {
-        PVByteArray *pvdata = static_cast<PVByteArray*>(pv);
-        ByteArrayData data = ByteArrayData();
-        while (len > 0) {
-            int num = 0;
-            num = pvdata->get(offset,len,&data);
-            if (num <= 0) break;
-            ByteArray dataArray = data.data;
-            int dataOffset = data.offset;
-            for(int i=0;i<num;i++) to[toOffset+i] = dataArray[dataOffset+1];
-            len -= num;
-            offset += num;
-            toOffset += num;
-            ntransfered += num;
-        }
-        return ntransfered;
-    }
-    case pvShort: {
-        PVShortArray *pvdata = static_cast<PVShortArray*>(pv);
-        ShortArrayData data = ShortArrayData();
-        while (len > 0) {
-            int num = pvdata->get(offset, len, &data);
-            if (num == 0) break;
-            ShortArray dataArray = data.data;
-            int dataOffset = data.offset;
-            for (int i = 0; i < num; i++)
-                to[i + toOffset] = dataArray[i + dataOffset];
-            len -= num;
-            offset += num;
-            toOffset += num;
-            ntransfered += num;
-        }
-        return ntransfered;
-    }
-    case pvInt: {
-        PVIntArray *pvdata = static_cast<PVIntArray*>(pv);
-        IntArrayData data = IntArrayData();
-        while (len > 0) {
-            int num = pvdata->get(offset, len, &data);
-            if (num == 0) break;
-            IntArray dataArray = data.data;
-            int dataOffset = data.offset;
-            for (int i = 0; i < num; i++)
-                to[i + toOffset] = dataArray[i + dataOffset];
-            len -= num;
-            offset += num;
-            toOffset += num;
-            ntransfered += num;
-        }
-        return ntransfered;
-    }
-    case pvLong: {
-        PVLongArray *pvdata = static_cast<PVLongArray*>(pv);
-        LongArrayData data = LongArrayData();
-        while (len > 0) {
-            int num = pvdata->get(offset, len, &data);
-            if (num == 0)
-                break;
-            LongArray dataArray = data.data;
-            int dataOffset = data.offset;
-            for (int i = 0; i < num; i++)
-                to[i + toOffset] = dataArray[i + dataOffset];
-            len -= num;
-            offset += num;
-            toOffset += num;
-            ntransfered += num;
-        }
-        return ntransfered;
-    }
-    case pvFloat: {
-        PVFloatArray *pvdata = static_cast<PVFloatArray*>(pv);
-        FloatArrayData data = FloatArrayData();
-        while (len > 0) {
-            int num = pvdata->get(offset, len, &data);
-            if (num == 0) break;
-            FloatArray dataArray = data.data;
-            int dataOffset = data.offset;
-            for (int i = 0; i < num; i++)
-                to[i + toOffset] =  static_cast<int64>(dataArray[i + dataOffset]);
-            len -= num;
-            offset += num;
-            toOffset += num;
-            ntransfered += num;
-        }
-        return ntransfered;
-    }
-    case pvDouble: {
-        PVDoubleArray *pvdata = static_cast<PVDoubleArray*>(pv);
-        DoubleArrayData data = DoubleArrayData();
-        while (len > 0) {
-            int num = pvdata->get(offset, len, &data);
-            if (num == 0)
-                break;
-            DoubleArray dataArray = data.data;
-            int dataOffset = data.offset;
-            for (int i = 0; i < num; i++)
-                to[i + toOffset] =  static_cast<int64>(dataArray[i + dataOffset]);
-            len -= num;
-            offset += num;
-            toOffset += num;
-            ntransfered += num;
-        }
-        return ntransfered;
-    }
-    case pvString: {
-        String message("convert StringArray to long[]] not legal");
-        throw std::invalid_argument(message);
-    }
-    }
-     String message("Convert::convertToLongArray should never get here");
-    throw std::logic_error(message);
-}
-
-int convertFromFloatArray(PVScalarArray *pv, int offset, int len,float from[], int fromOffset)
-{
-    ScalarType elemType = pv->getScalarArray()->getElementType();
-    int ntransfered = 0;
-    switch (elemType) {
-    case pvBoolean: {
-         String message("convert from float[] to BooleanArray not legal");
-         throw std::invalid_argument(message);
-    }
-    case pvByte: {
-        PVByteArray *pvdata = static_cast<PVByteArray*>(pv);
-        int8 data[1];
-        while (len > 0) {
-            data[0] = static_cast<int8>(from[fromOffset]);
-            if (pvdata->put(offset, 1, data, 0) == 0)
-                return ntransfered;
-            --len;
-            ++ntransfered;
-            ++offset;
-            ++fromOffset;
-        }
-        return ntransfered;
-    }
-    case pvShort: {
-        PVShortArray *pvdata = static_cast<PVShortArray*>(pv);
-        int16 data[1];
-        while (len > 0) {
-            data[0] =  static_cast<int16>(from[fromOffset]);
-            if (pvdata->put(offset, 1, data, 0) == 0)
-                return ntransfered;
-            --len;
-            ++ntransfered;
-            ++offset;
-            ++fromOffset;
-        }
-        return ntransfered;
-    }
-    case pvInt: {
-        PVIntArray *pvdata = static_cast<PVIntArray*>(pv);
-        int32 data[1];
-        while (len > 0) {
-            data[0] = static_cast<int32>(from[fromOffset]);
-            if (pvdata->put(offset, 1, data, 0) == 0)
-                return ntransfered;
-            --len;
-            ++ntransfered;
-            ++offset;
-            ++fromOffset;
-        }
-        return ntransfered;
-    }
-    case pvLong: {
-        PVLongArray *pvdata = static_cast<PVLongArray*>(pv);
-        int64 data[1];
-        while (len > 0) {
-            data[0] = static_cast<int64>(from[fromOffset]);
-            if (pvdata->put(offset, 1, data, 0) == 0)
-                return ntransfered;
-            --len;
-            ++ntransfered;
-            ++offset;
-            ++fromOffset;
-        }
-        return ntransfered;
-    }
-    case pvFloat: {
-        PVFloatArray *pvdata = static_cast<PVFloatArray*>(pv);
-        while (len > 0) {
-            int n = pvdata->put(offset, len, from, fromOffset);
-            if (n == 0)
-                break;
-            len -= n;
-            offset += n;
-            fromOffset += n;
-            ntransfered += n;
-        }
-        return ntransfered;
-    }
-    case pvDouble: {
-        PVDoubleArray *pvdata = static_cast<PVDoubleArray*>(pv);
-        double data[1];
-        while (len > 0) {
-            data[0] =  from[fromOffset];
-            if (pvdata->put(offset, 1, data, 0) == 0)
-                return ntransfered;
-            --len;
-            ++ntransfered;
-            ++offset;
-            ++fromOffset;
-        }
-        return ntransfered;
-    }
-    case pvString: {
-         String message("convert from float[] to StringArray not legal");
-         throw std::invalid_argument(message);
-    }
-    }
-    String message("Convert::convertFromFloatArray should never get here");
-    throw std::logic_error(message);
-}
-
-int convertToFloatArray(PVScalarArray * pv, int offset, int len,float to[], int toOffset)
-{
-    ScalarType elemType = pv->getScalarArray()->getElementType();
-    int ntransfered = 0;
-    switch (elemType) {
-    case pvBoolean: {
-        String message("convert BooleanArray to float[]] not legal");
-        throw std::invalid_argument(message);
-    }
-    case pvByte: {
-        PVByteArray *pvdata = static_cast<PVByteArray*>(pv);
-        ByteArrayData data = ByteArrayData();
-        while (len > 0) {
-            int num = 0;
-            num = pvdata->get(offset,len,&data);
-            if (num <= 0) break;
-            ByteArray dataArray = data.data;
-            int dataOffset = data.offset;
-            for(int i=0;i<num;i++) to[toOffset+i] = dataArray[dataOffset+1];
-            len -= num;
-            offset += num;
-            toOffset += num;
-            ntransfered += num;
-        }
-        return ntransfered;
-    }
-    case pvShort: {
-        PVShortArray *pvdata = static_cast<PVShortArray*>(pv);
-        ShortArrayData data = ShortArrayData();
-        while (len > 0) {
-            int num = pvdata->get(offset, len, &data);
-            if (num == 0) break;
-            ShortArray dataArray = data.data;
-            int dataOffset = data.offset;
-            for (int i = 0; i < num; i++)
-                to[i + toOffset] = dataArray[i + dataOffset];
-            len -= num;
-            offset += num;
-            toOffset += num;
-            ntransfered += num;
-        }
-        return ntransfered;
-    }
-    case pvInt: {
-        PVIntArray *pvdata = static_cast<PVIntArray*>(pv);
-        IntArrayData data = IntArrayData();
-        while (len > 0) {
-            int num = pvdata->get(offset, len, &data);
-            if (num == 0) break;
-            IntArray dataArray = data.data;
-            int dataOffset = data.offset;
-            for (int i = 0; i < num; i++)
-                to[i + toOffset] = dataArray[i + dataOffset];
-            len -= num;
-            offset += num;
-            toOffset += num;
-            ntransfered += num;
-        }
-        return ntransfered;
-    }
-    case pvLong: {
-        PVLongArray *pvdata = static_cast<PVLongArray*>(pv);
-        LongArrayData data = LongArrayData();
-        while (len > 0) {
-            int num = pvdata->get(offset, len, &data);
-            if (num == 0)
-                break;
-            LongArray dataArray = data.data;
-            int dataOffset = data.offset;
-            for (int i = 0; i < num; i++)
-                to[i + toOffset] = dataArray[i + dataOffset];
-            len -= num;
-            offset += num;
-            toOffset += num;
-            ntransfered += num;
-        }
-        return ntransfered;
-    }
-    case pvFloat: {
-        PVFloatArray *pvdata = static_cast<PVFloatArray*>(pv);
-        FloatArrayData data = FloatArrayData();
-        while (len > 0) {
-            int num = pvdata->get(offset, len, &data);
-            if (num == 0) break;
-            FloatArray dataArray = data.data;
-            int dataOffset = data.offset;
-            for (int i = 0; i < num; i++)
-                to[i + toOffset] = dataArray[i + dataOffset];
-            len -= num;
-            offset += num;
-            toOffset += num;
-            ntransfered += num;
-        }
-        return ntransfered;
-    }
-    case pvDouble: {
-        PVDoubleArray *pvdata = static_cast<PVDoubleArray*>(pv);
-        DoubleArrayData data = DoubleArrayData();
-        while (len > 0) {
-            int num = pvdata->get(offset, len, &data);
-            if (num == 0)
-                break;
-            DoubleArray dataArray = data.data;
-            int dataOffset = data.offset;
-            for (int i = 0; i < num; i++)
+            size_t dataOffset = data.offset;
+            for (size_t i = 0; i < num; i++)
                 to[i + toOffset] = dataArray[i + dataOffset];
             len -= num;
             offset += num;
@@ -2658,245 +1995,143 @@ int convertToFloatArray(PVScalarArray * pv, int offset, int len,float to[], int 
         return ntransfered;
     }
     case pvString: {
-        String message("convert StringArray to float[]] not legal");
+        String message("convert StringArray to numeric not legal");
         throw std::invalid_argument(message);
     }
     }
-     String message("Convert::convertToFloatArray should never get here");
+     String message("Convert::convertToScalarArray should never get here");
     throw std::logic_error(message);
 }
 
-int convertFromDoubleArray(PVScalarArray *pv, int offset, int len,double from[], int fromOffset)
+size_t convertFromByteArray(PVScalarArray *pv,
+    size_t offset, size_t len,int8 from[], size_t fromOffset)
 {
-    ScalarType elemType = pv->getScalarArray()->getElementType();
-    int ntransfered = 0;
-    switch (elemType) {
-    case pvBoolean: {
-         String message("convert from double[] to BooleanArray not legal");
-         throw std::invalid_argument(message);
-    }
-    case pvByte: {
-        PVByteArray *pvdata = static_cast<PVByteArray*>(pv);
-        int8 data[1];
-        while (len > 0) {
-            data[0] = static_cast<int8>(from[fromOffset]);
-            if (pvdata->put(offset, 1, data, 0) == 0)
-                return ntransfered;
-            --len;
-            ++ntransfered;
-            ++offset;
-            ++fromOffset;
-        }
-        return ntransfered;
-    }
-    case pvShort: {
-        PVShortArray *pvdata = static_cast<PVShortArray*>(pv);
-        int16 data[1];
-        while (len > 0) {
-            data[0] = static_cast<int16>(from[fromOffset]);
-            if (pvdata->put(offset, 1, data, 0) == 0)
-                return ntransfered;
-            --len;
-            ++ntransfered;
-            ++offset;
-            ++fromOffset;
-        }
-        return ntransfered;
-    }
-    case pvInt: {
-        PVIntArray *pvdata = static_cast<PVIntArray*>(pv);
-        int32 data[1];
-        while (len > 0) {
-            data[0] = static_cast<int32>(from[fromOffset]);
-            if (pvdata->put(offset, 1, data, 0) == 0)
-                return ntransfered;
-            --len;
-            ++ntransfered;
-            ++offset;
-            ++fromOffset;
-        }
-        return ntransfered;
-    }
-    case pvLong: {
-        PVLongArray *pvdata = static_cast<PVLongArray*>(pv);
-        int64 data[1];
-        while (len > 0) {
-            data[0] = static_cast<int64>(from[fromOffset]);
-            if (pvdata->put(offset, 1, data, 0) == 0)
-                return ntransfered;
-            --len;
-            ++ntransfered;
-            ++offset;
-            ++fromOffset;
-        }
-        return ntransfered;
-    }
-    case pvFloat: {
-        PVFloatArray *pvdata = static_cast<PVFloatArray*>(pv);
-        float data[1];
-        while (len > 0) {
-            data[0] =  from[fromOffset];
-            if (pvdata->put(offset, 1, data, 0) == 0)
-                return ntransfered;
-            --len;
-            ++ntransfered;
-            ++offset;
-            ++fromOffset;
-        }
-        return ntransfered;
-    }
-    case pvDouble: {
-        PVDoubleArray *pvdata = static_cast<PVDoubleArray*>(pv);
-        while (len > 0) {
-            int n = pvdata->put(offset, len, from, fromOffset);
-            if (n == 0)
-                break;
-            len -= n;
-            offset += n;
-            fromOffset += n;
-            ntransfered += n;
-        }
-        return ntransfered;
-    }
-    case pvString: {
-         String message("convert from double[] to StringArray not legal");
-         throw std::invalid_argument(message);
-    }
-    }
-    String message("Convert::convertFromDoubleArray should never get here");
-    throw std::logic_error(message);
+    return convertFromScalarArray<PVByteArray,int8>(pv,offset,len,from,fromOffset);
 }
 
-int convertToDoubleArray(PVScalarArray * pv, int offset, int len,double to[], int toOffset)
+size_t convertToByteArray(PVScalarArray * pv,
+    size_t offset, size_t len,int8 to[], size_t toOffset)
 {
-    ScalarType elemType = pv->getScalarArray()->getElementType();
-    int ntransfered = 0;
-    switch (elemType) {
-    case pvBoolean: {
-        String message("convert BooleanArray to float[]] not legal");
-        throw std::invalid_argument(message);
-    }
-    case pvByte: {
-        PVByteArray *pvdata = static_cast<PVByteArray*>(pv);
-        ByteArrayData data = ByteArrayData();
-        while (len > 0) {
-            int num = 0;
-            num = pvdata->get(offset,len,&data);
-            if (num <= 0) break;
-            ByteArray dataArray = data.data;
-            int dataOffset = data.offset;
-            for(int i=0;i<num;i++) to[toOffset+i] = dataArray[dataOffset+1];
-            len -= num;
-            offset += num;
-            toOffset += num;
-            ntransfered += num;
-        }
-        return ntransfered;
-    }
-    case pvShort: {
-        PVShortArray *pvdata = static_cast<PVShortArray*>(pv);
-        ShortArrayData data = ShortArrayData();
-        while (len > 0) {
-            int num = pvdata->get(offset, len, &data);
-            if (num == 0) break;
-            ShortArray dataArray = data.data;
-            int dataOffset = data.offset;
-            for (int i = 0; i < num; i++)
-                to[i + toOffset] = dataArray[i + dataOffset];
-            len -= num;
-            offset += num;
-            toOffset += num;
-            ntransfered += num;
-        }
-        return ntransfered;
-    }
-    case pvInt: {
-        PVIntArray *pvdata = static_cast<PVIntArray*>(pv);
-        IntArrayData data = IntArrayData();
-        while (len > 0) {
-            int num = pvdata->get(offset, len, &data);
-            if (num == 0) break;
-            IntArray dataArray = data.data;
-            int dataOffset = data.offset;
-            for (int i = 0; i < num; i++)
-                to[i + toOffset] = dataArray[i + dataOffset];
-            len -= num;
-            offset += num;
-            toOffset += num;
-            ntransfered += num;
-        }
-        return ntransfered;
-    }
-    case pvLong: {
-        PVLongArray *pvdata = static_cast<PVLongArray*>(pv);
-        LongArrayData data = LongArrayData();
-        while (len > 0) {
-            int num = pvdata->get(offset, len, &data);
-            if (num == 0)
-                break;
-            LongArray dataArray = data.data;
-            int dataOffset = data.offset;
-            for (int i = 0; i < num; i++)
-                to[i + toOffset] = dataArray[i + dataOffset];
-            len -= num;
-            offset += num;
-            toOffset += num;
-            ntransfered += num;
-        }
-        return ntransfered;
-    }
-    case pvFloat: {
-        PVFloatArray *pvdata = static_cast<PVFloatArray*>(pv);
-        FloatArrayData data = FloatArrayData();
-        while (len > 0) {
-            int num = pvdata->get(offset, len, &data);
-            if (num == 0) break;
-            FloatArray dataArray = data.data;
-            int dataOffset = data.offset;
-            for (int i = 0; i < num; i++)
-                to[i + toOffset] = dataArray[i + dataOffset];
-            len -= num;
-            offset += num;
-            toOffset += num;
-            ntransfered += num;
-        }
-        return ntransfered;
-    }
-    case pvDouble: {
-        PVDoubleArray *pvdata = static_cast<PVDoubleArray*>(pv);
-        DoubleArrayData data = DoubleArrayData();
-        while (len > 0) {
-            int num = pvdata->get(offset, len, &data);
-            if (num == 0)
-                break;
-            DoubleArray dataArray = data.data;
-            int dataOffset = data.offset;
-            for (int i = 0; i < num; i++)
-                to[i + toOffset] = dataArray[i + dataOffset];
-            len -= num;
-            offset += num;
-            toOffset += num;
-            ntransfered += num;
-        }
-        return ntransfered;
-    }
-    case pvString: {
-        String message("convert StringArray to double[]] not legal");
-        throw std::invalid_argument(message);
-    }
-    }
-    String message("Convert::convertToDoubleArray should never get here");
-    throw std::logic_error(message);
+    return convertToScalarArray<int8>(pv,offset,len,to,toOffset);
 }
 
-int convertFromStringArray(PVScalarArray *pv, int offset, int len,String from[], int fromOffset)
+size_t convertFromShortArray(PVScalarArray *pv,
+    size_t offset, size_t len,int16 from[], size_t fromOffset)
+{
+    return convertFromScalarArray<PVShortArray,int16>(pv,offset,len,from,fromOffset);
+}
+
+size_t convertToShortArray(PVScalarArray * pv,
+    size_t offset, size_t len,int16 to[], size_t toOffset)
+{
+    return convertToScalarArray<int16>(pv,offset,len,to,toOffset);
+}
+
+size_t convertFromIntArray(PVScalarArray *pv,
+    size_t offset, size_t len,int32 from[], size_t fromOffset)
+{
+    return convertFromScalarArray<PVIntArray,int32>(pv,offset,len,from,fromOffset);
+}
+
+size_t convertToIntArray(PVScalarArray * pv,
+    size_t offset, size_t len,int32 to[], size_t toOffset)
+{
+    return convertToScalarArray<int32>(pv,offset,len,to,toOffset);
+}
+
+size_t convertFromLongArray(PVScalarArray *pv,
+    size_t offset, size_t len,int64 from[], size_t fromOffset)
+{
+    return convertFromScalarArray<PVLongArray,int64>(pv,offset,len,from,fromOffset);
+}
+
+size_t convertToLongArray(PVScalarArray * pv,
+    size_t offset, size_t len,int64 to[], size_t toOffset)
+{
+    return convertToScalarArray<int64>(pv,offset,len,to,toOffset);
+}
+
+size_t convertFromUByteArray(PVScalarArray *pv,
+    size_t offset, size_t len,uint8 from[], size_t fromOffset)
+{
+    return convertFromScalarArray<PVUByteArray,uint8>(pv,offset,len,from,fromOffset);
+}
+
+size_t convertToUByteArray(PVScalarArray * pv,
+    size_t offset, size_t len,uint8 to[], size_t toOffset)
+{
+    return convertToScalarArray<uint8>(pv,offset,len,to,toOffset);
+}
+
+size_t convertFromUShortArray(PVScalarArray *pv,
+    size_t offset, size_t len,uint16 from[], size_t fromOffset)
+{
+    return convertFromScalarArray<PVUShortArray,uint16>(pv,offset,len,from,fromOffset);
+}
+
+size_t convertToUShortArray(PVScalarArray * pv,
+    size_t offset, size_t len,uint16 to[], size_t toOffset)
+{
+    return convertToScalarArray<uint16>(pv,offset,len,to,toOffset);
+}
+
+size_t convertFromUIntArray(PVScalarArray *pv,
+    size_t offset, size_t len,uint32 from[], size_t fromOffset)
+{
+    return convertFromScalarArray<PVUIntArray,uint32>(pv,offset,len,from,fromOffset);
+}
+
+size_t convertToUIntArray(PVScalarArray * pv,
+    size_t offset, size_t len,uint32 to[], size_t toOffset)
+{
+    return convertToScalarArray<uint32>(pv,offset,len,to,toOffset);
+}
+
+size_t convertFromULongArray(PVScalarArray *pv,
+    size_t offset, size_t len,uint64 from[], size_t fromOffset)
+{
+    return convertFromScalarArray<PVULongArray,uint64>(pv,offset,len,from,fromOffset);
+}
+
+size_t convertToULongArray(PVScalarArray * pv,
+    size_t offset, size_t len,uint64 to[], size_t toOffset)
+{
+    return convertToScalarArray<uint64>(pv,offset,len,to,toOffset);
+}
+
+size_t convertFromFloatArray(PVScalarArray *pv,
+    size_t offset, size_t len,float from[], size_t fromOffset)
+{
+    return convertFromScalarArray<PVFloatArray,float>(pv,offset,len,from,fromOffset);
+}
+
+size_t convertToFloatArray(PVScalarArray * pv,
+    size_t offset, size_t len,float to[], size_t toOffset)
+{
+    return convertToScalarArray<float>(pv,offset,len,to,toOffset);
+}
+
+size_t convertFromDoubleArray(PVScalarArray *pv,
+    size_t offset, size_t len,double from[], size_t fromOffset)
+{
+    return convertFromScalarArray<PVDoubleArray,double>(pv,offset,len,from,fromOffset);
+}
+
+size_t convertToDoubleArray(PVScalarArray * pv,
+    size_t offset, size_t len,double to[], size_t toOffset)
+{
+    return convertToScalarArray<double>(pv,offset,len,to,toOffset);
+}
+
+size_t convertFromStringArray(PVScalarArray *pv,
+    size_t offset, size_t len,StringArray const & from, size_t fromOffset)
 {
     ScalarType elemType = pv->getScalarArray()->getElementType();
-    int ntransfered = 0;
+    size_t ntransfered = 0;
     switch (elemType) {
     case pvBoolean: {
         PVBooleanArray *pvdata = static_cast<PVBooleanArray*>(pv);
-        bool data[1];
+        boolean data[1];
         while (len > 0) {
             String fromString = from[fromOffset];
             data[0] = (fromString.compare("true")==0) ? true : false;
@@ -2966,7 +2201,75 @@ int convertFromStringArray(PVScalarArray *pv, int offset, int len,String from[],
         while (len > 0) {
             String fromString = from[fromOffset];
             int64 ival;
-            sscanf(fromString.c_str(),"%lld",&ival);
+            sscanf(fromString.c_str(),"%lld",(long long int *)&ival);
+            data[0] = ival;
+            if (pvdata->put(offset, 1, data, 0) == 0)
+                return ntransfered;
+            --len;
+            ++ntransfered;
+            ++offset;
+            ++fromOffset;
+        }
+        return ntransfered;
+    }
+    case pvUByte: {
+        PVUByteArray *pvdata = static_cast<PVUByteArray*>(pv);
+        uint8 data[1];
+        while (len > 0) {
+            String fromString = from[fromOffset];
+            unsigned int ival;
+            sscanf(fromString.c_str(),"%u",&ival);
+            data[0] = ival;
+            if (pvdata->put(offset, 1, data, 0) == 0)
+                return ntransfered;
+            --len;
+            ++ntransfered;
+            ++offset;
+            ++fromOffset;
+        }
+        return ntransfered;
+    }
+    case pvUShort: {
+        PVUShortArray *pvdata = static_cast<PVUShortArray*>(pv);
+        uint16 data[1];
+        while (len > 0) {
+            String fromString = from[fromOffset];
+            unsigned int ival;
+            sscanf(fromString.c_str(),"%u",&ival);
+            data[0] = ival;
+            if (pvdata->put(offset, 1, data, 0) == 0)
+                return ntransfered;
+            --len;
+            ++ntransfered;
+            ++offset;
+            ++fromOffset;
+        }
+        return ntransfered;
+    }
+    case pvUInt: {
+        PVUIntArray *pvdata = static_cast<PVUIntArray*>(pv);
+        uint32 data[1];
+        while (len > 0) {
+            String fromString = from[fromOffset];
+            unsigned int ival;
+            sscanf(fromString.c_str(),"%u",&ival);
+            data[0] = ival;
+            if (pvdata->put(offset, 1, data, 0) == 0)
+                return ntransfered;
+            --len;
+            ++ntransfered;
+            ++offset;
+            ++fromOffset;
+        }
+        return ntransfered;
+    }
+    case pvULong: {
+        PVULongArray *pvdata = static_cast<PVULongArray*>(pv);
+        uint64 data[1];
+        while (len > 0) {
+            String fromString = from[fromOffset];
+            uint64 ival;
+            sscanf(fromString.c_str(),"%lld",(unsigned long long int *)&ival);
             data[0] = ival;
             if (pvdata->put(offset, 1, data, 0) == 0)
                 return ntransfered;
@@ -3014,7 +2317,7 @@ int convertFromStringArray(PVScalarArray *pv, int offset, int len,String from[],
     case pvString:
         PVStringArray *pvdata = static_cast<PVStringArray*>(pv);
         while (len > 0) {
-            int n = pvdata->put(offset, len, from, fromOffset);
+            size_t n = pvdata->put(offset, len, get(from), fromOffset);
             if (n == 0)
                 break;
             len -= n;
@@ -3028,18 +2331,20 @@ int convertFromStringArray(PVScalarArray *pv, int offset, int len,String from[],
     throw std::logic_error(message);
 }
 
-int convertToStringArray(PVScalarArray * pv, int offset, int len,String to[], int toOffset)
+size_t convertToStringArray(PVScalarArray *pv,
+    size_t offset, size_t len,StringArray const & xxx, size_t toOffset)
 {
+    String *to = const_cast<String *>(&xxx[0]);
     ScalarType elementType = pv->getScalarArray()->getElementType();
-    int ncopy = pv->getLength();
+    size_t ncopy = pv->getLength();
     if (ncopy > len) ncopy = len;
-    int num = ncopy;
+    size_t num = ncopy;
     switch (elementType) {
     case pvBoolean: {
         PVBooleanArray *pvdata = static_cast<PVBooleanArray*>(pv);
-        BooleanArrayData data = BooleanArrayData();
-        for (int i = 0; i < num; i++) {
-            if (pvdata->get(offset + i, 1, &data) == 1) {
+        BooleanArrayData data;
+        for (size_t i = 0; i < num; i++) {
+            if (pvdata->get(offset + i, 1, data) == 1) {
                 BooleanArray dataArray = data.data;
                 bool value = dataArray[data.offset];
                 to[toOffset + i] = value ? trueString : falseString;
@@ -3051,10 +2356,10 @@ int convertToStringArray(PVScalarArray * pv, int offset, int len,String to[], in
     break;
     case pvByte: {
         PVByteArray *pvdata = static_cast<PVByteArray*>(pv);
-        ByteArrayData data = ByteArrayData();
+        ByteArrayData data;
         char cr[30];
-        for (int i = 0; i < num; i++) {
-            if (pvdata->get(offset + i, 1, &data) == 1) {
+        for (size_t i = 0; i < num; i++) {
+            if (pvdata->get(offset + i, 1, data) == 1) {
                 ByteArray dataArray = data.data;
                 int ival = dataArray[data.offset];
                 sprintf(cr,"%d",ival);
@@ -3067,10 +2372,10 @@ int convertToStringArray(PVScalarArray * pv, int offset, int len,String to[], in
     break;
     case pvShort: {
         PVShortArray *pvdata = static_cast<PVShortArray*>(pv);
-        ShortArrayData data = ShortArrayData();
+        ShortArrayData data;
         char cr[30];
-        for (int i = 0; i < num; i++) {
-            if (pvdata->get(offset + i, 1, &data) == 1) {
+        for (size_t i = 0; i < num; i++) {
+            if (pvdata->get(offset + i, 1, data) == 1) {
                 ShortArray dataArray = data.data;
                 int ival = dataArray[data.offset];
                 sprintf(cr,"%d",ival);
@@ -3083,10 +2388,10 @@ int convertToStringArray(PVScalarArray * pv, int offset, int len,String to[], in
     break;
     case pvInt: {
         PVIntArray *pvdata = static_cast<PVIntArray*>(pv);
-        IntArrayData data = IntArrayData();
+        IntArrayData data;
         char cr[30];
-        for (int i = 0; i < num; i++) {
-            if (pvdata->get(offset + i, 1, &data) == 1) {
+        for (size_t i = 0; i < num; i++) {
+            if (pvdata->get(offset + i, 1, data) == 1) {
                 IntArray dataArray = data.data;
                 int ival = dataArray[data.offset];
                 sprintf(cr,"%d",ival);
@@ -3101,11 +2406,75 @@ int convertToStringArray(PVScalarArray * pv, int offset, int len,String to[], in
         PVLongArray *pvdata = static_cast<PVLongArray*>(pv);
         LongArrayData data = LongArrayData();
         char cr[30];
-        for (int i = 0; i < num; i++) {
-            if (pvdata->get(offset + i, 1, &data) == 1) {
+        for (size_t i = 0; i < num; i++) {
+            if (pvdata->get(offset + i, 1, data) == 1) {
                 LongArray dataArray = data.data;
                 int64 ival = dataArray[data.offset];
-                sprintf(cr,"%lld",ival);
+                sprintf(cr,"%lld",(long long)ival);
+                to[toOffset + i] = String(cr);
+            } else {
+                to[toOffset + i] = "bad pv";
+            }
+        }
+    }
+    break;
+    case pvUByte: {
+        PVUByteArray *pvdata = static_cast<PVUByteArray*>(pv);
+        UByteArrayData data;
+        char cr[30];
+        for (size_t i = 0; i < num; i++) {
+            if (pvdata->get(offset + i, 1, data) == 1) {
+                UByteArray dataArray = data.data;
+                unsigned int ival = dataArray[data.offset];
+                sprintf(cr,"%u",ival);
+                to[toOffset + i] = String(cr);
+            } else {
+                to[toOffset + i] = "bad pv";
+            }
+        }
+    }
+    break;
+    case pvUShort: {
+        PVUShortArray *pvdata = static_cast<PVUShortArray*>(pv);
+        UShortArrayData data;
+        char cr[30];
+        for (size_t i = 0; i < num; i++) {
+            if (pvdata->get(offset + i, 1, data) == 1) {
+                UShortArray dataArray = data.data;
+                unsigned int ival = dataArray[data.offset];
+                sprintf(cr,"%u",ival);
+                to[toOffset + i] = String(cr);
+            } else {
+                to[toOffset + i] = "bad pv";
+            }
+        }
+    }
+    break;
+    case pvUInt: {
+        PVUIntArray *pvdata = static_cast<PVUIntArray*>(pv);
+        UIntArrayData data;
+        char cr[30];
+        for (size_t i = 0; i < num; i++) {
+            if (pvdata->get(offset + i, 1, data) == 1) {
+                UIntArray dataArray = data.data;
+                unsigned int ival = dataArray[data.offset];
+                sprintf(cr,"%u",ival);
+                to[toOffset + i] = String(cr);
+            } else {
+                to[toOffset + i] = "bad pv";
+            }
+        }
+    }
+    break;
+    case pvULong: {
+        PVULongArray *pvdata = static_cast<PVULongArray*>(pv);
+        ULongArrayData data;
+        char cr[30];
+        for (size_t i = 0; i < num; i++) {
+            if (pvdata->get(offset + i, 1, data) == 1) {
+                ULongArray dataArray = data.data;
+                uint64 ival = dataArray[data.offset];
+                sprintf(cr,"%llu",(unsigned long long)ival);
                 to[toOffset + i] = String(cr);
             } else {
                 to[toOffset + i] = "bad pv";
@@ -3115,10 +2484,10 @@ int convertToStringArray(PVScalarArray * pv, int offset, int len,String to[], in
     break;
     case pvFloat: {
         PVFloatArray *pvdata = static_cast<PVFloatArray*>(pv);
-        FloatArrayData data = FloatArrayData();
+        FloatArrayData data;
         char cr[30];
-        for (int i = 0; i < num; i++) {
-            if (pvdata->get(offset + i, 1, &data) == 1) {
+        for (size_t i = 0; i < num; i++) {
+            if (pvdata->get(offset + i, 1, data) == 1) {
                 FloatArray dataArray = data.data;
                 float fval = dataArray[data.offset];
                 sprintf(cr,"%g",fval);
@@ -3131,10 +2500,10 @@ int convertToStringArray(PVScalarArray * pv, int offset, int len,String to[], in
     break;
     case pvDouble: {
         PVDoubleArray *pvdata = static_cast<PVDoubleArray*>(pv);
-        DoubleArrayData data = DoubleArrayData();
+        DoubleArrayData data;
         char cr[30];
-        for (int i = 0; i < num; i++) {
-            if (pvdata->get(offset + i, 1, &data) == 1) {
+        for (size_t i = 0; i < num; i++) {
+            if (pvdata->get(offset + i, 1, data) == 1) {
                 DoubleArray dataArray = data.data;
                 double fval = dataArray[data.offset];
                 sprintf(cr,"%g",fval);
@@ -3148,19 +2517,19 @@ int convertToStringArray(PVScalarArray * pv, int offset, int len,String to[], in
     case pvString: {
         PVStringArray *pvdata = static_cast<PVStringArray*>(pv);
         while (num > 0) {
-            int numnow = 0;
-            StringArray dataArray = 0;
-            int dataOffset = 0;
-            StringArrayData stringArrayData = StringArrayData();
-            numnow = pvdata->get(offset, num, &stringArrayData);
-            dataArray = stringArrayData.data;
+            size_t numnow = 0;
+            size_t dataOffset = 0;
+            String *dataArray;
+            StringArrayData stringArrayData;
+            numnow = pvdata->get(offset, num, stringArrayData);
+            dataArray = pvdata->get();
             dataOffset = stringArrayData.offset;
             if (numnow <= 0) {
-                for (int i = 0; i < num; i++)
+                for (size_t i = 0; i < num; i++)
                     to[toOffset + i] = "bad pv";
                 break;
             }
-            for(int i=0; i<num; i++) to[toOffset+i] = dataArray[dataOffset+i];
+            for(size_t i=0; i<num; i++) to[toOffset+i] = dataArray[dataOffset+i];
             num -= numnow;
             offset += numnow;
             toOffset += numnow;
@@ -3196,7 +2565,7 @@ void convertToString(StringBuilder buffer,PVField * pv,int indentLevel)
     ScalarType scalarType = pscalar->getScalarType();
     ScalarTypeFunc::toString(buffer,scalarType);
     *buffer += " ";
-    *buffer += pscalar->getFieldName();
+    *buffer += pv->getFieldName();
     *buffer += " ";
     switch(scalarType) {
     case pvBoolean: {
@@ -3233,7 +2602,35 @@ void convertToString(StringBuilder buffer,PVField * pv,int indentLevel)
     case pvLong: {
             PVLong *data = static_cast<PVLong*>(pv);
             char xxx[30];
-            sprintf(xxx,"%lld",(int64)data->get());
+            sprintf(xxx,"%lld",(long long)data->get());
+            *buffer += xxx;
+        }
+        return;
+    case pvUByte: {
+            PVUByte *data = static_cast<PVUByte*>(pv);
+            char xxx[30];
+            sprintf(xxx,"%u",(unsigned int)data->get());
+            *buffer += xxx;
+        }
+        return;
+    case pvUShort: {
+            PVUShort *data = static_cast<PVUShort*>(pv);
+            char xxx[30];
+            sprintf(xxx,"%u",(unsigned int)data->get());
+            *buffer += xxx;
+        }
+        return;
+    case pvUInt: {
+            PVUInt *data = static_cast<PVUInt*>(pv);
+            char xxx[30];
+            sprintf(xxx,"%u",(unsigned int)data->get());
+            *buffer += xxx;
+        }
+        return;
+    case pvULong: {
+            PVULong *data = static_cast<PVULong*>(pv);
+            char xxx[30];
+            sprintf(xxx,"%llu",(unsigned long long)data->get());
             *buffer += xxx;
         }
         return;
@@ -3270,13 +2667,13 @@ void convertStructure(StringBuilder buffer,PVStructure *data,int indentLevel)
         *buffer += extendsName;
         *buffer += " ";
     }
-    *buffer += data->getField()->getFieldName();
-    PVFieldPtrArray fieldsData = data->getPVFields();
-    if (fieldsData != 0) {
+    *buffer += data->getFieldName();
+    PVFieldPtrArray const & fieldsData = data->getPVFields();
+    if (fieldsData.size() != 0) {
         int length = data->getStructure()->getNumberFields();
         for(int i=0; i<length; i++) {
             convert->newLine(buffer, indentLevel+1);
-            PVField *fieldField = fieldsData[i];
+            PVFieldPtr fieldField = fieldsData[i];
             fieldField->toString(buffer,indentLevel + 1);
         }
     }
@@ -3288,16 +2685,16 @@ void convertArray(StringBuilder buffer,PVScalarArray * pv,int indentLevel)
     ScalarType type = array->getElementType();
     ScalarTypeFunc::toString(buffer,type);
     *buffer += "[] ";
-    *buffer += array->getFieldName();
+    *buffer += pv->getFieldName();
     *buffer += " ";
     switch(type) {
     case pvBoolean: {
             PVBooleanArray *pvdata = static_cast<PVBooleanArray*>(pv);
-            BooleanArrayData data = BooleanArrayData();
+            BooleanArrayData data;
             *buffer += "[";
-            for(int i=0; i < pvdata->getLength(); i++) {
+            for(size_t i=0; i < pvdata->getLength(); i++) {
                 if(i!=0) *buffer += ",";
-                int num = pvdata->get(i,1,&data);
+                size_t num = pvdata->get(i,1,data);
                 if(num==1) {
                      BooleanArray  value = data.data;
                      if(value[data.offset]) {
@@ -3314,11 +2711,11 @@ void convertArray(StringBuilder buffer,PVScalarArray * pv,int indentLevel)
         }
     case pvByte: {
             PVByteArray *pvdata = static_cast<PVByteArray*>(pv);
-            ByteArrayData data = ByteArrayData();
+            ByteArrayData data;
             *buffer += "[";
-            for(int i=0; i < pvdata->getLength(); i++) {
+            for(size_t i=0; i < pvdata->getLength(); i++) {
                 if(i!=0) *buffer += ",";
-                int num = pvdata->get(i,1,&data);
+                size_t num = pvdata->get(i,1,data);
                 if(num==1) {
                      int val = data.data[data.offset];
                      char buf[16];
@@ -3333,11 +2730,11 @@ void convertArray(StringBuilder buffer,PVScalarArray * pv,int indentLevel)
         }
     case pvShort: {
             PVShortArray *pvdata = static_cast<PVShortArray*>(pv);
-            ShortArrayData data = ShortArrayData();
+            ShortArrayData data;
             *buffer += "[";
-            for(int i=0; i < pvdata->getLength(); i++) {
+            for(size_t i=0; i < pvdata->getLength(); i++) {
                 if(i!=0) *buffer += ',';
-                int num = pvdata->get(i,1,&data);
+                size_t num = pvdata->get(i,1,data);
                 if(num==1) {
                      int val = data.data[data.offset];
                      char buf[16];
@@ -3352,11 +2749,11 @@ void convertArray(StringBuilder buffer,PVScalarArray * pv,int indentLevel)
         }
     case pvInt: {
             PVIntArray *pvdata = static_cast<PVIntArray*>(pv);
-            IntArrayData data = IntArrayData();
+            IntArrayData data;
             *buffer += "[";
-            for(int i=0; i < pvdata->getLength(); i++) {
+            for(size_t i=0; i < pvdata->getLength(); i++) {
                 if(i!=0) *buffer += ',';
-                int num = pvdata->get(i,1,&data);
+                size_t num = pvdata->get(i,1,data);
                 if(num==1) {
                      int val = data.data[data.offset];
                      char buf[16];
@@ -3371,15 +2768,91 @@ void convertArray(StringBuilder buffer,PVScalarArray * pv,int indentLevel)
         }
     case pvLong: {
             PVLongArray *pvdata = static_cast<PVLongArray*>(pv);
-            LongArrayData data = LongArrayData();
+            LongArrayData data;
             *buffer += "[";
-            for(int i=0; i < pvdata->getLength(); i++) {
+            for(size_t i=0; i < pvdata->getLength(); i++) {
                 if(i!=0) *buffer += ',';
-                int num = pvdata->get(i,1,&data);
+                size_t num = pvdata->get(i,1,data);
                 if(num==1) {
                      int64 val = data.data[data.offset];
+                     char buf[32];
+                     sprintf(buf,"%lld",(long long)val);
+                     *buffer += buf;
+                } else {
+                     *buffer += "???? ";
+                }
+            }
+            *buffer += "]";
+            break;
+        }
+    case pvUByte: {
+            PVUByteArray *pvdata = static_cast<PVUByteArray*>(pv);
+            UByteArrayData data;
+            *buffer += "[";
+            for(size_t i=0; i < pvdata->getLength(); i++) {
+                if(i!=0) *buffer += ",";
+                size_t num = pvdata->get(i,1,data);
+                if(num==1) {
+                      unsigned int val = data.data[data.offset];
                      char buf[16];
-                     sprintf(buf,"%lld",val);
+                     sprintf(buf,"%u",val);
+                     *buffer += buf;
+                } else {
+                     *buffer += "???? ";
+                }
+            }
+            *buffer += "]";
+            break;
+        }
+    case pvUShort: {
+            PVUShortArray *pvdata = static_cast<PVUShortArray*>(pv);
+            UShortArrayData data;
+            *buffer += "[";
+            for(size_t i=0; i < pvdata->getLength(); i++) {
+                if(i!=0) *buffer += ',';
+                size_t num = pvdata->get(i,1,data);
+                if(num==1) {
+                    unsigned  int val = data.data[data.offset];
+                     char buf[16];
+                     sprintf(buf,"%u",val);
+                     *buffer += buf;
+                } else {
+                     *buffer += "???? ";
+                }
+            }
+            *buffer += "]";
+            break;
+        }
+    case pvUInt: {
+            PVUIntArray *pvdata = static_cast<PVUIntArray*>(pv);
+            UIntArrayData data;
+            *buffer += "[";
+            for(size_t i=0; i < pvdata->getLength(); i++) {
+                if(i!=0) *buffer += ',';
+                size_t num = pvdata->get(i,1,data);
+                if(num==1) {
+                     unsigned int val = data.data[data.offset];
+                     char buf[16];
+                     sprintf(buf,"%u",val);
+                     *buffer += buf;
+                } else {
+                     *buffer += "???? ";
+                }
+            }
+            *buffer += "]";
+            break;
+        }
+    case pvULong: {
+            PVULongArray *pvdata = static_cast<PVULongArray*>(pv);
+            ULongArrayData data;
+            *buffer += "[";
+            for(size_t i=0; i < pvdata->getLength(); i++) {
+                if(i!=0) *buffer += ',';
+                size_t num = pvdata->get(i,1,data);
+                if(num==1) {
+                     uint64 val = data.data[data.offset];
+                     char buf[32];
+                     sprintf(buf,"%llu",(unsigned long long)val);
                      *buffer += buf;
                 } else {
                      *buffer += "???? ";
@@ -3390,11 +2863,11 @@ void convertArray(StringBuilder buffer,PVScalarArray * pv,int indentLevel)
         }
     case pvFloat: {
             PVFloatArray *pvdata = static_cast<PVFloatArray*>(pv);
-            FloatArrayData data = FloatArrayData();
+            FloatArrayData data;
             *buffer += "[";
-            for(int i=0; i < pvdata->getLength(); i++) {
+            for(size_t i=0; i < pvdata->getLength(); i++) {
                 if(i!=0) *buffer += ',';
-                int num = pvdata->get(i,1,&data);
+                size_t num = pvdata->get(i,1,data);
                 if(num==1) {
                      float val = data.data[data.offset];
                      char buf[16];
@@ -3409,11 +2882,11 @@ void convertArray(StringBuilder buffer,PVScalarArray * pv,int indentLevel)
         }
     case pvDouble: {
             PVDoubleArray *pvdata = static_cast<PVDoubleArray*>(pv);
-            DoubleArrayData data = DoubleArrayData();
+            DoubleArrayData data;
             *buffer += "[";
-            for(int i=0; i < pvdata->getLength(); i++) {
+            for(size_t i=0; i < pvdata->getLength(); i++) {
                 if(i!=0) *buffer += ',';
-                int num = pvdata->get(i,1,&data);
+                size_t num = pvdata->get(i,1,data);
                 if(num==1) {
                      double val = data.data[data.offset];
                      char buf[16];
@@ -3428,11 +2901,11 @@ void convertArray(StringBuilder buffer,PVScalarArray * pv,int indentLevel)
         }
     case pvString: {
     	PVStringArray *pvdata = static_cast<PVStringArray*>(pv);
-    	StringArrayData data = StringArrayData();
+    	StringArrayData data;
     	*buffer += "[";
-    	for(int i=0; i < pvdata->getLength(); i++) {
+    	for(size_t i=0; i < pvdata->getLength(); i++) {
     		if(i!=0) *buffer += ",";
-    		int num = pvdata->get(i,1,&data);
+    		size_t num = pvdata->get(i,1,data);
     		StringArray value = data.data;
                 if(num==1) {
                     if(value[data.offset].length()>0) {
@@ -3459,18 +2932,18 @@ void convertStructureArray(StringBuilder buffer,
     PVStructureArray * pvdata,int indentLevel)
 {
     *buffer += "structure[] ";
-    *buffer += pvdata->getField()->getFieldName();
+    *buffer += pvdata->getFieldName();
     *buffer += " ";
-    int length = pvdata->getLength();
+    size_t length = pvdata->getLength();
     if(length<=0) {
         return;
     }
     StructureArrayData data = StructureArrayData();
-    pvdata->get(0, length, &data);
-    for (int i = 0; i < length; i++) {
+    pvdata->get(0, length, data);
+    for (size_t i = 0; i < length; i++) {
         convert->newLine(buffer, indentLevel + 1);
-        PVStructure *pvStructure = data.data[i];
-        if (pvStructure == 0) {
+        PVStructurePtr pvStructure = data.data[i];
+        if (pvStructure.get() == 0) {
             *buffer += "null";
         } else {
             pvStructure->toString(buffer,indentLevel+1);
@@ -3478,80 +2951,92 @@ void convertStructureArray(StringBuilder buffer,
     }
 }
 
-int copyArrayDataReference(PVScalarArray *from,PVArray *to)
+size_t copyArrayDataReference(PVScalarArray *from,PVArray *to)
 {
     ScalarType scalarType = from->getScalarArray()->getElementType();
     switch (scalarType) {
     case pvBoolean: {
         PVBooleanArray *pvfrom = (PVBooleanArray*) from;
         PVBooleanArray *pvto = (PVBooleanArray*) to;
-        BooleanArrayData booleanArrayData = BooleanArrayData();
-        pvfrom->get(0, pvfrom->getLength(), &booleanArrayData);
-        BooleanArray booleanArray = booleanArrayData.data;
-        pvto->shareData(booleanArray,from->getCapacity(),from->getLength());
+        pvto->shareData(
+            pvfrom->getSharedVector(),pvfrom->getCapacity(),pvfrom->getLength());
         break;
     }
     case pvByte: {
         PVByteArray *pvfrom = (PVByteArray*) from;
         PVByteArray *pvto = (PVByteArray*) to;
-        ByteArrayData byteArrayData = ByteArrayData();
-        pvfrom->get(0, pvfrom->getLength(), &byteArrayData);
-        ByteArray byteArray = byteArrayData.data;
-        pvto->shareData(byteArray,from->getCapacity(),from->getLength());
+        pvto->shareData(
+            pvfrom->getSharedVector(),pvfrom->getCapacity(),pvfrom->getLength());
         break;
     }
     case pvShort: {
         PVShortArray *pvfrom = (PVShortArray*) from;
         PVShortArray *pvto = (PVShortArray*) to;
-        ShortArrayData shortArrayData = ShortArrayData();
-        pvfrom->get(0, pvfrom->getLength(), &shortArrayData);
-        ShortArray shortArray = shortArrayData.data;
-        pvto->shareData(shortArray,from->getCapacity(),from->getLength());
+        pvto->shareData(
+            pvfrom->getSharedVector(),pvfrom->getCapacity(),pvfrom->getLength());
         break;
     }
     case pvInt: {
         PVIntArray *pvfrom = (PVIntArray*) from;
         PVIntArray *pvto = (PVIntArray*) to;
-        IntArrayData intArrayData = IntArrayData();
-        pvfrom->get(0, pvfrom->getLength(), &intArrayData);
-        IntArray intArray = intArrayData.data;
-        pvto->shareData(intArray,from->getCapacity(),from->getLength());
+        pvto->shareData(
+            pvfrom->getSharedVector(),pvfrom->getCapacity(),pvfrom->getLength());
         break;
     }
     case pvLong: {
         PVLongArray *pvfrom = (PVLongArray*) from;
         PVLongArray *pvto = (PVLongArray*) to;
-        LongArrayData longArrayData = LongArrayData();
-        pvfrom->get(0, pvfrom->getLength(), &longArrayData);
-        LongArray longArray = longArrayData.data;
-        pvto->shareData(longArray,from->getCapacity(),from->getLength());
+        pvto->shareData(
+            pvfrom->getSharedVector(),pvfrom->getCapacity(),pvfrom->getLength());
+        break;
+    }
+    case pvUByte: {
+        PVUByteArray *pvfrom = (PVUByteArray*) from;
+        PVUByteArray *pvto = (PVUByteArray*) to;
+        pvto->shareData(
+            pvfrom->getSharedVector(),pvfrom->getCapacity(),pvfrom->getLength());
+        break;
+    }
+    case pvUShort: {
+        PVUShortArray *pvfrom = (PVUShortArray*) from;
+        PVUShortArray *pvto = (PVUShortArray*) to;
+        pvto->shareData(
+            pvfrom->getSharedVector(),pvfrom->getCapacity(),pvfrom->getLength());
+        break;
+    }
+    case pvUInt: {
+        PVUIntArray *pvfrom = (PVUIntArray*) from;
+        PVUIntArray *pvto = (PVUIntArray*) to;
+        pvto->shareData(
+            pvfrom->getSharedVector(),pvfrom->getCapacity(),pvfrom->getLength());
+        break;
+    }
+    case pvULong: {
+        PVULongArray *pvfrom = (PVULongArray*) from;
+        PVULongArray *pvto = (PVULongArray*) to;
+        pvto->shareData(
+            pvfrom->getSharedVector(),pvfrom->getCapacity(),pvfrom->getLength());
         break;
     }
     case pvFloat: {
         PVFloatArray *pvfrom = (PVFloatArray*) from;
         PVFloatArray *pvto = (PVFloatArray*) to;
-        FloatArrayData longArrayData = FloatArrayData();
-        pvfrom->get(0, pvfrom->getLength(), &longArrayData);
-        FloatArray longArray = longArrayData.data;
-        pvto->shareData(longArray,from->getCapacity(),from->getLength());
+        pvto->shareData(
+            pvfrom->getSharedVector(),pvfrom->getCapacity(),pvfrom->getLength());
         break;
     }
     case pvDouble: {
         PVDoubleArray *pvfrom = (PVDoubleArray*) from;
         PVDoubleArray *pvto = (PVDoubleArray*) to;
-        DoubleArrayData doubleArrayData = DoubleArrayData();
-        pvfrom->get(0, pvfrom->getLength(), &doubleArrayData);
-        DoubleArray doubleArray = doubleArrayData.data;
-        pvto->shareData(doubleArray,from->getCapacity(),from->getLength());
+        pvto->shareData(
+            pvfrom->getSharedVector(),pvfrom->getCapacity(),pvfrom->getLength());
         break;
     }
     case pvString: {
         PVStringArray *pvfrom = (PVStringArray*) from;
         PVStringArray *pvto = (PVStringArray*) to;
-        StringArrayData stringArrayData = StringArrayData();
-        pvfrom->get(0, pvfrom->getLength(), &stringArrayData);
-        StringArray stringArray = stringArrayData.data;
-        pvto->shareData(stringArray,from->getCapacity(),from->getLength());
+        pvto->shareData(
+            pvfrom->getSharedVector(),pvfrom->getCapacity(),pvfrom->getLength());
         break;
     }
     }
@@ -3559,24 +3044,24 @@ int copyArrayDataReference(PVScalarArray *from,PVArray *to)
     return from->getLength();
 }
 
-int copyNumericArray(PVScalarArray *from, int offset, PVScalarArray *to, int toOffset, int len)
+size_t copyNumericArray(PVScalarArray *from, size_t offset, PVScalarArray *to, size_t toOffset, size_t len)
 {
     ScalarType fromElementType = from->getScalarArray()->getElementType();
-    int ncopy = 0;
+    size_t ncopy = 0;
     switch (fromElementType) {
     case pvBoolean:
        throw std::logic_error(String("PVBooleanArray is not a numeric array"));
     case pvByte: {
         PVByteArray *pvfrom = (PVByteArray*) from;
         while (len > 0) {
-            int num = 0;
-            ByteArrayData byteArrayData = ByteArrayData();
-            num = pvfrom->get(offset, len, &byteArrayData);
-            ByteArray data = byteArrayData.data;
-            int dataOffset = byteArrayData.offset;
+            size_t num = 0;
+            ByteArrayData arrayData = ByteArrayData();
+            num = pvfrom->get(offset, len, arrayData);
+            int8 * data = get(arrayData.data);
+            size_t dataOffset = arrayData.offset;
             if (num <= 0) break;
             while (num > 0) {
-                int n = convert->fromByteArray(
+                size_t n = convertFromByteArray(
                      to, toOffset, num, data, dataOffset);
                 if (n <= 0) break;
                 len -= n;
@@ -3591,14 +3076,14 @@ int copyNumericArray(PVScalarArray *from, int offset, PVScalarArray *to, int toO
     case pvShort: {
         PVShortArray *pvfrom = (PVShortArray*) from;
         while (len > 0) {
-            int num = 0;
-            ShortArrayData shortArrayData = ShortArrayData();
-            num = pvfrom->get(offset, len, &shortArrayData);
-            ShortArray data = shortArrayData.data;
-            int dataOffset = shortArrayData.offset;
+            size_t num = 0;
+            ShortArrayData arrayData = ShortArrayData();
+            num = pvfrom->get(offset, len, arrayData);
+            int16 * data = get(arrayData.data);
+            size_t dataOffset = arrayData.offset;
             if (num <= 0) break;
             while (num > 0) {
-                int n = convert->fromShortArray(
+                size_t n = convertFromShortArray(
                     to, toOffset, num, data, dataOffset);
                 if (n <= 0) break;
                 len -= n;
@@ -3613,14 +3098,14 @@ int copyNumericArray(PVScalarArray *from, int offset, PVScalarArray *to, int toO
     case pvInt: {
         PVIntArray *pvfrom = (PVIntArray*) from;
         while (len > 0) {
-            int num = 0;
-            IntArrayData shortArrayData = IntArrayData();
-            num = pvfrom->get(offset, len, &shortArrayData);
-            IntArray data = shortArrayData.data;
-            int dataOffset = shortArrayData.offset;
+            size_t num = 0;
+            IntArrayData arrayData = IntArrayData();
+            num = pvfrom->get(offset, len, arrayData);
+            int32 * data = get(arrayData.data);
+            size_t dataOffset = arrayData.offset;
             if (num <= 0) break;
             while (num > 0) {
-                int n = convert->fromIntArray(
+                size_t n = convertFromIntArray(
                     to, toOffset, num, data, dataOffset);
                 if (n <= 0) break;
                 len -= n;
@@ -3635,14 +3120,102 @@ int copyNumericArray(PVScalarArray *from, int offset, PVScalarArray *to, int toO
     case pvLong: {
         PVLongArray *pvfrom = (PVLongArray*) from;
         while (len > 0) {
-            int num = 0;
-            LongArrayData longArrayData = LongArrayData();
-            num = pvfrom->get(offset, len, &longArrayData);
-            LongArray data = longArrayData.data;
-            int dataOffset = longArrayData.offset;
+            size_t num = 0;
+            LongArrayData arrayData = LongArrayData();
+            num = pvfrom->get(offset, len, arrayData);
+            int64 * data = get(arrayData.data);
+            size_t dataOffset = arrayData.offset;
             if (num <= 0) break;
             while (num > 0) {
-                int n = convert->fromLongArray(
+                size_t n = convertFromLongArray(
+                    to, toOffset, num, data, dataOffset);
+                if (n <= 0) break;
+                len -= n;
+                num -= n;
+                ncopy += n;
+                offset += n;
+                toOffset += n;
+            }
+        }
+        break;
+    }
+    case pvUByte: {
+        PVUByteArray *pvfrom = (PVUByteArray*) from;
+        while (len > 0) {
+            size_t num = 0;
+            UByteArrayData arrayData = UByteArrayData();
+            num = pvfrom->get(offset, len, arrayData);
+            uint8 * data = get(arrayData.data);
+            size_t dataOffset = arrayData.offset;
+            if (num <= 0) break;
+            while (num > 0) {
+                size_t n = convertFromUByteArray(
+                     to, toOffset, num, data, dataOffset);
+                if (n <= 0) break;
+                len -= n;
+                num -= n;
+                ncopy += n;
+                offset += n;
+                toOffset += n;
+            }
+        }
+        break;
+    }
+    case pvUShort: {
+        PVUShortArray *pvfrom = (PVUShortArray*) from;
+        while (len > 0) {
+            size_t num = 0;
+            UShortArrayData arrayData = UShortArrayData();
+            num = pvfrom->get(offset, len, arrayData);
+            uint16 * data = get(arrayData.data);
+            size_t dataOffset = arrayData.offset;
+            if (num <= 0) break;
+            while (num > 0) {
+                size_t n = convertFromUShortArray(
+                    to, toOffset, num, data, dataOffset);
+                if (n <= 0) break;
+                len -= n;
+                num -= n;
+                ncopy += n;
+                offset += n;
+                toOffset += n;
+            }
+        }
+        break;
+    }
+    case pvUInt: {
+        PVUIntArray *pvfrom = (PVUIntArray*) from;
+        while (len > 0) {
+            size_t num = 0;
+            UIntArrayData arrayData = UIntArrayData();
+            num = pvfrom->get(offset, len, arrayData);
+            uint32 * data = get(arrayData.data);
+            size_t dataOffset = arrayData.offset;
+            if (num <= 0) break;
+            while (num > 0) {
+                size_t n = convertFromUIntArray(
+                    to, toOffset, num, data, dataOffset);
+                if (n <= 0) break;
+                len -= n;
+                num -= n;
+                ncopy += n;
+                offset += n;
+                toOffset += n;
+            }
+        }
+        break;
+    }
+    case pvULong: {
+        PVULongArray *pvfrom = (PVULongArray*) from;
+        while (len > 0) {
+            size_t num = 0;
+            ULongArrayData arrayData = ULongArrayData();
+            num = pvfrom->get(offset, len, arrayData);
+            uint64 * data = get(arrayData.data);
+            size_t dataOffset = arrayData.offset;
+            if (num <= 0) break;
+            while (num > 0) {
+                size_t n = convertFromULongArray(
                     to, toOffset, num, data, dataOffset);
                 if (n <= 0) break;
                 len -= n;
@@ -3657,14 +3230,14 @@ int copyNumericArray(PVScalarArray *from, int offset, PVScalarArray *to, int toO
     case pvFloat: {
         PVFloatArray *pvfrom = (PVFloatArray*) from;
         while (len > 0) {
-            int num = 0;
+            size_t num = 0;
             FloatArrayData floatArrayData = FloatArrayData();
-            num = pvfrom->get(offset, len, &floatArrayData);
-            FloatArray data = floatArrayData.data;
-            int dataOffset = floatArrayData.offset;
+            num = pvfrom->get(offset, len, floatArrayData);
+            float * data = get(floatArrayData.data);
+            size_t dataOffset = floatArrayData.offset;
             if (num <= 0) break;
             while (num > 0) {
-                int n = convert->fromFloatArray(
+                size_t n = convertFromFloatArray(
                     to, toOffset, num, data, dataOffset);
                 if (n <= 0) break;
                 len -= n;
@@ -3679,14 +3252,14 @@ int copyNumericArray(PVScalarArray *from, int offset, PVScalarArray *to, int toO
     case pvDouble: {
         PVDoubleArray *pvfrom = (PVDoubleArray*) from;
         while (len > 0) {
-            int num = 0;
+            size_t num = 0;
             DoubleArrayData doubleArrayData = DoubleArrayData();
-            num = pvfrom->get(offset, len, &doubleArrayData);
-            DoubleArray data = doubleArrayData.data;
-            int dataOffset = doubleArrayData.offset;
+            num = pvfrom->get(offset, len, doubleArrayData);
+            double * data = get(doubleArrayData.data);
+            size_t dataOffset = doubleArrayData.offset;
             if (num <= 0) break;
             while (num > 0) {
-                int n = convert->fromDoubleArray(
+                size_t n = convertFromDoubleArray(
                     to, toOffset, num, data, dataOffset);
                 if (n <= 0) break;
                 len -= n;
@@ -3703,21 +3276,24 @@ int copyNumericArray(PVScalarArray *from, int offset, PVScalarArray *to, int toO
     }
     return ncopy;
 }
+#ifdef XXXXXXXXX
 
-class ConvertExt : public Convert {
-public:
-    ConvertExt(): Convert(){};
-};
+#endif ///MARTY REMOVE THIS XXXXXXX
 
-Convert * getConvert() {
+ConvertPtr Convert::getConvert()
+{
     static Mutex mutex;
     Lock xx(mutex);
 
-    if(convert==0){
-        convert = new ConvertExt();
+    if(convert.get()==0) {
+        convert = ConvertPtr(new Convert());
         pvDataCreate = getPVDataCreate();
     }
     return convert;
+}
+
+ConvertPtr getConvert() {
+    return Convert::getConvert();
 }
 
 }}
