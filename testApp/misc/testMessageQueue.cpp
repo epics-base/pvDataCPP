@@ -49,11 +49,11 @@ static void testBasic(FILE * fd,FILE *auxfd ) {
     assert(result);
     result = queue->put(messages[1],infoMessage,true);
     assert(result);
-    result = queue->put(messages[2],infoMessage,true);
+    result = queue->put(messages[2],warningMessage,true);
     assert(result);
     assert(queue->isFull());
     result = queue->put(messages[3],infoMessage,true);
-    assert(result==false);
+    assert(result==true);
     messageNode = queue->get();
     assert(messageNode.get()!=0);
     fprintf(fd,"message %s messageType %s\n",

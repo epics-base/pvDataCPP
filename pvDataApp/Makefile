@@ -39,6 +39,7 @@ LIBSRCS += executor.cpp
 LIBSRCS += timeFunction.cpp
 LIBSRCS += timer.cpp
 LIBSRCS += status.cpp
+LIBSRCS += messageQueue.cpp
 
 SRC_DIRS += $(PVDATA)/pv
 
