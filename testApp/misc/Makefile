@@ -38,9 +38,9 @@ PROD_HOST += testQueue
 testQueue_SRCS += testQueue.cpp
 testQueue_LIBS += pvData Com
 
-#PROD_HOST += testMessageQueue
-#testMessageQueue_SRCS += testMessageQueue.cpp
-#testMessageQueue_LIBS += pvData Com
+PROD_HOST += testMessageQueue
+testMessageQueue_SRCS += testMessageQueue.cpp
+testMessageQueue_LIBS += pvData Com
 
 include $(TOP)/configure/RULES
 #----------------------------------------

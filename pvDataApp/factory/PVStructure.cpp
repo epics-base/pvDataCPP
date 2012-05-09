@@ -626,10 +626,10 @@ static PVFieldPtr &findSubField(String fieldName,PVStructure *pvStructure) {
     PVFieldPtr pvField;
     size_t numFields = pvStructure->getStructure()->getNumberFields();
     for(size_t i=0; i<numFields; i++) {
-        PVFieldPtr pvField = pvFields[i];
+        pvField = pvFields[i];
         size_t result = pvField->getFieldName().compare(name);
         if(result==0) {
-            if(restOfName.length()==0) return pvField;
+            if(restOfName.length()==0) return pvFields[i];
             if(pvField->getField()->getType()!=structure) return nullPVField;
             PVStructurePtr pvStructure = std::tr1::static_pointer_cast<PVStructure>(pvField);
             return findSubField(restOfName,pvStructure.get());

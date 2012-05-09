@@ -19,29 +19,85 @@
 
 namespace epics { namespace pvData { 
 
-typedef PVStructure::shared_pointer* PVStructureSharedPointerPtr;
-typedef PVStructureSharedPointerPtr* PVStructureSharedPointerPtrArray;
+class MonitorQueue;
+typedef std::tr1::shared_ptr<MonitorQueue> MonitorQueuePtr;
 
 class MonitorQueue {
 public:
-    MonitorQueue(PVStructureSharedPointerPtrArray structures,int number);
+    static MonitorQueuePtr create(
+        StructureConstPtr & elementStructure,int  number);
+    MonitorQueue(MonitorElementArray &monitorElementArray);
     ~MonitorQueue();
-    static PVStructureSharedPointerPtrArray createStructures(
-        PVStructurePtrArray array,int number);
     void clear();
     int getNumberFree();
     int capacity();
     MonitorElementPtr & getFree();
     void setUsed(MonitorElementPtr & element);
-    MonitorElementPtr getUsed();
+    MonitorElementPtr & getUsed();
     void releaseUsed(MonitorElementPtr & element);
 private:
-    int number;
-    PVStructureSharedPointerPtrArray structures;
-    Queue<MonitorElementPtr> *queue;
-    MonitorElementPtr **queueElements;
     MonitorElementPtr nullElement;
+    MonitorElementArray elementArray;
+    Queue<MonitorElementPtr> queue;
 };
+
+MonitorQueuePtr MonitorQueue::create(i
+    StructureConstPtr & elementStructure,int  number)
+{
+    PVDataCreatePtr pvDataCreate = getPVDataCreate();
+    MonitorElementArray elementArray;
+    elementArray.reserve(number);
+    for(int i=0; i<number; i++) {
+         PVStructurePtr pvStructurePtr
+             = pvDataCreate->createPVStructure(elementStructure);
+         MonitorElementPtr  monitorElement(new MonitorElement(pvStructurePtr));
+         elementArray.push_back(new MonitorElement(pvStructurePtr));
+    }
+    return MonitorQueuePtr(new MonitorQueue(elementArray));
+}
+
+MonitorQueue::MonitorQueue(MonitorElementArray &monitorElementArray)
+: queue(new Queue<MonitorElementPtr>(monitorElementArray.swap()))
+  {}
+
+void MonitorQueue::clear()
+{
+    queue->clear();
+}
+
+int MonitorQueue::getNumberFree()
+{
+    return queue->getNumberFree();
+}
+
+int MonitorQueue::capacity()
+{
+    return queue.capacity();
+}
+
+MonitorElementPtr & MonitorQueue::getFree()
+{
+    MonitorElementPtr queueElement = queue->getFree();
+    if(queueElement.get()==0) return nullElement;
+    return queueElement;
+}
+
+void MonitorQueue::setUsed(MonitorElementPtr & element)
+{
+    queue->setUsed(element);
+}
+
+MonitorElementPtr & MonitorQueue::getUsed()
+{
+    MonitorElementPtr queueElement = queue->getUsed();
+    if(queueElement.get()==0) return nullElement;
+    return queueElement;
+}
+
+void MonitorQueue::releaseUsed(MonitorElementPtr & element)
+{
+    queue->releaseUsed(element);
+}
 
 }}
 

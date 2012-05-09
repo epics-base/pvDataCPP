@@ -15,8 +15,6 @@
 
 namespace epics { namespace pvData { 
 
-typedef std::tr1::shared_ptr<BitSet> BitSetPtr;
-
 class MonitorElement;
 typedef std::tr1::shared_ptr<MonitorElement> MonitorElementPtr;
 typedef std::vector<MonitorElementPtr> MonitorElementArray;
@@ -32,24 +30,19 @@ typedef std::tr1::shared_ptr<Monitor> MonitorPtr;
 class MonitorElement {
     public:
     POINTER_DEFINITIONS(MonitorElement);
-    virtual ~MonitorElement(){}
-    /**
-     * Get the PVStructure.
-     * @return The PVStructure.
-     */
-    virtual PVStructurePtr getPVStructure() = 0;
-    /**
-     * Get the bitSet showing which fields have changed.
-     * @return The bitSet.
-     */
-    virtual BitSetPtr getChangedBitSet() = 0;
-    /**
-     * Get the bitSet showing which fields have been changed more than once.
-     * @return The bitSet.
-     */
-    virtual BitSetPtr getOverrunBitSet() = 0;
+    MonitorElement(){}
+    MonitorElement(PVStructurePtr &pvStructurePtr);
+    PVStructurePtr pvStructurePtr;
+    BitSetPtr changedBitSet;
+    BitSetPtr overrunBitSet;
 };
 
+MonitorElement::MonitorElement(PVStructurePtr &pvStructurePtr)
+: pvStructurePtr(pvStructurePtr),
+  changedBitSet(BitSetPtr(BitSet::create(pvStructurePtr->getNumberFields()))),
+  overrunBitSet(BitSetPtr(BitSet::create(pvStructurePtr->getNumberFields())))
+{
+}
 
 /**
  * Interface for Monitor.

@@ -4,7 +4,7 @@
  * in file LICENSE that is included with this distribution.
  */
 /*
- * testQueue.cpp
+ * testMessageQueue.cpp
  *
  *  Created on: 2010.12
  *      Author: Marty Kraimer
@@ -33,12 +33,16 @@ using namespace epics::pvData;
 
 static void testBasic(FILE * fd,FILE *auxfd ) {
     int queueSize = 3;
-    String messages[]= {
-        String("1"),String("2"),String("3"),String("4"),String("5")
-    };
-    MessageQueue *queue = new MessageQueue(queueSize);
+    StringArray messages;
+    messages.reserve(5);
+    messages.push_back("1");
+    messages.push_back("2");
+    messages.push_back("3");
+    messages.push_back("4");
+    messages.push_back("5");
+    MessageQueuePtr queue = MessageQueue::create(queueSize);
     bool result;
-    MessageNode *messageNode;
+    MessageNodePtr messageNode;
     result = queue->isEmpty();
     assert(result);
     result = queue->put(messages[0],infoMessage,true);
@@ -51,25 +55,24 @@ static void testBasic(FILE * fd,FILE *auxfd ) {
     result = queue->put(messages[3],infoMessage,true);
     assert(result==false);
     messageNode = queue->get();
-    assert(messageNode!=0);
+    assert(messageNode.get()!=0);
     fprintf(fd,"message %s messageType %s\n",
         messageNode->getMessage().c_str(),
         messageTypeName[messageNode->getMessageType()].c_str());
     assert(messageNode->getMessage().compare(messages[0])==0);
     queue->release();
     messageNode = queue->get();
-    assert(messageNode!=0);
+    assert(messageNode.get()!=0);
     assert(messageNode->getMessage().compare(messages[1])==0);
     queue->release();
     messageNode = queue->get();
-    assert(messageNode!=0);
+    assert(messageNode.get()!=0);
     fprintf(fd,"message %s messageType %s\n",
         messageNode->getMessage().c_str(),
         messageTypeName[messageNode->getMessageType()].c_str());
     assert(messageNode->getMessage().compare(messages[3])==0);
     queue->release();
     result = queue->isEmpty();
-    delete queue;
 }
 
 int main(int argc, char *argv[]) {

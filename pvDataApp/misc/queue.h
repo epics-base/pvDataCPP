@@ -8,6 +8,7 @@
 #include <tr1/memory>
 #include <cstddef>
 #include <stdexcept>
+#include <pv/sharedPtr.h>
 #ifndef QUEUE_H
 #define QUEUE_H
 namespace epics { namespace pvData { 
@@ -16,20 +17,22 @@ template <typename T>
 class Queue
 {
 public:
+    POINTER_DEFINITIONS(Queue);
     typedef std::tr1::shared_ptr<T> queueElementPtr;
-    Queue(int size);
-    Queue(std::vector<queueElementPtr> elements);
-    ~Queue(){}
+    typedef std::vector<queueElementPtr> queueElementPtrArray;
+    Queue(queueElementPtrArray &);
+    virtual ~Queue();
     void clear();
-    int capacity(){return size;}
-    int getNumberFree(){return numberFree;}
-    int getNumberUsed(){return numberUsed;}
-    T * getFree();
-    void setUsed(T *element);
-    T * getUsed();
-    void releaseUsed(T *element);
+    int capacity();
+    int getNumberFree();
+    int getNumberUsed();
+    queueElementPtr & getFree();
+    void setUsed(queueElementPtr &element);
+    queueElementPtr & getUsed();
+    void releaseUsed(queueElementPtr &element);
 private:
-    std::vector<queueElementPtr> elements;
+    queueElementPtr nullElement;
+    queueElementPtrArray elements;
     int size;
     int numberFree;
     int numberUsed;
@@ -40,9 +43,8 @@ private:
 };
 
 template <typename T>
-Queue<T>::Queue(int size)
-: elements(size),
-  size(size),
+Queue<T>::Queue(std::vector<queueElementPtr> &xxx)
+: size(xxx.size()),
   numberFree(size),
   numberUsed(0),
   nextGetFree(0),
@@ -50,22 +52,20 @@ Queue<T>::Queue(int size)
   nextGetUsed(0),
   nextReleaseUsed(0)
 {
-    for(int i=0; i<size; i++) {
-        elements[i] = std::tr1::shared_ptr<T>(new T());
-    }
+     elements.swap(xxx);
 }
 
 template <typename T>
-Queue<T>::Queue(std::vector<queueElementPtr> elements)
-: elements(elements),
-  size(elements.size()),
-  numberFree(size),
-  numberUsed(0),
-  nextGetFree(0),
-  nextSetUsed(0),
-  nextGetUsed(0),
-  nextReleaseUsed(0)
-{ }
+Queue<T>::~Queue(){}
+
+template <typename T>
+int Queue<T>::capacity(){return size;}
+
+template <typename T>
+int Queue<T>::getNumberFree(){return numberFree;}
+
+template <typename T>
+int Queue<T>::getNumberUsed(){return numberUsed;}
 
 template <typename T>
 void Queue<T>::clear()
@@ -79,19 +79,20 @@ void Queue<T>::clear()
 }
 
 template <typename T>
-T * Queue<T>::getFree()
+std::tr1::shared_ptr<T> & Queue<T>::getFree()
 {
-    if(numberFree==0) return NULL;
+    if(numberFree==0) return nullElement;
     numberFree--;
+    int ind = nextGetFree;
     std::tr1::shared_ptr<T> queueElement = elements[nextGetFree++];
     if(nextGetFree>=size) nextGetFree = 0;
-    return queueElement.get();
+    return elements[ind];
 }
 
 template <typename T>
-void Queue<T>::setUsed(T *element)
+void Queue<T>::setUsed(std::tr1::shared_ptr<T> &element)
 {
-   if(element!=elements[nextSetUsed++].get()) {
+   if(element!=elements[nextSetUsed++]) {
         throw std::logic_error("not correct queueElement");
     }
     numberUsed++;
@@ -99,25 +100,25 @@ void Queue<T>::setUsed(T *element)
 }
 
 template <typename T>
-T * Queue<T>::getUsed()
+std::tr1::shared_ptr<T> & Queue<T>::getUsed()
 {
-    if(numberUsed==0) return 0;
+    if(numberUsed==0) return nullElement;
+    int ind = nextGetUsed;
     std::tr1::shared_ptr<T> queueElement = elements[nextGetUsed++];
     if(nextGetUsed>=size) nextGetUsed = 0;
-    return queueElement.get();
+    return elements[ind];
 }
 
 template <typename T>
-void Queue<T>::releaseUsed( T *element)
+void Queue<T>::releaseUsed(std::tr1::shared_ptr<T> &element)
 {
-    if(element!=elements[nextReleaseUsed++].get()) {
+    if(element!=elements[nextReleaseUsed++]) {
         throw std::logic_error(
            "not queueElement returned by last call to getUsed");
     }
     if(nextReleaseUsed>=size) nextReleaseUsed = 0;
     numberUsed--;
     numberFree++;
-
 }
 
 

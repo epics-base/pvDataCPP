@@ -13,94 +13,84 @@
 
 #include <pv/pvType.h>
 #include <pv/requester.h>
-#include <pv/noDefaultMethods.h>
+#include <pv/queue.h>
 
 namespace epics { namespace pvData { 
 
 class MessageNode;
 class MessageQueue;
 typedef std::tr1::shared_ptr<MessageNode> MessageNodePtr;
+typedef std::vector<MessageNodePtr> MessageNodePtrArray;
 typedef std::tr1::shared_ptr<MessageQueue> MessageQueuePtr;
 
 class MessageNode {
 public:
+    MessageNode() : messageType(infoMessage) {}
     String getMessage() const { return message;}
     MessageType getMessageType() const {return messageType;}
-    void setMessageNull() {message=String();}
 private:
-    MessageNode();
-    ~MessageNode();
-    friend class MessageQueue;
     String message;
     MessageType messageType;
+    friend class MessageQueue;
 };
 
-class MessageQueue : private NoDefaultMethods {
+class MessageQueue : public Queue<MessageNode> {
 public:
+    POINTER_DEFINITIONS(MessageQueue);
     static MessageQueuePtr create(int size);
-    ~MessageQueue();
-    MessageNode *get();
+    MessageQueue(MessageNodePtrArray &nodeArray);
+    virtual ~MessageQueue();
+    MessageNodePtr &get();
     // must call release before next get
     void release();
     // return (false,true) if message (was not, was) put into queue
     bool put(String message,MessageType messageType,bool replaceLast);
-    bool isEmpty() const;
-    bool isFull() const;
+    bool isEmpty() ;
+    bool isFull() ;
     int getClearOverrun();
 private:
-    MessageQueue(std::vector<std::tr1::shared_ptr<MessageNode> > data);
-
-    Queue<MessageNode> queue;
-    MessageNode *lastPut;
-    MessagreNode *lastGet;
-    int size;
-    int overrun;
+    MessageNodePtr nullNode;
+    MessageNodePtr lastGet;
+    MessageNodePtr lastPut;
+    uint32 overrun;
 };
 
 MessageQueuePtr MessageQueue::create(int size)
 {
-    std::vector<std::tr1::shared_ptr<MessageNode> > dataArray;
-    dataArray.reserve(size);
+    MessageNodePtrArray nodeArray;
+    nodeArray.reserve(size);
     for(int i=0; i<size; i++) {
-        dataArray.push_back(
-            std::tr1::shared_ptr<MessageNode>(new MessageNode()));
+        nodeArray.push_back(
+            MessageNodePtr(new MessageNode()));
     }
-    return std::tr1::shared_ptr<MessageQueue>(new MessageQueue(dataArray));
+    return std::tr1::shared_ptr<MessageQueue>(new MessageQueue(nodeArray));
 }
 
-MessageQueue::MessageQueue(std::vector<std::tr1::shared_ptr<MessageNode> > data)
-: queue(data),
-  lastPut(NULL),
-  lastGet(NULL),
-  size(data.size()),
+MessageQueue::MessageQueue(MessageNodePtrArray &data)
+: Queue<MessageNode>(data),
   overrun(0)
 { }
 
-MessageNode *MessageQueue::get() {
-    if(lastGet!=NULL) {
-        throw std::logic_error(
-            String("MessageQueue::get() but did not release last"));
-    }
-    MessageNode node = queue.getUsed();
-    if(node==NULL) return NULL;
-    lastGet = node;
-    return node;
+MessageNodePtr &MessageQueue::get() {
+    if(getNumberUsed()==0) return nullNode;
+    lastGet = getUsed();
+    return lastGet;
 }
 
 void MessageQueue::release() {
-    if(lastGet==NULL) return;
-    queue.releaseUsed(lastGet);
-    lastGet = NULL;
+    if(lastGet.get()==NULL) return;
+    releaseUsed(lastGet);
+    lastGet.reset();
 }
 
 bool MessageQueue::put(String message,MessageType messageType,bool replaceLast)
 {
-    MessageNode node = queue.getFree();
-    if(node!= NULL) {
+    MessageNodePtr node = getFree();
+    if(node.get()!= NULL) {
         node->message = message;
         node->messageType = messageType;
         lastPut = node;
-        queue.setUsed(node);
+        setUsed(node);
         return true;
     }
     overrun++;
@@ -108,20 +98,21 @@ bool MessageQueue::put(String message,MessageType messageType,bool replaceLast)
         node = lastPut;
         node->message = message;
         node->messageType = messageType;
+        return true;
     }
     return false;
 }
 
-bool MessageQueue::isEmpty() const
+bool MessageQueue::isEmpty() 
 {
-    int free = queue.getNumberFree();
-    if(free==size) return true;
+    int free = getNumberFree();
+    if(free==capacity()) return true;
     return false;
 }
 
-bool MessageQueue::isFull() const
+bool MessageQueue::isFull() 
 {
-    if(queue.getNumberFree()==0) return true;
+    if(getNumberFree()==0) return true;
     return false;
 }
 

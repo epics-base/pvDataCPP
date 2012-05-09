@@ -22,7 +22,6 @@
 #include <pv/lock.h>
 #include <pv/timeStamp.h>
 #include <pv/queue.h>
-#include <pv/CDRMonitor.h>
 #include <pv/event.h>
 #include <pv/thread.h>
 #include <pv/executor.h>
@@ -35,19 +34,25 @@ struct Data {
     int b;
 };
 
+typedef std::tr1::shared_ptr<Data> DataPtr;
+typedef std::vector<DataPtr> DataPtrArray;
 
 static const int numElements = 5;
 typedef Queue<Data> DataQueue;
 
+class Sink;
+typedef std::tr1::shared_ptr<Sink> SinkPtr;
+
 class Sink : public Runnable {
 public:
+    static SinkPtr create(DataQueue &queue,FILE *auxfd);
     Sink(DataQueue &queue,FILE *auxfd);
     ~Sink();
     void stop();
     void look();
     virtual void run();
 private:
-    DataQueue queue;
+    DataQueue &queue;
     FILE *auxfd;
     bool isStopped;
     Event *wait;
@@ -56,6 +61,11 @@ private:
     Event *waitEmpty;
     Thread *thread;
 };
+
+SinkPtr Sink::create(DataQueue &queue,FILE *auxfd)
+{
+    return SinkPtr(new Sink(queue,auxfd));
+}
 
 Sink::Sink(DataQueue &queue,FILE *auxfd)
 : queue(queue),
@@ -96,8 +106,8 @@ void Sink::run()
         wait->wait();
         if(isStopped) break;
         while(true) {
-            Data *data = queue.getUsed();
-            if(data==NULL) {
+            DataPtr data = queue.getUsed();
+            if(data.get()==NULL) {
                  waitEmpty->signal();
                  break;
             }
@@ -109,39 +119,41 @@ void Sink::run()
 }
 
 static void testBasic(FILE * fd,FILE *auxfd ) {
-    std::vector<std::tr1::shared_ptr<Data> >dataArray;
+    DataPtrArray dataArray;
     dataArray.reserve(numElements);
     for(int i=0; i<numElements; i++)  {
-        dataArray.push_back(std::tr1::shared_ptr<Data>(new Data()));
+        dataArray.push_back(DataPtr(new Data()));
     }
     DataQueue queue(dataArray);
-    Data *pdata = queue.getFree();
+    DataPtr data = queue.getFree();
     int value = 0;
-    while(pdata!=NULL) {
-         pdata->a = value;
-         pdata->b = value*10;
+    while(data.get()!=NULL) {
+         data->a = value;
+         data->b = value*10;
          value++;
-         queue.setUsed(pdata);
-         pdata = queue.getFree();
+         queue.setUsed(data);
+         data = queue.getFree();
     }
-    std::tr1::shared_ptr<Sink> sink = std::tr1::shared_ptr<Sink>(new Sink(queue,auxfd));
+    SinkPtr sink = SinkPtr(new Sink(queue,auxfd));
+    queue.clear();
     while(true) {
-        Data * data = queue.getFree();
-        if(data==NULL) break;
+        data = queue.getFree();
+        if(data.get()==NULL) break;
         fprintf(auxfd,"source a %d b %d\n",data->a,data->b);
         queue.setUsed(data);
     }
     sink->look();
     // now alternate 
     for(int i=0; i<numElements; i++) {
-        Data *data = queue.getFree();
-        assert(data!=NULL);
+        data = queue.getFree();
+        assert(data.get()!=NULL);
         fprintf(auxfd,"source a %d b %d\n",data->a,data->b);
         queue.setUsed(data);
         sink->look();
     }
     sink->stop();
 }
+
 
 int main(int argc, char *argv[]) {
      char *fileName = 0;
@@ -157,8 +169,6 @@ int main(int argc, char *argv[]) {
         auxfd = fopen(auxFileName,"w+");
     }
     testBasic(fd,auxfd);
-    epicsExitCallAtExits();
-    CDRMonitor::get().show(fd);
     return (0);
 }
  
