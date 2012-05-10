@@ -58,7 +58,7 @@ static void testBasic(FILE * fd,FILE *auxfd ) {
     assert(messageNode.get()!=0);
     fprintf(fd,"message %s messageType %s\n",
         messageNode->getMessage().c_str(),
-        messageTypeName[messageNode->getMessageType()].c_str());
+        getMessageTypeName(messageNode->getMessageType()).c_str());
     assert(messageNode->getMessage().compare(messages[0])==0);
     queue->release();
     messageNode = queue->get();
@@ -69,7 +69,7 @@ static void testBasic(FILE * fd,FILE *auxfd ) {
     assert(messageNode.get()!=0);
     fprintf(fd,"message %s messageType %s\n",
         messageNode->getMessage().c_str(),
-        messageTypeName[messageNode->getMessageType()].c_str());
+        getMessageTypeName(messageNode->getMessageType()).c_str());
     assert(messageNode->getMessage().compare(messages[3])==0);
     queue->release();
     result = queue->isEmpty();

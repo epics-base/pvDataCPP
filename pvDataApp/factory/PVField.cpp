@@ -47,7 +47,7 @@ void PVField::message(String fieldName,String message,MessageType messageType)
         requester->message(mess,messageType);
     } else {
         printf("%s %s %s\n",
-            messageTypeName[messageType].c_str(),
+            getMessageTypeName(messageType).c_str(),
             fieldName.c_str(),
             message.c_str());
     }
@@ -148,7 +148,6 @@ void PVField::renameField(String  newName)
     }
     std::tr1::shared_ptr<Structure> parentStructure = const_pointer_cast<Structure>(
          parent->getStructure());
-    StringArray const &fieldNames = parentStructure->getFieldNames();
     FieldConstPtrArray const &fields = parentStructure->getFields();
     for(size_t i=0; i<fields.size(); i++) {
          if(fields[i].get()==field.get()) {

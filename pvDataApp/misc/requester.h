@@ -18,17 +18,14 @@ enum MessageType {
    infoMessage,warningMessage,errorMessage,fatalErrorMessage
 };
 
-extern StringArray messageTypeName;
+extern String getMessageTypeName(MessageType messageType);
 extern const size_t messageTypeCount;
 class Requester {
 public:
     POINTER_DEFINITIONS(Requester);
-
     virtual ~Requester(){}
     virtual String getRequesterName() = 0;
     virtual void message(String message,MessageType messageType) = 0;
-private:
-    static void init();
 };
 
 }}

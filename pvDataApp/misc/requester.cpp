@@ -5,18 +5,27 @@
  * in file LICENSE that is included with this distribution.
  */
 #include <string>
+#include <cstdio>
+#include <pv/lock.h>
 #include <pv/requester.h>
 namespace epics { namespace pvData { 
 
 const size_t messageTypeCount = 4; 
+static StringArray messageTypeName(messageTypeCount);
 
-StringArray messageTypeName(messageTypeCount);
-void Requester::init()
+String getMessageTypeName(MessageType messageType)
 {
-    messageTypeName[0] = "info";
-    messageTypeName[1] = "warning";
-    messageTypeName[2] = "error";
-    messageTypeName[3] = "fatalError";
+    static Mutex mutex;
+    Lock xx(mutex);
+    if(messageTypeName[0].size()==0) {
+        messageTypeName[0] = "info";
+        messageTypeName[1] = "warning";
+        messageTypeName[2] = "error";
+        messageTypeName[3] = "fatalError";
+    }
+    return messageTypeName[messageType];
 }
+
+
 
 }}
