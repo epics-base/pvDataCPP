@@ -88,14 +88,13 @@ bool PVEnumerated::choicesMutable()
     return pvChoices->isImmutable();
 }
 
-StringArray&  PVEnumerated:: getChoices()
+StringArray  PVEnumerated:: getChoices()
 {
     if(pvIndex.get()==NULL ) {
          throw std::logic_error(notAttached);
     }
     StringArrayData data;
     pvChoices->get(0,pvChoices->getLength(),data);
-printf("getChoices %p size %d\n",&data.data,data.data.size());
     return data.data;
 }
 

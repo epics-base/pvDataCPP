@@ -27,7 +27,7 @@ public:
     int32 getIndex();
     String getChoice();
     bool choicesMutable();
-    StringArray & getChoices();
+    StringArray getChoices();
     int32 getNumberChoices();
     bool setChoices(StringArray & choices);
 private:

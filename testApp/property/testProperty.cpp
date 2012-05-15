@@ -214,13 +214,8 @@ static void testEnumerated(FILE * fd,FILE *auxfd)
     assert(result);
     int32 index = pvEnumerated.getIndex();
     String choice = pvEnumerated.getChoice();
-    StringArray &choices = pvEnumerated.getChoices();
+    StringArray choices = pvEnumerated.getChoices();
     int32 numChoices = pvEnumerated.getNumberChoices();
-printf("%p size %d numChoices %d\n",&choices,choices.size(),numChoices);
-for(int i=0; i<numChoices; i++ ) {
-String xxx = choices[i];
-printf("i %d %s\n",i,xxx.c_str());
-}
     fprintf(fd,"index %d choice %s choices",index,choice.c_str());
     for(int i=0; i<numChoices; i++ ) fprintf(fd," %s",choices[i].c_str());
     fprintf(fd,"\n");
