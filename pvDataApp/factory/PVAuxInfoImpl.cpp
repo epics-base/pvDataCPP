@@ -13,24 +13,20 @@
 #include <pv/convert.h>
 #include <pv/factory.h>
 #include <pv/lock.h>
-#include <pv/CDRMonitor.h>
 
 namespace epics { namespace pvData {
 
 static PVScalarPtr nullPVScalar;
 
-PVDATA_REFCOUNT_MONITOR_DEFINE(pvAuxInfo);
 
 PVAuxInfo::PVAuxInfo(PVField * pvField)
   :  pvField(pvField),
      pvInfos(std::map<String,std::tr1::shared_ptr<PVScalar> > ())
 {
-    PVDATA_REFCOUNT_MONITOR_CONSTRUCT(pvAuxInfo);
 } 
 
 PVAuxInfo::~PVAuxInfo()
 {
-    PVDATA_REFCOUNT_MONITOR_DESTRUCT(pvAuxInfo);
 }
 
 
@@ -53,7 +49,7 @@ PVScalarPtr PVAuxInfo::createInfo(String key,ScalarType scalarType)
     return pvScalar;
 }
 
-PVScalarPtr&  PVAuxInfo::getInfo(String key)
+PVScalarPtr  PVAuxInfo::getInfo(String key)
 {
     PVInfoIter iter;
     iter = pvInfos.find(key);

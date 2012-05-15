@@ -370,7 +370,7 @@ StructureConstPtr StandardField::enumerated()
 
 StructureConstPtr StandardField::enumerated(String properties)
 {
-    StructureConstPtr field = enumerated(valueFieldName);
+    StructureConstPtr field = enumerated();
     return createProperties(field,properties);
 }
 

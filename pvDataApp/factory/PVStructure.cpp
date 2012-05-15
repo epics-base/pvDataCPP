@@ -38,7 +38,7 @@ static PVStructurePtr nullPVStructure;
 static PVStructureArrayPtr nullPVStructureArray;
 static PVScalarArrayPtr nullPVScalarArray;
 
-static PVFieldPtr &findSubField(String fieldName,PVStructure *pvStructure);
+static PVFieldPtr findSubField(String fieldName,PVStructure *pvStructure);
 
 PVStructure::PVStructure(StructureConstPtr& structurePtr)
 : PVField(structurePtr),
@@ -87,13 +87,13 @@ PVFieldPtrArray & PVStructure::getPVFields()
     return pvFields;
 }
 
-PVFieldPtr  &PVStructure::getSubField(String fieldName)
+PVFieldPtr  PVStructure::getSubField(String fieldName)
 {
     return findSubField(fieldName,this);
 }
 
 
-PVFieldPtr  &PVStructure::getSubField(size_t fieldOffset)
+PVFieldPtr  PVStructure::getSubField(size_t fieldOffset)
 {
     if(fieldOffset<=getFieldOffset()) {
         return nullPVField;
@@ -622,7 +622,7 @@ void PVStructure::deserialize(ByteBuffer *pbuffer,
     }
 }
 
-static PVFieldPtr &findSubField(String fieldName,PVStructure *pvStructure) {
+static PVFieldPtr findSubField(String fieldName,PVStructure *pvStructure) {
     if( fieldName.length()<1) return nullPVField;
     String::size_type index = fieldName.find('.');
     String name = fieldName;
@@ -640,11 +640,7 @@ static PVFieldPtr &findSubField(String fieldName,PVStructure *pvStructure) {
         pvField = pvFields[i];
         size_t result = pvField->getFieldName().compare(name);
         if(result==0) {
-            if(restOfName.length()==0) {
-                PVFieldPtr & xxx = pvFields[i];
-printf("%p %p\n",pvFields[i].get(),xxx.get());
-                return pvFields[i];
-            }
+            if(restOfName.length()==0) return pvFields[i];
             if(pvField->getField()->getType()!=structure) return nullPVField;
             PVStructurePtr pvStructure =
                 std::tr1::static_pointer_cast<PVStructure>(pvField);

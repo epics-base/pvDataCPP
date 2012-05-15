@@ -83,7 +83,7 @@ static void testAlarm(FILE * fd,FILE *auxfd)
     PVAlarm pvAlarm; 
     bool result;
     PVFieldPtr pvField = doubleRecord->getSubField(String("alarm"));
-    if(pvField.get()==0) {
+    if(pvField.get()==NULL) {
         printf("testAlarm ERROR did not find field alarm\n");
         return;
     }
@@ -111,8 +111,8 @@ static void testTimeStamp(FILE * fd,FILE *auxfd)
     TimeStamp timeStamp;
     PVTimeStamp pvTimeStamp; 
     bool result;
-    PVField *pvField = doubleRecord->getSubField(String("timeStamp"));
-    if(pvField==0) {
+    PVFieldPtr pvField = doubleRecord->getSubField(String("timeStamp"));
+    if(pvField.get()==NULL) {
         printf("testTimeStamp ERROR did not find field timeStamp\n");
         return;
     }
@@ -148,8 +148,8 @@ static void testControl(FILE * fd,FILE *auxfd)
     Control control;
     PVControl pvControl; 
     bool result;
-    PVField *pvField = doubleRecord->getSubField(String("control"));
-    if(pvField==0) {
+    PVFieldPtr pvField = doubleRecord->getSubField(String("control"));
+    if(pvField.get()==NULL) {
         printf("testControl ERROR did not find field control\n");
         return;
     }
@@ -174,8 +174,8 @@ static void testDisplay(FILE * fd,FILE *auxfd)
     Display display;
     PVDisplay pvDisplay; 
     bool result;
-    PVField *pvField = doubleRecord->getSubField(String("display"));
-    if(pvField==0) {
+    PVFieldPtr pvField = doubleRecord->getSubField(String("display"));
+    if(pvField.get()==NULL) {
         printf("testDisplay ERROR did not find field display\n");
         return;
     }
@@ -205,8 +205,8 @@ static void testEnumerated(FILE * fd,FILE *auxfd)
     fprintf(fd,"testEnumerated\n");
     PVEnumerated pvEnumerated; 
     bool result;
-    PVField *pvField = enumeratedRecord->getSubField(String("value"));
-    if(pvField==0) {
+    PVFieldPtr pvField = enumeratedRecord->getSubField(String("value"));
+    if(pvField.get()==NULL) {
         printf("testEnumerated ERROR did not find field enumerated\n");
         return;
     }
@@ -214,8 +214,13 @@ static void testEnumerated(FILE * fd,FILE *auxfd)
     assert(result);
     int32 index = pvEnumerated.getIndex();
     String choice = pvEnumerated.getChoice();
-    StringArray choices = pvEnumerated.getChoices();
+    StringArray &choices = pvEnumerated.getChoices();
     int32 numChoices = pvEnumerated.getNumberChoices();
+printf("%p size %d numChoices %d\n",&choices,choices.size(),numChoices);
+for(int i=0; i<numChoices; i++ ) {
+String xxx = choices[i];
+printf("i %d %s\n",i,xxx.c_str());
+}
     fprintf(fd,"index %d choice %s choices",index,choice.c_str());
     for(int i=0; i<numChoices; i++ ) fprintf(fd," %s",choices[i].c_str());
     fprintf(fd,"\n");

@@ -95,6 +95,7 @@ StringArray&  PVEnumerated:: getChoices()
     }
     StringArrayData data;
     pvChoices->get(0,pvChoices->getLength(),data);
+printf("getChoices %p size %d\n",&data.data,data.data.size());
     return data.data;
 }
 

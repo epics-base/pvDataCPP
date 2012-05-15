@@ -156,7 +156,6 @@ static void testAppends(FILE * fd)
     fprintf(fd,"%s\n",builder.c_str());
     checkNameAndParent(fd,pvStructure,0);
     PVFieldPtr pvField = pvStructure->getSubField("child2.Bill");
-printf("pvField %p\n",pvField.get());
     assert(pvField.get()!=NULL);
     pvField->renameField("Joe");
     builder.clear();

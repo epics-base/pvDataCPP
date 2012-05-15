@@ -99,7 +99,7 @@ public:
      * Get the Auxinfo with the specified key.
      * @return The PVScalar or null if it does not exist.
      */
-    PVScalarPtr & getInfo(String key);
+    PVScalarPtr getInfo(String key);
     /**
      * Get the map for the info.
      * @return The map;
@@ -585,13 +585,13 @@ public:
      * @param fieldName The name of the field.
      * @return Pointer to the field or null if field does not exist.
      */
-    PVFieldPtr &  getSubField(String fieldName);
+    PVFieldPtr getSubField(String fieldName);
     /**
      * Get the subfield with the specified offset.
      * @param fieldOffset The offset.
      * @return Pointer to the field or null if field does not exist.
      */
-    PVFieldPtr &  getSubField(std::size_t fieldOffset);
+    PVFieldPtr getSubField(std::size_t fieldOffset);
     /**
      * Append a field to the structure.
      * @param fieldName The name of the field to append.
