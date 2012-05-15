@@ -47,13 +47,14 @@ PVStructure::PVStructure(StructureConstPtr& structurePtr)
 {
     size_t numberFields = structurePtr->getNumberFields();
     FieldConstPtrArray fields = structurePtr->getFields();
+    StringArray fieldNames = structurePtr->getFieldNames();
     pvFields.reserve(numberFields);
     PVDataCreatePtr pvDataCreate = getPVDataCreate();
     for(size_t i=0; i<numberFields; i++) {
         pvFields.push_back(pvDataCreate->createPVField(fields[i]));
     }
     for(size_t i=0; i<numberFields; i++) {
-        pvFields[i]->setParent(this);
+        pvFields[i]->setParentAndName(this,fieldNames[i]);
     }
 }
 
@@ -65,9 +66,10 @@ PVStructure::PVStructure(StructureConstPtr structurePtr,
   extendsStructureName("")
 {
     size_t numberFields = structurePtr->getNumberFields();
+    StringArray fieldNames = structurePtr->getFieldNames();
     pvFields = pvs;
     for(size_t i=0; i<numberFields; i++) {
-        pvFields[i]->setParent(this);
+        pvFields[i]->setParentAndName(this,fieldNames[i]);
     }
 }
 
@@ -124,7 +126,10 @@ void PVStructure::appendPVField(String fieldName,PVFieldPtr & pvField )
     FieldConstPtr field = getFieldCreate()->appendField(structurePtr,fieldName,pvField->getField());
     replaceField(field);
     structurePtr = static_pointer_cast<const Structure>(field);
-    for(size_t i=0; i<newLength; i++) pvFields[i]->setParent(this);
+    StringArray fieldNames = structurePtr->getFieldNames();
+    for(size_t i=0; i<newLength; i++) {
+        pvFields[i]->setParentAndName(this,fieldNames[i]);
+    }
 }
 
 void PVStructure::appendPVFields(StringArray &fieldNames,PVFieldPtrArray &pvFields)
@@ -148,7 +153,10 @@ void PVStructure::appendPVFields(StringArray &fieldNames,PVFieldPtrArray &pvFiel
     FieldConstPtr field = getFieldCreate()->appendFields(structurePtr,fieldNames,fields);
     replaceField(field);
     structurePtr = static_pointer_cast<const Structure>(field);
-    for(size_t i=0; i<newLength; i++) pvFields[i]->setParent(this);
+    StringArray names = structurePtr->getFieldNames();
+    for(size_t i=0; i<newLength; i++) {
+        pvFields[i]->setParentAndName(this,names[i]);
+    }
 }
 
 void PVStructure::removePVField(String fieldName)
@@ -181,7 +189,10 @@ void PVStructure::removePVField(String fieldName)
     FieldConstPtr field = getFieldCreate()->createStructure(newFieldNames,fields);
     replaceField(field);
     structurePtr = static_pointer_cast<const Structure>(field);
-    for(size_t i=0; i<newLength; i++) pvFields[i]->setParent(this);
+    StringArray fieldNames = structurePtr->getFieldNames();
+    for(size_t i=0; i<newLength; i++) {
+        pvFields[i]->setParentAndName(this,fieldNames[i]);
+    }
 }
 
 PVBooleanPtr PVStructure::getBooleanField(String fieldName)
@@ -629,9 +640,14 @@ static PVFieldPtr &findSubField(String fieldName,PVStructure *pvStructure) {
         pvField = pvFields[i];
         size_t result = pvField->getFieldName().compare(name);
         if(result==0) {
-            if(restOfName.length()==0) return pvFields[i];
+            if(restOfName.length()==0) {
+                PVFieldPtr & xxx = pvFields[i];
+printf("%p %p\n",pvFields[i].get(),xxx.get());
+                return pvFields[i];
+            }
             if(pvField->getField()->getType()!=structure) return nullPVField;
-            PVStructurePtr pvStructure = std::tr1::static_pointer_cast<PVStructure>(pvField);
+            PVStructurePtr pvStructure =
+                std::tr1::static_pointer_cast<PVStructure>(pvField);
             return findSubField(restOfName,pvStructure.get());
         }
     }

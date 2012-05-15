@@ -254,7 +254,7 @@ public:
     virtual void toString(StringBuilder buf,int indentLevel) ;
 protected:
     PVField(FieldConstPtr field);
-    void setParent(PVStructure *parent);
+    void setParentAndName(PVStructure *parent, String & fieldName);
     void replaceField(FieldConstPtr &field);
 private:
     void message(String fieldName,String message,MessageType messageType);

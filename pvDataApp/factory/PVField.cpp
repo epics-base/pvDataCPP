@@ -60,16 +60,7 @@ void PVField::message(String message,MessageType messageType)
 
 String PVField::getFieldName()
 {
-    if(parent==NULL) return fieldName;
-    PVFieldPtrArray  pvFields = parent->getPVFields();
-    StringArray const & fieldNames = parent->getStructure()->getFieldNames();
-    for(size_t i=0; i<pvFields.size(); i++) {
-        if(pvFields[i].get()==this) {
-            fieldName = fieldNames[i];
-            return fieldName;
-        }
-    }
-    throw std::logic_error("PVField::PVField did not find fieldName");
+    return fieldName;
 }
 
 void PVField::setRequester(Requester *requester)
@@ -152,6 +143,7 @@ void PVField::renameField(String  newName)
     for(size_t i=0; i<fields.size(); i++) {
          if(fields[i].get()==field.get()) {
              parentStructure->renameField(i,newName);
+             fieldName = newName;
              return;
          }
     }
@@ -174,9 +166,10 @@ void PVField::setPostHandler(PostHandler *postHandler)
     postHandler = postHandler;
 }
 
-void PVField::setParent(PVStructure * xxx)
+void PVField::setParentAndName(PVStructure * xxx,String & name)
 {
     parent = xxx;
+    fieldName = name;
 }
 
 bool PVField::equals(PVField &pv)
