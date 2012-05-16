@@ -332,7 +332,6 @@ public:
     typedef StructureArray& reference;
     typedef const StructureArray& const_reference;
 
-    const Structure& structure() const {return *pstructure;}
     /**
      * Get the introspection interface for the array elements.
      * @return The introspection interface.
