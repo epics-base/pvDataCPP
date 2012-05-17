@@ -123,7 +123,7 @@ static void testPVScalarWithProperties(
              hasValueAlarm = true;
              hasDisplayControl = true;
              PVIntPtr pvField = pvStructure->getIntField("value");
-             pvField->put((int)0x80000000);
+             pvField->put((int32)0x80000000);
              break;
         }
         case pvLong: {
@@ -132,6 +132,45 @@ static void testPVScalarWithProperties(
              hasValueAlarm = true;
              hasDisplayControl = true;
              PVLongPtr pvField = pvStructure->getLongField("value");
+             int64 value = 0x80000000;
+             value <<= 32;
+             value |= 0xffffffff;
+             pvField->put(value);
+             break;
+        }
+        case pvUByte: {
+             pvStructure = standardPVField->scalar(
+                 stype,allProperties);
+             hasValueAlarm = true;
+             hasDisplayControl = true;
+             PVUBytePtr pvField = pvStructure->getUByteField("value");
+             pvField->put(255);
+             break;
+        }
+        case pvUShort: {
+             pvStructure = standardPVField->scalar(
+                 stype,allProperties);
+             hasValueAlarm = true;
+             hasDisplayControl = true;
+             PVUShortPtr pvField = pvStructure->getUShortField("value");
+             pvField->put(65535);
+             break;
+        }
+        case pvUInt: {
+             pvStructure = standardPVField->scalar(
+                 stype,allProperties);
+             hasValueAlarm = true;
+             hasDisplayControl = true;
+             PVUIntPtr pvField = pvStructure->getUIntField("value");
+             pvField->put((uint32)0x80000000);
+             break;
+        }
+        case pvULong: {
+             pvStructure = standardPVField->scalar(
+                 stype,allProperties);
+             hasValueAlarm = true;
+             hasDisplayControl = true;
+             PVULongPtr pvField = pvStructure->getULongField("value");
              int64 value = 0x80000000;
              value <<= 32;
              value |= 0xffffffff;
@@ -158,7 +197,7 @@ static void testPVScalarWithProperties(
         }
         case pvString: {
              pvStructure = standardPVField->scalar(
-                 stype,allProperties);
+                 stype,alarmTimeStamp);
              PVStringPtr pvField = pvStructure->getStringField("value");
              pvField->put(String("this is a string"));
              break;
@@ -241,6 +280,10 @@ static void testPVScalar(FILE * fd) {
     testPVScalarCommon(fd,String("short"),pvShort);
     testPVScalarCommon(fd,String("int"),pvInt);
     testPVScalarCommon(fd,String("long"),pvLong);
+    testPVScalarCommon(fd,String("ubyte"),pvUByte);
+    testPVScalarCommon(fd,String("ushort"),pvUShort);
+    testPVScalarCommon(fd,String("uint"),pvUInt);
+    testPVScalarCommon(fd,String("ulong"),pvULong);
     testPVScalarCommon(fd,String("float"),pvFloat);
     testPVScalarCommon(fd,String("double"),pvDouble);
     testPVScalarCommon(fd,String("string"),pvString);
@@ -250,6 +293,10 @@ static void testPVScalar(FILE * fd) {
     testPVScalarWithProperties(fd,String("short"),pvShort);
     testPVScalarWithProperties(fd,String("int"),pvInt);
     testPVScalarWithProperties(fd,String("long"),pvLong);
+    testPVScalarWithProperties(fd,String("ubyte"),pvUByte);
+    testPVScalarWithProperties(fd,String("ushort"),pvUShort);
+    testPVScalarWithProperties(fd,String("uint"),pvUInt);
+    testPVScalarWithProperties(fd,String("ulong"),pvULong);
     testPVScalarWithProperties(fd,String("float"),pvFloat);
     testPVScalarWithProperties(fd,String("double"),pvDouble);
     testPVScalarWithProperties(fd,String("string"),pvString);

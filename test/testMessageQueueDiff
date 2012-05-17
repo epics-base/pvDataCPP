@@ -1,0 +1,8 @@
+--- testMessageQueueGold	2012-01-21 13:09:45.486004216 -0500
++++ testMessageQueue	2012-05-17 09:13:22.389315038 -0400
+@@ -1,5 +1,2 @@
+ message 1 messageType info
+ message 4 messageType info
+-queue:  totalConstruct 1 totalDestruct 1
+-queueElement:  totalConstruct 3 totalDestruct 3
+-messageQueue:  totalConstruct 1 totalDestruct 1

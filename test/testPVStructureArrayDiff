@@ -1,0 +1,238 @@
+--- testPVStructureArrayGold	2012-01-21 13:09:45.250002792 -0500
++++ testPVStructureArray	2012-05-17 09:13:21.512308401 -0400
+@@ -1,207 +1,52 @@
+ after append 5
+-structure powerSupply
++structure 
+     structure[] value 
+-        structure powerSupply
+-            structure voltage
+-                double value 0
+-                structure alarm
+-                    int severity 0
+-                    int status 0
+-                    string message 
+-            structure power
+-                double value 0
+-                structure alarm
+-                    int severity 0
+-                    int status 0
+-                    string message 
+-            structure current
+-                double value 0
+-                structure alarm
+-                    int severity 0
+-                    int status 0
+-                    string message 
+-        structure powerSupply
+-            structure voltage
+-                double value 0
+-                structure alarm
+-                    int severity 0
+-                    int status 0
+-                    string message 
+-            structure power
+-                double value 0
+-                structure alarm
+-                    int severity 0
+-                    int status 0
+-                    string message 
+-            structure current
+-                double value 0
+-                structure alarm
+-                    int severity 0
+-                    int status 0
+-                    string message 
+-        structure powerSupply
+-            structure voltage
+-                double value 0
+-                structure alarm
+-                    int severity 0
+-                    int status 0
+-                    string message 
+-            structure power
+-                double value 0
+-                structure alarm
+-                    int severity 0
+-                    int status 0
+-                    string message 
+-            structure current
+-                double value 0
+-                structure alarm
+-                    int severity 0
+-                    int status 0
+-                    string message 
+-        structure powerSupply
+-            structure voltage
+-                double value 0
+-                structure alarm
+-                    int severity 0
+-                    int status 0
+-                    string message 
+-            structure power
+-                double value 0
+-                structure alarm
+-                    int severity 0
+-                    int status 0
+-                    string message 
+-            structure current
+-                double value 0
+-                structure alarm
+-                    int severity 0
+-                    int status 0
+-                    string message 
+-        structure powerSupply
+-            structure voltage
+-                double value 0
+-                structure alarm
+-                    int severity 0
+-                    int status 0
+-                    string message 
+-            structure power
+-                double value 0
+-                structure alarm
+-                    int severity 0
+-                    int status 0
+-                    string message 
+-            structure current
+-                double value 0
+-                structure alarm
+-                    int severity 0
+-                    int status 0
+-                    string message 
+-    alarm alarm
++        null
++        null
++        null
++        null
++        null
++    structure alarm
++        int severity 0
++        int status 0
++        string message 
++    structure timeStamp
++        long secondsPastEpoch 0
++        int nanoSeconds 0
++        int userTag 0
++after remove(0,2)
++structure 
++    structure[] value 
++        null
++        null
++        null
++    structure alarm
+         int severity 0
+         int status 0
+         string message 
+-    timeStamp timeStamp
++    structure timeStamp
+         long secondsPastEpoch 0
+         int nanoSeconds 0
+         int userTag 0
+-after remove 0,1,3structure powerSupply
++after remove 0,1,3structure 
+     structure[] value 
+         null
+         null
+-        structure powerSupply
+-            structure voltage
+-                double value 0
+-                structure alarm
+-                    int severity 0
+-                    int status 0
+-                    string message 
+-            structure power
+-                double value 0
+-                structure alarm
+-                    int severity 0
+-                    int status 0
+-                    string message 
+-            structure current
+-                double value 0
+-                structure alarm
+-                    int severity 0
+-                    int status 0
+-                    string message 
+-        null
+-        structure powerSupply
+-            structure voltage
+-                double value 0
+-                structure alarm
+-                    int severity 0
+-                    int status 0
+-                    string message 
+-            structure power
+-                double value 0
+-                structure alarm
+-                    int severity 0
+-                    int status 0
+-                    string message 
+-            structure current
+-                double value 0
+-                structure alarm
+-                    int severity 0
+-                    int status 0
+-                    string message 
+-    alarm alarm
++    structure alarm
+         int severity 0
+         int status 0
+         string message 
+-    timeStamp timeStamp
++    structure timeStamp
+         long secondsPastEpoch 0
+         int nanoSeconds 0
+         int userTag 0
+-after compressstructure powerSupply
++after compressstructure 
+     structure[] value 
+-        structure powerSupply
+-            structure voltage
+-                double value 0
+-                structure alarm
+-                    int severity 0
+-                    int status 0
+-                    string message 
+-            structure power
+-                double value 0
+-                structure alarm
+-                    int severity 0
+-                    int status 0
+-                    string message 
+-            structure current
+-                double value 0
+-                structure alarm
+-                    int severity 0
+-                    int status 0
+-                    string message 
+-        structure powerSupply
+-            structure voltage
+-                double value 0
+-                structure alarm
+-                    int severity 0
+-                    int status 0
+-                    string message 
+-            structure power
+-                double value 0
+-                structure alarm
+-                    int severity 0
+-                    int status 0
+-                    string message 
+-            structure current
+-                double value 0
+-                structure alarm
+-                    int severity 0
+-                    int status 0
+-                    string message 
+-    alarm alarm
++    structure alarm
+         int severity 0
+         int status 0
+         string message 
+-    timeStamp timeStamp
++    structure timeStamp
+         long secondsPastEpoch 0
+         int nanoSeconds 0
+         int userTag 0
+-pvField:  totalConstruct 105 totalDestruct 105
+-field:  totalConstruct 104 totalDestruct 104

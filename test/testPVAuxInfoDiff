@@ -1,0 +1,76 @@
+--- testPVAuxInfoGold	2012-01-21 13:09:44.897000654 -0500
++++ testPVAuxInfo	2012-05-17 09:13:21.545308649 -0400
+@@ -1,31 +1,29 @@
+ 
+ testPVAuxInfo
+-structure value
++structure 
+     double value 0
+-    alarm alarm
++    structure alarm
+         int severity 0
+         int status 0
+         string message 
+-    timeStamp timeStamp
++    structure timeStamp
+         long secondsPastEpoch 0
+         int nanoSeconds 0
+         int userTag 0
+-    display display
++    structure display
++        double limitLow 0
++        double limitHigh 0
+         string description 
+         string format 
+         string units 
+-        structure limit
+-            double low 0
+-            double high 0
+-        auxInfo
+-            string factory factoryName
+-            double junk 3
+-    control control
+-        structure limit
+-            double low 0
+-            double high 0
++    auxInfo
++        string  factoryName
++        double  3
++    structure control
++        double limitLow 0
++        double limitHigh 0
+         double minStep 0
+-value offset 0 next 22 number 22
++ offset 0 next 20 number 20
+ value offset 1 next 2 number 1
+ alarm offset 2 next 6 number 4
+ severity offset 3 next 4 number 1
+@@ -35,18 +33,13 @@
+ secondsPastEpoch offset 7 next 8 number 1
+ nanoSeconds offset 8 next 9 number 1
+ userTag offset 9 next 10 number 1
+-display offset 10 next 17 number 7
+-description offset 11 next 12 number 1
+-format offset 12 next 13 number 1
+-units offset 13 next 14 number 1
+-limit offset 14 next 17 number 3
+-low offset 15 next 16 number 1
+-high offset 16 next 17 number 1
+-control offset 17 next 22 number 5
+-limit offset 18 next 21 number 3
+-low offset 19 next 20 number 1
+-high offset 20 next 21 number 1
+-minStep offset 21 next 22 number 1
+-pvAuxInfo:  totalConstruct 1 totalDestruct 1
+-pvField:  totalConstruct 24 totalDestruct 24
+-field:  totalConstruct 99 totalDestruct 99
++display offset 10 next 16 number 6
++limitLow offset 11 next 12 number 1
++limitHigh offset 12 next 13 number 1
++description offset 13 next 14 number 1
++format offset 14 next 15 number 1
++units offset 15 next 16 number 1
++control offset 16 next 20 number 4
++limitLow offset 17 next 18 number 1
++limitHigh offset 18 next 19 number 1
++minStep offset 19 next 20 number 1

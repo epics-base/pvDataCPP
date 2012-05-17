@@ -1,0 +1,42 @@
+--- testPVAppendGold	2012-01-21 13:09:44.859000430 -0500
++++ testPVAppend	2012-05-17 09:13:21.533308559 -0400
+@@ -1,32 +1,28 @@
+-structure request
+-    string fieldList value,timeStamp
+-structure request
+-    string fieldList value,timeStamp
++structure 
++    string fieldlist value,timeStamp
+     string extra junk
+-structure parent
++structure 
+     structure child1
+         string value bla
+     structure child2
+-        string value bla
+-structure parent
++        string value blabla
++structure 
+     structure child1
+         string Joe Good Guy
+         string Mary Good Girl
+     structure child2
+         string Bill Bad Guy
+         string Jane Bad Girl
+-structure parent
++structure 
+     structure child1
+         string Joe Good Guy
+         string Mary Good Girl
+     structure child2
+         string Joe Bad Guy
+         string Jane Bad Girl
+-structure parent
++structure 
+     structure child1
+         string Joe Good Guy
+         string Mary Good Girl
+     structure child2
+         string Jane Bad Girl
+-pvField:  totalConstruct 15 totalDestruct 15
+-field:  totalConstruct 110 totalDestruct 110

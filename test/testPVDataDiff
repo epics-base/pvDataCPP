@@ -1,0 +1,529 @@
+--- testPVDataGold	2012-01-21 13:09:44.840000316 -0500
++++ testPVData	2012-05-17 09:13:21.497308287 -0400
+@@ -1,13 +1,13 @@
+-structure request
+-    string fieldList value,timeStamp
+-structure top
++structure 
++    string request value,timeStamp
++structure 
+     structure value
+         double value 0
+-        alarm alarm
++        structure alarm
+             int severity 0
+             int status 0
+             string message 
+-        timeStamp timeStamp
++        structure timeStamp
+             long secondsPastEpoch 0
+             int nanoSeconds 0
+             int userTag 0
+@@ -25,21 +25,25 @@
+     string extra 
+ 
+ testScalar
+-boolean boolean true
+-byte byte 10
+-short short 10
+-int int 10
+-long long 10
+-float float 10
+-double double 10
+-string string 10
+-structure boolean
++boolean  true
++byte  10
++short  10
++int  10
++long  10
++ubyte  10
++ushort  10
++uint  10
++ulong  10
++float  10
++double  10
++string  10
++structure 
+     boolean value true
+-    alarm alarm
++    structure alarm
+         int severity 2
+         int status 0
+         string message messageForAlarm
+-    timeStamp timeStamp
++    structure timeStamp
+         long secondsPastEpoch 123456789
+         int nanoSeconds 1000000
+         int userTag 0
+@@ -48,27 +52,25 @@
+         int falseSeverity 0
+         int trueSeverity 0
+         int changeStateSeverity 0
+-structure byte
++structure 
+     byte value 127
+-    alarm alarm
++    structure alarm
+         int severity 2
+         int status 0
+         string message messageForAlarm
+-    timeStamp timeStamp
++    structure timeStamp
+         long secondsPastEpoch 123456789
+         int nanoSeconds 1000000
+         int userTag 0
+-    display display
++    structure display
++        double limitLow 0
++        double limitHigh 10
+         string description this is a description
+         string format f10.2
+         string units SomeUnits
+-        structure limit
+-            double low 0
+-            double high 10
+-    control control
+-        structure limit
+-            double low 1
+-            double high 9
++    structure control
++        double limitLow 1
++        double limitHigh 9
+         double minStep 0
+     structure valueAlarm
+         boolean active true
+@@ -81,27 +83,25 @@
+         int highWarningSeverity 0
+         int highAlarmSeverity 2
+         byte hystersis 0
+-structure short
++structure 
+     short value 32767
+-    alarm alarm
++    structure alarm
+         int severity 2
+         int status 0
+         string message messageForAlarm
+-    timeStamp timeStamp
++    structure timeStamp
+         long secondsPastEpoch 123456789
+         int nanoSeconds 1000000
+         int userTag 0
+-    display display
++    structure display
++        double limitLow 0
++        double limitHigh 10
+         string description this is a description
+         string format f10.2
+         string units SomeUnits
+-        structure limit
+-            double low 0
+-            double high 10
+-    control control
+-        structure limit
+-            double low 1
+-            double high 9
++    structure control
++        double limitLow 1
++        double limitHigh 9
+         double minStep 0
+     structure valueAlarm
+         boolean active true
+@@ -114,27 +114,25 @@
+         int highWarningSeverity 0
+         int highAlarmSeverity 2
+         short hystersis 0
+-structure int
++structure 
+     int value -2147483648
+-    alarm alarm
++    structure alarm
+         int severity 2
+         int status 0
+         string message messageForAlarm
+-    timeStamp timeStamp
++    structure timeStamp
+         long secondsPastEpoch 123456789
+         int nanoSeconds 1000000
+         int userTag 0
+-    display display
++    structure display
++        double limitLow 0
++        double limitHigh 10
+         string description this is a description
+         string format f10.2
+         string units SomeUnits
+-        structure limit
+-            double low 0
+-            double high 10
+-    control control
+-        structure limit
+-            double low 1
+-            double high 9
++    structure control
++        double limitLow 1
++        double limitHigh 9
+         double minStep 0
+     structure valueAlarm
+         boolean active true
+@@ -147,27 +145,25 @@
+         int highWarningSeverity 0
+         int highAlarmSeverity 2
+         int hystersis 0
+-structure long
++structure 
+     long value -9223372032559808513
+-    alarm alarm
++    structure alarm
+         int severity 2
+         int status 0
+         string message messageForAlarm
+-    timeStamp timeStamp
++    structure timeStamp
+         long secondsPastEpoch 123456789
+         int nanoSeconds 1000000
+         int userTag 0
+-    display display
++    structure display
++        double limitLow 0
++        double limitHigh 10
+         string description this is a description
+         string format f10.2
+         string units SomeUnits
+-        structure limit
+-            double low 0
+-            double high 10
+-    control control
+-        structure limit
+-            double low 1
+-            double high 9
++    structure control
++        double limitLow 1
++        double limitHigh 9
+         double minStep 0
+     structure valueAlarm
+         boolean active true
+@@ -180,27 +176,149 @@
+         int highWarningSeverity 0
+         int highAlarmSeverity 2
+         long hystersis 0
+-structure float
++structure 
++    ubyte value 255
++    structure alarm
++        int severity 2
++        int status 0
++        string message messageForAlarm
++    structure timeStamp
++        long secondsPastEpoch 123456789
++        int nanoSeconds 1000000
++        int userTag 0
++    structure display
++        double limitLow 0
++        double limitHigh 10
++        string description this is a description
++        string format f10.2
++        string units SomeUnits
++    structure control
++        double limitLow 1
++        double limitHigh 9
++        double minStep 0
++    structure valueAlarm
++        boolean active true
++        ubyte lowAlarmLimit 1
++        ubyte lowWarningLimit 0
++        ubyte highWarningLimit 0
++        ubyte highAlarmLimit 9
++        int lowAlarmSeverity 2
++        int lowWarningSeverity 0
++        int highWarningSeverity 0
++        int highAlarmSeverity 2
++        ubyte hystersis 0
++structure 
++    ushort value 65535
++    structure alarm
++        int severity 2
++        int status 0
++        string message messageForAlarm
++    structure timeStamp
++        long secondsPastEpoch 123456789
++        int nanoSeconds 1000000
++        int userTag 0
++    structure display
++        double limitLow 0
++        double limitHigh 10
++        string description this is a description
++        string format f10.2
++        string units SomeUnits
++    structure control
++        double limitLow 1
++        double limitHigh 9
++        double minStep 0
++    structure valueAlarm
++        boolean active true
++        ushort lowAlarmLimit 1
++        ushort lowWarningLimit 0
++        ushort highWarningLimit 0
++        ushort highAlarmLimit 9
++        int lowAlarmSeverity 2
++        int lowWarningSeverity 0
++        int highWarningSeverity 0
++        int highAlarmSeverity 2
++        ushort hystersis 0
++structure 
++    uint value 2147483648
++    structure alarm
++        int severity 2
++        int status 0
++        string message messageForAlarm
++    structure timeStamp
++        long secondsPastEpoch 123456789
++        int nanoSeconds 1000000
++        int userTag 0
++    structure display
++        double limitLow 0
++        double limitHigh 10
++        string description this is a description
++        string format f10.2
++        string units SomeUnits
++    structure control
++        double limitLow 1
++        double limitHigh 9
++        double minStep 0
++    structure valueAlarm
++        boolean active true
++        uint lowAlarmLimit 1
++        uint lowWarningLimit 0
++        uint highWarningLimit 0
++        uint highAlarmLimit 9
++        int lowAlarmSeverity 2
++        int lowWarningSeverity 0
++        int highWarningSeverity 0
++        int highAlarmSeverity 2
++        uint hystersis 0
++structure 
++    ulong value 9223372041149743103
++    structure alarm
++        int severity 2
++        int status 0
++        string message messageForAlarm
++    structure timeStamp
++        long secondsPastEpoch 123456789
++        int nanoSeconds 1000000
++        int userTag 0
++    structure display
++        double limitLow 0
++        double limitHigh 10
++        string description this is a description
++        string format f10.2
++        string units SomeUnits
++    structure control
++        double limitLow 1
++        double limitHigh 9
++        double minStep 0
++    structure valueAlarm
++        boolean active true
++        ulong lowAlarmLimit 1
++        ulong lowWarningLimit 0
++        ulong highWarningLimit 0
++        ulong highAlarmLimit 9
++        int lowAlarmSeverity 2
++        int lowWarningSeverity 0
++        int highWarningSeverity 0
++        int highAlarmSeverity 2
++        ulong hystersis 0
++structure 
+     float value 1.123e+08
+-    alarm alarm
++    structure alarm
+         int severity 2
+         int status 0
+         string message messageForAlarm
+-    timeStamp timeStamp
++    structure timeStamp
+         long secondsPastEpoch 123456789
+         int nanoSeconds 1000000
+         int userTag 0
+-    display display
++    structure display
++        double limitLow 0
++        double limitHigh 10
+         string description this is a description
+         string format f10.2
+         string units SomeUnits
+-        structure limit
+-            double low 0
+-            double high 10
+-    control control
+-        structure limit
+-            double low 1
+-            double high 9
++    structure control
++        double limitLow 1
++        double limitHigh 9
+         double minStep 0
+     structure valueAlarm
+         boolean active true
+@@ -213,27 +331,25 @@
+         int highWarningSeverity 0
+         int highAlarmSeverity 2
+         float hystersis 0
+-structure double
++structure 
+     double value 1.123e+35
+-    alarm alarm
++    structure alarm
+         int severity 2
+         int status 0
+         string message messageForAlarm
+-    timeStamp timeStamp
++    structure timeStamp
+         long secondsPastEpoch 123456789
+         int nanoSeconds 1000000
+         int userTag 0
+-    display display
++    structure display
++        double limitLow 0
++        double limitHigh 10
+         string description this is a description
+         string format f10.2
+         string units SomeUnits
+-        structure limit
+-            double low 0
+-            double high 10
+-    control control
+-        structure limit
+-            double low 1
+-            double high 9
++    structure control
++        double limitLow 1
++        double limitHigh 9
+         double minStep 0
+     structure valueAlarm
+         boolean active true
+@@ -246,97 +362,95 @@
+         int highWarningSeverity 0
+         int highAlarmSeverity 2
+         double hystersis 0
+-structure string
++structure 
+     string value this is a string
+-    alarm alarm
++    structure alarm
+         int severity 2
+         int status 0
+         string message messageForAlarm
+-    timeStamp timeStamp
++    structure timeStamp
+         long secondsPastEpoch 123456789
+         int nanoSeconds 1000000
+         int userTag 0
+ 
+ testScalarArray
+-structure boolean
++structure 
+     boolean[] value [true,false,true]
+-    alarm alarm
++    structure alarm
+         int severity 0
+         int status 0
+         string message 
+-    timeStamp timeStamp
++    structure timeStamp
+         long secondsPastEpoch 0
+         int nanoSeconds 0
+         int userTag 0
+-structure byte
++structure 
+     byte[] value [0,1,2]
+-    alarm alarm
++    structure alarm
+         int severity 0
+         int status 0
+         string message 
+-    timeStamp timeStamp
++    structure timeStamp
+         long secondsPastEpoch 0
+         int nanoSeconds 0
+         int userTag 0
+-structure short
++structure 
+     short[] value [0,1,2]
+-    alarm alarm
++    structure alarm
+         int severity 0
+         int status 0
+         string message 
+-    timeStamp timeStamp
++    structure timeStamp
+         long secondsPastEpoch 0
+         int nanoSeconds 0
+         int userTag 0
+-structure int
++structure 
+     int[] value [0,1,2]
+-    alarm alarm
++    structure alarm
+         int severity 0
+         int status 0
+         string message 
+-    timeStamp timeStamp
++    structure timeStamp
+         long secondsPastEpoch 0
+         int nanoSeconds 0
+         int userTag 0
+-structure long
++structure 
+     long[] value [0,1,2]
+-    alarm alarm
++    structure alarm
+         int severity 0
+         int status 0
+         string message 
+-    timeStamp timeStamp
++    structure timeStamp
+         long secondsPastEpoch 0
+         int nanoSeconds 0
+         int userTag 0
+-structure float
++structure 
+     float[] value [0,1,2]
+-    alarm alarm
++    structure alarm
+         int severity 0
+         int status 0
+         string message 
+-    timeStamp timeStamp
++    structure timeStamp
+         long secondsPastEpoch 0
+         int nanoSeconds 0
+         int userTag 0
+-structure double
++structure 
+     double[] value [0,1,2]
+-    alarm alarm
++    structure alarm
+         int severity 0
+         int status 0
+         string message 
+-    timeStamp timeStamp
++    structure timeStamp
+         long secondsPastEpoch 0
+         int nanoSeconds 0
+         int userTag 0
+-structure string
++structure 
+     string[] value [0,1,2]
+-    alarm alarm
++    structure alarm
+         int severity 0
+         int status 0
+         string message 
+-    timeStamp timeStamp
++    structure timeStamp
+         long secondsPastEpoch 0
+         int nanoSeconds 0
+         int userTag 0
+-pvField:  totalConstruct 336 totalDestruct 336
+-field:  totalConstruct 141 totalDestruct 141

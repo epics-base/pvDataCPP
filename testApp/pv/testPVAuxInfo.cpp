@@ -48,7 +48,7 @@ static void printOffsets(PVStructurePtr pvStructure,FILE *fd)
              printOffsets(xxx,fd);
              continue;
         }
-        fprintf(fd,"%s offset %d next %d number %d\n",
+        fprintf(fd,"%s offset %lli next %lli number %lli\n",
             pvField->getFieldName().c_str(),
             pvField->getFieldOffset(),
             pvField->getNextFieldOffset(),

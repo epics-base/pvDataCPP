@@ -1,5 +1,2 @@
 message 1 messageType info
 message 4 messageType info
-queue:  totalConstruct 1 totalDestruct 1
-queueElement:  totalConstruct 3 totalDestruct 3
-messageQueue:  totalConstruct 1 totalDestruct 1

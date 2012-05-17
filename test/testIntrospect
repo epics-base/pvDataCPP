@@ -1,26 +1,26 @@
 
 testScalar
-boolean boolean
-byte byte
-short short
-int int
-long long
-float float
-double double
-string string
+boolean
+byte
+short
+int
+long
+float
+double
+string
 
 testScalarArray
-boolean[] boolean
-byte[] byte
-short[] short
-int[] int
-long[] long
-float[] float
-double[] double
-string[] string
+boolean[]
+byte[]
+short[]
+int[]
+long[]
+float[]
+double[]
+string[]
 
 testSimpleStructure
-structure value
+structure
     double value
     structure alarm
         int severity
@@ -31,16 +31,14 @@ structure value
         int nanoSeconds
         int userTag
     structure display
+        double limitLow
+        double limitHigh
         string description
         string format
         string units
-        structure limit
-            double low
-            double high
     structure control
-        structure limit
-            double low
-            double high
+        double limitLow
+        double limitHigh
         double minStep
     structure valueAlarm
         boolean active
@@ -55,9 +53,9 @@ structure value
         double hystersis
 
 testStructureArray
-structure value
+structure
     structure[] value
-        structure powerSupply
+        structure
             structure voltage
                 double value
                 structure alarm
@@ -84,5 +82,3 @@ structure value
         long secondsPastEpoch
         int nanoSeconds
         int userTag
-pvField:  totalConstruct 49 totalDestruct 49
-field:  totalConstruct 122 totalDestruct 122

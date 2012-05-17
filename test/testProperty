@@ -1,34 +1,32 @@
-structure value
+structure 
     double value 0
-    alarm alarm
+    structure alarm
         int severity 0
         int status 0
         string message 
-    timeStamp timeStamp
+    structure timeStamp
         long secondsPastEpoch 0
         int nanoSeconds 0
         int userTag 0
-    display display
+    structure display
+        double limitLow 0
+        double limitHigh 0
         string description 
         string format 
         string units 
-        structure limit
-            double low 0
-            double high 0
-    control control
-        structure limit
-            double low 0
-            double high 0
+    structure control
+        double limitLow 0
+        double limitHigh 0
         double minStep 0
-structure value
+structure 
     structure value
         int index 0
-        string[] choices [0,1,2,3]
-    alarm alarm
+        string[] choices [1,2,3,4]
+    structure alarm
         int severity 0
         int status 0
         string message 
-    timeStamp timeStamp
+    structure timeStamp
         long secondsPastEpoch 0
         int nanoSeconds 0
         int userTag 0
@@ -40,43 +38,39 @@ testControl
 testDisplay
  low -10.000000 high -1.000000
 testEnumerated
-index 0 choice 0 choices 0 1 2 3
-index 2 choice 2
+index 0 choice 1 choices 1 2 3 4
+index 2 choice 3
 doubleRecord
-structure value
+structure 
     double value 0
-    alarm alarm
+    structure alarm
         int severity 2
         int status 7
         string message testMessage
-    timeStamp timeStamp
+    structure timeStamp
         long secondsPastEpoch 0
         int nanoSeconds 0
         int userTag 32
-    display display
+    structure display
+        double limitLow -10
+        double limitHigh -1
         string description testDescription
         string format %f10.0
         string units volts
-        structure limit
-            double low -10
-            double high -1
-    control control
-        structure limit
-            double low 1
-            double high 10
+    structure control
+        double limitLow 1
+        double limitHigh 10
         double minStep 0
 enumeratedRecord
-structure value
+structure 
     structure value
         int index 2
-        string[] choices [0,1,2,3]
-    alarm alarm
+        string[] choices [1,2,3,4]
+    structure alarm
         int severity 0
         int status 0
         string message 
-    timeStamp timeStamp
+    structure timeStamp
         long secondsPastEpoch 0
         int nanoSeconds 0
         int userTag 0
-pvField:  totalConstruct 34 totalDestruct 34
-field:  totalConstruct 101 totalDestruct 101

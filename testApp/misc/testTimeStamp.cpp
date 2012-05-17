@@ -30,7 +30,7 @@ void testTimeStamp(FILE *fd,FILE *auxfd)
     assert(nanoSecPerSec==1000000000);
     TimeStamp current;
     current.getCurrent();
-    fprintf(auxfd,"current %lli %i milliSec %lli\n",
+    fprintf(auxfd,"current %lli %i milliSec %li\n",
         current.getSecondsPastEpoch(),
         current.getNanoSeconds(),
         current.getMilliseconds());
@@ -46,7 +46,7 @@ void testTimeStamp(FILE *fd,FILE *auxfd)
         (ctm.tm_isdst==0) ? "false" : "true");
     tt = time(&tt);
     current.fromTime_t(tt);
-    fprintf(auxfd,"fromTime_t\ncurrent %lli %i milliSec %lli\n",
+    fprintf(auxfd,"fromTime_t\ncurrent %lli %i milliSec %li\n",
         current.getSecondsPastEpoch(),
         current.getNanoSeconds(),
         current.getMilliseconds());

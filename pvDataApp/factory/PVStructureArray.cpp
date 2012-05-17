@@ -42,9 +42,14 @@ size_t PVStructureArray::append(size_t number)
 
 bool PVStructureArray::remove(size_t offset,size_t number)
 {
-    size_t length = getCapacity();
+    size_t length = getLength();
     if(offset+number>length) return false;
-    value->erase(value->begin()+ offset,value->begin()+number-1);
+    PVStructurePtrArray vec = *value.get();
+    for(size_t i = offset; i+number < length; i++) {
+         vec[i] =  vec[i + number];
+    }
+    size_t newLength = length - number;
+    setCapacityLength(newLength,newLength);
     return true;
 }
 
@@ -73,7 +78,7 @@ void PVStructureArray::compress() {
          }
          break;
     }
-    setCapacity(newLength);
+    setCapacityLength(newLength,newLength);
 }
 
 void PVStructureArray::setCapacity(size_t capacity) {

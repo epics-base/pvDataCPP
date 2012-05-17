@@ -85,7 +85,7 @@ bool operator==(const Structure& a, const Structure& b)
 
 bool operator==(const StructureArray& a, const StructureArray& b)
 {
-    return a.getStructure().get()==b.getStructure().get();
+    return a.getStructure()==b.getStructure();
 }
 
 namespace nconvert {

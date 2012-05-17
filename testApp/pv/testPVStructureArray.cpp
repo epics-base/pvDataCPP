@@ -58,7 +58,10 @@ void testPowerSupplyArray(FILE * fd) {
     powerSupplyArrayStruct->toString(&buffer);
     fprintf(fd,"after append 5\n%s\n",buffer.c_str());
     powerSupplyArray->remove(0,2);
-    powerSupplyArray->remove(3,1);
+    buffer.clear();
+    powerSupplyArrayStruct->toString(&buffer);
+    fprintf(fd,"after remove(0,2)\n%s\n",buffer.c_str());
+    powerSupplyArray->remove(2,1);
     buffer.clear();
     powerSupplyArrayStruct->toString(&buffer);
     fprintf(fd,"after remove 0,1,3%s\n",buffer.c_str());
