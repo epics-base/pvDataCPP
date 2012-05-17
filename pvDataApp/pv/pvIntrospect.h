@@ -435,7 +435,7 @@ public:
     virtual void deserialize(ByteBuffer *buffer, DeserializableControl *flusher);
     
 protected:
-   Structure(StringArray fieldNames,FieldConstPtrArray fields);
+   Structure(StringArray const & fieldNames, FieldConstPtrArray const & fields);
 private:
     void toStringCommon(StringBuilder buf,int indentLevel) const;
     StringArray fieldNames;
