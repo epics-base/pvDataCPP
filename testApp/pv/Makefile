@@ -22,6 +22,10 @@ PROD_HOST += testPVData
 testPVData_SRCS += testPVData.cpp
 testPVData_LIBS += pvData Com
 
+PROD_HOST += testConvert
+testConvert_SRCS += testConvert.cpp
+testConvert_LIBS += pvData Com
+
 PROD_HOST += testPVStructureArray
 testPVStructureArray_SRCS += testPVStructureArray.cpp
 testPVStructureArray_LIBS += pvData Com
