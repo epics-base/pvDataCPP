@@ -17,7 +17,7 @@ namespace epics { namespace pvData {
 
     PVScalarArray::~PVScalarArray() {}
 
-    PVScalarArray::PVScalarArray(ScalarArrayConstPtr scalarArray)
+    PVScalarArray::PVScalarArray(ScalarArrayConstPtr const & scalarArray)
     : PVArray(scalarArray) {}
 
     ScalarArrayConstPtr PVScalarArray::getScalarArray() 

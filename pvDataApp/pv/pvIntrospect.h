@@ -353,7 +353,7 @@ protected:
      * Constructor.
      * @param structure The introspection interface for the elements.
      */
-    StructureArray(StructureConstPtr structure);
+    StructureArray(StructureConstPtr const & structure);
     /**
      * Destructor.
      */
@@ -471,7 +471,7 @@ public:
       * @param elementStructure The {@code Structure} for each array element.
       * @return An {@code Array} Interface for the newly created object.
       */
-    StructureArrayConstPtr createStructureArray(StructureConstPtr structure) const;
+    StructureArrayConstPtr createStructureArray(StructureConstPtr const & structure) const;
     /**
      * Create a {@code Structure} field.
      * @param fieldNames The array of {@code fieldNames} for the structure
@@ -489,8 +489,8 @@ public:
      * @return a {@code Structure} interface for the newly created object.
      */
     StructureConstPtr appendField(
-        StructureConstPtr structure,
-        String fieldName, FieldConstPtr field) const;
+        StructureConstPtr const & structure,
+        String fieldName, FieldConstPtr const & field) const;
     /**
      * Append fields to a structure.
      * @param structure The structure to which the fields appended.
@@ -499,7 +499,7 @@ public:
      * @return a {@code Structure} interface for the newly created object.
      */
     StructureConstPtr appendFields(
-        StructureConstPtr structure,
+        StructureConstPtr const & structure,
         StringArray const & fieldNames,
         FieldConstPtrArray const & fields) const;
     /**

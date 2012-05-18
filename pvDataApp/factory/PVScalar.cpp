@@ -17,7 +17,7 @@ namespace epics { namespace pvData {
 
     PVScalar::~PVScalar() {}
 
-    PVScalar::PVScalar(ScalarConstPtr  scalar)
+    PVScalar::PVScalar(ScalarConstPtr const & scalar)
     : PVField(scalar) {}
 
     ScalarConstPtr PVScalar::getScalar() 

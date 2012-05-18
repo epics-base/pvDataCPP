@@ -505,7 +505,7 @@ StructureConstPtr StandardField::scalarArray(
 
 
 StructureConstPtr StandardField::structureArray(
-    StructureConstPtr &structure,String properties)
+    StructureConstPtr const & structure,String properties)
 {
     StructureArrayConstPtr field = fieldCreate->createStructureArray(
         structure);

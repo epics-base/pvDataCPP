@@ -80,12 +80,15 @@ bool operator==(const Structure& a, const Structure& b)
     for (size_t i = 0; i < nflds; i++)
         if (*(af[i].get()) != *(bf[i].get()))
             return false;
-     return true;
+
+    StringArray an = a.getFieldNames();
+    StringArray bn = b.getFieldNames();
+    return std::equal( an.begin(), an.end(), bn.begin() );
 }
 
 bool operator==(const StructureArray& a, const StructureArray& b)
 {
-    return a.getStructure()==b.getStructure();
+    return *(a.getStructure().get())==*(b.getStructure().get());
 }
 
 namespace nconvert {

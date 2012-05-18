@@ -25,7 +25,7 @@ namespace epics { namespace pvData {
         bool capacityMutable;
     };
 
-    PVArray::PVArray(FieldConstPtr field)
+    PVArray::PVArray(FieldConstPtr const & field)
     : PVField(field),pImpl(new PVArrayPvt())
     { }
 

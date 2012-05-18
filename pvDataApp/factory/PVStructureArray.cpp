@@ -19,7 +19,7 @@ using std::size_t;
 
 namespace epics { namespace pvData {
 
-PVStructureArray::PVStructureArray(StructureArrayConstPtr structureArray)
+PVStructureArray::PVStructureArray(StructureArrayConstPtr const & structureArray)
 : PVArray(structureArray),
   structureArray(structureArray),
   value(std::tr1::shared_ptr<std::vector<PVStructurePtr> >

@@ -26,9 +26,9 @@ PROD_HOST += testBaseException
 testBaseException_SRCS += testBaseException.cpp
 testBaseException_LIBS += pvData
 
-#PROD_HOST += testSerialization
-#testSerialization_SRCS += testSerialization.cpp
-#testSerialization_LIBS += pvData Com
+PROD_HOST += testSerialization
+testSerialization_SRCS += testSerialization.cpp
+testSerialization_LIBS += pvData Com
 
 PROD_HOST += testTimeStamp
 testTimeStamp_SRCS += testTimeStamp.cpp

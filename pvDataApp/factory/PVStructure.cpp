@@ -40,7 +40,7 @@ static PVScalarArrayPtr nullPVScalarArray;
 
 static PVFieldPtr findSubField(String fieldName,PVStructure *pvStructure);
 
-PVStructure::PVStructure(StructureConstPtr& structurePtr)
+PVStructure::PVStructure(StructureConstPtr const & structurePtr)
 : PVField(structurePtr),
   structurePtr(structurePtr),
   extendsStructureName("")
@@ -58,8 +58,8 @@ PVStructure::PVStructure(StructureConstPtr& structurePtr)
     }
 }
 
-PVStructure::PVStructure(StructureConstPtr structurePtr,
-    PVFieldPtrArray & pvs
+PVStructure::PVStructure(StructureConstPtr const & structurePtr,
+    PVFieldPtrArray const & pvs
 )
 : PVField(structurePtr),
   structurePtr(structurePtr),
@@ -112,7 +112,7 @@ PVFieldPtr  PVStructure::getSubField(size_t fieldOffset)
     throw std::logic_error("PVStructure.getSubField: Logic error");
 }
 
-void PVStructure::appendPVField(String fieldName,PVFieldPtr & pvField )
+void PVStructure::appendPVField(String fieldName, PVFieldPtr const & pvField)
 {
     size_t origLength = pvFields.size();
     size_t newLength = origLength+1;
@@ -132,7 +132,7 @@ void PVStructure::appendPVField(String fieldName,PVFieldPtr & pvField )
     }
 }
 
-void PVStructure::appendPVFields(StringArray &fieldNames,PVFieldPtrArray &pvFields)
+void PVStructure::appendPVFields(StringArray const & fieldNames, PVFieldPtrArray const & pvFields)
 {
     size_t origLength = this->pvFields.size();
     size_t extra = fieldNames.size();

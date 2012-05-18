@@ -292,7 +292,7 @@ public:
      */
     ScalarConstPtr getScalar() ;
 protected:
-    PVScalar(ScalarConstPtr  scalar);
+    PVScalar(ScalarConstPtr const & scalar);
 };
 
 /**
@@ -320,7 +320,7 @@ public:
      */
     virtual void put(T value) = 0;
 protected:
-    PVScalarValue(ScalarConstPtr  scalar)
+    PVScalarValue(ScalarConstPtr const & scalar)
     : PVScalar(scalar) {}
 private:
     friend class PVDataCreate;
@@ -362,7 +362,7 @@ public:
      */
     virtual ~PVString() {}
 protected:
-    PVString(ScalarConstPtr & scalar)
+    PVString(ScalarConstPtr const & scalar)
     : PVScalarValue<String>(scalar) {}
 };
 typedef std::tr1::shared_ptr<PVString> PVStringPtr;
@@ -409,7 +409,7 @@ public:
      */
     virtual void setCapacity(std::size_t capacity) = 0;
 protected:
-    PVArray(FieldConstPtr  field);
+    PVArray(FieldConstPtr const & field);
     void setCapacityLength(std::size_t capacity,std::size_t length);
 private:
     class PVArrayPvt * pImpl;
@@ -461,7 +461,7 @@ public:
     ScalarArrayConstPtr getScalarArray() ;
 
 protected:
-    PVScalarArray(ScalarArrayConstPtr scalarArray);
+    PVScalarArray(ScalarArrayConstPtr const & scalarArray);
 private:
     friend class PVDataCreate;
 };
@@ -552,7 +552,7 @@ public:
     virtual vector const & getVector() {return *value;}
     virtual shared_vector const & getSharedVector() {return value;}
 protected:
-    PVStructureArray( StructureArrayConstPtr structureArray);
+    PVStructureArray(StructureArrayConstPtr const & structureArray);
 private:
     StructureArrayConstPtr structureArray;
     shared_vector value;
@@ -597,14 +597,14 @@ public:
      * @param fieldName The name of the field to append.
      * @param pvField The field to append.
      */
-    void appendPVField(String fieldName,PVFieldPtr & pvField);
+    void appendPVField(String fieldName,PVFieldPtr const & pvField);
     /**
      * Append fields to the structure.
      * @param fieldNames The names of the fields to add.
      * @param pvFields The fields to append.
      * @return Pointer to the field or null if field does not exist.
      */
-    void appendPVFields(StringArray & fieldNames,PVFieldPtrArray & pvFields);
+    void appendPVFields(StringArray const & fieldNames,PVFieldPtrArray const & pvFields);
     /**
      * Remove a field from the structure.
      * @param fieldName The name of the field to remove.
@@ -747,13 +747,13 @@ public:
      * Constructor
      * @param structure The introspection interface.
      */
-    PVStructure(StructureConstPtr & structure);
+    PVStructure(StructureConstPtr const & structure);
     /**
      * Constructor
      * @param structure The introspection interface.
      * @param pvFields The array of fields for the structure.
      */
-    PVStructure(StructureConstPtr structure,PVFieldPtrArray & pvFields);
+    PVStructure(StructureConstPtr const & structure,PVFieldPtrArray const & pvFields);
 private:
     PVFieldPtrArray pvFields;
     StructureConstPtr structurePtr;
@@ -811,7 +811,7 @@ public:
     virtual vector const & getVector() = 0;
     virtual shared_vector const & getSharedVector() = 0;
 protected:
-    PVValueArray(ScalarArrayConstPtr scalar)
+    PVValueArray(ScalarArrayConstPtr const & scalar)
     : PVScalarArray(scalar) {}
     friend class PVDataCreate;
 };
@@ -880,67 +880,66 @@ public:
      * @param field The introspection data to be used to create PVField.
      * @return The PVField implementation.
      */
-    PVFieldPtr createPVField(FieldConstPtr & field);
+    PVFieldPtr createPVField(FieldConstPtr const & field);
     /**
      * Create a PVField using given a PVField to clone.
      * This method calls the appropriate createPVScalar, createPVArray, or createPVStructure.
      * @param fieldToClone The field to clone.
      * @return The PVField implementation
      */
-    PVFieldPtr createPVField(PVFieldPtr & fieldToClone);
+    PVFieldPtr createPVField(PVFieldPtr const & fieldToClone);
     /**
      * Create an implementation of a scalar field reusing the Scalar introspection interface.
      * @param scalar The introspection interface.
      * @return The PVScalar implementation.
      */
-    PVScalarPtr createPVScalar(ScalarConstPtr & scalar);
+    PVScalarPtr createPVScalar(ScalarConstPtr const & scalar);
     /**
      * Create an implementation of a scalar field. A Scalar introspection interface is created.
      * @param fieldType The field type.
      * @return The PVScalar implementation.
      */
-    PVScalarPtr createPVScalar(ScalarType  scalarType);
+    PVScalarPtr createPVScalar(ScalarType scalarType);
     /**
      * Create an implementation of a scalar field by cloning an existing PVScalar.
      * The new PVScalar will have the same value and auxInfo as the original.
      * @param scalarToClone The PVScalar to clone.
      * @return The PVScalar implementation.
      */
-    PVScalarPtr createPVScalar(PVScalarPtr &  scalarToClone);
+    PVScalarPtr createPVScalar(PVScalarPtr const & scalarToClone);
     /**
      * Create an implementation of an array field reusing the Array introspection interface.
      * @param array The introspection interface.
      * @return The PVScalarArray implementation.
      */
-    PVScalarArrayPtr createPVScalarArray(ScalarArrayConstPtr & scalarArray);
+    PVScalarArrayPtr createPVScalarArray(ScalarArrayConstPtr const & scalarArray);
     /**
      * Create an implementation for an array field. An Array introspection interface is created.
      * @param parent The parent interface.
      * @param elementType The element type.
      * @return The PVScalarArray implementation.
      */
-    PVScalarArrayPtr createPVScalarArray(
-        ScalarType elementType);
+    PVScalarArrayPtr createPVScalarArray(ScalarType elementType);
     /**
      * Create an implementation of an array field by cloning an existing PVArray.
      * The new PVArray will have the same value and auxInfo as the original.
      * @param arrayToClone The PVScalarArray to clone.
      * @return The PVScalarArray implementation.
      */
-    PVScalarArrayPtr createPVScalarArray(PVScalarArrayPtr &  scalarArrayToClone);
+    PVScalarArrayPtr createPVScalarArray(PVScalarArrayPtr const  & scalarArrayToClone);
     /**
      * Create an implementation of an array with structure elements.
      * @param structureArray The introspection interface.
      * All elements share the same introspection interface.
      * @return The PVStructureArray implementation.
      */
-    PVStructureArrayPtr createPVStructureArray(StructureArrayConstPtr & structureArray);
+    PVStructureArrayPtr createPVStructureArray(StructureArrayConstPtr const & structureArray);
     /**
      * Create implementation for PVStructure.
      * @param structure The introspection interface.
      * @return The PVStructure implementation
      */
-    PVStructurePtr createPVStructure(StructureConstPtr & structure);
+    PVStructurePtr createPVStructure(StructureConstPtr const & structure);
     /**
      * Create implementation for PVStructure.
      * @param fieldNames The field names.
@@ -948,13 +947,13 @@ public:
      * @return The PVStructure implementation
      */
     PVStructurePtr createPVStructure(
-        StringArray & fieldNames,PVFieldPtrArray & pvFields);
+        StringArray const & fieldNames,PVFieldPtrArray const & pvFields);
      /**
       * Create implementation for PVStructure.
       * @param structToClone A structure. Each subfield and any auxInfo is cloned and added to the newly created structure.
       * @return The PVStructure implementation.
       */
-   PVStructurePtr createPVStructure(PVStructurePtr & structToClone);
+   PVStructurePtr createPVStructure(PVStructurePtr const & structToClone);
 private:
    PVDataCreate();
 };

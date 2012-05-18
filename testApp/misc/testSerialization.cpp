@@ -23,6 +23,8 @@
 #include <pv/CDRMonitor.h>
 #include <pv/convert.h>
 
+#include <pv/standardField.h>
+
 #define BYTE_MAX_VALUE 127
 #define BYTE_MIN_VALUE -128
 #define SHORT_MAX_VALUE 32767
@@ -49,7 +51,7 @@ public:
     virtual void flushSerializeBuffer() {
     }
 
-    virtual void ensureBuffer(int size) {
+    virtual void ensureBuffer(size_t size) {
     }
 
     virtual void alignBuffer(int alignment) {
@@ -71,7 +73,7 @@ public:
 class DeserializableControlImpl : public DeserializableControl,
         public NoDefaultMethods {
 public:
-    virtual void ensureData(int size) {
+    virtual void ensureData(size_t size) {
     }
 
     virtual void alignData(int alignment) {
@@ -90,8 +92,7 @@ public:
     }
 };
 
-
-void serializationTest(PVField* field) {
+void serializationTest(PVFieldPtr const & field) {
     buffer->clear();
 
     // serialize
@@ -100,33 +101,62 @@ void serializationTest(PVField* field) {
     buffer->flip();
 
     // create new instance and deserialize
-    PVField* deserializedField = getPVDataCreate()->createPVField(NULL,
-            field->getField());
+    PVFieldPtr deserializedField = getPVDataCreate()->createPVField(field->getField());
     deserializedField->deserialize(buffer, control);
 
     // must equal
     bool isEqual = getConvert()->equals(*field,*deserializedField);
     assert(isEqual);
-    delete deserializedField; // clean up
+}
+
+void testEquals(std::ostream& ofile) {
+    ofile<<"Testing equals...\n";
+    PVDataCreatePtr factory = getPVDataCreate();
+    assert(factory.get()!=NULL);
+
+	 // be sure all is covered
+	 for (int i = pvBoolean; i < pvString; i++)
+	 {
+		 ScalarType scalarType = static_cast<ScalarType>(i);
+
+		 PVScalarPtr scalar1 = factory->createPVScalar(scalarType);
+		 PVScalarPtr scalar2 = factory->createPVScalar(scalarType);
+		 assert((*scalar1)==(*scalar2));
+
+		 PVScalarArrayPtr array1 = factory->createPVScalarArray(scalarType);
+		 PVScalarArrayPtr array2 = factory->createPVScalarArray(scalarType);
+		 assert((*array1)==(*array2));
+	}
+
+	// and a structure
+    PVStructurePtr structure1 = factory->createPVStructure(getStandardField()->timeStamp());
+    PVStructurePtr structure2 = factory->createPVStructure(getStandardField()->timeStamp());
+	assert((*structure1)==(*structure2));
+
+    // and a structure array
+    PVStructureArrayPtr structureArray1 = factory->createPVStructureArray(getFieldCreate()->createStructureArray(structure1->getStructure()));
+    PVStructureArrayPtr structureArray2 = factory->createPVStructureArray(getFieldCreate()->createStructureArray(structure2->getStructure()));
+	assert((*structureArray1)==(*structureArray2));
+
+    ofile<<"!!!  PASSED\n\n";
 }
 
 void testScalar(std::ostream& ofile) {
     ofile<<"Testing scalars...\n";
-    PVDataCreate* factory = getPVDataCreate();
-    assert(factory!=NULL);
+    PVDataCreatePtr factory = getPVDataCreate();
+    assert(factory.get()!=NULL);
 
     ofile<<"\tPVBoolean\n";
-    PVBoolean* pvBoolean = (PVBoolean*)factory->createPVScalar(NULL,
-            "pvBoolean", epics::pvData::pvBoolean);
+    PVBooleanPtr pvBoolean =
+    		std::tr1::static_pointer_cast<PVBoolean>(factory->createPVScalar(epics::pvData::pvBoolean));
     pvBoolean->put(false);
     serializationTest(pvBoolean);
     pvBoolean->put(true);
     serializationTest(pvBoolean);
-    delete pvBoolean;
 
     ofile<<"\tPVByte\n";
-    PVByte* pvByte = (PVByte*)factory->createPVScalar(NULL, "pvByte",
-            epics::pvData::pvByte);
+    PVBytePtr pvByte =
+    		std::tr1::static_pointer_cast<PVByte>(factory->createPVScalar(epics::pvData::pvByte));
     pvByte->put(0);
     serializationTest(pvByte);
     pvByte->put(12);
@@ -135,11 +165,10 @@ void testScalar(std::ostream& ofile) {
     serializationTest(pvByte);
     pvByte->put(BYTE_MIN_VALUE);
     serializationTest(pvByte);
-    delete pvByte;
 
     ofile<<"\tPVShort\n";
-    PVShort* pvShort = (PVShort*)factory->createPVScalar(NULL, "pvShort",
-            epics::pvData::pvShort);
+    PVShortPtr pvShort =
+    		std::tr1::static_pointer_cast<PVShort>(factory->createPVScalar(epics::pvData::pvShort));
     pvShort->put(0);
     serializationTest(pvShort);
     pvShort->put(123);
@@ -152,11 +181,10 @@ void testScalar(std::ostream& ofile) {
     serializationTest(pvShort);
     pvShort->put(SHORT_MIN_VALUE);
     serializationTest(pvShort);
-    delete pvShort;
 
     ofile<<"\tPVInt\n";
-    PVInt* pvInt = (PVInt*)factory->createPVScalar(NULL, "pvInt",
-            epics::pvData::pvInt);
+    PVIntPtr pvInt =
+    		std::tr1::static_pointer_cast<PVInt>(factory->createPVScalar(epics::pvData::pvInt));
     pvInt->put(0);
     serializationTest(pvInt);
     pvInt->put(123456);
@@ -173,11 +201,10 @@ void testScalar(std::ostream& ofile) {
     serializationTest(pvInt);
     pvInt->put(INT_MIN_VALUE);
     serializationTest(pvInt);
-    delete pvInt;
 
     ofile<<"\tPVLong\n";
-    PVLong* pvLong = (PVLong*)factory->createPVScalar(NULL, "pvLong",
-            epics::pvData::pvLong);
+    PVLongPtr pvLong =
+    		std::tr1::static_pointer_cast<PVLong>(factory->createPVScalar(epics::pvData::pvLong));
     pvLong->put(0);
     serializationTest(pvLong);
     pvLong->put(12345678901LL);
@@ -198,11 +225,10 @@ void testScalar(std::ostream& ofile) {
     serializationTest(pvLong);
     pvLong->put(LONG_MIN_VALUE);
     serializationTest(pvLong);
-    delete pvLong;
 
     ofile<<"\tPVFloat\n";
-    PVFloat* pvFloat = (PVFloat*)factory->createPVScalar(NULL, "pvFloat",
-            epics::pvData::pvFloat);
+    PVFloatPtr pvFloat =
+    		std::tr1::static_pointer_cast<PVFloat>(factory->createPVScalar(epics::pvData::pvFloat));
     pvFloat->put(0);
     serializationTest(pvFloat);
     pvFloat->put(12.345);
@@ -211,11 +237,10 @@ void testScalar(std::ostream& ofile) {
     serializationTest(pvFloat);
     pvFloat->put(FLOAT_MIN_VALUE);
     serializationTest(pvFloat);
-    delete pvFloat;
 
     ofile<<"\tPVDouble\n";
-    PVDouble* pvDouble = (PVDouble*)factory->createPVScalar(NULL, "pvDouble",
-            epics::pvData::pvDouble);
+    PVDoublePtr pvDouble =
+    		std::tr1::static_pointer_cast<PVDouble>(factory->createPVScalar(epics::pvData::pvDouble));
     pvDouble->put(0);
     serializationTest(pvDouble);
     pvDouble->put(12.345);
@@ -224,11 +249,10 @@ void testScalar(std::ostream& ofile) {
     serializationTest(pvDouble);
     pvDouble->put(DOUBLE_MIN_VALUE);
     serializationTest(pvDouble);
-    delete pvDouble;
 
     ofile<<"\tPVString\n";
-    PVString* pvString = (PVString*)factory->createPVScalar(NULL, "pvString",
-            epics::pvData::pvString);
+    PVStringPtr pvString =
+    		std::tr1::static_pointer_cast<PVString>(factory->createPVScalar(epics::pvData::pvString));
     pvString->put("");
     serializationTest(pvString);
     pvString->put("s");
@@ -244,7 +268,7 @@ void testScalar(std::ostream& ofile) {
     pvString->put(String(10000, 'a'));
     serializationTest(pvString);
 
-    delete pvString;
+    // TODO unsigned test
 
     ofile<<"!!!  PASSED\n\n";
 }
@@ -252,93 +276,86 @@ void testScalar(std::ostream& ofile) {
 void testArray(std::ostream& ofile) {
     ofile<<"Testing arrays...\n";
 
-    PVDataCreate* factory = getPVDataCreate();
-    assert(factory!=NULL);
+    PVDataCreatePtr factory = getPVDataCreate();
+    assert(factory.get()!=NULL);
 
     ofile<<"\tPVBooleanArray\n";
     bool boolEmpty[] = { false };
     bool bv[] = { false, true, false, true, true };
-    PVBooleanArray* pvBoolean = (PVBooleanArray*)factory->createPVScalarArray(
-            NULL, "pvBooleanArray", epics::pvData::pvBoolean);
-    pvBoolean->put(0, 0, boolEmpty, 0);
+    PVBooleanArrayPtr pvBoolean =
+    		std::tr1::static_pointer_cast<PVBooleanArray>(factory->createPVScalarArray(epics::pvData::pvBoolean));
+//TODO    pvBoolean->put(0, 0, boolEmpty, 0);
     serializationTest(pvBoolean);
-    pvBoolean->put(0, 5, bv, 0);
+//TODO    pvBoolean->put(0, 5, bv, 0);
     serializationTest(pvBoolean);
-    delete pvBoolean;
 
     ofile<<"\tPVByteArray\n";
     int8 byteEmpty[] = { 0 };
     int8 byv[] = { 0, 1, 2, -1, BYTE_MAX_VALUE, BYTE_MAX_VALUE-1,
             BYTE_MIN_VALUE+1, BYTE_MIN_VALUE };
-    PVByteArray* pvByte = (PVByteArray*)factory->createPVScalarArray(NULL,
-            "pvByteArray", epics::pvData::pvByte);
+    PVByteArrayPtr pvByte =
+    		std::tr1::static_pointer_cast<PVByteArray>(factory->createPVScalarArray(epics::pvData::pvByte));
     pvByte->put(0, 0, byteEmpty, 0);
     serializationTest(pvByte);
     pvByte->put(0, 8, byv, 0);
     serializationTest(pvByte);
-    delete pvByte;
 
     ofile<<"\tPVShortArray\n";
     int16 shortEmpty[] = { 0 };
     int16 sv[] = { 0, 1, 2, -1, SHORT_MAX_VALUE, SHORT_MAX_VALUE-1,
             SHORT_MIN_VALUE+1, SHORT_MIN_VALUE };
-    PVShortArray* pvShort = (PVShortArray*)factory->createPVScalarArray(NULL,
-            "pvShortArray", epics::pvData::pvShort);
+    PVShortArrayPtr pvShort =
+    		std::tr1::static_pointer_cast<PVShortArray>(factory->createPVScalarArray(epics::pvData::pvShort));
     pvShort->put(0, 0, shortEmpty, 0);
     serializationTest(pvShort);
     pvShort->put(0, 8, sv, 0);
     serializationTest(pvShort);
-    delete pvShort;
 
     ofile<<"\tPVIntArray\n";
     int32 intEmpty[] = { 0 };
     int32 iv[] = { 0, 1, 2, -1, INT_MAX_VALUE, INT_MAX_VALUE-1,
             INT_MIN_VALUE+1, INT_MIN_VALUE };
-    PVIntArray* pvInt = (PVIntArray*)factory->createPVScalarArray(NULL,
-            "pvIntArray", epics::pvData::pvInt);
+    PVIntArrayPtr pvInt =
+    		std::tr1::static_pointer_cast<PVIntArray>(factory->createPVScalarArray(epics::pvData::pvInt));
     pvInt->put(0, 0, intEmpty, 0);
     serializationTest(pvInt);
     pvInt->put(0, 8, iv, 0);
     serializationTest(pvInt);
-    delete pvInt;
 
     ofile<<"\tPVLongArray\n";
     int64 longEmpty[] = { 0 };
     int64 lv[] = { 0, 1, 2, -1, LONG_MAX_VALUE, LONG_MAX_VALUE-1,
             LONG_MIN_VALUE+1, LONG_MIN_VALUE };
-    PVLongArray* pvLong = (PVLongArray*)factory->createPVScalarArray(NULL,
-            "pvLongArray", epics::pvData::pvLong);
+    PVLongArrayPtr pvLong =
+    		std::tr1::static_pointer_cast<PVLongArray>(factory->createPVScalarArray(epics::pvData::pvLong));
     pvLong->put(0, 0, longEmpty, 0);
     serializationTest(pvLong);
     pvLong->put(0, 8, lv, 0);
     serializationTest(pvLong);
-    delete pvLong;
 
     ofile<<"\tPVFloatArray\n";
     float floatEmpty[] = { (float)0.0 };
     float fv[] = { (float)0.0, (float)1.1, (float)2.3, (float)-1.4,
             FLOAT_MAX_VALUE, FLOAT_MAX_VALUE-(float)123456.789, FLOAT_MIN_VALUE
                     +(float)1.1, FLOAT_MIN_VALUE };
-    PVFloatArray* pvFloat = (PVFloatArray*)factory->createPVScalarArray(NULL,
-            "pvFloatArray", epics::pvData::pvFloat);
+    PVFloatArrayPtr pvFloat =
+    		std::tr1::static_pointer_cast<PVFloatArray>(factory->createPVScalarArray(epics::pvData::pvFloat));
     pvFloat->put(0, 0, floatEmpty, 0);
     serializationTest(pvFloat);
     pvFloat->put(0, 8, fv, 0);
     serializationTest(pvFloat);
-    delete pvFloat;
 
     ofile<<"\tPVDoubleArray\n";
     double doubleEmpty[] = { (double)0.0 };
     double dv[] = { (double)0.0, (double)1.1, (double)2.3, (double)-1.4,
             DOUBLE_MAX_VALUE, DOUBLE_MAX_VALUE-(double)123456.789,
             DOUBLE_MIN_VALUE+(double)1.1, DOUBLE_MIN_VALUE };
-    PVDoubleArray* pvDouble = (PVDoubleArray*)factory->createPVScalarArray(
-            NULL, "pvDoubleArray", epics::pvData::pvDouble);
+    PVDoubleArrayPtr pvDouble =
+    		std::tr1::static_pointer_cast<PVDoubleArray>(factory->createPVScalarArray(epics::pvData::pvDouble));
     pvDouble->put(0, 0, doubleEmpty, 0);
     serializationTest(pvDouble);
     pvDouble->put(0, 8, dv, 0);
     serializationTest(pvDouble);
-    delete pvDouble;
 
     ofile<<"\tPVStringArray\n";
     String stringEmpty[] = { "" };
@@ -353,295 +370,122 @@ void testArray(std::ostream& ofile) {
                             "smile",
                             "this is a little longer string... maybe a little but longer... this makes test better",
                             String(10000, 'b') };
-    PVStringArray* pvString = (PVStringArray*)factory->createPVScalarArray(
-            NULL, "pvStringArray", epics::pvData::pvString);
+    PVStringArrayPtr pvString =
+    		std::tr1::static_pointer_cast<PVStringArray>(factory->createPVScalarArray(epics::pvData::pvString));
     pvString->put(0, 0, stringEmpty, 0);
     serializationTest(pvString);
     pvString->put(0, 8, strv, 0);
     serializationTest(pvString);
-    delete pvString;
 
     ofile<<"!!!  PASSED\n\n";
 }
 
-void testScalarEquals(std::ostream& ofile) {
-    ofile<<"Testing scalar equals...\n";
-    PVDataCreate* factory = getPVDataCreate();
-    assert(factory!=NULL);
+void testNonInitialized(std::ostream& ofile) {
+    ofile<<"Testing non-initialized...\n";
+    PVDataCreatePtr factory = getPVDataCreate();
+    assert(factory.get()!=NULL);
 
-    PVScalar *scalar1, *scalar2;
+	 // be sure all is covered
+	 for (int i = pvBoolean; i < pvString; i++)
+	 {
+		 ScalarType scalarType = static_cast<ScalarType>(i);
 
-    scalar1 = factory->createPVScalar(NULL, "pvBoolean",
-            epics::pvData::pvBoolean);
-    scalar2 = factory->createPVScalar(NULL, "pvBoolean",
-            epics::pvData::pvBoolean);
-    assert((*scalar1)==(*scalar2));
-    delete scalar1;
-    delete scalar2;
+		 PVScalarPtr scalar = factory->createPVScalar(scalarType);
+		 serializationTest(scalar);
 
-    scalar1 = factory->createPVScalar(NULL, "pvByte", epics::pvData::pvByte);
-    scalar2 = factory->createPVScalar(NULL, "pvByte", epics::pvData::pvByte);
-    assert((*scalar1)==(*scalar2));
-    delete scalar1;
-    delete scalar2;
+		 PVScalarArrayPtr array = factory->createPVScalarArray(scalarType);
+		 serializationTest(array);
+	}
 
-    scalar1 = factory->createPVScalar(NULL, "pvShort", epics::pvData::pvShort);
-    scalar2 = factory->createPVScalar(NULL, "pvShort", epics::pvData::pvShort);
-    assert((*scalar1)==(*scalar2));
-    delete scalar1;
-    delete scalar2;
+	// and a structure
+	PVStructurePtr structure = factory->createPVStructure(getStandardField()->timeStamp());
+	serializationTest(structure);
 
-    scalar1 = factory->createPVScalar(NULL, "pvInt", epics::pvData::pvInt);
-    scalar2 = factory->createPVScalar(NULL, "pvInt", epics::pvData::pvInt);
-    assert((*scalar1)==(*scalar2));
-    delete scalar1;
-    delete scalar2;
+	// and a structure array
+	PVStructureArrayPtr structureArray = factory->createPVStructureArray(getFieldCreate()->createStructureArray(structure->getStructure()));
+	serializationTest(structureArray);
 
-    scalar1 = factory->createPVScalar(NULL, "pvLong", epics::pvData::pvLong);
-    scalar2 = factory->createPVScalar(NULL, "pvLong", epics::pvData::pvLong);
-    assert((*scalar1)==(*scalar2));
-    delete scalar1;
-    delete scalar2;
-
-    scalar1 = factory->createPVScalar(NULL, "pvFloat", epics::pvData::pvFloat);
-    scalar2 = factory->createPVScalar(NULL, "pvFloat", epics::pvData::pvFloat);
-    assert((*scalar1)==(*scalar2));
-    delete scalar1;
-    delete scalar2;
-
-    scalar1
-            = factory->createPVScalar(NULL, "pvDouble", epics::pvData::pvDouble);
-    scalar2
-            = factory->createPVScalar(NULL, "pvDouble", epics::pvData::pvDouble);
-    assert((*scalar1)==(*scalar2));
-    delete scalar1;
-    delete scalar2;
-
-    scalar1
-            = factory->createPVScalar(NULL, "pvString", epics::pvData::pvString);
-    scalar2
-            = factory->createPVScalar(NULL, "pvString", epics::pvData::pvString);
-    assert((*scalar1)==(*scalar2));
-    delete scalar1;
-    delete scalar2;
-
-    FieldCreate* fieldCreate = getFieldCreate();
-    FieldConstPtrArray fields = new FieldConstPtr[2];
-    fields[0] = fieldCreate->createScalar("secondsSinceEpoch",
-            epics::pvData::pvLong);
-    fields[1] = fieldCreate->createScalar("nanoSeconds", epics::pvData::pvInt);
-    StructureConstPtr structure = fieldCreate->createStructure("timeStamp", 2,
-            fields);
-
-    PVStructure* pvStruct1 = factory->createPVStructure(NULL, structure);
-    PVStructure* pvStruct2 = factory->createPVStructure(NULL, structure);
-    assert((*pvStruct1)==(*pvStruct2));
-    delete pvStruct2;
-    delete pvStruct1;
-    // 'structure' and 'fields' are deleted implicitly
-
-    ofile<<"!!!  PASSED\n\n";
-}
-
-void testScalarNonInitialized(std::ostream& ofile) {
-    ofile<<"Testing scalar non-initialized...\n";
-    PVDataCreate* factory = getPVDataCreate();
-    assert(factory!=NULL);
-
-    PVScalar* scalar;
-
-    scalar = factory->createPVScalar(NULL, "pvBoolean",
-            epics::pvData::pvBoolean);
-    serializationTest(scalar);
-    delete scalar;
-
-    scalar = factory->createPVScalar(NULL, "pvByte", epics::pvData::pvByte);
-    serializationTest(scalar);
-    delete scalar;
-
-    scalar = factory->createPVScalar(NULL, "pvShort", epics::pvData::pvShort);
-    serializationTest(scalar);
-    delete scalar;
-
-    scalar = factory->createPVScalar(NULL, "pvInt", epics::pvData::pvInt);
-    serializationTest(scalar);
-    delete scalar;
-
-    scalar = factory->createPVScalar(NULL, "pvLong", epics::pvData::pvLong);
-    serializationTest(scalar);
-    delete scalar;
-
-    scalar = factory->createPVScalar(NULL, "pvFloat", epics::pvData::pvFloat);
-    serializationTest(scalar);
-    delete scalar;
-
-    scalar = factory->createPVScalar(NULL, "pvDouble", epics::pvData::pvDouble);
-    serializationTest(scalar);
-    delete scalar;
-
-    scalar = factory->createPVScalar(NULL, "pvString", epics::pvData::pvString);
-    serializationTest(scalar);
-    delete scalar;
-
-    FieldCreate* fieldCreate = getFieldCreate();
-    FieldConstPtrArray fields = new FieldConstPtr[2];
-    fields[0] = fieldCreate->createScalar("secondsSinceEpoch",
-            epics::pvData::pvLong);
-    fields[1] = fieldCreate->createScalar("nanoSeconds", epics::pvData::pvInt);
-    StructureConstPtr structure = fieldCreate->createStructure("timeStamp", 2,
-            fields);
-
-    PVStructure* pvStruct = factory->createPVStructure(NULL, structure);
-    serializationTest(pvStruct);
-    delete pvStruct; // 'structure' and 'fields' are deleted implicitly
-
-    ofile<<"!!!  PASSED\n\n";
-}
-
-void testArrayNonInitialized(std::ostream& ofile) {
-    ofile<<"Testing array non-initialized...\n";
-    PVDataCreate* factory = getPVDataCreate();
-    assert(factory!=NULL);
-
-    PVArray* array;
-
-    array = factory->createPVScalarArray(NULL, "pvBooleanArray",
-            epics::pvData::pvBoolean);
-    serializationTest(array);
-    delete array;
-
-    array = factory->createPVScalarArray(NULL, "pvByteArray",
-            epics::pvData::pvByte);
-    serializationTest(array);
-    delete array;
-
-    array = factory->createPVScalarArray(NULL, "pvShortArray",
-            epics::pvData::pvShort);
-    serializationTest(array);
-    delete array;
-
-    array = factory->createPVScalarArray(NULL, "pvIntArray",
-            epics::pvData::pvInt);
-    serializationTest(array);
-    delete array;
-
-    array = factory->createPVScalarArray(NULL, "pvLongArray",
-            epics::pvData::pvLong);
-    serializationTest(array);
-    delete array;
-
-    array = factory->createPVScalarArray(NULL, "pvFloatArray",
-            epics::pvData::pvFloat);
-    serializationTest(array);
-    delete array;
-
-    array = factory->createPVScalarArray(NULL, "pvDoubleArray",
-            epics::pvData::pvDouble);
-    serializationTest(array);
-    delete array;
-
-    array = factory->createPVScalarArray(NULL, "pvStringArray",
-            epics::pvData::pvString);
-    serializationTest(array);
-    delete array;
-
-    FieldCreate* fieldCreate = getFieldCreate();
-    FieldConstPtrArray fields = new FieldConstPtr[2];
-    fields[0] = fieldCreate->createScalar("secondsSinceEpoch",
-            epics::pvData::pvLong);
-    fields[1] = fieldCreate->createScalar("nanoSeconds", epics::pvData::pvInt);
-    StructureConstPtr structure = fieldCreate->createStructure("timeStamp", 2,
-            fields);
-
-    StructureArrayConstPtr structureArray = fieldCreate->createStructureArray(
-            "timeStampArray", structure);
-    PVStructureArray* pvStructArray = factory->createPVStructureArray(NULL,
-            structureArray);
-    serializationTest(pvStructArray);
-    delete pvStructArray; // also deletes 'structureArray',
-    //'structureArray' also deletes 'structure'
-    //'structure' also deletes 'fields'
-
-    ofile<<"!!!  PASSED\n\n";
+	ofile<<"!!!  PASSED\n\n";
 }
 
 void testStructure(std::ostream& ofile) {
     ofile<<"Testing structure...\n";
 
-    FieldCreate* fieldCreate = getFieldCreate();
-    PVDataCreate* pvDataCreate = getPVDataCreate();
-    assert(fieldCreate!=NULL);
-    assert(pvDataCreate!=NULL);
+    PVDataCreatePtr factory = getPVDataCreate();
+    assert(factory.get()!=NULL);
 
     ofile<<"\tSimple structure serialization\n";
-    FieldConstPtrArray fields = new FieldConstPtr[2];
-    fields[0] = fieldCreate->createScalar("secondsSinceEpoch",
-            epics::pvData::pvLong);
-    fields[1] = fieldCreate->createScalar("nanoSeconds", epics::pvData::pvInt);
-    PVStructure* pvStructure = pvDataCreate->createPVStructure(NULL,
-            "timestamp", 2, fields);
-    pvStructure->getLongField(fields[0]->getFieldName())->put(123);
-    pvStructure->getIntField(fields[1]->getFieldName())->put(456);
+	PVStructurePtr pvStructure = factory->createPVStructure(getStandardField()->timeStamp());
+    pvStructure->getLongField("secondsPastEpoch")->put(123);
+    pvStructure->getIntField("nanoSeconds")->put(456);
+    pvStructure->getIntField("userTag")->put(789);
 
     serializationTest(pvStructure);
-    //serializationTest(pvStructure->getStructure());
-    delete pvStructure;
 
     ofile<<"\tComplex structure serialization\n";
-    // and more complex :)
-    FieldConstPtrArray fields2 = new FieldConstPtr[4];
-    fields2[0] = fieldCreate->createScalar("longVal", epics::pvData::pvLong);
-    fields2[1] = fieldCreate->createScalar("intVal", epics::pvData::pvInt);
-    fields2[2] = fieldCreate->createScalarArray("values", epics::pvData::pvDouble);
-    FieldConstPtrArray fields3 = new FieldConstPtr[2];
-    fields3[0] = fieldCreate->createScalar("secondsSinceEpoch", epics::pvData::pvLong);
-    fields3[1] = fieldCreate->createScalar("nanoSeconds", epics::pvData::pvInt);
-    fields2[3] = fieldCreate->createStructure("timeStamp", 2, fields3);
-    PVStructure* pvStructure2 = pvDataCreate->createPVStructure(NULL,
-            "complexStructure", 4, fields2);
-    pvStructure2->getLongField(fields2[0]->getFieldName())->put(1234);
-    pvStructure2->getIntField(fields2[1]->getFieldName())->put(4567);
-    PVDoubleArray* da = (PVDoubleArray*)pvStructure2->getScalarArrayField(
-            fields2[2]->getFieldName(), epics::pvData::pvDouble);
-    double dd[] = { 1.2, 3.4, 4.5 };
-    da->put(0, 3, dd, 0);
-
-    PVStructure* ps = pvStructure2->getStructureField(
-            fields2[3]->getFieldName());
-    ps->getLongField(fields3[0]->getFieldName())->put(789);
-    ps->getIntField(fields3[1]->getFieldName())->put(1011);
-
-    serializationTest(pvStructure2);
-    //serializationTest(pvStructure2->getStructure());
-    delete pvStructure2;
-
+	pvStructure = factory->createPVStructure(
+			getStandardField()->structureArray(
+					getStandardField()->timeStamp(), "alarm,control,display,timeStamp")
+			);
+	// TODO fill with data
+    serializationTest(pvStructure);
 
     ofile<<"!!!  PASSED\n\n";
 }
 
-/*
- void testIntrospectionSerialization() {
- cout<<"Testing introspection serialization...\n";
- FieldCreate* factory = getFieldCreate();
- assert(factory!=NULL);
+void serializatioTest(FieldConstPtr const & field)
+{
+	buffer->clear();
 
- ScalarConstPtr scalar = factory->createScalar("scalar", epics::pvData::pvDouble);
- serializatioTest(scalar);
- delete scalar;
+	// serialize
+	field->serialize(buffer, flusher);
 
- ScalarArrayConstPtr array = factory->createScalarArray("array", epics::pvData::pvDouble);
- serializatioTest(array);
- delete array;
+	// deserialize
+	buffer->flip();
 
- cout<<"!!!  PASSED\n\n";
+	FieldConstPtr deserializedField = getFieldCreate()->deserialize(buffer, control);
+
+	// must equal
+	bool isEqual = *field == *deserializedField;
+	assert(isEqual);
+	//assertEquals("field " + field.toString() + " serialization broken", field, deserializedField);
+}
+
+void testIntrospectionSerialization(std::ostream& ofile)
+{
+	 ofile<<"Testing introspection serialization...\n";
+
+	 FieldCreatePtr factory = getFieldCreate();
+	 assert(factory.get()!=NULL);
+
+	 // be sure all is covered
+	 for (int i = pvBoolean; i < pvString; i++)
+	 {
+		 ScalarType scalarType = static_cast<ScalarType>(i);
+
+		 ScalarConstPtr scalar = factory->createScalar(scalarType);
+		 serializatioTest(scalar);
+
+		 ScalarArrayConstPtr array = factory->createScalarArray(scalarType);
+		 serializatioTest(array);
+	}
+
+     // and a structure
+     StructureConstPtr structure = getStandardField()->timeStamp();
+     serializatioTest(structure);
+
+     // and a structure array
+     StructureArrayConstPtr structureArray = factory->createStructureArray(structure);
+     serializatioTest(structureArray);
+
+	 ofile<<"!!!  PASSED\n\n";
  }
- */
 
 void testStringCopy(std::ostream& ofile) {
     String s1 = "abc";
     String s2 = s1;
     if (s1.c_str() != s2.c_str())
-        ofile << "\n!!! implementation of epics::pvData::String assigment operator does not share content !!!\n\n";
+        ofile << "\n!!! implementation of epics::pvData::String assignment operator does not share content !!!\n\n";
 }
 
 int main(int argc, char *argv[]) {
@@ -661,13 +505,15 @@ int main(int argc, char *argv[]) {
     buffer = new ByteBuffer(1<<16);
 
     testStringCopy(*out);
-    testScalarEquals(*out);
+
+    testIntrospectionSerialization(*out);
+    testEquals(*out);
+    testNonInitialized(*out);
+
     testScalar(*out);
     testArray(*out);
-    testScalarNonInitialized(*out);
-    testArrayNonInitialized(*out);
     testStructure(*out);
-    //testIntrospectionSerialization();
+
 
     delete buffer;
     delete control;

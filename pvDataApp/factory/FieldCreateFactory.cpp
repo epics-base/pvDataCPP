@@ -117,8 +117,8 @@ static StructureConstPtr deserializeStructureField(const FieldCreate* fieldCreat
     StringArray fieldNames; fieldNames.reserve(size);
     for (std::size_t i = 0; i < size; i++)
     {
-        fieldNames[i] = SerializeHelper::deserializeString(buffer, control);
-        fields[i] = control->cachedDeserialize(buffer);
+        fieldNames.push_back(SerializeHelper::deserializeString(buffer, control));
+        fields.push_back(control->cachedDeserialize(buffer));
     }
 
     return fieldCreate->createStructure(fieldNames, fields);
@@ -143,7 +143,7 @@ void ScalarArray::deserialize(ByteBuffer *buffer, DeserializableControl *control
     throw std::runtime_error("not valid operation, use FieldCreate::deserialize instead");
 }
 
-StructureArray::StructureArray(StructureConstPtr structure)
+StructureArray::StructureArray(StructureConstPtr const & structure)
 : Field(structureArray),pstructure(structure)
 {
 }
@@ -289,7 +289,7 @@ StructureConstPtr FieldCreate::createStructure (
 }
 
 StructureArrayConstPtr FieldCreate::createStructureArray(
-    StructureConstPtr structure) const
+    StructureConstPtr const & structure) const
 {
      StructureArrayConstPtr structureArray(
         new StructureArray(structure), Field::Deleter());
@@ -297,7 +297,7 @@ StructureArrayConstPtr FieldCreate::createStructureArray(
 }
 
 StructureConstPtr FieldCreate::appendField(
-    StructureConstPtr structure,String fieldName, FieldConstPtr field) const
+    StructureConstPtr const & structure,String fieldName, FieldConstPtr const & field) const
 {
     StringArray oldNames = structure->getFieldNames();
     FieldConstPtrArray oldFields = structure->getFields();
@@ -314,7 +314,7 @@ StructureConstPtr FieldCreate::appendField(
 }
 
 StructureConstPtr FieldCreate::appendFields(
-    StructureConstPtr structure,
+    StructureConstPtr const & structure,
     StringArray const & fieldNames,
     FieldConstPtrArray const & fields) const
 {

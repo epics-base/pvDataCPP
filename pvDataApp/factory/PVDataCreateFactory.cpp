@@ -36,7 +36,7 @@ public:
     typedef T* pointer;
     typedef const T* const_pointer;
 
-    BasePVScalar(ScalarConstPtr &scalar);
+    BasePVScalar(ScalarConstPtr const & scalar);
     virtual ~BasePVScalar();
     virtual T get();
     virtual void put(T val);
@@ -49,7 +49,7 @@ private:
 };
 
 template<typename T>
-BasePVScalar<T>::BasePVScalar(ScalarConstPtr &scalar)
+BasePVScalar<T>::BasePVScalar(ScalarConstPtr const & scalar)
     : PVScalarValue<T>(scalar),value(0)
 {}
 //Note: '0' is a suitable default for all POD types (not String)
@@ -97,7 +97,7 @@ public:
     typedef String* pointer;
     typedef const String* const_pointer;
 
-    BasePVString(ScalarConstPtr &scalar);
+    BasePVString(ScalarConstPtr const & scalar);
     virtual ~BasePVString();
     virtual String get();
     virtual void put(String val);
@@ -111,7 +111,7 @@ private:
     String value;
 };
 
-BasePVString::BasePVString(ScalarConstPtr &scalar)
+BasePVString::BasePVString(ScalarConstPtr const & scalar)
     : PVString(scalar),value()
 {}
 
@@ -159,7 +159,7 @@ public:
     typedef std::vector<T> vector;
     typedef std::tr1::shared_ptr<vector> shared_vector;
 
-    DefaultPVArray(ScalarArrayConstPtr &scalarArray);
+    DefaultPVArray(ScalarArrayConstPtr const & scalarArray);
     virtual ~DefaultPVArray();
     virtual void setCapacity(size_t capacity);
     virtual size_t get(size_t offset, size_t length, PVArrayData<T> &data) ;
@@ -200,7 +200,7 @@ T *DefaultPVArray<T>::get() const
 
 
 template<typename T>
-DefaultPVArray<T>::DefaultPVArray(ScalarArrayConstPtr &scalarArray)
+DefaultPVArray<T>::DefaultPVArray(ScalarArrayConstPtr const & scalarArray)
 : PVValueArray<T>(scalarArray),
     value(std::tr1::shared_ptr<std::vector<T> >(new std::vector<T>()))
   
@@ -425,7 +425,7 @@ typedef DefaultPVArray<String> BasePVStringArray;
 
 PVDataCreate::PVDataCreate(){ }
 
-PVFieldPtr PVDataCreate::createPVField(FieldConstPtr & field)
+PVFieldPtr PVDataCreate::createPVField(FieldConstPtr const & field)
 {
      switch(field->getType()) {
      case scalar: {
@@ -448,7 +448,7 @@ PVFieldPtr PVDataCreate::createPVField(FieldConstPtr & field)
      throw std::logic_error("PVDataCreate::createPVField should never get here");
 }
 
-PVFieldPtr PVDataCreate::createPVField(PVFieldPtr & fieldToClone)
+PVFieldPtr PVDataCreate::createPVField(PVFieldPtr const & fieldToClone)
 {
      switch(fieldToClone->getField()->getType()) {
      case scalar:
@@ -484,7 +484,7 @@ PVFieldPtr PVDataCreate::createPVField(PVFieldPtr & fieldToClone)
      throw std::logic_error("PVDataCreate::createPVField should never get here");
 }
 
-PVScalarPtr PVDataCreate::createPVScalar(ScalarConstPtr & scalar)
+PVScalarPtr PVDataCreate::createPVScalar(ScalarConstPtr const & scalar)
 {
      ScalarType scalarType = scalar->getScalarType();
      switch(scalarType) {
@@ -523,7 +523,7 @@ PVScalarPtr PVDataCreate::createPVScalar(ScalarType scalarType)
 }
 
 
-PVScalarPtr PVDataCreate::createPVScalar(PVScalarPtr & scalarToClone)
+PVScalarPtr PVDataCreate::createPVScalar(PVScalarPtr const & scalarToClone)
 {
      ScalarType scalarType = scalarToClone->getScalar()->getScalarType();
      PVScalarPtr pvScalar = createPVScalar(scalarType);
@@ -542,7 +542,7 @@ PVScalarPtr PVDataCreate::createPVScalar(PVScalarPtr & scalarToClone)
 }
 
 PVScalarArrayPtr PVDataCreate::createPVScalarArray(
-        ScalarArrayConstPtr & scalarArray)
+        ScalarArrayConstPtr const & scalarArray)
 {
      switch(scalarArray->getElementType()) {
      case pvBoolean:
@@ -582,7 +582,7 @@ PVScalarArrayPtr PVDataCreate::createPVScalarArray(
 }
 
 PVScalarArrayPtr PVDataCreate::createPVScalarArray(
-        PVScalarArrayPtr &arrayToClone)
+        PVScalarArrayPtr const & arrayToClone)
 {
      PVScalarArrayPtr pvArray = createPVScalarArray(
           arrayToClone->getScalarArray()->getElementType());
@@ -601,19 +601,19 @@ PVScalarArrayPtr PVDataCreate::createPVScalarArray(
 }
 
 PVStructureArrayPtr PVDataCreate::createPVStructureArray(
-        StructureArrayConstPtr & structureArray)
+        StructureArrayConstPtr const & structureArray)
 {
      return PVStructureArrayPtr(new PVStructureArray(structureArray));
 }
 
 PVStructurePtr PVDataCreate::createPVStructure(
-        StructureConstPtr &structure)
+        StructureConstPtr const & structure)
 {
      return PVStructurePtr(new PVStructure(structure));
 }
 
 PVStructurePtr PVDataCreate::createPVStructure(
-        StringArray & fieldNames,PVFieldPtrArray & pvFields)
+        StringArray const & fieldNames,PVFieldPtrArray const & pvFields)
 {
      size_t num = fieldNames.size();
      FieldConstPtrArray fields(num);
@@ -622,7 +622,7 @@ PVStructurePtr PVDataCreate::createPVStructure(
      return PVStructurePtr(new PVStructure(structure,pvFields));
 }
 
-PVStructurePtr PVDataCreate::createPVStructure(PVStructurePtr &structToClone)
+PVStructurePtr PVDataCreate::createPVStructure(PVStructurePtr const & structToClone)
 {
     FieldConstPtrArray field;
     if(structToClone==0) {

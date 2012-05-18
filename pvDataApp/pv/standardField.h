@@ -57,7 +57,7 @@ public:
     ~StandardField();
     StructureConstPtr scalar(ScalarType type,String properties);
     StructureConstPtr scalarArray(ScalarType elementType, String properties);
-    StructureConstPtr structureArray(StructureConstPtr & structure,String properties);
+    StructureConstPtr structureArray(StructureConstPtr const & structure,String properties);
     StructureConstPtr enumerated();
     StructureConstPtr enumerated(String properties);
     StructureConstPtr alarm();

@@ -30,7 +30,7 @@ static String illegalScalarType("Illegal ScalarType");
 static ConvertPtr convert;
 
 template<typename T>
-T toScalar(PVScalarPtr &pv)
+T toScalar(PVScalarPtr const &pv)
 {
     ScalarConstPtr scalar = pv->getScalar();
     ScalarType scalarType = scalar->getScalarType();
@@ -83,52 +83,52 @@ T toScalar(PVScalarPtr &pv)
     throw std::logic_error(logicError);
 }
 
-int8 Convert::toByte(PVScalarPtr & pv)
+int8 Convert::toByte(PVScalarPtr const & pv)
 {
      return toScalar<int8>(pv);
 }
 
-int16 Convert::toShort(PVScalarPtr & pv)
+int16 Convert::toShort(PVScalarPtr const & pv)
 {
      return toScalar<int16>(pv);
 }
 
-int32 Convert::toInt(PVScalarPtr & pv)
+int32 Convert::toInt(PVScalarPtr const & pv)
 {
      return toScalar<int32>(pv);
 }
 
-int64 Convert::toLong(PVScalarPtr & pv)
+int64 Convert::toLong(PVScalarPtr const & pv)
 {
      return toScalar<int64>(pv);
 }
 
-uint8 Convert::toUByte(PVScalarPtr & pv)
+uint8 Convert::toUByte(PVScalarPtr const & pv)
 {
      return toScalar<uint8>(pv);
 }
 
-uint16 Convert::toUShort(PVScalarPtr & pv)
+uint16 Convert::toUShort(PVScalarPtr const & pv)
 {
      return toScalar<uint16>(pv);
 }
 
-uint32 Convert::toUInt(PVScalarPtr & pv)
+uint32 Convert::toUInt(PVScalarPtr const & pv)
 {
      return toScalar<uint32>(pv);
 }
 
-uint64 Convert::toULong(PVScalarPtr &pv)
+uint64 Convert::toULong(PVScalarPtr const &pv)
 {
      return toScalar<uint64>(pv);
 }
 
-float Convert::toFloat(PVScalarPtr &pv)
+float Convert::toFloat(PVScalarPtr const &pv)
 {
      return toScalar<float>(pv);
 }
 
-double Convert::toDouble(PVScalarPtr& pv)
+double Convert::toDouble(PVScalarPtr const & pv)
 {
      return toScalar<double>(pv);
 }
@@ -222,7 +222,7 @@ String scalarToString<double>(double value)
 }
 
 template<typename T>
-void fromScalar(PVScalarPtr &pv,T from)
+void fromScalar(PVScalarPtr const &pv,T from)
 {
     ScalarConstPtr scalar = pv->getScalar();
     ScalarType scalarType = scalar->getScalarType();
@@ -279,52 +279,52 @@ void fromScalar(PVScalarPtr &pv,T from)
     throw std::logic_error(logicError);
 }
 
-void Convert::fromByte(PVScalarPtr &pv,int8 from)
+void Convert::fromByte(PVScalarPtr const &pv,int8 from)
 {
      fromScalar<int8>(pv,from);
 }
 
-void  Convert::fromShort(PVScalarPtr &pv,int16 from)
+void  Convert::fromShort(PVScalarPtr const &pv,int16 from)
 {
     fromScalar<int16>(pv,from);
 }
 
-void  Convert::fromInt(PVScalarPtr &pv, int32 from)
+void  Convert::fromInt(PVScalarPtr const &pv, int32 from)
 {
     fromScalar<int32>(pv,from);
 }
 
-void  Convert::fromLong(PVScalarPtr &pv, int64 from)
+void  Convert::fromLong(PVScalarPtr const &pv, int64 from)
 {
     fromScalar<int64>(pv,from);
 }
 
-void Convert::fromUByte(PVScalarPtr &pv,uint8 from)
+void Convert::fromUByte(PVScalarPtr const &pv,uint8 from)
 {
      fromScalar<uint8>(pv,from);
 }
 
-void  Convert::fromUShort(PVScalarPtr &pv,uint16 from)
+void  Convert::fromUShort(PVScalarPtr const &pv,uint16 from)
 {
     fromScalar<uint16>(pv,from);
 }
 
-void  Convert::fromUInt(PVScalarPtr &pv, uint32 from)
+void  Convert::fromUInt(PVScalarPtr const &pv, uint32 from)
 {
     fromScalar<uint32>(pv,from);
 }
 
-void  Convert::fromULong(PVScalarPtr &pv, uint64 from)
+void  Convert::fromULong(PVScalarPtr const &pv, uint64 from)
 {
     fromScalar<uint64>(pv,from);
 }
 
-void  Convert::fromFloat(PVScalarPtr &pv, float from)
+void  Convert::fromFloat(PVScalarPtr const &pv, float from)
 {
     fromScalar<float>(pv,from);
 }
 
-void  Convert::fromDouble(PVScalarPtr &pv, double from)
+void  Convert::fromDouble(PVScalarPtr const &pv, double from)
 {
     fromScalar<double>(pv,from);
 }
@@ -414,7 +414,7 @@ Convert::Convert(){}
 
 Convert::~Convert(){}
 
-void Convert::getFullName(StringBuilder buf,PVFieldPtr & pvField)
+void Convert::getFullName(StringBuilder buf,PVFieldPtr const & pvField)
 {
     buf->empty();
     *buf += pvField->getFieldName();
@@ -429,7 +429,7 @@ void Convert::getFullName(StringBuilder buf,PVFieldPtr & pvField)
     }
 }
 
-bool Convert::equals(PVFieldPtr &a,PVFieldPtr &b)
+bool Convert::equals(PVFieldPtr const &a,PVFieldPtr const &b)
 {
     return convertEquals(a.get(),b.get());
 }
@@ -439,12 +439,12 @@ bool Convert::equals(PVField &a,PVField &b)
     return convertEquals(&a,&b);
 }
 
-void Convert::getString(StringBuilder buf,PVFieldPtr & pvField,int indentLevel)
+void Convert::getString(StringBuilder buf,PVFieldPtr const & pvField,int indentLevel)
 {
     convertToString(buf,pvField.get(),indentLevel);
 }
 
-void Convert::getString(StringBuilder buf,PVFieldPtr & pvField)
+void Convert::getString(StringBuilder buf,PVFieldPtr const & pvField)
 {
     convertToString(buf,pvField.get(),0);
 }
@@ -459,7 +459,7 @@ void Convert::getString(StringBuilder buf,PVField *pvField)
     convertToString(buf,pvField,0);
 }
 
-size_t Convert::fromString(PVStructurePtr &pvStructure, StringArray const & from, size_t fromStartIndex)
+size_t Convert::fromString(PVStructurePtr const &pvStructure, StringArray const & from, size_t fromStartIndex)
 {
     size_t processed = 0;
     
@@ -500,7 +500,7 @@ size_t Convert::fromString(PVStructurePtr &pvStructure, StringArray const & from
 }
 
 
-void Convert::fromString(PVScalarPtr &pvScalar, String from)
+void Convert::fromString(PVScalarPtr const &pvScalar, String from)
 {
     ScalarConstPtr scalar = pvScalar->getScalar();
     ScalarType scalarType = scalar->getScalarType();
@@ -601,7 +601,7 @@ void Convert::fromString(PVScalarPtr &pvScalar, String from)
     throw std::logic_error(message);
 }
 
-size_t Convert::fromString(PVScalarArrayPtr &pv, String from)
+size_t Convert::fromString(PVScalarArrayPtr const &pv, String from)
 {
    if(from[0]=='[' && from[from.length()]==']') {
         size_t offset = from.rfind(']');
@@ -620,19 +620,19 @@ size_t Convert::fromString(PVScalarArrayPtr &pv, String from)
     return length;
 }
 
-size_t Convert::fromStringArray(PVScalarArrayPtr &pv, size_t offset, size_t length,
+size_t Convert::fromStringArray(PVScalarArrayPtr const &pv, size_t offset, size_t length,
     StringArray const & from, size_t fromOffset)
 {
     return convertFromStringArray(pv.get(),offset,length,from,fromOffset);
 }
 
-size_t Convert::toStringArray(PVScalarArrayPtr & pv, size_t offset, size_t length,
+size_t Convert::toStringArray(PVScalarArrayPtr const & pv, size_t offset, size_t length,
     StringArray  const &to, size_t toOffset)
 {
     return convertToStringArray(pv.get(),offset,length,to,toOffset);
 }
 
-bool Convert::isCopyCompatible(FieldConstPtr &from, FieldConstPtr &to)
+bool Convert::isCopyCompatible(FieldConstPtr const &from, FieldConstPtr const &to)
 {
     if(from->getType()!=to->getType()) return false;
     switch(from->getType()) {
@@ -665,7 +665,7 @@ bool Convert::isCopyCompatible(FieldConstPtr &from, FieldConstPtr &to)
     throw std::logic_error(message);
 }
 
-void Convert::copy(PVFieldPtr &from,PVFieldPtr &to)
+void Convert::copy(PVFieldPtr const & from, PVFieldPtr const & to)
 {
     switch(from->getField()->getType()) {
     case scalar: 
@@ -700,7 +700,7 @@ void Convert::copy(PVFieldPtr &from,PVFieldPtr &to)
 }
 
 bool Convert::isCopyScalarCompatible(
-     ScalarConstPtr& fromField, ScalarConstPtr& toField)
+     ScalarConstPtr const & fromField, ScalarConstPtr const & toField)
 {
     ScalarType fromScalarType = fromField->getScalarType();
     ScalarType toScalarType = toField->getScalarType();
@@ -712,7 +712,7 @@ bool Convert::isCopyScalarCompatible(
     return false;
 }
 
-void Convert::copyScalar(PVScalarPtr &from, PVScalarPtr &to)
+void Convert::copyScalar(PVScalarPtr const & from, PVScalarPtr const & to)
 {
     if(to->isImmutable()) {
         if(from==to) return;
@@ -813,8 +813,8 @@ void Convert::copyScalar(PVScalarPtr &from, PVScalarPtr &to)
     throw std::logic_error(message);
 }
 
-bool Convert::isCopyScalarArrayCompatible(ScalarArrayConstPtr &fromArray,
-    ScalarArrayConstPtr &toArray)
+bool Convert::isCopyScalarArrayCompatible(ScalarArrayConstPtr const &fromArray,
+    ScalarArrayConstPtr const &toArray)
 {
     ScalarType fromType = fromArray->getElementType();
     ScalarType toType = toArray->getElementType();
@@ -826,8 +826,8 @@ bool Convert::isCopyScalarArrayCompatible(ScalarArrayConstPtr &fromArray,
     return false;
 }
 
-size_t Convert::copyScalarArray(PVScalarArrayPtr &from, size_t offset,
-    PVScalarArrayPtr &to, size_t toOffset, size_t length)
+size_t Convert::copyScalarArray(PVScalarArrayPtr const & from, size_t offset,
+    PVScalarArrayPtr const & to, size_t toOffset, size_t length)
 {
     
     if(to->isImmutable()) {
@@ -920,7 +920,7 @@ size_t Convert::copyScalarArray(PVScalarArrayPtr &from, size_t offset,
 }
 
 bool Convert::isCopyStructureCompatible(
-    StructureConstPtr &fromStruct, StructureConstPtr &toStruct)
+    StructureConstPtr const &fromStruct, StructureConstPtr const &toStruct)
 {
     FieldConstPtrArray fromFields = fromStruct->getFields();
     FieldConstPtrArray toFields = toStruct->getFields();
@@ -966,7 +966,7 @@ bool Convert::isCopyStructureCompatible(
     return true;
 }
 
-void Convert::copyStructure(PVStructurePtr &from, PVStructurePtr &to)
+void Convert::copyStructure(PVStructurePtr const & from, PVStructurePtr const & to)
 {
     if(to->isImmutable()) {
         if(from==to) return;
@@ -1053,7 +1053,7 @@ void Convert::copyStructure(PVStructurePtr &from, PVStructurePtr &to)
 }
 
 bool Convert::isCopyStructureArrayCompatible(
-    StructureArrayConstPtr &from, StructureArrayConstPtr &to)
+    StructureArrayConstPtr const &from, StructureArrayConstPtr const &to)
 {
     StructureConstPtr xxx = from->getStructure();
     StructureConstPtr yyy = to->getStructure();
@@ -1061,7 +1061,7 @@ bool Convert::isCopyStructureArrayCompatible(
 }
 
 void Convert::copyStructureArray(
-    PVStructureArrayPtr &from, PVStructureArrayPtr &to)
+    PVStructureArrayPtr const & from, PVStructureArrayPtr const & to)
 {
     if(to->isImmutable()) {
         if(from==to) return;
@@ -1093,7 +1093,7 @@ void Convert::copyStructureArray(
     to->postPut();
 }
 
-String Convert::toString(PVScalarPtr & pv)
+String Convert::toString(PVScalarPtr const & pv)
 {
     static String trueString("true");
     static String falseString("false");
@@ -1174,121 +1174,121 @@ String Convert::toString(PVScalarPtr & pv)
     throw std::logic_error(logicError);
 }
 
-size_t Convert::toByteArray(PVScalarArrayPtr  &pv, size_t offset, size_t length,
+size_t Convert::toByteArray(PVScalarArrayPtr const &pv, size_t offset, size_t length,
     int8 to[], size_t toOffset)
 {
     return convertToByteArray(pv.get(), offset, length, to, toOffset);
 }
 
-size_t Convert::toShortArray(PVScalarArrayPtr &pv, size_t offset, size_t length,
+size_t Convert::toShortArray(PVScalarArrayPtr const &pv, size_t offset, size_t length,
     int16 to[], size_t toOffset)
 {
     return convertToShortArray(pv.get(), offset, length, to, toOffset);
 }
 
-size_t Convert::toIntArray(PVScalarArrayPtr &pv, size_t offset, size_t length,
+size_t Convert::toIntArray(PVScalarArrayPtr const &pv, size_t offset, size_t length,
     int32 to[], size_t toOffset)
 {
     return convertToIntArray(pv.get(), offset, length, to, toOffset);
 }
 
-size_t Convert::toLongArray(PVScalarArrayPtr &pv, size_t offset, size_t length,
+size_t Convert::toLongArray(PVScalarArrayPtr const &pv, size_t offset, size_t length,
     int64 to[], size_t toOffset)
 {
     return convertToLongArray(pv.get(), offset, length, to, toOffset);
 }
 
-size_t Convert::toUByteArray(PVScalarArrayPtr  &pv, size_t offset, size_t length,
+size_t Convert::toUByteArray(PVScalarArrayPtr const &pv, size_t offset, size_t length,
     uint8 to[], size_t toOffset)
 {
     return convertToUByteArray(pv.get(), offset, length, to, toOffset);
 }
 
-size_t Convert::toUShortArray(PVScalarArrayPtr &pv, size_t offset, size_t length,
+size_t Convert::toUShortArray(PVScalarArrayPtr const &pv, size_t offset, size_t length,
     uint16 to[], size_t toOffset)
 {
     return convertToUShortArray(pv.get(), offset, length, to, toOffset);
 }
 
-size_t Convert::toUIntArray(PVScalarArrayPtr &pv, size_t offset, size_t length,
+size_t Convert::toUIntArray(PVScalarArrayPtr const &pv, size_t offset, size_t length,
     uint32 to[], size_t toOffset)
 {
     return convertToUIntArray(pv.get(), offset, length, to, toOffset);
 }
 
-size_t Convert::toULongArray(PVScalarArrayPtr &pv, size_t offset, size_t length,
+size_t Convert::toULongArray(PVScalarArrayPtr const &pv, size_t offset, size_t length,
     uint64 to[], size_t toOffset)
 {
     return convertToULongArray(pv.get(), offset, length, to, toOffset);
 }
 
-size_t Convert::toFloatArray(PVScalarArrayPtr &pv, size_t offset, size_t length,
+size_t Convert::toFloatArray(PVScalarArrayPtr const &pv, size_t offset, size_t length,
     float to[], size_t toOffset)
 {
     return convertToFloatArray(pv.get(), offset, length, to, toOffset);
 }
 
-size_t Convert::toDoubleArray(PVScalarArrayPtr &pv, size_t offset, size_t length,
+size_t Convert::toDoubleArray(PVScalarArrayPtr const &pv, size_t offset, size_t length,
     double to[], size_t toOffset)
 {
     return convertToDoubleArray(pv.get(), offset, length, to, toOffset);
 }
 
-size_t Convert::fromByteArray(PVScalarArrayPtr &pv, size_t offset, size_t length,
+size_t Convert::fromByteArray(PVScalarArrayPtr const &pv, size_t offset, size_t length,
     int8 from[], size_t fromOffset)
 {
     return convertFromByteArray(pv.get(), offset, length, from, fromOffset);
 }
 
-size_t Convert::fromShortArray(PVScalarArrayPtr &pv, size_t offset, size_t length,
+size_t Convert::fromShortArray(PVScalarArrayPtr const &pv, size_t offset, size_t length,
     int16 from[], size_t fromOffset)
 {
     return convertFromShortArray(pv.get(), offset, length, from, fromOffset);
 }
 
-size_t Convert::fromIntArray(PVScalarArrayPtr &pv, size_t offset, size_t length,
+size_t Convert::fromIntArray(PVScalarArrayPtr const &pv, size_t offset, size_t length,
     int32 from[], size_t fromOffset)
 {
     return convertFromIntArray(pv.get(), offset, length, from, fromOffset);
 }
 
-size_t Convert::fromLongArray(PVScalarArrayPtr &pv, size_t offset, size_t length,
+size_t Convert::fromLongArray(PVScalarArrayPtr const &pv, size_t offset, size_t length,
     int64 from[], size_t fromOffset)
 {
     return convertFromLongArray(pv.get(), offset, length, from, fromOffset);
 }
 
-size_t Convert::fromUByteArray(PVScalarArrayPtr &pv, size_t offset, size_t length,
+size_t Convert::fromUByteArray(PVScalarArrayPtr const &pv, size_t offset, size_t length,
     uint8 from[], size_t fromOffset)
 {
     return convertFromUByteArray(pv.get(), offset, length, from, fromOffset);
 }
 
-size_t Convert::fromUShortArray(PVScalarArrayPtr &pv, size_t offset, size_t length,
+size_t Convert::fromUShortArray(PVScalarArrayPtr const &pv, size_t offset, size_t length,
     uint16 from[], size_t fromOffset)
 {
     return convertFromUShortArray(pv.get(), offset, length, from, fromOffset);
 }
 
-size_t Convert::fromUIntArray(PVScalarArrayPtr &pv, size_t offset, size_t length,
+size_t Convert::fromUIntArray(PVScalarArrayPtr const &pv, size_t offset, size_t length,
     uint32 from[], size_t fromOffset)
 {
     return convertFromUIntArray(pv.get(), offset, length, from, fromOffset);
 }
 
-size_t Convert::fromULongArray(PVScalarArrayPtr &pv, size_t offset, size_t length,
+size_t Convert::fromULongArray(PVScalarArrayPtr const &pv, size_t offset, size_t length,
     uint64 from[], size_t fromOffset)
 {
     return convertFromULongArray(pv.get(), offset, length, from, fromOffset);
 }
 
-size_t Convert::fromFloatArray(PVScalarArrayPtr &pv, size_t offset, size_t length,
+size_t Convert::fromFloatArray(PVScalarArrayPtr const &pv, size_t offset, size_t length,
     float from[], size_t fromOffset)
 {
     return convertFromFloatArray(pv.get(), offset, length, from, fromOffset);
 }
 
-size_t Convert::fromDoubleArray(PVScalarArrayPtr &pv, size_t offset, size_t length,
+size_t Convert::fromDoubleArray(PVScalarArrayPtr const &pv, size_t offset, size_t length,
     double from[], size_t fromOffset)
 {
     return convertFromDoubleArray(pv.get(), offset, length, from, fromOffset);
