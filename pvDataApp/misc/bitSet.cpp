@@ -14,9 +14,9 @@
 namespace epics { namespace pvData {
  
     PVDATA_REFCOUNT_MONITOR_DEFINE(bitSet);
-    BitSetPtr BitSet::create(uint32 nbits)
+    BitSet::shared_pointer BitSet::create(uint32 nbits)
     {
-        return BitSetPtr(new BitSet(nbits));
+        return BitSet::shared_pointer(new BitSet(nbits));
     }
     
     BitSet::BitSet() : words(0), wordsLength(0), wordsInUse(0) {

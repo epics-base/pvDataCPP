@@ -33,14 +33,14 @@ class MonitorElement {
     MonitorElement(){}
     MonitorElement(PVStructurePtr &pvStructurePtr);
     PVStructurePtr pvStructurePtr;
-    BitSetPtr changedBitSet;
-    BitSetPtr overrunBitSet;
+    BitSet::shared_pointer changedBitSet;
+    BitSet::shared_pointer overrunBitSet;
 };
 
 MonitorElement::MonitorElement(PVStructurePtr &pvStructurePtr)
 : pvStructurePtr(pvStructurePtr),
-  changedBitSet(BitSetPtr(BitSet::create(pvStructurePtr->getNumberFields()))),
-  overrunBitSet(BitSetPtr(BitSet::create(pvStructurePtr->getNumberFields())))
+  changedBitSet(BitSet::create(pvStructurePtr->getNumberFields())),
+  overrunBitSet(BitSet::create(pvStructurePtr->getNumberFields()))
 {
 }
 

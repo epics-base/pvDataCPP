@@ -36,12 +36,10 @@ namespace epics { namespace pvData {
      *
      * Based on Java implementation.
      */
-    class BitSet;
-    typedef std::tr1::shared_ptr<BitSet> BitSetPtr;
     class BitSet : public Serializable {
     public:
         POINTER_DEFINITIONS(BitSet);
-        static BitSetPtr create(uint32 nbits);
+        static BitSet::shared_pointer create(uint32 nbits);
         /**
          * Creates a new bit set. All bits are initially {@code false}.
          */
