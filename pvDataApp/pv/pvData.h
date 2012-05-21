@@ -329,7 +329,7 @@ private:
 /**
  * typedefs for the various possible scalar types.
  */
-typedef PVScalarValue<boolean> PVBoolean;
+typedef PVScalarValue<uint8> PVBoolean;
 typedef PVScalarValue<int8> PVByte;
 typedef PVScalarValue<int16> PVShort;
 typedef PVScalarValue<int32> PVInt;
@@ -770,6 +770,7 @@ public:
     typedef const T* const_pointer;
     typedef PVArrayData<T> ArrayDataType;
     typedef std::vector<T> vector;
+    typedef const std::vector<T> const_vector;
     typedef std::tr1::shared_ptr<vector> shared_vector;
     typedef PVValueArray & reference;
     typedef const PVValueArray & const_reference;
@@ -795,7 +796,9 @@ public:
      * @return The number of elements put into the array.
      */
     virtual std::size_t put(std::size_t offset,
-        std::size_t length, pointer const from, std::size_t fromOffset) = 0;
+        std::size_t length, const_pointer from, std::size_t fromOffset) = 0;
+    virtual std::size_t put(std::size_t offset,
+        std::size_t length, const_vector &from, std::size_t fromOffset);
     /**
      * Share data from another source.
      * @param value The data to share.
@@ -816,11 +819,19 @@ protected:
     friend class PVDataCreate;
 };
 
+template<typename T>
+std::size_t PVValueArray<T>::put(
+    std::size_t offset,
+    std::size_t length,
+    const_vector &from,
+    std::size_t fromOffset)
+{ return put(offset,length, &from[0], fromOffset); }
+
 /**
  * Definitions for the various scalarArray types.
  */
-typedef PVArrayData<boolean> BooleanArrayData;
-typedef PVValueArray<boolean> PVBooleanArray;
+typedef PVArrayData<uint8> BooleanArrayData;
+typedef PVValueArray<uint8> PVBooleanArray;
 typedef std::tr1::shared_ptr<PVBooleanArray> PVBooleanArrayPtr;
 
 typedef PVArrayData<int8> ByteArrayData;

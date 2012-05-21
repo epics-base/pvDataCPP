@@ -570,13 +570,6 @@ static void testConvertScalarArray(FILE *fd) {
     convert->copyScalarArray(pvULongPtr,0, pvDoublePtr,0,length);
     builder.clear(); pvDoublePtr->toString(&builder);
     fprintf(fd,"double from unsigned %s\n",builder.c_str());
-ULongArrayData arrayData = ULongArrayData();
-PVULongArrayPtr xxx = static_pointer_cast<PVULongArray>(pvULongPtr);
-xxx->get(0,length,arrayData);
-uint64 * data = get(arrayData.data);
-printf("data %p %lli %lli %lli %lli\n",data,data[0],data[1],data[2],data[3]);
-uint64 val = arrayData.data[0];
-printf("val %p %lli\n",&(arrayData.data[0]),val);
 }
 
 int main(int argc,char *argv[])

@@ -16,7 +16,6 @@
 #include <pv/bitSet.h>
 
 using std::tr1::static_pointer_cast;
-using std::tr1::const_pointer_cast;
 using std::size_t;
 
 namespace epics { namespace pvData {

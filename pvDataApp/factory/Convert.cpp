@@ -15,7 +15,6 @@
 #include <pv/convert.h>
 
 using std::tr1::static_pointer_cast;
-using std::tr1::const_pointer_cast;
 using std::size_t;
 
 namespace epics { namespace pvData { 
@@ -332,49 +331,49 @@ void  Convert::fromDouble(PVScalarPtr const &pv, double from)
 
 static bool convertEquals(PVField *a,PVField *b);
 static size_t convertFromByteArray(PVScalarArray * pv, size_t offset,
-    size_t len,int8 from[], size_t fromOffset);
+    size_t len,const int8 from[], size_t fromOffset);
 static size_t convertToByteArray(PVScalarArray *pv, size_t offset,
     size_t len,int8 to[], size_t toOffset);
 static size_t convertFromShortArray(PVScalarArray *pv, size_t offset,
-    size_t len,int16 from[], size_t fromOffset);
+    size_t len,const int16 from[], size_t fromOffset);
 static size_t convertToShortArray(PVScalarArray *pv, size_t offset,
     size_t len,int16 to[], size_t toOffset);
 static size_t convertFromIntArray(PVScalarArray *pv, size_t offset,
-    size_t len,int32 from[], size_t fromOffset);
+    size_t len,const int32 from[], size_t fromOffset);
 static size_t convertToIntArray(PVScalarArray *pv, size_t offset,
     size_t len,int32 to[], size_t toOffset);
 static size_t convertFromLongArray(PVScalarArray *pv, size_t offset,
-    size_t len,int64 from[], size_t fromOffset);
+    size_t len,const int64 from[], size_t fromOffset);
 static size_t convertToLongArray(PVScalarArray * pv, size_t offset,
     size_t len,int64 to[], size_t toOffset);
 static size_t convertFromUByteArray(PVScalarArray * pv, size_t offset,
-    size_t len,uint8 from[], size_t fromOffset);
+    size_t len,const uint8 from[], size_t fromOffset);
 static size_t convertToUByteArray(PVScalarArray *pv, size_t offset,
     size_t len,uint8 to[], size_t toOffset);
 static size_t convertFromUShortArray(PVScalarArray *pv, size_t offset,
-    size_t len,uint16 from[], size_t fromOffset);
+    size_t len,const uint16 from[], size_t fromOffset);
 static size_t convertToUShortArray(PVScalarArray *pv, size_t offset,
     size_t len,uint16 to[], size_t toOffset);
 static size_t convertFromUIntArray(PVScalarArray *pv, size_t offset,
-    size_t len,uint32 from[], size_t fromOffset);
+    size_t len,const uint32 from[], size_t fromOffset);
 static size_t convertToUIntArray(PVScalarArray *pv, size_t offset,
     size_t len,uint32 to[], size_t toOffset);
 static size_t convertFromULongArray(PVScalarArray *pv, size_t offset,
-    size_t len,uint64 from[], size_t fromOffset);
+    size_t len,const uint64 from[], size_t fromOffset);
 static size_t convertToULongArray(PVScalarArray * pv, size_t offset,
     size_t len,uint64 to[], size_t toOffset);
 static size_t convertFromFloatArray(PVScalarArray *pv, size_t offset,
-    size_t len,float from[], size_t fromOffset);
+    size_t len,const float from[], size_t fromOffset);
 static size_t convertToFloatArray(PVScalarArray * pv, size_t offset,
     size_t len,float to[], size_t toOffset);
 static size_t convertFromDoubleArray(PVScalarArray *pv, size_t offset,
-    size_t len,double from[], size_t fromOffset);
+    size_t len,const double from[], size_t fromOffset);
 static size_t convertToDoubleArray(PVScalarArray *pv, size_t offset,
     size_t len,double to[], size_t toOffset);
 static size_t convertFromStringArray(PVScalarArray *pv, size_t offset,
-    size_t len,StringArray const & from, size_t fromOffset);
+    size_t len,const StringArray & from, size_t fromOffset);
 static size_t convertToStringArray(PVScalarArray *pv, size_t offset,
-    size_t len,StringArray const & to, size_t toOffset);
+    size_t len,StringArray & to, size_t toOffset);
 
 static void convertToString(StringBuilder buffer,
     PVField *pv,int indentLevel);
@@ -627,7 +626,7 @@ size_t Convert::fromStringArray(PVScalarArrayPtr const &pv, size_t offset, size_
 }
 
 size_t Convert::toStringArray(PVScalarArrayPtr const & pv, size_t offset, size_t length,
-    StringArray  const &to, size_t toOffset)
+    StringArray  &to, size_t toOffset)
 {
     return convertToStringArray(pv.get(),offset,length,to,toOffset);
 }
@@ -1235,63 +1234,123 @@ size_t Convert::toDoubleArray(PVScalarArrayPtr const &pv, size_t offset, size_t 
 }
 
 size_t Convert::fromByteArray(PVScalarArrayPtr const &pv, size_t offset, size_t length,
-    int8 from[], size_t fromOffset)
+    const int8 from[], size_t fromOffset)
 {
     return convertFromByteArray(pv.get(), offset, length, from, fromOffset);
 }
 
+size_t Convert::fromByteArray(PVScalarArrayPtr const &pv, size_t offset, size_t length,
+    const ByteArray & from, size_t fromOffset)
+{
+    return convertFromByteArray(pv.get(), offset, length, get(from), fromOffset);
+}
+
 size_t Convert::fromShortArray(PVScalarArrayPtr const &pv, size_t offset, size_t length,
-    int16 from[], size_t fromOffset)
+    const int16 from[], size_t fromOffset)
 {
     return convertFromShortArray(pv.get(), offset, length, from, fromOffset);
 }
 
+size_t Convert::fromShortArray(PVScalarArrayPtr const &pv, size_t offset, size_t length,
+    const ShortArray & from, size_t fromOffset)
+{
+    return convertFromShortArray(pv.get(), offset, length, get(from), fromOffset);
+}
+
 size_t Convert::fromIntArray(PVScalarArrayPtr const &pv, size_t offset, size_t length,
-    int32 from[], size_t fromOffset)
+    const int32 from[], size_t fromOffset)
 {
     return convertFromIntArray(pv.get(), offset, length, from, fromOffset);
 }
 
+size_t Convert::fromIntArray(PVScalarArrayPtr const &pv, size_t offset, size_t length,
+    const IntArray & from, size_t fromOffset)
+{
+    return convertFromIntArray(pv.get(), offset, length, get(from), fromOffset);
+}
+
 size_t Convert::fromLongArray(PVScalarArrayPtr const &pv, size_t offset, size_t length,
-    int64 from[], size_t fromOffset)
+    const int64 from[], size_t fromOffset)
 {
     return convertFromLongArray(pv.get(), offset, length, from, fromOffset);
 }
 
+size_t Convert::fromLongArray(PVScalarArrayPtr const &pv, size_t offset, size_t length,
+    const LongArray & from, size_t fromOffset)
+{
+    return convertFromLongArray(pv.get(), offset, length, get(from), fromOffset);
+}
+
 size_t Convert::fromUByteArray(PVScalarArrayPtr const &pv, size_t offset, size_t length,
-    uint8 from[], size_t fromOffset)
+    const uint8 from[], size_t fromOffset)
 {
     return convertFromUByteArray(pv.get(), offset, length, from, fromOffset);
 }
 
+size_t Convert::fromUByteArray(PVScalarArrayPtr const &pv, size_t offset, size_t length,
+    const UByteArray & from, size_t fromOffset)
+{
+    return convertFromUByteArray(pv.get(), offset, length, get(from), fromOffset);
+}
+
 size_t Convert::fromUShortArray(PVScalarArrayPtr const &pv, size_t offset, size_t length,
-    uint16 from[], size_t fromOffset)
+    const uint16 from[], size_t fromOffset)
 {
     return convertFromUShortArray(pv.get(), offset, length, from, fromOffset);
 }
 
+size_t Convert::fromUShortArray(PVScalarArrayPtr const &pv, size_t offset, size_t length,
+    const UShortArray &from, size_t fromOffset)
+{
+    return convertFromUShortArray(pv.get(), offset, length, get(from), fromOffset);
+}
+
 size_t Convert::fromUIntArray(PVScalarArrayPtr const &pv, size_t offset, size_t length,
-    uint32 from[], size_t fromOffset)
+    const uint32 from[], size_t fromOffset)
 {
     return convertFromUIntArray(pv.get(), offset, length, from, fromOffset);
 }
 
+size_t Convert::fromUIntArray(PVScalarArrayPtr const &pv, size_t offset, size_t length,
+    const UIntArray & from, size_t fromOffset)
+{
+    return convertFromUIntArray(pv.get(), offset, length, get(from), fromOffset);
+}
+
 size_t Convert::fromULongArray(PVScalarArrayPtr const &pv, size_t offset, size_t length,
-    uint64 from[], size_t fromOffset)
+    const uint64 from[], size_t fromOffset)
 {
     return convertFromULongArray(pv.get(), offset, length, from, fromOffset);
 }
 
+size_t Convert::fromULongArray(PVScalarArrayPtr const &pv, size_t offset, size_t length,
+    const ULongArray &from, size_t fromOffset)
+{
+    return convertFromULongArray(pv.get(), offset, length, get(from), fromOffset);
+}
+
 size_t Convert::fromFloatArray(PVScalarArrayPtr const &pv, size_t offset, size_t length,
-    float from[], size_t fromOffset)
+    const float from[], size_t fromOffset)
 {
     return convertFromFloatArray(pv.get(), offset, length, from, fromOffset);
 }
 
+size_t Convert::fromFloatArray(PVScalarArrayPtr const &pv, size_t offset, size_t length,
+    const FloatArray & from, size_t fromOffset)
+{
+    return convertFromFloatArray(pv.get(), offset, length, get(from), fromOffset);
+}
+
 size_t Convert::fromDoubleArray(PVScalarArrayPtr const &pv, size_t offset, size_t length,
-    double from[], size_t fromOffset)
+    const double from[], size_t fromOffset)
 {
     return convertFromDoubleArray(pv.get(), offset, length, from, fromOffset);
+}
+
+size_t Convert::fromDoubleArray(PVScalarArrayPtr const &pv, size_t offset, size_t length,
+    const DoubleArray & from, size_t fromOffset)
+{
+    return convertFromDoubleArray(pv.get(), offset, length, get(from), fromOffset);
 }
 
 void Convert::newLine(StringBuilder buffer, int indentLevel)
@@ -1637,7 +1696,7 @@ bool convertEquals(PVField *a,PVField *b)
 
 template<typename PVT,typename T>
 size_t convertFromScalarArray(PVScalarArray *pv,
-    size_t offset, size_t len,T from[], size_t fromOffset)
+    size_t offset, size_t len,const T from[], size_t fromOffset)
 {
     ScalarType elemType = pv->getScalarArray()->getElementType();
     size_t ntransfered = 0;
@@ -2004,7 +2063,7 @@ size_t convertToScalarArray(PVScalarArray *pv,
 }
 
 size_t convertFromByteArray(PVScalarArray *pv,
-    size_t offset, size_t len,int8 from[], size_t fromOffset)
+    size_t offset, size_t len,const int8 from[], size_t fromOffset)
 {
     return convertFromScalarArray<PVByteArray,int8>(pv,offset,len,from,fromOffset);
 }
@@ -2016,7 +2075,7 @@ size_t convertToByteArray(PVScalarArray * pv,
 }
 
 size_t convertFromShortArray(PVScalarArray *pv,
-    size_t offset, size_t len,int16 from[], size_t fromOffset)
+    size_t offset, size_t len,const int16 from[], size_t fromOffset)
 {
     return convertFromScalarArray<PVShortArray,int16>(pv,offset,len,from,fromOffset);
 }
@@ -2028,7 +2087,7 @@ size_t convertToShortArray(PVScalarArray * pv,
 }
 
 size_t convertFromIntArray(PVScalarArray *pv,
-    size_t offset, size_t len,int32 from[], size_t fromOffset)
+    size_t offset, size_t len,const int32 from[], size_t fromOffset)
 {
     return convertFromScalarArray<PVIntArray,int32>(pv,offset,len,from,fromOffset);
 }
@@ -2040,7 +2099,7 @@ size_t convertToIntArray(PVScalarArray * pv,
 }
 
 size_t convertFromLongArray(PVScalarArray *pv,
-    size_t offset, size_t len,int64 from[], size_t fromOffset)
+    size_t offset, size_t len,const int64 from[], size_t fromOffset)
 {
     return convertFromScalarArray<PVLongArray,int64>(pv,offset,len,from,fromOffset);
 }
@@ -2052,7 +2111,7 @@ size_t convertToLongArray(PVScalarArray * pv,
 }
 
 size_t convertFromUByteArray(PVScalarArray *pv,
-    size_t offset, size_t len,uint8 from[], size_t fromOffset)
+    size_t offset, size_t len,const uint8 from[], size_t fromOffset)
 {
     return convertFromScalarArray<PVUByteArray,uint8>(pv,offset,len,from,fromOffset);
 }
@@ -2064,7 +2123,7 @@ size_t convertToUByteArray(PVScalarArray * pv,
 }
 
 size_t convertFromUShortArray(PVScalarArray *pv,
-    size_t offset, size_t len,uint16 from[], size_t fromOffset)
+    size_t offset, size_t len,const uint16 from[], size_t fromOffset)
 {
     return convertFromScalarArray<PVUShortArray,uint16>(pv,offset,len,from,fromOffset);
 }
@@ -2076,7 +2135,7 @@ size_t convertToUShortArray(PVScalarArray * pv,
 }
 
 size_t convertFromUIntArray(PVScalarArray *pv,
-    size_t offset, size_t len,uint32 from[], size_t fromOffset)
+    size_t offset, size_t len,const uint32 from[], size_t fromOffset)
 {
     return convertFromScalarArray<PVUIntArray,uint32>(pv,offset,len,from,fromOffset);
 }
@@ -2088,7 +2147,7 @@ size_t convertToUIntArray(PVScalarArray * pv,
 }
 
 size_t convertFromULongArray(PVScalarArray *pv,
-    size_t offset, size_t len,uint64 from[], size_t fromOffset)
+    size_t offset, size_t len,const uint64 from[], size_t fromOffset)
 {
     return convertFromScalarArray<PVULongArray,uint64>(pv,offset,len,from,fromOffset);
 }
@@ -2100,7 +2159,7 @@ size_t convertToULongArray(PVScalarArray * pv,
 }
 
 size_t convertFromFloatArray(PVScalarArray *pv,
-    size_t offset, size_t len,float from[], size_t fromOffset)
+    size_t offset, size_t len,const float from[], size_t fromOffset)
 {
     return convertFromScalarArray<PVFloatArray,float>(pv,offset,len,from,fromOffset);
 }
@@ -2112,7 +2171,7 @@ size_t convertToFloatArray(PVScalarArray * pv,
 }
 
 size_t convertFromDoubleArray(PVScalarArray *pv,
-    size_t offset, size_t len,double from[], size_t fromOffset)
+    size_t offset, size_t len,const double from[], size_t fromOffset)
 {
     return convertFromScalarArray<PVDoubleArray,double>(pv,offset,len,from,fromOffset);
 }
@@ -2124,7 +2183,7 @@ size_t convertToDoubleArray(PVScalarArray * pv,
 }
 
 size_t convertFromStringArray(PVScalarArray *pv,
-    size_t offset, size_t len,StringArray const & from, size_t fromOffset)
+    size_t offset, size_t len,const StringArray & from, size_t fromOffset)
 {
     ScalarType elemType = pv->getScalarArray()->getElementType();
     size_t ntransfered = 0;
@@ -2317,7 +2376,8 @@ size_t convertFromStringArray(PVScalarArray *pv,
     case pvString:
         PVStringArray *pvdata = static_cast<PVStringArray*>(pv);
         while (len > 0) {
-            size_t n = pvdata->put(offset, len, get(from), fromOffset);
+            String * xxx = const_cast<String *>(get(from));
+            size_t n = pvdata->put(offset, len, xxx, fromOffset);
             if (n == 0)
                 break;
             len -= n;
@@ -2332,9 +2392,9 @@ size_t convertFromStringArray(PVScalarArray *pv,
 }
 
 size_t convertToStringArray(PVScalarArray *pv,
-    size_t offset, size_t len,StringArray const & xxx, size_t toOffset)
+    size_t offset, size_t len,StringArray & xxx, size_t toOffset)
 {
-    String *to = const_cast<String *>(&xxx[0]);
+    String *to = &xxx[0];
     ScalarType elementType = pv->getScalarArray()->getElementType();
     size_t ncopy = pv->getLength();
     if (ncopy > len) ncopy = len;

@@ -19,7 +19,6 @@
 #include <pv/serializeHelper.h>
 
 using std::tr1::static_pointer_cast;
-using std::tr1::const_pointer_cast;
 using std::size_t;
 
 namespace epics { namespace pvData {
@@ -156,14 +155,16 @@ template<typename T>
 class DefaultPVArray : public PVValueArray<T> {
 public:
     typedef T* pointer;
+    typedef const T* const_pointer;
     typedef std::vector<T> vector;
+    typedef const std::vector<T> const_vector;
     typedef std::tr1::shared_ptr<vector> shared_vector;
 
     DefaultPVArray(ScalarArrayConstPtr const & scalarArray);
     virtual ~DefaultPVArray();
     virtual void setCapacity(size_t capacity);
     virtual size_t get(size_t offset, size_t length, PVArrayData<T> &data) ;
-    virtual size_t put(size_t offset,size_t length, pointer const  from,
+    virtual size_t put(size_t offset,size_t length, const_pointer from,
        size_t fromOffset);
     virtual void shareData(
         std::tr1::shared_ptr<std::vector<T> > const & value,
@@ -245,7 +246,7 @@ size_t DefaultPVArray<T>::get(size_t offset, size_t len, PVArrayData<T> &data)
 
 template<typename T>
 size_t DefaultPVArray<T>::put(size_t offset,size_t len,
-    pointer  const from,size_t fromOffset)
+    const_pointer from,size_t fromOffset)
 {
     if(PVField::isImmutable()) {
         PVField::message("field is immutable",errorMessage);

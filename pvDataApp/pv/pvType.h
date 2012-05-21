@@ -69,23 +69,21 @@ typedef std::string String;
 /**
  * A boolean array.
  */
-typedef std::vector<boolean> BooleanArray;
-// get will be the same as for UByte
-/*
-inline boolean * get(BooleanArray value)
-{
-    return const_cast<boolean *>(&value[0]);
-}
-*/
+typedef std::vector<uint8> BooleanArray;
+/* get is same is UInt */
 typedef std::vector<uint8>::iterator BooleanArray_iterator;
 typedef std::vector<uint8>::const_iterator BooleanArray_const_iterator;
 /**
  * A byte array.
  */
 typedef std::vector<int8> ByteArray;
-inline int8 * get(ByteArray value)
+inline int8 * get(ByteArray &value)
 {
-    return const_cast<int8 *>(&value[0]);
+    return &value[0];
+}
+inline const int8 * get(const ByteArray &value)
+{
+    return static_cast<const int8 *>(&value[0]);
 }
 typedef std::vector<int8>::iterator ByteArray_iterator;
 typedef std::vector<int8>::const_iterator ByteArray_const_iterator;
@@ -93,9 +91,13 @@ typedef std::vector<int8>::const_iterator ByteArray_const_iterator;
  * A short array.
  */
 typedef std::vector<int16> ShortArray;
-inline int16 * get(ShortArray value)
+inline int16 * get(ShortArray &value)
 {
-    return const_cast<int16 *>(&value[0]);
+    return &value[0];
+}
+inline const int16 * get(const ShortArray &value)
+{
+    return static_cast<const int16 *>(&value[0]);
 }
 typedef std::vector<int16>::iterator ShortArray_iterator;
 typedef std::vector<int16>::const_iterator ShortArray_const_iterator;
@@ -103,9 +105,13 @@ typedef std::vector<int16>::const_iterator ShortArray_const_iterator;
  * A int array.
  */
 typedef std::vector<int32> IntArray;
-inline int32 * get(IntArray value)
+inline int32 * get(IntArray &value)
 {
-    return const_cast<int32 *>(&value[0]);
+    return &value[0];
+}
+inline const int32 * get(const IntArray &value)
+{
+    return static_cast<const int32 *>(&value[0]);
 }
 typedef std::vector<int32>::iterator IntArray_iterator;
 typedef std::vector<int32>::const_iterator IntArray_const_iterator;
@@ -113,9 +119,13 @@ typedef std::vector<int32>::const_iterator IntArray_const_iterator;
  * A long array.
  */
 typedef std::vector<int64> LongArray;
-inline int64 * get(LongArray value)
+inline int64 * get(LongArray &value)
 {
-    return const_cast<int64 *>(&value[0]);
+    return &value[0];
+}
+inline const int64 * get(const LongArray &value)
+{
+    return static_cast<const int64 *>(&value[0]);
 }
 typedef std::vector<int64>::iterator LongArray_iterator;
 typedef std::vector<int64>::const_iterator LongArray_const_iterator;
@@ -123,9 +133,13 @@ typedef std::vector<int64>::const_iterator LongArray_const_iterator;
  * An unsigned byte array.
  */
 typedef std::vector<uint8> UByteArray;
-inline uint8 * get(UByteArray value)
+inline uint8 * get(UByteArray &value)
 {
-    return const_cast<uint8 *>(&value[0]);
+    return &value[0];
+}
+inline const uint8 * get(const UByteArray &value)
+{
+    return static_cast<const uint8 *>(&value[0]);
 }
 typedef std::vector<uint8>::iterator UByteArray_iterator;
 typedef std::vector<uint8>::const_iterator UByteArray_const_iterator;
@@ -133,9 +147,13 @@ typedef std::vector<uint8>::const_iterator UByteArray_const_iterator;
  * An unsigned short array.
  */
 typedef std::vector<uint16> UShortArray;
-inline uint16 * get(UShortArray value)
+inline uint16 * get(UShortArray &value)
 {
-    return const_cast<uint16 *>(&value[0]);
+    return &value[0];
+}
+inline const uint16 * get(const UShortArray &value)
+{
+    return static_cast<const uint16 *>(&value[0]);
 }
 typedef std::vector<uint16>::iterator UShortArray_iterator;
 typedef std::vector<uint16>::const_iterator UShortArray_const_iterator;
@@ -143,9 +161,13 @@ typedef std::vector<uint16>::const_iterator UShortArray_const_iterator;
  * An unsigned int array.
  */
 typedef std::vector<uint32> UIntArray;
-inline uint32 * get(UIntArray value)
+inline uint32 * get(UIntArray &value)
 {
-    return const_cast<uint32 *>(&value[0]);
+    return &value[0];
+}
+inline const uint32 * get(const UIntArray &value)
+{
+    return static_cast<const uint32 *>(&value[0]);
 }
 typedef std::vector<uint32>::iterator UIntArray_iterator;
 typedef std::vector<uint32>::const_iterator UIntArray_const_iterator;
@@ -153,9 +175,13 @@ typedef std::vector<uint32>::const_iterator UIntArray_const_iterator;
  * An unsigned long array.
  */
 typedef std::vector<uint64> ULongArray;
-inline uint64 * get(ULongArray value)
+inline uint64 * get(ULongArray &value)
 {
-    return const_cast<uint64 *>(&value[0]);
+    return &value[0];
+}
+inline const uint64 * get(const ULongArray &value)
+{
+    return static_cast<const uint64 *>(&value[0]);
 }
 typedef std::vector<uint64>::iterator ULongArray_iterator;
 typedef std::vector<uint64>::const_iterator ULongArray_const_iterator;
@@ -163,9 +189,13 @@ typedef std::vector<uint64>::const_iterator ULongArray_const_iterator;
  * A float array.
  */
 typedef std::vector<float> FloatArray;
-inline float * get(FloatArray value)
+inline float * get(FloatArray &value)
 {
-    return const_cast<float *>(&value[0]);
+    return &value[0];
+}
+inline const float * get(const FloatArray &value)
+{
+    return static_cast<const float *>(&value[0]);
 }
 typedef std::vector<float>::iterator FloatArray_iterator;
 typedef std::vector<float>::const_iterator FloatArray_const_iterator;
@@ -173,9 +203,13 @@ typedef std::vector<float>::const_iterator FloatArray_const_iterator;
  * A double array.
  */
 typedef std::vector<double> DoubleArray;
-inline double * get(DoubleArray value)
+inline double * get(DoubleArray &value)
 {
-    return const_cast<double *>(&value[0]);
+    return &value[0];
+}
+inline const double * get(const DoubleArray &value)
+{
+    return static_cast<const double *>(&value[0]);
 }
 typedef std::vector<double>::iterator DoubleArray_iterator;
 typedef std::vector<double>::const_iterator DoubleArray_const_iterator;
@@ -183,9 +217,13 @@ typedef std::vector<double>::const_iterator DoubleArray_const_iterator;
  * A string array.
  */
 typedef std::vector<String> StringArray;
-inline String * get(StringArray value)
+inline String * get(StringArray &value)
 {
-    return const_cast<String *>(&value[0]);
+    return &value[0];
+}
+inline const String * get(const StringArray &value)
+{
+    return static_cast<const String *>(&value[0]);
 }
 typedef std::vector<String>::iterator StringArray_iterator;
 typedef std::vector<String>::const_iterator StringArray_const_iterator;
