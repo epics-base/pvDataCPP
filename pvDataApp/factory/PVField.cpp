@@ -58,7 +58,7 @@ void PVField::message(String message,MessageType messageType)
     PVField::message(fieldName,message,messageType);
 }
 
-String PVField::getFieldName()
+String PVField::getFieldName() const
 {
     return fieldName;
 }
@@ -77,19 +77,19 @@ void PVField::setRequester(Requester *requester)
     requester = requester;
 }
 
-size_t PVField::getFieldOffset() 
+size_t PVField::getFieldOffset() const
 {
     if(nextFieldOffset==0) computeOffset(this);
     return fieldOffset;
 }
 
-size_t PVField::getNextFieldOffset() 
+size_t PVField::getNextFieldOffset() const
 {
     if(nextFieldOffset==0) computeOffset(this);
     return nextFieldOffset;
 }
 
-size_t PVField::getNumberFields() 
+size_t PVField::getNumberFields() const
 {
     if(nextFieldOffset==0) computeOffset(this);
     return (nextFieldOffset - fieldOffset);
@@ -102,15 +102,15 @@ PVAuxInfoPtr & PVField::getPVAuxInfo(){
     return pvAuxInfo;
 }
 
-bool PVField::isImmutable()  {return immutable;}
+bool PVField::isImmutable() const {return immutable;}
 
 void PVField::setImmutable() {immutable = true;}
 
-FieldConstPtr & PVField::getField()  {return field;}
+const FieldConstPtr & PVField::getField() const {return field;}
 
-PVStructure *PVField::getParent()  {return parent;}
+PVStructure *PVField::getParent() const {return parent;}
 
-void PVField::replacePVField(PVFieldPtr & newPVField)
+void PVField::replacePVField(const PVFieldPtr & newPVField)
 {
     if(parent==NULL) {
         throw std::logic_error("no parent");
@@ -189,15 +189,16 @@ void PVField::toString(StringBuilder buf,int indentLevel)
    if(pvAuxInfo.get()!=NULL) pvAuxInfo->toString(buf,indentLevel);
 }
 
-void PVField::computeOffset(PVField   *  pvField) {
-    PVStructure * pvTop = pvField->getParent();
+void PVField::computeOffset(const PVField   *  pvField) {
+    const PVStructure * pvTop = pvField->getParent();
     if(pvTop==NULL) {
         if(pvField->getField()->getType()!=structure) {
-           pvField->fieldOffset = 0;
-           pvField->nextFieldOffset = 1;
+           PVField *xxx = const_cast<PVField *>(pvField);
+           xxx->fieldOffset = 0;
+           xxx->nextFieldOffset = 1;
            return;
         }
-        pvTop = static_cast<PVStructure *>(pvField);
+        pvTop = static_cast<const PVStructure *>(pvField);
     } else {
         while(pvTop->getParent()!=NULL) pvTop = pvTop->getParent();
     }
@@ -224,15 +225,16 @@ void PVField::computeOffset(PVField   *  pvField) {
         }
     }
     PVField *top = (PVField *)pvTop;
-    top->fieldOffset = 0;
-    top->nextFieldOffset = nextOffset;
+    PVField *xxx = const_cast<PVField *>(top);
+    xxx->fieldOffset = 0;
+    xxx->nextFieldOffset = nextOffset;
 }
 
-void PVField::computeOffset(PVField   *  pvField,size_t offset) {
+void PVField::computeOffset(const PVField   *  pvField,size_t offset) {
     int beginOffset = offset;
     int nextOffset = offset + 1;
-    PVStructure *pvStructure = static_cast<PVStructure *>(pvField);
-    PVFieldPtrArray  pvFields = pvStructure->getPVFields();
+    const PVStructure *pvStructure = static_cast<const PVStructure *>(pvField);
+    const PVFieldPtrArray  pvFields = pvStructure->getPVFields();
     for(size_t i=0; i < pvStructure->getStructure()->getNumberFields(); i++) {
         offset = nextOffset;
         PVField *pvSubField = pvFields[i].get();
@@ -252,8 +254,9 @@ void PVField::computeOffset(PVField   *  pvField,size_t offset) {
             }
         }
     }
-    pvField->fieldOffset = beginOffset;
-    pvField->nextFieldOffset = nextOffset;
+    PVField *xxx = const_cast<PVField *>(pvField);
+    xxx->fieldOffset = beginOffset;
+    xxx->nextFieldOffset = nextOffset;
 }
 
 }}

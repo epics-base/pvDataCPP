@@ -376,13 +376,13 @@ static size_t convertToStringArray(PVScalarArray *pv, size_t offset,
     size_t len,StringArray & to, size_t toOffset);
 
 static void convertToString(StringBuilder buffer,
-    PVField *pv,int indentLevel);
+    PVField const  *pv,int indentLevel);
 static void convertStructure(StringBuilder buffer,
-    PVStructure *data,int indentLevel);
+    PVStructure const *data,int indentLevel);
 static void convertArray(StringBuilder buffer,
-    PVScalarArray * pv,int indentLevel);
+    PVScalarArray  const* pv,int indentLevel);
 static void convertStructureArray(StringBuilder buffer,
-    PVStructureArray * pvdata,int indentLevel);
+    PVStructureArray const * pvdata,int indentLevel);
 static size_t copyArrayDataReference(PVScalarArray *from,PVArray *to);
 static size_t copyNumericArray(PVScalarArray *from,
     size_t offset, PVScalarArray *to, size_t toOffset, size_t len);
@@ -448,12 +448,12 @@ void Convert::getString(StringBuilder buf,PVFieldPtr const & pvField)
     convertToString(buf,pvField.get(),0);
 }
 
-void Convert::getString(StringBuilder buf,PVField *pvField,int indentLevel)
+void Convert::getString(StringBuilder buf,PVField const *pvField,int indentLevel)
 {
     convertToString(buf,pvField,indentLevel);
 }
 
-void Convert::getString(StringBuilder buf,PVField *pvField)
+void Convert::getString(StringBuilder buf,PVField const *pvField)
 {
     convertToString(buf,pvField,0);
 }
@@ -1233,121 +1233,121 @@ size_t Convert::toDoubleArray(PVScalarArrayPtr const &pv, size_t offset, size_t 
     return convertToDoubleArray(pv.get(), offset, length, to, toOffset);
 }
 
-size_t Convert::fromByteArray(PVScalarArrayPtr const &pv, size_t offset, size_t length,
+size_t Convert::fromByteArray(PVScalarArrayPtr &pv, size_t offset, size_t length,
     const int8 from[], size_t fromOffset)
 {
     return convertFromByteArray(pv.get(), offset, length, from, fromOffset);
 }
 
-size_t Convert::fromByteArray(PVScalarArrayPtr const &pv, size_t offset, size_t length,
+size_t Convert::fromByteArray(PVScalarArrayPtr &pv, size_t offset, size_t length,
     const ByteArray & from, size_t fromOffset)
 {
     return convertFromByteArray(pv.get(), offset, length, get(from), fromOffset);
 }
 
-size_t Convert::fromShortArray(PVScalarArrayPtr const &pv, size_t offset, size_t length,
+size_t Convert::fromShortArray(PVScalarArrayPtr &pv, size_t offset, size_t length,
     const int16 from[], size_t fromOffset)
 {
     return convertFromShortArray(pv.get(), offset, length, from, fromOffset);
 }
 
-size_t Convert::fromShortArray(PVScalarArrayPtr const &pv, size_t offset, size_t length,
+size_t Convert::fromShortArray(PVScalarArrayPtr &pv, size_t offset, size_t length,
     const ShortArray & from, size_t fromOffset)
 {
     return convertFromShortArray(pv.get(), offset, length, get(from), fromOffset);
 }
 
-size_t Convert::fromIntArray(PVScalarArrayPtr const &pv, size_t offset, size_t length,
+size_t Convert::fromIntArray(PVScalarArrayPtr &pv, size_t offset, size_t length,
     const int32 from[], size_t fromOffset)
 {
     return convertFromIntArray(pv.get(), offset, length, from, fromOffset);
 }
 
-size_t Convert::fromIntArray(PVScalarArrayPtr const &pv, size_t offset, size_t length,
+size_t Convert::fromIntArray(PVScalarArrayPtr &pv, size_t offset, size_t length,
     const IntArray & from, size_t fromOffset)
 {
     return convertFromIntArray(pv.get(), offset, length, get(from), fromOffset);
 }
 
-size_t Convert::fromLongArray(PVScalarArrayPtr const &pv, size_t offset, size_t length,
+size_t Convert::fromLongArray(PVScalarArrayPtr &pv, size_t offset, size_t length,
     const int64 from[], size_t fromOffset)
 {
     return convertFromLongArray(pv.get(), offset, length, from, fromOffset);
 }
 
-size_t Convert::fromLongArray(PVScalarArrayPtr const &pv, size_t offset, size_t length,
+size_t Convert::fromLongArray(PVScalarArrayPtr &pv, size_t offset, size_t length,
     const LongArray & from, size_t fromOffset)
 {
     return convertFromLongArray(pv.get(), offset, length, get(from), fromOffset);
 }
 
-size_t Convert::fromUByteArray(PVScalarArrayPtr const &pv, size_t offset, size_t length,
+size_t Convert::fromUByteArray(PVScalarArrayPtr &pv, size_t offset, size_t length,
     const uint8 from[], size_t fromOffset)
 {
     return convertFromUByteArray(pv.get(), offset, length, from, fromOffset);
 }
 
-size_t Convert::fromUByteArray(PVScalarArrayPtr const &pv, size_t offset, size_t length,
+size_t Convert::fromUByteArray(PVScalarArrayPtr &pv, size_t offset, size_t length,
     const UByteArray & from, size_t fromOffset)
 {
     return convertFromUByteArray(pv.get(), offset, length, get(from), fromOffset);
 }
 
-size_t Convert::fromUShortArray(PVScalarArrayPtr const &pv, size_t offset, size_t length,
+size_t Convert::fromUShortArray(PVScalarArrayPtr &pv, size_t offset, size_t length,
     const uint16 from[], size_t fromOffset)
 {
     return convertFromUShortArray(pv.get(), offset, length, from, fromOffset);
 }
 
-size_t Convert::fromUShortArray(PVScalarArrayPtr const &pv, size_t offset, size_t length,
+size_t Convert::fromUShortArray(PVScalarArrayPtr &pv, size_t offset, size_t length,
     const UShortArray &from, size_t fromOffset)
 {
     return convertFromUShortArray(pv.get(), offset, length, get(from), fromOffset);
 }
 
-size_t Convert::fromUIntArray(PVScalarArrayPtr const &pv, size_t offset, size_t length,
+size_t Convert::fromUIntArray(PVScalarArrayPtr &pv, size_t offset, size_t length,
     const uint32 from[], size_t fromOffset)
 {
     return convertFromUIntArray(pv.get(), offset, length, from, fromOffset);
 }
 
-size_t Convert::fromUIntArray(PVScalarArrayPtr const &pv, size_t offset, size_t length,
+size_t Convert::fromUIntArray(PVScalarArrayPtr &pv, size_t offset, size_t length,
     const UIntArray & from, size_t fromOffset)
 {
     return convertFromUIntArray(pv.get(), offset, length, get(from), fromOffset);
 }
 
-size_t Convert::fromULongArray(PVScalarArrayPtr const &pv, size_t offset, size_t length,
+size_t Convert::fromULongArray(PVScalarArrayPtr &pv, size_t offset, size_t length,
     const uint64 from[], size_t fromOffset)
 {
     return convertFromULongArray(pv.get(), offset, length, from, fromOffset);
 }
 
-size_t Convert::fromULongArray(PVScalarArrayPtr const &pv, size_t offset, size_t length,
+size_t Convert::fromULongArray(PVScalarArrayPtr &pv, size_t offset, size_t length,
     const ULongArray &from, size_t fromOffset)
 {
     return convertFromULongArray(pv.get(), offset, length, get(from), fromOffset);
 }
 
-size_t Convert::fromFloatArray(PVScalarArrayPtr const &pv, size_t offset, size_t length,
+size_t Convert::fromFloatArray(PVScalarArrayPtr &pv, size_t offset, size_t length,
     const float from[], size_t fromOffset)
 {
     return convertFromFloatArray(pv.get(), offset, length, from, fromOffset);
 }
 
-size_t Convert::fromFloatArray(PVScalarArrayPtr const &pv, size_t offset, size_t length,
+size_t Convert::fromFloatArray(PVScalarArrayPtr &pv, size_t offset, size_t length,
     const FloatArray & from, size_t fromOffset)
 {
     return convertFromFloatArray(pv.get(), offset, length, get(from), fromOffset);
 }
 
-size_t Convert::fromDoubleArray(PVScalarArrayPtr const &pv, size_t offset, size_t length,
+size_t Convert::fromDoubleArray(PVScalarArrayPtr &pv, size_t offset, size_t length,
     const double from[], size_t fromOffset)
 {
     return convertFromDoubleArray(pv.get(), offset, length, from, fromOffset);
 }
 
-size_t Convert::fromDoubleArray(PVScalarArrayPtr const &pv, size_t offset, size_t length,
+size_t Convert::fromDoubleArray(PVScalarArrayPtr &pv, size_t offset, size_t length,
     const DoubleArray & from, size_t fromOffset)
 {
     return convertFromDoubleArray(pv.get(), offset, length, get(from), fromOffset);
@@ -2604,24 +2604,24 @@ size_t convertToStringArray(PVScalarArray *pv,
 }
 
 
-void convertToString(StringBuilder buffer,PVField * pv,int indentLevel)
+void convertToString(StringBuilder buffer,PVField const * pv,int indentLevel)
 {
     Type type = pv->getField()->getType();
     if(type==scalarArray) {
-        convertArray(buffer,static_cast<PVScalarArray *>(pv),indentLevel);
+        convertArray(buffer,static_cast<PVScalarArray const *>(pv),indentLevel);
         return;
     }
     if(type==structure) {
-        convertStructure(buffer,static_cast<PVStructure*>(pv),indentLevel);
+        convertStructure(buffer,static_cast<PVStructure const *>(pv),indentLevel);
         return;
     }
     if(type==structureArray) {
     	convertStructureArray(
-            buffer,static_cast<PVStructureArray*>(pv),indentLevel);
+            buffer,static_cast<PVStructureArray const *>(pv),indentLevel);
         return;
     }
-    PVScalar *pvScalar = static_cast<PVScalar*>(pv);
-    ScalarConstPtr pscalar = pvScalar->getScalar();
+    PVScalar const *pvScalar = static_cast<PVScalar const *>(pv);
+    const ScalarConstPtr & pscalar = pvScalar->getScalar();
     ScalarType scalarType = pscalar->getScalarType();
     ScalarTypeFunc::toString(buffer,scalarType);
     *buffer += " ";
@@ -2629,7 +2629,7 @@ void convertToString(StringBuilder buffer,PVField * pv,int indentLevel)
     *buffer += " ";
     switch(scalarType) {
     case pvBoolean: {
-            PVBoolean *data = static_cast<PVBoolean*>(pv);
+            PVBoolean const *data = static_cast<PVBoolean const *>(pv);
             bool value = data->get();
             if(value) {
                 *buffer += "true";
@@ -2639,77 +2639,77 @@ void convertToString(StringBuilder buffer,PVField * pv,int indentLevel)
         }
         return;
     case pvByte: {
-            PVByte *data = static_cast<PVByte*>(pv);
+            PVByte const *data = static_cast<PVByte const *>(pv);
             char xxx[30];
             sprintf(xxx,"%d",(int)data->get());
             *buffer += xxx;
         }
         return;
     case pvShort: {
-            PVShort *data = static_cast<PVShort*>(pv);
+            PVShort const  *data = static_cast<PVShort const *>(pv);
             char xxx[30];
             sprintf(xxx,"%d",(int)data->get());
             *buffer += xxx;
         }
         return;
     case pvInt: {
-            PVInt *data = static_cast<PVInt*>(pv);
+            PVInt const  *data = static_cast<PVInt const *>(pv);
             char xxx[30];
             sprintf(xxx,"%d",(int)data->get());
             *buffer += xxx;
         }
         return;
     case pvLong: {
-            PVLong *data = static_cast<PVLong*>(pv);
+            PVLong const  *data = static_cast<PVLong const *>(pv);
             char xxx[30];
             sprintf(xxx,"%lld",(long long)data->get());
             *buffer += xxx;
         }
         return;
     case pvUByte: {
-            PVUByte *data = static_cast<PVUByte*>(pv);
+            PVUByte const  *data = static_cast<PVUByte const *>(pv);
             char xxx[30];
             sprintf(xxx,"%u",(unsigned int)data->get());
             *buffer += xxx;
         }
         return;
     case pvUShort: {
-            PVUShort *data = static_cast<PVUShort*>(pv);
+            PVUShort const  *data = static_cast<PVUShort const *>(pv);
             char xxx[30];
             sprintf(xxx,"%u",(unsigned int)data->get());
             *buffer += xxx;
         }
         return;
     case pvUInt: {
-            PVUInt *data = static_cast<PVUInt*>(pv);
+            PVUInt const  *data = static_cast<PVUInt const *>(pv);
             char xxx[30];
             sprintf(xxx,"%u",(unsigned int)data->get());
             *buffer += xxx;
         }
         return;
     case pvULong: {
-            PVULong *data = static_cast<PVULong*>(pv);
+            PVULong const  *data = static_cast<PVULong const *>(pv);
             char xxx[30];
             sprintf(xxx,"%llu",(unsigned long long)data->get());
             *buffer += xxx;
         }
         return;
     case pvFloat: {
-            PVFloat *data = static_cast<PVFloat*>(pv);
+            PVFloat const  *data = static_cast<PVFloat const *>(pv);
             char xxx[30];
             sprintf(xxx,"%g",data->get());
             *buffer += xxx;
         }
         return;
     case pvDouble: {
-            PVDouble *data = static_cast<PVDouble*>(pv);
+            PVDouble const  *data = static_cast<PVDouble const *>(pv);
             char xxx[30];
             sprintf(xxx,"%lg",data->get());
             *buffer += xxx;
         }
         return;
     case pvString: {
-            PVString *data = static_cast<PVString*>(pv);
+            PVString const  *data = static_cast<PVString const *>(pv);
             *buffer += data->get();
         }
         return;
@@ -2718,7 +2718,7 @@ void convertToString(StringBuilder buffer,PVField * pv,int indentLevel)
     }
 }
 
-void convertStructure(StringBuilder buffer,PVStructure *data,int indentLevel)
+void convertStructure(StringBuilder buffer,PVStructure const *data,int indentLevel)
 {
     String extendsName = data->getExtendsStructureName();
     if(extendsName.length()<=0) {
@@ -2739,8 +2739,9 @@ void convertStructure(StringBuilder buffer,PVStructure *data,int indentLevel)
     }
 }
 
-void convertArray(StringBuilder buffer,PVScalarArray * pv,int indentLevel)
+void convertArray(StringBuilder buffer,PVScalarArray const * xxx,int indentLevel)
 {
+    PVScalarArray *pv = const_cast<PVScalarArray *>(xxx);
     ScalarArrayConstPtr array = pv->getScalarArray();
     ScalarType type = array->getElementType();
     ScalarTypeFunc::toString(buffer,type);
@@ -2749,7 +2750,7 @@ void convertArray(StringBuilder buffer,PVScalarArray * pv,int indentLevel)
     *buffer += " ";
     switch(type) {
     case pvBoolean: {
-            PVBooleanArray *pvdata = static_cast<PVBooleanArray*>(pv);
+            PVBooleanArray *pvdata = static_cast<PVBooleanArray *>(pv);
             BooleanArrayData data;
             *buffer += "[";
             for(size_t i=0; i < pvdata->getLength(); i++) {
@@ -2989,8 +2990,9 @@ void convertArray(StringBuilder buffer,PVScalarArray * pv,int indentLevel)
 }
 
 void convertStructureArray(StringBuilder buffer,
-    PVStructureArray * pvdata,int indentLevel)
+    PVStructureArray const * xxx,int indentLevel)
 {
+     PVStructureArray *pvdata = const_cast<PVStructureArray *>(xxx);
     *buffer += "structure[] ";
     *buffer += pvdata->getFieldName();
     *buffer += " ";

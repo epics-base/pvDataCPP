@@ -57,7 +57,7 @@ namespace epics { namespace pvData {
      }
 
 
-     bool PVArray::isCapacityMutable() 
+     bool PVArray::isCapacityMutable() const
      {
           if(PVField::isImmutable()) {
               return false;

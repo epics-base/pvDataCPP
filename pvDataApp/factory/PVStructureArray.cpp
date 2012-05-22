@@ -98,7 +98,7 @@ void PVStructureArray::setCapacity(size_t capacity) {
 }
 
 
-StructureArrayConstPtr PVStructureArray::getStructureArray()
+StructureArrayConstPtr PVStructureArray::getStructureArray() const
 {
     return structureArray;
 }

@@ -37,7 +37,7 @@ public:
 
     BasePVScalar(ScalarConstPtr const & scalar);
     virtual ~BasePVScalar();
-    virtual T get();
+    virtual T get() const ;
     virtual void put(T val);
     virtual void serialize(ByteBuffer *pbuffer,
         SerializableControl *pflusher) const;
@@ -57,7 +57,7 @@ template<typename T>
 BasePVScalar<T>::~BasePVScalar() {}
 
 template<typename T>
-T BasePVScalar<T>::get() { return value;}
+T BasePVScalar<T>::get() const  { return value;}
 
 template<typename T>
 void BasePVScalar<T>::put(T val){value = val;}
@@ -98,7 +98,7 @@ public:
 
     BasePVString(ScalarConstPtr const & scalar);
     virtual ~BasePVString();
-    virtual String get();
+    virtual String get() const ;
     virtual void put(String val);
     virtual void serialize(ByteBuffer *pbuffer,
         SerializableControl *pflusher) const;
@@ -116,7 +116,7 @@ BasePVString::BasePVString(ScalarConstPtr const & scalar)
 
 BasePVString::~BasePVString() {}
 
-String BasePVString::get() { return value;}
+String BasePVString::get() const  { return value;}
 
 void BasePVString::put(String val){value = val;}
 
@@ -620,7 +620,12 @@ PVStructurePtr PVDataCreate::createPVStructure(
      FieldConstPtrArray fields(num);
      for (size_t i=0;i<num;i++) fields[i] = pvFields[i]->getField();
      StructureConstPtr structure = fieldCreate->createStructure(fieldNames,fields);
-     return PVStructurePtr(new PVStructure(structure,pvFields));
+     PVStructurePtr pvStructure(new PVStructure(structure,pvFields));
+     const PVFieldPtrArray & xxx = pvStructure->getPVFields();
+     for(size_t i=0; i<pvFields.size();i++) {
+         convert->copy(pvFields[i],xxx[i]);
+     }
+     return pvStructure;
 }
 
 PVStructurePtr PVDataCreate::createPVStructure(PVStructurePtr const & structToClone)

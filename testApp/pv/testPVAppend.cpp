@@ -66,6 +66,7 @@ static void checkNameAndParent(
 
 static void testAppendSimple(FILE * fd)
 {
+    printf("\ntestAppendSimple\n");
     PVFieldPtrArray fields;
     StringArray names;
     PVStructurePtr pvParent = pvDataCreate->createPVStructure(names,fields);
@@ -86,6 +87,7 @@ static void testAppendSimple(FILE * fd)
 
 static void testAppendMore(FILE * fd)
 {
+    printf("\ntestAppendMore\n");
     PVFieldPtrArray fields;
     StringArray names;
     PVStructurePtr pvStructure = pvDataCreate->createPVStructure(names,fields);
@@ -111,7 +113,7 @@ static void testAppendMore(FILE * fd)
     checkNameAndParent(fd,pvStructure,0);
 }
 
-static void append2(PVStructurePtr pvStructure,
+static void append2(PVStructurePtr &pvStructure,
     const char *oneName,const char *twoName,
     const char *oneValue,const char *twoValue)
 {
@@ -133,6 +135,7 @@ static void append2(PVStructurePtr pvStructure,
 }
 static void testAppends(FILE * fd)
 {
+    printf("\ntestAppends\n");
     PVFieldPtrArray emptyPVFields;
     StringArray emptyNames;
     PVFieldPtrArray pvFields;
