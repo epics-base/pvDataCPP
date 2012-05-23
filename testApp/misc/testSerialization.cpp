@@ -27,12 +27,16 @@
 
 #define BYTE_MAX_VALUE 127
 #define BYTE_MIN_VALUE -128
+#define UBYTE_MAX_VALUE 255
 #define SHORT_MAX_VALUE 32767
 #define SHORT_MIN_VALUE -32768
+#define USHORT_MAX_VALUE 65535
 #define INT_MAX_VALUE 2147483647
 #define INT_MIN_VALUE (-INT_MAX_VALUE - 1)
+#define UINT_MAX_VALUE 4294967295ULL
 #define LONG_MAX_VALUE 9223372036854775807LL
 #define LONG_MIN_VALUE (-LONG_MAX_VALUE - 1LL)
+#define ULONG_MAX_VALUE 18446744073709549999ULL
 #define FLOAT_MAX_VALUE 3.4028235E38
 #define FLOAT_MIN_VALUE 1.4E-45
 #define DOUBLE_MAX_VALUE 1.7976931348623157E308
@@ -226,6 +230,99 @@ void testScalar(std::ostream& ofile) {
     pvLong->put(LONG_MIN_VALUE);
     serializationTest(pvLong);
 
+
+    ofile<<"\tPVUByte\n";
+    PVUBytePtr pvUByte =
+    		std::tr1::static_pointer_cast<PVUByte>(factory->createPVScalar(epics::pvData::pvUByte));
+    pvUByte->put(0);
+    serializationTest(pvUByte);
+    pvUByte->put(12);
+    serializationTest(pvUByte);
+    pvUByte->put(UBYTE_MAX_VALUE);
+    serializationTest(pvUByte);
+    pvUByte->put(BYTE_MAX_VALUE);
+    serializationTest(pvUByte);
+    pvUByte->put(BYTE_MIN_VALUE);
+    serializationTest(pvUByte);
+
+    ofile<<"\tPVUShort\n";
+    PVUShortPtr pvUShort =
+    		std::tr1::static_pointer_cast<PVUShort>(factory->createPVScalar(epics::pvData::pvUShort));
+    pvUShort->put(0);
+    serializationTest(pvUShort);
+    pvUShort->put(1234);
+    serializationTest(pvUShort);
+    pvUShort->put(BYTE_MAX_VALUE);
+    serializationTest(pvUShort);
+    pvUShort->put(BYTE_MIN_VALUE);
+    serializationTest(pvUShort);
+    pvUShort->put(UBYTE_MAX_VALUE);
+    serializationTest(pvUShort);
+    pvUShort->put(SHORT_MAX_VALUE);
+    serializationTest(pvUShort);
+    pvUShort->put(SHORT_MIN_VALUE);
+    serializationTest(pvUShort);
+    pvUShort->put(USHORT_MAX_VALUE);
+    serializationTest(pvUShort);
+
+    ofile<<"\tPVInt\n";
+    PVIntPtr pvUInt =
+    		std::tr1::static_pointer_cast<PVInt>(factory->createPVScalar(epics::pvData::pvUInt));
+    pvUInt->put(0);
+    serializationTest(pvUInt);
+    pvUInt->put(123456);
+    serializationTest(pvUInt);
+    pvUInt->put(BYTE_MAX_VALUE);
+    serializationTest(pvUInt);
+    pvUInt->put(BYTE_MIN_VALUE);
+    serializationTest(pvUInt);
+    pvUInt->put(UBYTE_MAX_VALUE);
+    serializationTest(pvUInt);
+    pvUInt->put(SHORT_MAX_VALUE);
+    serializationTest(pvUInt);
+    pvUInt->put(SHORT_MIN_VALUE);
+    serializationTest(pvUInt);
+    pvUInt->put(USHORT_MAX_VALUE);
+    serializationTest(pvUInt);
+    pvUInt->put(INT_MAX_VALUE);
+    serializationTest(pvUInt);
+    pvUInt->put(INT_MIN_VALUE);
+    serializationTest(pvUInt);
+    pvUInt->put(UINT_MAX_VALUE);
+    serializationTest(pvUInt);
+
+    ofile<<"\tPVLong\n";
+    PVLongPtr pvULong =
+    		std::tr1::static_pointer_cast<PVLong>(factory->createPVScalar(epics::pvData::pvULong));
+    pvULong->put(0);
+    serializationTest(pvULong);
+    pvULong->put(12345678901LL);
+    serializationTest(pvULong);
+    pvULong->put(BYTE_MAX_VALUE);
+    serializationTest(pvULong);
+    pvULong->put(BYTE_MIN_VALUE);
+    serializationTest(pvULong);
+    pvULong->put(UBYTE_MAX_VALUE);
+    serializationTest(pvULong);
+    pvULong->put(SHORT_MAX_VALUE);
+    serializationTest(pvULong);
+    pvULong->put(SHORT_MIN_VALUE);
+    serializationTest(pvULong);
+    pvULong->put(USHORT_MAX_VALUE);
+    serializationTest(pvULong);
+    pvULong->put(INT_MAX_VALUE);
+    serializationTest(pvULong);
+    pvULong->put(INT_MIN_VALUE);
+    serializationTest(pvULong);
+    pvULong->put(UINT_MAX_VALUE);
+    serializationTest(pvULong);
+    pvULong->put(LONG_MAX_VALUE);
+    serializationTest(pvULong);
+    pvULong->put(LONG_MIN_VALUE);
+    serializationTest(pvULong);
+    pvULong->put(ULONG_MAX_VALUE);
+    serializationTest(pvULong);
+
     ofile<<"\tPVFloat\n";
     PVFloatPtr pvFloat =
     		std::tr1::static_pointer_cast<PVFloat>(factory->createPVScalar(epics::pvData::pvFloat));
@@ -332,7 +429,52 @@ void testArray(std::ostream& ofile) {
     serializationTest(pvLong);
     pvLong->put(0, 8, lv, 0);
     serializationTest(pvLong);
+// TODO
+    /*
+    ofile<<"\tPVUByteArray\n";
+    uint8 ubyteEmpty[] = { 0 };
+    uint8 ubyv[] = { 0, 1, 2, -1, BYTE_MAX_VALUE, BYTE_MAX_VALUE-1,
+            BYTE_MIN_VALUE+1, BYTE_MIN_VALUE, UBYTE_MAX_VALUE };
+    PVUByteArrayPtr pvUByte =
+    		std::tr1::static_pointer_cast<PVUByteArray>(factory->createPVScalarArray(epics::pvData::pvUByte));
+    pvUByte->put(0, 0, ubyteEmpty, 0);
+    serializationTest(pvUByte);
+    pvByte->put(0, 9, ubyv, 0);
+    serializationTest(pvUByte);
 
+    ofile<<"\tPVUShortArray\n";
+    uint16 ushortEmpty[] = { 0 };
+    uint16 usv[] = { 0, 1, 2, -1, SHORT_MAX_VALUE, SHORT_MAX_VALUE-1,
+            SHORT_MIN_VALUE+1, SHORT_MIN_VALUE, USHORT_MAX_VALUE };
+    PVUShortArrayPtr pvUShort =
+    		std::tr1::static_pointer_cast<PVUShortArray>(factory->createPVScalarArray(epics::pvData::pvUShort));
+    pvShort->put(0, 0, ushortEmpty, 0);
+    serializationTest(pvUShort);
+    pvShort->put(0, 8, usv, 0);
+    serializationTest(pvUShort);
+
+    ofile<<"\tPVUIntArray\n";
+    uint32 uintEmpty[] = { 0 };
+    uint32 uiv[] = { 0, 1, 2, -1, INT_MAX_VALUE, INT_MAX_VALUE-1,
+            INT_MIN_VALUE+1, INT_MIN_VALUE, UINT_MAX_VALUE };
+    PVUIntArrayPtr pvUInt =
+    		std::tr1::static_pointer_cast<PVUIntArray>(factory->createPVScalarArray(epics::pvData::pvUInt));
+    pvInt->put(0, 0, uintEmpty, 0);
+    serializationTest(pvUInt);
+    pvInt->put(0, 9, uiv, 0);
+    serializationTest(pvUInt);
+
+    ofile<<"\tPVULongArray\n";
+    uint64 ulongEmpty[] = { 0 };
+    uint64 ulv[] = { 0, 1, 2, -1, LONG_MAX_VALUE, LONG_MAX_VALUE-1,
+            LONG_MIN_VALUE+1, LONG_MIN_VALUE, ULONG_MAX_VALUE };
+    PVULongArrayPtr pvULong =
+    		std::tr1::static_pointer_cast<PVULongArray>(factory->createPVScalarArray(epics::pvData::pvULong));
+    pvLong->put(0, 0, ulongEmpty, 0);
+    serializationTest(pvULong);
+    pvLong->put(0, 9, ulv, 0);
+    serializationTest(pvULong);
+*/
     ofile<<"\tPVFloatArray\n";
     float floatEmpty[] = { (float)0.0 };
     float fv[] = { (float)0.0, (float)1.1, (float)2.3, (float)-1.4,
