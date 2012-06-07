@@ -30,7 +30,7 @@ namespace epics {
         }
 
         void SerializeHelper::writeSize(std::size_t s, ByteBuffer* buffer) {
-            if(s==-1) // null
+            if(s==(std::size_t)-1) // null    // TODO remove
                 buffer->putByte(-1);
             else if(s<254)
                 buffer->putByte(s);

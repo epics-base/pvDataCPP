@@ -71,7 +71,7 @@ void testBasicOperations(std::ostream& ofile) {
     assert(buff->getFloat(16)==testFloat);
     assert(buff->getDouble(20)==testDouble);
 /*
-    uintptr_t sp = buff->getPosition();
+    std::size_t sp = buff->getPosition();
     buff->setPosition(0);
     assert(buff->getBoolean()==true);
     assert(buff->getByte()==-12);

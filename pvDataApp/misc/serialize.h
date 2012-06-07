@@ -23,7 +23,7 @@ namespace epics { namespace pvData {
         virtual ~SerializableControl(){}
         virtual void flushSerializeBuffer() =0;
         virtual void ensureBuffer(std::size_t size) =0;
-        virtual void alignBuffer(int alignment) =0;
+        virtual void alignBuffer(std::size_t alignment) =0;
         virtual void cachedSerialize(std::tr1::shared_ptr<const Field> const & field, ByteBuffer* buffer) = 0;
     };
 
@@ -31,7 +31,7 @@ namespace epics { namespace pvData {
     public:
         virtual ~DeserializableControl(){}
         virtual void ensureData(std::size_t size) =0;
-        virtual void alignData(int alignment) =0;
+        virtual void alignData(std::size_t alignment) =0;
         virtual std::tr1::shared_ptr<const Field> cachedDeserialize(ByteBuffer* buffer) = 0;
     };
 

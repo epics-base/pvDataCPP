@@ -244,9 +244,9 @@ public:
      * Returns the current position.
      * @return The current position in the raw data.
      */
-    inline std::ptrdiff_t getPosition()
+    inline std::size_t getPosition()
     {
-        return (((std::ptrdiff_t)(const void *)_position) - ((std::ptrdiff_t)(const void *)_buffer));
+        return (std::size_t)(((std::ptrdiff_t)(const void *)_position) - ((std::ptrdiff_t)(const void *)_buffer));
     }
     /**
      * Sets the buffer position.
@@ -255,7 +255,7 @@ public:
      * @param  pos The offset into the raw buffer.
      * The new position value; must be no larger than the current limit
      */
-    inline void setPosition(std::ptrdiff_t pos)
+    inline void setPosition(std::size_t pos)
     {
         _position = _buffer + pos;
     }
@@ -264,9 +264,9 @@ public:
      *
      * @return The offset into the raw buffer.
      */
-    inline std::ptrdiff_t getLimit()
+    inline std::size_t getLimit()
     {
-        return (((std::ptrdiff_t)(const void *)_limit) - ((std::ptrdiff_t)(const void *)_buffer));
+        return (std::size_t)(((std::ptrdiff_t)(const void *)_limit) - ((std::ptrdiff_t)(const void *)_buffer));
     }
     /**
      * Sets this buffer's limit.
@@ -276,7 +276,7 @@ public:
      * @param  limit The new position value;
      * must be no larger than the current limit 
      */
-    inline void setLimit(std::ptrdiff_t limit)
+    inline void setLimit(std::size_t limit)
     {
         _limit = _buffer + limit;
     }
@@ -287,7 +287,7 @@ public:
      */
     inline std::size_t getRemaining()
     {
-        return (((std::ptrdiff_t)(const void *)_limit) - ((std::ptrdiff_t)(const void *)_position));
+        return (std::size_t)(((std::ptrdiff_t)(const void *)_limit) - ((std::ptrdiff_t)(const void *)_position));
     }
     /**
      * Returns The size, i.e. capacity of the raw data buffer in bytes.
@@ -625,9 +625,9 @@ public:
      * Size MUST be a power of 2.
      * @param  size The alignment requirement.
      */
-    inline void align(int size)
+    inline void align(std::size_t size)
     {
-        const std::size_t  k = size - 1;
+        const std::size_t k = size - 1;
         _position = (char*)((((std::ptrdiff_t)(const void *)_position) + k) & ~(k));
     }
     /**
@@ -721,7 +721,7 @@ public:
      * @param  index The offset in the byte buffer,
      * @param  value The value.
      */
-    inline void putDouble (std::size_t  index,double value) { put<double>(index, value); }
+    inline void putDouble (std::size_t  index, double value) { put<double>(index, value); }
 
     /**
      * Get a boolean value from the byte buffer.

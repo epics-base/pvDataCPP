@@ -55,10 +55,10 @@ public:
     virtual void flushSerializeBuffer() {
     }
 
-    virtual void ensureBuffer(size_t size) {
+    virtual void ensureBuffer(std::size_t size) {
     }
 
-    virtual void alignBuffer(int alignment) {
+    virtual void alignBuffer(std::size_t alignment) {
         buffer->align(alignment);
     }
     
@@ -80,7 +80,7 @@ public:
     virtual void ensureData(size_t size) {
     }
 
-    virtual void alignData(int alignment) {
+    virtual void alignData(size_t alignment) {
         buffer->align(alignment);
     }
 
@@ -377,13 +377,13 @@ void testArray(std::ostream& ofile) {
     assert(factory.get()!=NULL);
 
     ofile<<"\tPVBooleanArray\n";
-    bool boolEmpty[] = { false };
-    bool bv[] = { false, true, false, true, true };
+    //bool boolEmpty[] = { false };
+    //bool bv[] = { false, true, false, true, true };
     PVBooleanArrayPtr pvBoolean =
     		std::tr1::static_pointer_cast<PVBooleanArray>(factory->createPVScalarArray(epics::pvData::pvBoolean));
-//TODO    pvBoolean->put(0, 0, boolEmpty, 0);
+    //pvBoolean->put(0, 0, boolEmpty, 0);
     serializationTest(pvBoolean);
-//TODO    pvBoolean->put(0, 5, bv, 0);
+    //pvBoolean->put(0, 5, bv, 0);
     serializationTest(pvBoolean);
 
     ofile<<"\tPVByteArray\n";
@@ -429,8 +429,7 @@ void testArray(std::ostream& ofile) {
     serializationTest(pvLong);
     pvLong->put(0, 8, lv, 0);
     serializationTest(pvLong);
-// TODO
-    /*
+
     ofile<<"\tPVUByteArray\n";
     uint8 ubyteEmpty[] = { 0 };
     uint8 ubyv[] = { 0, 1, 2, -1, BYTE_MAX_VALUE, BYTE_MAX_VALUE-1,
@@ -439,7 +438,7 @@ void testArray(std::ostream& ofile) {
     		std::tr1::static_pointer_cast<PVUByteArray>(factory->createPVScalarArray(epics::pvData::pvUByte));
     pvUByte->put(0, 0, ubyteEmpty, 0);
     serializationTest(pvUByte);
-    pvByte->put(0, 9, ubyv, 0);
+    pvUByte->put(0, 9, ubyv, 0);
     serializationTest(pvUByte);
 
     ofile<<"\tPVUShortArray\n";
@@ -448,9 +447,9 @@ void testArray(std::ostream& ofile) {
             SHORT_MIN_VALUE+1, SHORT_MIN_VALUE, USHORT_MAX_VALUE };
     PVUShortArrayPtr pvUShort =
     		std::tr1::static_pointer_cast<PVUShortArray>(factory->createPVScalarArray(epics::pvData::pvUShort));
-    pvShort->put(0, 0, ushortEmpty, 0);
+    pvUShort->put(0, 0, ushortEmpty, 0);
     serializationTest(pvUShort);
-    pvShort->put(0, 8, usv, 0);
+    pvUShort->put(0, 8, usv, 0);
     serializationTest(pvUShort);
 
     ofile<<"\tPVUIntArray\n";
@@ -459,9 +458,9 @@ void testArray(std::ostream& ofile) {
             INT_MIN_VALUE+1, INT_MIN_VALUE, UINT_MAX_VALUE };
     PVUIntArrayPtr pvUInt =
     		std::tr1::static_pointer_cast<PVUIntArray>(factory->createPVScalarArray(epics::pvData::pvUInt));
-    pvInt->put(0, 0, uintEmpty, 0);
+    pvUInt->put(0, 0, uintEmpty, 0);
     serializationTest(pvUInt);
-    pvInt->put(0, 9, uiv, 0);
+    pvUInt->put(0, 9, uiv, 0);
     serializationTest(pvUInt);
 
     ofile<<"\tPVULongArray\n";
@@ -470,11 +469,11 @@ void testArray(std::ostream& ofile) {
             LONG_MIN_VALUE+1, LONG_MIN_VALUE, ULONG_MAX_VALUE };
     PVULongArrayPtr pvULong =
     		std::tr1::static_pointer_cast<PVULongArray>(factory->createPVScalarArray(epics::pvData::pvULong));
-    pvLong->put(0, 0, ulongEmpty, 0);
+    pvULong->put(0, 0, ulongEmpty, 0);
     serializationTest(pvULong);
-    pvLong->put(0, 9, ulv, 0);
+    pvULong->put(0, 9, ulv, 0);
     serializationTest(pvULong);
-*/
+
     ofile<<"\tPVFloatArray\n";
     float floatEmpty[] = { (float)0.0 };
     float fv[] = { (float)0.0, (float)1.1, (float)2.3, (float)-1.4,

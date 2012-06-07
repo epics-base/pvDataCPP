@@ -275,9 +275,9 @@ static void stringArray()
     PVStringArrayPtr pvStringArray = static_pointer_cast<PVStringArray>(pvScalarArray);
     StringArray value;
     value.reserve(length);
-    for(int i = 0; i<length; i++) {
+    for(size_t i = 0; i<length; i++) {
         char val[20];
-        sprintf(val,"value%d",i);
+        sprintf(val,"value%d",(int)i);
         value.push_back(val);
     }
     pvStringArray->put(0,length,value,0);

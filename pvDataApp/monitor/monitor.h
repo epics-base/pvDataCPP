@@ -31,18 +31,14 @@ class MonitorElement {
     public:
     POINTER_DEFINITIONS(MonitorElement);
     MonitorElement(){}
-    MonitorElement(PVStructurePtr &pvStructurePtr);
+    MonitorElement(PVStructurePtr &pvStructurePtr): pvStructurePtr(pvStructurePtr),
+    		  changedBitSet(BitSet::create(pvStructurePtr->getNumberFields())),
+    		  overrunBitSet(BitSet::create(pvStructurePtr->getNumberFields()))
+    {}
     PVStructurePtr pvStructurePtr;
     BitSet::shared_pointer changedBitSet;
     BitSet::shared_pointer overrunBitSet;
 };
-
-MonitorElement::MonitorElement(PVStructurePtr &pvStructurePtr)
-: pvStructurePtr(pvStructurePtr),
-  changedBitSet(BitSet::create(pvStructurePtr->getNumberFields())),
-  overrunBitSet(BitSet::create(pvStructurePtr->getNumberFields()))
-{
-}
 
 /**
  * Interface for Monitor.
