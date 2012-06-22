@@ -66,18 +66,18 @@ static void checkNameAndParent(
 
 static void testAppendSimple(FILE * fd)
 {
-    printf("\ntestAppendSimple\n");
+    fprintf(fd,"\ntestAppendSimple\n");
     PVFieldPtrArray fields;
     StringArray names;
     PVStructurePtr pvParent = pvDataCreate->createPVStructure(names,fields);
     PVStringPtr pvStringField = static_pointer_cast<PVString>(
         pvDataCreate->createPVScalar(pvString));
-    pvStringField->put(String("value,timeStamp"));
+    pvStringField->put("value,timeStamp");
     PVFieldPtr pvField = pvStringField;
     pvParent->appendPVField("fieldlist",pvField);
     pvStringField = static_pointer_cast<PVString>(
         pvDataCreate->createPVScalar(pvString));
-    pvStringField->put(String("junk"));
+    pvStringField->put("junk");
     pvField = pvStringField;
     pvParent->appendPVField("extra",pvField);
     builder.clear();
@@ -87,7 +87,7 @@ static void testAppendSimple(FILE * fd)
 
 static void testAppendMore(FILE * fd)
 {
-    printf("\ntestAppendMore\n");
+    fprintf(fd,"\ntestAppendMore\n");
     PVFieldPtrArray fields;
     StringArray names;
     PVStructurePtr pvStructure = pvDataCreate->createPVStructure(names,fields);
@@ -135,7 +135,7 @@ static void append2(PVStructurePtr &pvStructure,
 }
 static void testAppends(FILE * fd)
 {
-    printf("\ntestAppends\n");
+    fprintf(fd,"\ntestAppends\n");
     PVFieldPtrArray emptyPVFields;
     StringArray emptyNames;
     PVFieldPtrArray pvFields;

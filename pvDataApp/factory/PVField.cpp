@@ -139,9 +139,9 @@ void PVField::renameField(String  newName)
     }
     std::tr1::shared_ptr<Structure> parentStructure = const_pointer_cast<Structure>(
          parent->getStructure());
-    FieldConstPtrArray const &fields = parentStructure->getFields();
-    for(size_t i=0; i<fields.size(); i++) {
-         if(fields[i].get()==field.get()) {
+    PVFieldPtrArray  pvFields = parent->getPVFields();
+    for(size_t i=0; i<pvFields.size(); i++) {
+         if(pvFields[i].get()==this) {
              parentStructure->renameField(i,newName);
              fieldName = newName;
              return;

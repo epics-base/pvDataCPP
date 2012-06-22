@@ -184,6 +184,9 @@ Structure::Structure (StringArray const & fieldNames,FieldConstPtrArray const & 
     size_t number = fields.size();
     for(size_t i=0; i<number; i++) {
         String name = fieldNames[i];
+        if(name.size()<1) {
+            throw std::invalid_argument("fieldNames has a zero length string");
+        }
         // look for duplicates
         for(size_t j=i+1; j<number; j++) {
             String otherName = fieldNames[j];

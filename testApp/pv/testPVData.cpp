@@ -89,12 +89,13 @@ static void testPVScalarWithProperties(
 {
     PVStructurePtr pvStructure;
     bool hasValueAlarm = false;
+    bool hasBooleanAlarm = false;
     bool hasDisplayControl = false;
     switch(stype) {
         case pvBoolean: {
              pvStructure = standardPVField->scalar(
                  stype,alarmTimeStampValueAlarm);
-             hasValueAlarm = true;
+             hasBooleanAlarm = true;
              PVBooleanPtr pvField = pvStructure->getBooleanField("value");
              pvField->put(true);
              break;
@@ -245,7 +246,13 @@ static void testPVScalarWithProperties(
             String("control.limitHigh"));
         assert(limit!=0);
         limit->put(9.0);
+    }
+    if(hasValueAlarm) {
         PVFieldPtr  pvField = pvStructure->getSubField(
+            String("valueAlarm.active"));
+        PVBooleanPtr pvBoolean = static_pointer_cast<PVBoolean>(pvField);
+        pvBoolean->put(true);
+        pvField = pvStructure->getSubField(
             String("valueAlarm.lowAlarmLimit"));
         PVScalarPtr pvtemp = static_pointer_cast<PVScalar>(pvField);
         assert(pvtemp.get()!=0);
@@ -267,6 +274,24 @@ static void testPVScalarWithProperties(
             String("valueAlarm.active"));
         assert(active!=0);
         active->put(true);
+    }
+    if(hasBooleanAlarm) {
+        PVFieldPtr  pvField = pvStructure->getSubField(
+            String("valueAlarm.active"));
+        PVBooleanPtr pvBoolean = static_pointer_cast<PVBoolean>(pvField);
+        pvBoolean->put(true);
+        severity = pvStructure->getIntField(
+            String("valueAlarm.falseSeverity"));
+        assert(severity!=0);
+        severity->put(0);
+        severity = pvStructure->getIntField(
+            String("valueAlarm.trueSeverity"));
+        assert(severity!=0);
+        severity->put(2);
+        severity = pvStructure->getIntField(
+            String("valueAlarm.changeStateSeverity"));
+        assert(severity!=0);
+        severity->put(1);
     }
     builder.clear();
     pvStructure->toString(&builder);
