@@ -26,8 +26,8 @@ class MonitorQueue {
 public:
     static MonitorQueuePtr create(
         StructureConstPtr & elementStructure,int  number);
-    MonitorQueue(MonitorElementArray &monitorElementArray);
-    ~MonitorQueue();
+    MonitorQueue(MonitorElementPtrArray &monitorElementArray);
+    ~MonitorQueue(){}
     void clear();
     int getNumberFree();
     int capacity();
@@ -37,37 +37,38 @@ public:
     void releaseUsed(MonitorElementPtr & element);
 private:
     MonitorElementPtr nullElement;
-    MonitorElementArray elementArray;
-    Queue<MonitorElementPtr> queue;
+    MonitorElementPtrArray elementArray;
+    Queue<MonitorElement> queue;
 };
 
-MonitorQueuePtr MonitorQueue::create(i
+MonitorQueuePtr MonitorQueue::create(
     StructureConstPtr & elementStructure,int  number)
 {
     PVDataCreatePtr pvDataCreate = getPVDataCreate();
-    MonitorElementArray elementArray;
+    MonitorElementPtrArray elementArray;
     elementArray.reserve(number);
     for(int i=0; i<number; i++) {
          PVStructurePtr pvStructurePtr
              = pvDataCreate->createPVStructure(elementStructure);
          MonitorElementPtr  monitorElement(new MonitorElement(pvStructurePtr));
-         elementArray.push_back(new MonitorElement(pvStructurePtr));
+         elementArray.push_back(monitorElement);
     }
     return MonitorQueuePtr(new MonitorQueue(elementArray));
 }
 
-MonitorQueue::MonitorQueue(MonitorElementArray &monitorElementArray)
-: queue(new Queue<MonitorElementPtr>(monitorElementArray.swap()))
-  {}
+MonitorQueue::MonitorQueue(MonitorElementPtrArray &monitorElementArray)
+: queue(monitorElementArray)
+{
+}
 
 void MonitorQueue::clear()
 {
-    queue->clear();
+    queue.clear();
 }
 
 int MonitorQueue::getNumberFree()
 {
-    return queue->getNumberFree();
+    return queue.getNumberFree();
 }
 
 int MonitorQueue::capacity()
@@ -77,26 +78,26 @@ int MonitorQueue::capacity()
 
 MonitorElementPtr & MonitorQueue::getFree()
 {
-    MonitorElementPtr queueElement = queue->getFree();
+    MonitorElementPtr &queueElement = queue.getFree();
     if(queueElement.get()==0) return nullElement;
     return queueElement;
 }
 
 void MonitorQueue::setUsed(MonitorElementPtr & element)
 {
-    queue->setUsed(element);
+    queue.setUsed(element);
 }
 
 MonitorElementPtr & MonitorQueue::getUsed()
 {
-    MonitorElementPtr queueElement = queue->getUsed();
+    MonitorElementPtr &queueElement = queue.getUsed();
     if(queueElement.get()==0) return nullElement;
     return queueElement;
 }
 
 void MonitorQueue::releaseUsed(MonitorElementPtr & element)
 {
-    queue->releaseUsed(element);
+    queue.releaseUsed(element);
 }
 
 }}

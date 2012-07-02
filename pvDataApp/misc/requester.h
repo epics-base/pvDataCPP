@@ -13,6 +13,7 @@
 namespace epics { namespace pvData { 
 
 class Requester;
+typedef std::tr1::shared_ptr<Requester> RequesterPtr;
 
 enum MessageType {
    infoMessage,warningMessage,errorMessage,fatalErrorMessage

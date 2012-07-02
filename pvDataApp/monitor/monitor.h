@@ -17,7 +17,7 @@ namespace epics { namespace pvData {
 
 class MonitorElement;
 typedef std::tr1::shared_ptr<MonitorElement> MonitorElementPtr;
-typedef std::vector<MonitorElementPtr> MonitorElementArray;
+typedef std::vector<MonitorElementPtr> MonitorElementPtrArray;
 
 class Monitor;
 typedef std::tr1::shared_ptr<Monitor> MonitorPtr;
@@ -31,9 +31,10 @@ class MonitorElement {
     public:
     POINTER_DEFINITIONS(MonitorElement);
     MonitorElement(){}
-    MonitorElement(PVStructurePtr &pvStructurePtr): pvStructurePtr(pvStructurePtr),
-    		  changedBitSet(BitSet::create(pvStructurePtr->getNumberFields())),
-    		  overrunBitSet(BitSet::create(pvStructurePtr->getNumberFields()))
+    MonitorElement(PVStructurePtr &pvStructurePtr)
+    : pvStructurePtr(pvStructurePtr),
+      changedBitSet(BitSet::create(pvStructurePtr->getNumberFields())),
+      overrunBitSet(BitSet::create(pvStructurePtr->getNumberFields()))
     {}
     PVStructurePtr pvStructurePtr;
     BitSet::shared_pointer changedBitSet;
@@ -44,7 +45,7 @@ class MonitorElement {
  * Interface for Monitor.
  * @author mrk
  */
-class Monitor : public Destroyable, private NoDefaultMethods {
+class Monitor : public Destroyable{
     public:
     POINTER_DEFINITIONS(Monitor);
     virtual ~Monitor(){}
