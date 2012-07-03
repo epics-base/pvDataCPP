@@ -20,7 +20,6 @@
 #include <pv/pvIntrospect.h>
 #include <pv/pvData.h>
 #include <pv/monitor.h>
-#include <pv/monitorQueue.h>
 #include <pv/standardField.h>
 
 
@@ -69,34 +68,9 @@ static void testMonitor()
     monitor->stop();
 }
 
-static void testMonitorQueue()
-{
-    int queueSize = 3;
-    StructureConstPtr  structure = standardField->scalar(pvDouble,allProperties);
-    MonitorQueuePtr monitorQueue =  MonitorQueue::create(structure,queueSize);
-    int numberFree = monitorQueue->getNumberFree();
-    printf("start numberFree %d\n",numberFree);
-    MonitorElementPtr element = monitorQueue->getFree();
-    numberFree = monitorQueue->getNumberFree();
-    printf("after getFree numberFree %d\n",numberFree);
-    PVStructurePtr pvStructure = element->pvStructurePtr;
-    String buffer;
-    buffer.clear();
-    pvStructure->toString(&buffer);
-//printf("pvStructure\n%s\n",buffer.c_str());
-    monitorQueue->setUsed(element);
-    element = monitorQueue->getUsed();  
-    assert(element.get()!=NULL);
-    numberFree = monitorQueue->getNumberFree();
-    printf("after getUsed numberFree %d\n",numberFree);
-    monitorQueue->releaseUsed(element);
-    numberFree = monitorQueue->getNumberFree();
-    printf("after releaseUsed numberFree %d\n",numberFree);
-}
 
 int main(int argc,char *argv[])
 {
-    testMonitorQueue();
     testMonitor();
     return(0);
 }
