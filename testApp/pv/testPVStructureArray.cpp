@@ -29,6 +29,30 @@ static StandardFieldPtr standardField;
 static StandardPVFieldPtr standardPVField;
 static String buffer;
 
+void testPVStructureArray(FILE * fd) {
+    StructureArrayConstPtr alarm(
+        fieldCreate->createStructureArray(standardField->alarm()));
+    PVStructureArrayPtr pvAlarmStructure(
+         pvDataCreate->createPVStructureArray(alarm));
+    PVStructurePtrArray palarms;
+    size_t na=2;
+    palarms.reserve(na);
+    for(size_t i=0; i<na; i++) {
+        palarms.push_back(
+            pvDataCreate->createPVStructure(standardField->alarm()));
+    }
+    PVStructurePtr *xxx = &palarms[0];
+for(size_t i=0;i<na; i++) {
+buffer.clear();
+xxx[i]->toString(&buffer);
+printf("xxx[%d]\n%s\n",(int)i,buffer.c_str());
+}
+    pvAlarmStructure->put(0,2,xxx,0);
+    buffer.clear();
+    pvAlarmStructure->toString(&buffer);
+    fprintf(fd,"pvAlarmStructure\n%s\n",buffer.c_str());
+}
+
 StructureConstPtr getPowerSupplyStructure() {
     String properties("alarm");
     FieldConstPtrArray  fields;
@@ -83,6 +107,7 @@ int main(int argc,char *argv[])
     pvDataCreate = getPVDataCreate();
     standardField = getStandardField();
     standardPVField = getStandardPVField();
+    testPVStructureArray(fd);
     testPowerSupplyArray(fd);
     return(0);
 }

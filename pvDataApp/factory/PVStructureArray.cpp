@@ -32,9 +32,10 @@ size_t PVStructureArray::append(size_t number)
     size_t newLength = currentLength + number;
     setCapacity(newLength);
     StructureConstPtr structure = structureArray->getStructure();
+    PVStructurePtrArray vec = *value.get();
     for(size_t i=currentLength; i<newLength; i++) {
-        PVStructurePtrArray vec = *value.get();
-        vec[i] = getPVDataCreate()->createPVStructure(structure);
+        PVStructurePtr pvStructure(getPVDataCreate()->createPVStructure(structure));
+        vec[i].swap(pvStructure);
     }
     return newLength;
 }
@@ -151,7 +152,8 @@ size_t PVStructureArray::put(size_t offset,size_t len,
                    "Element is not a compatible structure"));
     	    }
     	}
-    	to[i+offset] = frompv;
+        PVStructurePtr pvStructure(frompv);
+    	to[i+offset].swap(pvStructure);
     }
     postPut();
     setLength(length);
