@@ -1067,29 +1067,7 @@ void Convert::copyStructureArray(
         String message("Convert.copyStructureArray destination is immutable");
         throw std::invalid_argument(message);
     }
-    StructureConstPtr xxx = from->getStructureArray()->getStructure();
-    StructureConstPtr yyy = to->getStructureArray()->getStructure();
-    if(!isCopyStructureCompatible(xxx,yyy)) {
-        String message("Convert.copyStructureArray from and to are not compatible");
-        throw std::invalid_argument(message);
-    }
-    size_t length = from->getLength();
-    if(to->getCapacity()<length) to->setCapacity(length);
-    PVStructurePtr * fromArray = from->get();
-    PVStructurePtr * toArray = to->get();
-    for(size_t i=0; i<length; i++) {
-    	if(fromArray[i].get()==NULL) {
-            toArray[i] = PVStructurePtr();
-    	} else {
-    	    if(toArray[i].get()==0) {
-    		StructureConstPtr structure = to->getStructureArray()->getStructure();
-    		toArray[i] = pvDataCreate->createPVStructure(structure);
-    	    }
-    	    copyStructure(fromArray[i],toArray[i]);
-    	}
-    }
-    to->setLength(length);
-    to->postPut();
+    to->put(0,from->getLength(),from->getVector(),0);
 }
 
 String Convert::toString(PVScalarPtr const & pv)

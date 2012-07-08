@@ -178,19 +178,19 @@ void PVStructureArray::deserialize(ByteBuffer *pbuffer,
     if(size>=0) {
         // prepare array, if necessary
         if(size>getCapacity()) setCapacity(size);
-        PVStructurePtrArray pvArray = *value.get();
+        PVStructurePtrArray *pvArray = value.get();
         for(size_t i = 0; i<size; i++) {
             pcontrol->ensureData(1);
             size_t temp = pbuffer->getByte();
             if(temp==0) {
-                pvArray[i].reset();
+                (*pvArray)[i].reset();
             }
             else {
-                if(pvArray[i].get()==NULL) {
+                if((*pvArray)[i].get()==NULL) {
                     StructureConstPtr structure = structureArray->getStructure();
-                    pvArray[i] = getPVDataCreate()->createPVStructure(structure);
+                    (*pvArray)[i] = getPVDataCreate()->createPVStructure(structure);
                 }
-                pvArray[i]->deserialize(pbuffer, pcontrol);
+                (*pvArray)[i]->deserialize(pbuffer, pcontrol);
             }
         }
         setLength(size);

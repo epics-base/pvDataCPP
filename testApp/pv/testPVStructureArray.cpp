@@ -18,6 +18,7 @@
 #include <pv/requester.h>
 #include <pv/pvIntrospect.h>
 #include <pv/pvData.h>
+#include <pv/convert.h>
 #include <pv/standardField.h>
 #include <pv/standardPVField.h>
 
@@ -27,6 +28,7 @@ static FieldCreatePtr fieldCreate;
 static PVDataCreatePtr pvDataCreate;
 static StandardFieldPtr standardField;
 static StandardPVFieldPtr standardPVField;
+static ConvertPtr convert;
 static String buffer;
 
 void testPVStructureArray(FILE * fd) {
@@ -45,6 +47,11 @@ void testPVStructureArray(FILE * fd) {
     buffer.clear();
     pvAlarmStructure->toString(&buffer);
     fprintf(fd,"pvAlarmStructure\n%s\n",buffer.c_str());
+    PVStructureArrayPtr copy(pvDataCreate->createPVStructureArray(alarm));
+    convert->copyStructureArray(pvAlarmStructure,copy);
+    buffer.clear();
+    copy->toString(&buffer);
+    fprintf(fd,"copy\n%s\n",buffer.c_str());
 }
 
 StructureConstPtr getPowerSupplyStructure() {
@@ -101,6 +108,7 @@ int main(int argc,char *argv[])
     pvDataCreate = getPVDataCreate();
     standardField = getStandardField();
     standardPVField = getStandardPVField();
+    convert = getConvert();
     testPVStructureArray(fd);
     testPowerSupplyArray(fd);
     return(0);
