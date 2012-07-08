@@ -483,6 +483,7 @@ public:
     typedef const PVStructurePtr* const_pointer;
     typedef PVArrayData<PVStructurePtr> ArrayDataType;
     typedef std::vector<PVStructurePtr> vector;
+    typedef const std::vector<PVStructurePtr> const_vector;
     typedef std::tr1::shared_ptr<vector> shared_vector;
     typedef PVStructureArray &reference;
     typedef const PVStructureArray& const_reference;
@@ -530,7 +531,7 @@ public:
      * @return The number of elements put into the array.
      */
     virtual std::size_t put(std::size_t offset,std::size_t length,
-        pointer const  from, std::size_t fromOffset);
+        const_vector const & from, std::size_t fromOffset);
     /**
      * Share data from another source.
      * @param value The data to share.

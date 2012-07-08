@@ -32,10 +32,10 @@ size_t PVStructureArray::append(size_t number)
     size_t newLength = currentLength + number;
     setCapacity(newLength);
     StructureConstPtr structure = structureArray->getStructure();
-    PVStructurePtrArray vec = *value.get();
+    PVStructurePtrArray *to = value.get();
     for(size_t i=currentLength; i<newLength; i++) {
         PVStructurePtr pvStructure(getPVDataCreate()->createPVStructure(structure));
-        vec[i].swap(pvStructure);
+        (*to)[i].swap(pvStructure);
     }
     return newLength;
 }
@@ -119,14 +119,13 @@ size_t PVStructureArray::get(
 }
 
 size_t PVStructureArray::put(size_t offset,size_t len,
-    PVStructurePtr* const from, size_t fromOffset)
+    const_vector const & from, size_t fromOffset)
 {
     if(isImmutable()) {
         message(String("field is immutable"), errorMessage);
         return 0;
     }
-    std::vector<PVStructurePtr> to = *value.get();
-    if(from==&to[0]) return len;
+    if(&from==value.get()) return 0;
     if(len<1) return 0;
     size_t length = getLength();
     size_t capacity = getCapacity();
@@ -142,7 +141,7 @@ size_t PVStructureArray::put(size_t offset,size_t len,
         length = newlength;
         setLength(length);
     }
-    to = *value.get();
+    PVStructurePtrArray *to = value.get();
     StructureConstPtr structure = structureArray->getStructure();
     for(size_t i=0; i<len; i++) {
     	PVStructurePtr frompv = from[i+fromOffset];
@@ -152,8 +151,7 @@ size_t PVStructureArray::put(size_t offset,size_t len,
                    "Element is not a compatible structure"));
     	    }
     	}
-        PVStructurePtr pvStructure(frompv);
-    	to[i+offset].swap(pvStructure);
+    	(*to)[i+offset] = frompv;
     }
     postPut();
     setLength(length);

@@ -41,13 +41,7 @@ void testPVStructureArray(FILE * fd) {
         palarms.push_back(
             pvDataCreate->createPVStructure(standardField->alarm()));
     }
-    PVStructurePtr *xxx = &palarms[0];
-for(size_t i=0;i<na; i++) {
-buffer.clear();
-xxx[i]->toString(&buffer);
-printf("xxx[%d]\n%s\n",(int)i,buffer.c_str());
-}
-    pvAlarmStructure->put(0,2,xxx,0);
+    pvAlarmStructure->put(0,2,palarms,0);
     buffer.clear();
     pvAlarmStructure->toString(&buffer);
     fprintf(fd,"pvAlarmStructure\n%s\n",buffer.c_str());
