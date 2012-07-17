@@ -23,7 +23,6 @@
 #include <pv/event.h>
 #include <pv/thread.h>
 #include <pv/executor.h>
-#include <pv/CDRMonitor.h>
 #include <pv/timeFunction.h>
 
 using namespace epics::pvData;
@@ -39,7 +38,7 @@ public:
         begin.signal();
         bool waited=end.wait();
         actuallyRan=true;
-        fprintf(out, "Action1 %s\n", waited?"true":"false");
+        fprintf(out, "Action %s\n", waited?"true":"false");
     }
 };
 
@@ -49,81 +48,89 @@ static void testThreadRun(FILE *fd) {
     {
         Thread tr("Action", lowPriority, &ax);
         bool w=ax.begin.wait();
-        fprintf(fd, "main1 %s\n", w?"true":"false");
+        fprintf(fd, "main %s\n", w?"true":"false");
         fprintf(fd, "Action is %s\n", ax.actuallyRan?"true":"false");
         ax.end.signal();
     }
     fprintf(fd, "Action is %s\n", ax.actuallyRan?"true":"false");
 }
 
-class Basic : public Command {
+class Basic :
+     public Command,
+     public std::tr1::enable_shared_from_this<Basic>
+{
 public:
-    Basic(Executor *executor);
+    POINTER_DEFINITIONS(Basic);
+    Basic(ExecutorPtr const &executor);
     ~Basic();
     void run();
     virtual void command();
 private:
-    Executor *executor;
-    ExecutorNode *executorNode;
-    Event *wait;
+    Basic::shared_pointer getPtrSelf()
+    {
+        return shared_from_this();
+    }
+    ExecutorPtr executor;
+    Event wait;
 };
 
-Basic::Basic(Executor *executor)
-: executor(executor),
-  executorNode(executor->createNode(this)),
-  wait(new Event())
+typedef std::tr1::shared_ptr<Basic> BasicPtr;
+
+Basic::Basic(ExecutorPtr const &executor)
+: executor(executor)
 {
 }
 
 Basic::~Basic() {
-    delete wait;
 }
 
 void Basic::run()
 {
-    executor->execute(executorNode);
-    bool result = wait->wait();
+    executor->execute(getPtrSelf());
+    bool result = wait.wait();
     if(result==false) printf("basic::run wait returned false\n");
 }
 
 void Basic::command()
 {
-    wait->signal();
+    wait.signal();
 }
 
 
 static void testBasic(FILE *fd) {
-    Executor *executor = new Executor(String("basic"),middlePriority);
-    Basic *basic = new Basic(executor);
+    ExecutorPtr executor( new Executor(String("basic"),middlePriority));
+    BasicPtr basic( new Basic(executor));
     basic->run();
-    delete basic; 
-    String buf("");
-    delete executor;
 }
 
 class MyFunc : public TimeFunctionRequester {
 public:
-    MyFunc(Basic *basic)
-    : basic(basic)
-    {}
-    virtual void function()
-    {
-        basic->run();
-    }
+    POINTER_DEFINITIONS(MyFunc);
+    MyFunc(BasicPtr const &basic);
+    virtual void function();
 private:
-    Basic *basic;
+    BasicPtr basic;
 };
 
+MyFunc::MyFunc(BasicPtr const &basic)
+    : basic(basic)
+    {}
+void MyFunc::function()
+{
+    basic->run();
+}
+
+
+typedef std::tr1::shared_ptr<MyFunc> MyFuncPtr;
+
 static void testThreadContext(FILE *fd,FILE *auxFd) {
-    Executor *executor = new Executor(String("basic"),middlePriority);
-    Basic *basic = new Basic(executor);
-    MyFunc myFunc(basic);
-    TimeFunction timeFunction(&myFunc);
-    double perCall = timeFunction.timeCall();
+    ExecutorPtr executor(new Executor(String("basic"),middlePriority));
+    BasicPtr basic(new Basic(executor));
+    MyFuncPtr myFunc(new MyFunc(basic));
+    TimeFunctionPtr timeFunction(new TimeFunction(myFunc));
+    double perCall = timeFunction->timeCall();
     perCall *= 1e6;
     fprintf(auxFd,"time per call %f microseconds\n",perCall);
-    delete basic;
-    delete executor;
 }
 
 int main(int argc, char *argv[]) {
@@ -142,7 +149,5 @@ int main(int argc, char *argv[]) {
     testThreadRun(fd);
     testBasic(fd);
     testThreadContext(fd,auxFd);
-    epicsExitCallAtExits();
-    CDRMonitor::get().show(fd);
-    return (0);
+    return 0;
 }

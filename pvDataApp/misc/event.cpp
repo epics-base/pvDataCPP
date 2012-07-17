@@ -20,24 +20,20 @@
 #include <pv/pvType.h>
 #include <pv/lock.h>
 #include <pv/event.h>
-#include <pv/CDRMonitor.h>
 
 namespace epics { namespace pvData { 
 
-PVDATA_REFCOUNT_MONITOR_DEFINE(event);
 static String alreadyOn("already on list");
 
 Event::~Event() {
     epicsEventDestroy(id);
     id = 0;
-    PVDATA_REFCOUNT_MONITOR_DESTRUCT(event);
 }
 
 
 Event::Event(bool full)
 : id(epicsEventCreate(full?epicsEventFull : epicsEventEmpty))
 {
-    PVDATA_REFCOUNT_MONITOR_CONSTRUCT(event);
 }
 
 void Event::signal()

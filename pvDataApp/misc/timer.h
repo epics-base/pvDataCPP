@@ -15,44 +15,57 @@
 
 #include <pv/pvType.h>
 #include <pv/thread.h>
-#include <pv/noDefaultMethods.h>
+#include <pv/timeStamp.h>
+#include <pv/event.h>
+#include <pv/lock.h>
 #include <pv/sharedPtr.h>
 
 namespace epics { namespace pvData { 
 
+class TimerCallback;
 class Timer;
+typedef std::tr1::shared_ptr<TimerCallback> TimerCallbackPtr;
+typedef std::tr1::shared_ptr<Timer> TimerPtr;
 
 class TimerCallback {
 public:
+    POINTER_DEFINITIONS(TimerCallback);
+    TimerCallback();
     virtual ~TimerCallback(){}
     virtual void callback() = 0;
     virtual void timerStopped() = 0;
-};
-
-class TimerNode {
-public:
-    TimerNode(TimerCallback &timerCallback);
-    ~TimerNode();
-    void cancel();
-    bool isScheduled();
-    class Pvt;
 private:
-    std::auto_ptr<Pvt> pImpl;
+    TimerCallbackPtr next;
+    TimeStamp timeToRun;
+    double period;
+    bool onList;
     friend class Timer;
 };
 
-class Timer : private NoDefaultMethods {
+class Timer : public Runnable {
 public:
     POINTER_DEFINITIONS(Timer);
-
     Timer(String threadName, ThreadPriority priority);
-    ~Timer();
-    void scheduleAfterDelay(TimerNode &timerNode,double delay);
-    void schedulePeriodic(TimerNode &timerNode,double delay,double period);
-
-    class Pvt;
+    virtual ~Timer();
+    virtual void run();
+    void scheduleAfterDelay(
+        TimerCallbackPtr const &timerCallback,
+        double delay);
+    void schedulePeriodic(
+        TimerCallbackPtr const &timerCallback,
+        double delay,
+        double period);
+    void cancel(TimerCallbackPtr const &timerCallback);
+    bool isScheduled(TimerCallbackPtr const &timerCallback);
+    void toString(StringBuilder builder);
 private:
-    std::auto_ptr<Pvt> pImpl;
+    void addElement(TimerCallbackPtr const &timerCallback);
+    TimerCallbackPtr head;
+    Mutex mutex;
+    Event waitForWork;
+    Event waitForDone;
+    bool alive;
+    Thread thread;
 };
 
 }}

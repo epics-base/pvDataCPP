@@ -20,7 +20,6 @@
 #include <pv/pvIntrospect.h>
 #include <pv/pvData.h>
 #include <pv/standardField.h>
-#include <pv/CDRMonitor.h>
 
 using namespace epics::pvData;
 

@@ -3316,9 +3316,6 @@ size_t copyNumericArray(PVScalarArray *from, size_t offset, PVScalarArray *to, s
     }
     return ncopy;
 }
-#ifdef XXXXXXXXX
-
-#endif ///MARTY REMOVE THIS XXXXXXX
 
 ConvertPtr Convert::getConvert()
 {

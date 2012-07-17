@@ -23,7 +23,6 @@
 #include <pv/timeStamp.h>
 #include <pv/requester.h>
 #include <pv/messageQueue.h>
-#include <pv/CDRMonitor.h>
 #include <pv/event.h>
 #include <pv/thread.h>
 #include <pv/executor.h>
@@ -89,8 +88,6 @@ int main(int argc, char *argv[]) {
         auxfd = fopen(auxFileName,"w+");
     }
     testBasic(fd,auxfd);
-    epicsExitCallAtExits();
-    CDRMonitor::get().show(fd);
     return (0);
 }
  

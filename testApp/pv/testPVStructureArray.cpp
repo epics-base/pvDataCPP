@@ -89,7 +89,7 @@ void testPowerSupplyArray(FILE * fd) {
     powerSupplyArray->remove(2,1);
     buffer.clear();
     powerSupplyArrayStruct->toString(&buffer);
-    fprintf(fd,"after remove 0,1,3%s\n",buffer.c_str());
+    fprintf(fd,"after remove 2,1%s\n",buffer.c_str());
     powerSupplyArray->compress();
     buffer.clear();
     powerSupplyArrayStruct->toString(&buffer);

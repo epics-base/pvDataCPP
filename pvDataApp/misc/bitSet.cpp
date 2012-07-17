@@ -8,12 +8,10 @@
 #include "stdio.h"
 #include <pv/bitSet.h>
 #include <pv/lock.h>
-#include <pv/CDRMonitor.h>
 #include <pv/serializeHelper.h>
 
 namespace epics { namespace pvData {
  
-    PVDATA_REFCOUNT_MONITOR_DEFINE(bitSet);
     BitSet::shared_pointer BitSet::create(uint32 nbits)
     {
         return BitSet::shared_pointer(new BitSet(nbits));
@@ -22,19 +20,15 @@ namespace epics { namespace pvData {
     BitSet::BitSet() : words(0), wordsLength(0), wordsInUse(0) {
         initWords(BITS_PER_WORD);
 
-        PVDATA_REFCOUNT_MONITOR_CONSTRUCT(bitSet);
     }
 
     BitSet::BitSet(uint32 nbits) : words(0), wordsLength(0), wordsInUse(0) {
         initWords(nbits);
 
-        PVDATA_REFCOUNT_MONITOR_CONSTRUCT(bitSet);
     }
 
     BitSet::~BitSet() {
         delete[] words;
-
-        PVDATA_REFCOUNT_MONITOR_DESTRUCT(bitSet);
     }
 
     void BitSet::initWords(uint32 nbits) {

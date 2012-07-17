@@ -7,30 +7,43 @@
 #ifndef EXECUTOR_H
 #define EXECUTOR_H
 #include <memory>
-#include <vector>
-#include <pv/noDefaultMethods.h>
 #include <pv/pvType.h>
+#include <pv/lock.h>
+#include <pv/event.h>
 #include <pv/thread.h>
+#include <pv/sharedPtr.h>
 
 namespace epics { namespace pvData { 
 
-// This is created by Executor.createNode and passed to Executor.execute
-class ExecutorNode;
+class Command;
+class Executor;
+typedef std::tr1::shared_ptr<Command> CommandPtr;
+typedef std::tr1::shared_ptr<Executor> ExecutorPtr;
 
 class Command {
 public:
+    POINTER_DEFINITIONS(Command);
     virtual ~Command(){}
     virtual void command() = 0;
+private:
+    CommandPtr next;
+    friend class Executor;
 };
 
-class Executor : private NoDefaultMethods {
+class Executor :  public Runnable{
 public:
+    POINTER_DEFINITIONS(Executor);
     Executor(String threadName,ThreadPriority priority);
     ~Executor();
-    ExecutorNode * createNode(Command *command);
-    void execute(ExecutorNode *node);
+    void execute(CommandPtr const &node);
+    virtual void run();
 private:
-    class ExecutorPvt *pImpl;
+    CommandPtr head;
+    CommandPtr tail;
+    epics::pvData::Mutex mutex;
+    epics::pvData::Event moreWork;
+    epics::pvData::Event stopped;
+    epics::pvData::Thread thread;
 };
 
 }}

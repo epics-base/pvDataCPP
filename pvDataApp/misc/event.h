@@ -9,13 +9,17 @@
 #include <memory>
 #include <vector>
 #include <epicsEvent.h>
-#include <pv/noDefaultMethods.h>
 #include <pv/pvType.h>
+#include <pv/sharedPtr.h>
 
 namespace epics { namespace pvData { 
 
-class Event : private NoDefaultMethods {
+class Event;
+typedef std::tr1::shared_ptr<Event> EventPtr;
+
+class Event {
 public:
+    POINTER_DEFINITIONS(Event);
     explicit Event(bool = false);
     ~Event();
     void signal();

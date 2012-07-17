@@ -4,14 +4,19 @@
  * EPICS pvDataCPP is distributed subject to a Software License Agreement found
  * in file LICENSE that is included with this distribution.
  */
-#include <pv/noDefaultMethods.h>
+#include <cstddef>
+#include <cstdlib>
+#include <cstddef>
+#include <string>
+#include <cstdio>
+
 #include <pv/pvType.h>
 #include <pv/timeStamp.h>
 #include <pv/timeFunction.h>
 
 namespace epics { namespace pvData { 
 
-TimeFunction::TimeFunction(TimeFunctionRequester *requester)
+TimeFunction::TimeFunction(TimeFunctionRequesterPtr const &requester)
 : requester(requester) {}
 
 

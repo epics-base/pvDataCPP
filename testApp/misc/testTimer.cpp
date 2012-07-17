@@ -22,19 +22,26 @@
 #include <pv/event.h>
 #include <pv/timer.h>
 #include <pv/thread.h>
-#include <pv/CDRMonitor.h>
 
 using namespace epics::pvData;
 
 static TimeStamp currentTimeStamp;
 static double oneDelay = 4.0;
 static double twoDelay = 2.0;
+static double threeDelay = 1.0;
+static int ntimes = 3;
+
+class MyCallback;
+typedef std::tr1::shared_ptr<MyCallback> MyCallbackPtr;
 
 class MyCallback : public TimerCallback {
 public:
-    MyCallback(String name,FILE *fd,FILE *auxfd,Event *wait)
-    : name(name),fd(fd),auxfd(auxfd),wait(wait),
-      timerNode(*this),timeStamp(TimeStamp())
+    POINTER_DEFINITIONS(MyCallback);
+    MyCallback(String name,FILE *fd,FILE *auxfd,EventPtr const & wait)
+    : name(name),
+      fd(fd),
+      auxfd(auxfd),
+      wait(wait)
     {
     }
     ~MyCallback()
@@ -49,45 +56,115 @@ public:
     {
         fprintf(fd,"timerStopped %s\n",name.c_str());
     }
-    TimerNode &getTimerNode() { return timerNode;}
     TimeStamp &getTimeStamp() { return timeStamp;}
 private:
     String name;
     FILE *fd;
     FILE *auxfd;
-    Event *wait;
-    TimerNode timerNode;
+    EventPtr wait;
     TimeStamp timeStamp;
 };
 
 static void testBasic(FILE *fd, FILE *auxfd)
 {
+printf("\n\ntestBasic oneDelay %lf twoDelay %lf threeDaley %lf\n",
+oneDelay,twoDelay,threeDelay);
     String one("one");
     String two("two");
-    Event *eventOne = new Event();
-    Event *eventTwo = new Event();
-    Timer *timer = new Timer(String("timer"),middlePriority);
-    MyCallback *callbackOne = new MyCallback(
-        one,fd,auxfd,eventOne);
-    MyCallback *callbackTwo = new MyCallback(
-        two,fd,auxfd,eventTwo);
-    currentTimeStamp.getCurrent();
-    timer->scheduleAfterDelay(callbackOne->getTimerNode(),oneDelay);
-    timer->scheduleAfterDelay(callbackTwo->getTimerNode(),twoDelay);
-    eventOne->wait();
-    eventTwo->wait();
-    double diff;
-    diff = TimeStamp::diff(
-        callbackOne->getTimeStamp(),currentTimeStamp);
-    fprintf(auxfd,"one requested %f  diff %f seconds\n",oneDelay,diff);
-    diff = TimeStamp::diff(
-        callbackTwo->getTimeStamp(),currentTimeStamp);
-    fprintf(auxfd,"two requested %f  diff %f seconds\n",twoDelay,diff);
-    delete timer;
-    delete callbackTwo;
-    delete callbackOne;
-    delete eventTwo;
-    delete eventOne;
+    String three("three");
+    EventPtr eventOne(new Event());
+    EventPtr eventTwo(new Event());
+    EventPtr eventThree(new Event());
+    TimerPtr timer(new Timer(String("timer"),middlePriority));
+    MyCallbackPtr callbackOne(new MyCallback(one,fd,auxfd,eventOne));
+    MyCallbackPtr callbackTwo(new MyCallback(two,fd,auxfd,eventTwo));
+    MyCallbackPtr callbackThree(new MyCallback(three,fd,auxfd,eventThree));
+    for(int n=0; n<ntimes; n++) {
+        currentTimeStamp.getCurrent();
+        assert(!timer->isScheduled(callbackOne));
+        assert(!timer->isScheduled(callbackTwo));
+        assert(!timer->isScheduled(callbackThree));
+        timer->scheduleAfterDelay(callbackOne,oneDelay);
+        timer->scheduleAfterDelay(callbackTwo,twoDelay);
+        timer->scheduleAfterDelay(callbackThree,threeDelay);
+        if(oneDelay>.1) assert(timer->isScheduled(callbackOne));
+        if(twoDelay>.1) assert(timer->isScheduled(callbackTwo));
+        if(threeDelay>.1) assert(timer->isScheduled(callbackThree));
+        String builder;
+        timer->toString(&builder);
+        printf("timerQueue\n%s",builder.c_str());
+        eventOne->wait();
+        eventTwo->wait();
+        eventThree->wait();
+        double diff;
+        double delta;
+        diff = TimeStamp::diff(
+            callbackOne->getTimeStamp(),currentTimeStamp);
+        delta = diff - oneDelay;
+        fprintf(auxfd,"one requested %f  actual %f delta %f\n",oneDelay,diff,delta);
+        if(delta<0.0) delta = -delta;
+        assert(delta<.1);
+        diff = TimeStamp::diff(
+            callbackTwo->getTimeStamp(),currentTimeStamp);
+        delta = diff - twoDelay;
+        fprintf(auxfd,"two requested %f  actual %f delta %f\n",twoDelay,diff,delta);
+        if(delta<0.0) delta = -delta;
+        assert(delta<.1);
+        diff = TimeStamp::diff(
+            callbackThree->getTimeStamp(),currentTimeStamp);
+        delta = diff - threeDelay;
+        fprintf(auxfd,"three requested %f  actual %f delta %f\n",threeDelay,diff,delta);
+        if(delta<0.0) delta = -delta;
+        assert(delta<.1);
+    }
+}
+
+static void testCancel(FILE *fd, FILE *auxfd)
+{
+printf("\n\ntestCancel oneDelay %lf twoDelay %lf threeDaley %lf\n",
+oneDelay,twoDelay,threeDelay);
+    String one("one");
+    String two("two");
+    String three("three");
+    EventPtr eventOne(new Event());
+    EventPtr eventTwo(new Event());
+    EventPtr eventThree(new Event());
+    TimerPtr timer(new Timer(String("timer"),middlePriority));
+    MyCallbackPtr callbackOne(new MyCallback(one,fd,auxfd,eventOne));
+    MyCallbackPtr callbackTwo(new MyCallback(two,fd,auxfd,eventTwo));
+    MyCallbackPtr callbackThree(new MyCallback(three,fd,auxfd,eventThree));
+    for(int n=0; n<ntimes; n++) {
+        currentTimeStamp.getCurrent();
+        assert(!timer->isScheduled(callbackOne));
+        assert(!timer->isScheduled(callbackTwo));
+        assert(!timer->isScheduled(callbackThree));
+        timer->scheduleAfterDelay(callbackOne,oneDelay);
+        timer->scheduleAfterDelay(callbackTwo,twoDelay);
+        timer->scheduleAfterDelay(callbackThree,threeDelay);
+        timer->cancel(callbackTwo);
+        if(oneDelay>.1) assert(timer->isScheduled(callbackOne));
+        assert(!timer->isScheduled(callbackTwo));
+        if(threeDelay>.1) assert(timer->isScheduled(callbackThree));
+        String builder;
+        timer->toString(&builder);
+        printf("timerQueue\n%s",builder.c_str());
+        eventOne->wait();
+        eventThree->wait();
+        double diff;
+        double delta;
+        diff = TimeStamp::diff(
+            callbackOne->getTimeStamp(),currentTimeStamp);
+        delta = diff - oneDelay;
+        fprintf(auxfd,"one requested %f  actual %f delta %f\n",oneDelay,diff,delta);
+        if(delta<0.0) delta = -delta;
+        assert(delta<.1);
+        diff = TimeStamp::diff(
+            callbackThree->getTimeStamp(),currentTimeStamp);
+        delta = diff - threeDelay;
+        fprintf(auxfd,"three requested %f  actual %f delta %f\n",threeDelay,diff,delta);
+        if(delta<0.0) delta = -delta;
+        assert(delta<.1);
+    }
 }
 
 int main(int argc, char *argv[]) {
@@ -105,14 +182,24 @@ int main(int argc, char *argv[]) {
     }
     oneDelay = .4;
     twoDelay = .2;
+    threeDelay = .1;
     testBasic(fd,auxfd);
-    oneDelay = .2;
+    testCancel(fd,auxfd);
+    oneDelay = .1;
+    twoDelay = .2;
+    threeDelay = .4;
+    testBasic(fd,auxfd);
+    testCancel(fd,auxfd);
+    oneDelay = .1;
     twoDelay = .4;
+    threeDelay = .2;
     testBasic(fd,auxfd);
+    testCancel(fd,auxfd);
     oneDelay = .0;
     twoDelay = .0;
+    threeDelay = .0;
     testBasic(fd,auxfd);
+    testCancel(fd,auxfd);
     epicsExitCallAtExits();
-    CDRMonitor::get().show(fd);
     return (0);
 }

@@ -12,7 +12,6 @@
 #include <string.h>
 #include <stdio.h>
 #include <pv/bitSet.h>
-#include <pv/CDRMonitor.h>
 
 #include <epicsAssert.h>
 #include <epicsExit.h>
@@ -150,8 +149,6 @@ int main(int argc,char *argv[])
     }
     testGetSetClearFlip(fd);
     testOperators(fd);
-    epicsExitCallAtExits();
-    CDRMonitor::get().show(fd);
     return(0);
 }
 

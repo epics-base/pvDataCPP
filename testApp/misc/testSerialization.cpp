@@ -20,7 +20,6 @@
 #include <pv/serialize.h>
 #include <pv/noDefaultMethods.h>
 #include <pv/byteBuffer.h>
-#include <pv/CDRMonitor.h>
 #include <pv/convert.h>
 
 #include <pv/standardField.h>
@@ -661,8 +660,6 @@ int main(int argc, char *argv[]) {
     delete flusher;
 
     epicsExitCallAtExits();
-    (*out)<<"Done.\n"<<CDRMonitor::get();
-
     return 0;
 }
 

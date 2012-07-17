@@ -6,24 +6,31 @@
  */
 #ifndef TIMEFUNCTION_H
 #define TIMEFUNCTION_H
-#include <pv/noDefaultMethods.h>
-#include <pv/pvType.h>
+#include <pv/sharedPtr.h>
 
 namespace epics { namespace pvData { 
 
+class TimeFunctionRequester;
+class TimeFunction;
+typedef std::tr1::shared_ptr<TimeFunctionRequester> TimeFunctionRequesterPtr;
+typedef std::tr1::shared_ptr<TimeFunction> TimeFunctionPtr;
+
 class TimeFunctionRequester {
 public:
+    POINTER_DEFINITIONS(TimeFunctionRequester);
     virtual ~TimeFunctionRequester(){}
     virtual void function() = 0;
 };
 
-class TimeFunction : private NoDefaultMethods {
+
+class TimeFunction {
 public:
-    TimeFunction(TimeFunctionRequester *requester);
+    POINTER_DEFINITIONS(TimeFunction);
+    TimeFunction(TimeFunctionRequesterPtr const & requester);
     ~TimeFunction();
     double timeCall();
 private:
-    TimeFunctionRequester *requester;
+    TimeFunctionRequesterPtr requester;
 };
   
 
