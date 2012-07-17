@@ -149,5 +149,6 @@ int main(int argc, char *argv[]) {
     testThreadRun(fd);
     testBasic(fd);
     testThreadContext(fd,auxFd);
+    epicsExitCallAtExits();
     return 0;
 }
