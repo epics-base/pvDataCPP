@@ -48,10 +48,10 @@ structure
         int nanoSeconds 1000000
         int userTag 0
     structure valueAlarm
-        boolean active false
+        boolean active true
         int falseSeverity 0
-        int trueSeverity 0
-        int changeStateSeverity 0
+        int trueSeverity 2
+        int changeStateSeverity 1
 structure 
     byte value 127
     structure alarm

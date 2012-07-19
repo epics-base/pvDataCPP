@@ -560,12 +560,22 @@ StructureConstPtr StandardField::byteAlarm()
     return byteAlarmField;
 }
 
+StructureConstPtr StandardField::ubyteAlarm()
+{
+    return ubyteAlarmField;
+}
+
 StructureConstPtr StandardField::shortAlarm()
 {
     return shortAlarmField;
 }
 
-StructureConstPtr StandardField::intAlarm()
+StructureConstPtr StandardField::ushortAlarm()
+{
+    return shortAlarmField;
+}
+
+StructureConstPtr StandardField::uintAlarm()
 {
     return intAlarmField;
 }
@@ -573,6 +583,11 @@ StructureConstPtr StandardField::intAlarm()
 StructureConstPtr StandardField::longAlarm()
 {
     return longAlarmField;
+}
+
+StructureConstPtr StandardField::ulongAlarm()
+{
+    return ulongAlarmField;
 }
 
 StructureConstPtr StandardField::floatAlarm()

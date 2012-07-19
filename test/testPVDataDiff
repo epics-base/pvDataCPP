@@ -1,5 +1,5 @@
 --- testPVDataGold	2012-01-21 13:09:44.840000316 -0500
-+++ testPVData	2012-05-17 09:13:21.497308287 -0400
++++ testPVData	2012-07-19 16:06:14.905022437 -0400
 @@ -1,13 +1,13 @@
 -structure request
 -    string fieldList value,timeStamp
@@ -19,7 +19,7 @@
              long secondsPastEpoch 0
              int nanoSeconds 0
              int userTag 0
-@@ -25,21 +25,25 @@
+@@ -25,50 +25,52 @@
      string extra 
  
  testScalar
@@ -56,11 +56,15 @@
          long secondsPastEpoch 123456789
          int nanoSeconds 1000000
          int userTag 0
-@@ -48,27 +52,25 @@
+     structure valueAlarm
+-        boolean active false
++        boolean active true
          int falseSeverity 0
-         int trueSeverity 0
-         int changeStateSeverity 0
+-        int trueSeverity 0
+-        int changeStateSeverity 0
 -structure byte
++        int trueSeverity 2
++        int changeStateSeverity 1
 +structure 
      byte value 127
 -    alarm alarm

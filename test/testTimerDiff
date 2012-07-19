@@ -1,0 +1,8 @@
+--- testTimerGold	2012-01-21 13:09:44.818000181 -0500
++++ testTimer	2012-07-19 16:06:15.023023486 -0400
+@@ -1,5 +0,0 @@
+-timerNode:  totalConstruct 6 totalDestruct 6
+-timer:  totalConstruct 3 totalDestruct 3
+-LinkedList:  totalConstruct 3 totalDestruct 3
+-LinkedListNode:  totalConstruct 9 totalDestruct 9
+-event:  totalConstruct 12 totalDestruct 12

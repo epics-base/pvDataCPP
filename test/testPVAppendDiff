@@ -1,14 +1,18 @@
 --- testPVAppendGold	2012-01-21 13:09:44.859000430 -0500
-+++ testPVAppend	2012-05-17 09:13:21.533308559 -0400
-@@ -1,32 +1,28 @@
++++ testPVAppend	2012-07-19 16:06:14.969023006 -0400
+@@ -1,32 +1,34 @@
 -structure request
 -    string fieldList value,timeStamp
 -structure request
 -    string fieldList value,timeStamp
++
++testAppendSimple
 +structure 
 +    string fieldlist value,timeStamp
      string extra junk
 -structure parent
++
++testAppendMore
 +structure 
      structure child1
          string value bla
@@ -16,6 +20,8 @@
 -        string value bla
 -structure parent
 +        string value blabla
++
++testAppends
 +structure 
      structure child1
          string Joe Good Guy
