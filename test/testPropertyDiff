@@ -1,5 +1,5 @@
 --- testPropertyGold	2012-01-21 13:09:45.080001766 -0500
-+++ testProperty	2012-05-17 09:13:22.406315168 -0400
++++ testProperty	2012-07-19 16:06:21.736083171 -0400
 @@ -1,34 +1,32 @@
 -structure value
 +structure 

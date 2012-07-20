@@ -1,6 +1,60 @@
-one requested 0.400000  diff 0.400134 seconds
-two requested 0.200000  diff 0.200133 seconds
-one requested 0.200000  diff 0.200128 seconds
-two requested 0.400000  diff 0.400131 seconds
-one requested 0.000000  diff 0.000036 seconds
-two requested 0.000000  diff 0.000043 seconds
+one requested 0.400000  actual 0.400149 delta 0.000149
+two requested 0.200000  actual 0.200165 delta 0.000165
+three requested 0.100000  actual 0.100116 delta 0.000116
+one requested 0.400000  actual 0.400270 delta 0.000270
+two requested 0.200000  actual 0.200209 delta 0.000209
+three requested 0.100000  actual 0.100178 delta 0.000178
+one requested 0.400000  actual 0.400172 delta 0.000172
+two requested 0.200000  actual 0.200164 delta 0.000164
+three requested 0.100000  actual 0.100166 delta 0.000166
+one requested 0.400000  actual 0.400177 delta 0.000177
+three requested 0.100000  actual 0.100253 delta 0.000253
+one requested 0.400000  actual 0.400172 delta 0.000172
+three requested 0.100000  actual 0.100201 delta 0.000201
+one requested 0.400000  actual 0.400179 delta 0.000179
+three requested 0.100000  actual 0.100178 delta 0.000178
+one requested 0.100000  actual 0.100165 delta 0.000165
+two requested 0.200000  actual 0.200220 delta 0.000220
+three requested 0.400000  actual 0.400203 delta 0.000203
+one requested 0.100000  actual 0.100206 delta 0.000206
+two requested 0.200000  actual 0.200234 delta 0.000234
+three requested 0.400000  actual 0.400251 delta 0.000251
+one requested 0.100000  actual 0.100189 delta 0.000189
+two requested 0.200000  actual 0.200400 delta 0.000400
+three requested 0.400000  actual 0.400426 delta 0.000426
+one requested 0.100000  actual 0.100227 delta 0.000227
+three requested 0.400000  actual 0.400281 delta 0.000281
+one requested 0.100000  actual 0.100177 delta 0.000177
+three requested 0.400000  actual 0.400293 delta 0.000293
+one requested 0.100000  actual 0.100196 delta 0.000196
+three requested 0.400000  actual 0.400236 delta 0.000236
+one requested 0.100000  actual 0.100193 delta 0.000193
+two requested 0.400000  actual 0.400186 delta 0.000186
+three requested 0.200000  actual 0.200206 delta 0.000206
+one requested 0.100000  actual 0.100202 delta 0.000202
+two requested 0.400000  actual 0.400232 delta 0.000232
+three requested 0.200000  actual 0.200198 delta 0.000198
+one requested 0.100000  actual 0.100199 delta 0.000199
+two requested 0.400000  actual 0.400216 delta 0.000216
+three requested 0.200000  actual 0.200235 delta 0.000235
+one requested 0.100000  actual 0.100231 delta 0.000231
+three requested 0.200000  actual 0.200250 delta 0.000250
+one requested 0.100000  actual 0.100201 delta 0.000201
+three requested 0.200000  actual 0.200195 delta 0.000195
+one requested 0.100000  actual 0.100198 delta 0.000198
+three requested 0.200000  actual 0.200232 delta 0.000232
+one requested 0.000000  actual 0.000059 delta 0.000059
+two requested 0.000000  actual 0.000127 delta 0.000127
+three requested 0.000000  actual 0.000194 delta 0.000194
+one requested 0.000000  actual 0.000043 delta 0.000043
+two requested 0.000000  actual 0.000106 delta 0.000106
+three requested 0.000000  actual 0.000171 delta 0.000171
+one requested 0.000000  actual 0.000036 delta 0.000036
+two requested 0.000000  actual 0.000098 delta 0.000098
+three requested 0.000000  actual 0.000161 delta 0.000161
+one requested 0.000000  actual 0.000056 delta 0.000056
+three requested 0.000000  actual 0.000120 delta 0.000120
+one requested 0.000000  actual 0.000037 delta 0.000037
+three requested 0.000000  actual 0.000099 delta 0.000099
+one requested 0.000000  actual 0.000038 delta 0.000038
+three requested 0.000000  actual 0.000099 delta 0.000099

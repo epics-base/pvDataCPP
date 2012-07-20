@@ -1,11 +1,17 @@
+
+testAppendSimple
 structure 
     string fieldlist value,timeStamp
     string extra junk
+
+testAppendMore
 structure 
     structure child1
         string value bla
     structure child2
         string value blabla
+
+testAppends
 structure 
     structure child1
         string Joe Good Guy

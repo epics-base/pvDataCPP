@@ -394,7 +394,7 @@ public:
      * @return The introspection interface.
      * This will hold a null pointer if the field is not in the structure.
      */
-    FieldConstPtr getField(std::size_t index) {return fields[index];}
+    FieldConstPtr getField(std::size_t index) const {return fields[index];}
     /**
      * Get the field index for the specified fieldName.
      * @return The introspection interface.

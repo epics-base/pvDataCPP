@@ -66,9 +66,13 @@ public:
     StructureConstPtr control();
     StructureConstPtr booleanAlarm();
     StructureConstPtr byteAlarm();
+    StructureConstPtr ubyteAlarm();
     StructureConstPtr shortAlarm();
+    StructureConstPtr ushortAlarm();
     StructureConstPtr intAlarm();
+    StructureConstPtr uintAlarm();
     StructureConstPtr longAlarm();
+    StructureConstPtr ulongAlarm();
     StructureConstPtr floatAlarm();
     StructureConstPtr doubleAlarm();
     StructureConstPtr enumeratedAlarm();
