@@ -76,6 +76,12 @@ extern "C"
         }
     }
 
+    void destroy(void * handle)
+    {
+        StructureHandle * sh = (StructureHandle *)handle;
+        delete sh;
+    }
+
 };
 
 
