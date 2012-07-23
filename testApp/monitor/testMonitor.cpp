@@ -45,12 +45,12 @@ public:
         printf("stop called\n");
         return status;
     }
-    virtual MonitorElementPtr poll()
+    virtual MonitorElementPtr &poll()
     {
         printf("poll called\n");
         return emptyElement;
     }
-    virtual void release(MonitorElementPtr & monitorElement)
+    virtual void release(MonitorElementPtr const & monitorElement)
     {
         printf("release called\n");
     }

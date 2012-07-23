@@ -13,6 +13,9 @@
 
 namespace epics { namespace pvData { 
 
+    class BitSet;
+    typedef std::tr1::shared_ptr<BitSet> BitSetPtr;
+
     /**
      * This class implements a vector of bits that grows as needed. Each
      * component of the bit set has a {@code bool} value. The

@@ -31,7 +31,7 @@ class MonitorElement {
     public:
     POINTER_DEFINITIONS(MonitorElement);
     MonitorElement(){}
-    MonitorElement(PVStructurePtr &pvStructurePtr)
+    MonitorElement(PVStructurePtr const &pvStructurePtr)
     : pvStructurePtr(pvStructurePtr),
       changedBitSet(BitSet::create(pvStructurePtr->getNumberFields())),
       overrunBitSet(BitSet::create(pvStructurePtr->getNumberFields()))
@@ -64,12 +64,12 @@ class Monitor : public Destroyable{
      * @return monitorElement for modified data.
      * Must call get to determine if data is available.
      */
-    virtual MonitorElementPtr poll() = 0;
+    virtual MonitorElementPtr &poll() = 0;
     /**
      * Release a MonitorElement that was returned by poll.
      * @param monitorElement
      */
-    virtual void release(MonitorElementPtr & monitorElement) = 0;
+    virtual void release(MonitorElementPtr const & monitorElement) = 0;
 };
 
 
@@ -88,7 +88,7 @@ class MonitorRequester : public virtual Requester {
      * @param structure The structure defining the data.
      */
     virtual void monitorConnect(Status const &status,
-        MonitorPtr & monitor, StructureConstPtr const & structure) = 0;
+        MonitorPtr const & monitor, StructureConstPtr const & structure) = 0;
     /**
      * A monitor event has occurred.
      * The requester must call Monitor.poll to get data.
