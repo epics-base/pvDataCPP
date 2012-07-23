@@ -572,12 +572,17 @@ StructureConstPtr StandardField::shortAlarm()
 
 StructureConstPtr StandardField::ushortAlarm()
 {
-    return shortAlarmField;
+    return ushortAlarmField;
+}
+
+StructureConstPtr StandardField::intAlarm()
+{
+    return intAlarmField;
 }
 
 StructureConstPtr StandardField::uintAlarm()
 {
-    return intAlarmField;
+    return uintAlarmField;
 }
 
 StructureConstPtr StandardField::longAlarm()
