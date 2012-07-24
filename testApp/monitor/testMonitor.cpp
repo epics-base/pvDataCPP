@@ -45,7 +45,7 @@ public:
         printf("stop called\n");
         return status;
     }
-    virtual MonitorElementPtr &poll()
+    virtual MonitorElementPtr poll()
     {
         printf("poll called\n");
         return emptyElement;
