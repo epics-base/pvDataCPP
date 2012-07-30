@@ -103,7 +103,7 @@ namespace epics {
                 DeserializableControl* control) {
 
             std::size_t size = SerializeHelper::readSize(buffer, control);
-            if(size>0)
+            if(size!=(size_t)-1)	// TODO null strings check, to be removed in the future
             {
                 if (buffer->getRemaining()>=size)
                 {
