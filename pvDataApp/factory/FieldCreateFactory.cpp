@@ -71,6 +71,25 @@ void Scalar::toString(StringBuilder buffer,int indentLevel) const{
     ScalarTypeFunc::toString(buffer,scalarType);
 }
 
+static const String idScalarLUT[] = {
+	"boolean", // pvBoolean
+	"byte",    // pvByte
+	"short",   // pvShort
+	"int",     // pvInt
+	"long",    // pvLong
+	"ubyte",   // pvUByte
+	"ushort",  // pvUShort
+	"uint",    // pvUInt
+	"ulong",   // pvULong
+	"float",   // pvFloat
+	"double",  // pvDouble
+	"string"   // pvString
+};
+
+String Scalar::getID() const
+{
+    return idScalarLUT[scalarType];
+}
 
 static const int8 typeCodeLUT[] = {
     0x00, // pvBoolean
@@ -99,6 +118,7 @@ void Scalar::deserialize(ByteBuffer *buffer, DeserializableControl *control) {
 
 static void serializeStructureField(const Structure* structure, ByteBuffer* buffer, SerializableControl* control)
 {
+    SerializeHelper::serializeString(structure->getID(), buffer, control);
     FieldConstPtrArray const & fields = structure->getFields();
     StringArray const & fieldNames = structure->getFieldNames();
     std::size_t len = fields.size();
@@ -112,6 +132,7 @@ static void serializeStructureField(const Structure* structure, ByteBuffer* buff
 
 static StructureConstPtr deserializeStructureField(const FieldCreate* fieldCreate, ByteBuffer* buffer, DeserializableControl* control)
 {
+    String id = SerializeHelper::deserializeString(buffer, control);
     const std::size_t size = SerializeHelper::readSize(buffer, control);
     FieldConstPtrArray fields; fields.reserve(size);
     StringArray fieldNames; fieldNames.reserve(size);
@@ -121,13 +142,33 @@ static StructureConstPtr deserializeStructureField(const FieldCreate* fieldCreat
         fields.push_back(control->cachedDeserialize(buffer));
     }
 
-    return fieldCreate->createStructure(fieldNames, fields);
+    return fieldCreate->createStructure(id, fieldNames, fields);
 }
 
 ScalarArray::ScalarArray(ScalarType elementType)
 : Field(scalarArray),elementType(elementType){}
 
 ScalarArray::~ScalarArray() {}
+
+static const String idScalarArrayLUT[] = {
+	"boolean[]", // pvBoolean
+	"byte[]",    // pvByte
+	"short[]",   // pvShort
+	"int[]",     // pvInt
+	"long[]",    // pvLong
+	"ubyte[]",   // pvUByte
+	"ushort[]",  // pvUShort
+	"uint[]",    // pvUInt
+	"ulong[]",   // pvULong
+	"float[]",   // pvFloat
+	"double[]",  // pvDouble
+	"string[]"   // pvString
+};
+
+String ScalarArray::getID() const
+{
+    return idScalarArrayLUT[elementType];
+}
 
 void ScalarArray::toString(StringBuilder buffer,int indentLevel) const{
     ScalarTypeFunc::toString(buffer,elementType);
@@ -152,6 +193,12 @@ StructureArray::~StructureArray() {
     if(debugLevel==highDebug) printf("~StructureArray\n");
 }
 
+String StructureArray::getID() const
+{
+	// NOTE: structure->getID() can return an empty string
+	return pstructure->getID() + "[]";
+}
+
 void StructureArray::toString(StringBuilder buffer,int indentLevel) const {
     if(indentLevel==0) {
         *buffer +=  "structure[]";
@@ -172,11 +219,11 @@ void StructureArray::deserialize(ByteBuffer *buffer, DeserializableControl *cont
     throw std::runtime_error("not valid operation, use FieldCreate::deserialize instead");
 }
 
-
-Structure::Structure (StringArray const & fieldNames,FieldConstPtrArray const & infields)
+Structure::Structure (StringArray const & fieldNames,FieldConstPtrArray const & infields, String inid)
 : Field(structure),
       fieldNames(fieldNames),
-      fields(infields)
+      fields(infields),
+      id(inid)
 {
     if(fieldNames.size()!=fields.size()) {
         throw std::invalid_argument("fieldNames.size()!=fields.size()");
@@ -203,6 +250,11 @@ Structure::Structure (StringArray const & fieldNames,FieldConstPtrArray const & 
 Structure::~Structure() { }
 
 
+String Structure::getID() const
+{
+	return id;
+}
+
 FieldConstPtr  Structure::getField(String fieldName) const {
     size_t numberFields = fields.size();
     for(size_t i=0; i<numberFields; i++) {
@@ -225,7 +277,8 @@ size_t Structure::getFieldIndex(String fieldName) const {
 
 void Structure::toString(StringBuilder buffer,int indentLevel) const{
     *buffer += "structure";
-     toStringCommon(buffer,indentLevel+1);
+    if (!id.empty()) { *buffer += ' '; *buffer += id; };
+    toStringCommon(buffer,indentLevel+1);
 }
     
 void Structure::toStringCommon(StringBuilder buffer,int indentLevel) const{
@@ -288,6 +341,15 @@ StructureConstPtr FieldCreate::createStructure (
 {
       StructureConstPtr structure(
          new Structure(fieldNames,fields), Field::Deleter());
+      return structure;
+}
+
+StructureConstPtr FieldCreate::createStructure (
+	String id,
+    StringArray const & fieldNames,FieldConstPtrArray const & fields) const
+{
+      StructureConstPtr structure(
+         new Structure(fieldNames,fields,id), Field::Deleter());
       return structure;
 }
 

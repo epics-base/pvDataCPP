@@ -573,6 +573,37 @@ void testStructure(std::ostream& ofile) {
     ofile<<"!!!  PASSED\n\n";
 }
 
+
+
+void testStructureId(std::ostream& ofile) {
+    ofile<<"Testing structureID...\n";
+
+    FieldCreatePtr fieldCreate = getFieldCreate();
+
+    StringArray fieldNames;
+    fieldNames.push_back("longField");
+    fieldNames.push_back("intField");
+
+    FieldConstPtrArray fields;
+    fields.push_back(fieldCreate->createScalar(pvLong));
+    fields.push_back(fieldCreate->createScalar(pvInt));
+
+    StructureConstPtr structureWithNoId = fieldCreate->createStructure(fieldNames, fields);
+    StructureConstPtr structure1 = fieldCreate->createStructure("id1", fieldNames, fields);
+    StructureConstPtr structure2 = fieldCreate->createStructure("id2", fieldNames, fields);
+
+
+    assert(structureWithNoId!=structure1);
+    assert(structure1!=structure2);
+
+    //serializationTest(structure1);
+
+    PVStructurePtr pvStructure = getPVDataCreate()->createPVStructure(structure1);
+    serializationTest(pvStructure);
+
+    ofile<<"!!!  PASSED\n\n";
+}
+
 void serializatioTest(FieldConstPtr const & field)
 {
 	buffer->clear();

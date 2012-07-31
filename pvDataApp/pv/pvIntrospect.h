@@ -209,6 +209,11 @@ public:
      * @return The type.
      */
    Type getType() const{return m_fieldType;}
+   /**
+    * Get the identification string.
+    * @return The identification string, can be empty.
+    */
+   virtual String getID() const = 0;
     /**
      * Convert the scalarType to a string and add it to builder.
      * @param  builder The string builder.
@@ -268,9 +273,11 @@ public:
      * @param  indentLevel The number of blanks at the beginning of new lines.
      */
     virtual void toString(StringBuilder buf,int indentLevel) const;
-    
-    virtual void serialize(ByteBuffer *buffer, SerializableControl *flusher) const;
-    virtual void deserialize(ByteBuffer *buffer, DeserializableControl *flusher);
+
+    virtual String getID() const;
+
+    virtual void serialize(ByteBuffer *buffer, SerializableControl *control) const;
+    virtual void deserialize(ByteBuffer *buffer, DeserializableControl *control);
     
 protected:
     Scalar(ScalarType scalarType);
@@ -310,8 +317,10 @@ public:
      */
     virtual void toString(StringBuilder buf,int indentLevel) const;
     
-    virtual void serialize(ByteBuffer *buffer, SerializableControl *flusher) const;
-    virtual void deserialize(ByteBuffer *buffer, DeserializableControl *flusher);
+    virtual String getID() const;
+
+    virtual void serialize(ByteBuffer *buffer, SerializableControl *control) const;
+    virtual void deserialize(ByteBuffer *buffer, DeserializableControl *control);
     
 protected:
     /**
@@ -345,8 +354,10 @@ public:
      */
     virtual void toString(StringBuilder buf,int indentLevel=0) const;
     
-    virtual void serialize(ByteBuffer *buffer, SerializableControl *flusher) const;
-    virtual void deserialize(ByteBuffer *buffer, DeserializableControl *flusher);
+    virtual String getID() const;
+
+    virtual void serialize(ByteBuffer *buffer, SerializableControl *control) const;
+    virtual void deserialize(ByteBuffer *buffer, DeserializableControl *control);
 
 protected:
     /**
@@ -431,15 +442,18 @@ public:
      */
     virtual void toString(StringBuilder buf,int indentLevel) const;
     
-    virtual void serialize(ByteBuffer *buffer, SerializableControl *flusher) const;
-    virtual void deserialize(ByteBuffer *buffer, DeserializableControl *flusher);
+    virtual String getID() const;
+
+    virtual void serialize(ByteBuffer *buffer, SerializableControl *control) const;
+    virtual void deserialize(ByteBuffer *buffer, DeserializableControl *control);
     
 protected:
-   Structure(StringArray const & fieldNames, FieldConstPtrArray const & fields);
+   Structure(StringArray const & fieldNames, FieldConstPtrArray const & fields, String id = "");
 private:
     void toStringCommon(StringBuilder buf,int indentLevel) const;
     StringArray fieldNames;
     FieldConstPtrArray fields;
+    String id;
    friend class FieldCreate;
 };
 
@@ -474,11 +488,22 @@ public:
     StructureArrayConstPtr createStructureArray(StructureConstPtr const & structure) const;
     /**
      * Create a {@code Structure} field.
-     * @param fieldNames The array of {@code fieldNames} for the structure
+     * @param fieldNames The array of {@code fieldNames} for the structure.
      * @param fields The array of {@code fields} for the structure.
      * @return a {@code Structure} interface for the newly created object.
      */
     StructureConstPtr createStructure (
+        StringArray const & fieldNames,
+        FieldConstPtrArray const & fields) const;
+    /**
+     * Create a {@code Structure} field with identification string.
+     * @param id The identification string for the structure.
+     * @param fieldNames The array of {@code fieldNames} for the structure.
+     * @param fields The array of {@code fields} for the structure.
+     * @return a {@code Structure} interface for the newly created object.
+     */
+    StructureConstPtr createStructure (
+    	String id,
         StringArray const & fieldNames,
         FieldConstPtrArray const & fields) const;
     /**

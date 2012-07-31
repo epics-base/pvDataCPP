@@ -70,6 +70,8 @@ bool operator==(const Structure& a, const Structure& b)
 {
     if(&a==&b)
         return true;
+    if (a.getID()!=b.getID())
+    	return false;
     size_t nflds=a.getNumberFields();
     if (b.getNumberFields()!=nflds)
         return false;
