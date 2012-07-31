@@ -191,6 +191,10 @@ namespace epics { namespace pvData {
         return sum;
     }
 
+    uint32 BitSet::size() const {
+        return wordsLength * BITS_PER_WORD;
+    }
+
     BitSet& BitSet::operator&=(const BitSet& set) {
 
         while (wordsInUse > set.wordsInUse)

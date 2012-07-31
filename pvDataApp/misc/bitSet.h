@@ -152,6 +152,15 @@ namespace epics { namespace pvData {
         uint32 cardinality() const;
 
         /**
+         * Returns the number of bits of space actually in use by this
+         * {@code BitSet} to represent bit values.
+         * The maximum element in the set is the size - 1st element.
+         *
+         * @return the number of bits currently in this bit set
+         */
+        uint32 size() const;
+
+        /**
          * Performs a logical <b>AND</b> of this target bit set with the
          * argument bit set. This bit set is modified so that each bit in it
          * has the value {@code true} if and only if it both initially
