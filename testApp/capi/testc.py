@@ -12,18 +12,26 @@ libname = "../../lib/%s/libtestc.so" % os.environ["EPICS_HOST_ARCH"]
 lib = CDLL(libname)
 lib.createTest.restype = c_void_p
 lib.createTest.argtypes = []
-lib.getDoubleArray.argtypes = [c_void_p, c_char_p]
-lib.getDoubleArray.restype = POINTER(c_double)
+
 lib.getLength.argtypes = [c_void_p, c_char_p]
 lib.getLength.restype = c_int
 lib.setLength.argtypes = [c_void_p, c_char_p, c_int]
 lib.setLength.restype = None
-lib.getInt.argtypes = [c_void_p, c_char_p]
-lib.getInt.restype = c_int
+
+lib.getField_int.argtypes = [c_void_p, c_char_p]
+lib.getField_int.restype = c_int
 lib.putField_int.argtypes = [c_void_p, c_char_p, c_int]
 lib.putField_int.restype = None
+lib.getArray_int.argtypes = [c_void_p, c_char_p]
+lib.getArray_int.restype = POINTER(c_int)
+
+lib.getField_double.argtypes = [c_void_p, c_char_p]
+lib.getField_double.restype = c_double
 lib.putField_double.argtypes = [c_void_p, c_char_p, c_double]
 lib.putField_double.restype = None
+lib.getArray_double.argtypes = [c_void_p, c_char_p]
+lib.getArray_double.restype = POINTER(c_double)
+
 lib.PVStructuretoString.restype = None
 lib.PVStructuretoString.argtypes = [c_void_p]
 lib.createStructureVariant.restype = c_void_p
@@ -51,9 +59,9 @@ class FieldVariant(Structure):
 
 scalar, scalarArray, structure, structureArray = range(4)
 type_enum = ["scalar", "scalarArray", "structure", "structureArray"]
-scalar_enum = ["pvBoolean", "pvByte", "pvShort", "pvInt",
-               "pvLong", "pvUByte", "pvUShort", "pvUInt",
-               "pvULong", "pvFloat", "pvDouble", "pvString"]
+scalar_enum = ["boolean", "byte", "short", "int",
+               "long", "byte", "ushort", "uint",
+               "ulong", "float", "double", "string"]
 
 pvBoolean, pvByte, pvShort, pvInt, \
            pvLong, pvUByte, pvUShort, pvUInt, \
@@ -87,27 +95,40 @@ class Structure4(object):
                 subtype = s.getScalarType(n)
             elif type_enum[type_] == "scalarArray":
                 subtype = s.getElementType(n)
-            self.fields.append((name, type_, subtype))
+            else:
+                # TODO
+                subtype = None
+            self.fields.append((name, (type_, subtype)))
+        self.fdict = dict(self.fields)
         
     def show(self):
         s = self
         l = s.getNumberFields()
+        print "show structure from Python"
         print "structure"
         for n in range(l):
             name = s.getFieldName(n)
             type_ = s.getFieldType(n)
             if type_enum[type_] == "scalar":
                 sc_type = s.getScalarType(n)
-                print "  ", scalar_enum[sc_type], name
+                print "    %s %s" % (scalar_enum[sc_type], name)
             elif type_enum[type_] == "scalarArray":
                 el_type = s.getElementType(n)
-                print "  ", scalar_enum[el_type], "[]", name
-            else:
-                print "TODO"
+                print "    %s[] %s" % (scalar_enum[el_type], name)
+            elif type_enum[type_] == "structure":
+                print "    structure %s" % name
+                print "        TODO"
+            elif type_enum[type_] == "structureArray":
+                print "    structure[] %s" % name
+                print "        TODO"
 
+    def __init__(self, fields = None, handle = None):
 
-class MyStructure(Structure4):
-    def __init__(self, fields = None):
+        if handle is not None:
+            self.handle = handle
+            self.init()
+            return
+
         if fields is None:
             fields = self._fields_
         N = len(fields)
@@ -122,8 +143,32 @@ class MyStructure(Structure4):
         self.handle = lib.createStructureVariant(fs, N)
         self.init()
 
+
+class PVField(object):
+    def __init__(self, pvs, k):
+        self.pvs = pvs
+        self.k = k
+        (self.type_, self.scalarType) = self.pvs.s.fdict[k]
+    def put(self, value):
+        if self.scalarType == pvInt:
+            self.pvs.putInt(self.k, value)
+        elif self.scalarType == pvDouble:
+            self.pvs.putDouble(self.k, value)
+    def get(self):
+        if self.type_ == scalarArray:
+            return self.pvs.getDoubleArray(self.k)
+        else:
+            if self.scalarType == pvInt:
+                return self.pvs.getInt(self.k)
+            elif self.scalarType == pvDouble:
+                return self.pvs.getDouble(self.k)
+    def getType(self):
+        return self.type_, self.scalarType
+
 class PVStructure(object):
     def __init__(self, s):
+        object.__setattr__(self, "s", s)
+        # self.s = s
         self.handle = lib.createPVStructure(s.handle)
     def show(self):
         lib.PVStructuretoString(self.handle)
@@ -131,9 +176,10 @@ class PVStructure(object):
         return self
     def __exit__(self, a, b, c):
         print "destroying PVStructure handle (TODO)"
-        pass
     def getInt(self, name):
-        return lib.getInt(self.handle, name)
+        return lib.getField_int(self.handle, name)
+    def getDouble(self, name):
+        return lib.getField_double(self.handle, name)
     def putInt(self, name, value):
         return lib.putField_int(self.handle, name, value)
     def putDouble(self, name, value):
@@ -142,7 +188,7 @@ class PVStructure(object):
         lib.setLength(self.handle, name, length)
     def getDoubleArray(self, name):
         sz = lib.getLength(self.handle, name)
-        ptr = lib.getDoubleArray(self.handle, name)
+        ptr = lib.getArray_double(self.handle, name)
         # use the library routine 'as_array' in numpy 1.6
         ptr.__array_interface__ = {'typestr': '<f8',
                                    'version': 3,
@@ -150,13 +196,20 @@ class PVStructure(object):
                                    'shape': (sz,)}
         a = array(ptr, copy = False)
         return a
-    
+    def __getattr__(self, k):
+        return PVField(self, k).get()
+    def __setattr__(self, k, v):
+        if k in self.s.fdict:
+            PVField(self, k).put(v)
+        else:
+            object.__setattr__(self, k, v)
+
 # create Structure from Python (ctypes style)
 
-class MyStructure1(MyStructure):
+class MyStructure1(Structure4):
     _fields_ = (("name", scalar, pvDouble),)
 
-class MyStructure2(MyStructure):
+class MyStructure2(Structure4):
     _fields_ = (("hello", scalar, pvDouble),
                 ("world", scalar, pvInt),
                 ("epics", scalarArray, pvUShort),
@@ -168,11 +221,17 @@ with MyStructure2() as s:
     # create PVStructure from Structure
     with PVStructure(s) as pv:
         pv.setLength("diamond", 10)
-        a = pv.getDoubleArray("diamond")
+        # by reference
+        a = pv.diamond
         a[:5] = -0.1
         a[-5:] = [2,4,6,8,10]
         a *= 100
-        pv.putInt("world", 99)
-        pv.putDouble("hello", 102.5)
+        pv.hello = 102.5
+        pv.world = 101
+        print
+        print "the value of 'hello' is", pv.hello
+        print
+        print "show PVStructure from C"
         pv.show()
         
+# TODO sub-structure access

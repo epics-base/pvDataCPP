@@ -28,6 +28,14 @@ struct PVStructureHandle
     PVStructureHandle(PVStructurePtr s) : s(s) {}
 };
 
+template<typename T> T getField(void * handle, char * name)
+{
+    PVStructureHandle * ph = (PVStructureHandle *)handle;
+    std::tr1::shared_ptr<PVScalarValue<T> > a = 
+        std::tr1::static_pointer_cast<PVScalarValue<T> >(ph->s->getSubField(name));
+    return a->get();
+}
+
 template<typename T> void putField(void * handle, char * name, T value)
 {
     PVStructureHandle * ph = (PVStructureHandle *)handle;
@@ -36,21 +44,38 @@ template<typename T> void putField(void * handle, char * name, T value)
     a->put(value);
 }
 
-#define MAKEputField(T) \
+template<typename T> T * getArray(void * handle, char * name)
+{
+    PVStructureHandle * ph = (PVStructureHandle *)handle;
+    PVScalarArrayPtr p = ph->s->getScalarArrayField(name, pvDouble);
+    std::tr1::shared_ptr<PVValueArray<T> > d = std::tr1::static_pointer_cast<PVValueArray<T> >(p);
+    return d->get();
+}
+
+#define MAKEAPI(T)                                         \
     void putField_##T(void * handle, char * name, T value) \
-    {                                                     \
-        putField(handle, name, value);                    \
+    {                                                      \
+        putField<T>(handle, name, value);                  \
+    }                                                      \
+    T getField_##T(void * handle, char * name)             \
+    {                                                      \
+        return getField<T>(handle, name);                  \
+    }                                                      \
+    T * getArray_##T(void * handle, char * name)           \
+    {                                                      \
+        return getArray<T>(handle, name);                  \
     }
 
 extern "C"
 {
-    double * getDoubleArray(void * handle, char * name)
-    {
-        PVStructureHandle * ph = (PVStructureHandle *)handle;
-        PVScalarArrayPtr p = ph->s->getScalarArrayField(name, pvDouble);
-        PVDoubleArrayPtr d = std::tr1::static_pointer_cast<PVDoubleArray>(p);
-        return d->get();
-    }
+
+    MAKEAPI(char);
+    MAKEAPI(short);
+    MAKEAPI(int);
+    MAKEAPI(int64_t);
+    MAKEAPI(float);
+    MAKEAPI(double);
+
     int getLength(void * handle, char * name)
     {
         PVStructureHandle * ph = (PVStructureHandle *)handle;
@@ -65,16 +90,6 @@ extern "C"
         PVScalarArrayPtr a = std::tr1::static_pointer_cast<PVScalarArray>(p);
         return a->setLength(length);
     }
-    
-    int getInt(void * handle, char * name)
-    {
-        PVStructureHandle * ph = (PVStructureHandle *)handle;
-        return ph->s->getIntField(name)->get();
-    }
-
-    MAKEputField(int);
-    MAKEputField(double);
-    MAKEputField(short);
     
     void PVStructuretoString(void * handle)
     {
@@ -145,13 +160,13 @@ extern "C"
         StructureHandle * sh = (StructureHandle *)handle;
         return sh->s->getNumberFields();
     }
-
+    
     const char * getFieldName(void * handle, int n)
     {
         StructureHandle * sh = (StructureHandle *)handle;
         return sh->s->getFieldNames()[n].c_str();
     }
-
+    
     int getFieldType(void * handle, int n)
     {
         StructureHandle * sh = (StructureHandle *)handle;
