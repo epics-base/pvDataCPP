@@ -66,6 +66,7 @@ static void testMonitor()
     MonitorElementPtr monitorElement = monitor->poll();
     monitor->release(monitorElement);
     monitor->stop();
+    printf("PASSED\n");
 }
 
 

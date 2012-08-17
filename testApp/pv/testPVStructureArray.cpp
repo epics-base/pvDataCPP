@@ -24,6 +24,8 @@
 
 using namespace epics::pvData;
 
+static bool debug = false;
+
 static FieldCreatePtr fieldCreate;
 static PVDataCreatePtr pvDataCreate;
 static StandardFieldPtr standardField;
@@ -31,7 +33,8 @@ static StandardPVFieldPtr standardPVField;
 static ConvertPtr convert;
 static String buffer;
 
-void testPVStructureArray(FILE * fd) {
+static void testPVStructureArray(FILE * fd) {
+    if(debug) fprintf(fd,"/ntestPVStructureArray\n");
     StructureArrayConstPtr alarm(
         fieldCreate->createStructureArray(standardField->alarm()));
     PVStructureArrayPtr pvAlarmStructure(
@@ -46,15 +49,16 @@ void testPVStructureArray(FILE * fd) {
     pvAlarmStructure->put(0,2,palarms,0);
     buffer.clear();
     pvAlarmStructure->toString(&buffer);
-    fprintf(fd,"pvAlarmStructure\n%s\n",buffer.c_str());
+    if(debug) fprintf(fd,"pvAlarmStructure\n%s\n",buffer.c_str());
     PVStructureArrayPtr copy(pvDataCreate->createPVStructureArray(alarm));
     convert->copyStructureArray(pvAlarmStructure,copy);
     buffer.clear();
     copy->toString(&buffer);
-    fprintf(fd,"copy\n%s\n",buffer.c_str());
+    if(debug) fprintf(fd,"copy\n%s\n",buffer.c_str());
+    fprintf(fd,"testPVStructureArray PASSED\n");
 }
 
-StructureConstPtr getPowerSupplyStructure() {
+static StructureConstPtr getPowerSupplyStructure() {
     String properties("alarm");
     FieldConstPtrArray  fields;
     StringArray fieldNames;
@@ -67,32 +71,35 @@ StructureConstPtr getPowerSupplyStructure() {
     fields.push_back(standardField->scalar(pvDouble,properties));
     fields.push_back(standardField->scalar(pvDouble,properties));
     StructureConstPtr structure = fieldCreate->createStructure(
-        fieldNames,fields);
+        "powerSupply_t",fieldNames,fields);
     return structure;
 }
 
-void testPowerSupplyArray(FILE * fd) {
+static void testPowerSupplyArray(FILE * fd) {
+    if(debug) fprintf(fd,"/ntestPowerSupplyArray\n");
     PVStructurePtr powerSupplyArrayStruct = standardPVField->structureArray(
         getPowerSupplyStructure(),String("alarm,timeStamp"));
     PVStructureArrayPtr powerSupplyArray =
         powerSupplyArrayStruct->getStructureArrayField(String("value"));
     assert(powerSupplyArray.get()!=NULL);
     int offset = powerSupplyArray->append(5);
+    if(debug) fprintf(fd,"offset %d\n",offset);
     buffer.clear();
     powerSupplyArrayStruct->toString(&buffer);
-    fprintf(fd,"after append 5\n%s\n",buffer.c_str());
+    if(debug) fprintf(fd,"after append 5\n%s\n",buffer.c_str());
     powerSupplyArray->remove(0,2);
     buffer.clear();
     powerSupplyArrayStruct->toString(&buffer);
-    fprintf(fd,"after remove(0,2)\n%s\n",buffer.c_str());
+    if(debug) fprintf(fd,"after remove(0,2)\n%s\n",buffer.c_str());
     powerSupplyArray->remove(2,1);
     buffer.clear();
     powerSupplyArrayStruct->toString(&buffer);
-    fprintf(fd,"after remove 2,1%s\n",buffer.c_str());
+    if(debug) fprintf(fd,"after remove 2,1%s\n",buffer.c_str());
     powerSupplyArray->compress();
     buffer.clear();
     powerSupplyArrayStruct->toString(&buffer);
-    fprintf(fd,"after compress%s\n",buffer.c_str());
+    if(debug) fprintf(fd,"after compress%s\n",buffer.c_str());
+    fprintf(fd,"testPowerSupplyArray PASSED\n");
 }
 
 int main(int argc,char *argv[])

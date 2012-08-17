@@ -54,24 +54,26 @@ static void testBasic(FILE * fd,FILE *auxfd ) {
     result = queue->put(messages[3],infoMessage,true);
     assert(result==true);
     messageNode = queue->get();
-    assert(messageNode.get()!=0);
+    assert(messageNode.get()!=NULL);
     fprintf(fd,"message %s messageType %s\n",
         messageNode->getMessage().c_str(),
         getMessageTypeName(messageNode->getMessageType()).c_str());
     assert(messageNode->getMessage().compare(messages[0])==0);
     queue->release();
     messageNode = queue->get();
-    assert(messageNode.get()!=0);
+    assert(messageNode.get()!=NULL);
     assert(messageNode->getMessage().compare(messages[1])==0);
     queue->release();
     messageNode = queue->get();
-    assert(messageNode.get()!=0);
+    assert(messageNode.get()!=NULL);
     fprintf(fd,"message %s messageType %s\n",
         messageNode->getMessage().c_str(),
         getMessageTypeName(messageNode->getMessageType()).c_str());
     assert(messageNode->getMessage().compare(messages[3])==0);
     queue->release();
     result = queue->isEmpty();
+    assert(result);
+    fprintf(fd,"PASSED\n");
 }
 
 int main(int argc, char *argv[]) {

@@ -152,6 +152,7 @@ static void testBasic(FILE * fd,FILE *auxfd ) {
         sink->look();
     }
     sink->stop();
+    fprintf(fd,"PASSED\n");
 }
 
 

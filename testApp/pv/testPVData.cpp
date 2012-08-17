@@ -25,6 +25,8 @@
 using namespace epics::pvData;
 using std::tr1::static_pointer_cast;
 
+static bool debug = false;
+
 static FieldCreatePtr fieldCreate;
 static PVDataCreatePtr pvDataCreate;
 static StandardFieldPtr standardField;
@@ -37,6 +39,7 @@ static String allProperties("alarm,timeStamp,display,control,valueAlarm");
 
 static void testAppend(FILE * fd)
 {
+    if(debug) fprintf(fd,"\ntestAppend\n");
     PVFieldPtrArray pvFields;
     StringArray fieldNames;
     PVStructurePtr pvParent = pvDataCreate->createPVStructure(
@@ -48,11 +51,13 @@ static void testAppend(FILE * fd)
     pvParent->appendPVField("request",pvField);
     builder.clear();
     pvParent->toString(&builder);
-    fprintf(fd,"%s\n",builder.c_str());
+    if(debug) fprintf(fd,"%s\n",builder.c_str());
+    fprintf(fd,"testAppend PASSED\n");
 }
 
 static void testCreatePVStructure(FILE * fd)
 {
+    if(debug) fprintf(fd,"\ntestCreatePVStructure\n");
     PVStructurePtr pv0 = standardPVField->scalar(
          pvDouble,alarmTimeStampValueAlarm);
     PVScalarPtr pv1 = pvDataCreate->createPVScalar(pvString);
@@ -68,7 +73,8 @@ static void testCreatePVStructure(FILE * fd)
         fieldNames,pvFields);
     builder.clear();
     pvParent->toString(&builder);
-    fprintf(fd,"%s\n",builder.c_str());
+    if(debug) fprintf(fd,"%s\n",builder.c_str());
+    fprintf(fd,"testCreatePVStructure PASSED\n");
 }
 
 static void testPVScalarCommon(FILE * fd,String fieldName,ScalarType stype)
@@ -81,7 +87,7 @@ static void testPVScalarCommon(FILE * fd,String fieldName,ScalarType stype)
     }
     builder.clear();
     pvScalar->toString(&builder);
-    fprintf(fd,"%s\n",builder.c_str());
+    if(debug) fprintf(fd,"%s\n",builder.c_str());
 }
 
 static void testPVScalarWithProperties(
@@ -295,12 +301,12 @@ static void testPVScalarWithProperties(
     }
     builder.clear();
     pvStructure->toString(&builder);
-    fprintf(fd,"%s\n",builder.c_str());
+    if(debug) fprintf(fd,"%s\n",builder.c_str());
 }
 
 static void testPVScalar(FILE * fd) {
-    fprintf(fd,"\ntestScalar\n");
-    testPVScalarCommon(fd,String("boolean"),pvBoolean);
+    if(debug) fprintf(fd,"\ntestScalar\n");
+    testPVScalarCommon(fd,String("boolean"),pvByte);
     testPVScalarCommon(fd,String("byte"),pvByte);
     testPVScalarCommon(fd,String("short"),pvShort);
     testPVScalarCommon(fd,String("int"),pvInt);
@@ -325,6 +331,7 @@ static void testPVScalar(FILE * fd) {
     testPVScalarWithProperties(fd,String("float"),pvFloat);
     testPVScalarWithProperties(fd,String("double"),pvDouble);
     testPVScalarWithProperties(fd,String("string"),pvString);
+    fprintf(fd,"testScalar PASSED\n");
 }
 
 
@@ -350,13 +357,13 @@ static void testScalarArrayCommon(FILE * fd,String fieldName,ScalarType stype)
     }
     builder.clear();
     pvStructure->toString(&builder);
-    fprintf(fd,"%s\n",builder.c_str());
+    if(debug) fprintf(fd,"%s\n",builder.c_str());
     PVFieldPtr pvField = pvStructure->getSubField("alarm.status");
     pvField->message("this is a test",infoMessage);
 }
 
 static void testScalarArray(FILE * fd) {
-    fprintf(fd,"\ntestScalarArray\n");
+    if(debug) fprintf(fd,"\ntestScalarArray\n");
     testScalarArrayCommon(fd,String("boolean"),pvBoolean);
     testScalarArrayCommon(fd,String("byte"),pvByte);
     testScalarArrayCommon(fd,String("short"),pvShort);
@@ -365,6 +372,7 @@ static void testScalarArray(FILE * fd) {
     testScalarArrayCommon(fd,String("float"),pvFloat);
     testScalarArrayCommon(fd,String("double"),pvDouble);
     testScalarArrayCommon(fd,String("string"),pvString);
+    fprintf(fd,"testScalarArray PASSED\n");
 }
 
 int main(int argc,char *argv[])

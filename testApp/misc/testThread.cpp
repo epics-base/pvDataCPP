@@ -53,6 +53,7 @@ static void testThreadRun(FILE *fd) {
         ax.end.signal();
     }
     fprintf(fd, "Action is %s\n", ax.actuallyRan?"true":"false");
+    fprintf(fd,"testThreadRun PASSED\n");
 }
 
 class Basic :
@@ -101,6 +102,7 @@ static void testBasic(FILE *fd) {
     ExecutorPtr executor( new Executor(String("basic"),middlePriority));
     BasicPtr basic( new Basic(executor));
     basic->run();
+    fprintf(fd,"testBasic PASSED\n");
 }
 
 class MyFunc : public TimeFunctionRequester {
@@ -131,6 +133,7 @@ static void testThreadContext(FILE *fd,FILE *auxFd) {
     double perCall = timeFunction->timeCall();
     perCall *= 1e6;
     fprintf(auxFd,"time per call %f microseconds\n",perCall);
+    fprintf(fd,"testThreadContext PASSED\n");
 }
 
 int main(int argc, char *argv[]) {

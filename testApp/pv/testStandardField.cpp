@@ -24,13 +24,15 @@
 using namespace epics::pvData;
 using std::tr1::static_pointer_cast;
 
+static bool debug = false;
+
 static FieldCreatePtr fieldCreate = getFieldCreate();
 static StandardFieldPtr standardField = getStandardField();
 static String builder("");
 
 static void print(String name)
 {
-    printf("\n%s\n%s\n",name.c_str(),builder.c_str());
+    if(debug) printf("\n%s\n%s\n",name.c_str(),builder.c_str());
 }
 
 int main(int argc,char *argv[])
@@ -63,6 +65,7 @@ int main(int argc,char *argv[])
     builder.clear();
     structureArrayValue->toString(&builder);
     print("structureArrayValue");
+    printf("PASSED\n");
     return(0);
 }
 

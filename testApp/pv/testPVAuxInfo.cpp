@@ -25,6 +25,8 @@
 using namespace epics::pvData;
 using std::tr1::static_pointer_cast;
 
+static bool debug = false;
+
 static FieldCreatePtr fieldCreate;
 static PVDataCreatePtr pvDataCreate;
 static StandardFieldPtr standardField;
@@ -57,7 +59,7 @@ static void printOffsets(PVStructurePtr pvStructure,FILE *fd)
 }
 
 static void testPVAuxInfo(FILE * fd) {
-    fprintf(fd,"\ntestPVAuxInfo\n");
+    if(debug) fprintf(fd,"\ntestPVAuxInfo\n");
     PVStructurePtr pvStructure = standardPVField->scalar(
         pvDouble,"alarm,timeStamp,display,control");
     PVStructurePtr display
@@ -74,9 +76,10 @@ static void testPVAuxInfo(FILE * fd) {
     convert->fromString(pscalar,"3.0");
     buffer.clear();
     pvStructure->toString(&buffer);
-    fprintf(fd,"%s\n",buffer.c_str());
+    if(debug) fprintf(fd,"%s\n",buffer.c_str());
     // now show field offsets
-    printOffsets(pvStructure,fd);
+    if(debug) printOffsets(pvStructure,fd);
+    fprintf(fd,"testPVAuxInfo PASSED\n");
 }
 
 int main(int argc,char *argv[])

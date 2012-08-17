@@ -34,6 +34,8 @@
 
 using namespace epics::pvData;
 
+static bool debug = false;
+
 static FieldCreatePtr fieldCreate;
 static PVDataCreatePtr pvDataCreate;
 static StandardFieldPtr standardField;
@@ -49,9 +51,11 @@ static PVStructurePtr enumeratedRecord;
 static void createRecords(FILE * fd,FILE *auxfd)
 {
     doubleRecord = standardPVField->scalar(pvDouble,allProperties);
-    builder.clear();
-    doubleRecord->toString(&builder);
-    fprintf(fd,"%s\n",builder.c_str());
+    if(debug) {
+        builder.clear();
+        doubleRecord->toString(&builder);
+        fprintf(fd,"doubleRecord\n%s\n",builder.c_str());
+    }
     StringArray choices;
     choices.reserve(4);
     choices.push_back("1");
@@ -59,9 +63,11 @@ static void createRecords(FILE * fd,FILE *auxfd)
     choices.push_back("3");
     choices.push_back("4");
     enumeratedRecord = standardPVField->enumerated(choices,alarmTimeStamp);
-    builder.clear();
-    enumeratedRecord->toString(&builder);
-    fprintf(fd,"%s\n",builder.c_str());
+    if(debug) {
+        builder.clear();
+        enumeratedRecord->toString(&builder);
+        fprintf(fd,"enumeratedRecord\n%s\n",builder.c_str());
+    }
 }
 
 static void printRecords(FILE * fd,FILE *auxfd)
@@ -78,7 +84,7 @@ static void printRecords(FILE * fd,FILE *auxfd)
 
 static void testAlarm(FILE * fd,FILE *auxfd)
 {
-    fprintf(fd,"testAlarm\n");
+    if(debug) fprintf(fd,"testAlarm\n");
     Alarm alarm;
     PVAlarm pvAlarm; 
     bool result;
@@ -102,12 +108,16 @@ static void testAlarm(FILE * fd,FILE *auxfd)
     String message = alarm.getMessage();
     String severity = AlarmSeverityFunc::getSeverityNames()[alarm.getSeverity()];
     String status = AlarmStatusFunc::getStatusNames()[alarm.getStatus()];
-    fprintf(fd," message %s severity %s status %s\n",message.c_str(),severity.c_str(),status.c_str());
+    if(debug) {
+        fprintf(fd," message %s severity %s status %s\n",
+            message.c_str(),severity.c_str(),status.c_str());
+    }
+    fprintf(fd,"testAlarm PASSED\n");
 }
 
 static void testTimeStamp(FILE * fd,FILE *auxfd)
 {
-    fprintf(fd,"testTimeStamp\n");
+    if(debug) fprintf(fd,"testTimeStamp\n");
     TimeStamp timeStamp;
     PVTimeStamp pvTimeStamp; 
     bool result;
@@ -131,20 +141,23 @@ static void testTimeStamp(FILE * fd,FILE *auxfd)
     timeStamp.toTime_t(tt);
     struct tm ctm;
     memcpy(&ctm,localtime(&tt),sizeof(struct tm));
-    fprintf(auxfd,
-        "%4.4d.%2.2d.%2.2d %2.2d:%2.2d:%2.2d %d nanoSeconds isDst %s userTag %d\n",
-        ctm.tm_year+1900,ctm.tm_mon + 1,ctm.tm_mday,
-        ctm.tm_hour,ctm.tm_min,ctm.tm_sec,
-        timeStamp.getNanoSeconds(),
-        (ctm.tm_isdst==0) ? "false" : "true",
-        timeStamp.getUserTag());
+    if(debug) {
+        fprintf(auxfd,
+            "%4.4d.%2.2d.%2.2d %2.2d:%2.2d:%2.2d %d nanoSeconds isDst %s userTag %d\n",
+            ctm.tm_year+1900,ctm.tm_mon + 1,ctm.tm_mday,
+            ctm.tm_hour,ctm.tm_min,ctm.tm_sec,
+            timeStamp.getNanoSeconds(),
+            (ctm.tm_isdst==0) ? "false" : "true",
+            timeStamp.getUserTag());
+    }
     timeStamp.put(0,0);
     pvTimeStamp.set(timeStamp);
+    fprintf(fd,"testTimeStamp PASSED\n");
 }
 
 static void testControl(FILE * fd,FILE *auxfd)
 {
-    fprintf(fd,"testControl\n");
+    if(debug) fprintf(fd,"testControl\n");
     Control control;
     PVControl pvControl; 
     bool result;
@@ -165,12 +178,13 @@ static void testControl(FILE * fd,FILE *auxfd)
     assert(cl.getHigh()==control.getHigh());
     double low = control.getLow();
     double high = control.getHigh();
-    fprintf(fd," low %f high %f\n",low,high);
+    if(debug) fprintf(fd," low %f high %f\n",low,high);
+    fprintf(fd,"testControl PASSED\n");
 }
 
 static void testDisplay(FILE * fd,FILE *auxfd)
 {
-    fprintf(fd,"testDisplay\n");
+    if(debug) fprintf(fd,"testDisplay\n");
     Display display;
     PVDisplay pvDisplay; 
     bool result;
@@ -197,12 +211,13 @@ static void testDisplay(FILE * fd,FILE *auxfd)
     assert(dy.getUnits().compare(display.getUnits())==0);
     double low = display.getLow();
     double high = display.getHigh();
-    fprintf(fd," low %f high %f\n",low,high);
+    if(debug) fprintf(fd," low %f high %f\n",low,high);
+    fprintf(fd,"testDisplay PASSED\n");
 }
 
 static void testEnumerated(FILE * fd,FILE *auxfd)
 {
-    fprintf(fd,"testEnumerated\n");
+    if(debug) fprintf(fd,"testEnumerated\n");
     PVEnumerated pvEnumerated; 
     bool result;
     PVFieldPtr pvField = enumeratedRecord->getSubField(String("value"));
@@ -216,13 +231,16 @@ static void testEnumerated(FILE * fd,FILE *auxfd)
     String choice = pvEnumerated.getChoice();
     StringArray choices = pvEnumerated.getChoices();
     int32 numChoices = pvEnumerated.getNumberChoices();
-    fprintf(fd,"index %d choice %s choices",index,choice.c_str());
-    for(int i=0; i<numChoices; i++ ) fprintf(fd," %s",choices[i].c_str());
-    fprintf(fd,"\n");
+    if(debug) {
+        fprintf(fd,"index %d choice %s choices",index,choice.c_str());
+        for(int i=0; i<numChoices; i++ ) fprintf(fd," %s",choices[i].c_str());
+        fprintf(fd,"\n");
+    }
     pvEnumerated.setIndex(2);
     index = pvEnumerated.getIndex();
     choice = pvEnumerated.getChoice();
-    fprintf(fd,"index %d choice %s\n",index,choice.c_str());
+    if(debug) fprintf(fd,"index %d choice %s\n",index,choice.c_str());
+    fprintf(fd,"testEnumerated PASSED\n");
 }
 
 int main(int argc,char *argv[])
@@ -250,7 +268,8 @@ int main(int argc,char *argv[])
     testControl(fd,auxfd);
     testDisplay(fd,auxfd);
     testEnumerated(fd,auxfd);
-    printRecords(fd,auxfd);
+    if(debug) printRecords(fd,auxfd);
+    fprintf(fd,"ALL PASSED\n");
     return(0);
 }
 

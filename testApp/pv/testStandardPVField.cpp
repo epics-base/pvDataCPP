@@ -25,6 +25,8 @@
 using namespace epics::pvData;
 using std::tr1::static_pointer_cast;
 
+static bool debug = false;
+
 static PVDataCreatePtr pvDataCreate = getPVDataCreate();
 static StandardFieldPtr standardField = getStandardField();
 static StandardPVFieldPtr standardPVField = getStandardPVField();
@@ -32,7 +34,7 @@ static String builder("");
 
 static void print(String name)
 {
-    printf("\n%s\n%s\n",name.c_str(),builder.c_str());
+    if(debug) printf("\n%s\n%s\n",name.c_str(),builder.c_str());
 }
 
 int main(int argc,char *argv[])
@@ -79,6 +81,7 @@ int main(int argc,char *argv[])
     builder.clear();
     pvStructure->toString(&builder);
     print("structureArrayTest");
+    printf("PASSED\n");
     return(0);
 }
 

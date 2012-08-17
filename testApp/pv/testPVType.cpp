@@ -66,7 +66,8 @@ int main(int argc,char *argv[])
     longInt = intValue = 0x80000000;;
     longInt <<= 32;
     fprintf(fd," min %lli\n",longInt);
-    
+
+    fprintf(fd,"PASSED\n");
     return(0);
 }
 

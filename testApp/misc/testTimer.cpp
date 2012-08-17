@@ -30,6 +30,7 @@ static double oneDelay = 4.0;
 static double twoDelay = 2.0;
 static double threeDelay = 1.0;
 static int ntimes = 3;
+static bool debug = false;
 
 class MyCallback;
 typedef std::tr1::shared_ptr<MyCallback> MyCallbackPtr;
@@ -67,8 +68,10 @@ private:
 
 static void testBasic(FILE *fd, FILE *auxfd)
 {
-printf("\n\ntestBasic oneDelay %lf twoDelay %lf threeDaley %lf\n",
-oneDelay,twoDelay,threeDelay);
+    if(debug) {
+        printf("\n\ntestBasic oneDelay %lf twoDelay %lf threeDaley %lf\n",
+            oneDelay,twoDelay,threeDelay);
+    }
     String one("one");
     String two("two");
     String three("three");
@@ -90,9 +93,11 @@ oneDelay,twoDelay,threeDelay);
         if(oneDelay>.1) assert(timer->isScheduled(callbackOne));
         if(twoDelay>.1) assert(timer->isScheduled(callbackTwo));
         if(threeDelay>.1) assert(timer->isScheduled(callbackThree));
-        String builder;
-        timer->toString(&builder);
-        printf("timerQueue\n%s",builder.c_str());
+        if(debug) {
+            String builder;
+            timer->toString(&builder);
+            printf("timerQueue\n%s",builder.c_str());
+        }
         eventOne->wait();
         eventTwo->wait();
         eventThree->wait();
@@ -101,28 +106,40 @@ oneDelay,twoDelay,threeDelay);
         diff = TimeStamp::diff(
             callbackOne->getTimeStamp(),currentTimeStamp);
         delta = diff - oneDelay;
-        fprintf(auxfd,"one requested %f  actual %f delta %f\n",oneDelay,diff,delta);
+        if(debug) {
+            fprintf(auxfd,"one requested %f  actual %f delta %f\n",
+                 oneDelay,diff,delta);
+        }
         if(delta<0.0) delta = -delta;
         assert(delta<.1);
         diff = TimeStamp::diff(
             callbackTwo->getTimeStamp(),currentTimeStamp);
         delta = diff - twoDelay;
-        fprintf(auxfd,"two requested %f  actual %f delta %f\n",twoDelay,diff,delta);
+        if(debug) {
+            fprintf(auxfd,"two requested %f  actual %f delta %f\n",
+                twoDelay,diff,delta);
+        }
         if(delta<0.0) delta = -delta;
         assert(delta<.1);
         diff = TimeStamp::diff(
             callbackThree->getTimeStamp(),currentTimeStamp);
         delta = diff - threeDelay;
-        fprintf(auxfd,"three requested %f  actual %f delta %f\n",threeDelay,diff,delta);
+        if(debug) {
+            fprintf(auxfd,"three requested %f  actual %f delta %f\n",
+                threeDelay,diff,delta);
+        }
         if(delta<0.0) delta = -delta;
         assert(delta<.1);
     }
+    fprintf(fd,"testBasic PASSED\n");
 }
 
 static void testCancel(FILE *fd, FILE *auxfd)
 {
-printf("\n\ntestCancel oneDelay %lf twoDelay %lf threeDaley %lf\n",
-oneDelay,twoDelay,threeDelay);
+    if(debug) {
+        printf("\n\ntestCancel oneDelay %lf twoDelay %lf threeDaley %lf\n",
+            oneDelay,twoDelay,threeDelay);
+    }
     String one("one");
     String two("two");
     String three("three");
@@ -145,9 +162,11 @@ oneDelay,twoDelay,threeDelay);
         if(oneDelay>.1) assert(timer->isScheduled(callbackOne));
         assert(!timer->isScheduled(callbackTwo));
         if(threeDelay>.1) assert(timer->isScheduled(callbackThree));
-        String builder;
-        timer->toString(&builder);
-        printf("timerQueue\n%s",builder.c_str());
+        if(debug) {
+            String builder;
+            timer->toString(&builder);
+            printf("timerQueue\n%s",builder.c_str());
+        }
         eventOne->wait();
         eventThree->wait();
         double diff;
@@ -155,16 +174,23 @@ oneDelay,twoDelay,threeDelay);
         diff = TimeStamp::diff(
             callbackOne->getTimeStamp(),currentTimeStamp);
         delta = diff - oneDelay;
-        fprintf(auxfd,"one requested %f  actual %f delta %f\n",oneDelay,diff,delta);
+        if(debug) {
+            fprintf(auxfd,"one requested %f  actual %f delta %f\n",
+                 oneDelay,diff,delta);
+        }
         if(delta<0.0) delta = -delta;
         assert(delta<.1);
         diff = TimeStamp::diff(
             callbackThree->getTimeStamp(),currentTimeStamp);
         delta = diff - threeDelay;
-        fprintf(auxfd,"three requested %f  actual %f delta %f\n",threeDelay,diff,delta);
+        if(debug) {
+            fprintf(auxfd,"three requested %f  actual %f delta %f\n",
+                threeDelay,diff,delta);
+        }
         if(delta<0.0) delta = -delta;
         assert(delta<.1);
     }
+    fprintf(fd,"testCancel PASSED\n");
 }
 
 int main(int argc, char *argv[]) {
@@ -183,23 +209,30 @@ int main(int argc, char *argv[]) {
     oneDelay = .4;
     twoDelay = .2;
     threeDelay = .1;
+    fprintf(fd,"oneDelay %f twoDelay %f threeDelay %f\n",
+         oneDelay,twoDelay,threeDelay);
     testBasic(fd,auxfd);
     testCancel(fd,auxfd);
     oneDelay = .1;
     twoDelay = .2;
     threeDelay = .4;
+    fprintf(fd,"oneDelay %f twoDelay %f threeDelay %f\n",
+         oneDelay,twoDelay,threeDelay);
     testBasic(fd,auxfd);
     testCancel(fd,auxfd);
     oneDelay = .1;
     twoDelay = .4;
     threeDelay = .2;
+    fprintf(fd,"oneDelay %f twoDelay %f threeDelay %f\n",
+         oneDelay,twoDelay,threeDelay);
     testBasic(fd,auxfd);
     testCancel(fd,auxfd);
     oneDelay = .0;
     twoDelay = .0;
     threeDelay = .0;
+    fprintf(fd,"oneDelay %f twoDelay %f threeDelay %f\n",
+         oneDelay,twoDelay,threeDelay);
     testBasic(fd,auxfd);
     testCancel(fd,auxfd);
-    epicsExitCallAtExits();
     return (0);
 }
