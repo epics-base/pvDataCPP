@@ -17,7 +17,7 @@ public:
     PVDisplay() {}
     //default constructors and destructor are OK
     //An automatic detach is issued if already attached.
-    bool attach(PVFieldPtr pvField);
+    bool attach(PVFieldPtr const & pvField);
     void detach();
     bool isAttached();
     // each of the following throws logic_error is not attached to PVField

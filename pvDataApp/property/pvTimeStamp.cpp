@@ -17,7 +17,7 @@ using std::tr1::static_pointer_cast;
 static String noTimeStamp("No timeStamp structure found");
 static String notAttached("Not attached to a timeStamp structure");
 
-bool PVTimeStamp::attach(PVFieldPtr pvField)
+bool PVTimeStamp::attach(PVFieldPtr const & pvField)
 {
     if(pvField->getField()->getType()!=structure) {
             pvField->message(noTimeStamp,errorMessage);

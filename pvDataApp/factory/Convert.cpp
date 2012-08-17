@@ -2601,7 +2601,7 @@ void convertToString(StringBuilder buffer,PVField const * pv,int indentLevel)
     PVScalar const *pvScalar = static_cast<PVScalar const *>(pv);
     const ScalarConstPtr & pscalar = pvScalar->getScalar();
     ScalarType scalarType = pscalar->getScalarType();
-    ScalarTypeFunc::toString(buffer,scalarType);
+    *buffer += pscalar->getID();
     *buffer += " ";
     *buffer += pv->getFieldName();
     *buffer += " ";
@@ -2698,14 +2698,11 @@ void convertToString(StringBuilder buffer,PVField const * pv,int indentLevel)
 
 void convertStructure(StringBuilder buffer,PVStructure const *data,int indentLevel)
 {
+    *buffer += data->getStructure()->getID() + " " + data->getFieldName();
     String extendsName = data->getExtendsStructureName();
-    if(extendsName.length()<=0) {
-        *buffer += "structure ";
-    } else {
-        *buffer += extendsName;
-        *buffer += " ";
+    if(extendsName.length()>0) {
+        *buffer += " extends " + extendsName;
     }
-    *buffer += data->getFieldName();
     PVFieldPtrArray const & fieldsData = data->getPVFields();
     if (fieldsData.size() != 0) {
         int length = data->getStructure()->getNumberFields();
@@ -2722,10 +2719,7 @@ void convertArray(StringBuilder buffer,PVScalarArray const * xxx,int indentLevel
     PVScalarArray *pv = const_cast<PVScalarArray *>(xxx);
     ScalarArrayConstPtr array = pv->getScalarArray();
     ScalarType type = array->getElementType();
-    ScalarTypeFunc::toString(buffer,type);
-    *buffer += "[] ";
-    *buffer += pv->getFieldName();
-    *buffer += " ";
+    *buffer += array->getID() + " " + pv->getFieldName() + " ";
     switch(type) {
     case pvBoolean: {
             PVBooleanArray *pvdata = static_cast<PVBooleanArray *>(pv);
@@ -2970,10 +2964,8 @@ void convertArray(StringBuilder buffer,PVScalarArray const * xxx,int indentLevel
 void convertStructureArray(StringBuilder buffer,
     PVStructureArray const * xxx,int indentLevel)
 {
-     PVStructureArray *pvdata = const_cast<PVStructureArray *>(xxx);
-    *buffer += "structure[] ";
-    *buffer += pvdata->getFieldName();
-    *buffer += " ";
+    PVStructureArray *pvdata = const_cast<PVStructureArray *>(xxx);
+    *buffer += pvdata->getStructureArray()->getID() + " " + pvdata->getFieldName() + " ";
     size_t length = pvdata->getLength();
     if(length<=0) {
         return;

@@ -25,12 +25,12 @@
 using namespace epics::pvData;
 using std::tr1::static_pointer_cast;
 
-static FieldCreatePtr fieldCreate;
-static PVDataCreatePtr pvDataCreate;
-static StandardFieldPtr standardField;
-static StandardPVFieldPtr standardPVField;
-static ConvertPtr convert;
-static String builder("");
+static FieldCreatePtr fieldCreate = getFieldCreate();
+static PVDataCreatePtr pvDataCreate = getPVDataCreate();
+static StandardFieldPtr standardField = getStandardField();
+static StandardPVFieldPtr standardPVField = getStandardPVField();
+static ConvertPtr convert = getConvert();
+static String builder;
 static String alarmTimeStamp("alarm,timeStamp");
 static String alarmTimeStampValueAlarm("alarm,timeStamp,valueAlarm");
 static String allProperties("alarm,timeStamp,display,control,valueAlarm");
@@ -312,6 +312,31 @@ static void stringArray()
     fprintf(fd,"]\n");
 }
 
+static void shareArray()
+{
+    PVScalarArrayPtr pvScalarArray = pvDataCreate->createPVScalarArray(pvDouble);;
+    PVDoubleArrayPtr pvDoubleArray = static_pointer_cast<PVDoubleArray>(pvScalarArray);
+    DoubleArray value;
+    value.reserve(length);
+    for(size_t i = 0; i<length; i++) value.push_back(10.0*i);
+    pvDoubleArray->put(0,length,value,0);
+    PVDoubleArrayPtr pvShareArray = static_pointer_cast<PVDoubleArray>(
+          pvDataCreate->createPVScalarArray(pvDouble));
+    pvShareArray->shareData(
+        pvDoubleArray->getSharedVector(),
+        pvDoubleArray->getCapacity(),
+        pvDoubleArray->getLength());
+    printf("pvDoubleArray->get() %p pvShareArray->get() %p\n",pvDoubleArray->get(),pvShareArray->get());
+    printf("pvDoubleArray->getVector() %p pvShareArray->getVector() %p\n",
+        &(pvDoubleArray->getVector()),&(pvShareArray->getVector()));
+    printf("pvDoubleArray->getSharedVector() %p pvShareArray->getSharedVector() %p\n",
+        &(pvDoubleArray->getSharedVector()),&(pvShareArray->getSharedVector()));
+    assert(pvDoubleArray->get()==pvShareArray->get());
+    builder.clear();
+    pvShareArray->toString(&builder);
+    fprintf(fd,"pvShare\n%s\n",builder.c_str());
+}
+
 int main(int argc,char *argv[])
 {
     char *fileName = 0;
@@ -320,11 +345,6 @@ int main(int argc,char *argv[])
     if(fileName!=0 && fileName[0]!=0) {
         fd = fopen(fileName,"w+");
     }
-    fieldCreate = getFieldCreate();
-    pvDataCreate = getPVDataCreate();
-    standardField = getStandardField();
-    standardPVField = getStandardPVField();
-    convert = getConvert();
     byteArray();
     ubyteArray();
     longArray();
@@ -332,6 +352,7 @@ int main(int argc,char *argv[])
     floatArray();
     doubleArray();
     stringArray();
+    shareArray();
     return(0);
 }
 

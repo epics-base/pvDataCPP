@@ -26,6 +26,37 @@ class PVStructure;
 class PVStructureArray;
 
 /**
+ * typedef for a pointer to a PVAuxInfo.
+ */
+typedef std::tr1::shared_ptr<PVAuxInfo> PVAuxInfoPtr;
+
+/**
+ * typedef for a pointer to a PostHandler.
+ */
+typedef std::tr1::shared_ptr<PostHandler> PostHandlerPtr;
+
+/**
+ * typedef for a pointer to a PVField.
+ */
+typedef std::tr1::shared_ptr<PVField> PVFieldPtr;
+/**
+ * typedef for a pointer to a array of pointer to PVField.
+ */
+typedef std::vector<PVFieldPtr> PVFieldPtrArray;
+typedef std::vector<PVFieldPtr>::iterator PVFieldPtrArray_iterator;
+typedef std::vector<PVFieldPtr>::const_iterator PVFieldPtrArray_const__iterator;
+
+/**
+ * typedef for a pointer to a PVScalar.
+ */
+typedef std::tr1::shared_ptr<PVScalar> PVScalarPtr;
+
+/**
+ * typedef for a pointer to a PVScalarArray.
+ */
+typedef std::tr1::shared_ptr<PVScalarArray> PVScalarArrayPtr;
+
+/**
  * typedef for a pointer to a PVStructure.
  */
 typedef std::tr1::shared_ptr<PVStructure> PVStructurePtr;
@@ -35,32 +66,11 @@ typedef std::tr1::shared_ptr<PVStructure> PVStructurePtr;
 typedef std::vector<PVStructurePtr> PVStructurePtrArray;
 typedef std::vector<PVStructurePtr>::iterator PVStructurePtrArray_iterator;
 typedef std::vector<PVStructurePtr>::const_iterator PVStructurePtrArray_const__iterator;
-/**
- * typedef for a pointer to a PVField.
- */
-typedef std::tr1::shared_ptr<PVField> PVFieldPtr;
-/**
- * typedef for a pointer to a PVScalar.
- */
-typedef std::tr1::shared_ptr<PVScalar> PVScalarPtr;
-/**
- * typedef for a pointer to a PVScalarArray.
- */
-typedef std::tr1::shared_ptr<PVScalarArray> PVScalarArrayPtr;
+
 /**
  * typedef for a pointer to a PVStructureArray.
  */
 typedef std::tr1::shared_ptr<PVStructureArray> PVStructureArrayPtr;
-/**
- * typedef for a pointer to a array of pointer to PVField.
- */
-typedef std::vector<PVFieldPtr> PVFieldPtrArray;
-typedef std::vector<PVFieldPtr>::iterator PVFieldPtrArray_iterator;
-typedef std::vector<PVFieldPtr>::const_iterator PVFieldPtrArray_const__iterator;
-/**
- * typedef for a pointer to a PVAuxInfo.
- */
-typedef std::tr1::shared_ptr<PVAuxInfo> PVAuxInfoPtr;
 
 /**
  * This class provides auxillary information about a PVField.
@@ -125,8 +135,11 @@ private:
 /**
  * This class is implemented by code that calls setPostHander
  */
-class PostHandler {
+class PostHandler :
+  public std::tr1::enable_shared_from_this<PostHandler>
+{
 public:
+    POINTER_DEFINITIONS(PostHandler);
     /**
      * Destructor
      */
@@ -167,7 +180,7 @@ public:
      * At most one requester can be registered.
      * @param prequester The requester.
      */
-    virtual void setRequester(Requester *prequester);
+    virtual void setRequester(RequesterPtr const &prequester);
     /**
      * Get offset of the PVField field within top level structure.
      * Every field within the PVStructure has a unique offset.
@@ -233,7 +246,7 @@ public:
      * At most one handler can be set.
      * @param postHandler The handler.
      */
-    void setPostHandler(PostHandler *postHandler);
+    void setPostHandler(PostHandlerPtr const &postHandler);
     /**
      * Is this field equal to another field.
      * @param pv other field
@@ -253,11 +266,15 @@ public:
      */
     virtual void toString(StringBuilder buf,int indentLevel) ;
 protected:
+    PVField::shared_pointer getPtrSelf()
+    {
+        return shared_from_this();
+    }
     PVField(FieldConstPtr field);
     void setParentAndName(PVStructure *parent, String & fieldName);
     void replaceField(FieldConstPtr &field);
 private:
-    void message(String fieldName,String message,MessageType messageType);
+    void message(String message,MessageType messageType,String fullFieldName);
     static void computeOffset(const PVField *pvField);
     static void computeOffset(const PVField *pvField,std::size_t offset);
     PVAuxInfoPtr pvAuxInfo;
@@ -267,8 +284,8 @@ private:
     size_t fieldOffset;
     size_t nextFieldOffset;
     bool immutable;
-    Requester *requester;
-    PostHandler *postHandler;
+    RequesterPtr requester;
+    PostHandlerPtr postHandler;
     std::tr1::shared_ptr<class Convert> convert;
     friend class PVDataCreate;
     friend class PVStructure;
@@ -379,6 +396,11 @@ public:
      */
     virtual ~PVArray();
     /**
+     * Set the field to be immutable, i. e. it can no longer be modified.
+     * This is permanent, i.e. once done the field can onot be made mutable.
+     */
+    virtual void setImmutable();
+    /**
      * Get the array length.
      * @return The length.
      */
@@ -387,7 +409,7 @@ public:
      * Set the array length.
      * @param The length.
      */
-    void setLength(std::size_t length);
+    virtual void setLength(std::size_t length);
     /**
      * Get the array capacity.
      * @return The capacity.
@@ -491,7 +513,16 @@ public:
      * Destructor
      */
     virtual ~PVStructureArray() {}
+    /**
+     * Set the array capacity.
+     * @param capacity The length.
+     */
     virtual void setCapacity(size_t capacity);
+    /**
+     * Set the array length.
+     * @param length The length.
+     */
+    virtual void setLength(std::size_t length);
     /**
      * Get the introspection interface
      * @return The interface.
@@ -571,6 +602,11 @@ public:
     virtual ~PVStructure();
     typedef PVStructure & reference;
     typedef const PVStructure & const_reference;
+    /**
+     * Set the field to be immutable, i. e. it can no longer be modified.
+     * This is permanent, i.e. once done the field can onot be made mutable.
+     */
+    virtual void setImmutable();
     /**
      * Get the introspection interface
      * @return The interface.

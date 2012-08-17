@@ -20,7 +20,7 @@ public:
     //This class should not be extended
     
     //returns (false,true) if pvField(isNot, is valid timeStamp structure
-    bool attach(PVFieldPtr pvField);
+    bool attach(PVFieldPtr const & pvField);
     void detach();
     bool isAttached();
     // following throw logic_error is not attached to PVField

@@ -163,6 +163,7 @@ public:
     DefaultPVArray(ScalarArrayConstPtr const & scalarArray);
     virtual ~DefaultPVArray();
     virtual void setCapacity(size_t capacity);
+    virtual void setLength(size_t length);
     virtual size_t get(size_t offset, size_t length, PVArrayData<T> &data) ;
     virtual size_t put(size_t offset,size_t length, const_pointer from,
        size_t fromOffset);
@@ -221,12 +222,30 @@ void DefaultPVArray<T>::setCapacity(size_t capacity)
         return;
     }
     size_t length = PVArray::getLength();
-    std::vector<T> array(capacity);
-    size_t num = PVArray::getLength();
-    if(num>capacity) num = capacity;
+    if(length>capacity) length = capacity;
+    std::vector<T> array;
+    array.reserve(capacity);
+    array.resize(length);
     T * from = get();
-    for (size_t i=0; i<num; i++) array[i] = from[i];
+    for (size_t i=0; i<length; i++) array[i] = from[i];
     value->swap(array);
+    PVArray::setCapacityLength(capacity,length);
+}
+
+template<typename T>
+void DefaultPVArray<T>::setLength(size_t length)
+{
+    if(PVArray::getLength()==length) return;
+    size_t capacity = PVArray::getCapacity();
+    if(length>capacity) {
+        if(!PVArray::isCapacityMutable()) {
+            std::string message("not capacityMutable");
+            PVField::message(message, errorMessage);
+            return;
+        }
+        setCapacity(length);
+    }
+    value->resize(length);
     PVArray::setCapacityLength(capacity,length);
 }
 
@@ -266,6 +285,7 @@ size_t DefaultPVArray<T>::put(size_t offset,size_t len,
             if(len<=0) return 0;
         }
         length = newlength;
+        setLength(length);
     }
     pvalue = get();
     for(size_t i=0;i<len;i++) {

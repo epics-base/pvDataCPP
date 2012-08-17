@@ -47,15 +47,16 @@ static inline bool operator!=(const StructureArray& a, const StructureArray& b)
  * numeric types. It is not possible to convert between a scalar
  * and an array.
  * Numeric conversions are between types:
- * pvByte, pvShort, pvInt,
- * pvLong, pvFloat, or pvDouble.</p>
+ * pvByte, pvShort, pvInt, pvLong,
+ * pvUByte, pvUShort, pvUInt, pvULong,
+ * pvFloat, or pvDouble.</p>
  * 
  * <p>getString converts any supported type to a String.
- * Code that implements a PVField interface can implement
+ * Code that implements a PVField interface should implement
  * method toString by calling this method.</p>
  *
  * <p>fromString converts a String to a scalar.
- * fromStringArray converts an array of String
+ * fromStringArray converts an array of Strings
  * to a pvArray, which must have a scaler element type.
  * A scalar field is a numeric field or pvBoolean or pvString.</p>
  * <p>All from methods put data into a PVField, e.g. from means where the PVField gets it's data.</p>

@@ -21,21 +21,20 @@ namespace epics { namespace pvData {
 PVStructureArray::PVStructureArray(StructureArrayConstPtr const & structureArray)
 : PVArray(structureArray),
   structureArray(structureArray),
-  value(std::tr1::shared_ptr<std::vector<PVStructurePtr> >
-      (new std::vector<PVStructurePtr>()))
+  value(std::tr1::shared_ptr<PVStructurePtrArray>(new PVStructurePtrArray()))
 {
 }
 
 size_t PVStructureArray::append(size_t number)
 {
-    size_t currentLength = getCapacity();
+    size_t currentLength = getLength();
     size_t newLength = currentLength + number;
     setCapacity(newLength);
+    setLength(newLength);
     StructureConstPtr structure = structureArray->getStructure();
     PVStructurePtrArray *to = value.get();
     for(size_t i=currentLength; i<newLength; i++) {
-        PVStructurePtr pvStructure(getPVDataCreate()->createPVStructure(structure));
-        (*to)[i].swap(pvStructure);
+        (*to)[i] =getPVDataCreate()->createPVStructure(structure);
     }
     return newLength;
 }
@@ -89,15 +88,30 @@ void PVStructureArray::setCapacity(size_t capacity) {
         return;
     }
     size_t length = getCapacity();
-    PVStructurePtrArray array(capacity);
-    size_t num = PVArray::getLength();
-    if(num>capacity) num = capacity;
+    if(length>capacity) length = capacity;
+    PVStructurePtrArray array;
+    array.reserve(capacity);
+    array.resize(length);
     PVStructurePtr * from = get();
-    for (size_t i=0; i<num; i++) array[i] = from[i];
+    for (size_t i=0; i<length; i++) array[i] = from[i];
     value->swap(array);
     setCapacityLength(capacity,length);
 }
 
+void PVStructureArray::setLength(size_t length) {
+    if(PVArray::getLength()==length) return;
+    size_t capacity = PVArray::getCapacity();
+    if(length>capacity) {
+        if(!PVArray::isCapacityMutable()) {
+            std::string message("not capacityMutable");
+            PVField::message(message, errorMessage);
+            return;
+        }
+        setCapacity(length);
+    }
+    value->resize(length);
+    PVArray::setCapacityLength(capacity,length);
+}
 
 StructureArrayConstPtr PVStructureArray::getStructureArray() const
 {

@@ -51,7 +51,7 @@ static void createAlarm() {
     fields[0] = fieldCreate->createScalar(pvInt);
     fields[1] = fieldCreate->createScalar(pvInt);
     fields[2] = fieldCreate->createScalar(pvString);
-    alarmField = fieldCreate->createStructure(names,fields);
+    alarmField = fieldCreate->createStructure("alarm_t",names,fields);
 }
 
 static void createTimeStamp() {
@@ -64,7 +64,7 @@ static void createTimeStamp() {
     fields[0] = fieldCreate->createScalar(pvLong);
     fields[1] = fieldCreate->createScalar(pvInt);
     fields[2] = fieldCreate->createScalar(pvInt);
-    timeStampField = fieldCreate->createStructure(names,fields);
+    timeStampField = fieldCreate->createStructure("timeStamp_t",names,fields);
 }
 
 static void createDisplay() {
@@ -81,7 +81,7 @@ static void createDisplay() {
     fields[2] = fieldCreate->createScalar(pvString);
     fields[3] = fieldCreate->createScalar(pvString);
     fields[4] = fieldCreate->createScalar(pvString);
-    displayField = fieldCreate->createStructure(names,fields);
+    displayField = fieldCreate->createStructure("display_t",names,fields);
 }
 
 static void createControl() {
@@ -94,7 +94,7 @@ static void createControl() {
     fields[0] = fieldCreate->createScalar(pvDouble);
     fields[1] = fieldCreate->createScalar(pvDouble);
     fields[2] = fieldCreate->createScalar(pvDouble);
-    controlField = fieldCreate->createStructure(names,fields);
+    controlField = fieldCreate->createStructure("control_t",names,fields);
 }
 
 static void createBooleanAlarm() {
@@ -109,7 +109,7 @@ static void createBooleanAlarm() {
     fields[1] = fieldCreate->createScalar(pvInt);
     fields[2] = fieldCreate->createScalar(pvInt);
     fields[3] = fieldCreate->createScalar(pvInt);
-    booleanAlarmField = fieldCreate->createStructure(names,fields);
+    booleanAlarmField = fieldCreate->createStructure("valueAlarm_t",names,fields);
 }
 
 static void createByteAlarm() {
@@ -136,7 +136,7 @@ static void createByteAlarm() {
     fields[7] = fieldCreate->createScalar(pvInt);
     fields[8] = fieldCreate->createScalar(pvInt);
     fields[9] = fieldCreate->createScalar(pvByte);
-    byteAlarmField = fieldCreate->createStructure(names,fields);
+    byteAlarmField = fieldCreate->createStructure("valueAlarm_t",names,fields);
 }
 
 static void createShortAlarm() {
@@ -163,7 +163,7 @@ static void createShortAlarm() {
     fields[7] = fieldCreate->createScalar(pvInt);
     fields[8] = fieldCreate->createScalar(pvInt);
     fields[9] = fieldCreate->createScalar(pvShort);
-    shortAlarmField = fieldCreate->createStructure(names,fields);
+    shortAlarmField = fieldCreate->createStructure("valueAlarm_t",names,fields);
 }
 
 static void createIntAlarm() {
@@ -190,7 +190,7 @@ static void createIntAlarm() {
     fields[7] = fieldCreate->createScalar(pvInt);
     fields[8] = fieldCreate->createScalar(pvInt);
     fields[9] = fieldCreate->createScalar(pvInt);
-    intAlarmField = fieldCreate->createStructure(names,fields);
+    intAlarmField = fieldCreate->createStructure("valueAlarm_t",names,fields);
 }
 
 static void createLongAlarm() {
@@ -217,7 +217,7 @@ static void createLongAlarm() {
     fields[7] = fieldCreate->createScalar(pvInt);
     fields[8] = fieldCreate->createScalar(pvInt);
     fields[9] = fieldCreate->createScalar(pvLong);
-    longAlarmField = fieldCreate->createStructure(names,fields);
+    longAlarmField = fieldCreate->createStructure("valueAlarm_t",names,fields);
 }
 
 static void createUByteAlarm() {
@@ -244,7 +244,7 @@ static void createUByteAlarm() {
     fields[7] = fieldCreate->createScalar(pvInt);
     fields[8] = fieldCreate->createScalar(pvInt);
     fields[9] = fieldCreate->createScalar(pvUByte);
-    ubyteAlarmField = fieldCreate->createStructure(names,fields);
+    ubyteAlarmField = fieldCreate->createStructure("valueAlarm_t",names,fields);
 }
 
 static void createUShortAlarm() {
@@ -271,7 +271,7 @@ static void createUShortAlarm() {
     fields[7] = fieldCreate->createScalar(pvInt);
     fields[8] = fieldCreate->createScalar(pvInt);
     fields[9] = fieldCreate->createScalar(pvUShort);
-    ushortAlarmField = fieldCreate->createStructure(names,fields);
+    ushortAlarmField = fieldCreate->createStructure("valueAlarm_t",names,fields);
 }
 
 static void createUIntAlarm() {
@@ -298,7 +298,7 @@ static void createUIntAlarm() {
     fields[7] = fieldCreate->createScalar(pvInt);
     fields[8] = fieldCreate->createScalar(pvInt);
     fields[9] = fieldCreate->createScalar(pvUInt);
-    uintAlarmField = fieldCreate->createStructure(names,fields);
+    uintAlarmField = fieldCreate->createStructure("valueAlarm_t",names,fields);
 }
 
 static void createULongAlarm() {
@@ -325,7 +325,7 @@ static void createULongAlarm() {
     fields[7] = fieldCreate->createScalar(pvInt);
     fields[8] = fieldCreate->createScalar(pvInt);
     fields[9] = fieldCreate->createScalar(pvULong);
-    ulongAlarmField = fieldCreate->createStructure(names,fields);
+    ulongAlarmField = fieldCreate->createStructure("valueAlarm_t",names,fields);
 }
 
 static void createFloatAlarm() {
@@ -352,7 +352,7 @@ static void createFloatAlarm() {
     fields[7] = fieldCreate->createScalar(pvInt);
     fields[8] = fieldCreate->createScalar(pvInt);
     fields[9] = fieldCreate->createScalar(pvFloat);
-    floatAlarmField = fieldCreate->createStructure(names,fields);
+    floatAlarmField = fieldCreate->createStructure("valueAlarm_t",names,fields);
 }
 
 static void createDoubleAlarm() {
@@ -379,7 +379,7 @@ static void createDoubleAlarm() {
     fields[7] = fieldCreate->createScalar(pvInt);
     fields[8] = fieldCreate->createScalar(pvInt);
     fields[9] = fieldCreate->createScalar(pvDouble);
-    doubleAlarmField = fieldCreate->createStructure(names,fields);
+    doubleAlarmField = fieldCreate->createStructure("valueAlarm_t",names,fields);
 }
 
 static void createEnumeratedAlarm() {
@@ -392,10 +392,10 @@ static void createEnumeratedAlarm() {
     fields[0] = fieldCreate->createScalar(pvBoolean);
     fields[1] = fieldCreate->createScalar(pvInt);
     fields[2] = fieldCreate->createScalar(pvInt);
-    enumeratedAlarmField = fieldCreate->createStructure(names,fields);
+    enumeratedAlarmField = fieldCreate->createStructure("valueAlarm_t",names,fields);
 }
 
-static StructureConstPtr createProperties(FieldConstPtr field,String properties)
+static StructureConstPtr createProperties(String id,FieldConstPtr field,String properties)
 {
     bool gotAlarm = false;
     bool gotTimeStamp = false;
@@ -485,31 +485,31 @@ static StructureConstPtr createProperties(FieldConstPtr field,String properties)
         names[next] = "valueAlarm";
         fields[next++] = valueAlarm;
     }
-    return fieldCreate->createStructure(names,fields);
+    return fieldCreate->createStructure(id,names,fields);
 }
 
 
 StructureConstPtr StandardField::scalar(
-    ScalarType type,String properties)
+    ScalarType type,String  properties)
 {
     ScalarConstPtr field = fieldCreate->createScalar(type);
-    return createProperties(field,properties);    
+    return createProperties("scalar_t",field,properties);    
 }
 
 StructureConstPtr StandardField::scalarArray(
-    ScalarType elementType, String properties)
+    ScalarType elementType, String  properties)
 {
     ScalarArrayConstPtr field = fieldCreate->createScalarArray(elementType);
-    return createProperties(field,properties);
+    return createProperties("scalarArray_t",field,properties);
 }
 
 
 StructureConstPtr StandardField::structureArray(
-    StructureConstPtr const & structure,String properties)
+    StructureConstPtr const & structure,String  properties)
 {
     StructureArrayConstPtr field = fieldCreate->createStructureArray(
         structure);
-    return createProperties(field,properties);
+    return createProperties("structureArray_t",field,properties);
 }
 
 StructureConstPtr StandardField::enumerated()
@@ -521,13 +521,13 @@ StructureConstPtr StandardField::enumerated()
     names[1] = "choices";
     fields[0] = fieldCreate->createScalar(pvInt);
     fields[1] = fieldCreate->createScalarArray(pvString);
-    return fieldCreate->createStructure(names,fields);
+    return fieldCreate->createStructure("enumerated_t",names,fields);
 }
 
-StructureConstPtr StandardField::enumerated(String properties)
+StructureConstPtr StandardField::enumerated(String  properties)
 {
     StructureConstPtr field = enumerated();
-    return createProperties(field,properties);
+    return createProperties("enumerated_t",field,properties);
 }
 
 StructureConstPtr StandardField::alarm()

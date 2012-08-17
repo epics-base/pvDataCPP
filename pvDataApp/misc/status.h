@@ -36,7 +36,7 @@ namespace epics { namespace pvData {
         	
         	static const char* StatusTypeName[];
         	
-        	static Status Ok;
+        	static Status OK;
 
             /**
              * Creates OK status; STATUSTYPE_OK, empty message and stackDump.
@@ -80,7 +80,7 @@ namespace epics { namespace pvData {
              * @return OK status.
              * @see #isSuccess()
              */
-            bool isOk() const;
+            bool isOK() const;
 
             /**
              * Check if operation succeeded.

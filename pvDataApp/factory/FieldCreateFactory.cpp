@@ -68,7 +68,7 @@ Scalar::Scalar(ScalarType scalarType)
 Scalar::~Scalar(){}
 
 void Scalar::toString(StringBuilder buffer,int indentLevel) const{
-    ScalarTypeFunc::toString(buffer,scalarType);
+    *buffer += getID();
 }
 
 static const String idScalarLUT[] = {
@@ -171,8 +171,7 @@ String ScalarArray::getID() const
 }
 
 void ScalarArray::toString(StringBuilder buffer,int indentLevel) const{
-    ScalarTypeFunc::toString(buffer,elementType);
-    *buffer += "[]";
+    *buffer += getID();
 }
 
 void ScalarArray::serialize(ByteBuffer *buffer, SerializableControl *control) const {
@@ -195,18 +194,13 @@ StructureArray::~StructureArray() {
 
 String StructureArray::getID() const
 {
-	// NOTE: structure->getID() can return an empty string
 	return pstructure->getID() + "[]";
 }
 
 void StructureArray::toString(StringBuilder buffer,int indentLevel) const {
-    if(indentLevel==0) {
-        *buffer +=  "structure[]";
-        newLine(buffer,indentLevel + 1);
-        pstructure->toString(buffer,indentLevel + 1);
-        return;
-    }
-    pstructure->toString(buffer,indentLevel);
+    *buffer +=  getID();
+    newLine(buffer,indentLevel + 1);
+    pstructure->toString(buffer,indentLevel + 1);
 }
 
 void StructureArray::serialize(ByteBuffer *buffer, SerializableControl *control) const {
@@ -255,7 +249,7 @@ String Structure::getID() const
 	return id;
 }
 
-FieldConstPtr  Structure::getField(String fieldName) const {
+FieldConstPtr  Structure::getField(String const & fieldName) const {
     size_t numberFields = fields.size();
     for(size_t i=0; i<numberFields; i++) {
         FieldConstPtr pfield = fields[i];
@@ -265,7 +259,7 @@ FieldConstPtr  Structure::getField(String fieldName) const {
     return FieldConstPtr();
 }
 
-size_t Structure::getFieldIndex(String fieldName) const {
+size_t Structure::getFieldIndex(String const &fieldName) const {
     size_t numberFields = fields.size();
     for(size_t i=0; i<numberFields; i++) {
         FieldConstPtr pfield = fields[i];
@@ -276,8 +270,7 @@ size_t Structure::getFieldIndex(String fieldName) const {
 }
 
 void Structure::toString(StringBuilder buffer,int indentLevel) const{
-    *buffer += "structure";
-    if (!id.empty()) { *buffer += ' '; *buffer += id; };
+    *buffer += getID();
     toStringCommon(buffer,indentLevel+1);
 }
     
@@ -286,24 +279,19 @@ void Structure::toStringCommon(StringBuilder buffer,int indentLevel) const{
     size_t numberFields = fields.size();
     for(size_t i=0; i<numberFields; i++) {
         FieldConstPtr pfield = fields[i];
+        *buffer += pfield->getID() + " " + fieldNames[i];
         switch(pfield->getType()) {
             case scalar:
             case scalarArray:
-                pfield->toString(buffer, indentLevel);
-                *buffer += " ";
-                *buffer += fieldNames[i];
                 break;
             case structure:
             {
                 Field const *xxx = pfield.get();
                 Structure const *pstruct = static_cast<Structure const*>(xxx);
-                *buffer += "structure ";
-                *buffer += fieldNames[i];
                 pstruct->toStringCommon(buffer,indentLevel + 1);
                 break;
             }
             case structureArray:
-                *buffer += "structure[] " + fieldNames[i];
                 newLine(buffer,indentLevel +1);
                 pfield->toString(buffer,indentLevel +1);
                 break;
@@ -340,13 +328,12 @@ StructureConstPtr FieldCreate::createStructure (
     StringArray const & fieldNames,FieldConstPtrArray const & fields) const
 {
       StructureConstPtr structure(
-         new Structure(fieldNames,fields), Field::Deleter());
+         new Structure(fieldNames,fields,"structure"), Field::Deleter());
       return structure;
 }
 
 StructureConstPtr FieldCreate::createStructure (
-	String id,
-    StringArray const & fieldNames,FieldConstPtrArray const & fields) const
+    String id, StringArray const & fieldNames,FieldConstPtrArray const & fields) const
 {
       StructureConstPtr structure(
          new Structure(fieldNames,fields,id), Field::Deleter());

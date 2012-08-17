@@ -17,7 +17,7 @@ using std::tr1::static_pointer_cast;
 static String noControlFound("No control structure found");
 static String notAttached("Not attached to an control structure");
 
-bool PVControl::attach(PVFieldPtr pvField)
+bool PVControl::attach(PVFieldPtr const & pvField)
 {
     if(pvField->getField()->getType()!=structure) {
             pvField->message(noControlFound,errorMessage);

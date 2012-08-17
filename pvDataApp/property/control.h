@@ -14,11 +14,14 @@ public:
     //default constructors and destructor are OK
     double getLow() const {return low;}
     double getHigh() const {return high;}
+    double getMinStep() const {return minStep;}
     void setLow(double value) {low = value;}
     void setHigh(double value) {high = value;}
+    void setMinStep(double value) {minStep = value;}
 private:
     double low;
     double high;
+    double minStep;
 };
     
 }}

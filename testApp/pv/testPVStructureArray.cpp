@@ -78,7 +78,6 @@ void testPowerSupplyArray(FILE * fd) {
         powerSupplyArrayStruct->getStructureArrayField(String("value"));
     assert(powerSupplyArray.get()!=NULL);
     int offset = powerSupplyArray->append(5);
-    powerSupplyArray->setLength(offset);
     buffer.clear();
     powerSupplyArrayStruct->toString(&buffer);
     fprintf(fd,"after append 5\n%s\n",buffer.c_str());

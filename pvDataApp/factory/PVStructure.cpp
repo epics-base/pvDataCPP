@@ -82,6 +82,16 @@ PVStructure::~PVStructure()
 {
 }
 
+void PVStructure::setImmutable()
+{
+    size_t numFields = pvFields.size();
+    for(size_t i=0; i<numFields; i++) {
+        PVFieldPtr pvField  = pvFields[i];
+        pvField->setImmutable();
+    }
+    PVField::setImmutable();
+}
+
 StructureConstPtr PVStructure::getStructure() const
 {
     return structurePtr;

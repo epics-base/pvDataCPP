@@ -17,7 +17,7 @@ using std::tr1::static_pointer_cast;
 static String notFound("No enumerated structure found");
 static String notAttached("Not attached to an enumerated structure");
 
-bool PVEnumerated::attach(PVFieldPtr pvField)
+bool PVEnumerated::attach(PVFieldPtr const & pvField)
 {
     if(pvField->getField()->getType()!=structure) {
             pvField->message(notFound,errorMessage);

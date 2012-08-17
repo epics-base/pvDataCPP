@@ -17,7 +17,7 @@ using std::tr1::static_pointer_cast;
 static String noDisplayFound("No display structure found");
 static String notAttached("Not attached to an display structure");
 
-bool PVDisplay::attach(PVFieldPtr pvField)
+bool PVDisplay::attach(PVFieldPtr const & pvField)
 {
     if(pvField->getField()->getType()!=structure) {
             pvField->message(noDisplayFound,errorMessage);

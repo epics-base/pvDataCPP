@@ -34,9 +34,9 @@ public:
     ~StandardPVField();
     PVStructurePtr scalar(ScalarType type,String properties);
     PVStructurePtr scalarArray(ScalarType elementType, String properties);
-    PVStructurePtr structureArray(StructureConstPtr structure,String properties);
-    PVStructurePtr enumerated(StringArray choices);
-    PVStructurePtr enumerated(StringArray choices, String properties);
+    PVStructurePtr structureArray(StructureConstPtr const &structure,String properties);
+    PVStructurePtr enumerated(StringArray const &choices);
+    PVStructurePtr enumerated(StringArray const &choices, String properties);
 private:
     StandardPVField();
 };

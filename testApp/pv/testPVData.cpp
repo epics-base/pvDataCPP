@@ -351,6 +351,8 @@ static void testScalarArrayCommon(FILE * fd,String fieldName,ScalarType stype)
     builder.clear();
     pvStructure->toString(&builder);
     fprintf(fd,"%s\n",builder.c_str());
+    PVFieldPtr pvField = pvStructure->getSubField("alarm.status");
+    pvField->message("this is a test",infoMessage);
 }
 
 static void testScalarArray(FILE * fd) {

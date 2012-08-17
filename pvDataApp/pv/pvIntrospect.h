@@ -11,7 +11,6 @@
 #include <stdexcept>
 
 #include <pv/noDefaultMethods.h>
-#include <pv/sharedPtr.h>
 #include <pv/pvType.h>
 #include <pv/byteBuffer.h>
 #include <pv/serialize.h>
@@ -398,7 +397,7 @@ public:
      * @return The introspection interface.
      * This will hold a null pointer if the field is not in the structure.
      */
-    FieldConstPtr getField(String fieldName) const;
+    FieldConstPtr getField(String const &fieldName) const;
     /**
      * Get the field for the specified fieldName.
      * @param fieldName The index of the field to get;
@@ -411,7 +410,7 @@ public:
      * @return The introspection interface.
      * This will be -1 if the field is not in the structure.
      */
-    std::size_t getFieldIndex(String fieldName) const;
+    std::size_t getFieldIndex(String const &fieldName) const;
     /**
      * Get the fields in the structure.
      * @return The array of fields.

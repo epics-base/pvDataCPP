@@ -17,7 +17,7 @@ using std::tr1::static_pointer_cast;
 static String noAlarmFound("No alarm structure found");
 static String notAttached("Not attached to an alarm structure");
 
-bool PVAlarm::attach(PVFieldPtr pvField)
+bool PVAlarm::attach(PVFieldPtr const & pvField)
 {
     if(pvField->getField()->getType()!=structure) {
         pvField->message(noAlarmFound,errorMessage);

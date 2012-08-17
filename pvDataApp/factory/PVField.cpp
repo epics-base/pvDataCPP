@@ -24,7 +24,7 @@ static String notImplemented("not implemented");
 PVField::PVField(FieldConstPtr field)
 : parent(NULL),field(field),
   fieldOffset(0), nextFieldOffset(0),
-  immutable(false),requester(0),postHandler(0),
+  immutable(false),
   convert(getConvert())
 {
 }
@@ -32,19 +32,20 @@ PVField::PVField(FieldConstPtr field)
 PVField::~PVField()
 { }
 
-void PVField::message(String fieldName,String message,MessageType messageType)  
+void PVField::message(String message,MessageType messageType,String fullFieldName)  
 {
     if(parent!=NULL) {
-        String parentName = parent->getFieldName();
-        if(parentName.length()>0) {
-            fieldName = parentName + "." + fieldName;
+        if(fullFieldName.length()>0) {
+            fullFieldName = fieldName + '.' + fullFieldName;
+        } else {
+            fullFieldName = fieldName;
         }
-        parent->message(fieldName,message,messageType);
+        parent->message(message,messageType,fullFieldName);
         return;
     }
+    message = fullFieldName + " " + message;
     if(requester) {
-        String mess = fieldName + " " + message;
-        requester->message(mess,messageType);
+        requester->message(message,messageType);
     } else {
         printf("%s %s %s\n",
             getMessageTypeName(messageType).c_str(),
@@ -55,7 +56,7 @@ void PVField::message(String fieldName,String message,MessageType messageType)
 
 void PVField::message(String message,MessageType messageType)  
 {
-    PVField::message(fieldName,message,messageType);
+    PVField::message(message,messageType,"");
 }
 
 String PVField::getFieldName() const
@@ -63,18 +64,18 @@ String PVField::getFieldName() const
     return fieldName;
 }
 
-void PVField::setRequester(Requester *requester)
+void PVField::setRequester(RequesterPtr const &req)
 {
     if(parent!=NULL) {
         throw std::logic_error(
             "PVField::setRequester only legal for top level structure");
     }
-    if(requester!=NULL) {
-        if(requester==requester) return;
+    if(requester.get()!=NULL) {
+        if(requester.get()==req.get()) return;
         throw std::logic_error(
             "PVField::setRequester requester is already present");
     }
-    requester = requester;
+    requester = req;
 }
 
 size_t PVField::getFieldOffset() const
@@ -155,15 +156,15 @@ void PVField::postPut()
    if(postHandler!=NULL) postHandler->postPut();
 }
 
-void PVField::setPostHandler(PostHandler *postHandler)
+void PVField::setPostHandler(PostHandlerPtr const &handler)
 {
-    if(postHandler!=NULL) {
-        if(postHandler==postHandler) return;
+    if(postHandler.get()!=NULL) {
+        if(postHandler.get()==handler.get()) return;
         throw std::logic_error(
             "PVField::setPostHandler a postHandler is already registered");
 
     }
-    postHandler = postHandler;
+    postHandler = handler;
 }
 
 void PVField::setParentAndName(PVStructure * xxx,String & name)

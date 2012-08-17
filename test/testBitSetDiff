@@ -1,6 +1,0 @@
---- testBitSetGold	2012-01-21 13:09:45.106001921 -0500
-+++ testBitSet	2012-07-19 16:06:14.839021851 -0400
-@@ -1,3 +1,2 @@
- testGetSetClearFlip... PASSED
- testOperators... PASSED
--bitSet:  totalConstruct 4 totalDestruct 4

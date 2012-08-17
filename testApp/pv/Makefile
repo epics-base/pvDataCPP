@@ -18,6 +18,14 @@ PROD_HOST += testPVAuxInfo
 testPVAuxInfo_SRCS += testPVAuxInfo.cpp
 testPVAuxInfo_LIBS += pvData Com
 
+PROD_HOST += testStandardField
+testStandardField_SRCS += testStandardField.cpp
+testStandardField_LIBS += pvData Com
+
+PROD_HOST += testStandardPVField
+testStandardPVField_SRCS += testStandardPVField.cpp
+testStandardPVField_LIBS += pvData Com
+
 PROD_HOST += testPVData
 testPVData_SRCS += testPVData.cpp
 testPVData_LIBS += pvData Com

@@ -1,5 +1,0 @@
-timerNode:  totalConstruct 6 totalDestruct 6
-timer:  totalConstruct 3 totalDestruct 3
-LinkedList:  totalConstruct 3 totalDestruct 3
-LinkedListNode:  totalConstruct 9 totalDestruct 9
-event:  totalConstruct 12 totalDestruct 12

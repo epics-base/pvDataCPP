@@ -20,9 +20,11 @@ namespace epics { namespace pvData {
  * The property field is a comma separated string of property names of the following:
  *    alarm, timeStamp, display, control, and valueAlarm.
  * An example is "alarm,timeStamp,valueAlarm".
- * The method with properties creates a structure with fields named fieldName and each of the property names.s
+ * The method with properties creates a structure with fields named fieldName
+ *     and each of the property names.
  * Each property field is a structure defining the property.
- * The details about each property is given in the section named "Property". For example the call:
+ * The details about each property is given in the section named "Property".
+ * For example the call:
  * {@code
    StructureConstPtr example = standardField->scalar(
         String("value"),
@@ -33,12 +35,13 @@ namespace epics { namespace pvData {
   structure example
     double value
     structure alarm
-        structure severity
-            int index
-            string[] choices
-       structure timeStamp
-            long secondsPastEpoch
-            int  nanoSeconds
+        int severity
+        int status
+        string message
+   structure timeStamp
+        long secondsPastEpoch
+        int  nanoSeconds
+        int userTag
  * }
  * In addition there are methods that create each of the property structures,
  * i.e. the methods named: alarm, .... enumeratedAlarm."

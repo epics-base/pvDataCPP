@@ -24,63 +24,32 @@ static PVDataCreatePtr pvDataCreate;
 
 static String notImplemented("not implemented");
 
-static void addExtendsStructureName(PVStructure *pvStructure,String properties)
-{
-    bool gotAlarm = false;
-    bool gotTimeStamp = false;
-    bool gotDisplay = false;
-    bool gotControl = false;
-    if(properties.find("alarm")!=String::npos)  gotAlarm = true;
-    if(properties.find("timeStamp")!=String::npos)  gotTimeStamp = true;
-    if(properties.find("display")!=String::npos) gotDisplay = true;
-    if(properties.find("control")!=String::npos) gotControl = true;
-    if(gotAlarm) {
-        PVStructure *pv = pvStructure->getStructureField("alarm").get();
-        if(pv!=NULL) pv->putExtendsStructureName("alarm");
-    }
-    if(gotTimeStamp) {
-        PVStructure *pv = pvStructure->getStructureField("timeStamp").get();
-        if(pv!=NULL) pv->putExtendsStructureName("timeStamp");
-    }
-    if(gotDisplay) {
-        PVStructure *pv = pvStructure->getStructureField("display").get();
-        if(pv!=NULL) pv->putExtendsStructureName("display");
-    }
-    if(gotControl) {
-        PVStructure *pv = pvStructure->getStructureField("control").get();
-        if(pv!=NULL) pv->putExtendsStructureName(String("control"));
-    }
-}
-
 StandardPVField::StandardPVField(){}
 
 StandardPVField::~StandardPVField(){}
 
-PVStructurePtr StandardPVField::scalar(ScalarType type,String properties)
+PVStructurePtr StandardPVField::scalar(ScalarType type,String  properties)
 {
     StructureConstPtr field = standardField->scalar(type,properties);
     PVStructurePtr pvStructure = pvDataCreate->createPVStructure(field);
-    addExtendsStructureName(pvStructure.get(),properties);
     return pvStructure;
 }
 
-PVStructurePtr StandardPVField::scalarArray(ScalarType elementType, String properties)
+PVStructurePtr StandardPVField::scalarArray(ScalarType elementType, String  properties)
 {
     StructureConstPtr field = standardField->scalarArray(elementType,properties);
     PVStructurePtr pvStructure = pvDataCreate->createPVStructure(field);
-    addExtendsStructureName(pvStructure.get(),properties);
     return pvStructure;
 }
 
-PVStructurePtr StandardPVField::structureArray(StructureConstPtr structure,String properties)
+PVStructurePtr StandardPVField::structureArray(StructureConstPtr const & structure,String  properties)
 {
     StructureConstPtr field = standardField->structureArray(structure,properties);
     PVStructurePtr pvStructure = pvDataCreate->createPVStructure(field);
-    addExtendsStructureName(pvStructure.get(),properties);
     return pvStructure;
 }
 
-PVStructurePtr StandardPVField::enumerated(StringArray choices)
+PVStructurePtr StandardPVField::enumerated(StringArray const &choices)
 {
     StructureConstPtr field = standardField->enumerated();
     PVStructurePtr pvStructure = pvDataCreate->createPVStructure(field);
@@ -94,11 +63,10 @@ PVStructurePtr StandardPVField::enumerated(StringArray choices)
     return pvStructure;
 }
 
-PVStructurePtr StandardPVField::enumerated(StringArray choices,String properties)
+PVStructurePtr StandardPVField::enumerated(StringArray const &choices,String  properties)
 {
     StructureConstPtr field = standardField->enumerated(properties);
     PVStructurePtr pvStructure =  pvDataCreate->createPVStructure(field);
-    addExtendsStructureName(pvStructure.get(),properties);
     PVScalarArrayPtr pvScalarArray = pvStructure->getScalarArrayField("value.choices",pvString);
     if(pvScalarArray.get()==NULL) {
         throw std::logic_error(String("StandardPVField::enumerated"));
