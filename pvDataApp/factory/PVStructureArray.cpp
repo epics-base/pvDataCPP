@@ -192,6 +192,7 @@ void PVStructureArray::deserialize(ByteBuffer *pbuffer,
     if(size>=0) {
         // prepare array, if necessary
         if(size>getCapacity()) setCapacity(size);
+        setLength(size);
         PVStructurePtrArray *pvArray = value.get();
         for(size_t i = 0; i<size; i++) {
             pcontrol->ensureData(1);
@@ -207,7 +208,6 @@ void PVStructureArray::deserialize(ByteBuffer *pbuffer,
                 (*pvArray)[i]->deserialize(pbuffer, pcontrol);
             }
         }
-        setLength(size);
         postPut();
     }
 }
