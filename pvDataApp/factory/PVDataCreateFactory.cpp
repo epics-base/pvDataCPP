@@ -223,15 +223,17 @@ void DefaultPVArray<T>::setCapacity(size_t capacity)
     }
     size_t length = PVArray::getLength();
     if(length>capacity) length = capacity;
-    /*
-    std::vector<T> array;
-    array.reserve(capacity);
-    array.resize(length);
-    T * from = get();
-    for (size_t i=0; i<length; i++) array[i] = from[i];
-    value->swap(array);
-    */
-    value->reserve(capacity);
+    size_t oldCapacity = PVArray::getCapacity();
+    if(oldCapacity>capacity) {
+        std::vector<T> array;
+        array.reserve(capacity);
+        array.resize(length);
+        T * from = get();
+        for (size_t i=0; i<length; i++) array[i] = from[i];
+        value->swap(array);
+    } else {
+        value->reserve(capacity);
+    }
     PVArray::setCapacityLength(capacity,length);
 }
 

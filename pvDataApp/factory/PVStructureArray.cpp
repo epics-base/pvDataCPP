@@ -87,14 +87,19 @@ void PVStructureArray::setCapacity(size_t capacity) {
         PVField::message(message, errorMessage);
         return;
     }
-    size_t length = getCapacity();
+    size_t length = getLength();
     if(length>capacity) length = capacity;
-    PVStructurePtrArray array;
-    array.reserve(capacity);
-    array.resize(length);
-    PVStructurePtr * from = get();
-    for (size_t i=0; i<length; i++) array[i] = from[i];
-    value->swap(array);
+    size_t oldCapacity = getCapacity();
+    if(oldCapacity>capacity) {
+        PVStructurePtrArray array;
+        array.reserve(capacity);
+        array.resize(length);
+        PVStructurePtr * from = get();
+        for (size_t i=0; i<length; i++) array[i] = from[i];
+        value->swap(array);
+    } else {
+        value->reserve(capacity);
+    }
     setCapacityLength(capacity,length);
 }
 
