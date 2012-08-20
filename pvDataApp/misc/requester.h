@@ -26,7 +26,7 @@ public:
     POINTER_DEFINITIONS(Requester);
     virtual ~Requester(){}
     virtual String getRequesterName() = 0;
-    virtual void message(String message,MessageType messageType) = 0;
+    virtual void message(String const & message,MessageType messageType) = 0;
 };
 
 }}
