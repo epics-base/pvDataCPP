@@ -193,7 +193,7 @@ void PVStructure::removePVField(String fieldName)
     }
     PVFieldPtrArray * xxx = const_cast<PVFieldPtrArray *>(&pvFields);
     xxx->swap(newPVFields);
-    FieldConstPtr field = getFieldCreate()->createStructure(newFieldNames,fields);
+    FieldConstPtr field = getFieldCreate()->createStructure(structurePtr->getID(),newFieldNames,fields);
     replaceField(field);
     structurePtr = static_pointer_cast<const Structure>(field);
     StringArray fieldNames = structurePtr->getFieldNames();

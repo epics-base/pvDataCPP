@@ -362,7 +362,7 @@ StructureConstPtr FieldCreate::appendField(
     }
     newNames[oldLen] = fieldName;
     newFields[oldLen] = field;
-    return createStructure(newNames,newFields);
+    return createStructure(structure->getID(),newNames,newFields);
 }
 
 StructureConstPtr FieldCreate::appendFields(
@@ -384,7 +384,7 @@ StructureConstPtr FieldCreate::appendFields(
         newNames[oldLen +i] = fieldNames[i];
         newFields[oldLen +i] = fields[i];
     }
-    return createStructure(newNames,newFields);
+    return createStructure(structure->getID(),newNames,newFields);
 }
 
 
