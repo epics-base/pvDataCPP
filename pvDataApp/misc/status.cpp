@@ -22,7 +22,7 @@ Status::Status() :
 {
 }
 
-Status::Status(StatusType type, String message) :
+Status::Status(StatusType type, String const & message) :
     m_statusType(type), m_message(message)
 {
     if (type == STATUSTYPE_OK)
@@ -31,7 +31,7 @@ Status::Status(StatusType type, String message) :
     //PVDATA_REFCOUNT_MONITOR_CONSTRUCT(status);
 }
 
-Status::Status(StatusType type, String message, String stackDump) :
+Status::Status(StatusType type, String const & message, String const & stackDump) :
     m_statusType(type), m_message(message), m_stackDump(stackDump)
 {
     if (type == STATUSTYPE_OK)

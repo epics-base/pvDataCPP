@@ -46,12 +46,12 @@ namespace epics { namespace pvData {
         	/**
         	 * Create non-OK status.
         	 */
-            Status(StatusType type, epics::pvData::String message);
+            Status(StatusType type, epics::pvData::String const & message);
         
             /**
              * Create non-OK status.
              */
-            Status(StatusType type, epics::pvData::String message, epics::pvData::String stackDump);
+            Status(StatusType type, epics::pvData::String const & message, epics::pvData::String const & stackDump);
         
             ~Status();
             
