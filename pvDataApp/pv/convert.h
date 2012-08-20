@@ -138,7 +138,7 @@ public:
      * @param from The String value to convert and put into a PV.
      * @throws std::logic_error if the String does not have a valid value.
      */
-    void fromString(PVScalarPtr const & pv, String from);
+    void fromString(PVScalarPtr const & pv, String const & from);
     /**
      * Convert  from a String to a PVScalarArray.
      * The String must be a comma separated set of values optionally enclosed in []

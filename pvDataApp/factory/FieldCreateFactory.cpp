@@ -213,7 +213,10 @@ void StructureArray::deserialize(ByteBuffer *buffer, DeserializableControl *cont
     throw std::runtime_error("not valid operation, use FieldCreate::deserialize instead");
 }
 
-Structure::Structure (StringArray const & fieldNames,FieldConstPtrArray const & infields, String inid)
+Structure::Structure (
+    StringArray const & fieldNames,
+    FieldConstPtrArray const & infields,
+    String const & inid)
 : Field(structure),
       fieldNames(fieldNames),
       fields(infields),
@@ -333,7 +336,9 @@ StructureConstPtr FieldCreate::createStructure (
 }
 
 StructureConstPtr FieldCreate::createStructure (
-    String id, StringArray const & fieldNames,FieldConstPtrArray const & fields) const
+    String const & id,
+    StringArray const & fieldNames,
+    FieldConstPtrArray const & fields) const
 {
       StructureConstPtr structure(
          new Structure(fieldNames,fields,id), Field::Deleter());
@@ -349,7 +354,9 @@ StructureArrayConstPtr FieldCreate::createStructureArray(
 }
 
 StructureConstPtr FieldCreate::appendField(
-    StructureConstPtr const & structure,String fieldName, FieldConstPtr const & field) const
+    StructureConstPtr const & structure,
+    String const & fieldName,
+    FieldConstPtr const & field) const
 {
     StringArray oldNames = structure->getFieldNames();
     FieldConstPtrArray oldFields = structure->getFields();

@@ -58,11 +58,11 @@ class StandardField {
 public:
     static StandardFieldPtr getStandardField();
     ~StandardField();
-    StructureConstPtr scalar(ScalarType type,String properties);
-    StructureConstPtr scalarArray(ScalarType elementType, String properties);
-    StructureConstPtr structureArray(StructureConstPtr const & structure,String properties);
+    StructureConstPtr scalar(ScalarType type,String const & properties);
+    StructureConstPtr scalarArray(ScalarType elementType, String const & properties);
+    StructureConstPtr structureArray(StructureConstPtr const & structure,String const & properties);
     StructureConstPtr enumerated();
-    StructureConstPtr enumerated(String properties);
+    StructureConstPtr enumerated(String const & properties);
     StructureConstPtr alarm();
     StructureConstPtr timeStamp();
     StructureConstPtr display();

@@ -32,11 +32,11 @@ class StandardPVField : private NoDefaultMethods {
 public:
     static StandardPVFieldPtr getStandardPVField();
     ~StandardPVField();
-    PVStructurePtr scalar(ScalarType type,String properties);
-    PVStructurePtr scalarArray(ScalarType elementType, String properties);
-    PVStructurePtr structureArray(StructureConstPtr const &structure,String properties);
+    PVStructurePtr scalar(ScalarType type,String const & properties);
+    PVStructurePtr scalarArray(ScalarType elementType, String const & properties);
+    PVStructurePtr structureArray(StructureConstPtr const &structure,String const & properties);
     PVStructurePtr enumerated(StringArray const &choices);
-    PVStructurePtr enumerated(StringArray const &choices, String properties);
+    PVStructurePtr enumerated(StringArray const &choices, String const & properties);
 private:
     StandardPVField();
 };

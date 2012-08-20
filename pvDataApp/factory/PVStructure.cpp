@@ -37,7 +37,9 @@ static PVStructurePtr nullPVStructure;
 static PVStructureArrayPtr nullPVStructureArray;
 static PVScalarArrayPtr nullPVScalarArray;
 
-static PVFieldPtr findSubField(String fieldName,const PVStructure *pvStructure);
+static PVFieldPtr findSubField(
+    String const &fieldName,
+    const PVStructure *pvStructure);
 
 PVStructure::PVStructure(StructureConstPtr const & structurePtr)
 : PVField(structurePtr),
@@ -102,7 +104,7 @@ const PVFieldPtrArray & PVStructure::getPVFields() const
     return pvFields;
 }
 
-PVFieldPtr  PVStructure::getSubField(String fieldName) const
+PVFieldPtr  PVStructure::getSubField(String const &fieldName) const
 {
     return findSubField(fieldName,this);
 }
@@ -127,13 +129,16 @@ PVFieldPtr  PVStructure::getSubField(size_t fieldOffset) const
     throw std::logic_error("PVStructure.getSubField: Logic error");
 }
 
-void PVStructure::appendPVField(String fieldName, PVFieldPtr const & pvField)
+void PVStructure::appendPVField(
+    String const &fieldName,
+    PVFieldPtr const & pvField)
 {
     size_t origLength = pvFields.size();
     size_t newLength = origLength+1;
     PVFieldPtrArray * xxx = const_cast<PVFieldPtrArray *>(&pvFields);
     xxx->push_back(pvField);
-    FieldConstPtr field = getFieldCreate()->appendField(structurePtr,fieldName,pvField->getField());
+    FieldConstPtr field = getFieldCreate()->appendField(
+        structurePtr,fieldName,pvField->getField());
     replaceField(field);
     structurePtr = static_pointer_cast<const Structure>(field);
     StringArray fieldNames = structurePtr->getFieldNames();
@@ -142,7 +147,9 @@ void PVStructure::appendPVField(String fieldName, PVFieldPtr const & pvField)
     }
 }
 
-void PVStructure::appendPVFields(StringArray const & fieldNames, PVFieldPtrArray const & pvFields)
+void PVStructure::appendPVFields(
+    StringArray const & fieldNames,
+    PVFieldPtrArray const & pvFields)
 {
     size_t origLength = this->pvFields.size();
     size_t extra = fieldNames.size();
@@ -156,7 +163,8 @@ void PVStructure::appendPVFields(StringArray const & fieldNames, PVFieldPtrArray
     FieldConstPtrArray fields;
     fields.reserve(extra);
     for(size_t i=0; i<extra; i++) fields.push_back(pvFields[i]->getField());
-    FieldConstPtr field = getFieldCreate()->appendFields(structurePtr,fieldNames,fields);
+    FieldConstPtr field = getFieldCreate()->appendFields(
+        structurePtr,fieldNames,fields);
     replaceField(field);
     structurePtr = static_pointer_cast<const Structure>(field);
     StringArray names = structurePtr->getFieldNames();
@@ -165,7 +173,7 @@ void PVStructure::appendPVFields(StringArray const & fieldNames, PVFieldPtrArray
     }
 }
 
-void PVStructure::removePVField(String fieldName)
+void PVStructure::removePVField(String const &fieldName)
 {
     PVFieldPtr pvField = getSubField(fieldName);
     if(pvField.get()==NULL) {
@@ -193,7 +201,8 @@ void PVStructure::removePVField(String fieldName)
     }
     PVFieldPtrArray * xxx = const_cast<PVFieldPtrArray *>(&pvFields);
     xxx->swap(newPVFields);
-    FieldConstPtr field = getFieldCreate()->createStructure(structurePtr->getID(),newFieldNames,fields);
+    FieldConstPtr field = getFieldCreate()->createStructure(
+        structurePtr->getID(),newFieldNames,fields);
     replaceField(field);
     structurePtr = static_pointer_cast<const Structure>(field);
     StringArray fieldNames = structurePtr->getFieldNames();
@@ -202,7 +211,7 @@ void PVStructure::removePVField(String fieldName)
     }
 }
 
-PVBooleanPtr PVStructure::getBooleanField(String fieldName)
+PVBooleanPtr PVStructure::getBooleanField(String const &fieldName)
 {
     PVFieldPtr pvField = findSubField(fieldName,this);
     if(pvField.get()==NULL) {
@@ -224,7 +233,7 @@ PVBooleanPtr PVStructure::getBooleanField(String fieldName)
     return nullPVBoolean;
 }
 
-PVBytePtr PVStructure::getByteField(String fieldName)
+PVBytePtr PVStructure::getByteField(String const &fieldName)
 {
     PVFieldPtr pvField = findSubField(fieldName,this);
     if(pvField.get()==NULL) {
@@ -246,7 +255,7 @@ PVBytePtr PVStructure::getByteField(String fieldName)
     return nullPVByte;
 }
 
-PVShortPtr PVStructure::getShortField(String fieldName)
+PVShortPtr PVStructure::getShortField(String const &fieldName)
 {
     PVFieldPtr pvField  = findSubField(fieldName,this);
     if(pvField.get()==NULL) {
@@ -268,7 +277,7 @@ PVShortPtr PVStructure::getShortField(String fieldName)
     return nullPVShort;
 }
 
-PVIntPtr PVStructure::getIntField(String fieldName)
+PVIntPtr PVStructure::getIntField(String const &fieldName)
 {
     PVFieldPtr pvField  = findSubField(fieldName,this);
     if(pvField.get()==NULL) {
@@ -290,7 +299,7 @@ PVIntPtr PVStructure::getIntField(String fieldName)
     return nullPVInt;
 }
 
-PVLongPtr PVStructure::getLongField(String fieldName)
+PVLongPtr PVStructure::getLongField(String const &fieldName)
 {
     PVFieldPtr pvField  = findSubField(fieldName,this);
     if(pvField.get()==NULL) {
@@ -312,7 +321,7 @@ PVLongPtr PVStructure::getLongField(String fieldName)
     return nullPVLong;
 }
 
-PVUBytePtr PVStructure::getUByteField(String fieldName)
+PVUBytePtr PVStructure::getUByteField(String const &fieldName)
 {
     PVFieldPtr pvField  = findSubField(fieldName,this);
     if(pvField.get()==NULL) {
@@ -334,7 +343,7 @@ PVUBytePtr PVStructure::getUByteField(String fieldName)
     return nullPVUByte;
 }
 
-PVUShortPtr PVStructure::getUShortField(String fieldName)
+PVUShortPtr PVStructure::getUShortField(String const &fieldName)
 {
     PVFieldPtr pvField  = findSubField(fieldName,this);
     if(pvField.get()==NULL) {
@@ -356,7 +365,7 @@ PVUShortPtr PVStructure::getUShortField(String fieldName)
     return nullPVUShort;
 }
 
-PVUIntPtr PVStructure::getUIntField(String fieldName)
+PVUIntPtr PVStructure::getUIntField(String const &fieldName)
 {
     PVFieldPtr pvField  = findSubField(fieldName,this);
     if(pvField.get()==NULL) {
@@ -378,7 +387,7 @@ PVUIntPtr PVStructure::getUIntField(String fieldName)
     return nullPVUInt;
 }
 
-PVULongPtr PVStructure::getULongField(String fieldName)
+PVULongPtr PVStructure::getULongField(String const &fieldName)
 {
     PVFieldPtr pvField  = findSubField(fieldName,this);
     if(pvField.get()==NULL) {
@@ -400,7 +409,7 @@ PVULongPtr PVStructure::getULongField(String fieldName)
     return nullPVULong;
 }
 
-PVFloatPtr PVStructure::getFloatField(String fieldName)
+PVFloatPtr PVStructure::getFloatField(String const &fieldName)
 {
     PVFieldPtr pvField  = findSubField(fieldName,this);
     if(pvField.get()==NULL) {
@@ -422,7 +431,7 @@ PVFloatPtr PVStructure::getFloatField(String fieldName)
     return nullPVFloat;
 }
 
-PVDoublePtr PVStructure::getDoubleField(String fieldName)
+PVDoublePtr PVStructure::getDoubleField(String const &fieldName)
 {
     PVFieldPtr pvField  = findSubField(fieldName,this);
     if(pvField.get()==NULL) {
@@ -444,7 +453,7 @@ PVDoublePtr PVStructure::getDoubleField(String fieldName)
     return nullPVDouble;
 }
 
-PVStringPtr PVStructure::getStringField(String fieldName)
+PVStringPtr PVStructure::getStringField(String const &fieldName)
 {
     PVFieldPtr pvField  = findSubField(fieldName,this);
     if(pvField.get()==NULL) {
@@ -466,7 +475,7 @@ PVStringPtr PVStructure::getStringField(String fieldName)
     return nullPVString;
 }
 
-PVStructurePtr PVStructure::getStructureField(String fieldName)
+PVStructurePtr PVStructure::getStructureField(String const &fieldName)
 {
     PVFieldPtr pvField  = findSubField(fieldName,this);
     if(pvField.get()==NULL) {
@@ -485,7 +494,7 @@ PVStructurePtr PVStructure::getStructureField(String fieldName)
 }
 
 PVScalarArrayPtr PVStructure::getScalarArrayField(
-    String fieldName,ScalarType elementType)
+    String const &fieldName,ScalarType elementType)
 {
     PVFieldPtr pvField  = findSubField(fieldName,this);
     if(pvField.get()==NULL) {
@@ -515,7 +524,7 @@ PVScalarArrayPtr PVStructure::getScalarArrayField(
 }
 
 PVStructureArrayPtr PVStructure::getStructureArrayField(
-    String fieldName)
+    String const &fieldName)
 {
     PVFieldPtr pvField  = findSubField(fieldName,this);
     if(pvField.get()==NULL) {
@@ -539,10 +548,10 @@ String PVStructure::getExtendsStructureName() const
 }
 
 bool PVStructure::putExtendsStructureName(
-    String extendsStructureName)
+    String const &xxx)
 {
     if(extendsStructureName.length()!=0) return false;
-    extendsStructureName = extendsStructureName;
+    extendsStructureName = xxx;
     return true;
 }
 
@@ -629,7 +638,10 @@ void PVStructure::deserialize(ByteBuffer *pbuffer,
     }
 }
 
-static PVFieldPtr findSubField(String fieldName,PVStructure const *pvStructure) {
+static PVFieldPtr findSubField(
+    String const & fieldName,
+    PVStructure const *pvStructure)
+{
     if( fieldName.length()<1) return nullPVField;
     String::size_type index = fieldName.find('.');
     String name = fieldName;

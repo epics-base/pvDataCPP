@@ -32,7 +32,10 @@ PVField::PVField(FieldConstPtr field)
 PVField::~PVField()
 { }
 
-void PVField::message(String message,MessageType messageType,String fullFieldName)  
+void PVField::message(
+    String message,
+    MessageType messageType,
+    String fullFieldName)  
 {
     if(parent!=NULL) {
         if(fullFieldName.length()>0) {
@@ -133,7 +136,7 @@ void PVField::replaceField(FieldConstPtr &xxx)
     field = xxx;
 }
 
-void PVField::renameField(String  newName)
+void PVField::renameField(String const & newName)
 {
     if(parent==NULL) {
         throw std::logic_error("no parent");
@@ -167,7 +170,7 @@ void PVField::setPostHandler(PostHandlerPtr const &handler)
     postHandler = handler;
 }
 
-void PVField::setParentAndName(PVStructure * xxx,String & name)
+void PVField::setParentAndName(PVStructure * xxx,String const & name)
 {
     parent = xxx;
     fieldName = name;

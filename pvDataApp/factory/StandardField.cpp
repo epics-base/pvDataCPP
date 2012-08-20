@@ -490,14 +490,14 @@ static StructureConstPtr createProperties(String id,FieldConstPtr field,String p
 
 
 StructureConstPtr StandardField::scalar(
-    ScalarType type,String  properties)
+    ScalarType type,String  const &properties)
 {
     ScalarConstPtr field = fieldCreate->createScalar(type);
     return createProperties("scalar_t",field,properties);    
 }
 
 StructureConstPtr StandardField::scalarArray(
-    ScalarType elementType, String  properties)
+    ScalarType elementType, String  const &properties)
 {
     ScalarArrayConstPtr field = fieldCreate->createScalarArray(elementType);
     return createProperties("scalarArray_t",field,properties);
@@ -505,7 +505,7 @@ StructureConstPtr StandardField::scalarArray(
 
 
 StructureConstPtr StandardField::structureArray(
-    StructureConstPtr const & structure,String  properties)
+    StructureConstPtr const & structure,String  const &properties)
 {
     StructureArrayConstPtr field = fieldCreate->createStructureArray(
         structure);
@@ -524,7 +524,7 @@ StructureConstPtr StandardField::enumerated()
     return fieldCreate->createStructure("enumerated_t",names,fields);
 }
 
-StructureConstPtr StandardField::enumerated(String  properties)
+StructureConstPtr StandardField::enumerated(String  const &properties)
 {
     StructureConstPtr field = enumerated();
     return createProperties("enumerated_t",field,properties);

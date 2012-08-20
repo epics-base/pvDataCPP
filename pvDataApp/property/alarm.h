@@ -39,7 +39,7 @@ public:
     Alarm() : severity(0),status(0), message(String("")) {}
     //default constructors and destructor are OK
     String getMessage() const {return message;}
-    void setMessage(String value) {message = value;}
+    void setMessage(String const &value) {message = value;}
     AlarmSeverity getSeverity() const;
     void setSeverity(AlarmSeverity value) {severity = value;}
     AlarmStatus getStatus() const;

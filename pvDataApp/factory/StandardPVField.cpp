@@ -28,21 +28,24 @@ StandardPVField::StandardPVField(){}
 
 StandardPVField::~StandardPVField(){}
 
-PVStructurePtr StandardPVField::scalar(ScalarType type,String  properties)
+PVStructurePtr StandardPVField::scalar(
+    ScalarType type,String const & properties)
 {
     StructureConstPtr field = standardField->scalar(type,properties);
     PVStructurePtr pvStructure = pvDataCreate->createPVStructure(field);
     return pvStructure;
 }
 
-PVStructurePtr StandardPVField::scalarArray(ScalarType elementType, String  properties)
+PVStructurePtr StandardPVField::scalarArray(
+    ScalarType elementType, String const & properties)
 {
     StructureConstPtr field = standardField->scalarArray(elementType,properties);
     PVStructurePtr pvStructure = pvDataCreate->createPVStructure(field);
     return pvStructure;
 }
 
-PVStructurePtr StandardPVField::structureArray(StructureConstPtr const & structure,String  properties)
+PVStructurePtr StandardPVField::structureArray(
+    StructureConstPtr const & structure,String const & properties)
 {
     StructureConstPtr field = standardField->structureArray(structure,properties);
     PVStructurePtr pvStructure = pvDataCreate->createPVStructure(field);
@@ -63,11 +66,13 @@ PVStructurePtr StandardPVField::enumerated(StringArray const &choices)
     return pvStructure;
 }
 
-PVStructurePtr StandardPVField::enumerated(StringArray const &choices,String  properties)
+PVStructurePtr StandardPVField::enumerated(
+    StringArray const &choices,String const & properties)
 {
     StructureConstPtr field = standardField->enumerated(properties);
     PVStructurePtr pvStructure =  pvDataCreate->createPVStructure(field);
-    PVScalarArrayPtr pvScalarArray = pvStructure->getScalarArrayField("value.choices",pvString);
+    PVScalarArrayPtr pvScalarArray = pvStructure->getScalarArrayField(
+        "value.choices",pvString);
     if(pvScalarArray.get()==NULL) {
         throw std::logic_error(String("StandardPVField::enumerated"));
     }

@@ -104,12 +104,12 @@ public:
      * @param scalarType The scalarType for the new item being added/
      * @return The new PVScalar that has been added to the Auxinfo.
      */
-    PVScalarPtr createInfo(String key,ScalarType scalarType);
+    PVScalarPtr createInfo(String const & key,ScalarType scalarType);
     /**
      * Get the Auxinfo with the specified key.
      * @return The PVScalar or null if it does not exist.
      */
-    PVScalarPtr getInfo(String key);
+    PVScalarPtr getInfo(String const & key);
     /**
      * Get the map for the info.
      * @return The map;
@@ -236,7 +236,7 @@ public:
      * Rename the field name.
      * @param newName The new name.
      */
-    void renameField(String newName);
+    void renameField(String const & newName);
     /**
      * postPut. Called when the field is updated by the implementation.
      */
@@ -271,10 +271,10 @@ protected:
         return shared_from_this();
     }
     PVField(FieldConstPtr field);
-    void setParentAndName(PVStructure *parent, String & fieldName);
+    void setParentAndName(PVStructure *parent, String const & fieldName);
     void replaceField(FieldConstPtr &field);
 private:
-    void message(String message,MessageType messageType,String fullFieldName);
+    void message(String  message,MessageType messageType,String fullFieldName);
     static void computeOffset(const PVField *pvField);
     static void computeOffset(const PVField *pvField,std::size_t offset);
     PVAuxInfoPtr pvAuxInfo;
@@ -622,7 +622,7 @@ public:
      * @param fieldName The name of the field.
      * @return Pointer to the field or null if field does not exist.
      */
-    PVFieldPtr getSubField(String fieldName) const;
+    PVFieldPtr getSubField(String const &fieldName) const;
     /**
      * Get the subfield with the specified offset.
      * @param fieldOffset The offset.
@@ -634,7 +634,7 @@ public:
      * @param fieldName The name of the field to append.
      * @param pvField The field to append.
      */
-    void appendPVField(String fieldName,PVFieldPtr const & pvField);
+    void appendPVField(String const &fieldName,PVFieldPtr const & pvField);
     /**
      * Append fields to the structure.
      * @param fieldNames The names of the fields to add.
@@ -646,85 +646,85 @@ public:
      * Remove a field from the structure.
      * @param fieldName The name of the field to remove.
      */
-    void removePVField(String fieldName);
+    void removePVField(String const &fieldName);
     /**
      * Get a boolean field with the specified name.
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
-    PVBooleanPtr getBooleanField(String fieldName) ;
+    PVBooleanPtr getBooleanField(String const &fieldName) ;
     /**
      * Get a byte field with the specified name.
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
-    PVBytePtr getByteField(String fieldName) ;
+    PVBytePtr getByteField(String const &fieldName) ;
     /**
      * Get a short field with the specified name.
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
-    PVShortPtr getShortField(String fieldName) ;
+    PVShortPtr getShortField(String const &fieldName) ;
     /**
      * Get a int field with the specified name.
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
-    PVIntPtr getIntField(String fieldName) ;
+    PVIntPtr getIntField(String const &fieldName) ;
     /**
      * Get a long field with the specified name.
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
-    PVLongPtr getLongField(String fieldName) ;
+    PVLongPtr getLongField(String const &fieldName) ;
     /**
      * Get an unsigned byte field with the specified name.
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
-    PVUBytePtr getUByteField(String fieldName) ;
+    PVUBytePtr getUByteField(String const &fieldName) ;
     /**
      * Get an unsigned short field with the specified name.
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
-    PVUShortPtr getUShortField(String fieldName) ;
+    PVUShortPtr getUShortField(String const &fieldName) ;
     /**
      * Get an unsigned int field with the specified name.
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
-    PVUIntPtr getUIntField(String fieldName) ;
+    PVUIntPtr getUIntField(String const &fieldName) ;
     /**
      * Get an unsigned long field with the specified name.
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
-    PVULongPtr getULongField(String fieldName) ;
+    PVULongPtr getULongField(String const &fieldName) ;
     /**
      * Get a float field with the specified name.
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
-    PVFloatPtr getFloatField(String fieldName) ;
+    PVFloatPtr getFloatField(String const &fieldName) ;
     /**
      * Get a double field with the specified name.
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
-    PVDoublePtr getDoubleField(String fieldName) ;
+    PVDoublePtr getDoubleField(String const &fieldName) ;
     /**
      * Get a string field with the specified name.
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
-    PVStringPtr getStringField(String fieldName) ;
+    PVStringPtr getStringField(String const &fieldName) ;
     /**
      * Get a structure field with the specified name.
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
-    PVStructurePtr getStructureField(String fieldName) ;
+    PVStructurePtr getStructureField(String const &fieldName) ;
     /**
      * Get a scalarArray field with the specified name.
      * @param fieldName The name of the field to get.
@@ -732,13 +732,13 @@ public:
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
     PVScalarArrayPtr getScalarArrayField(
-        String fieldName,ScalarType elementType) ;
+        String const &fieldName,ScalarType elementType) ;
     /**
      * Get a structureArray field with the specified name.
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
-    PVStructureArrayPtr getStructureArrayField(String fieldName) ;
+    PVStructureArrayPtr getStructureArrayField(String const &fieldName) ;
     /**
      * Get the name if this structure extends another structure.
      * @return The string which may be null.
@@ -749,7 +749,7 @@ public:
      * @param extendsStructureName The name.
      */
     bool putExtendsStructureName(
-        String extendsStructureName);
+        String const &extendsStructureName);
     /**
      * Serialize.
      * @param pbuffer The byte buffer.

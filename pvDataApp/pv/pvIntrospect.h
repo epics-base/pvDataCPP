@@ -176,7 +176,7 @@ namespace ScalarTypeFunc {
      * @return The scalarType.
      * An exception is thrown if the name is not the name of a scalar type.
      */
-    ScalarType getScalarType(String value);
+    ScalarType getScalarType(String const &value);
     /**
      * Get a name for the scalarType.
      * @param  scalarType The type.
@@ -421,7 +421,7 @@ public:
      * @return The array of fieldNames.
      */
     StringArray const & getFieldNames() const {return fieldNames;}
-    void renameField(std::size_t fieldIndex,String newName)
+    void renameField(std::size_t fieldIndex,String const & newName)
         {fieldNames[fieldIndex] = newName;}
     /**
      * Get the name of the field with the specified index;
@@ -447,7 +447,7 @@ public:
     virtual void deserialize(ByteBuffer *buffer, DeserializableControl *control);
     
 protected:
-   Structure(StringArray const & fieldNames, FieldConstPtrArray const & fields, String id = "");
+   Structure(StringArray const & fieldNames, FieldConstPtrArray const & fields, String const & id = "");
 private:
     void toStringCommon(StringBuilder buf,int indentLevel) const;
     StringArray fieldNames;
@@ -502,7 +502,7 @@ public:
      * @return a {@code Structure} interface for the newly created object.
      */
     StructureConstPtr createStructure (
-    	String id,
+    	String const & id,
         StringArray const & fieldNames,
         FieldConstPtrArray const & fields) const;
     /**
@@ -514,7 +514,7 @@ public:
      */
     StructureConstPtr appendField(
         StructureConstPtr const & structure,
-        String fieldName, FieldConstPtr const & field) const;
+        String const & fieldName, FieldConstPtr const & field) const;
     /**
      * Append fields to a structure.
      * @param structure The structure to which the fields appended.

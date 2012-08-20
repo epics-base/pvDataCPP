@@ -22,11 +22,11 @@ public:
     void setLow(double value){low = value;}
     void setHigh(double value){high = value;}
     String getDescription() const {return description;}
-    void setDescription(String value) {description = value;}
+    void setDescription(String const & value) {description = value;}
     String getFormat() const {return format;}
-    void setFormat(String value) {format = value;}
+    void setFormat(String const & value) {format = value;}
     String getUnits() const {return units;}
-    void setUnits(String value) {units = value;}
+    void setUnits(String const & value) {units = value;}
 private:
     String description;
     String format;

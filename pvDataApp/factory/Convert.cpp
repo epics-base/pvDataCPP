@@ -499,7 +499,7 @@ size_t Convert::fromString(PVStructurePtr const &pvStructure, StringArray const 
 }
 
 
-void Convert::fromString(PVScalarPtr const &pvScalar, String from)
+void Convert::fromString(PVScalarPtr const &pvScalar, String const & from)
 {
     ScalarConstPtr scalar = pvScalar->getScalar();
     ScalarType scalarType = scalar->getScalarType();

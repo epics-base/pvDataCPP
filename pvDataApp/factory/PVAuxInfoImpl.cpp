@@ -35,7 +35,7 @@ PVField * PVAuxInfo::getPVField() {
 }
 
 
-PVScalarPtr PVAuxInfo::createInfo(String key,ScalarType scalarType)
+PVScalarPtr PVAuxInfo::createInfo(String const & key,ScalarType scalarType)
 {
     PVInfoIter iter = pvInfos.find(key);
     if(iter!=pvInfos.end()) {
@@ -49,7 +49,7 @@ PVScalarPtr PVAuxInfo::createInfo(String key,ScalarType scalarType)
     return pvScalar;
 }
 
-PVScalarPtr  PVAuxInfo::getInfo(String key)
+PVScalarPtr  PVAuxInfo::getInfo(String const & key)
 {
     PVInfoIter iter;
     iter = pvInfos.find(key);
