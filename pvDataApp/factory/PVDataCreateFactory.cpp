@@ -223,12 +223,15 @@ void DefaultPVArray<T>::setCapacity(size_t capacity)
     }
     size_t length = PVArray::getLength();
     if(length>capacity) length = capacity;
+    /*
     std::vector<T> array;
     array.reserve(capacity);
     array.resize(length);
     T * from = get();
     for (size_t i=0; i<length; i++) array[i] = from[i];
     value->swap(array);
+    */
+    value->reserve(capacity);
     PVArray::setCapacityLength(capacity,length);
 }
 
@@ -320,6 +323,8 @@ void DefaultPVArray<T>::deserialize(ByteBuffer *pbuffer,
     if(size>=0) {
         // prepare array, if necessary
         if(size>this->getCapacity()) this->setCapacity(size);
+        // set new length
+        this->setLength(size);
         // retrieve value from the buffer
         size_t i = 0;
         while(true) {
@@ -337,8 +342,7 @@ void DefaultPVArray<T>::deserialize(ByteBuffer *pbuffer,
             else
                 break;
         }
-        // set new length
-        this->setLength(size);
+        // inform about the change?
         PVField::postPut();
     }
     // TODO null arrays (size == -1) not supported
@@ -393,14 +397,15 @@ void DefaultPVArray<String>::deserialize(ByteBuffer *pbuffer,
     if(size>=0) {
         // prepare array, if necessary
         if(size>getCapacity()) setCapacity(size);
+        // set new length
+        setLength(size);
         // retrieve value from the buffer
         String * pvalue = get();
         for(size_t i = 0; i<size; i++) {
             pvalue[i] = SerializeHelper::deserializeString(pbuffer,
                     pcontrol);
         }
-        // set new length
-        setLength(size);
+        // inform about the change?
         postPut();
     }
     // TODO null arrays (size == -1) not supported
