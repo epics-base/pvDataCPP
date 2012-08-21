@@ -74,7 +74,7 @@ of products:</p>
     <dd>A middle layer for implementing services.</dd>
 </dl>
 
-<p>Each of the products has a CPP and a C++ implementation.</p>
+<p>Each of the products has a Java and a C++ implementation.</p>
 
 <p>The products are all part of the <a
 href="http://epics-pvdata.sourceforge.net/">V4</a> implementation of <a
@@ -3217,7 +3217,7 @@ public:
     POINTER_DEFINITIONS(Requester);
     virtual ~Requester(){}
     virtual String getRequesterName() = 0;
-    virtual void message(String message,MessageType messageType) = 0;
+    virtual void message(String const &amp; message,MessageType messageType) = 0;
 };</pre>
 
 <p>where</p>
@@ -3347,8 +3347,8 @@ public:
     static const char* StatusTypeName[];
     static Status OK;
     Status();
-    Status(StatusType type, epics::pvData::String message);
-    Status(StatusType type, epics::pvData::String message, epics::pvData::String stackDump);
+    Status(StatusType type, epics::pvData::String const &amp; message);
+    Status(StatusType type, epics::pvData::String const &amp; message, epics::pvData::String stackDump);
     ~Status()
     StatusType getType() const;
     String getMessage() const;
