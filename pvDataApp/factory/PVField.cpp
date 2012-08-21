@@ -193,6 +193,19 @@ void PVField::toString(StringBuilder buf,int indentLevel)
    if(pvAuxInfo.get()!=NULL) pvAuxInfo->toString(buf,indentLevel);
 }
 
+std::ostream& PVField::dumpValue(std::ostream& o) const
+{
+	// default implementation
+	// each PVField class should implement it to avoid switch statement
+	// and string reallocation
+	static ConvertPtr convert = getConvert();
+	String tmp;
+	convert->getString(&tmp,this,0);
+	return o << tmp;
+}
+
+std::ostream& operator<<(std::ostream& o, const PVField& f) { return f.dumpValue(o); };
+
 void PVField::computeOffset(const PVField   *  pvField) {
     const PVStructure * pvTop = pvField->getParent();
     if(pvTop==NULL) {

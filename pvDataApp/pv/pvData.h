@@ -10,6 +10,9 @@
 #include <string>
 #include <map>
 #include <stdexcept>
+#include <ostream>
+#include <algorithm>
+#include <iterator>
 #include <pv/pvIntrospect.h>
 #include <pv/requester.h>
 namespace epics { namespace pvData { 
@@ -265,6 +268,14 @@ public:
      * @param indentLevel The indentation level.
      */
     virtual void toString(StringBuilder buf,int indentLevel) ;
+
+    /**
+     * Puts the PVField raw value to the stream.
+     * @param o output stream.
+     * @return The output stream.
+     */
+    virtual std::ostream& dumpValue(std::ostream& o) const;
+
 protected:
     PVField::shared_pointer getPtrSelf()
     {
@@ -290,6 +301,8 @@ private:
     friend class PVDataCreate;
     friend class PVStructure;
 };
+
+std::ostream& operator<<(std::ostream& o, const PVField& f);
 
 /**
  * PVScalar is the base class for each scalar field.
@@ -336,6 +349,12 @@ public:
      * @param The value.
      */
     virtual void put(T value) = 0;
+
+    std::ostream& dumpValue(std::ostream& o) const
+    {
+    	return o << get();
+    }
+
 protected:
     PVScalarValue(ScalarConstPtr const & scalar)
     : PVScalar(scalar) {}
@@ -481,6 +500,8 @@ public:
      * @return The interface.
      */
     const ScalarArrayConstPtr getScalarArray() const ;
+
+    virtual std::ostream& dumpValue(std::ostream& o, size_t index) const = 0;
 
 protected:
     PVScalarArray(ScalarArrayConstPtr const & scalarArray);
@@ -850,6 +871,31 @@ public:
     virtual pointer get() const = 0;
     virtual vector const & getVector() = 0;
     virtual shared_vector const & getSharedVector() = 0;
+
+    std::ostream& dumpValue(std::ostream& o) const
+    {
+    	o << "[";
+    	pointer iter = get();
+    	pointer last = iter + getLength();
+    	if (iter != last)
+    	{
+    		while (true)
+    		{
+    			o << *(iter++);
+    			if (iter == last)
+    				break;
+    			else
+    				o << ",";
+    		}
+    	}
+    	return o << "]";
+    }
+
+    std::ostream& dumpValue(std::ostream& o, size_t index) const
+    {
+    	return o << *(get() + index);
+    }
+
 protected:
     PVValueArray(ScalarArrayConstPtr const & scalar)
     : PVScalarArray(scalar) {}
