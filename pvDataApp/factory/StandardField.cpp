@@ -393,7 +393,7 @@ static void createEnumeratedAlarm() {
     names[1] = "stateSeverity";
     names[2] = "changeStateSeverity";
     fields[0] = fieldCreate->createScalar(pvBoolean);
-    fields[1] = fieldCreate->createScalar(pvInt);
+    fields[1] = fieldCreate->createScalarArray(pvInt);
     fields[2] = fieldCreate->createScalar(pvInt);
     enumeratedAlarmField = fieldCreate->createStructure("valueAlarm_t",names,fields);
 }
