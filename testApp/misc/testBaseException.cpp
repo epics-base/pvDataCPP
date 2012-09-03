@@ -1,7 +1,7 @@
 /* testBaseException.cpp */
 /**
  * Copyright - See the COPYRIGHT that is included with this distribution.
- * EPICS pvDataCPP is distributed subject to a Software License Agreement found
+ * EPICS pvData is distributed subject to a Software License Agreement found
  * in file LICENSE that is included with this distribution.
  */
 /* Author:  Matej Sekoranja Date: 2010.10.18 */

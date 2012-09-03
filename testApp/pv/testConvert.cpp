@@ -1,7 +1,7 @@
 /* testConvert.cpp */
 /**
  * Copyright - See the COPYRIGHT that is included with this distribution.
- * EPICS pvDataCPP is distributed subject to a Software License Agreement found
+ * EPICS pvData is distributed subject to a Software License Agreement found
  * in file LICENSE that is included with this distribution.
  */
 /* Author:  Marty Kraimer Date: 2010.11 */
@@ -177,7 +177,7 @@ static void testConvertScalar(FILE *fd) {
     fprintf(fd,"fromInt PASSED\n");
 
     if(debug) fprintf(fd,"\nfromLong\n");
-    int64 lval = 0x7fffffffffffffffL;
+    int64 lval = 0x7fffffffffffffffLL;
     for(int i=0; i<3; i++) {
         convert->fromLong(pvBytePtr, lval);
         builder.clear(); pvBytePtr->toString(&builder);
@@ -349,7 +349,7 @@ static void testConvertScalar(FILE *fd) {
     fprintf(fd,"fromUInt PASSED\n");
 
     if(debug) fprintf(fd,"\nfromULong\n");
-    uint64 ulval = 0x7fffffffffffffffL;
+    uint64 ulval = 0x7fffffffffffffffLL;
     for(int i=0; i<3; i++) {
         convert->fromULong(pvBytePtr, ulval);
         builder.clear(); pvBytePtr->toString(&builder);
@@ -537,7 +537,7 @@ static void testConvertScalarArray(FILE *fd) {
 
     if(debug) fprintf(fd,"\nfromLong\n");
     int64 larray[length];
-    int64 lval = 0x7fffffffffffffff;
+    int64 lval = 0x7fffffffffffffffLL;
     larray[0] = lval;
     for(size_t i=1; i<length; i++) larray[i] = larray[i-1] + 1;
     convert->fromLongArray(pvBytePtr,0,length,larray,0);
@@ -709,7 +709,7 @@ static void testConvertScalarArray(FILE *fd) {
 
     if(debug) fprintf(fd,"\nfromULong\n");
     uint64 ularray[length];
-    uint64 ulval = 0x7fffffffffffffff;
+    uint64 ulval = 0x7fffffffffffffffLL;
     ularray[0] = ulval;
     for(size_t i=1; i<length; i++) ularray[i] = ularray[i-1] + 1;
     convert->fromULongArray(pvBytePtr,0,length,ularray,0);

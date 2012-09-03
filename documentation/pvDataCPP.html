@@ -38,7 +38,7 @@
 <h1>EPICS pvDataCPP</h1>
 <!-- Maturity: Working Draft or Request for Comments, or Recommendation, and date. -->
 
-<h2 class="nocount">EPICS v4 Working Group, Working Draft, 20-Aug-2012</h2>
+<h2 class="nocount">EPICS v4 Working Group, Working Draft, 22-Aug-2012</h2>
 <dl>
   <dt>This version:</dt>
     <dd><a
@@ -83,7 +83,7 @@ Control System.</a></p>
 
 <h2 class="nocount">Status of this Document</h2>
 
-<p>This is the 20-Aug-2012 version of the C++ implementation of pvData. It is a
+<p>This is the 22-Aug-2012 version of the C++ implementation of pvData. It is a
 complete implementation of pvData as currently defined. </p>
 
 <h2 class="nocount">TODO</h2>
@@ -866,6 +866,7 @@ public:
    virtual bool equals(PVField &amp;pv);
    virtual void toString(StringBuilder buf) ;
    virtual void toString(StringBuilder buf,int indentLevel);
+   std::ostream&amp; dumpValue(std::ostream&amp; o) const;
  ...
 }</pre>
 
@@ -928,6 +929,8 @@ public:
   <dt>toString</dt>
     <dd>Converts the field data to a string. This is mostly for debugging
       purposes.</dd>
+  <dt>dumpValue</dt>
+     <dd>Method for streams I/O.</dd>
 </dl>
 
 <h4>PVAuxInfo</h4>
@@ -1094,6 +1097,7 @@ public:
     typedef PVScalarArray &amp;reference;
     typedef const PVScalarArray&amp; const_reference;
     const ScalarArrayConstPtr getScalarArray() const ;
+    virtual std::ostream&amp; dumpValue(std::ostream&amp; o, size_t index) const = 0;
  ...
 }</pre>
 
@@ -1101,6 +1105,8 @@ public:
 <dl>
   <dt>getScalarArray</dt>
     <dd>Get the introspection interface.</dd>
+  <dt>dumpValue</dt>
+     <dd>Method for streams I/O.</dd>
 </dl>
 
 <h4>PVValueArray</h4>
@@ -1136,6 +1142,8 @@ public:
     virtual pointer get() const = 0;
     virtual vector const &amp; getVector() = 0;
     virtual shared_vector const &amp; getSharedVector() = 0;
+    std::ostream&amp; dumpValue(std::ostream&amp; o) const;
+    std::ostream&amp; dumpValue(std::ostream&amp; o, size_t index) const;
 protected:
     PVValueArray(ScalarArrayConstPtr const &amp; scalar)
     : PVScalarArray(scalar) {}
@@ -1242,6 +1250,8 @@ typedef std::tr1::shared_ptr&lt;PVStringArray&gt; PVStringArrayPtr;</pre>
     <dd>Get the vector holding the raw array.</dd>
   <dt>getSharedVector()</dt>
     <dd>Get the shared vector holding the data.</dd>
+  <dt>dumpValue</dt>
+     <dd>Method for streams I/O.</dd>
 </dl>
 
 <p>Both get and put return the number of elements actually transfered. The

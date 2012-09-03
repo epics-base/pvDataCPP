@@ -1,8 +1,11 @@
 /* destroyable.h */
 /**
  * Copyright - See the COPYRIGHT that is included with this distribution.
- * EPICS pvDataCPP is distributed subject to a Software License Agreement found
+ * EPICS pvData is distributed subject to a Software License Agreement found
  * in file LICENSE that is included with this distribution.
+ */
+/**
+ *  @author mse
  */
 #ifndef DESTROYABLE_H
 #define DESTROYABLE_H
