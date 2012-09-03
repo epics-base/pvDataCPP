@@ -23,7 +23,7 @@
 
 // where should we look?
 
-#if defined(__GNUC__) && __GNUC__>=4
+#if defined(__GNUC__) && __GNUC__>=4 && !defined(__vxworks)
    // GCC >=4.0.0
 #  define SHARED_FROM_TR1
 
@@ -47,6 +47,12 @@
 #  include <tr1/memory>
 
 #elif defined(SHARED_FROM_BOOST)
+
+#if defined(__GNUC__) && __GNUC__ < 3
+#define BOOST_EXCEPTION_DISABLE
+#define BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION
+#endif
+
 #  include <boost/tr1/memory.hpp>
 
 #else

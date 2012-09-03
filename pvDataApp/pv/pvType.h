@@ -14,7 +14,13 @@
 #define PVTYPE_H
 #include <string>
 #include <vector>
+
+#ifdef __vxworks
+typedef int intptr_t;
+typedef unsigned int uintptr_t;
+#else
 #include <stdint.h>
+#endif
 
 #include <pv/sharedPtr.h>
 

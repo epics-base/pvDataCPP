@@ -298,60 +298,13 @@ public:
     {
         return _size;
     }
-
     /**
      * Put the value into the raw buffer as a byte stream in the current byte order.
      *
      * @param  value The value to be put into the byte buffer.
      */
     template<typename T>
-    inline void put(T value)
-    {
-        // this avoids int8 specialization, compiler will take care if optimization, -O2 or more
-        if (sizeof(T) == 1)
-        {
-            *(_position++) = (int8)value;
-            return;
-        }
-        
-        if (ENDIANESS_SUPPORT && reverse<T>())
-        {
-            value = swap<T>(value);
-        }
-           
-        if (UNALIGNED_ACCESS)
-        {
-            // NOTE: some CPU handle unaligned access pretty good (e.g. x86)
-            *((T*)_position) = value;
-            _position += sizeof(T);
-        }
-        else
-        {
-            // NOTE: this check and branching does not always payoff 
-            if (ADAPTIVE_ACCESS && is_aligned(_position, sizeof(T)))
-            {
-                *((T*)_position) = value;
-                _position += sizeof(T);
-            }
-            else
-            {
-                if (USE_INLINE_MEMCPY)
-                {
-                    // NOTE: it turns out that this compiler can optimize this with inline code, e.g. gcc
-                    memcpy(_position, &value, sizeof(T));
-                    _position += sizeof(T);
-                }
-                else
-                {
-                    // NOTE: compiler should optimize this and unroll the loop
-                    for (size_t i = 0; i < sizeof(T); i++)
-                        _position[i] = ((char*)&value)[i];
-                    _position += sizeof(T);
-                }
-            }
-        }
-        
-    }
+    inline void put(T value);
     /**
      * Put the value into the raw buffer at the specified index  as a byte stream in the current byte order.
      *
@@ -359,108 +312,20 @@ public:
      * @param  value The value to be put into the byte buffer.
      */
     template<typename T>
-    inline void put(std::size_t index, T value)
-    {
-        // this avoids int8 specialization, compiler will take care if optimization, -O2 or more
-        if (sizeof(T) == 1)
-        {
-            *(_buffer + index) = (int8)value;
-            return;
-        }
-        
-        if (ENDIANESS_SUPPORT && reverse<T>())
-        {
-            value = swap<T>(value);
-        }
-           
-        if (UNALIGNED_ACCESS)
-        {
-            // NOTE: some CPU handle unaligned access preety good (e.g. x86)
-            *((T*)(_buffer + index)) = value;
-        }
-        else
-        {
-            // NOTE: this check and branching does not always payoff 
-            if (ADAPTIVE_ACCESS && is_aligned(_position, sizeof(T)))
-            {
-                *((T*)(_buffer + index)) = value;
-            }
-            else
-            {
-                if (USE_INLINE_MEMCPY)
-                {
-                    // NOTE: it turns out that this compiler can optimize this with inline code, e.g. gcc
-                    memcpy(_buffer + index, &value, sizeof(T));
-                }
-                else
-                {
-                    // NOTE: compiler should optimize this and unroll the loop
-                    char *p = _buffer + index;
-                    for (size_t i = 0; i < sizeof(T); i++)
-                        p[i] = ((char*)&value)[i];
-                }
-            }
-        }
-        
-    }
+    inline void put(std::size_t index, T value);
     /**
      * Get the new object from  the byte buffer. The item MUST have type {@code T}.
      * The position is adjusted based on the type.
      *
      * @return The object.
      */
+#if defined (__GNUC__) && __GNUC__ < 3
     template<typename T>
-    inline T get()
-    {
-        // this avoids int8 specialization, compiler will take care if optimization, -O2 or more
-        if (sizeof(T) == 1)
-        {
-            return (int8)(*(_position++));
-        }
-        
-
-        T value;
-        
-        if (UNALIGNED_ACCESS)
-        {
-            // NOTE: some CPU handle unaligned access preety good (e.g. x86)
-            value = *((T*)_position);
-            _position += sizeof(T);
-        }
-        else
-        {
-            // NOTE: this check and branching does not always payoff 
-            if (ADAPTIVE_ACCESS && is_aligned(_position, sizeof(T)))
-            {
-                value = *((T*)_position);
-                _position += sizeof(T);
-            }
-            else
-            {
-                if (USE_INLINE_MEMCPY)
-                {
-                    // NOTE: it turns out that this compiler can optimize this with inline code, e.g. gcc
-                    memcpy(&value, _position, sizeof(T));
-                    _position += sizeof(T);
-                }
-                else
-                {
-                    // NOTE: compiler should optimize this and unroll the loop
-                    for (size_t i = 0; i < sizeof(T); i++)
-                        ((char*)&value)[i] = _position[i];
-                    _position += sizeof(T);
-                }
-            }
-        }
-        
-        if (ENDIANESS_SUPPORT && reverse<T>())
-        {
-            value = swap<T>(value);
-        }
-           
-        return value;        
-    }
-
+    inline T get(const T*);
+#else
+    template<typename T>
+    inline T get();
+#endif
     /**
      * Get the new object from  the byte buffer at the specified index.
      * The item MUST have type {@code T}.
@@ -470,53 +335,7 @@ public:
      * @return The object.
      */
     template<typename T>
-    inline T get(std::size_t index)
-    {
-        // this avoids int8 specialization, compiler will take care if optimization, -O2 or more
-        if (sizeof(T) == 1)
-        {
-            return (int8)(*(_buffer + index));
-        }
-        
-
-        T value;
-        
-        if (UNALIGNED_ACCESS)
-        {
-            // NOTE: some CPU handle unaligned access preety good (e.g. x86)
-            value = *((T*)(_buffer + index));
-        }
-        else
-        {
-            // NOTE: this check and branching does not always payoff 
-            if (ADAPTIVE_ACCESS && is_aligned(_position, sizeof(T)))
-            {
-                value = *((T*)(_buffer + index));
-            }
-            else
-            {
-                if (USE_INLINE_MEMCPY)
-                {
-                    // NOTE: it turns out that this compiler can optimize this with inline code, e.g. gcc
-                    memcpy(&value, _buffer + index, sizeof(T));
-                }
-                else
-                {
-                    // NOTE: compiler should optimize this and unroll the loop
-                    char* p = _buffer + index;
-                    for (size_t i = 0; i < sizeof(T); i++)
-                        ((char*)&value)[i] = p[i];
-                }
-            }
-        }
-        
-        if (ENDIANESS_SUPPORT && reverse<T>())
-        {
-            value = swap<T>(value);
-        }
-           
-        return value;        
-    }
+    inline T get(std::size_t index);
     /**
      * Put a sub-array of bytes into the byte buffer.
      * The position is increased by the count.
@@ -551,32 +370,7 @@ public:
      * @param  count  The number of elements.
      */
     template<typename T>
-    inline void putArray(T* values, std::size_t count)
-    {
-        // this avoids int8 specialization, compiler will take care if optimization, -O2 or more
-        if (sizeof(T) == 1)
-        {
-            put((const char*)values, 0, count);
-            return;
-        }
-        
-        T* start = (T*)_position;
-        
-        size_t n = sizeof(T)*count;
-        // we require aligned arrays...
-        memcpy(_position, values, n);
-        _position += n;
-        
-        // ... so that we can be fast changing endianess
-        if (ENDIANESS_SUPPORT && reverse<T>()) 
-        {
-            for (std::size_t i = 0; i < count; i++)
-            {
-                *start = swap<T>(*start);
-                start++;            
-            }   
-        }
-    }
+    inline void putArray(T* values, std::size_t count);
     /**
      * Get an array of type {@code T} from the byte buffer.
      * The position is adjusted.
@@ -585,32 +379,7 @@ public:
      * @param  count  The number of elements.
      */
     template<typename T>
-    inline void getArray(T* values, std::size_t count)
-    {
-        // this avoids int8 specialization, compiler will take care if optimization, -O2 or more
-        if (sizeof(T) == 1)
-        {
-            get((char*)values, 0, count);
-            return;
-        }
-
-        T* start = (T*)values;
-        
-        size_t n = sizeof(T)*count;
-        // we require aligned arrays...
-        memcpy(values, _position, n);
-        _position += n;
-        
-        // ... so that we can be fast changing endianess
-        if (ENDIANESS_SUPPORT && reverse<T>()) 
-        {
-            for (std::size_t i = 0; i < count; i++)
-            {
-                *start = swap<T>(*start);
-                start++;            
-            }   
-        }
-    }
+    inline void getArray(T* values, std::size_t count);
     /**
      * Is the byte order the EPICS_BYTE_ORDER
      * @return (false,true) if (is, is not) the EPICS_BYTE_ORDER
@@ -723,6 +492,58 @@ public:
      */
     inline void putDouble (std::size_t  index, double value) { put<double>(index, value); }
 
+#if defined (__GNUC__) && __GNUC__ < 3
+
+    /**
+     * Get a boolean value from the byte buffer.
+     *
+     * @return The value.
+     */
+    inline   bool getBoolean() { return get((int8*)0) != 0; }
+    /**
+     * Get a byte value from the byte buffer.
+     *
+     * @return The value.
+     */
+    inline   int8 getByte   () { return get((int8*)0); }
+    /**
+     * Get a short value from the byte buffer.
+     *
+     * @return The value.
+     */
+    inline  int16 getShort  () { return get((int16*)0); }
+    /**
+     * Get a int value from the byte buffer.
+     *
+     * @return The value.
+     */
+    inline  int32 getInt    () { return get((int32*)0); }
+    /**
+     * Get a long value from the byte buffer.
+     *
+     * @return The value.
+     */
+    inline  int64 getLong   () { return get((int64*)0); }
+    /**
+     * Get a float value from the byte buffer.
+     *
+     * @return The value.
+     */
+    inline  float getFloat  () { return get((float*)0); }
+    /**
+     * Get a double value from the byte buffer.
+     *
+     * @return The value.
+     */
+    inline double getDouble () { return get((double*)0); }
+
+    /**
+     * Get a boolean value from the byte buffer at the specified index.
+     *
+     * @param  index The offset in the byte buffer.
+     * @return The value.
+     */
+#else
     /**
      * Get a boolean value from the byte buffer.
      *
@@ -765,7 +586,7 @@ public:
      * @return The value.
      */
     inline double getDouble () { return get<double>(); }
-
+#endif
     /**
      * Get a boolean value from the byte buffer at the specified index.
      *
@@ -844,6 +665,264 @@ private:
         return _reverseFloatEndianess;
     }
 
+    // the following methods must come after the specialized reverse<>() methods to make pre-gcc3 happy
+
+    template<typename T>
+    inline void ByteBuffer::put(T value)
+    {
+        // this avoids int8 specialization, compiler will take care if optimization, -O2 or more
+        if (sizeof(T) == 1)
+        {
+            *(_position++) = (int8)value;
+            return;
+        }
+
+        if (ENDIANESS_SUPPORT && reverse<T>())
+        {
+            value = swap<T>(value);
+        }
+
+        if (UNALIGNED_ACCESS)
+        {
+            // NOTE: some CPU handle unaligned access pretty good (e.g. x86)
+            *((T*)_position) = value;
+            _position += sizeof(T);
+        }
+        else
+        {
+            // NOTE: this check and branching does not always payoff
+            if (ADAPTIVE_ACCESS && is_aligned(_position, sizeof(T)))
+            {
+                *((T*)_position) = value;
+                _position += sizeof(T);
+            }
+            else
+            {
+                if (USE_INLINE_MEMCPY)
+                {
+                    // NOTE: it turns out that this compiler can optimize this with inline code, e.g. gcc
+                    memcpy(_position, &value, sizeof(T));
+                    _position += sizeof(T);
+                }
+                else
+                {
+                    // NOTE: compiler should optimize this and unroll the loop
+                    for (size_t i = 0; i < sizeof(T); i++)
+                        _position[i] = ((char*)&value)[i];
+                    _position += sizeof(T);
+                }
+            }
+        }
+
+    }
+
+    template<typename T>
+    inline void ByteBuffer::put(std::size_t index, T value)
+    {
+        // this avoids int8 specialization, compiler will take care if optimization, -O2 or more
+        if (sizeof(T) == 1)
+        {
+            *(_buffer + index) = (int8)value;
+            return;
+        }
+
+        if (ENDIANESS_SUPPORT && reverse<T>())
+        {
+            value = swap<T>(value);
+        }
+
+        if (UNALIGNED_ACCESS)
+        {
+            // NOTE: some CPU handle unaligned access preety good (e.g. x86)
+            *((T*)(_buffer + index)) = value;
+        }
+        else
+        {
+            // NOTE: this check and branching does not always payoff
+            if (ADAPTIVE_ACCESS && is_aligned(_position, sizeof(T)))
+            {
+                *((T*)(_buffer + index)) = value;
+            }
+            else
+            {
+                if (USE_INLINE_MEMCPY)
+                {
+                    // NOTE: it turns out that this compiler can optimize this with inline code, e.g. gcc
+                    memcpy(_buffer + index, &value, sizeof(T));
+                }
+                else
+                {
+                    // NOTE: compiler should optimize this and unroll the loop
+                    char *p = _buffer + index;
+                    for (size_t i = 0; i < sizeof(T); i++)
+                        p[i] = ((char*)&value)[i];
+                }
+            }
+        }
+
+    }
+
+#if defined (__GNUC__) && __GNUC__ < 3
+    template<typename T>
+    inline T ByteBuffer::get(const T*)
+#else
+    template<typename T>
+    inline T ByteBuffer::get()
+#endif
+    {
+        // this avoids int8 specialization, compiler will take care if optimization, -O2 or more
+        if (sizeof(T) == 1)
+        {
+            return (int8)(*(_position++));
+        }
+
+
+        T value;
+
+        if (UNALIGNED_ACCESS)
+        {
+            // NOTE: some CPU handle unaligned access preety good (e.g. x86)
+            value = *((T*)_position);
+            _position += sizeof(T);
+        }
+        else
+        {
+            // NOTE: this check and branching does not always payoff
+            if (ADAPTIVE_ACCESS && is_aligned(_position, sizeof(T)))
+            {
+                value = *((T*)_position);
+                _position += sizeof(T);
+            }
+            else
+            {
+                if (USE_INLINE_MEMCPY)
+                {
+                    // NOTE: it turns out that this compiler can optimize this with inline code, e.g. gcc
+                    memcpy(&value, _position, sizeof(T));
+                    _position += sizeof(T);
+                }
+                else
+                {
+                    // NOTE: compiler should optimize this and unroll the loop
+                    for (size_t i = 0; i < sizeof(T); i++)
+                        ((char*)&value)[i] = _position[i];
+                    _position += sizeof(T);
+                }
+            }
+        }
+
+        if (ENDIANESS_SUPPORT && reverse<T>())
+        {
+            value = swap<T>(value);
+        }
+
+        return value;
+    }
+
+    template<typename T>
+    inline T ByteBuffer::get(std::size_t index)
+    {
+        // this avoids int8 specialization, compiler will take care if optimization, -O2 or more
+        if (sizeof(T) == 1)
+        {
+            return (int8)(*(_buffer + index));
+        }
+
+
+        T value;
+
+        if (UNALIGNED_ACCESS)
+        {
+            // NOTE: some CPU handle unaligned access preety good (e.g. x86)
+            value = *((T*)(_buffer + index));
+        }
+        else
+        {
+            // NOTE: this check and branching does not always payoff
+            if (ADAPTIVE_ACCESS && is_aligned(_position, sizeof(T)))
+            {
+                value = *((T*)(_buffer + index));
+            }
+            else
+            {
+                if (USE_INLINE_MEMCPY)
+                {
+                    // NOTE: it turns out that this compiler can optimize this with inline code, e.g. gcc
+                    memcpy(&value, _buffer + index, sizeof(T));
+                }
+                else
+                {
+                    // NOTE: compiler should optimize this and unroll the loop
+                    char* p = _buffer + index;
+                    for (size_t i = 0; i < sizeof(T); i++)
+                        ((char*)&value)[i] = p[i];
+                }
+            }
+        }
+
+        if (ENDIANESS_SUPPORT && reverse<T>())
+        {
+            value = swap<T>(value);
+        }
+
+        return value;
+    }
+
+    template<typename T>
+    inline void ByteBuffer::putArray(T* values, std::size_t count)
+    {
+        // this avoids int8 specialization, compiler will take care if optimization, -O2 or more
+        if (sizeof(T) == 1)
+        {
+            put((const char*)values, 0, count);
+            return;
+        }
+
+        T* start = (T*)_position;
+
+        size_t n = sizeof(T)*count;
+        // we require aligned arrays...
+        memcpy(_position, values, n);
+        _position += n;
+
+        // ... so that we can be fast changing endianess
+        if (ENDIANESS_SUPPORT && reverse<T>())
+        {
+            for (std::size_t i = 0; i < count; i++)
+            {
+                *start = swap<T>(*start);
+                start++;
+            }
+        }
+    }
+
+    template<typename T>
+    inline void ByteBuffer::getArray(T* values, std::size_t count)
+    {
+        // this avoids int8 specialization, compiler will take care if optimization, -O2 or more
+        if (sizeof(T) == 1)
+        {
+            get((char*)values, 0, count);
+            return;
+        }
+
+        T* start = (T*)values;
+
+        size_t n = sizeof(T)*count;
+        // we require aligned arrays...
+        memcpy(values, _position, n);
+        _position += n;
+
+        // ... so that we can be fast changing endianess
+        if (ENDIANESS_SUPPORT && reverse<T>())
+        {
+            for (std::size_t i = 0; i < count; i++)
+            {
+                *start = swap<T>(*start);
+                start++;
+            }
+        }
+    }
 
     }
 }

@@ -477,13 +477,13 @@ size_t Convert::fromString(PVStructurePtr const &pvStructure, StringArray const 
             }
             else if(type==scalarArray) {
                 PVScalarArrayPtr pv = static_pointer_cast<PVScalarArray>(fieldField);
-                size_t count = fromString(pv, from.at(fromStartIndex));
+                size_t count = fromString(pv, from[fromStartIndex]);
                 processed += count;
                 fromStartIndex += count;
             }
             else if(type==scalar) {
                 PVScalarPtr pv = static_pointer_cast<PVScalar>(fieldField);
-                fromString(pv, from.at(fromStartIndex++));
+                fromString(pv, from[fromStartIndex++]);
                 processed++;
             }
             else {

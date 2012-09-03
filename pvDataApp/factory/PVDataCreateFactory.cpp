@@ -66,7 +66,11 @@ template<typename T>
 void BasePVScalar<T>::serialize(ByteBuffer *pbuffer,
     SerializableControl *pflusher) const {
     pflusher->ensureBuffer(sizeof(T));
+#if defined (__GNUC__) &&__GNUC__ < 3
+    pbuffer->put(value);
+#else
     pbuffer->put<T>(value);
+#endif
 }
 
 template<typename T>
@@ -74,7 +78,11 @@ void BasePVScalar<T>::deserialize(ByteBuffer *pbuffer,
     DeserializableControl *pflusher)
 {
     pflusher->ensureData(sizeof(T));
+#if defined (__GNUC__) &&__GNUC__ < 3
+    value = pbuffer->get(pbuffer);
+#else
     value = pbuffer->get<T>();
+#endif
 }
 
 typedef BasePVScalar<boolean> BasePVBoolean;
