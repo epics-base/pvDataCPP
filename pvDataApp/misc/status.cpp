@@ -16,7 +16,7 @@ namespace epics { namespace pvData {
 const char* Status::StatusTypeName[] = { "OK", "WARNING", "ERROR", "FATAL" };
 epics::pvData::String Status::m_emptyString;
 
-Status Status::OK;
+Status Status::Ok;
 
 //PVDATA_REFCOUNT_MONITOR_DEFINE(status);
 

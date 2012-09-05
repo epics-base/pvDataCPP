@@ -128,7 +128,7 @@ static void longArray()
     PVLongArrayPtr pvLongArray = static_pointer_cast<PVLongArray>(pvScalarArray);
     LongArray value;
     value.reserve(length);
-    int64 xxx = 0x7fffffffffffffffL;
+    int64 xxx = 0x7fffffffffffffffLL;
     for(size_t i = 0; i<length; i++) value.push_back(xxx++);
     pvLongArray->put(0,length,value,0);
     builder.clear();
@@ -169,7 +169,7 @@ static void ulongArray()
     PVULongArrayPtr pvULongArray = static_pointer_cast<PVULongArray>(pvScalarArray);
     ULongArray value;
     value.reserve(length);
-    uint64 xxx = 0x7fffffffffffffffL;
+    uint64 xxx = 0x7fffffffffffffffLL;
     for(size_t i = 0; i<length; i++) value.push_back(xxx++);
     pvULongArray->put(0,length,value,0);
     builder.clear();

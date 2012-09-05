@@ -23,6 +23,7 @@
 
 using std::tr1::static_pointer_cast;
 using std::size_t;
+using std::min;
 
 namespace epics { namespace pvData {
 
@@ -69,11 +70,7 @@ template<typename T>
 void BasePVScalar<T>::serialize(ByteBuffer *pbuffer,
     SerializableControl *pflusher) const {
     pflusher->ensureBuffer(sizeof(T));
-#if defined (__GNUC__) &&__GNUC__ < 3
     pbuffer->put(value);
-#else
-    pbuffer->put<T>(value);
-#endif
 }
 
 template<typename T>
@@ -81,11 +78,7 @@ void BasePVScalar<T>::deserialize(ByteBuffer *pbuffer,
     DeserializableControl *pflusher)
 {
     pflusher->ensureData(sizeof(T));
-#if defined (__GNUC__) &&__GNUC__ < 3
-    value = pbuffer->get(pbuffer);
-#else
-    value = pbuffer->get<T>();
-#endif
+    value = pbuffer->GET(T);
 }
 
 typedef BasePVScalar<boolean> BasePVBoolean;
@@ -342,12 +335,12 @@ void DefaultPVArray<T>::deserialize(ByteBuffer *pbuffer,
         size_t i = 0;
         while(true) {
             /*
-            size_t maxIndex = std::min(size-i, (int)(pbuffer->getRemaining()/sizeof(T)))+i;
+            size_t maxIndex = min(size-i, (int)(pbuffer->getRemaining()/sizeof(T)))+i;
             for(; i<maxIndex; i++)
                 value[i] = pbuffer->get<T>();
               */  
-            size_t maxCount = std::min(size-i, (pbuffer->getRemaining()/sizeof(T)));
-            pbuffer->getArray<T>(get(), maxCount);
+            size_t maxCount = min(size-i, (pbuffer->getRemaining()/sizeof(T)));
+            pbuffer->getArray(get(), maxCount);
             i += maxCount;
             
             if(i<size)
@@ -384,14 +377,14 @@ void DefaultPVArray<T>::serialize(ByteBuffer *pbuffer,
     while(true) {
         
         /*
-        size_t maxIndex = std::min<int>(end-i, (int)(pbuffer->getRemaining()/sizeof(T)))+i;
+        size_t maxIndex = min<int>(end-i, (int)(pbuffer->getRemaining()/sizeof(T)))+i;
         for(; i<maxIndex; i++)
             pbuffer->put<T>(value[i]);
         */
         
-        size_t maxCount = std::min<int>(end-i, (int)(pbuffer->getRemaining()/sizeof(T)));
+        size_t maxCount = min<int>(end-i, (int)(pbuffer->getRemaining()/sizeof(T)));
         T * pvalue = const_cast<T *>(get());
-        pbuffer->putArray<T>(pvalue, maxCount);
+        pbuffer->putArray(pvalue, maxCount);
         i += maxCount;
         
         if(i<end)

@@ -12,7 +12,6 @@
 #include <string>
 #include <map>
 #include <stdexcept>
-#include <ostream>
 #include <algorithm>
 #include <iterator>
 #include <pv/pvIntrospect.h>

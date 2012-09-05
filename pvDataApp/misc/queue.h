@@ -8,7 +8,6 @@
  *  @author mrk
  */
 #include <vector>
-#include <tr1/memory>
 #include <cstddef>
 #include <stdexcept>
 #include <pv/sharedPtr.h>

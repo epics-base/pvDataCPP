@@ -168,6 +168,12 @@ inline double swap(double val)
 #define ADAPTIVE_ACCESS true
 #define USE_INLINE_MEMCPY true
 
+#if defined (__GNUC__) && (__GNUC__ < 3)
+#define GET(T) get((T*)0)
+#else
+#define GET(T) get<T>()
+#endif
+
 /**
  * This class implements {@code Bytebuffer} that is like the {@code java.nio.ByteBuffer}.
  * <p>A {@code BitSet} is not safe for multithreaded use without
@@ -322,7 +328,7 @@ public:
      *
      * @return The object.
      */
-#if defined (__GNUC__) && __GNUC__ < 3
+#if defined (__GNUC__) && (__GNUC__ < 3)
     template<typename T>
     inline T get(const T*);
 #else
@@ -494,102 +500,48 @@ public:
      * @param  value The value.
      */
     inline void putDouble (std::size_t  index, double value) { put<double>(index, value); }
-
-#if defined (__GNUC__) && __GNUC__ < 3
-
     /**
      * Get a boolean value from the byte buffer.
      *
      * @return The value.
      */
-    inline   bool getBoolean() { return get((int8*)0) != 0; }
+    inline   bool getBoolean() { return GET(  int8) != 0; }
     /**
      * Get a byte value from the byte buffer.
      *
      * @return The value.
      */
-    inline   int8 getByte   () { return get((int8*)0); }
+    inline   int8 getByte   () { return GET(  int8); }
     /**
      * Get a short value from the byte buffer.
      *
      * @return The value.
      */
-    inline  int16 getShort  () { return get((int16*)0); }
+    inline  int16 getShort  () { return GET( int16); }
     /**
      * Get a int value from the byte buffer.
      *
      * @return The value.
      */
-    inline  int32 getInt    () { return get((int32*)0); }
+    inline  int32 getInt    () { return GET( int32); }
     /**
      * Get a long value from the byte buffer.
      *
      * @return The value.
      */
-    inline  int64 getLong   () { return get((int64*)0); }
+    inline  int64 getLong   () { return GET( int64); }
     /**
      * Get a float value from the byte buffer.
      *
      * @return The value.
      */
-    inline  float getFloat  () { return get((float*)0); }
+    inline  float getFloat  () { return GET( float); }
     /**
      * Get a double value from the byte buffer.
      *
      * @return The value.
      */
-    inline double getDouble () { return get((double*)0); }
-
-    /**
-     * Get a boolean value from the byte buffer at the specified index.
-     *
-     * @param  index The offset in the byte buffer.
-     * @return The value.
-     */
-#else
-    /**
-     * Get a boolean value from the byte buffer.
-     *
-     * @return The value.
-     */
-    inline   bool getBoolean() { return get<  int8>() != 0; }
-    /**
-     * Get a byte value from the byte buffer.
-     *
-     * @return The value.
-     */
-    inline   int8 getByte   () { return get<  int8>(); }
-    /**
-     * Get a short value from the byte buffer.
-     *
-     * @return The value.
-     */
-    inline  int16 getShort  () { return get< int16>(); }
-    /**
-     * Get a int value from the byte buffer.
-     *
-     * @return The value.
-     */
-    inline  int32 getInt    () { return get< int32>(); }
-    /**
-     * Get a long value from the byte buffer.
-     *
-     * @return The value.
-     */
-    inline  int64 getLong   () { return get< int64>(); }
-    /**
-     * Get a float value from the byte buffer.
-     *
-     * @return The value.
-     */
-    inline  float getFloat  () { return get< float>(); }
-    /**
-     * Get a double value from the byte buffer.
-     *
-     * @return The value.
-     */
-    inline double getDouble () { return get<double>(); }
-#endif
+    inline double getDouble () { return GET(double); }
     /**
      * Get a boolean value from the byte buffer at the specified index.
      *
@@ -765,7 +717,7 @@ private:
 
     }
 
-#if defined (__GNUC__) && __GNUC__ < 3
+#if defined (__GNUC__) && (__GNUC__ < 3)
     template<typename T>
     inline T ByteBuffer::get(const T*)
 #else

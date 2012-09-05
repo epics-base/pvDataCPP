@@ -24,3 +24,4 @@ EPICS_BASE=/home/install/epics/base
 # EPICS_BASE=/home/install/epics/base
 
 -include $(TOP)/configure/RELEASE.local
+-include $(TOP)/../RELEASE.local
