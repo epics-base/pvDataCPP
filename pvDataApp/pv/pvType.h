@@ -20,6 +20,8 @@
 #ifdef __vxworks
 typedef int intptr_t;
 typedef unsigned int uintptr_t;
+#define INT64_MAX (0x7fffffffffffffffLL)
+#define UINT64_MAX (0xffffffffffffffffLL)
 #else
 #include <stdint.h>
 #endif
