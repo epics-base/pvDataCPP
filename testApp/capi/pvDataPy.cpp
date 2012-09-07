@@ -14,21 +14,50 @@ using std::size_t;
 
 namespace epics { namespace pvData { 
 
+PVFieldPy::PVFieldPy(Type type)
+: type(type){}
+
+PVScalarPy::PVScalarPy(PVScalarPtr const & pvScalarPtr)
+    : PVFieldPy(pvScalarPtr->getField()->getType()),
+      pvScalarPtr(pvScalarPtr)
+      {}
+
+PVScalarArrayPy::PVScalarArrayPy(PVScalarArrayPtr const & pvScalarArrayPtr)
+    : PVFieldPy(pvScalarArrayPtr->getField()->getType()),
+      pvScalarArrayPtr(pvScalarArrayPtr)
+      {}
+
+PVStructureArrayPy::PVStructureArrayPy(PVStructureArrayPtr const & pvStructureArrayPtr)
+    : PVFieldPy(pvStructureArrayPtr->getField()->getType()),
+      pvStructureArrayPtr(pvStructureArrayPtr)
+      {}
+
+PVStructurePy:: PVStructurePy(PVStructurePtr const &pvStructurePtr)
+       : PVFieldPy(structure),
+         pvStructurePtr(pvStructurePtr)
+         {}
+ 
+PVTopPy::PVTopPy(PVStructurePyPtr const &pvStructurePyPtr)
+    : pvStructurePyPtr(pvStructurePyPtr)
+      {}
+
+
 PVTopPyPtr PVTopPy::createTop(PVStructurePtr const & pvStructure)
 {
    PVStructurePyPtr top = PVStructurePyPtr(create(pvStructure));
-   return PVTopPyPtr(new PVTopPy(top));
+   PVTopPyPtr pvTopPyPtr(new PVTopPy(top));
+   return pvTopPyPtr;
     
 }
 
-PVStructurePyPtr PVTopPy::create(PVStructurePtr const & pvStructure)
+PVStructurePyPtr PVTopPy::create(PVStructurePtr const & pvStructurePtr)
 {
     PVStructurePyPtr pvStructurePyPtr =
-       PVStructurePyPtr(new PVStructurePy(pvStructure));
-    const PVFieldPtrArray & pvFields = pvStructure->getPVFields();
+       PVStructurePyPtr(new PVStructurePy(pvStructurePtr));
+    const PVFieldPtrArray & pvFields = pvStructurePtr->getPVFields();
     size_t n = pvFields.size();
-    PVFieldPyPtrArray & pvPyFields = pvStructurePyPtr->pvPyFields;
-    pvPyFields.reserve(n);
+    PVFieldPyPtrArrayPtr pvPyFields(new PVFieldPyPtrArray());
+    pvPyFields->reserve(n);
     for(size_t i = 0; i<n; i++) {
         PVFieldPtr pvField = pvFields[i];
         Type type = pvField->getField()->getType();
@@ -59,8 +88,9 @@ PVStructurePyPtr PVTopPy::create(PVStructurePtr const & pvStructure)
             }
             break;
         }
-        pvPyFields.push_back(pvFieldPy);
+        pvPyFields->push_back(pvFieldPy);
     }
+    pvStructurePyPtr->pvFieldPyPtrArrayPtr = pvPyFields;
     return pvStructurePyPtr;
 }
 

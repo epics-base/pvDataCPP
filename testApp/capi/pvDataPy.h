@@ -35,7 +35,7 @@ public:
     Type getType(){return type;};
     virtual ~PVFieldPy(){}
 protected:
-    PVFieldPy(Type type) : type(type){}
+    PVFieldPy(Type type);
 private:
     Type type;
 };
@@ -43,14 +43,11 @@ private:
 class PVScalarPy : public PVFieldPy {
 public:
     virtual ~PVScalarPy(){}
-    PVScalarPtr const &getPVScalar() {return pvScalar;}
+    PVScalarPtr getPVScalarPtr() {return pvScalarPtr;}
+    PVScalarPtr *addrPVScalarPtr() {return &pvScalarPtr;}
 private:
-    PVScalarPy(PVScalarPtr const & pvScalarPtr)
-    : PVFieldPy(pvScalarPtr->getField()->getType()),
-      pvScalar(pvScalarPtr)
-      {}
-
-    PVScalarPtr pvScalar;
+    PVScalarPy(PVScalarPtr const & pvScalarPtr);
+    PVScalarPtr pvScalarPtr;
     friend class PVTopPy;
 };
 
@@ -58,28 +55,22 @@ private:
 class PVScalarArrayPy : public PVFieldPy {
 public:
     virtual ~PVScalarArrayPy(){}
-    PVScalarArrayPtr const &getPVScalarArray() {return pvScalarArray;}
+    PVScalarArrayPtr getPVScalarArrayPtr() {return pvScalarArrayPtr;}
+    PVScalarArrayPtr *addrPVScalarArrayPtr() {return &pvScalarArrayPtr;}
 private:
-    PVScalarArrayPy(PVScalarArrayPtr const & pvScalarArrayPtr)
-    : PVFieldPy(pvScalarArrayPtr->getField()->getType()),
-      pvScalarArray(pvScalarArrayPtr)
-      {}
-
-    PVScalarArrayPtr pvScalarArray;
+    PVScalarArrayPy(PVScalarArrayPtr const & pvScalarArrayPtr);
+    PVScalarArrayPtr pvScalarArrayPtr;
     friend class PVTopPy;
 };
 
 class PVStructureArrayPy : public PVFieldPy {
 public:
     virtual ~PVStructureArrayPy(){}
-    PVStructureArrayPtr const &getPVStructureArray() {return pvStructureArray;}
+    PVStructureArrayPtr getPVStructureArrayPtr() {return pvStructureArrayPtr;}
+    PVStructureArrayPtr *addrPVStructureArrayPtr() {return &pvStructureArrayPtr;}
 private:
-    PVStructureArrayPy(PVStructureArrayPtr const & pvStructureArrayPtr)
-    : PVFieldPy(pvStructureArrayPtr->getField()->getType()),
-      pvStructureArray(pvStructureArrayPtr)
-      {}
-
-    PVStructureArrayPtr pvStructureArray;
+    PVStructureArrayPy(PVStructureArrayPtr const & pvStructureArrayPtr);
+    PVStructureArrayPtr pvStructureArrayPtr;
     friend class PVTopPy;
 };
 
@@ -87,30 +78,25 @@ private:
 class PVStructurePy : public PVFieldPy {
 public:
     virtual ~PVStructurePy(){}
-    PVFieldPyPtrArray const & getPVFieldPyPtrArray()
-    {return pvPyFields;}
-    PVStructurePtr const & getPVStructurePtr()
-    {return pvStructurePtr;}
+    PVFieldPyPtrArrayPtr getPVFieldPyPtrArrayPtr() {return pvFieldPyPtrArrayPtr;}
+    PVStructurePtr getPVStructurePtr() {return pvStructurePtr;}
+    PVFieldPyPtrArrayPtr * addrPVFieldPyPtrArrayPtr() {return &pvFieldPyPtrArrayPtr;}
+    PVStructurePtr *addrPVStructurePtr() {return &pvStructurePtr;}
 private:
-    PVStructurePy(PVStructurePtr const &pvStructurePtr)
-       : PVFieldPy(structure),
-         pvStructurePtr(pvStructurePtr)
-         {}
-    PVStructurePtr const &pvStructurePtr;
-    PVFieldPyPtrArray pvPyFields;
+    PVStructurePy(PVStructurePtr const &pvStructurePtr);
+    PVStructurePtr pvStructurePtr;
+    PVFieldPyPtrArrayPtr pvFieldPyPtrArrayPtr;
     friend class PVTopPy;
 };
 
 class PVTopPy {
 public:
-    static PVTopPyPtr createTop(PVStructurePtr const & pvStructure);
-    PVStructurePyPtr const &  getPVStructurePy(){return pvStructurePyPtr;}
+    static PVTopPyPtr createTop(PVStructurePtr const & pvStructurePtr);
+    PVStructurePyPtr getPVStructurePyPtr(){return pvStructurePyPtr;}
+    PVStructurePyPtr *addrPVStructurePyPtr(){return &pvStructurePyPtr;};
 private:
-    static PVStructurePyPtr create(PVStructurePtr const & pvStructure);
-    PVTopPy(PVStructurePyPtr const &pvStructurePyPtr)
-    : pvStructurePyPtr(pvStructurePyPtr)
-      {}
-
+    static PVStructurePyPtr create(PVStructurePtr const & pvStructurePtr);
+    PVTopPy(PVStructurePyPtr const & pvStructurePyPtr);
     PVStructurePyPtr pvStructurePyPtr;
 };
 

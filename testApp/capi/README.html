@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
+  <title>EPICS pvDataCAPI</title>
+    <link rel="stylesheet" type="text/css" href="http://epics-pvdata.sourceforge.net/base.css" />
+  <link rel="stylesheet" type="text/css" href="http://epics-pvdata.sourceforge.net/epicsv4.css" />
+
+  <style type="text/css">
+  /*<![CDATA[*/
+     .about { margin-left: 3em; margin-right: 3em; font-size: .83em}
+     table { margin-left: auto; margin-right: auto }
+     .diagram { text-align: center; margin: 2.5em 0 }
+     span.opt { color: grey }
+     span.nterm { font-style:italic }
+     span.term { font-family:courier }
+     span.user { font-family:courier }
+     span.user:before { content:"<" }
+     span.user:after { content:">" }
+     .nonnorm { font-style:italic }
+     p.ed.priv { display: inline; }
+     span.ed.priv { display: inline; }
+     hr { border: none; background-color: #ccc; color: #ccc; height: 1px }
+  /*]]>*/</style>
+  <!-- Script that generates the Table of Contents -->
+  <script type="text/javascript" src="http://epics-pvdata.sourceforge.net/script/tocgen.js"></script>
+
+</head>
+<body>
+
+<div id="toc">
+<h2 class="nocount" style="page-break-before: always">Table of Contents</h2>
+</div>
+<div id="contents" class="contents">
+
+<h2>Introduction</h2>
+<p>This is the beginning of a proposed Application programming interface for C code.
+The primary purpose is an interface that can be called by python using ctypes
+but it could also be used by other code.</p>
+<p>The following header files are discussed:</p>
+<dt>
+   <dl>pvDataPy.h</dt>
+      <dd>C++ suport that creates a wrapper for each of the basic pvData types.</dd>
+   <dl>pvDataPyCAPI.h</dt>
+      <dd>This is a set of C functions that make the pvDataPY wrappers available to C code.
+      The address of a wrapper is passed between C code and C++ code.</dd>
+   <dl>pvDataPyCreateTest.h</dl>
+      <dd>An example of code that creates a top level PVStructure and a C callable function
+       that creates a top level "wrapper" that C code calls.
+       There is also a C callable function to delete the top level wrapper.
+       Calling this function also deletes the top level PVStructure.</dd>
+</dt> 
+<p><b>NOT DONE:</b></p>
+<dl>
+   <dt>Python</dt>
+     <dd>A Python class for pvDataPyCAPI is not implemented.</dd>
+   <dt>pvDataPyCAPI.h<dt>
+     <dd>Needs many additional function for get/put data.</dd>
+   <dt>C code creating top level Structure</dt>
+     <dd> There is no way for the C code, e.g. Python to create an arbitary top level
+        PVStructure. I have ideas about how to do this but later.
+        For now it is only possible to access top level PVStructures created by C++ code.</dd>
+</dl>
+
+<h2>pvDataPy.h</h2>
+<p>This is a complete implementation of the wrappers.
+They are desigend to be usable by C++ code.
+In addition to the use by pvDataPyCAPI.h they can also be used by
+different pieces of C++ code that are called be Python
+Python can pass addresses of wrappers between the different pieces.</p>
+
+<h2>pvDataPyCAPI.h</h2>
+<p>Currently the only functions for trasfering raw data between C code and PVData objects
+ are to get/put a scalar int32 and a double.</p>
+</div>
+</body>
+</html>

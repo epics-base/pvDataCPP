@@ -11,6 +11,8 @@ INC += pvDataPy.h
 INC += pvDataPyCAPI.h
 INC += pvDataPyCreateTest.h
 pvDataPy_SRCS += pvDataPy.cpp
+pvDataPy_SRCS += pvDataPyCAPI.cpp
+pvDataPy_SRCS += pvDataPyCreateTest.cpp
 pvDataPy_LIBS += pvData Com
 
 PROD_HOST += testPVDataPy

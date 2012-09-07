@@ -12,45 +12,36 @@
 #include <pv/pvDataPyCAPI.h>
 #include <pv/standardPVField.h>
 
-typedef struct PVTopPyAddr {
-    epics::pvData::PVTopPyPtr pvTop;
-} PVTopPyAddr;
-
 extern "C"
 {
-    void * pvPyCreateScalar(int scalarType,const char *properties)
-    {
-        PVTopPyAddr *pPVTopPyAddr = new PVTopPyAddr();
-        epics::pvData::StandardPVFieldPtr standardPVField
-            = epics::pvData::getStandardPVField();
-        epics::pvData::String xxx(properties);
-        epics::pvData::ScalarType yyy
-            = static_cast<epics::pvData::ScalarType>(scalarType);
-        epics::pvData::PVStructurePtr pv = standardPVField->scalar(yyy,xxx);
-printf("pvPyCreateScalar pvStructure %p\n",pv.get());
-epics::pvData::String buffer;
-pv->toString(&buffer);
-printf("%s\n",buffer.c_str());
-        pPVTopPyAddr->pvTop = epics::pvData::PVTopPy::createTop(pv);
-printf("pvPyCreateScalar pvTop %p\n",&pPVTopPyAddr->pvTop);
-        return static_cast<void *>(pPVTopPyAddr);
-    }
-
-
-    void * pvPyGetTop(void * pvTopPyAddr)
-    {
-         PVTopPyAddr *p = static_cast<PVTopPyAddr *>(pvTopPyAddr);
-         void *ppp = static_cast<void *>(&p->pvTop);
-printf("pvPyGetTop pvTop %p\n",&p->pvTop);
-         return ppp;
-    }
-
-    void pvPyDeleteTop(void *pvTopPyAddr)
-    {
-         PVTopPyAddr *p = static_cast<PVTopPyAddr *>(pvTopPyAddr);
-         delete p;
-    }
-
+    /**
+     * Create top level structure with a scalar value field.
+     * @param scalarType The scalarType for the value field.
+     * &param properties Some combination of "alarm,timeStamp,display,control"
+     * @return void *addrPVTopPyPtr.
+     * PVTopPyPtr has the address of the top level structure
+     */
+    extern void * pvPyCreateScalar(int scalarType,const char *properties);
+    /**
+     * Create top level structure with a scalar array value field.
+     * @param elementType The scalarType for the value field elements.
+     * &param properties Some combination of "alarm,timeStamp,display,control"
+     * @return void *addrPVTopPyPtr.
+     * PVTopPyPtr has the address of the top level structure
+     */
+    extern void * pvPyCreateScalarArray(int elementType,const char *properties);
+    /**
+     * Get the top level structure.
+     * @param addrPVTopPyPtr PVTopPyPtr has the address of the top level structure
+     * @return void *addrPVStructurePyPtr
+     */
+    extern void * pvPyGetTop(void * addrPVTopPyPtr);
+    /**
+     * Delete PVTopPyPtr.
+     * Also deletes the top level structure.
+     * @param addrPVTopPyPtr PVTopPyPtr has the address of the top level structure
+     */
+    extern void pvPyDeleteTop(void *addrPVTopPyPtr);
 }
 
 #endif  /* PVDATAPYCREATETEST_H */
