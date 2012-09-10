@@ -14,25 +14,25 @@
 namespace epics { namespace pvData {
 
 static bool checkBitSetPVField(
-    PVField *pvField,BitSet *bitSet,int initialOffset)
+    PVField *pvField,BitSet *bitSet,int32 initialOffset)
 {
     bool atLeastOneBitSet = false;
     bool allBitsSet = true;
-    int offset = initialOffset;
-    int nbits = pvField->getNumberFields();
+    int32 offset = initialOffset;
+    int32 nbits = pvField->getNumberFields();
     if(nbits==1) return bitSet->get(offset);
-    int nextSetBit = bitSet->nextSetBit(offset);
+    int32 nextSetBit = bitSet->nextSetBit(offset);
     if(nextSetBit>=(offset+nbits)) return false;
     if(bitSet->get(offset)) {
         if(nbits>1) {
-            for(int i=offset+1; i<offset+nbits; i++) bitSet->clear(i);
+            for(int32 i=offset+1; i<offset+nbits; i++) bitSet->clear(i);
         }
         return true;
     }
     PVStructure *pvStructure = static_cast<PVStructure *>(pvField);
     while(offset<initialOffset + nbits) {
         PVField *pvSubField = pvStructure->getSubField(offset).get();
-        int nbitsNow = pvSubField->getNumberFields();
+        int32 nbitsNow = pvSubField->getNumberFields();
         if(nbitsNow==1) {
             if(bitSet->get(offset)) {
                 atLeastOneBitSet = true;
@@ -46,7 +46,7 @@ static bool checkBitSetPVField(
             PVFieldPtrArray pvSubStructureFields =
                 pvSubStructure->getPVFields();
             int num = pvSubStructure->getStructure()->getNumberFields();
-            for(int i=0; i<num; i++) {
+            for(int32 i=0; i<num; i++) {
                 PVField *pvSubSubField = pvSubStructureFields[i].get();
                 bool result = checkBitSetPVField(pvSubSubField,bitSet,offset);
                 if(result) {
@@ -63,7 +63,7 @@ static bool checkBitSetPVField(
     }
     if(allBitsSet) {
         if(nbits>1) {
-            for(int i=initialOffset+1; i<initialOffset+nbits; i++){
+            for(int32 i=initialOffset+1; i<initialOffset+nbits; i++){
                 bitSet->clear(i);
             }
         }

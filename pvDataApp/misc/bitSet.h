@@ -120,7 +120,7 @@ namespace epics { namespace pvData {
          * use the following loop:
          *
          *  <pre> {@code
-         * for (int i = bs.nextSetBit(0); i >= 0; i = bs.nextSetBit(i+1)) {
+         * for (int32 i = bs.nextSetBit(0); i >= 0; i = bs.nextSetBit(i+1)) {
          *     // operate on index i here
          * }}</pre>
          *
