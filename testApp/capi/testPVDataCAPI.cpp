@@ -1,4 +1,4 @@
-/* testPVDataPy.cpp */
+/* testPVDataCAPI.cpp */
 /**
  * Copyright - See the COPYRIGHT that is included with this distribution.
  * EPICS pvData is distributed subject to a Software License Agreement found
@@ -12,7 +12,7 @@
 #include <string>
 #include <cstdio>
 
-#include <pv/pvDataPy.h>
+#include <pv/pvDataCAPI.h>
 #include <pv/standardPVField.h>
 #include <pv/convert.h>
 
@@ -24,26 +24,26 @@ static String alarmTimeStamp("alarm,timeStamp");
 
 static bool debug = false;
 
-static void dumpPVStructurePy(
-    PVStructurePyPtr const &pvStructurePyPtr,String indent)
+static void dumpPVStructureCAPI(
+    PVStructureCAPIPtr const &pvStructureCAPIPtr,String indent)
 {
     String builder;
     builder += indent + "structure ";
-    builder += pvStructurePyPtr->getPVStructurePtr()->getFieldName();
+    builder += pvStructureCAPIPtr->getPVStructurePtr()->getFieldName();
     printf("%s\n",builder.c_str());
     builder.clear();
     indent += "    ";
-    PVFieldPyPtrArrayPtr pvFieldPyPtrArrayPtr
-        = pvStructurePyPtr->getPVFieldPyPtrArrayPtr();
-    PVFieldPyPtrArray *pvFieldPyPtrArray = pvFieldPyPtrArrayPtr.get();
-    size_t n = pvFieldPyPtrArray->size();
+    PVFieldCAPIPtrArrayPtr pvFieldCAPIPtrArrayPtr
+        = pvStructureCAPIPtr->getPVFieldCAPIPtrArrayPtr();
+    PVFieldCAPIPtrArray *pvFieldCAPIPtrArray = pvFieldCAPIPtrArrayPtr.get();
+    size_t n = pvFieldCAPIPtrArray->size();
     for(size_t i=0; i<n; i++) {
-         PVFieldPyPtr pvFieldPyPtr = (*pvFieldPyPtrArray)[i];
-         Type type = pvFieldPyPtr->getType();
+         PVFieldCAPIPtr pvFieldCAPIPtr = (*pvFieldCAPIPtrArray)[i];
+         Type type = pvFieldCAPIPtr->getType();
          switch(type) {
          case scalar:
              {
-                 PVScalarPyPtr py = static_pointer_cast<PVScalarPy>(pvFieldPyPtr);
+                 PVScalarCAPIPtr py = static_pointer_cast<PVScalarCAPI>(pvFieldCAPIPtr);
                  PVScalarPtr pv = py->getPVScalarPtr();
                  builder.clear(); builder += indent;
                  pv->toString(&builder);
@@ -52,8 +52,8 @@ static void dumpPVStructurePy(
              break;
          case scalarArray:
              {
-                 PVScalarArrayPyPtr py = static_pointer_cast<PVScalarArrayPy>
-                      (pvFieldPyPtr);
+                 PVScalarArrayCAPIPtr py = static_pointer_cast<PVScalarArrayCAPI>
+                      (pvFieldCAPIPtr);
                  PVScalarArrayPtr pv = py->getPVScalarArrayPtr();
                  builder.clear(); builder += indent;
                  pv->toString(&builder);
@@ -62,8 +62,8 @@ static void dumpPVStructurePy(
              break;
          case structureArray:
              {
-                 PVStructureArrayPyPtr py = static_pointer_cast<PVStructureArrayPy>
-                      (pvFieldPyPtr);
+                 PVStructureArrayCAPIPtr py = static_pointer_cast<PVStructureArrayCAPI>
+                      (pvFieldCAPIPtr);
                  PVStructureArrayPtr pv = py->getPVStructureArrayPtr();
                  builder.clear(); builder += indent;
                  pv->toString(&builder);
@@ -72,9 +72,9 @@ static void dumpPVStructurePy(
              break;
          case structure:
              {
-                 PVStructurePyPtr py = static_pointer_cast<PVStructurePy>
-                      (pvFieldPyPtr);
-                 dumpPVStructurePy(py,indent);
+                 PVStructureCAPIPtr py = static_pointer_cast<PVStructureCAPI>
+                      (pvFieldCAPIPtr);
+                 dumpPVStructureCAPI(py,indent);
              }
              break;
          }
@@ -88,14 +88,14 @@ static void testScalar(FILE * fd)
      String builder;
      pv0->toString(&builder);
      printf("testScalar\npv0\n%s\n",builder.c_str());
-     PVTopPyPtr pvTop = PVTopPy::createTop(pv0);
-     PVStructurePyPtr pvStructurePyPtr = pvTop->getPVStructurePyPtr();
-     PVStructurePtr pvStructurePtr = pvStructurePyPtr->getPVStructurePtr();
+     void *top = PVStructureCAPI::create(pv0);
+     PVStructureCAPIPtr pvStructureCAPIPtr = PVStructureCAPI::getPVStructureCAPIPtr(top);
+     PVStructurePtr pvStructurePtr = pvStructureCAPIPtr->getPVStructurePtr();
      builder.clear();
      pvStructurePtr->toString(&builder);
      printf("pvStructurePtr\n%s\n",builder.c_str());
-     printf("PVStructurePyPtr\n");
-     dumpPVStructurePy(pvStructurePyPtr,String(""));
+     printf("PVStructureCAPIPtr\n");
+     dumpPVStructureCAPI(pvStructureCAPIPtr,String(""));
      PVDoublePtr pvDouble = pv0->getDoubleField("value");
      pvDouble->put(10.23);
      PVIntPtr pvInt = pv0->getIntField("alarm.severity");
@@ -105,8 +105,9 @@ static void testScalar(FILE * fd)
      PVLongPtr pvLong = pv0->getLongField("timeStamp.secondsPastEpoch");
      pvLong->put(123456789123456789LL);
      builder.clear();
-     printf("PVStructurePyPtr\n");
-     dumpPVStructurePy(pvStructurePyPtr,String(""));
+     printf("PVStructureCAPIPtr\n");
+     dumpPVStructureCAPI(pvStructureCAPIPtr,String(""));
+     PVStructureCAPI::destroy(top);
 }
 
 static void testScalarArray(FILE * fd)
@@ -116,14 +117,15 @@ static void testScalarArray(FILE * fd)
      String builder;
      pv0->toString(&builder);
      printf("testScalarArray\npv0\n%s\n",builder.c_str());
-     PVTopPyPtr pvTop = PVTopPy::createTop(pv0);
-     PVStructurePyPtr pvStructurePyPtr = pvTop->getPVStructurePyPtr();
-     PVStructurePtr pvStructurePtr = pvStructurePyPtr->getPVStructurePtr();
+     void *top = PVStructureCAPI::create(pv0);
+     PVStructureCAPIPtr pvStructureCAPIPtr = PVStructureCAPI::getPVStructureCAPIPtr(top);
+     PVStructurePtr pvStructurePtr = pvStructureCAPIPtr->getPVStructurePtr();
      builder.clear();
      pvStructurePtr->toString(&builder);
      printf("pvStructurePtr\n%s\n",builder.c_str());
-     printf("PVStructurePyPtr\n");
-     dumpPVStructurePy(pvStructurePyPtr,String(""));
+     printf("PVStructureCAPIPtr\n");
+     dumpPVStructureCAPI(pvStructureCAPIPtr,String(""));
+     PVStructureCAPI::destroy(top);
 }
 
 

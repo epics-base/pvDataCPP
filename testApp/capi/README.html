@@ -41,22 +41,39 @@ The primary purpose is an interface that can be called by python using ctypes
 but it could also be used by other code.</p>
 <p>The following header files are discussed:</p>
 <dt>
-   <dl>pvDataPy.h</dt>
-      <dd>C++ suport that creates a wrapper for each of the basic pvData types.</dd>
-   <dl>pvDataPyCAPI.h</dt>
-      <dd>This is a set of C functions that make the pvDataPY wrappers available to C code.
-      The address of a wrapper is passed between C code and C++ code.</dd>
+   <dl>pvDataCAPI.h</dt>
+      <dd>This provides the following:
+         <dl>
+            <dt>C++</dt>
+              <dd>Suport that creates a wrapper for each of the basic pvData types.</dd>
+            <dt>C</dt>
+               <dd>A set of C functions that make the pvDataPY wrappers available to C code.
+                 The address of a wrapper is passed between C code and C++ code.</dd>
+        </dl>
    <dl>pvDataPyCreateTest.h</dl>
-      <dd>An example of code that creates a top level PVStructure and a C callable function
-       that creates a top level "wrapper" that C code calls.
-       There is also a C callable function to delete the top level wrapper.
-       Calling this function also deletes the top level PVStructure.</dd>
+      <dd>A C callable function
+       that creates a "wrapper" that C code uses to call
+        the C functions defined in pvDataCAPI.</dd>
 </dt> 
+<p>The following test programs are provided:</p>
+<dl>
+   <dt>testPVDataCAPI.cpp</dt>
+     <dd>C++ code that tests the C++ code defined in pvDataCAPI
+     It also shows how support code written in C++ can use pvDataCAPI.
+     This test has been run via valgrind and has no memory leaks.</dd>
+   <dt>testPVDataCAPIViaC.c</dt>
+     <dd>C code that calls the C callable function in pvDataCAPI.
+     This test has been run via valgrind and has no memory leaks.
+       I maintain that everything this test does could be done in Python
+       if Python classes using ctypes are created to call the C functions.</dd>
+</dl>
+
+
 <p><b>NOT DONE:</b></p>
 <dl>
    <dt>Python</dt>
-     <dd>A Python class for pvDataPyCAPI is not implemented.</dd>
-   <dt>pvDataPyCAPI.h<dt>
+     <dd>A Python class for pvDataCAPI is not implemented.</dd>
+   <dt>pvDataCAPI.h<dt>
      <dd>Needs many additional function for get/put data.</dd>
    <dt>C code creating top level Structure</dt>
      <dd> There is no way for the C code, e.g. Python to create an arbitary top level
@@ -64,16 +81,6 @@ but it could also be used by other code.</p>
         For now it is only possible to access top level PVStructures created by C++ code.</dd>
 </dl>
 
-<h2>pvDataPy.h</h2>
-<p>This is a complete implementation of the wrappers.
-They are desigend to be usable by C++ code.
-In addition to the use by pvDataPyCAPI.h they can also be used by
-different pieces of C++ code that are called be Python
-Python can pass addresses of wrappers between the different pieces.</p>
-
-<h2>pvDataPyCAPI.h</h2>
-<p>Currently the only functions for trasfering raw data between C code and PVData objects
- are to get/put a scalar int32 and a double.</p>
 </div>
 </body>
 </html>
