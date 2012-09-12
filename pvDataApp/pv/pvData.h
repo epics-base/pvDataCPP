@@ -814,7 +814,7 @@ public:
      */
     PVStructure(StructureConstPtr const & structure,PVFieldPtrArray const & pvFields);
 private:
-    const PVFieldPtrArray pvFields;
+    PVFieldPtrArray pvFields;
     StructureConstPtr structurePtr;
     String extendsStructureName;
     friend class PVDataCreate;
