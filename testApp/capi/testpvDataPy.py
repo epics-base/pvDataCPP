@@ -36,6 +36,48 @@ lib.pvCAPIGetPVScalarCAPI.restype = c_void_p
 lib.pvCAPIScalarPutDouble.argtypes = [c_void_p, c_double]
 lib.pvCAPIScalarPutDouble.restype = None
 
+lib.pvCAPIFieldCreateStructure.argtypes = [POINTER(c_char_p),
+                                           POINTER(c_void_p),
+                                           c_int]
+
+lib.pvCAPIFieldCreateStructure.restype = c_void_p
+
+# test creating an arbitrary structure from Python
+
+def createStructure():
+    one = lib.pvCAPIFieldCreateScalarArray(pvDouble)
+    two = lib.pvCAPIFieldCreateScalar(pvString)
+    three = lib.pvCAPIFieldCreateScalar(pvInt)
+    four = lib.pvCAPIFieldCreateScalar(pvString)
+
+    N = 2
+    fields = (c_void_p * N)()
+    fields[0] = three
+    fields[1] = four
+
+    names = (c_char_p * N)()
+    names[0] = "three"
+    names[1] = "four"
+
+    middle = lib.pvCAPIFieldCreateStructure(names, fields, N)
+    middleArray = lib.pvCAPIFieldCreateStructureArray(middle)
+
+    N = 3
+    fields = (c_void_p * N)()
+    fields[0] = three
+    fields[1] = four
+    fields[2] = middleArray
+
+    names = (c_char_p * N)()
+    names[0] = "one"
+    names[1] = "two"
+    names[2] = "middle"
+
+    top = lib.pvCAPIFieldCreateStructure(names, fields, N)
+    lib.pvCAPIDumpStructure(top)
+
+createStructure()
+
 # test creating a scalar and filling the value field
 
 addrTop = lib.pvCAPICreateScalar(pvFloat, "alarm,timeStamp")
