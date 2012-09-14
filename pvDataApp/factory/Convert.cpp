@@ -195,7 +195,7 @@ template<>
 String scalarToString<uint32>(uint32 value)
 {
     char buffer[20];
-    sprintf(buffer,"%ud",value);
+    sprintf(buffer,"%ud",(unsigned int)value);
     return String(buffer);
 }
 
@@ -1089,19 +1089,19 @@ String Convert::toString(PVScalarPtr const & pv)
         case pvByte: {
             PVBytePtr value = static_pointer_cast<PVByte>(pv);
             char buffer[30];
-            sprintf(buffer,"%d",(int32)value->get());
+            sprintf(buffer,"%d",(int)value->get());
             return String(buffer);
         }
         case pvShort: {
             PVShortPtr value = static_pointer_cast<PVShort>(pv);
             char buffer[30];
-            sprintf(buffer,"%d",(int32)value->get());
+            sprintf(buffer,"%d",(int)value->get());
             return String(buffer);
         }
         case pvInt: {
             PVIntPtr value = static_pointer_cast<PVInt>(pv);
             char buffer[30];
-            sprintf(buffer,"%d",(int32)value->get());
+            sprintf(buffer,"%d",(int)value->get());
             return String(buffer);
         }
         case pvLong: {
@@ -1113,19 +1113,19 @@ String Convert::toString(PVScalarPtr const & pv)
         case pvUByte: {
             PVUBytePtr value = static_pointer_cast<PVUByte>(pv);
             char buffer[30];
-            sprintf(buffer,"%u",(uint32)value->get());
+            sprintf(buffer,"%u",(unsigned int)value->get());
             return String(buffer);
         }
         case pvUShort: {
             PVUShortPtr value = static_pointer_cast<PVUShort>(pv);
             char buffer[30];
-            sprintf(buffer,"%u",(uint32)value->get());
+            sprintf(buffer,"%u",(unsigned int)value->get());
             return String(buffer);
         }
         case pvUInt: {
             PVUIntPtr value = static_pointer_cast<PVUInt>(pv);
             char buffer[30];
-            sprintf(buffer,"%u",value->get());
+            sprintf(buffer,"%u",(unsigned int)value->get());
             return String(buffer);
         }
         case pvULong: {
@@ -1143,7 +1143,7 @@ String Convert::toString(PVScalarPtr const & pv)
         case pvDouble: {
             PVDoublePtr value = static_pointer_cast<PVDouble>(pv);
             char buffer[30];
-            sprintf(buffer,"%lg",value->get());
+            sprintf(buffer,"%g",value->get());
             return String(buffer);
         }
         case pvString: {
@@ -2685,7 +2685,7 @@ void convertToString(StringBuilder buffer,PVField const * pv,int indentLevel)
     case pvDouble: {
             PVDouble const  *data = static_cast<PVDouble const *>(pv);
             char xxx[30];
-            sprintf(xxx,"%lg",data->get());
+            sprintf(xxx,"%g",data->get());
             *buffer += xxx;
         }
         return;
@@ -2926,7 +2926,7 @@ void convertArray(StringBuilder buffer,PVScalarArray const * xxx,int indentLevel
                 if(num==1) {
                      double val = data.data[data.offset];
                      char buf[16];
-                     sprintf(buf,"%lg",val);
+                     sprintf(buf,"%g",val);
                      *buffer += buf;
                 } else {
                      *buffer += "???? ";

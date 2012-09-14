@@ -143,20 +143,20 @@ static void longArray()
     LongArray_iterator iter = data.data.begin();
     if(debug) fprintf(fd,"iter  [");
     for(iter=data.data.begin();iter!=data.data.end();++iter) {
-         if(debug) fprintf(fd,"%lli ",*iter);
+         if(debug) fprintf(fd,"%lli ",(long long)*iter);
     }
     if(debug) fprintf(fd,"]\n");
     if(debug) fprintf(fd,"raw   [");
     int64 * pdata = get(data.data);
     for(size_t i=0; i<length; i++) {
          int64 val = pdata[i];
-         if(debug) fprintf(fd,"%lli  ",val);
+         if(debug) fprintf(fd,"%lli  ",(long long)val);
     }
     if(debug) fprintf(fd,"]\n");
     if(debug) fprintf(fd,"direct[");
     for(size_t i=0; i<length; i++) {
          int64 val = data.data[i];
-         if(debug) fprintf(fd,"%lli ",val);
+         if(debug) fprintf(fd,"%lli ",(long long)val);
     }
     if(debug) fprintf(fd,"]\n");
     fprintf(fd,"longArray PASSED\n");
@@ -184,20 +184,20 @@ static void ulongArray()
     ULongArray_iterator iter = data.data.begin();
     if(debug) fprintf(fd,"iter  [");
     for(iter=data.data.begin();iter!=data.data.end();++iter) {
-         if(debug) fprintf(fd,"%llu ",*iter);
+         if(debug) fprintf(fd,"%llu ",(long long unsigned)*iter);
     }
     if(debug) fprintf(fd,"]\n");
     if(debug) fprintf(fd,"raw   [");
     uint64 * pdata = get(data.data);
     for(size_t i=0; i<length; i++) {
          uint64 val = pdata[i];
-         if(debug) fprintf(fd,"%llu  ",val);
+         if(debug) fprintf(fd,"%llu  ",(long long unsigned)val);
     }
     if(debug) fprintf(fd,"]\n");
     if(debug) fprintf(fd,"direct[");
     for(size_t i=0; i<length; i++) {
          uint64 val = data.data[i];
-         if(debug) fprintf(fd,"%llu ",val);
+         if(debug) fprintf(fd,"%llu ",(long long unsigned)val);
     }
     if(debug) fprintf(fd,"]\n");
     fprintf(fd,"ulongArray PASSED\n");

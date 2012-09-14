@@ -32,10 +32,10 @@ void testTimeStamp(FILE *fd,FILE *auxfd)
     assert(nanoSecPerSec==1000000000);
     TimeStamp current;
     current.getCurrent();
-    fprintf(auxfd,"current %lli %i milliSec %li\n",
-        current.getSecondsPastEpoch(),
+    fprintf(auxfd,"current %lli %i milliSec %lli\n",
+        (long long)current.getSecondsPastEpoch(),
         current.getNanoSeconds(),
-        current.getMilliseconds());
+        (long long)current.getMilliseconds());
     time_t tt;
     current.toTime_t(tt);
     struct tm ctm;
@@ -48,10 +48,10 @@ void testTimeStamp(FILE *fd,FILE *auxfd)
         (ctm.tm_isdst==0) ? "false" : "true");
     tt = time(&tt);
     current.fromTime_t(tt);
-    fprintf(auxfd,"fromTime_t\ncurrent %lli %i milliSec %li\n",
-        current.getSecondsPastEpoch(),
+    fprintf(auxfd,"fromTime_t\ncurrent %lli %i milliSec %lli\n",
+        (long long)current.getSecondsPastEpoch(),
         current.getNanoSeconds(),
-        current.getMilliseconds());
+        (long long)current.getMilliseconds());
     current.toTime_t(tt);
     memcpy(&ctm,localtime(&tt),sizeof(struct tm));
     fprintf(auxfd,

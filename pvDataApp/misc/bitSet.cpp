@@ -337,10 +337,10 @@ namespace epics { namespace pvData {
         int32 i = nextSetBit(0);
         char tmp[30];
         if (i != -1) {
-            sprintf(tmp,"%d",i); *buffer += tmp;
+            sprintf(tmp,"%d",(int)i); *buffer += tmp;
             for (i = nextSetBit(i+1); i >= 0; i = nextSetBit(i+1)) {
                 int32 endOfRun = nextClearBit(i);
-                do { *buffer += ", "; sprintf(tmp,"%d",i); *buffer += tmp; } while (++i < endOfRun);
+                do { *buffer += ", "; sprintf(tmp,"%d",(int)i); *buffer += tmp; } while (++i < endOfRun);
             }
         }
         *buffer += '}';

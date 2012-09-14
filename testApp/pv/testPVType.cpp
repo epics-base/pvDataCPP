@@ -62,10 +62,10 @@ int main(int argc,char *argv[])
     int64 longInt = 0x7fffffff;
     longInt <<= 32;
     longInt |= 0xffffffff;
-    fprintf(fd,"int8 max %lli",longInt);
+    fprintf(fd,"int8 max %lli",(long long)longInt);
     longInt = intValue = 0x80000000;;
     longInt <<= 32;
-    fprintf(fd," min %lli\n",longInt);
+    fprintf(fd," min %lli\n",(long long)longInt);
 
     fprintf(fd,"PASSED\n");
     return(0);
