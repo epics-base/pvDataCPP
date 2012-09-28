@@ -652,10 +652,6 @@ PVStructurePtr PVDataCreate::createPVStructure(
      for (size_t i=0;i<num;i++) fields[i] = pvFields[i]->getField();
      StructureConstPtr structure = fieldCreate->createStructure(fieldNames,fields);
      PVStructurePtr pvStructure(new PVStructure(structure,pvFields));
-     const PVFieldPtrArray & xxx = pvStructure->getPVFields();
-     for(size_t i=0; i<pvFields.size();i++) {
-         convert->copy(pvFields[i],xxx[i]);
-     }
      return pvStructure;
 }
 

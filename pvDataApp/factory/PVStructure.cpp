@@ -72,14 +72,12 @@ PVStructure::PVStructure(StructureConstPtr const & structurePtr,
 {
     size_t numberFields = structurePtr->getNumberFields();
     StringArray fieldNames = structurePtr->getFieldNames();
-    PVFieldPtrArray * xxx = const_cast<PVFieldPtrArray *>(&pvFields);
-    xxx->reserve(numberFields);
-    PVDataCreatePtr pvDataCreate = getPVDataCreate();
+    pvFields.reserve(numberFields);
     for(size_t i=0; i<numberFields; i++) {
-        xxx->push_back(pvDataCreate->createPVField(pvs[i]->getField()));
+        pvFields.push_back(pvs[i]);
     }
     for(size_t i=0; i<numberFields; i++) {
-        (*xxx)[i]->setParentAndName(this,fieldNames[i]);
+        pvFields[i]->setParentAndName(this,fieldNames[i]);
     }
 }
 

@@ -37,7 +37,7 @@
 <h1>EPICS pvDataCPP</h1>
 <!-- Maturity: Working Draft or Request for Comments, or Recommendation, and date.  -->
 
-<h2 class="nocount">EPICS v4 Working Group, Working Draft, 27-Sep-2012</h2>
+<h2 class="nocount">EPICS v4 Working Group, Working Draft, 03-Sep-2012</h2>
 
   <dl>
     <dt>Latest version:</dt>
@@ -95,7 +95,7 @@ Control System (EPICS).</a></p>
 
 <h2 class="nocount">Status of this Document</h2>
 
-<p>This is the 27-Sep-2012 version of the Java implementation of pvData.</p>
+<p>This is the 03-Sep-2012 version of the Java implementation of pvData.</p>
 
 <p> The text describes software which is a complete implementation of pvData as
 currently planned by the EPICS V4 Working Group. </p> </p>
@@ -114,33 +114,6 @@ currently planned by the EPICS V4 Working Group. </p> </p>
     <dd>Create an example of how to use the array typedefs</dd>
   <dt>Convert test</dt>
     <dd>How can this be better tested?</dd>
-  <dt>Structure and PVStructure</dt>
-    <dd>These two classes still keep data via std::vector.
-     Should they keep it as std::tr1::shared_ptr&lt;std::vector&lt;... ?<br />
-    In particular change
-<pre>
-class Structure
-...
-StringArray fieldNames;
-FieldConstPtrArray fields
-
-class PVStructure
-...
-PVFieldPtrArray pvFields;
-</pre>
-To
-<pre>
-class Structure
-...
-StringArrayPtr fieldNames;
-FieldConstPtrArrayPtr fields
-
-class PVStructure
-...
-PVFieldPtrArrayPtr pvFields;
-</pre>
-If these are changed several methods also change so that raw vectors are never passed as
-argument or returned from methods.</dd>
 </dl>
 
 <div id="toc">
