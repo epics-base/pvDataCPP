@@ -340,7 +340,7 @@ void DefaultPVArray<T>::deserialize(ByteBuffer *pbuffer,
                 value[i] = pbuffer->get<T>();
               */  
             size_t maxCount = min(size-i, (pbuffer->getRemaining()/sizeof(T)));
-            pbuffer->getArray(get(), maxCount);
+            pbuffer->getArray(get()+i, maxCount);
             i += maxCount;
             
             if(i<size)
@@ -384,7 +384,7 @@ void DefaultPVArray<T>::serialize(ByteBuffer *pbuffer,
         
         size_t maxCount = min<int>(end-i, (int)(pbuffer->getRemaining()/sizeof(T)));
         T * pvalue = const_cast<T *>(get());
-        pbuffer->putArray(pvalue, maxCount);
+        pbuffer->putArray(pvalue+i, maxCount);
         i += maxCount;
         
         if(i<end)
