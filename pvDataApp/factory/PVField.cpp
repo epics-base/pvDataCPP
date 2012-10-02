@@ -191,7 +191,6 @@ void PVField::toString(StringBuilder buf)
 
 void PVField::toString(StringBuilder buf,int indentLevel) 
 {
-   static ConvertPtr convert = getConvert();
    convert->getString(buf,this,indentLevel);
    if(pvAuxInfo.get()!=NULL) pvAuxInfo->toString(buf,indentLevel);
 }
@@ -201,7 +200,6 @@ std::ostream& PVField::dumpValue(std::ostream& o) const
 	// default implementation
 	// each PVField class should implement it to avoid switch statement
 	// and string reallocation
-	static ConvertPtr convert = getConvert();
 	String tmp;
 	convert->getString(&tmp,this,0);
 	return o << tmp;

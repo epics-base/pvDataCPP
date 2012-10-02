@@ -27,8 +27,8 @@ using std::min;
 
 namespace epics { namespace pvData {
 
-static Convert* convert = 0;
-static FieldCreate * fieldCreate = 0;
+static ConvertPtr convert = getConvert();
+static FieldCreatePtr fieldCreate = getFieldCreate();
 
 /** Default storage for scalar values
  */
