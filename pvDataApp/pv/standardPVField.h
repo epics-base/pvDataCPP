@@ -13,6 +13,7 @@
 #include <stdexcept>
 #include <pv/pvIntrospect.h>
 #include <pv/pvData.h>
+#include <pv/standardField.h>
 
 namespace epics { namespace pvData { 
 /**
