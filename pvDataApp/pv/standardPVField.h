@@ -41,6 +41,10 @@ public:
     PVStructurePtr enumerated(StringArray const &choices, String const & properties);
 private:
     StandardPVField();
+    StandardFieldPtr standardField;
+    FieldCreatePtr fieldCreate;
+    PVDataCreatePtr pvDataCreate;
+    String notImplemented;
 };
 
 extern StandardPVFieldPtr getStandardPVField();

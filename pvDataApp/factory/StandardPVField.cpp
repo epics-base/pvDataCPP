@@ -20,14 +20,12 @@
 
 namespace epics { namespace pvData { 
 
-static StandardFieldPtr standardField;
-static FieldCreatePtr fieldCreate;
-static PVDataCreatePtr pvDataCreate;
-
-
-static String notImplemented("not implemented");
-
-StandardPVField::StandardPVField(){}
+StandardPVField::StandardPVField()
+: standardField(getStandardField()),
+  fieldCreate(getFieldCreate()),
+  pvDataCreate(getPVDataCreate()),
+  notImplemented("not implemented")
+{}
 
 StandardPVField::~StandardPVField(){}
 
@@ -91,9 +89,6 @@ StandardPVFieldPtr StandardPVField::getStandardPVField()
     Lock xx(mutex);
 
     if(standardPVField.get()==NULL) {
-        standardField = getStandardField();
-        fieldCreate = getFieldCreate();
-        pvDataCreate = getPVDataCreate();
         standardPVField= StandardPVFieldPtr(new StandardPVField());
     }
     return standardPVField;

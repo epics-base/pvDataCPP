@@ -19,8 +19,6 @@
 
 namespace epics { namespace pvData {
 
-static PVScalarPtr nullPVScalar;
-
 
 PVAuxInfo::PVAuxInfo(PVField * pvField)
   :  pvField(pvField),

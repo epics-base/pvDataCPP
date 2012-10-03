@@ -17,8 +17,8 @@ namespace epics { namespace pvData {
 
 using std::tr1::static_pointer_cast;
 
-static String noTimeStamp("No timeStamp structure found");
-static String notAttached("Not attached to a timeStamp structure");
+String PVTimeStamp::noTimeStamp("No timeStamp structure found");
+String PVTimeStamp::notAttached("Not attached to a timeStamp structure");
 
 bool PVTimeStamp::attach(PVFieldPtr const & pvField)
 {

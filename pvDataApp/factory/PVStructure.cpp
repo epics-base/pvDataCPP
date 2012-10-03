@@ -23,22 +23,22 @@ using std::size_t;
 
 namespace epics { namespace pvData {
 
-static PVFieldPtr nullPVField;
-static PVBooleanPtr nullPVBoolean;
-static PVBytePtr nullPVByte;
-static PVShortPtr nullPVShort;
-static PVIntPtr nullPVInt;
-static PVLongPtr nullPVLong;
-static PVUBytePtr nullPVUByte;
-static PVUShortPtr nullPVUShort;
-static PVUIntPtr nullPVUInt;
-static PVULongPtr nullPVULong;
-static PVFloatPtr nullPVFloat;
-static PVDoublePtr nullPVDouble;
-static PVStringPtr nullPVString;
-static PVStructurePtr nullPVStructure;
-static PVStructureArrayPtr nullPVStructureArray;
-static PVScalarArrayPtr nullPVScalarArray;
+PVFieldPtr PVStructure::nullPVField;
+PVBooleanPtr PVStructure::nullPVBoolean;
+PVBytePtr PVStructure::nullPVByte;
+PVShortPtr PVStructure::nullPVShort;
+PVIntPtr PVStructure::nullPVInt;
+PVLongPtr PVStructure::nullPVLong;
+PVUBytePtr PVStructure::nullPVUByte;
+PVUShortPtr PVStructure::nullPVUShort;
+PVUIntPtr PVStructure::nullPVUInt;
+PVULongPtr PVStructure::nullPVULong;
+PVFloatPtr PVStructure::nullPVFloat;
+PVDoublePtr PVStructure::nullPVDouble;
+PVStringPtr PVStructure::nullPVString;
+PVStructurePtr PVStructure::nullPVStructure;
+PVStructureArrayPtr PVStructure::nullPVStructureArray;
+PVScalarArrayPtr PVStructure::nullPVScalarArray;
 
 static PVFieldPtr findSubField(
     String const &fieldName,
@@ -649,7 +649,7 @@ static PVFieldPtr findSubField(
     String const & fieldName,
     PVStructure const *pvStructure)
 {
-    if( fieldName.length()<1) return nullPVField;
+    if( fieldName.length()<1) return PVFieldPtr();
     String::size_type index = fieldName.find('.');
     String name = fieldName;
     String restOfName = String();
@@ -667,13 +667,13 @@ static PVFieldPtr findSubField(
         size_t result = pvField->getFieldName().compare(name);
         if(result==0) {
             if(restOfName.length()==0) return pvFields[i];
-            if(pvField->getField()->getType()!=structure) return nullPVField;
+            if(pvField->getField()->getType()!=structure) return PVFieldPtr();
             PVStructurePtr pvStructure =
                 std::tr1::static_pointer_cast<PVStructure>(pvField);
             return findSubField(restOfName,pvStructure.get());
         }
     }
-    return nullPVField;
+    return PVFieldPtr();
 }
 
 }}

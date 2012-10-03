@@ -22,14 +22,12 @@ using std::size_t;
 
 namespace epics { namespace pvData { 
 
-static PVDataCreatePtr pvDataCreate;
 
-static String trueString("true");
-static String falseString("false");
-static String logicError("Logic error. Should never get here.");
-static String illegalScalarType("Illegal ScalarType");
-
-static ConvertPtr convert;
+static void newLineImpl(StringBuilder buffer, int indentLevel)
+{
+    *buffer += "\n";
+    for(int i=0; i<indentLevel; i++) *buffer += "    ";
+}
 
 template<typename T>
 T toScalar(PVScalarPtr const &pv)
@@ -82,7 +80,7 @@ T toScalar(PVScalarPtr const &pv)
         case pvString:
            throw std::logic_error(String("string can not be converted to byte"));
     }
-    throw std::logic_error(logicError);
+    throw std::logic_error("Logic error. Should never get here.");
 }
 
 int8 Convert::toByte(PVScalarPtr const & pv)
@@ -278,7 +276,7 @@ void fromScalar(PVScalarPtr const &pv,T from)
             return;
         }
     }
-    throw std::logic_error(logicError);
+    throw std::logic_error("Logic error. Should never get here.");
 }
 
 void Convert::fromByte(PVScalarPtr const &pv,int8 from)
@@ -412,7 +410,14 @@ static std::vector<String> split(String commaSeparatedList) {
     return valueList;
 }
     
-Convert::Convert(){}
+Convert::Convert()
+: pvDataCreate(getPVDataCreate()),
+  trueString("true"),
+  falseString("false"),
+  illegalScalarType("Illegal ScalarType")
+{}
+
+
 
 Convert::~Convert(){}
 
@@ -1151,7 +1156,7 @@ String Convert::toString(PVScalarPtr const & pv)
             return value->get();
         }
     }
-    throw std::logic_error(logicError);
+    throw std::logic_error("Logic error. Should never get here.");
 }
 
 size_t Convert::toByteArray(PVScalarArrayPtr const &pv, size_t offset, size_t length,
@@ -1336,8 +1341,7 @@ size_t Convert::fromDoubleArray(PVScalarArrayPtr &pv, size_t offset, size_t leng
 
 void Convert::newLine(StringBuilder buffer, int indentLevel)
 {
-    *buffer += "\n";
-    for(int i=0; i<indentLevel; i++) *buffer += "    ";
+    newLineImpl(buffer,indentLevel);
 }
 
 static bool scalarEquals(PVScalar *a,PVScalar *b)
@@ -2388,7 +2392,7 @@ size_t convertToStringArray(PVScalarArray *pv,
             if (pvdata->get(offset + i, 1, data) == 1) {
                 BooleanArray dataArray = data.data;
                 bool value = dataArray[data.offset];
-                to[toOffset + i] = value ? trueString : falseString;
+                to[toOffset + i] = value ? "true" : "false";
             } else {
                 to[toOffset + i] = "bad pv";
             }
@@ -2710,7 +2714,7 @@ void convertStructure(StringBuilder buffer,PVStructure const *data,int indentLev
     if (fieldsData.size() != 0) {
         int length = data->getStructure()->getNumberFields();
         for(int i=0; i<length; i++) {
-            convert->newLine(buffer, indentLevel+1);
+            newLineImpl(buffer, indentLevel+1);
             PVFieldPtr fieldField = fieldsData[i];
             fieldField->toString(buffer,indentLevel + 1);
         }
@@ -2976,7 +2980,7 @@ void convertStructureArray(StringBuilder buffer,
     StructureArrayData data = StructureArrayData();
     pvdata->get(0, length, data);
     for (size_t i = 0; i < length; i++) {
-        convert->newLine(buffer, indentLevel + 1);
+        newLineImpl(buffer, indentLevel + 1);
         PVStructurePtr pvStructure = data.data[i];
         if (pvStructure.get() == 0) {
             *buffer += "null";
@@ -3314,12 +3318,12 @@ size_t copyNumericArray(PVScalarArray *from, size_t offset, PVScalarArray *to, s
 
 ConvertPtr Convert::getConvert()
 {
+    static ConvertPtr convert;
     static Mutex mutex;
     Lock xx(mutex);
 
     if(convert.get()==0) {
         convert = ConvertPtr(new Convert());
-        pvDataCreate = getPVDataCreate();
     }
     return convert;
 }

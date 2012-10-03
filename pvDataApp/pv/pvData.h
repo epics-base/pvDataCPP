@@ -131,6 +131,7 @@ public:
      */
     void toString(StringBuilder buf,int indentLevel);
 private:
+    PVScalarPtr nullPVScalar;
     PVField * pvField;
     PVInfoMap pvInfos;
     friend class PVDataCreate;
@@ -289,6 +290,7 @@ private:
     void message(String  message,MessageType messageType,String fullFieldName);
     static void computeOffset(const PVField *pvField);
     static void computeOffset(const PVField *pvField,std::size_t offset);
+    String notImplemented;
     PVAuxInfoPtr pvAuxInfo;
     String fieldName;
     PVStructure *parent;
@@ -814,6 +816,23 @@ public:
      */
     PVStructure(StructureConstPtr const & structure,PVFieldPtrArray const & pvFields);
 private:
+    static PVFieldPtr nullPVField;
+    static PVBooleanPtr nullPVBoolean;
+    static PVBytePtr nullPVByte;
+    static PVShortPtr nullPVShort;
+    static PVIntPtr nullPVInt;
+    static PVLongPtr nullPVLong;
+    static PVUBytePtr nullPVUByte;
+    static PVUShortPtr nullPVUShort;
+    static PVUIntPtr nullPVUInt;
+    static PVULongPtr nullPVULong;
+    static PVFloatPtr nullPVFloat;
+    static PVDoublePtr nullPVDouble;
+    static PVStringPtr nullPVString;
+    static PVStructurePtr nullPVStructure;
+    static PVStructureArrayPtr nullPVStructureArray;
+    static PVScalarArrayPtr nullPVScalarArray;
+
     PVFieldPtrArray pvFields;
     StructureConstPtr structurePtr;
     String extendsStructureName;
@@ -1051,6 +1070,7 @@ public:
    PVStructurePtr createPVStructure(PVStructurePtr const & structToClone);
 private:
    PVDataCreate();
+   FieldCreatePtr fieldCreate;
 };
 
 /**

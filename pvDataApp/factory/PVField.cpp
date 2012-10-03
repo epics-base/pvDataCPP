@@ -21,11 +21,10 @@ using std::size_t;
 
 namespace epics { namespace pvData {
 
-static String notImplemented("not implemented");
-
 
 PVField::PVField(FieldConstPtr field)
-: parent(NULL),field(field),
+: notImplemented("not implemented"),
+  parent(NULL),field(field),
   fieldOffset(0), nextFieldOffset(0),
   immutable(false),
   convert(getConvert())

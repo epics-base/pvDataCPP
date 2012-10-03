@@ -27,8 +27,6 @@ using std::min;
 
 namespace epics { namespace pvData {
 
-static ConvertPtr convert = getConvert();
-static FieldCreatePtr fieldCreate = getFieldCreate();
 
 /** Default storage for scalar values
  */
@@ -455,7 +453,9 @@ typedef DefaultPVArray<String> BasePVStringArray;
 
 // Factory
 
-PVDataCreate::PVDataCreate(){ }
+PVDataCreate::PVDataCreate()
+: fieldCreate(getFieldCreate())
+{ }
 
 PVFieldPtr PVDataCreate::createPVField(FieldConstPtr const & field)
 {
@@ -509,7 +509,7 @@ PVFieldPtr PVDataCreate::createPVField(PVFieldPtr const & fieldToClone)
              StructureArrayConstPtr structureArray = from->getStructureArray();
              PVStructureArrayPtr to = createPVStructureArray(
                  structureArray);
-             convert->copyStructureArray(from, to);
+             getConvert()->copyStructureArray(from, to);
              return to;
          }
      }
@@ -559,7 +559,7 @@ PVScalarPtr PVDataCreate::createPVScalar(PVScalarPtr const & scalarToClone)
 {
      ScalarType scalarType = scalarToClone->getScalar()->getScalarType();
      PVScalarPtr pvScalar = createPVScalar(scalarType);
-     convert->copyScalar(scalarToClone, pvScalar);
+     getConvert()->copyScalar(scalarToClone, pvScalar);
      PVAuxInfoPtr from = scalarToClone->getPVAuxInfo();
      PVAuxInfoPtr to = pvScalar->getPVAuxInfo();
      PVAuxInfo::PVInfoMap & map = from->getInfoMap();
@@ -568,7 +568,7 @@ PVScalarPtr PVDataCreate::createPVScalar(PVScalarPtr const & scalarToClone)
          PVScalarPtr pvFrom = iter->second;
          ScalarConstPtr scalar = pvFrom->getScalar();
          PVScalarPtr pvTo = to->createInfo(key,scalar->getScalarType());
-         convert->copyScalar(pvFrom,pvTo);
+         getConvert()->copyScalar(pvFrom,pvTo);
      }
      return pvScalar;
 }
@@ -618,7 +618,7 @@ PVScalarArrayPtr PVDataCreate::createPVScalarArray(
 {
      PVScalarArrayPtr pvArray = createPVScalarArray(
           arrayToClone->getScalarArray()->getElementType());
-     convert->copyScalarArray(arrayToClone,0, pvArray,0,arrayToClone->getLength());
+     getConvert()->copyScalarArray(arrayToClone,0, pvArray,0,arrayToClone->getLength());
      PVAuxInfoPtr from = arrayToClone->getPVAuxInfo();
      PVAuxInfoPtr to = pvArray->getPVAuxInfo();
      PVAuxInfo::PVInfoMap & map = from->getInfoMap();
@@ -627,7 +627,7 @@ PVScalarArrayPtr PVDataCreate::createPVScalarArray(
          PVScalarPtr pvFrom = iter->second;
          ScalarConstPtr scalar = pvFrom->getScalar();
          PVScalarPtr pvTo = to->createInfo(key,scalar->getScalarType());
-         convert->copyScalar(pvFrom,pvTo);
+         getConvert()->copyScalar(pvFrom,pvTo);
      }
     return pvArray;
 }
@@ -666,7 +666,7 @@ PVStructurePtr PVDataCreate::createPVStructure(PVStructurePtr const & structToCl
     }
     StructureConstPtr structure = structToClone->getStructure();
     PVStructurePtr pvStructure(new PVStructure(structure));
-    convert->copyStructure(structToClone,pvStructure);
+    getConvert()->copyStructure(structToClone,pvStructure);
     return pvStructure;
 }
 

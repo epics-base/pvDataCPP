@@ -29,6 +29,8 @@ public:
 private:
     PVDoublePtr pvLow;
     PVDoublePtr pvHigh;
+    static String noControlFound;
+    static String notAttached;
 };
     
 }}

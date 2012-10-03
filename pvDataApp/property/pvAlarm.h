@@ -33,6 +33,8 @@ private:
     PVIntPtr pvSeverity;
     PVIntPtr pvStatus;
     PVStringPtr pvMessage;
+    static String noAlarmFound;
+    static String notAttached;
 };
     
 }}

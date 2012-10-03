@@ -28,6 +28,8 @@ public:
     void get(Display &) const;
     bool set(Display const & display);
 private:
+    static String noDisplayFound;
+    static String notAttached;
     PVStringPtr pvDescription;
     PVStringPtr pvFormat;
     PVStringPtr pvUnits;

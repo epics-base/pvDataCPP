@@ -17,8 +17,8 @@ namespace epics { namespace pvData {
 
 using std::tr1::static_pointer_cast;
 
-static String noDisplayFound("No display structure found");
-static String notAttached("Not attached to an display structure");
+String PVDisplay::noDisplayFound("No display structure found");
+String PVDisplay::notAttached("Not attached to an display structure");
 
 bool PVDisplay::attach(PVFieldPtr const & pvField)
 {

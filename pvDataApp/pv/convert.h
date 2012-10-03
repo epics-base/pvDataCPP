@@ -756,6 +756,10 @@ public:
     void newLine(StringBuilder buf, int indentLevel);
 private:
     Convert();
+    PVDataCreatePtr pvDataCreate;
+    String trueString;
+    String falseString;
+    String illegalScalarType;
 };
 
 extern ConvertPtr getConvert();

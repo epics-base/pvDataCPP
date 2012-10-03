@@ -283,6 +283,7 @@ public:
 protected:
     Scalar(ScalarType scalarType);
 private:
+    const int8 getTypeCodeLUT() const;
     ScalarType scalarType;
     friend class FieldCreate;
 };
@@ -329,6 +330,8 @@ protected:
      */
     virtual ~ScalarArray();
 private:
+    const int8 getTypeCodeLUT() const;
+    const String getIDScalarArrayLUT() const;
     ScalarType elementType;
     friend class FieldCreate;
 };

@@ -17,8 +17,8 @@ namespace epics { namespace pvData {
 
 using std::tr1::static_pointer_cast;
 
-static String noControlFound("No control structure found");
-static String notAttached("Not attached to an control structure");
+String PVControl::noControlFound("No control structure found");
+String PVControl::notAttached("Not attached to an control structure");
 
 bool PVControl::attach(PVFieldPtr const & pvField)
 {

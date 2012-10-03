@@ -17,8 +17,8 @@ namespace epics { namespace pvData {
 
 using std::tr1::static_pointer_cast;
 
-static String notFound("No enumerated structure found");
-static String notAttached("Not attached to an enumerated structure");
+String PVEnumerated::notFound("No enumerated structure found");
+String PVEnumerated::notAttached("Not attached to an enumerated structure");
 
 bool PVEnumerated::attach(PVFieldPtr const & pvField)
 {

@@ -26,7 +26,6 @@
 
 namespace epics { namespace pvData { 
 
-static String alreadyOn("already on list");
 
 Event::~Event() {
     epicsEventDestroy(id);
@@ -35,7 +34,8 @@ Event::~Event() {
 
 
 Event::Event(bool full)
-: id(epicsEventCreate(full?epicsEventFull : epicsEventEmpty))
+: id(epicsEventCreate(full?epicsEventFull : epicsEventEmpty)),
+  alreadyOn("already on list")
 {
 }
 

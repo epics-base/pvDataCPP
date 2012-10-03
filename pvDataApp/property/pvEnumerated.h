@@ -34,6 +34,8 @@ public:
     int32 getNumberChoices();
     bool setChoices(StringArray & choices);
 private:
+    static String notFound;
+    static String notAttached;
     PVIntPtr pvIndex;
     PVStringArrayPtr pvChoices;
 };

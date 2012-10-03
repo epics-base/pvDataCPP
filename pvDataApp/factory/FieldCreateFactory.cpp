@@ -74,7 +74,10 @@ void Scalar::toString(StringBuilder buffer,int indentLevel) const{
     *buffer += getID();
 }
 
-static const String idScalarLUT[] = {
+
+String Scalar::getID() const
+{
+    static const String idScalarLUT[] = {
 	"boolean", // pvBoolean
 	"byte",    // pvByte
 	"short",   // pvShort
@@ -87,31 +90,33 @@ static const String idScalarLUT[] = {
 	"float",   // pvFloat
 	"double",  // pvDouble
 	"string"   // pvString
-};
-
-String Scalar::getID() const
-{
+    };
     return idScalarLUT[scalarType];
 }
 
-static const int8 typeCodeLUT[] = {
-    0x00, // pvBoolean
-    0x20, // pvByte
-    0x21, // pvShort
-    0x22, // pvInt
-    0x23, // pvLong
-    0x28, // pvUByte
-    0x29, // pvUShort
-    0x2A, // pvUInt
-    0x2B, // pvULong
-    0x42, // pvFloat
-    0x43, // pvDouble
-    0x60  // pvString
-};
+const int8 Scalar::getTypeCodeLUT() const
+{
+    static const int8 typeCodeLUT[] = {
+        0x00, // pvBoolean
+        0x20, // pvByte
+        0x21, // pvShort
+        0x22, // pvInt
+        0x23, // pvLong
+        0x28, // pvUByte
+        0x29, // pvUShort
+        0x2A, // pvUInt
+        0x2B, // pvULong
+        0x42, // pvFloat
+        0x43, // pvDouble
+        0x60  // pvString
+    };
+   return typeCodeLUT[scalarType];
+}
+
 
 void Scalar::serialize(ByteBuffer *buffer, SerializableControl *control) const {
     control->ensureBuffer(1);
-    buffer->putByte(typeCodeLUT[scalarType]);
+    buffer->putByte(getTypeCodeLUT());
 }
 
 void Scalar::deserialize(ByteBuffer *buffer, DeserializableControl *control) {
@@ -153,7 +158,28 @@ ScalarArray::ScalarArray(ScalarType elementType)
 
 ScalarArray::~ScalarArray() {}
 
-static const String idScalarArrayLUT[] = {
+const int8 ScalarArray::getTypeCodeLUT() const
+{
+    static const int8 typeCodeLUT[] = {
+        0x00, // pvBoolean
+        0x20, // pvByte
+        0x21, // pvShort
+        0x22, // pvInt
+        0x23, // pvLong
+        0x28, // pvUByte
+        0x29, // pvUShort
+        0x2A, // pvUInt
+        0x2B, // pvULong
+        0x42, // pvFloat
+        0x43, // pvDouble
+        0x60  // pvString
+    };
+   return typeCodeLUT[elementType];
+}
+
+const String ScalarArray::getIDScalarArrayLUT() const
+{
+    static const String idScalarArrayLUT[] = {
 	"boolean[]", // pvBoolean
 	"byte[]",    // pvByte
 	"short[]",   // pvShort
@@ -166,11 +192,13 @@ static const String idScalarArrayLUT[] = {
 	"float[]",   // pvFloat
 	"double[]",  // pvDouble
 	"string[]"   // pvString
-};
+    };
+    return idScalarArrayLUT[elementType];
+}
 
 String ScalarArray::getID() const
 {
-    return idScalarArrayLUT[elementType];
+    return getIDScalarArrayLUT();
 }
 
 void ScalarArray::toString(StringBuilder buffer,int indentLevel) const{
@@ -179,7 +207,7 @@ void ScalarArray::toString(StringBuilder buffer,int indentLevel) const{
 
 void ScalarArray::serialize(ByteBuffer *buffer, SerializableControl *control) const {
     control->ensureBuffer(1);
-    buffer->putByte(0x10 | typeCodeLUT[elementType]);
+    buffer->putByte(0x10 | getTypeCodeLUT());
 }
 
 void ScalarArray::deserialize(ByteBuffer *buffer, DeserializableControl *control) {
@@ -398,51 +426,47 @@ StructureConstPtr FieldCreate::appendFields(
 }
 
 
-
-
-
-static const int integerLUT[] =
-{
-    pvByte,  // 8-bits
-    pvShort, // 16-bits
-    pvInt,   // 32-bits
-    pvLong,  // 64-bits
-    -1,
-    -1,
-    -1,
-    -1,
-    pvUByte,  // unsigned 8-bits
-    pvUShort, // unsigned 16-bits
-    pvUInt,   // unsigned 32-bits
-    pvULong,  // unsigned 64-bits
-    -1,
-    -1,
-    -1,
-    -1
-};
-
-static const int floatLUT[] =
-{
-    -1, // reserved
-    -1, // 16-bits
-    pvFloat,   // 32-bits
-    pvDouble,  // 64-bits
-    -1,
-    -1,
-    -1,
-    -1,
-    -1,
-    -1,
-    -1,
-    -1,
-    -1,
-    -1,
-    -1,
-    -1
-};
-
 static int decodeScalar(int8 code)
 {
+    static const int integerLUT[] =
+    {
+        pvByte,  // 8-bits
+        pvShort, // 16-bits
+        pvInt,   // 32-bits
+        pvLong,  // 64-bits
+        -1,
+        -1,
+        -1,
+        -1,
+        pvUByte,  // unsigned 8-bits
+        pvUShort, // unsigned 16-bits
+        pvUInt,   // unsigned 32-bits
+        pvULong,  // unsigned 64-bits
+        -1,
+        -1,
+        -1,
+        -1
+    };
+    
+    static const int floatLUT[] =
+    {
+        -1, // reserved
+        -1, // 16-bits
+        pvFloat,   // 32-bits
+        pvDouble,  // 64-bits
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+    };
     // bits 7-5
     switch (code >> 5)
     {

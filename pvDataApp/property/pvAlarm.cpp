@@ -17,8 +17,8 @@ namespace epics { namespace pvData {
 
 using std::tr1::static_pointer_cast;
 
-static String noAlarmFound("No alarm structure found");
-static String notAttached("Not attached to an alarm structure");
+String PVAlarm::noAlarmFound("No alarm structure found");
+String PVAlarm::notAttached("Not attached to an alarm structure");
 
 bool PVAlarm::attach(PVFieldPtr const & pvField)
 {
