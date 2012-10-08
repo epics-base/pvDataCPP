@@ -23,6 +23,7 @@ INC += messageQueue.h
 INC += destroyable.h
 INC += status.h
 INC += sharedPtr.h
+INC += localStaticLock.h
 
 LIBSRCS += byteBuffer.cpp
 LIBSRCS += bitSet.cpp
@@ -35,6 +36,7 @@ LIBSRCS += timeFunction.cpp
 LIBSRCS += timer.cpp
 LIBSRCS += status.cpp
 LIBSRCS += messageQueue.cpp
+LIBSRCS += localStaticLock.cpp
 
 SRC_DIRS += $(PVDATA)/pv
 

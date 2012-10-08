@@ -528,10 +528,11 @@ FieldConstPtr FieldCreate::deserialize(ByteBuffer* buffer, DeserializableControl
 
 FieldCreatePtr FieldCreate::getFieldCreate()
 {
-    static FieldCreatePtr fieldCreate;
-    static Mutex mutex;
-    Lock xx(mutex);
+	LOCAL_STATIC_LOCK;
+	static FieldCreatePtr fieldCreate;
+	static Mutex mutex;
 
+	Lock xx(mutex);
     if(fieldCreate.get()==0) fieldCreate = FieldCreatePtr(new FieldCreate());
     return fieldCreate;
 }
