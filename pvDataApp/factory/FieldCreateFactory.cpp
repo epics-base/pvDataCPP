@@ -124,9 +124,18 @@ void Scalar::deserialize(ByteBuffer *buffer, DeserializableControl *control) {
     throw std::runtime_error("not valid operation, use FieldCreate::deserialize instead");
 }
 
+static String emptyString;
+
 static void serializeStructureField(const Structure* structure, ByteBuffer* buffer, SerializableControl* control)
 {
-    SerializeHelper::serializeString(structure->getID(), buffer, control);
+	// to optimize default (non-empty) IDs optimization
+	// empty IDs are not allowed
+	String id = structure->getID();
+	if (id == Structure::DEFAULT_ID)	// TODO slow comparison
+		SerializeHelper::serializeString(emptyString, buffer, control);
+	else
+	    SerializeHelper::serializeString(id, buffer, control);
+
     FieldConstPtrArray const & fields = structure->getFields();
     StringArray const & fieldNames = structure->getFieldNames();
     std::size_t len = fields.size();
@@ -150,7 +159,10 @@ static StructureConstPtr deserializeStructureField(const FieldCreate* fieldCreat
         fields.push_back(control->cachedDeserialize(buffer));
     }
 
-    return fieldCreate->createStructure(id, fieldNames, fields);
+    if (id.empty())
+        return fieldCreate->createStructure(fieldNames, fields);
+    else
+    	return fieldCreate->createStructure(id, fieldNames, fields);
 }
 
 ScalarArray::ScalarArray(ScalarType elementType)
@@ -244,6 +256,8 @@ void StructureArray::deserialize(ByteBuffer *buffer, DeserializableControl *cont
     throw std::runtime_error("not valid operation, use FieldCreate::deserialize instead");
 }
 
+String Structure::DEFAULT_ID = "structure";
+
 Structure::Structure (
     StringArray const & fieldNames,
     FieldConstPtrArray const & infields,
@@ -253,6 +267,9 @@ Structure::Structure (
       fields(infields),
       id(inid)
 {
+    if(inid.empty()) {
+        throw std::invalid_argument("id is empty");
+    }
     if(fieldNames.size()!=fields.size()) {
         throw std::invalid_argument("fieldNames.size()!=fields.size()");
     }
@@ -362,7 +379,7 @@ StructureConstPtr FieldCreate::createStructure (
     StringArray const & fieldNames,FieldConstPtrArray const & fields) const
 {
       StructureConstPtr structure(
-         new Structure(fieldNames,fields,"structure"), Field::Deleter());
+         new Structure(fieldNames,fields), Field::Deleter());
       return structure;
 }
 

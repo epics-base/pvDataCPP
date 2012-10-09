@@ -384,6 +384,12 @@ private:
 class Structure : public Field {
 public:
     POINTER_DEFINITIONS(Structure);
+
+    /**
+     * Default structure ID.
+     */
+    static epics::pvData::String DEFAULT_ID;
+
     /**
      * Destructor.
      */
@@ -452,7 +458,7 @@ public:
     virtual void deserialize(ByteBuffer *buffer, DeserializableControl *control);
     
 protected:
-   Structure(StringArray const & fieldNames, FieldConstPtrArray const & fields, String const & id = "");
+   Structure(StringArray const & fieldNames, FieldConstPtrArray const & fields, String const & id = DEFAULT_ID);
 private:
     void toStringCommon(StringBuilder buf,int indentLevel) const;
     StringArray fieldNames;
