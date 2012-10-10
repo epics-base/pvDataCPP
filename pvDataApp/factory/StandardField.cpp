@@ -165,7 +165,7 @@ void StandardField::createTimeStamp() {
     fields[0] = fieldCreate->createScalar(pvLong);
     fields[1] = fieldCreate->createScalar(pvInt);
     fields[2] = fieldCreate->createScalar(pvInt);
-    timeStampField = fieldCreate->createStructure("timeStamp_t",names,fields);
+    timeStampField = fieldCreate->createStructure("time_t",names,fields);
 }
 
 void StandardField::createDisplay() {
@@ -500,15 +500,15 @@ void StandardField::createEnumeratedAlarm() {
 StructureConstPtr StandardField::scalar(
     ScalarType type,String  const &properties)
 {
-    ScalarConstPtr field = fieldCreate->createScalar(type);
-    return createProperties("scalar_t",field,properties);    
+    ScalarConstPtr field = fieldCreate->createScalar(type); // scalar_t
+    return createProperties("uri:ev4:nt/2012/pwd:NTScalar",field,properties);
 }
 
 StructureConstPtr StandardField::scalarArray(
     ScalarType elementType, String  const &properties)
 {
-    ScalarArrayConstPtr field = fieldCreate->createScalarArray(elementType);
-    return createProperties("scalarArray_t",field,properties);
+    ScalarArrayConstPtr field = fieldCreate->createScalarArray(elementType); // scalar_t[]
+    return createProperties("uri:ev4:nt/2012/pwd:NTScalarArray",field,properties);
 }
 
 
@@ -517,7 +517,7 @@ StructureConstPtr StandardField::structureArray(
 {
     StructureArrayConstPtr field = fieldCreate->createStructureArray(
         structure);
-    return createProperties("structureArray_t",field,properties);
+    return createProperties("uri:ev4:nt/2012/pwd:NTAny",field,properties);
 }
 
 StructureConstPtr StandardField::enumerated()
@@ -529,13 +529,14 @@ StructureConstPtr StandardField::enumerated()
     names[1] = "choices";
     fields[0] = fieldCreate->createScalar(pvInt);
     fields[1] = fieldCreate->createScalarArray(pvString);
-    return fieldCreate->createStructure("enumerated_t",names,fields);
+    return fieldCreate->createStructure("enum_t",names,fields);
+    // NOTE: if this method is used to get NTEnum wihtout properties the ID will be wrong!
 }
 
 StructureConstPtr StandardField::enumerated(String  const &properties)
 {
-    StructureConstPtr field = enumerated();
-    return createProperties("enumerated_t",field,properties);
+    StructureConstPtr field = enumerated(); // enum_t
+    return createProperties("uri:ev4:nt/2012/pwd:NTEnum",field,properties);
 }
 
 StructureConstPtr StandardField::alarm()

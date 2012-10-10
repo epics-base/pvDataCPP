@@ -895,18 +895,15 @@ public:
     std::ostream& dumpValue(std::ostream& o) const
     {
     	o << "[";
-    	pointer iter = get();
-    	pointer last = iter + getLength();
-    	if (iter != last)
+    	std::size_t len = getLength();
+    	bool first = true;
+    	for (std::size_t i = 0; i < len; i++)
     	{
-    		while (true)
-    		{
-    			o << *(iter++);
-    			if (iter == last)
-    				break;
-    			else
-    				o << ",";
-    		}
+    		if (first)
+    			first = false;
+    		else
+    			o << ",";
+    		dumpValue(o, i);
     	}
     	return o << "]";
     }
