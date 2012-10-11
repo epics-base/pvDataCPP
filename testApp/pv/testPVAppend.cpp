@@ -121,6 +121,33 @@ static void testAppendMore(FILE * fd)
     fprintf(fd,"testAppendMore PASSED\n");
 }
 
+static void testAppendStructures(FILE * fd)
+{
+    if(debug) fprintf(fd,"\ntestAppendStructures\n");
+    PVFieldPtrArray fields;
+    StringArray names;
+    PVStructurePtr pvParent = pvDataCreate->createPVStructure(names,fields);
+    PVFieldPtrArray topFields;
+    StringArray topNames;
+    PVStructurePtr pvTop = pvDataCreate->createPVStructure(topNames,topFields);
+    pvParent->appendPVField("top",pvTop);
+    PVFieldPtrArray valueFields;
+    StringArray valueNames;
+    PVStructurePtr pvValue = pvDataCreate->createPVStructure(valueNames,valueFields);
+    pvTop->appendPVField("value",pvValue);
+    PVFieldPtrArray indexFields;
+    StringArray indexNames;
+    PVStructurePtr pvIndex = pvDataCreate->createPVStructure(indexNames,indexFields);
+    pvValue->appendPVField("index",pvIndex);
+    builder.clear();
+    pvParent->toString(&builder);
+    if(debug) fprintf(fd,"%s\n",builder.c_str());
+    builder.clear();
+    pvParent->getField()->toString(&builder);
+    if(debug) fprintf(fd,"field\n%s\n",builder.c_str());
+    fprintf(fd,"testAppendStructures PASSED\n");
+}
+
 static void append2(PVStructurePtr &pvStructure,
     const char *oneName,const char *twoName,
     const char *oneValue,const char *twoValue)
@@ -193,6 +220,7 @@ int main(int argc,char *argv[])
     standardField = getStandardField();
     standardPVField = getStandardPVField();
     convert = getConvert();
+    testAppendStructures(fd);
     testAppendSimple(fd);
     testAppendMore(fd);
     testAppends(fd);

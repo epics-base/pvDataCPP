@@ -816,6 +816,7 @@ public:
      */
     PVStructure(StructureConstPtr const & structure,PVFieldPtrArray const & pvFields);
 private:
+    void   fixParentStructure();
     static PVFieldPtr nullPVField;
     static PVBooleanPtr nullPVBoolean;
     static PVBytePtr nullPVByte;

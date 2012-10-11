@@ -130,6 +130,30 @@ PVFieldPtr  PVStructure::getSubField(size_t fieldOffset) const
     throw std::logic_error("PVStructure.getSubField: Logic error");
 }
 
+void PVStructure::fixParentStructure()
+{
+    PVStructure *parent = getParent();
+    if(parent==NULL) return;
+    StructureConstPtr parentStructure = parent->structurePtr;
+    String fieldName = getFieldName();
+    size_t index = parentStructure->getFieldIndex(fieldName);
+    StringArray const &fieldNames = parentStructure->getFieldNames();
+    size_t num = fieldNames.size();
+    FieldConstPtrArray fields(num);
+    FieldConstPtrArray const & oldFields = parentStructure->getFields();
+    for(size_t i=0; i< num; i++) {
+        if(i==index) {
+            fields[i] = structurePtr;
+        } else {
+            fields[i] = oldFields[i];
+        }
+    }
+    FieldConstPtr field = getFieldCreate()->createStructure(
+        parentStructure->getID(),fieldNames,fields);
+    parent->replaceField(field);
+    parent->fixParentStructure();
+}
+
 void PVStructure::appendPVField(
     String const &fieldName,
     PVFieldPtr const & pvField)
@@ -146,6 +170,7 @@ void PVStructure::appendPVField(
     for(size_t i=0; i<newLength; i++) {
         pvFields[i]->setParentAndName(this,fieldNames[i]);
     }
+    fixParentStructure();
 }
 
 void PVStructure::appendPVFields(
@@ -172,6 +197,7 @@ void PVStructure::appendPVFields(
     for(size_t i=0; i<newLength; i++) {
         (*xxx)[i]->setParentAndName(this,names[i]);
     }
+    fixParentStructure();
 }
 
 void PVStructure::removePVField(String const &fieldName)
