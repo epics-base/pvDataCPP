@@ -1455,8 +1455,8 @@ static bool arrayEquals(PVScalarArray *a,PVScalarArray *b)
             BooleanArrayData bdata;
             aarray->get(0,length,adata);
             barray->get(0,length,bdata);
-            BooleanArray avalue = adata.data;
-            BooleanArray bvalue = bdata.data;
+            BooleanArray & avalue = adata.data;
+            BooleanArray & bvalue = bdata.data;
             for(size_t i=0; i<length; i++) {
                 if(avalue[i]!=bvalue[i]) return false;
             }
@@ -1469,8 +1469,8 @@ static bool arrayEquals(PVScalarArray *a,PVScalarArray *b)
             ByteArrayData bdata;
             aarray->get(0,length,adata);
             barray->get(0,length,bdata);
-            ByteArray avalue = adata.data;
-            ByteArray bvalue = bdata.data;
+            ByteArray & avalue = adata.data;
+            ByteArray & bvalue = bdata.data;
             for(size_t i=0; i<length; i++) {
                 if(avalue[i]!=bvalue[i]) return false;
             }
@@ -1483,8 +1483,8 @@ static bool arrayEquals(PVScalarArray *a,PVScalarArray *b)
             ShortArrayData bdata;
             aarray->get(0,length,adata);
             barray->get(0,length,bdata);
-            ShortArray avalue = adata.data;
-            ShortArray bvalue = bdata.data;
+            ShortArray & avalue = adata.data;
+            ShortArray & bvalue = bdata.data;
             for(size_t i=0; i<length; i++) {
                 if(avalue[i]!=bvalue[i]) return false;
             }
@@ -1497,8 +1497,8 @@ static bool arrayEquals(PVScalarArray *a,PVScalarArray *b)
             IntArrayData bdata;
             aarray->get(0,length,adata);
             barray->get(0,length,bdata);
-            IntArray avalue = adata.data;
-            IntArray bvalue = bdata.data;
+            IntArray & avalue = adata.data;
+            IntArray & bvalue = bdata.data;
             for(size_t i=0; i<length; i++) {
                 if(avalue[i]!=bvalue[i]) return false;
             }
@@ -1511,8 +1511,8 @@ static bool arrayEquals(PVScalarArray *a,PVScalarArray *b)
             LongArrayData bdata;
             aarray->get(0,length,adata);
             barray->get(0,length,bdata);
-            LongArray avalue = adata.data;
-            LongArray bvalue = bdata.data;
+            LongArray & avalue = adata.data;
+            LongArray & bvalue = bdata.data;
             for(size_t i=0; i<length; i++) {
                 if(avalue[i]!=bvalue[i]) return false;
             }
@@ -1525,8 +1525,8 @@ static bool arrayEquals(PVScalarArray *a,PVScalarArray *b)
             UByteArrayData bdata;
             aarray->get(0,length,adata);
             barray->get(0,length,bdata);
-            UByteArray avalue = adata.data;
-            UByteArray bvalue = bdata.data;
+            UByteArray & avalue = adata.data;
+            UByteArray & bvalue = bdata.data;
             for(size_t i=0; i<length; i++) {
                 if(avalue[i]!=bvalue[i]) return false;
             }
@@ -1539,8 +1539,8 @@ static bool arrayEquals(PVScalarArray *a,PVScalarArray *b)
             UShortArrayData bdata;
             aarray->get(0,length,adata);
             barray->get(0,length,bdata);
-            UShortArray avalue = adata.data;
-            UShortArray bvalue = bdata.data;
+            UShortArray & avalue = adata.data;
+            UShortArray & bvalue = bdata.data;
             for(size_t i=0; i<length; i++) {
                 if(avalue[i]!=bvalue[i]) return false;
             }
@@ -1553,8 +1553,8 @@ static bool arrayEquals(PVScalarArray *a,PVScalarArray *b)
             UIntArrayData bdata;
             aarray->get(0,length,adata);
             barray->get(0,length,bdata);
-            UIntArray avalue = adata.data;
-            UIntArray bvalue = bdata.data;
+            UIntArray & avalue = adata.data;
+            UIntArray & bvalue = bdata.data;
             for(size_t i=0; i<length; i++) {
                 if(avalue[i]!=bvalue[i]) return false;
             }
@@ -1567,8 +1567,8 @@ static bool arrayEquals(PVScalarArray *a,PVScalarArray *b)
             ULongArrayData bdata;
             aarray->get(0,length,adata);
             barray->get(0,length,bdata);
-            ULongArray avalue = adata.data;
-            ULongArray bvalue = bdata.data;
+            ULongArray & avalue = adata.data;
+            ULongArray & bvalue = bdata.data;
             for(size_t i=0; i<length; i++) {
                 if(avalue[i]!=bvalue[i]) return false;
             }
@@ -1581,8 +1581,8 @@ static bool arrayEquals(PVScalarArray *a,PVScalarArray *b)
             FloatArrayData bdata;
             aarray->get(0,length,adata);
             barray->get(0,length,bdata);
-            FloatArray avalue = adata.data;
-            FloatArray bvalue = bdata.data;
+            FloatArray & avalue = adata.data;
+            FloatArray & bvalue = bdata.data;
             for(size_t i=0; i<length; i++) {
                 if(avalue[i]!=bvalue[i]) return false;
             }
@@ -1595,8 +1595,8 @@ static bool arrayEquals(PVScalarArray *a,PVScalarArray *b)
             DoubleArrayData bdata;
             aarray->get(0,length,adata);
             barray->get(0,length,bdata);
-            DoubleArray avalue = adata.data;
-            DoubleArray bvalue = bdata.data;
+            DoubleArray & avalue = adata.data;
+            DoubleArray & bvalue = bdata.data;
             for(size_t i=0; i<length; i++) {
                 if(avalue[i]!=bvalue[i]) return false;
             }
@@ -1609,8 +1609,8 @@ static bool arrayEquals(PVScalarArray *a,PVScalarArray *b)
             StringArrayData bdata;
             aarray->get(0,length,adata);
             barray->get(0,length,bdata);
-            StringArray avalue = adata.data;
-            StringArray bvalue = bdata.data;
+            StringArray & avalue = adata.data;
+            StringArray & bvalue = bdata.data;
             for(size_t i=0; i<length; i++) {
                 if(avalue[i]!=bvalue[i]) return false;
             }
@@ -1630,8 +1630,8 @@ static bool structureArrayEquals(PVStructureArray *a,PVStructureArray *b)
     StructureArrayData aData = StructureArrayData();
     StructureArrayData bData = StructureArrayData();
     size_t length = a->getLength();
-    PVStructurePtrArray aArray = aData.data;
-    PVStructurePtrArray bArray = bData.data;
+    PVStructurePtrArray & aArray = aData.data;
+    PVStructurePtrArray & bArray = bData.data;
     if(aArray==bArray) return true;
     for(size_t i=0; i<length; i++) {
         if(aArray[i]==0) {
@@ -1872,7 +1872,7 @@ size_t convertToScalarArray(PVScalarArray *pv,
             size_t num = 0;
             num = pvdata->get(offset,len,data);
             if (num <= 0) break;
-            ByteArray dataArray = data.data;
+            ByteArray & dataArray = data.data;
             size_t dataOffset = data.offset;
             for(size_t i=0;i<num;i++) to[toOffset+i] = dataArray[dataOffset+1];
             len -= num;
@@ -1888,7 +1888,7 @@ size_t convertToScalarArray(PVScalarArray *pv,
         while (len > 0) {
             size_t num = pvdata->get(offset, len, data);
             if (num == 0) break;
-            ShortArray dataArray = data.data;
+            ShortArray & dataArray = data.data;
             size_t dataOffset = data.offset;
             for (size_t i = 0; i < num; i++)
                 to[i + toOffset] =  dataArray[i + dataOffset];
@@ -1905,7 +1905,7 @@ size_t convertToScalarArray(PVScalarArray *pv,
         while (len > 0) {
             size_t num = pvdata->get(offset, len, data);
             if (num == 0) break;
-            IntArray dataArray = data.data;
+            IntArray & dataArray = data.data;
             size_t dataOffset = data.offset;
             for (size_t i = 0; i < num; i++)
                 to[i + toOffset] =  dataArray[i + dataOffset];
@@ -1923,7 +1923,7 @@ size_t convertToScalarArray(PVScalarArray *pv,
             size_t num = pvdata->get(offset, len, data);
             if (num == 0)
                 break;
-            LongArray dataArray = data.data;
+            LongArray & dataArray = data.data;
             size_t dataOffset = data.offset;
             for (size_t i = 0; i < num; i++)
                 to[i + toOffset] = dataArray[i + dataOffset];
@@ -1941,7 +1941,7 @@ size_t convertToScalarArray(PVScalarArray *pv,
             size_t num = 0;
             num = pvdata->get(offset,len,data);
             if (num <= 0) break;
-            UByteArray dataArray = data.data;
+            UByteArray & dataArray = data.data;
             size_t dataOffset = data.offset;
             for(size_t i=0;i<num;i++) to[toOffset+i] = dataArray[dataOffset+1];
             len -= num;
@@ -1957,7 +1957,7 @@ size_t convertToScalarArray(PVScalarArray *pv,
         while (len > 0) {
             size_t num = pvdata->get(offset, len, data);
             if (num == 0) break;
-            UShortArray dataArray = data.data;
+            UShortArray & dataArray = data.data;
             size_t dataOffset = data.offset;
             for (size_t i = 0; i < num; i++)
                 to[i + toOffset] =  dataArray[i + dataOffset];
@@ -1974,7 +1974,7 @@ size_t convertToScalarArray(PVScalarArray *pv,
         while (len > 0) {
             size_t num = pvdata->get(offset, len, data);
             if (num == 0) break;
-            UIntArray dataArray = data.data;
+            UIntArray & dataArray = data.data;
             size_t dataOffset = data.offset;
             for (size_t i = 0; i < num; i++)
                 to[i + toOffset] =  dataArray[i + dataOffset];
@@ -1992,7 +1992,7 @@ size_t convertToScalarArray(PVScalarArray *pv,
             size_t num = pvdata->get(offset, len, data);
             if (num == 0)
                 break;
-            ULongArray dataArray = data.data;
+            ULongArray & dataArray = data.data;
             size_t dataOffset = data.offset;
             for (size_t i = 0; i < num; i++)
                 to[i + toOffset] = dataArray[i + dataOffset];
@@ -2009,7 +2009,7 @@ size_t convertToScalarArray(PVScalarArray *pv,
         while (len > 0) {
             size_t num = pvdata->get(offset, len, data);
             if (num == 0) break;
-            FloatArray dataArray = data.data;
+            FloatArray & dataArray = data.data;
             size_t dataOffset = data.offset;
             for (size_t i = 0; i < num; i++)
                 to[i + toOffset] = static_cast<T>(dataArray[i + dataOffset]);
@@ -2027,7 +2027,7 @@ size_t convertToScalarArray(PVScalarArray *pv,
             size_t num = pvdata->get(offset, len, data);
             if (num == 0)
                 break;
-            DoubleArray dataArray = data.data;
+            DoubleArray & dataArray = data.data;
             size_t dataOffset = data.offset;
             for (size_t i = 0; i < num; i++)
                 to[i + toOffset] = static_cast<T>(dataArray[i + dataOffset]);
@@ -2390,7 +2390,7 @@ size_t convertToStringArray(PVScalarArray *pv,
         BooleanArrayData data;
         for (size_t i = 0; i < num; i++) {
             if (pvdata->get(offset + i, 1, data) == 1) {
-                BooleanArray dataArray = data.data;
+                BooleanArray & dataArray = data.data;
                 bool value = dataArray[data.offset];
                 to[toOffset + i] = value ? "true" : "false";
             } else {
@@ -2405,7 +2405,7 @@ size_t convertToStringArray(PVScalarArray *pv,
         char cr[30];
         for (size_t i = 0; i < num; i++) {
             if (pvdata->get(offset + i, 1, data) == 1) {
-                ByteArray dataArray = data.data;
+                ByteArray & dataArray = data.data;
                 int ival = dataArray[data.offset];
                 sprintf(cr,"%d",ival);
                 to[toOffset + i] = String(cr);
@@ -2421,7 +2421,7 @@ size_t convertToStringArray(PVScalarArray *pv,
         char cr[30];
         for (size_t i = 0; i < num; i++) {
             if (pvdata->get(offset + i, 1, data) == 1) {
-                ShortArray dataArray = data.data;
+                ShortArray & dataArray = data.data;
                 int ival = dataArray[data.offset];
                 sprintf(cr,"%d",ival);
                 to[toOffset + i] = String(cr);
@@ -2437,7 +2437,7 @@ size_t convertToStringArray(PVScalarArray *pv,
         char cr[30];
         for (size_t i = 0; i < num; i++) {
             if (pvdata->get(offset + i, 1, data) == 1) {
-                IntArray dataArray = data.data;
+                IntArray & dataArray = data.data;
                 int ival = dataArray[data.offset];
                 sprintf(cr,"%d",ival);
                 to[toOffset + i] = String(cr);
@@ -2453,7 +2453,7 @@ size_t convertToStringArray(PVScalarArray *pv,
         char cr[30];
         for (size_t i = 0; i < num; i++) {
             if (pvdata->get(offset + i, 1, data) == 1) {
-                LongArray dataArray = data.data;
+                LongArray & dataArray = data.data;
                 int64 ival = dataArray[data.offset];
                 sprintf(cr,"%lld",(long long)ival);
                 to[toOffset + i] = String(cr);
@@ -2469,7 +2469,7 @@ size_t convertToStringArray(PVScalarArray *pv,
         char cr[30];
         for (size_t i = 0; i < num; i++) {
             if (pvdata->get(offset + i, 1, data) == 1) {
-                UByteArray dataArray = data.data;
+                UByteArray & dataArray = data.data;
                 unsigned int ival = dataArray[data.offset];
                 sprintf(cr,"%u",ival);
                 to[toOffset + i] = String(cr);
@@ -2485,7 +2485,7 @@ size_t convertToStringArray(PVScalarArray *pv,
         char cr[30];
         for (size_t i = 0; i < num; i++) {
             if (pvdata->get(offset + i, 1, data) == 1) {
-                UShortArray dataArray = data.data;
+                UShortArray & dataArray = data.data;
                 unsigned int ival = dataArray[data.offset];
                 sprintf(cr,"%u",ival);
                 to[toOffset + i] = String(cr);
@@ -2501,7 +2501,7 @@ size_t convertToStringArray(PVScalarArray *pv,
         char cr[30];
         for (size_t i = 0; i < num; i++) {
             if (pvdata->get(offset + i, 1, data) == 1) {
-                UIntArray dataArray = data.data;
+                UIntArray & dataArray = data.data;
                 unsigned int ival = dataArray[data.offset];
                 sprintf(cr,"%u",ival);
                 to[toOffset + i] = String(cr);
@@ -2517,7 +2517,7 @@ size_t convertToStringArray(PVScalarArray *pv,
         char cr[30];
         for (size_t i = 0; i < num; i++) {
             if (pvdata->get(offset + i, 1, data) == 1) {
-                ULongArray dataArray = data.data;
+                ULongArray & dataArray = data.data;
                 uint64 ival = dataArray[data.offset];
                 sprintf(cr,"%llu",(unsigned long long)ival);
                 to[toOffset + i] = String(cr);
@@ -2533,7 +2533,7 @@ size_t convertToStringArray(PVScalarArray *pv,
         char cr[30];
         for (size_t i = 0; i < num; i++) {
             if (pvdata->get(offset + i, 1, data) == 1) {
-                FloatArray dataArray = data.data;
+                FloatArray & dataArray = data.data;
                 float fval = dataArray[data.offset];
                 sprintf(cr,"%g",fval);
                 to[toOffset + i] = String(cr);
@@ -2549,7 +2549,7 @@ size_t convertToStringArray(PVScalarArray *pv,
         char cr[30];
         for (size_t i = 0; i < num; i++) {
             if (pvdata->get(offset + i, 1, data) == 1) {
-                DoubleArray dataArray = data.data;
+                DoubleArray & dataArray = data.data;
                 double fval = dataArray[data.offset];
                 sprintf(cr,"%g",fval);
                 to[toOffset + i] = String(cr);
@@ -2736,7 +2736,7 @@ void convertArray(StringBuilder buffer,PVScalarArray const * xxx,int indentLevel
                 if(i!=0) *buffer += ",";
                 size_t num = pvdata->get(i,1,data);
                 if(num==1) {
-                     BooleanArray  value = data.data;
+                     BooleanArray  & value = data.data;
                      if(value[data.offset]) {
                          *buffer += "true";
                      } else {
@@ -2946,7 +2946,7 @@ void convertArray(StringBuilder buffer,PVScalarArray const * xxx,int indentLevel
     	for(size_t i=0; i < pvdata->getLength(); i++) {
     		if(i!=0) *buffer += ",";
     		size_t num = pvdata->get(i,1,data);
-    		StringArray value = data.data;
+    		StringArray & value = data.data;
                 if(num==1) {
                     if(value[data.offset].length()>0) {
                          *buffer += value[data.offset].c_str();
@@ -2981,7 +2981,7 @@ void convertStructureArray(StringBuilder buffer,
     pvdata->get(0, length, data);
     for (size_t i = 0; i < length; i++) {
         newLineImpl(buffer, indentLevel + 1);
-        PVStructurePtr pvStructure = data.data[i];
+        PVStructurePtr & pvStructure = data.data[i];
         if (pvStructure.get() == 0) {
             *buffer += "null";
         } else {
