@@ -106,8 +106,8 @@ static void testAlarm(FILE * fd,FILE *auxfd)
     assert(al.getSeverity()==alarm.getSeverity());
     assert(al.getStatus()==alarm.getStatus());
     String message = alarm.getMessage();
-    String severity = AlarmSeverityFunc::getSeverityNames()[alarm.getSeverity()];
-    String status = AlarmStatusFunc::getStatusNames()[alarm.getStatus()];
+    String severity = (*AlarmSeverityFunc::getSeverityNames())[alarm.getSeverity()];
+    String status = (*AlarmStatusFunc::getStatusNames())[alarm.getStatus()];
     if(debug) {
         fprintf(fd," message %s severity %s status %s\n",
             message.c_str(),severity.c_str(),status.c_str());
@@ -229,11 +229,11 @@ static void testEnumerated(FILE * fd,FILE *auxfd)
     assert(result);
     int32 index = pvEnumerated.getIndex();
     String choice = pvEnumerated.getChoice();
-    StringArray choices = pvEnumerated.getChoices();
+    StringArrayPtr const & choices = pvEnumerated.getChoices();
     int32 numChoices = pvEnumerated.getNumberChoices();
     if(debug) {
         fprintf(fd,"index %d choice %s choices",index,choice.c_str());
-        for(int i=0; i<numChoices; i++ ) fprintf(fd," %s",choices[i].c_str());
+        for(int i=0; i<numChoices; i++ ) fprintf(fd," %s",(*choices)[i].c_str());
         fprintf(fd,"\n");
     }
     pvEnumerated.setIndex(2);

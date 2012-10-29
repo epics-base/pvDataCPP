@@ -30,7 +30,7 @@ public:
     int32 getIndex();
     String getChoice();
     bool choicesMutable();
-    StringArray getChoices();
+    StringArrayPtr const & getChoices();
     int32 getNumberChoices();
     bool setChoices(StringArray & choices);
 private:

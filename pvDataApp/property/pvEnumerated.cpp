@@ -91,14 +91,13 @@ bool PVEnumerated::choicesMutable()
     return pvChoices->isImmutable();
 }
 
-StringArray  PVEnumerated:: getChoices()
+StringArrayPtr const & PVEnumerated:: getChoices()
 {
     if(pvIndex.get()==NULL ) {
          throw std::logic_error(notAttached);
     }
     StringArrayData data;
-    pvChoices->get(0,pvChoices->getLength(),data);
-    return data.data;
+    return pvChoices->getSharedVector();
 }
 
 int32 PVEnumerated::getNumberChoices()

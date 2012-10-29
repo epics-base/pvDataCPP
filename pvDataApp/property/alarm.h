@@ -27,14 +27,14 @@ extern const size_t severityCount;
 class AlarmSeverityFunc {
 public:
     static AlarmSeverity getSeverity(int value);
-    static StringArray getSeverityNames();
+    static StringArrayPtr getSeverityNames();
 };
 
 extern const size_t statusCount;
 class AlarmStatusFunc {
 public:
     static AlarmStatus getStatus(int value);
-    static StringArray getStatusNames();
+    static StringArrayPtr getStatusNames();
 };
 
 class Alarm {

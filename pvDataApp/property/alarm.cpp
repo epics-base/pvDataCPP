@@ -32,19 +32,20 @@ AlarmSeverity AlarmSeverityFunc::getSeverity(int value)
     throw std::logic_error(String("should never get here"));
 }
 
-StringArray AlarmSeverityFunc::getSeverityNames()
+StringArrayPtr AlarmSeverityFunc::getSeverityNames()
 {
     static  size_t severityCount = 5;
-    static StringArray severityNames;
+    static StringArrayPtr severityNames;
     static Mutex mutex;
     Lock xx(mutex);
-    if(severityNames.size()==0) {
-        severityNames.reserve(severityCount);
-        severityNames.push_back("NONE");
-        severityNames.push_back("MINOR");
-        severityNames.push_back("MAJOR");
-        severityNames.push_back("INVALID");
-        severityNames.push_back("UNDEFINED");
+    if(severityNames.get()==NULL) {
+        severityNames = StringArrayPtr(new StringArray());
+        severityNames->reserve(severityCount);
+        severityNames->push_back("NONE");
+        severityNames->push_back("MINOR");
+        severityNames->push_back("MAJOR");
+        severityNames->push_back("INVALID");
+        severityNames->push_back("UNDEFINED");
     }
     return severityNames;
 }
@@ -79,22 +80,23 @@ AlarmStatus AlarmStatusFunc::getStatus(int value)
     throw std::logic_error(String("should never get here"));
 }
 
-StringArray AlarmStatusFunc::getStatusNames()
+StringArrayPtr AlarmStatusFunc::getStatusNames()
 {
     static  size_t statusCount = 8;
-    static StringArray statusNames;
+    static StringArrayPtr statusNames;
     static Mutex mutex;
     Lock xx(mutex);
-    if(statusNames.size()==0) {
-        statusNames.reserve(statusCount);
-        statusNames.push_back("NONE");
-        statusNames.push_back("DEVICE");
-        statusNames.push_back("DRIVER");
-        statusNames.push_back("RECORD");
-        statusNames.push_back("DB");
-        statusNames.push_back("CONF");
-        statusNames.push_back("UNDEFINED");
-        statusNames.push_back("CLIENT");
+    if(statusNames.get()==NULL) {
+        statusNames = StringArrayPtr(new StringArray());
+        statusNames->reserve(statusCount);
+        statusNames->push_back("NONE");
+        statusNames->push_back("DEVICE");
+        statusNames->push_back("DRIVER");
+        statusNames->push_back("RECORD");
+        statusNames->push_back("DB");
+        statusNames->push_back("CONF");
+        statusNames->push_back("UNDEFINED");
+        statusNames->push_back("CLIENT");
     }
     return statusNames;
 }
