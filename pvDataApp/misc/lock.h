@@ -44,6 +44,15 @@ public:
             locked=false;
         }
     }
+    bool tryLock()
+    {
+         if(locked) return true;
+         if(mutexPtr.tryLock()) {
+             locked = true;
+             return true;
+         }
+         return false;
+    }
     bool ownsLock() const{return locked;}
 private:
     Mutex &mutexPtr;

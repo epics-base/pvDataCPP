@@ -37,7 +37,7 @@
 <h1>EPICS pvDataCPP</h1>
 <!-- Maturity: Working Draft or Request for Comments, or Recommendation, and date.  -->
 
-<h2 class="nocount">EPICS v4 Working Group, Working Draft, 01-Oct-2012</h2>
+<h2 class="nocount">EPICS v4 Working Group, Working Draft, 12-Dec-2012</h2>
 
   <dl>
     <dt>Latest version:</dt>
@@ -46,11 +46,11 @@
     </dd>
     <dt>This version:</dt>
     <dd><a
-      href="http://epics-pvdata.hg.sourceforge.net/hgweb/epics-pvdata/pvDataCPP/raw-file/tip/documentation/pvDataCPP_20121026html">pvDataCPP_20121026html</a>
+      href="http://epics-pvdata.hg.sourceforge.net/hgweb/epics-pvdata/pvDataCPP/raw-file/tip/documentation/pvDataCPP_20121212html">pvDataCPP_20121212html</a>
     </dd>
     <dt>Previous version:</dt>
     <dd><a
-      href="http://epics-pvdata.hg.sourceforge.net/hgweb/epics-pvdata/pvDataCPP/raw-file/tip/documentation/pvDataCPP_20121001.html">pvDataCPP_20121001.html</a>
+      href="http://epics-pvdata.hg.sourceforge.net/hgweb/epics-pvdata/pvDataCPP/raw-file/tip/documentation/pvDataCPP_20121026html">pvDataCPP_20121026html</a>
     </dd>
     <dt>Editors:</dt>
     <dd>Marty Kraimer, BNL</dd>
@@ -97,7 +97,7 @@ Control System (EPICS).</a></p>
 
 <h2 class="nocount">Status of this Document</h2>
 
-<p>This is the 01-Oct-2012 version of the C++ implementation of pvData.</p>
+<p>This is the 12-Dec-2012 version of the C++ implementation of pvData.</p>
 
 <p> The text describes software which is a complete implementation of pvData as
 currently planned by the EPICS V4 Working Group. </p> </p>
@@ -865,8 +865,7 @@ typedef std::tr1::shared_ptr&lt;PostHandler&gt; PostHandlerPtr</pre>
 <p>PostHandler is a class that must be implemented by any code that calls
 setPostHandler. It's single virtual method. postPut is called whenever
 PVField::postPut is called.</p>
-<pre>class PostHandler :
-  public std::tr1::enable_shared_from_this&lt;PostHandler&gt;
+<pre>class PostHandler 
 {
 public:
     POINTER_DEFINITIONS(PostHandler);
@@ -3037,6 +3036,7 @@ public:
     ~Lock();
     void lock();
     void unlock();
+    bool tryLock();
     bool ownsLock() ;
  ...
 };</pre>

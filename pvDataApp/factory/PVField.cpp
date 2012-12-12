@@ -158,7 +158,7 @@ void PVField::renameField(String const & newName)
 
 void PVField::postPut() 
 {
-   if(postHandler!=NULL) postHandler->postPut();
+   if(postHandler.get()!=NULL) postHandler->postPut();
 }
 
 void PVField::setPostHandler(PostHandlerPtr const &handler)

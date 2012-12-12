@@ -75,6 +75,8 @@ typedef std::vector<PVStructurePtr>::const_iterator PVStructurePtrArray_const__i
  * typedef for a pointer to a PVStructureArray.
  */
 typedef std::tr1::shared_ptr<PVStructureArray> PVStructureArrayPtr;
+typedef std::vector<PVStructureArrayPtr> PVStructureArrayPtrArray;
+typedef std::tr1::shared_ptr<PVStructureArrayPtrArray> PVStructureArrayPtrArrayPtr;
 
 /**
  * This class provides auxillary information about a PVField.
@@ -140,8 +142,7 @@ private:
 /**
  * This class is implemented by code that calls setPostHander
  */
-class PostHandler :
-  public std::tr1::enable_shared_from_this<PostHandler>
+class PostHandler 
 {
 public:
     POINTER_DEFINITIONS(PostHandler);

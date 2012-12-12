@@ -62,7 +62,11 @@ template<typename T>
 T BasePVScalar<T>::get() const  { return value;}
 
 template<typename T>
-void BasePVScalar<T>::put(T val){value = val;}
+void BasePVScalar<T>::put(T val)
+{
+    value = val;
+    PVField::postPut();
+}
 
 template<typename T>
 void BasePVScalar<T>::serialize(ByteBuffer *pbuffer,
@@ -120,7 +124,11 @@ BasePVString::~BasePVString() {}
 
 String BasePVString::get() const  { return value;}
 
-void BasePVString::put(String val){value = val;}
+void BasePVString::put(String val)
+{
+    value = val;
+    postPut();
+}
 
 void BasePVString::serialize(ByteBuffer *pbuffer,
     SerializableControl *pflusher) const
