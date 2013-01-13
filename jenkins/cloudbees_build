@@ -31,7 +31,8 @@ EPICS_BASE=${EPICS_BASE}
 EOF
 
 make distclean all
-doxygen
+# There's no doxygen on CB... (yet)
+#doxygen
 
 ###########################################
 # Test
