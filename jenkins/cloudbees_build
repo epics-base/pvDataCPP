@@ -50,3 +50,8 @@ done
 # Create distribution
 
 tar czf pvData.CB-dist.tar.gz lib include COPYRIGHT LICENSE
+
+###########################################
+# Publish documentation
+
+rsync -aP --delete -e ssh documentation epics-jenkins@web.sourceforge.net:/home/project-web/epics-pvdata/htdocs/docbuild/pvDataCPP/tip
