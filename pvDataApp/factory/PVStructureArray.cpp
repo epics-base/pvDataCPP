@@ -250,4 +250,27 @@ void PVStructureArray::serialize(ByteBuffer *pbuffer,
     }
 }
 
+std::ostream& PVStructureArray::dumpValue(std::ostream& o) const
+{
+    o << format::indent() << getStructureArray()->getID() << ' ' << getFieldName() << std::endl;
+    size_t length = getLength();
+    if (length > 0)
+    {
+    	format::indent_scope s(o);
+
+        for (size_t i = 0; i < length; i++)
+        	dumpValue(o, i);
+    }
+
+    return o;
+}
+
+std::ostream& PVStructureArray::dumpValue(std::ostream& o, std::size_t index) const
+{
+    PVStructurePtrArray pvArray = *value.get();
+	PVStructurePtr pvStructure = pvArray[index];
+    return o << *(pvStructure.get());
+    return o;
+}
+
 }}
