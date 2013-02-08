@@ -423,6 +423,20 @@ public:
     	return o << get();
     }
 
+    // get operator
+    // double value; doubleField >>= value;
+    void operator>>=(T& value) const
+	{
+    	value = get();
+	}
+
+    // put operator
+    // double value = 12.8; doubleField <<= value;
+    void operator<<=(T value)
+	{
+    	put(value);
+	}
+
 protected:
     PVScalarValue(ScalarConstPtr const & scalar)
     : PVScalar(scalar) {}
