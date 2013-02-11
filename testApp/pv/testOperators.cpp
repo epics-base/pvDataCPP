@@ -63,8 +63,14 @@ int main(int, char*)
 
 
 
-    pvStructure = standardPVField->scalarArray(pvBoolean,"alarm,timeStamp");
+    pvStructure = standardPVField->scalarArray(pvDouble,"alarm,timeStamp");
     std::cout << *pvStructure << std::endl;
+    
+    double values[] = { 1.1, 2.2, 3.3 };
+    PVDoubleArrayPtr darray = std::tr1::dynamic_pointer_cast<PVDoubleArray>(pvStructure->getScalarArrayField("value", pvDouble));
+    darray->put(0, 3, values, 0);
+    std::cout << *darray << std::endl;
+    std::cout << format::array_at(1) << *darray << std::endl;
 
 
     StructureConstPtr structure = standardField->scalar(pvDouble, "alarm,timeStamp");
