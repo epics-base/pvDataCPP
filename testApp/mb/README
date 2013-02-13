@@ -1,0 +1,49 @@
+channelGet
+0 - client channelGet->get()
+1 - client channelGet->serialize (start)
+2 - client channelGet->serialize (end)
+3 - server channelGet->deserialize request (start)
+4 - server channelGet->deserialize request (end)
+5 - server channelGet->getDone()
+6 - server channelGet->serialize response (start)
+7 - server channelGet->serialize response (end)
+8 - client channelGet->deserialize (start)
+9 - client channelGet->deserialize (end), just before channelGet->getDone() is called
+
+
+
+MB_DECLARE_EXPORT(channelGet);
+
+# 10000 - max size
+MB_DECLARE(channelGet, 10000);
+
+# in main() to install atexit() hook
+MB_INIT;
+
+MB_INC_AUTO_ID(channelGet);
+MB_POINT(channelGet, 0);
+MB_POINT(channelGet, 1);
+MB_POINT(channelGet, 2);
+
+MB_INC_AUTO_ID(channelGet);
+MB_POINT(channelGet, 3);
+MB_POINT(channelGet, 4);
+MB_POINT(channelGet, 5);
+MB_POINT(channelGet, 6);
+MB_POINT(channelGet, 7);
+
+MB_POINT(channelGet, 8);
+MB_POINT(channelGet, 9);
+
+
+----
+
+
+cat mb* | sort < mb.csv
+mb_stat mb.csv 
+
+
+mb_stat mb.csv -n | grep ,2, | cut -d , -f 3 | gnuplot -p -e "plot '-'"
+
+
+---
