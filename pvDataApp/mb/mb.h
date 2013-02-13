@@ -9,7 +9,7 @@
 
 #include <epicsVersion.h>
 
-#if EPICS_VERSION_INT >= VERSION_INT(3,15,0,0)
+#if 0 //(EPICS_VERSION_INT >= VERSION_INT(3,15,0,0))
 //#include <epicsAtomic.h>
 // epicsAtomic only support int and size_t type
 // TODO fully fenced (not optimal)
