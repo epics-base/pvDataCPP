@@ -30,7 +30,7 @@
 
 using namespace epics::pvData;
 
-static void testBasic(FILE * fd,FILE *auxfd ) {
+static void testBasic(FILE * fd,FILE */*auxfd*/) {
     int queueSize = 3;
     StringArray messages;
     messages.reserve(5);

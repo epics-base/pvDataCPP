@@ -77,7 +77,7 @@ static void testCreatePVStructure(FILE * fd)
     fprintf(fd,"testCreatePVStructure PASSED\n");
 }
 
-static void testPVScalarCommon(FILE * fd,String fieldName,ScalarType stype)
+static void testPVScalarCommon(FILE * fd,String /*fieldName*/,ScalarType stype)
 {
     PVScalarPtr pvScalar = pvDataCreate->createPVScalar(stype);
     if(stype==pvBoolean) {
@@ -91,7 +91,7 @@ static void testPVScalarCommon(FILE * fd,String fieldName,ScalarType stype)
 }
 
 static void testPVScalarWithProperties(
-    FILE * fd,String fieldName,ScalarType stype)
+    FILE * fd,String /*fieldName*/,ScalarType stype)
 {
     PVStructurePtr pvStructure;
     bool hasValueAlarm = false;
@@ -335,7 +335,7 @@ static void testPVScalar(FILE * fd) {
 }
 
 
-static void testScalarArrayCommon(FILE * fd,String fieldName,ScalarType stype)
+static void testScalarArrayCommon(FILE * fd,String /*fieldName*/,ScalarType stype)
 {
     PVStructurePtr pvStructure = standardPVField->scalarArray(
         stype,alarmTimeStamp);

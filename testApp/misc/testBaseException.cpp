@@ -27,11 +27,11 @@ struct Unroller
 };
 
 template<>
-void Unroller::unroll<0>(double d) {
+void Unroller::unroll<0>(double /*d*/) {
     THROW_BASE_EXCEPTION("the root cause");
 }
 
-void internalTestBaseException(int unused = 0)
+void internalTestBaseException(int /*unused*/ = 0)
 {
     try {
         // NOTE: 5, 4, 3, 2, 1 calls will be optimized and not shown

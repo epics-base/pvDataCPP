@@ -35,7 +35,7 @@ static void print(String name)
     if(debug) printf("\n%s\n%s\n",name.c_str(),builder.c_str());
 }
 
-int main(int argc,char *argv[])
+int main(int, char **)
 {
     StructureConstPtr doubleValue = standardField->scalar(pvDouble,
         "alarm,timeStamp,display,control,valueAlarm");

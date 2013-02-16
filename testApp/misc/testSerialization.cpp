@@ -24,22 +24,24 @@
 
 #include <pv/standardField.h>
 
-#define BYTE_MAX_VALUE 127
-#define BYTE_MIN_VALUE -128
-#define UBYTE_MAX_VALUE 255
-#define SHORT_MAX_VALUE 32767
-#define SHORT_MIN_VALUE -32768
-#define USHORT_MAX_VALUE 65535
-#define INT_MAX_VALUE 2147483647
-#define INT_MIN_VALUE (-INT_MAX_VALUE - 1)
-#define UINT_MAX_VALUE 4294967295ULL
-#define LONG_MAX_VALUE 9223372036854775807LL
-#define LONG_MIN_VALUE (-LONG_MAX_VALUE - 1LL)
-#define ULONG_MAX_VALUE 18446744073709549999ULL
-#define FLOAT_MAX_VALUE 3.4028235E38
-#define FLOAT_MIN_VALUE 1.4E-45
-#define DOUBLE_MAX_VALUE 1.7976931348623157E308
-#define DOUBLE_MIN_VALUE 4.9E-324
+#include <limits>
+
+#define BYTE_MAX_VALUE std::numeric_limits<int8>::max()
+#define BYTE_MIN_VALUE std::numeric_limits<int8>::min()
+#define UBYTE_MAX_VALUE std::numeric_limits<uint8>::max()
+#define SHORT_MAX_VALUE std::numeric_limits<int16>::max()
+#define SHORT_MIN_VALUE std::numeric_limits<int16>::min()
+#define USHORT_MAX_VALUE std::numeric_limits<uint16>::max()
+#define INT_MAX_VALUE std::numeric_limits<int32>::max()
+#define INT_MIN_VALUE std::numeric_limits<int32>::min()
+#define UINT_MAX_VALUE std::numeric_limits<uint32>::max()
+#define LONG_MAX_VALUE std::numeric_limits<int64>::max()
+#define LONG_MIN_VALUE std::numeric_limits<int64>::min()
+#define ULONG_MAX_VALUE std::numeric_limits<uint64>::max()
+#define FLOAT_MAX_VALUE std::numeric_limits<float>::max()
+#define FLOAT_MIN_VALUE std::numeric_limits<float>::min()
+#define DOUBLE_MAX_VALUE std::numeric_limits<double>::max()
+#define DOUBLE_MIN_VALUE std::numeric_limits<double>::min()
 
 using namespace epics::pvData;
 
@@ -54,7 +56,7 @@ public:
     virtual void flushSerializeBuffer() {
     }
 
-    virtual void ensureBuffer(std::size_t size) {
+    virtual void ensureBuffer(std::size_t /*size*/) {
     }
 
     virtual void alignBuffer(std::size_t alignment) {
@@ -76,7 +78,7 @@ public:
 class DeserializableControlImpl : public DeserializableControl,
         public NoDefaultMethods {
 public:
-    virtual void ensureData(size_t size) {
+    virtual void ensureData(size_t /*size*/) {
     }
 
     virtual void alignData(size_t alignment) {

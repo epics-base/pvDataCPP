@@ -50,7 +50,7 @@ public:
         printf("poll called\n");
         return emptyElement;
     }
-    virtual void release(MonitorElementPtr const & monitorElement)
+    virtual void release(MonitorElementPtr const & /*monitorElement*/)
     {
         printf("release called\n");
     }
@@ -70,7 +70,7 @@ static void testMonitor()
 }
 
 
-int main(int argc,char *argv[])
+int main(int, char **)
 {
     testMonitor();
     return(0);

@@ -39,7 +39,7 @@ Field::~Field() {
 }
 
 
-void Field::toString(StringBuilder buffer,int indentLevel) const{
+void Field::toString(StringBuilder /*buffer*/,int /*indentLevel*/) const{
 }
 
 
@@ -54,7 +54,7 @@ struct ScalarArrayHashFunction {
 };
 
 struct StructureHashFunction {
-    size_t operator() (const Structure& structure) const { return 0; }
+    size_t operator() (const Structure& /*structure*/) const { return 0; }
     // TODO
 //        final int PRIME = 31;
 //        return PRIME * Arrays.hashCode(fieldNames) + Arrays.hashCode(fields);
@@ -70,7 +70,7 @@ Scalar::Scalar(ScalarType scalarType)
 
 Scalar::~Scalar(){}
 
-void Scalar::toString(StringBuilder buffer,int indentLevel) const{
+void Scalar::toString(StringBuilder buffer,int /*indentLevel*/) const{
     *buffer += getID();
 }
 
@@ -119,7 +119,7 @@ void Scalar::serialize(ByteBuffer *buffer, SerializableControl *control) const {
     buffer->putByte(getTypeCodeLUT());
 }
 
-void Scalar::deserialize(ByteBuffer *buffer, DeserializableControl *control) {
+void Scalar::deserialize(ByteBuffer */*buffer*/, DeserializableControl */*control*/) {
     // must be done via FieldCreate
     throw std::runtime_error("not valid operation, use FieldCreate::deserialize instead");
 }
@@ -213,7 +213,7 @@ String ScalarArray::getID() const
     return getIDScalarArrayLUT();
 }
 
-void ScalarArray::toString(StringBuilder buffer,int indentLevel) const{
+void ScalarArray::toString(StringBuilder buffer,int /*indentLevel*/) const{
     *buffer += getID();
 }
 
@@ -222,7 +222,7 @@ void ScalarArray::serialize(ByteBuffer *buffer, SerializableControl *control) co
     buffer->putByte(0x10 | getTypeCodeLUT());
 }
 
-void ScalarArray::deserialize(ByteBuffer *buffer, DeserializableControl *control) {
+void ScalarArray::deserialize(ByteBuffer */*buffer*/, DeserializableControl */*control*/) {
     throw std::runtime_error("not valid operation, use FieldCreate::deserialize instead");
 }
 
@@ -252,7 +252,7 @@ void StructureArray::serialize(ByteBuffer *buffer, SerializableControl *control)
     control->cachedSerialize(pstructure, buffer);
 }
 
-void StructureArray::deserialize(ByteBuffer *buffer, DeserializableControl *control) {
+void StructureArray::deserialize(ByteBuffer */*buffer*/, DeserializableControl */*control*/) {
     throw std::runtime_error("not valid operation, use FieldCreate::deserialize instead");
 }
 
@@ -357,7 +357,7 @@ void Structure::serialize(ByteBuffer *buffer, SerializableControl *control) cons
     serializeStructureField(this, buffer, control);
 }
 
-void Structure::deserialize(ByteBuffer *buffer, DeserializableControl *control) {
+void Structure::deserialize(ByteBuffer */*buffer*/, DeserializableControl */*control*/) {
     throw std::runtime_error("not valid operation, use FieldCreate::deserialize instead");
 }
 

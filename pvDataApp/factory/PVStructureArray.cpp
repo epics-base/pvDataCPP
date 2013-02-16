@@ -133,7 +133,7 @@ size_t PVStructureArray::get(
     size_t length = getLength();
     if(offset+len > length) {
         n = length - offset;
-        if(n<0) n = 0;
+        //if(n<0) n = 0;
     }
     data.data = *value.get();
     data.offset = offset;
@@ -197,7 +197,7 @@ void PVStructureArray::serialize(ByteBuffer *pbuffer,
 void PVStructureArray::deserialize(ByteBuffer *pbuffer,
         DeserializableControl *pcontrol) {
     size_t size = SerializeHelper::readSize(pbuffer, pcontrol);
-    if(size>=0) {
+    //if(size>=0) {
         // prepare array, if necessary
         if(size>getCapacity()) setCapacity(size);
         setLength(size);
@@ -217,7 +217,7 @@ void PVStructureArray::deserialize(ByteBuffer *pbuffer,
             }
         }
         postPut();
-    }
+    //}
 }
 
 void PVStructureArray::serialize(ByteBuffer *pbuffer,
@@ -226,10 +226,10 @@ void PVStructureArray::serialize(ByteBuffer *pbuffer,
     size_t length = getLength();
 
     // check bounds
-    if(offset<0)
+    /*if(offset<0)
         offset = 0;
-    else if(offset>length) offset = length;
-    if(count<0) count = length;
+    else*/ if(offset>length) offset = length;
+    //if(count<0) count = length;
 
     size_t maxCount = length-offset;
     if(count>maxCount) count = maxCount;

@@ -48,7 +48,7 @@ static String allProperties("alarm,timeStamp,display,control");
 static PVStructurePtr doubleRecord;
 static PVStructurePtr enumeratedRecord;
 
-static void createRecords(FILE * fd,FILE *auxfd)
+static void createRecords(FILE * fd,FILE */*auxfd*/)
 {
     doubleRecord = standardPVField->scalar(pvDouble,allProperties);
     if(debug) {
@@ -70,7 +70,7 @@ static void createRecords(FILE * fd,FILE *auxfd)
     }
 }
 
-static void printRecords(FILE * fd,FILE *auxfd)
+static void printRecords(FILE * fd,FILE */*auxfd*/)
 {
     fprintf(fd,"doubleRecord\n");
     builder.clear();
@@ -82,7 +82,7 @@ static void printRecords(FILE * fd,FILE *auxfd)
     fprintf(fd,"%s\n",builder.c_str());
 }
 
-static void testAlarm(FILE * fd,FILE *auxfd)
+static void testAlarm(FILE * fd,FILE */*auxfd*/)
 {
     if(debug) fprintf(fd,"testAlarm\n");
     Alarm alarm;
@@ -155,7 +155,7 @@ static void testTimeStamp(FILE * fd,FILE *auxfd)
     fprintf(fd,"testTimeStamp PASSED\n");
 }
 
-static void testControl(FILE * fd,FILE *auxfd)
+static void testControl(FILE * fd,FILE */*auxfd*/)
 {
     if(debug) fprintf(fd,"testControl\n");
     Control control;
@@ -182,7 +182,7 @@ static void testControl(FILE * fd,FILE *auxfd)
     fprintf(fd,"testControl PASSED\n");
 }
 
-static void testDisplay(FILE * fd,FILE *auxfd)
+static void testDisplay(FILE * fd,FILE */*auxfd*/)
 {
     if(debug) fprintf(fd,"testDisplay\n");
     Display display;
@@ -215,7 +215,7 @@ static void testDisplay(FILE * fd,FILE *auxfd)
     fprintf(fd,"testDisplay PASSED\n");
 }
 
-static void testEnumerated(FILE * fd,FILE *auxfd)
+static void testEnumerated(FILE * fd,FILE */*auxfd*/)
 {
     if(debug) fprintf(fd,"testEnumerated\n");
     PVEnumerated pvEnumerated; 
