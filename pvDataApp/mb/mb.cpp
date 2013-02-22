@@ -4,7 +4,7 @@
 #include <map>
 #include <math.h>
 #include <cstdlib>
-
+#include <limits>
 #include <fstream>
 #include <sstream>
 #include <unistd.h>
@@ -28,7 +28,11 @@ uint64_t MBTime()
 }
 #endif
 
-
+#ifdef vxWorks
+#define GETPID() taskIdSelf()
+#else
+#define GETPID() getpid()
+#endif
 void MBPointAdd(MBEntity &e, intptr_t id, uint8_t stage)
 {
     // no copy and no MBPoint init solution
@@ -106,12 +110,12 @@ struct MBStatistics
     std::size_t count;
     uint64_t min;
     uint64_t max;
-    uint64_t rms;
+    double rms;
     
     MBStatistics() :
         count(0),
-        min(-1),
-        max(0),
+        min(std::numeric_limits<uint64_t>::max()),
+        max(std::numeric_limits<uint64_t>::min()),
         rms(0.0)
     {}
     
@@ -263,10 +267,11 @@ void MBEntityRegister(MBEntity *e)
             // skip empty entities
             if ((*i)->pos)
             {
-                char fileName[128];
+                char fileName[1024];
                 char* path = getenv("MB_OUTPUT_DIR");
                 if (path == 0) path = const_cast<char*>(".");
-                snprintf(fileName, 128, "%s/mb_%s_%d.csv", path, (*i)->name.c_str(), getpid());
+                // NOTE: snprintf not used because of older VxWorks
+                sprintf(fileName, "%s/mb_%s_%d.csv", path, (*i)->name.c_str(), GETPID());
                 std::ofstream out(fileName);
                 if (out.is_open())
                 {
