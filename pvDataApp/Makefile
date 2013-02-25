@@ -92,15 +92,6 @@ LIBSRCS += bitSetUtil.cpp
 SRC_DIRS += $(PVDATA)/monitor
 INC += monitor.h
 
-SRC_DIRS += $(PVDATA)/mb
-INC += mb.h
-LIBSRCS += mb.cpp
-
-PROD_HOST += mb_stat
-mb_stat_CXXFLAGS += -DPV_MB
-mb_stat_SRCS += mb_stat.cpp
-mb_stat_LIBS += pvData Com
-
 LIBRARY = pvData
 pvData_LIBS += Com
 
