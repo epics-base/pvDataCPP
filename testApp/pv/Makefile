@@ -42,6 +42,10 @@ PROD_HOST += testPVStructureArray
 testPVStructureArray_SRCS += testPVStructureArray.cpp
 testPVStructureArray_LIBS += pvData Com
 
+PROD_HOST += testOperators
+testOperators_SRCS += testOperators.cpp
+testOperators_LIBS += pvData Com
+
 include $(TOP)/configure/RULES
 #----------------------------------------
 #  ADD RULES AFTER THIS LINE

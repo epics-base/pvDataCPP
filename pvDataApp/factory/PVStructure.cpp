@@ -702,4 +702,31 @@ static PVFieldPtr findSubField(
     return PVFieldPtr();
 }
 
+std::ostream& PVStructure::dumpValue(std::ostream& o) const
+{
+    o << format::indent() << getStructure()->getID() << ' ' << getFieldName();
+    String extendsName = getExtendsStructureName();
+    if(extendsName.length()>0) {
+        o << " extends " << extendsName;
+    }
+    o << std::endl;
+    {
+    	format::indent_scope s(o);
+
+		PVFieldPtrArray const & fieldsData = getPVFields();
+		if (fieldsData.size() != 0) {
+			size_t length = getStructure()->getNumberFields();
+			for(size_t i=0; i<length; i++) {
+				PVFieldPtr fieldField = fieldsData[i];
+				Type type = fieldField->getField()->getType();
+				if (type == scalar || type == scalarArray)
+					o << format::indent() << fieldField->getField()->getID() << ' ' << fieldField->getFieldName() << ' ' << *(fieldField.get()) << std::endl;
+				else
+					o << *(fieldField.get());
+			}
+		}
+    }
+ 	return o;
+}
+
 }}

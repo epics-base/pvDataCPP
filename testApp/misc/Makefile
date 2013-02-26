@@ -24,7 +24,7 @@ testByteBuffer_LIBS += pvData Com
 
 PROD_HOST += testBaseException
 testBaseException_SRCS += testBaseException.cpp
-testBaseException_LIBS += pvData
+testBaseException_LIBS += pvData Com
 
 PROD_HOST += testSerialization
 testSerialization_SRCS += testSerialization.cpp

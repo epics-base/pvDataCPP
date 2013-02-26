@@ -147,9 +147,9 @@ void BasePVString::serialize(ByteBuffer *pbuffer,
 {
 	// check bounds
 	const size_t length = /*(value == null) ? 0 :*/ value.length();
-	if (offset < 0) offset = 0;
-	else if (offset > length) offset = length;
-	if (count < 0) count = length;
+	/*if (offset < 0) offset = 0;
+	else*/ if (offset > length) offset = length;
+	//if (count < 0) count = length;
 
 	const size_t maxCount = length - offset;
 	if (count > maxCount)
@@ -271,7 +271,7 @@ size_t DefaultPVArray<T>::get(size_t offset, size_t len, PVArrayData<T> &data)
     size_t length = this->getLength();
     if(offset+len > length) {
         n = length-offset;
-        if(n<0) n = 0;
+        //if(n<0) n = 0;
     }
     data.data = *value.get();
     data.offset = offset;
@@ -331,8 +331,8 @@ template<typename T>
 void DefaultPVArray<T>::deserialize(ByteBuffer *pbuffer,
         DeserializableControl *pcontrol) {
     size_t size = SerializeHelper::readSize(pbuffer, pcontrol);
-    // if (size>0) { pcontrol->ensureData(sizeof(T)-1); pbuffer->align(sizeof(T)); }
-    if(size>=0) {
+    // alignment if (size>0) { pcontrol->ensureData(sizeof(T)-1); pbuffer->align(sizeof(T)); }
+    //if(size>=0) {
         // prepare array, if necessary
         if(size>this->getCapacity()) this->setCapacity(size);
         // set new length
@@ -356,7 +356,7 @@ void DefaultPVArray<T>::deserialize(ByteBuffer *pbuffer,
         }
         // inform about the change?
         PVField::postPut();
-    }
+    //}
     // TODO null arrays (size == -1) not supported
 }
 
@@ -367,10 +367,10 @@ void DefaultPVArray<T>::serialize(ByteBuffer *pbuffer,
     size_t length = this->getLength();
 
     // check bounds
-    if(offset<0)
+    /*if(offset<0)
         offset = 0;
-    else if(offset>length) offset = length;
-    if(count<0) count = length;
+    else*/ if(offset>length) offset = length;
+    //if(count<0) count = length;
 
     size_t maxCount = length-offset;
     if(count>maxCount) count = maxCount;
@@ -406,7 +406,7 @@ template<>
 void DefaultPVArray<String>::deserialize(ByteBuffer *pbuffer,
         DeserializableControl *pcontrol) {
     size_t size = SerializeHelper::readSize(pbuffer, pcontrol);
-    if(size>=0) {
+    //if(size>=0) {
         // prepare array, if necessary
         if(size>getCapacity()) setCapacity(size);
         // set new length
@@ -419,7 +419,7 @@ void DefaultPVArray<String>::deserialize(ByteBuffer *pbuffer,
         }
         // inform about the change?
         postPut();
-    }
+    //}
     // TODO null arrays (size == -1) not supported
 }
 
@@ -429,10 +429,10 @@ void DefaultPVArray<String>::serialize(ByteBuffer *pbuffer,
     size_t length = getLength();
 
     // check bounds
-    if(offset<0)
+    /*if(offset<0)
         offset = 0;
-    else if(offset>length) offset = length;
-    if(count<0) count = length;
+    else*/ if(offset>length) offset = length;
+    //if(count<0) count = length;
 
     size_t maxCount = length-offset;
     if(count>maxCount) count = maxCount;

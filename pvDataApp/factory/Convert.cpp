@@ -2721,7 +2721,7 @@ void convertStructure(StringBuilder buffer,PVStructure const *data,int indentLev
     }
 }
 
-void convertArray(StringBuilder buffer,PVScalarArray const * xxx,int indentLevel)
+void convertArray(StringBuilder buffer,PVScalarArray const * xxx,int /*indentLevel*/)
 {
     PVScalarArray *pv = const_cast<PVScalarArray *>(xxx);
     ScalarArrayConstPtr array = pv->getScalarArray();

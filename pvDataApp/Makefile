@@ -92,9 +92,7 @@ LIBSRCS += bitSetUtil.cpp
 SRC_DIRS += $(PVDATA)/monitor
 INC += monitor.h
 
-
-LIBRARY=pvData
-
+LIBRARY = pvData
 pvData_LIBS += Com
 
 include $(TOP)/configure/RULES

@@ -77,14 +77,14 @@ namespace epics {
         void SerializeHelper::serializeSubstring(const String& value,
                 std::size_t offset, std::size_t count, ByteBuffer* buffer,
                 SerializableControl* flusher) {
-            if(offset<0)
+            /*if(offset<0)
                 offset = 0;
-            else if(offset>(std::size_t)value.length()) offset = value.length();
+            else*/ if(offset>value.length()) offset = value.length();
 
-            if(offset+count>(std::size_t)value.length()) count = value.length()-offset;
+            if(offset+count>value.length()) count = value.length()-offset;
 
             SerializeHelper::writeSize(count, buffer, flusher);
-            if (count<=0) return;
+            /*if (count<=0)*/ return;
             std::size_t i = 0;
             while(true) {
                 std::size_t maxToWrite = min(count-i, buffer->getRemaining());

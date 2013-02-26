@@ -117,7 +117,7 @@ String Status::toString() const
     return str;
 }
 
-void Status::toString(StringBuilder buffer, int indentLevel) const
+void Status::toString(StringBuilder buffer, int /*indentLevel*/) const
 {
     *buffer += "Status [type=";
     *buffer += StatusTypeName[m_statusType];

@@ -14,9 +14,73 @@
 #include <stdexcept>
 #include <algorithm>
 #include <iterator>
+#include <iostream>
+#include <iomanip>
 #include <pv/pvIntrospect.h>
 #include <pv/requester.h>
 namespace epics { namespace pvData { 
+
+
+namespace format {
+
+struct indent_level
+{
+    long level;
+
+    indent_level(long l) : level(l) {}
+};
+
+inline long& indent_value(std::ios_base& ios)
+{
+  static int indent_index = std::ios_base::xalloc();
+  return ios.iword(indent_index);
+}
+
+std::ostream& operator<<(std::ostream& os, indent_level const& indent);
+struct indent_scope
+{
+    long saved_level;
+    std::ios_base& stream;
+
+    indent_scope(std::ios_base& ios) :
+        stream(ios)
+    {
+        long& l = indent_value(ios);
+        saved_level = l;
+        l = saved_level + 1;
+    }
+
+    ~indent_scope()
+    {
+        indent_value(stream) = saved_level;
+    }
+};
+
+struct indent
+{
+};
+
+std::ostream& operator<<(std::ostream& os, indent const&);
+
+struct array_at
+{
+    std::size_t index;
+
+    array_at(std::size_t ix) : index(ix) {}
+};
+
+struct array_at_internal
+{
+    std::size_t index;
+    std::ostream& stream;
+
+    array_at_internal(std::size_t ix, std::ostream& str) : index(ix), stream(str) {}
+};
+
+array_at_internal operator<<(std::ostream& str, array_at const& manip);
+
+};
+
 
 class PVAuxInfo;
 class PostHandler;
@@ -277,7 +341,7 @@ public:
      * @param o output stream.
      * @return The output stream.
      */
-    virtual std::ostream& dumpValue(std::ostream& o) const;
+    virtual std::ostream& dumpValue(std::ostream& o) const = 0;
 
 protected:
     PVField::shared_pointer getPtrSelf()
@@ -358,6 +422,20 @@ public:
     {
     	return o << get();
     }
+
+    // get operator
+    // double value; doubleField >>= value;
+    void operator>>=(T& value) const
+	{
+    	value = get();
+	}
+
+    // put operator
+    // double value = 12.8; doubleField <<= value;
+    void operator<<=(T value)
+	{
+    	put(value);
+	}
 
 protected:
     PVScalarValue(ScalarConstPtr const & scalar)
@@ -453,6 +531,9 @@ public:
      * @param The capacity.
      */
     virtual void setCapacity(std::size_t capacity) = 0;
+
+    virtual std::ostream& dumpValue(std::ostream& o, std::size_t index) const = 0;
+
 protected:
     PVArray(FieldConstPtr const & field);
     void setCapacityLength(std::size_t capacity,std::size_t length);
@@ -460,6 +541,8 @@ private:
     class PVArrayPvt * pImpl;
     friend class PVDataCreate;
 };
+
+std::ostream& operator<<(format::array_at_internal const& manip, const PVArray& array);
 
 /**
  * Class provided by caller of get
@@ -504,8 +587,6 @@ public:
      * @return The interface.
      */
     const ScalarArrayConstPtr getScalarArray() const ;
-
-    virtual std::ostream& dumpValue(std::ostream& o, size_t index) const = 0;
 
 protected:
     PVScalarArray(ScalarArrayConstPtr const & scalarArray);
@@ -608,6 +689,10 @@ public:
     virtual pointer get() const { return &((*value.get())[0]); }
     virtual vector const & getVector() {return *value;}
     virtual shared_vector const & getSharedVector() {return value;}
+
+    virtual std::ostream& dumpValue(std::ostream& o) const;
+    virtual std::ostream& dumpValue(std::ostream& o, std::size_t index) const;
+
 protected:
     PVStructureArray(StructureArrayConstPtr const & structureArray);
 private:
@@ -816,6 +901,9 @@ public:
      * @param pvFields The array of fields for the structure.
      */
     PVStructure(StructureConstPtr const & structure,PVFieldPtrArray const & pvFields);
+
+    virtual std::ostream& dumpValue(std::ostream& o) const;
+
 private:
     void   fixParentStructure();
     static PVFieldPtr nullPVField;
@@ -896,7 +984,7 @@ public:
 
     std::ostream& dumpValue(std::ostream& o) const
     {
-    	o << "[";
+    	o << '[';
     	std::size_t len = getLength();
     	bool first = true;
     	for (std::size_t i = 0; i < len; i++)
@@ -904,10 +992,10 @@ public:
     		if (first)
     			first = false;
     		else
-    			o << ",";
+    			o << ',';
     		dumpValue(o, i);
     	}
-    	return o << "]";
+    	return o << ']';
     }
 
     std::ostream& dumpValue(std::ostream& o, size_t index) const

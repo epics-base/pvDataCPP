@@ -331,7 +331,7 @@ namespace epics { namespace pvData {
         return !(*this == set);
     }
 
-    void BitSet::toString(StringBuilder buffer, int indentLevel) const
+    void BitSet::toString(StringBuilder buffer, int /*indentLevel*/) const
     {
         *buffer += '{';
         int32 i = nextSetBit(0);
