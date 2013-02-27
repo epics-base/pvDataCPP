@@ -17,8 +17,9 @@
 # EPICS V4 Developers: Do not edit the locations in this file!
 #
 # Create a file RELEASE.local pointing to your EPICS_BASE
-# build directory, e.g.
+# and PVCOMMON build directories, e.g.
 #   EPICS_BASE = /home/install/epics/base
+#   PVCOMMON = /home/install/epicsV4/pvCommonCPP
 
 -include $(TOP)/configure/RELEASE.local
 -include $(TOP)/../RELEASE.local

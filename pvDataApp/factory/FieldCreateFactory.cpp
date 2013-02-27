@@ -94,7 +94,7 @@ String Scalar::getID() const
     return idScalarLUT[scalarType];
 }
 
-const int8 Scalar::getTypeCodeLUT() const
+int8 Scalar::getTypeCodeLUT() const
 {
     static const int8 typeCodeLUT[] = {
         0x00, // pvBoolean
@@ -170,7 +170,7 @@ ScalarArray::ScalarArray(ScalarType elementType)
 
 ScalarArray::~ScalarArray() {}
 
-const int8 ScalarArray::getTypeCodeLUT() const
+int8 ScalarArray::getTypeCodeLUT() const
 {
     static const int8 typeCodeLUT[] = {
         0x00, // pvBoolean
