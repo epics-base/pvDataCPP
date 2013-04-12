@@ -63,6 +63,12 @@ public:
         buffer->align(alignment);
     }
     
+    virtual bool directSerialize(ByteBuffer */*existingBuffer*/, const char* /*toSerialize*/,
+                                 std::size_t /*elementCount*/, std::size_t /*elementSize*/)
+    {
+        return false;
+    }
+
     virtual void cachedSerialize(std::tr1::shared_ptr<const Field> const & field, ByteBuffer* buffer)
     {
         field->serialize(buffer, this);
@@ -83,6 +89,12 @@ public:
 
     virtual void alignData(size_t alignment) {
         buffer->align(alignment);
+    }
+
+    virtual bool directDeserialize(ByteBuffer */*existingBuffer*/, char* /*deserializeTo*/,
+                                   std::size_t /*elementCount*/, std::size_t /*elementSize*/)
+    {
+        return false;
     }
 
     virtual std::tr1::shared_ptr<const Field> cachedDeserialize(ByteBuffer* buffer)

@@ -609,6 +609,24 @@ private:
 };
 
     template<>
+    inline bool ByteBuffer::reverse<bool>()
+    {
+        return false;
+    }
+
+    template<>
+    inline bool ByteBuffer::reverse<int8>()
+    {
+        return false;
+    }
+
+    template<>
+    inline bool ByteBuffer::reverse<uint8>()
+    {
+        return false;
+    }
+
+    template<>
     inline bool ByteBuffer::reverse<float>()
     {
         return _reverseFloatEndianess;

@@ -337,8 +337,20 @@ void DefaultPVArray<T>::deserialize(ByteBuffer *pbuffer,
         if(size>this->getCapacity()) this->setCapacity(size);
         // set new length
         this->setLength(size);
+
+        // try to avoid deserializing from the buffer
+        // this is only possible if we do not need to do endian-swapping
+        if (!pbuffer->reverse<T>())
+            if (pcontrol->directDeserialize(pbuffer, (char*)(get()), size, sizeof(T)))
+            {
+                // inform about the change?
+                PVField::postPut();
+                return;
+            }
+
         // retrieve value from the buffer
         size_t i = 0;
+        T * pvalue = get();
         while(true) {
             /*
             size_t maxIndex = min(size-i, (int)(pbuffer->getRemaining()/sizeof(T)))+i;
@@ -346,7 +358,7 @@ void DefaultPVArray<T>::deserialize(ByteBuffer *pbuffer,
                 value[i] = pbuffer->get<T>();
               */  
             size_t maxCount = min(size-i, (pbuffer->getRemaining()/sizeof(T)));
-            pbuffer->getArray(get()+i, maxCount);
+            pbuffer->getArray(pvalue+i, maxCount);
             i += maxCount;
             
             if(i<size)
@@ -378,8 +390,17 @@ void DefaultPVArray<T>::serialize(ByteBuffer *pbuffer,
     // write
     SerializeHelper::writeSize(count, pbuffer, pflusher);
     //if (count == 0) return; pcontrol->ensureData(sizeof(T)-1); pbuffer->align(sizeof(T));
+
+
+    // try to avoid copying into the buffer
+    // this is only possible if we do not need to do endian-swapping
+    if (!pbuffer->reverse<T>())
+        if (pflusher->directSerialize(pbuffer, (const char*)(get()+offset), count, sizeof(T)))
+            return;
+
     size_t end = offset+count;
     size_t i = offset;
+    T * pvalue = const_cast<T *>(get());
     while(true) {
         
         /*
@@ -389,7 +410,6 @@ void DefaultPVArray<T>::serialize(ByteBuffer *pbuffer,
         */
         
         size_t maxCount = min<int>(end-i, (int)(pbuffer->getRemaining()/sizeof(T)));
-        T * pvalue = const_cast<T *>(get());
         pbuffer->putArray(pvalue+i, maxCount);
         i += maxCount;
         
