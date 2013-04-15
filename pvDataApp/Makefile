@@ -38,6 +38,7 @@ LIBSRCS += timer.cpp
 LIBSRCS += status.cpp
 LIBSRCS += messageQueue.cpp
 LIBSRCS += localStaticLock.cpp
+LIBSRCS += typeCast.cpp
 LIBSRCS += parseToPOD.cpp
 
 SRC_DIRS += $(PVDATA)/pv

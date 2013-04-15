@@ -13,6 +13,7 @@
 #include <epicsConvert.h>
 
 #include <pv/pvType.h>
+#include <pv/pvIntrospect.h>
 
 // gently nudge the compiler to inline our wrappers
 #if defined(__GNUC__) && __GNUC__>=3
@@ -169,6 +170,8 @@ static FORCE_INLINE TO castUnsafe(const FROM& from)
 {
     return detail::cast_helper<TO,FROM>::op(from);
 }
+
+void castUnsafeV(size_t count, ScalarType to, void *dest, ScalarType from, const void *src);
 
 }} // end namespace
 

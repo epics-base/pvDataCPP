@@ -384,8 +384,22 @@ int main(int argc,char *argv[])
     TEST(float, FLT_MIN, double, 1e-300);
     TEST(float, -FLT_MIN, double, -1e-300);
     xfloat = ::epics::pvData::castUnsafe<float,double>(epicsNAN);
-    *out << "Cast double NAN to float NAN yields: "<<xfloat<<"\n";
+    *out << "Test cast double NAN to float NAN yields: "<<xfloat<<"\n";
     fail |= !isnan( xfloat );
+
+    {
+        std::string result[3];
+        const int32_t in[3] = { 1234, 506001, 42424242 };
+
+        *out << "Test vcast int32 -> String\n";
+        epics::pvData::castUnsafeV(3, epics::pvData::pvString, (void*)result,
+                                   epics::pvData::pvInt, (void*)in);
+        *out << "Yields "<<result[0]<<" "<<result[1]<<" "<<result[2]<<"\n";
+
+        fail |= result[0]!="1234";
+        fail |= result[1]!="506001";
+        fail |= result[2]!="42424242";
+    }
 
     return fail ? 1 : 0;
 }
