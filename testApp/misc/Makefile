@@ -42,6 +42,11 @@ PROD_HOST += testMessageQueue
 testMessageQueue_SRCS += testMessageQueue.cpp
 testMessageQueue_LIBS += pvData Com
 
+PROD_HOST += testTypeCast
+testTypeCast_SRCS += testTypeCast.cpp
+testTypeCast_LIBS += pvData Com
+
+
 include $(TOP)/configure/RULES
 #----------------------------------------
 #  ADD RULES AFTER THIS LINE
