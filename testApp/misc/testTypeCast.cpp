@@ -7,6 +7,7 @@
 
 #include <fstream>
 #include <iostream>
+#include <algorithm>
 #include <limits>
 #include <typeinfo>
 #include <stddef.h>
@@ -136,7 +137,8 @@ int main(int argc,char *argv[])
     typedef epics::pvData::String String_t;
 
     // force all possibilities to be compiled
-#define CHECK(M, N) x## M = ::epics::pvData::castUnsafe<M ##_t>(x## N)
+#define CHECK(M, N) x## M = ::epics::pvData::castUnsafe<M ##_t>(x## N); \
+    std::transform(&x ## N, &x ## N+1, &x ## M, ::epics::pvData::castUnsafe<M ##_t,N ##_t>)
 //#define CHECK(M, N) x## M = ::epics::pvData::detail::cast_helper<M ##_t,N ##_t>::op(x## N)
     CHECK(int8, int8);
     CHECK(int8, uint8);
