@@ -12,6 +12,11 @@
 
 #include "typeCast.h"
 
+// need to use "long long" when sizeof(int)==sizeof(long)
+#if ULONG_MAX == 0xfffffffful
+#define NEED_LONGLONG
+#endif
+
 #ifndef EPICS_VERSION_INT
 #define VERSION_INT(V,R,M,P) ( ((V)<<24) | ((R)<<16) | ((M)<<8) | (P))
 #define EPICS_VERSION_INT VERSION_INT(EPICS_VERSION, EPICS_REVISION, EPICS_MODIFICATION, EPICS_PATCH_LEVEL)
@@ -241,7 +246,7 @@ epicsParseFloat(const char *str, float *to, char **units)
 #endif
 
 /* do we need long long? */
-#if INT_MAX == LONG_MAX
+#ifdef NEED_LONGLONG
 static int
 epicsParseLongLong(const char *str, long long *to, int base, char **units)
 {
@@ -343,7 +348,7 @@ INTFN(int32_t, Int32);
 INTFN(uint32_t, UInt32);
 
 void parseToPOD(const std::string& in, int64_t *out) {
-#if INT_MAX == LONG_MAX
+#ifdef NEED_LONGLONG
     int err = epicsParseLongLong(in.c_str(), out, 0, NULL);
 #else
     int err = epicsParseLong(in.c_str(), out, 0, NULL);
@@ -352,7 +357,7 @@ void parseToPOD(const std::string& in, int64_t *out) {
 }
 
 void parseToPOD(const std::string& in, uint64_t *out) {
-#if INT_MAX == LONG_MAX
+#ifdef NEED_LONGLONG
     int err = epicsParseULongLong(in.c_str(), out, 0, NULL);
 #else
     int err = epicsParseULong(in.c_str(), out, 0, NULL);
