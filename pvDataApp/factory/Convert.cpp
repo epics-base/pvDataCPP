@@ -1633,7 +1633,7 @@ static bool structureArrayEquals(PVStructureArray *a,PVStructureArray *b)
 static bool structureEquals(PVStructure *a,PVStructure *b)
 {
     StructureConstPtr aStructure = a->getStructure();
-    StructureConstPtr bStructure = a->getStructure();
+    StructureConstPtr bStructure = b->getStructure();
     size_t length = aStructure->getNumberFields();
     if(length!=bStructure->getNumberFields()) return false;
     PVFieldPtrArray const & aFields = a->getPVFields();
