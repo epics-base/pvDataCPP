@@ -89,7 +89,11 @@ public:
      * @param  Second field
      * @return (false, true) if the fields (are not, are) the same.
      */
-    bool equals(PVFieldPtr const &a,PVFieldPtr const &b);
+    bool equals(PVFieldPtr const &a,PVFieldPtr const &b)
+    {
+        return *a==*b;
+    }
+
     /**
      * Do fields have the same definition.
      *
@@ -97,7 +101,11 @@ public:
      * @param  Second field
      * @return (false, true) if the fields (are not, are) the same.
      */
-    bool equals(PVField &a,PVField &b);
+    bool equals(PVField &a,PVField &b)
+    {
+        return a==b;
+    }
+
     /**
      * Convert a PVField to a string.
      * @param buf buffer for the result
