@@ -421,21 +421,6 @@ Convert::Convert()
 
 Convert::~Convert(){}
 
-void Convert::getFullName(StringBuilder buf,PVFieldPtr const & pvField)
-{
-    buf->empty();
-    *buf += pvField->getFieldName();
-    PVStructure *parent;
-    while((parent=pvField->getParent())!=0) {
-         parent = pvField->getParent();
-         String name = parent->getFieldName();
-         if(name.length()>0) {
-             buf->insert(0,".");
-             buf->insert(0,name);
-         }
-    }
-}
-
 bool Convert::equals(PVFieldPtr const &a,PVFieldPtr const &b)
 {
     return convertEquals(a.get(),b.get());

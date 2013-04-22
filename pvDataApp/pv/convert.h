@@ -77,7 +77,11 @@ public:
      * @param builder The builder that will have the result.
      * @param pvField The pvField.
      */
-    void getFullName(StringBuilder buf,PVFieldPtr const & pvField);
+    void getFullName(StringBuilder buf,PVFieldPtr const & pvField)
+    {
+        *buf = pvField->getFullName();
+    }
+
     /**
      * Do fields have the same definition.
      *

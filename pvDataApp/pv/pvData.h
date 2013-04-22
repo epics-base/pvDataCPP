@@ -244,7 +244,13 @@ public:
      * Get the fieldName for this field.
      * @return The name or empty string if top level field.
      */
-    String getFieldName() const ;
+    inline const String& getFieldName() const {return fieldName;}
+    /**
+     * Fully expand the name of this field using the
+     * names of its parent fields with a dot '.' seperating
+     * each name.
+     */
+    String getFullName() const;
     /**
      * Register the message requester.
      * At most one requester can be registered.
@@ -342,6 +348,7 @@ public:
      * @return The output stream.
      */
     virtual std::ostream& dumpValue(std::ostream& o) const = 0;
+
 
 protected:
     PVField::shared_pointer getPtrSelf()
