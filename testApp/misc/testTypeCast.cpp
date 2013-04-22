@@ -350,10 +350,23 @@ int main(int argc,char *argv[])
     TEST(int32_t, -7, String, "-07");
     TEST(int32_t, -8, String, "-010");
 
+    TEST(int64_t, 15, String, "0xf");
+    TEST(int64_t, 15, String, "0xF");
+    TEST(int64_t, -15, String, "-0xF");
+    TEST(int64_t, 16, String, "0x10");
+    TEST(int64_t, -16, String, "-0x10");
+
+    TEST(int64_t, 7, String, "07");
+    TEST(int64_t, 8, String, "010");
+    TEST(int64_t, -7, String, "-07");
+    TEST(int64_t, -8, String, "-010");
+
     *out << "String parsing errors\n";
 
     FAIL(int32_t, String, "hello!");
     FAIL(int32_t, String, "42 is the answer");
+    FAIL(int64_t, String, "hello!");
+    FAIL(int64_t, String, "42 is the answer");
     FAIL(double, String, "hello!");
     FAIL(double, String, "42 is the answer");
 

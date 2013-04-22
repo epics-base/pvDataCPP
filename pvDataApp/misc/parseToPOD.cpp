@@ -245,6 +245,99 @@ epicsParseFloat(const char *str, float *to, char **units)
 }
 #endif
 
+#if defined(NEED_LONGLONG) && defined(__vxworks)
+static
+long long strtoll(const char *ptr, char ** endp, int base)
+{
+    size_t inlen = strlen(ptr);
+    long long result;
+    unsigned char offset=0;
+    
+    assert(base==0);
+
+    if(ptr[0]=='-')
+        offset=1;
+
+    try {
+        std::istringstream strm(ptr);
+
+        assert(strm.rdbuf()->in_avail()>=0
+               && inlen==(size_t)strm.rdbuf()->in_avail());
+
+        if(ptr[offset]=='0') {
+            if(ptr[offset+1]=='x')
+                strm >> std::hex;
+            else
+                strm >> std::oct;
+        }
+
+        strm >> result;
+        if(strm.fail())
+            goto noconvert;
+
+        assert(strm.rdbuf()->in_avail()>=0
+               && inlen>=(size_t)strm.rdbuf()->in_avail());
+
+        size_t consumed = inlen - strm.rdbuf()->in_avail();
+        *endp = (char*)ptr + consumed;
+
+        return result;
+        
+    } catch(...) {
+        goto noconvert;
+    }
+
+    return result;
+noconvert:
+    *endp = (char*)ptr;
+    return 0;
+}
+
+static
+unsigned long long strtoull(const char *ptr, char ** endp, int base)
+{
+    size_t inlen = strlen(ptr);
+    unsigned long long result;
+
+    assert(base==0);
+
+    try {
+        std::istringstream strm(ptr);
+
+        assert(strm.rdbuf()->in_avail()>=0
+               && inlen==(size_t)strm.rdbuf()->in_avail());
+
+        if(ptr[0]=='0') {
+            if(ptr[1]=='x')
+                strm >> std::hex;
+            else
+                strm >> std::oct;
+        }
+
+        strm >> result;
+        if(strm.fail())
+            goto noconvert;
+
+        assert(strm.rdbuf()->in_avail()>=0
+               && inlen>=(size_t)strm.rdbuf()->in_avail());
+
+        size_t consumed = inlen - strm.rdbuf()->in_avail();
+        *endp = (char*)ptr + consumed;
+
+        return result;
+
+    } catch(...) {
+        goto noconvert;
+    }
+
+    return result;
+noconvert:
+    *endp = (char*)ptr;
+    return 0;
+}
+
+#endif
+
 /* do we need long long? */
 #ifdef NEED_LONGLONG
 static int

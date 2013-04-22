@@ -15,7 +15,7 @@
 #include <pv/pvType.h>
 
 // gently nudge the compiler to inline our wrappers
-#if defined(__GNUC__)
+#if defined(__GNUC__) && __GNUC__>=3
 # define FORCE_INLINE __attribute__((always_inline)) inline
 #elif defined(_MSC_VER)
 # define FORCE_INLINE __forceinline
