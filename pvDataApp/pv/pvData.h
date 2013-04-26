@@ -646,8 +646,24 @@ public:
      */
     const ScalarArrayConstPtr getScalarArray() const ;
 
+    template<ScalarType ID>
+    inline void getAs(typename ScalarTypeTraits<ID>::type* ptr,
+                      size_t count, size_t offset = 0) const
+    {
+        getAs(ID, (void*)ptr, count, offset);
+    }
+
+    template<ScalarType ID>
+    inline void putFrom(const typename ScalarTypeTraits<ID>::type* ptr,
+                 size_t count, size_t offset = 0)
+    {
+        putFrom(ID, (const void*)ptr, count, offset);
+    }
+
 protected:
     PVScalarArray(ScalarArrayConstPtr const & scalarArray);
+    virtual void getAs(ScalarType, void*, size_t, size_t) const = 0;
+    virtual void putFrom(ScalarType, const void*, size_t ,size_t) = 0;
 private:
     friend class PVDataCreate;
 };
@@ -1001,6 +1017,8 @@ public:
     typedef PVValueArray & reference;
     typedef const PVValueArray & const_reference;
 
+    static const ScalarType typeCode;
+
     /**
      * Destructor
      */
@@ -1065,6 +1083,15 @@ protected:
     PVValueArray(ScalarArrayConstPtr const & scalar)
     : PVScalarArray(scalar) {}
     friend class PVDataCreate;
+
+    virtual void getAs(ScalarType dtype, void* ptr, size_t count, size_t offset) const
+    {
+        castUnsafeV(count, dtype, ptr, typeCode, (const void*)(get()+offset));
+    }
+    virtual void putFrom(ScalarType dtype, const void*ptr, size_t count, size_t offset)
+    {
+        castUnsafeV(count, typeCode, (void*)(get()+offset), dtype, ptr);
+    }
 };
 
 template<typename T>

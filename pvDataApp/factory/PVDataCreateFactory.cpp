@@ -41,6 +41,19 @@ template<> const ScalarType PVFloat::typeCode = pvFloat;
 template<> const ScalarType PVDouble::typeCode = pvDouble;
 template<> const ScalarType PVScalarValue<String>::typeCode = pvString;
 
+//template<> const ScalarType PVBooleanArray::typeCode = pvBoolean;
+template<> const ScalarType PVByteArray::typeCode = pvByte;
+template<> const ScalarType PVShortArray::typeCode = pvShort;
+template<> const ScalarType PVIntArray::typeCode = pvInt;
+template<> const ScalarType PVLongArray::typeCode = pvLong;
+template<> const ScalarType PVUByteArray::typeCode = pvUByte;
+template<> const ScalarType PVUShortArray::typeCode = pvUShort;
+template<> const ScalarType PVUIntArray::typeCode = pvUInt;
+template<> const ScalarType PVULongArray::typeCode = pvULong;
+template<> const ScalarType PVFloatArray::typeCode = pvFloat;
+template<> const ScalarType PVDoubleArray::typeCode = pvDouble;
+template<> const ScalarType PVStringArray::typeCode = pvString;
+
 /** Default storage for scalar values
  */
 template<typename T>
