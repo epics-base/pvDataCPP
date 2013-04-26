@@ -371,8 +371,6 @@ static size_t convertFromDoubleArray(PVScalarArray *pv, size_t offset,
     size_t len,const double from[], size_t fromOffset);
 static size_t convertToDoubleArray(PVScalarArray *pv, size_t offset,
     size_t len,double to[], size_t toOffset);
-static size_t convertToStringArray(PVScalarArray *pv, size_t offset,
-    size_t len,StringArray & to, size_t toOffset);
 
 static size_t copyArrayDataReference(PVScalarArray *from,PVArray *to);
 static size_t copyNumericArray(PVScalarArray *from,
@@ -489,10 +487,16 @@ size_t Convert::fromStringArray(PVScalarArrayPtr const &pv,
     return length;
 }
 
-size_t Convert::toStringArray(PVScalarArrayPtr const & pv, size_t offset, size_t length,
-    StringArray  &to, size_t toOffset)
+size_t Convert::toStringArray(PVScalarArrayPtr const & pv,
+                              size_t offset, size_t length,
+                              StringArray  &to, size_t toOffset)
 {
-    return convertToStringArray(pv.get(),offset,length,to,toOffset);
+    size_t alen = pv->getLength();
+    if(offset>alen) return 0;
+    alen -= offset;
+    if(length>alen) length=alen;
+    pv->getAs<pvString>(&to[toOffset], length, offset);
+    return length;
 }
 
 bool Convert::isCopyCompatible(FieldConstPtr const &from, FieldConstPtr const &to)
@@ -1686,218 +1690,6 @@ size_t convertToDoubleArray(PVScalarArray * pv,
     size_t offset, size_t len,double to[], size_t toOffset)
 {
     return convertToScalarArray<double>(pv,offset,len,to,toOffset);
-}
-
-size_t convertToStringArray(PVScalarArray *pv,
-    size_t offset, size_t len,StringArray & xxx, size_t toOffset)
-{
-    String *to = &xxx[0];
-    ScalarType elementType = pv->getScalarArray()->getElementType();
-    size_t ncopy = pv->getLength();
-    if (ncopy > len) ncopy = len;
-    size_t num = ncopy;
-    switch (elementType) {
-    case pvBoolean: {
-        PVBooleanArray *pvdata = static_cast<PVBooleanArray*>(pv);
-        BooleanArrayData data;
-        for (size_t i = 0; i < num; i++) {
-            if (pvdata->get(offset + i, 1, data) == 1) {
-                BooleanArray & dataArray = data.data;
-                bool value = dataArray[data.offset];
-                to[toOffset + i] = value ? "true" : "false";
-            } else {
-                to[toOffset + i] = "bad pv";
-            }
-        }
-    }
-    break;
-    case pvByte: {
-        PVByteArray *pvdata = static_cast<PVByteArray*>(pv);
-        ByteArrayData data;
-        char cr[30];
-        for (size_t i = 0; i < num; i++) {
-            if (pvdata->get(offset + i, 1, data) == 1) {
-                ByteArray & dataArray = data.data;
-                int ival = dataArray[data.offset];
-                sprintf(cr,"%d",ival);
-                to[toOffset + i] = String(cr);
-            } else {
-                to[toOffset + i] = "bad pv";
-            }
-        }
-    }
-    break;
-    case pvShort: {
-        PVShortArray *pvdata = static_cast<PVShortArray*>(pv);
-        ShortArrayData data;
-        char cr[30];
-        for (size_t i = 0; i < num; i++) {
-            if (pvdata->get(offset + i, 1, data) == 1) {
-                ShortArray & dataArray = data.data;
-                int ival = dataArray[data.offset];
-                sprintf(cr,"%d",ival);
-                to[toOffset + i] = String(cr);
-            } else {
-                to[toOffset + i] = "bad pv";
-            }
-        }
-    }
-    break;
-    case pvInt: {
-        PVIntArray *pvdata = static_cast<PVIntArray*>(pv);
-        IntArrayData data;
-        char cr[30];
-        for (size_t i = 0; i < num; i++) {
-            if (pvdata->get(offset + i, 1, data) == 1) {
-                IntArray & dataArray = data.data;
-                int ival = dataArray[data.offset];
-                sprintf(cr,"%d",ival);
-                to[toOffset + i] = String(cr);
-            } else {
-                to[toOffset + i] = "bad pv";
-            }
-        }
-    }
-    break;
-    case pvLong: {
-        PVLongArray *pvdata = static_cast<PVLongArray*>(pv);
-        LongArrayData data = LongArrayData();
-        char cr[30];
-        for (size_t i = 0; i < num; i++) {
-            if (pvdata->get(offset + i, 1, data) == 1) {
-                LongArray & dataArray = data.data;
-                int64 ival = dataArray[data.offset];
-                sprintf(cr,"%lld",(long long)ival);
-                to[toOffset + i] = String(cr);
-            } else {
-                to[toOffset + i] = "bad pv";
-            }
-        }
-    }
-    break;
-    case pvUByte: {
-        PVUByteArray *pvdata = static_cast<PVUByteArray*>(pv);
-        UByteArrayData data;
-        char cr[30];
-        for (size_t i = 0; i < num; i++) {
-            if (pvdata->get(offset + i, 1, data) == 1) {
-                UByteArray & dataArray = data.data;
-                unsigned int ival = dataArray[data.offset];
-                sprintf(cr,"%u",ival);
-                to[toOffset + i] = String(cr);
-            } else {
-                to[toOffset + i] = "bad pv";
-            }
-        }
-    }
-    break;
-    case pvUShort: {
-        PVUShortArray *pvdata = static_cast<PVUShortArray*>(pv);
-        UShortArrayData data;
-        char cr[30];
-        for (size_t i = 0; i < num; i++) {
-            if (pvdata->get(offset + i, 1, data) == 1) {
-                UShortArray & dataArray = data.data;
-                unsigned int ival = dataArray[data.offset];
-                sprintf(cr,"%u",ival);
-                to[toOffset + i] = String(cr);
-            } else {
-                to[toOffset + i] = "bad pv";
-            }
-        }
-    }
-    break;
-    case pvUInt: {
-        PVUIntArray *pvdata = static_cast<PVUIntArray*>(pv);
-        UIntArrayData data;
-        char cr[30];
-        for (size_t i = 0; i < num; i++) {
-            if (pvdata->get(offset + i, 1, data) == 1) {
-                UIntArray & dataArray = data.data;
-                unsigned int ival = dataArray[data.offset];
-                sprintf(cr,"%u",ival);
-                to[toOffset + i] = String(cr);
-            } else {
-                to[toOffset + i] = "bad pv";
-            }
-        }
-    }
-    break;
-    case pvULong: {
-        PVULongArray *pvdata = static_cast<PVULongArray*>(pv);
-        ULongArrayData data;
-        char cr[30];
-        for (size_t i = 0; i < num; i++) {
-            if (pvdata->get(offset + i, 1, data) == 1) {
-                ULongArray & dataArray = data.data;
-                uint64 ival = dataArray[data.offset];
-                sprintf(cr,"%llu",(unsigned long long)ival);
-                to[toOffset + i] = String(cr);
-            } else {
-                to[toOffset + i] = "bad pv";
-            }
-        }
-    }
-    break;
-    case pvFloat: {
-        PVFloatArray *pvdata = static_cast<PVFloatArray*>(pv);
-        FloatArrayData data;
-        char cr[30];
-        for (size_t i = 0; i < num; i++) {
-            if (pvdata->get(offset + i, 1, data) == 1) {
-                FloatArray & dataArray = data.data;
-                float fval = dataArray[data.offset];
-                sprintf(cr,"%g",fval);
-                to[toOffset + i] = String(cr);
-            } else {
-                to[toOffset + i] = "bad pv";
-            }
-        }
-    }
-    break;
-    case pvDouble: {
-        PVDoubleArray *pvdata = static_cast<PVDoubleArray*>(pv);
-        DoubleArrayData data;
-        char cr[30];
-        for (size_t i = 0; i < num; i++) {
-            if (pvdata->get(offset + i, 1, data) == 1) {
-                DoubleArray & dataArray = data.data;
-                double fval = dataArray[data.offset];
-                sprintf(cr,"%g",fval);
-                to[toOffset + i] = String(cr);
-            } else {
-                to[toOffset + i] = "bad pv";
-            }
-        }
-    }
-    break;
-    case pvString: {
-        PVStringArray *pvdata = static_cast<PVStringArray*>(pv);
-        while (num > 0) {
-            size_t numnow = 0;
-            size_t dataOffset = 0;
-            String *dataArray;
-            StringArrayData stringArrayData;
-            numnow = pvdata->get(offset, num, stringArrayData);
-            dataArray = pvdata->get();
-            dataOffset = stringArrayData.offset;
-            if (numnow <= 0) {
-                for (size_t i = 0; i < num; i++)
-                    to[toOffset + i] = "bad pv";
-                break;
-            }
-            for(size_t i=0; i<num; i++) to[toOffset+i] = dataArray[dataOffset+i];
-            num -= numnow;
-            offset += numnow;
-            toOffset += numnow;
-        }
-    }
-    break;
-    default:
-        String message("Convert::convertToStringArray should never get here");
-        throw std::logic_error(message);
-    }
-    return ncopy;
 }
 
 size_t copyArrayDataReference(PVScalarArray *from,PVArray *to)
