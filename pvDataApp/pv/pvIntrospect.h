@@ -555,5 +555,29 @@ private:
  */
 extern FieldCreatePtr getFieldCreate();
 
+/**
+ * Static mapping from ScalarType enum to value type.
+ @code
+   typename ScalarTypeTraits<pvByte>::type value = 4;
+ @endcode
+ */
+template<ScalarType ID>
+struct ScalarTypeTraits {};
+
+#define OP(ENUM, TYPE) template<> struct ScalarTypeTraits<ENUM> {typedef TYPE type;}
+OP(pvBoolean, boolean);
+OP(pvByte, int8);
+OP(pvShort, int16);
+OP(pvInt, int32);
+OP(pvLong, int64);
+OP(pvUByte, uint8);
+OP(pvUShort, uint16);
+OP(pvUInt, uint32);
+OP(pvULong, uint64);
+OP(pvFloat, float);
+OP(pvDouble, double);
+OP(pvString, String);
+#undef OP
+
 }}
 #endif  /* PVINTROSPECT_H */

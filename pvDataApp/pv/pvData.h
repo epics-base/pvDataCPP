@@ -18,6 +18,7 @@
 #include <iomanip>
 #include <pv/pvIntrospect.h>
 #include <pv/requester.h>
+#include <pv/typeCast.h>
 namespace epics { namespace pvData { 
 
 
@@ -396,6 +397,41 @@ public:
      * @return the interface.
      */
     const ScalarConstPtr getScalar() const ;
+
+    /**
+     * Convert and return the scalar value in the requested type.
+     * Result type is determined from the function template argument
+     * which must be one of the ScalarType enums.
+     * Uses castUnsafe<TO>() for value conversion.
+     @code
+      PVScalar* pv = ...;
+      uint32 val = pv->getAs<pvInt>();
+     @endcode
+     */
+    template<ScalarType ID>
+    inline typename ScalarTypeTraits<ID>::type getAs() const {
+        typename ScalarTypeTraits<ID>::type result;
+        this->getAs((void*)&result, ID);
+        return result;
+    }
+    virtual void getAs(void *, ScalarType) const = 0;
+
+    /**
+     * Convert and assign the provided value.
+     * The value type is determined from the function template argument
+     * which must be one of the ScalarType enums.
+     * Uses castUnsafe<TO>() for value conversion.
+     @code
+      PVScalar* pv = ...;
+      pv->putFrom<pvInt>((int32)42);
+     @endcode
+     */
+    template<ScalarType ID>
+    inline void putFrom(typename ScalarTypeTraits<ID>::type val) {
+        this->putFrom((const void*)&val, ID);
+    }
+    virtual void putFrom(const void *, ScalarType) = 0;
+
 protected:
     PVScalar(ScalarConstPtr const & scalar);
 };
@@ -410,6 +446,9 @@ public:
     typedef T value_type;
     typedef T* pointer;
     typedef const T* const_pointer;
+
+    static const ScalarType typeCode;
+
     /**
      * Destructor
      */
@@ -447,6 +486,18 @@ public:
 protected:
     PVScalarValue(ScalarConstPtr const & scalar)
     : PVScalar(scalar) {}
+    virtual void getAs(void * result, ScalarType rtype) const
+    {
+        const T src = get();
+        castUnsafeV(1, rtype, result, typeCode, (const void*)&src);
+    }
+    virtual void putFrom(const void *src, ScalarType stype)
+    {
+        T result;
+        castUnsafeV(1, typeCode, (void*)&result, stype, src);
+        put(result);
+    }
+
 private:
     friend class PVDataCreate;
 };
