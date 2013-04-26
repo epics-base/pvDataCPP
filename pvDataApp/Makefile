@@ -25,6 +25,7 @@ INC += status.h
 INC += sharedPtr.h
 INC += localStaticLock.h
 INC += typeCast.h
+INC += printer.h
 
 LIBSRCS += byteBuffer.cpp
 LIBSRCS += bitSet.cpp
@@ -67,6 +68,7 @@ LIBSRCS += Convert.cpp
 LIBSRCS += Compare.cpp
 LIBSRCS += StandardField.cpp
 LIBSRCS += StandardPVField.cpp
+LIBSRCS += printer.cpp
 
 SRC_DIRS += $(PVDATA)/property
 
