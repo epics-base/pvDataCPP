@@ -432,6 +432,8 @@ public:
     }
     virtual void putFrom(const void *, ScalarType) = 0;
 
+    virtual void assign(const PVScalar&) = 0;
+
 protected:
     PVScalar(ScalarConstPtr const & scalar);
 };
@@ -495,6 +497,12 @@ protected:
     {
         T result;
         castUnsafeV(1, typeCode, (void*)&result, stype, src);
+        put(result);
+    }
+    virtual void assign(const PVScalar& scalar)
+    {
+        T result;
+        scalar.getAs((void*)&result, typeCode);
         put(result);
     }
 
@@ -652,6 +660,7 @@ public:
     {
         getAs(ID, (void*)ptr, count, offset);
     }
+    virtual void getAs(ScalarType, void*, size_t, size_t) const = 0;
 
     template<ScalarType ID>
     inline void putFrom(const typename ScalarTypeTraits<ID>::type* ptr,
@@ -659,11 +668,12 @@ public:
     {
         putFrom(ID, (const void*)ptr, count, offset);
     }
+    virtual void putFrom(ScalarType, const void*, size_t ,size_t) = 0;
+
+    virtual void assign(const PVScalarArray& pv) = 0;
 
 protected:
     PVScalarArray(ScalarArrayConstPtr const & scalarArray);
-    virtual void getAs(ScalarType, void*, size_t, size_t) const = 0;
-    virtual void putFrom(ScalarType, const void*, size_t ,size_t) = 0;
 private:
     friend class PVDataCreate;
 };
@@ -1079,11 +1089,6 @@ public:
     	return o << *(get() + index);
     }
 
-protected:
-    PVValueArray(ScalarArrayConstPtr const & scalar)
-    : PVScalarArray(scalar) {}
-    friend class PVDataCreate;
-
     virtual void getAs(ScalarType dtype, void* ptr, size_t count, size_t offset) const
     {
         castUnsafeV(count, dtype, ptr, typeCode, (const void*)(get()+offset));
@@ -1092,6 +1097,17 @@ protected:
     {
         castUnsafeV(count, typeCode, (void*)(get()+offset), dtype, ptr);
     }
+
+    virtual void assign(const PVScalarArray& pv)
+    {
+        setLength(pv.getLength());
+        pv.getAs(typeCode, (void*)get(), std::min(getLength(),pv.getLength()), 0);
+    }
+
+protected:
+    PVValueArray(ScalarArrayConstPtr const & scalar)
+    : PVScalarArray(scalar) {}
+    friend class PVDataCreate;
 };
 
 template<typename T>
