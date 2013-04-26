@@ -113,7 +113,7 @@ public:
      * If a PVField is a structure or array be prepared for a very long string.
      * @param indentLevel indentation level
      */
-    void getString(StringBuilder buf,PVFieldPtr const & pvField,int indentLevel)
+    inline void getString(StringBuilder buf,PVFieldPtr const & pvField,int indentLevel)
     {getString(buf, pvField.get(), indentLevel);}
     /**
      * Convert a PVField to a string.
@@ -137,7 +137,7 @@ public:
      * @param pv The PVField to convert to a string.
      * If the PVField is a structure or array be prepared for a very long string.
      */
-    void getString(StringBuilder buf,PVField const * pvField)
+    inline void getString(StringBuilder buf,PVField const * pvField)
     {getString(buf, pvField, 0);}
      /**
       * Convert from an array of String to a PVScalar
@@ -156,7 +156,11 @@ public:
      * @param from The String value to convert and put into a PV.
      * @throws std::logic_error if the String does not have a valid value.
      */
-    void fromString(PVScalarPtr const & pv, String const & from);
+    void fromString(PVScalarPtr const & pv, String const & from)
+    {
+        pv->putFrom<pvString>(from);
+    }
+
     /**
      * Convert  from a String to a PVScalarArray.
      * The String must be a comma separated set of values optionally enclosed in []

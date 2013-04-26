@@ -464,122 +464,15 @@ size_t Convert::fromString(PVStructurePtr const &pvStructure, StringArray const 
     return processed;
 }
 
-
-void Convert::fromString(PVScalarPtr const &pvScalar, String const & from)
-{
-    ScalarConstPtr scalar = pvScalar->getScalar();
-    ScalarType scalarType = scalar->getScalarType();
-    switch(scalarType) {
-        case pvBoolean: {
-                PVBooleanPtr pv = static_pointer_cast<PVBoolean>(pvScalar);
-                bool value = 
-                  ((from.compare("true")==0) ? true : false);
-                pv->put(value);
-                return;
-            }
-        case pvByte : {
-                PVBytePtr pv = static_pointer_cast<PVByte>(pvScalar);
-                int ival;
-                sscanf(from.c_str(),"%d",&ival);
-                int8 value = ival;
-                pv->put(value);
-                return;
-            }
-        case pvShort : {
-                PVShortPtr pv = static_pointer_cast<PVShort>(pvScalar);
-                int ival;
-                sscanf(from.c_str(),"%d",&ival);
-                int16 value = ival;
-                pv->put(value);
-                return;
-            }
-        case pvInt : {
-                PVIntPtr pv = static_pointer_cast<PVInt>(pvScalar);
-                int ival;
-                sscanf(from.c_str(),"%d",&ival);
-                int32 value = ival;
-                pv->put(value);
-                return;
-            }
-        case pvLong : {
-                PVLongPtr pv = static_pointer_cast<PVLong>(pvScalar);
-                int64 ival;
-                sscanf(from.c_str(),"%lld",(long long *)&ival);
-                int64 value = ival;
-                pv->put(value);
-                return;
-            }
-        case pvUByte : {
-                PVUBytePtr pv = static_pointer_cast<PVUByte>(pvScalar);
-                unsigned int ival;
-                sscanf(from.c_str(),"%u",&ival);
-                uint8 value = ival;
-                pv->put(value);
-                return;
-            }
-        case pvUShort : {
-                PVUShortPtr pv = static_pointer_cast<PVUShort>(pvScalar);
-                unsigned int ival;
-                sscanf(from.c_str(),"%u",&ival);
-                uint16 value = ival;
-                pv->put(value);
-                return;
-            }
-        case pvUInt : {
-                PVUIntPtr pv = static_pointer_cast<PVUInt>(pvScalar);
-                unsigned int ival;
-                sscanf(from.c_str(),"%u",&ival);
-                uint32 value = ival;
-                pv->put(value);
-                return;
-            }
-        case pvULong : {
-                PVULongPtr pv = static_pointer_cast<PVULong>(pvScalar);
-                unsigned long long ival;
-                sscanf(from.c_str(),"%llu",(long long unsigned int *)&ival);
-                uint64 value = ival;
-                pv->put(value);
-                return;
-            }
-        case pvFloat : {
-                PVFloatPtr pv = static_pointer_cast<PVFloat>(pvScalar);
-                float value;
-                sscanf(from.c_str(),"%f",&value);
-                pv->put(value);
-                return;
-            }
-        case pvDouble : {
-                PVDoublePtr pv = static_pointer_cast<PVDouble>(pvScalar);
-                double value;
-                sscanf(from.c_str(),"%lf",&value);
-                pv->put(value);
-                return;
-            }
-        case pvString: {
-                PVStringPtr value = static_pointer_cast<PVString>(pvScalar);
-                value->put(from);
-                return;
-            }
-    }
-    String message("Convert::fromString unknown scalarType ");
-    ScalarTypeFunc::toString(&message,scalarType);
-    throw std::logic_error(message);
-}
-
 size_t Convert::fromString(PVScalarArrayPtr const &pv, String from)
 {
    if(from[0]=='[' && from[from.length()]==']') {
         size_t offset = from.rfind(']');
         from = from.substr(1, offset);
     }
-    std::vector<String> valueList = split(from);
+    std::vector<String> valueList(split(from));
     size_t length = valueList.size();
-    StringArray valueArray = StringArray(length);
-    for(size_t i=0; i<length; i++) {
-        String value = valueList[i];
-        valueArray[i] = value;
-    }
-    size_t num = fromStringArray(pv,0,length,valueArray,0);
+    size_t num = fromStringArray(pv,0,length,valueList,0);
     if(num<length) length = num;
     pv->setLength(length);
     return length;
