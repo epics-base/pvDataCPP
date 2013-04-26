@@ -113,14 +113,16 @@ public:
      * If a PVField is a structure or array be prepared for a very long string.
      * @param indentLevel indentation level
      */
-    void getString(StringBuilder buf,PVFieldPtr const & pvField,int indentLevel);
+    void getString(StringBuilder buf,PVFieldPtr const & pvField,int indentLevel)
+    {getString(buf, pvField.get(), indentLevel);}
     /**
      * Convert a PVField to a string.
      * param buf buffer for the result
      * @param pv The PVField to convert to a string.
      * If the PVField is a structure or array be prepared for a very long string.
      */
-    void getString(StringBuilder buf,PVFieldPtr const & pvField);
+    inline void getString(StringBuilder buf,PVFieldPtr const & pvField)
+    {getString(buf, pvField.get(), 0);}
     /**
      * Convert a PVField to a string.
      * @param buf buffer for the result
@@ -135,7 +137,8 @@ public:
      * @param pv The PVField to convert to a string.
      * If the PVField is a structure or array be prepared for a very long string.
      */
-    void getString(StringBuilder buf,PVField const * pvField);
+    void getString(StringBuilder buf,PVField const * pvField)
+    {getString(buf, pvField, 0);}
      /**
       * Convert from an array of String to a PVScalar
       * @param pv The PV.
