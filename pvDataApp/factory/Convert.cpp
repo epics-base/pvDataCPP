@@ -371,8 +371,6 @@ static size_t convertFromDoubleArray(PVScalarArray *pv, size_t offset,
     size_t len,const double from[], size_t fromOffset);
 static size_t convertToDoubleArray(PVScalarArray *pv, size_t offset,
     size_t len,double to[], size_t toOffset);
-static size_t convertFromStringArray(PVScalarArray *pv, size_t offset,
-    size_t len,const StringArray & from, size_t fromOffset);
 static size_t convertToStringArray(PVScalarArray *pv, size_t offset,
     size_t len,StringArray & to, size_t toOffset);
 
@@ -478,10 +476,17 @@ size_t Convert::fromString(PVScalarArrayPtr const &pv, String from)
     return length;
 }
 
-size_t Convert::fromStringArray(PVScalarArrayPtr const &pv, size_t offset, size_t length,
-    StringArray const & from, size_t fromOffset)
+size_t Convert::fromStringArray(PVScalarArrayPtr const &pv,
+                                size_t offset, size_t length,
+                                StringArray const & from,
+                                size_t fromOffset)
 {
-    return convertFromStringArray(pv.get(),offset,length,from,fromOffset);
+    size_t alen = pv->getLength();
+    if(fromOffset>alen) return 0;
+    alen -= fromOffset;
+    if(length>alen) length=alen;
+    pv->putFrom<pvString>(&from[fromOffset], length, offset);
+    return length;
 }
 
 size_t Convert::toStringArray(PVScalarArrayPtr const & pv, size_t offset, size_t length,
@@ -1681,215 +1686,6 @@ size_t convertToDoubleArray(PVScalarArray * pv,
     size_t offset, size_t len,double to[], size_t toOffset)
 {
     return convertToScalarArray<double>(pv,offset,len,to,toOffset);
-}
-
-size_t convertFromStringArray(PVScalarArray *pv,
-    size_t offset, size_t len,const StringArray & from, size_t fromOffset)
-{
-    ScalarType elemType = pv->getScalarArray()->getElementType();
-    size_t ntransfered = 0;
-    switch (elemType) {
-    case pvBoolean: {
-        PVBooleanArray *pvdata = static_cast<PVBooleanArray*>(pv);
-        boolean data[1];
-        while (len > 0) {
-            String fromString = from[fromOffset];
-            data[0] = (fromString.compare("true")==0) ? true : false;
-            if (pvdata->put(offset, 1, data, 0) == 0)
-                return ntransfered;
-            --len;
-            ++ntransfered;
-            ++offset;
-            ++fromOffset;
-        }
-        return ntransfered;
-    }
-    case pvByte: {
-        PVByteArray *pvdata = static_cast<PVByteArray*>(pv);
-        int8 data[1];
-        while (len > 0) {
-            String fromString = from[fromOffset];
-            int ival;
-            sscanf(fromString.c_str(),"%d",&ival);
-            data[0] = ival;
-            if (pvdata->put(offset, 1, data, 0) == 0)
-                return ntransfered;
-            --len;
-            ++ntransfered;
-            ++offset;
-            ++fromOffset;
-        }
-        return ntransfered;
-    }
-    case pvShort: {
-        PVShortArray *pvdata = static_cast<PVShortArray*>(pv);
-        int16 data[1];
-        while (len > 0) {
-            String fromString = from[fromOffset];
-            int ival;
-            sscanf(fromString.c_str(),"%d",&ival);
-            data[0] = ival;
-            if (pvdata->put(offset, 1, data, 0) == 0)
-                return ntransfered;
-            --len;
-            ++ntransfered;
-            ++offset;
-            ++fromOffset;
-        }
-        return ntransfered;
-    }
-    case pvInt: {
-        PVIntArray *pvdata = static_cast<PVIntArray*>(pv);
-        int32 data[1];
-        while (len > 0) {
-            String fromString = from[fromOffset];
-            int ival;
-            sscanf(fromString.c_str(),"%d",&ival);
-            data[0] = ival;
-            if (pvdata->put(offset, 1, data, 0) == 0)
-                return ntransfered;
-            --len;
-            ++ntransfered;
-            ++offset;
-            ++fromOffset;
-        }
-        return ntransfered;
-    }
-    case pvLong: {
-        PVLongArray *pvdata = static_cast<PVLongArray*>(pv);
-        int64 data[1];
-        while (len > 0) {
-            String fromString = from[fromOffset];
-            int64 ival;
-            sscanf(fromString.c_str(),"%lld",(long long int *)&ival);
-            data[0] = ival;
-            if (pvdata->put(offset, 1, data, 0) == 0)
-                return ntransfered;
-            --len;
-            ++ntransfered;
-            ++offset;
-            ++fromOffset;
-        }
-        return ntransfered;
-    }
-    case pvUByte: {
-        PVUByteArray *pvdata = static_cast<PVUByteArray*>(pv);
-        uint8 data[1];
-        while (len > 0) {
-            String fromString = from[fromOffset];
-            unsigned int ival;
-            sscanf(fromString.c_str(),"%u",&ival);
-            data[0] = ival;
-            if (pvdata->put(offset, 1, data, 0) == 0)
-                return ntransfered;
-            --len;
-            ++ntransfered;
-            ++offset;
-            ++fromOffset;
-        }
-        return ntransfered;
-    }
-    case pvUShort: {
-        PVUShortArray *pvdata = static_cast<PVUShortArray*>(pv);
-        uint16 data[1];
-        while (len > 0) {
-            String fromString = from[fromOffset];
-            unsigned int ival;
-            sscanf(fromString.c_str(),"%u",&ival);
-            data[0] = ival;
-            if (pvdata->put(offset, 1, data, 0) == 0)
-                return ntransfered;
-            --len;
-            ++ntransfered;
-            ++offset;
-            ++fromOffset;
-        }
-        return ntransfered;
-    }
-    case pvUInt: {
-        PVUIntArray *pvdata = static_cast<PVUIntArray*>(pv);
-        uint32 data[1];
-        while (len > 0) {
-            String fromString = from[fromOffset];
-            unsigned int ival;
-            sscanf(fromString.c_str(),"%u",&ival);
-            data[0] = ival;
-            if (pvdata->put(offset, 1, data, 0) == 0)
-                return ntransfered;
-            --len;
-            ++ntransfered;
-            ++offset;
-            ++fromOffset;
-        }
-        return ntransfered;
-    }
-    case pvULong: {
-        PVULongArray *pvdata = static_cast<PVULongArray*>(pv);
-        uint64 data[1];
-        while (len > 0) {
-            String fromString = from[fromOffset];
-            uint64 ival;
-            sscanf(fromString.c_str(),"%lld",(unsigned long long int *)&ival);
-            data[0] = ival;
-            if (pvdata->put(offset, 1, data, 0) == 0)
-                return ntransfered;
-            --len;
-            ++ntransfered;
-            ++offset;
-            ++fromOffset;
-        }
-        return ntransfered;
-    }
-    case pvFloat: {
-        PVFloatArray *pvdata = static_cast<PVFloatArray*>(pv);
-        float data[1];
-        while (len > 0) {
-            String fromString = from[fromOffset];
-            float fval;
-            sscanf(fromString.c_str(),"%f",&fval);
-            data[0] = fval;
-            if (pvdata->put(offset, 1, data, 0) == 0)
-                return ntransfered;
-            --len;
-            ++ntransfered;
-            ++offset;
-            ++fromOffset;
-        }
-        return ntransfered;
-    }
-    case pvDouble: {
-        PVDoubleArray *pvdata = static_cast<PVDoubleArray*>(pv);
-        double data[1];
-        while (len > 0) {
-            String fromString = from[fromOffset];
-            double fval;
-            sscanf(fromString.c_str(),"%lf",&fval);
-            data[0] = fval;
-            if (pvdata->put(offset, 1, data, 0) == 0)
-                return ntransfered;
-            --len;
-            ++ntransfered;
-            ++offset;
-            ++fromOffset;
-        }
-        return ntransfered;
-    }
-    case pvString:
-        PVStringArray *pvdata = static_cast<PVStringArray*>(pv);
-        while (len > 0) {
-            String * xxx = const_cast<String *>(get(from));
-            size_t n = pvdata->put(offset, len, xxx, fromOffset);
-            if (n == 0)
-                break;
-            len -= n;
-            offset += n;
-            fromOffset += n;
-            ntransfered += n;
-        }
-        return ntransfered;
-    }
-    String message("Convert::convertFromStringArray should never get here");
-    throw std::logic_error(message);
 }
 
 size_t convertToStringArray(PVScalarArray *pv,
