@@ -45,10 +45,7 @@ static std::vector<String> split(String commaSeparatedList) {
 }
     
 Convert::Convert()
-: pvDataCreate(getPVDataCreate()),
-  trueString("true"),
-  falseString("false"),
-  illegalScalarType("Illegal ScalarType")
+: pvDataCreate(getPVDataCreate())
 {}
 
 
@@ -298,8 +295,7 @@ void Convert::copyStructure(PVStructurePtr const & from, PVStructurePtr const & 
 {
     if(to->isImmutable()) {
         if(from==to) return;
-        String message("Convert.copyStructure destination is immutable");
-        throw std::invalid_argument(message);
+        throw std::invalid_argument("Convert.copyStructure destination is immutable");
     }
     if(from==to) return;
     PVFieldPtrArray const & fromDatas = from->getPVFields();
@@ -342,6 +338,10 @@ void Convert::copyStructure(PVStructurePtr const & from, PVStructurePtr const & 
         if(fromType!=toType) {
             String message("Convert.copyStructure Illegal copyStructure");
             throw std::invalid_argument(message);
+        }
+        if(toData->isImmutable()) {
+            if(fromData==toData) return;
+            throw std::invalid_argument("Convert.copyStructure destination is immutable");
         }
         switch(fromType) {
         case scalar:
@@ -413,10 +413,6 @@ ConvertPtr Convert::getConvert()
         convert = ConvertPtr(new Convert());
     }
     return convert;
-}
-
-ConvertPtr getConvert() {
-    return Convert::getConvert();
 }
 
 }}

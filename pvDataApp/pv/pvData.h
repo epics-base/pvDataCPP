@@ -501,6 +501,10 @@ protected:
     }
     virtual void assign(const PVScalar& scalar)
     {
+        if(this==&scalar)
+            return;
+        if(isImmutable())
+            throw std::invalid_argument("Destination is immutable");
         T result;
         scalar.getAs((void*)&result, typeCode);
         put(result);

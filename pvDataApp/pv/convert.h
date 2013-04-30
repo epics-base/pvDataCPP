@@ -89,7 +89,7 @@ public:
      * @param  Second field
      * @return (false, true) if the fields (are not, are) the same.
      */
-    bool equals(PVFieldPtr const &a,PVFieldPtr const &b)
+    inline bool equals(PVFieldPtr const &a,PVFieldPtr const &b)
     {
         return *a==*b;
     }
@@ -101,7 +101,7 @@ public:
      * @param  Second field
      * @return (false, true) if the fields (are not, are) the same.
      */
-    bool equals(PVField &a,PVField &b)
+    inline bool equals(PVField &a,PVField &b)
     {
         return a==b;
     }
@@ -820,12 +820,9 @@ public:
 private:
     Convert();
     PVDataCreatePtr pvDataCreate;
-    String trueString;
-    String falseString;
-    String illegalScalarType;
 };
 
-extern ConvertPtr getConvert();
+static inline ConvertPtr getConvert() { return Convert::getConvert(); }
     
 }}
 #endif  /* CONVERT_H */
