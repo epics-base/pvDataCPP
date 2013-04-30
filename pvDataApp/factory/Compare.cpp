@@ -171,13 +171,15 @@ bool compareField(PVScalarArray* left, PVScalarArray* right)
 
 bool compareField(PVStructure* left, PVStructure* right)
 {
-    if(left->getStructure()!=right->getStructure())
+    StructureConstPtr ls = left->getStructure();
+
+    if(*ls!=*right->getStructure())
         return false;
 
     const PVFieldPtrArray& lf = left->getPVFields();
     const PVFieldPtrArray& rf = right->getPVFields();
 
-    for(size_t i=0, nfld=left->getNumberFields(); i<nfld; i++) {
+    for(size_t i=0, nfld=ls->getNumberFields(); i<nfld; i++) {
         if(*lf[i]!=*rf[i])
             return false;
     }

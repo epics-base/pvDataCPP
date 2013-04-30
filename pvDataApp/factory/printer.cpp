@@ -59,7 +59,7 @@ void PrinterBase::impl_print(const PVField& pv)
                 const PVFieldPtrArray& vals = fld.getPVFields();
 
                 beginStructure(fld);
-                for(size_t i=0, nfld=fld.getNumberFields(); i<nfld; i++)
+                for(size_t i=0, nfld=fld.getStructure()->getNumberFields(); i<nfld; i++)
                     this->print(*vals[i]);
                 endStructure(fld);
             }
