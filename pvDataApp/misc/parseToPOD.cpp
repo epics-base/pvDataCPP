@@ -420,20 +420,16 @@ void handleParseError(int err)
 
 namespace epics { namespace pvData { namespace detail {
 
-void parseToPOD(const std::string& in, int8 *out) {
-    epicsInt8 temp;
-    int err = epicsParseInt8(in.c_str(), &temp, 0, NULL);
-    if(err)   handleParseError(err);
-    else      *out = temp;
-}
-
 #define INTFN(T, S) \
 void parseToPOD(const std::string& in, T *out) { \
-    int err = epicsParse ## S(in.c_str(), out, 0, NULL); \
+    epics ## S temp; \
+    int err = epicsParse ## S (in.c_str(), &temp, 0, NULL); \
     if(err)   handleParseError(err); \
+    else      *out = temp; \
 }
 
 INTFN(char, Int8);
+INTFN(int8_t, Int8);
 INTFN(uint8_t, UInt8);
 INTFN(int16_t, Int16);
 INTFN(uint16_t, UInt16);
