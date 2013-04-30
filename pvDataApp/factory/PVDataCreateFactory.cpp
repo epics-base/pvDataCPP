@@ -672,7 +672,7 @@ PVScalarArrayPtr PVDataCreate::createPVScalarArray(
 {
      PVScalarArrayPtr pvArray = createPVScalarArray(
           arrayToClone->getScalarArray()->getElementType());
-     getConvert()->copyScalarArray(arrayToClone,0, pvArray,0,arrayToClone->getLength());
+     pvArray->assign(*arrayToClone.get());
      PVAuxInfoPtr from = arrayToClone->getPVAuxInfo();
      PVAuxInfoPtr to = pvArray->getPVAuxInfo();
      PVAuxInfo::PVInfoMap & map = from->getInfoMap();

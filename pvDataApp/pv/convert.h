@@ -255,22 +255,6 @@ public:
         ScalarArrayConstPtr const & from,
         ScalarArrayConstPtr const & to);
     /**
-     * Convert from a source PV array to a destination PV array.
-     * @param from The source array.
-     * @param offset Starting element in the source.
-     * @param to The destination array.
-     * @param toOffset Starting element in the array.
-     * @param length Number of elements to transfer.
-     * @return Number of elements converted.
-     * @throws std::invalid_argument if the arguments are not compatible.
-     */
-    std::size_t copyScalarArray(
-        PVScalarArrayPtr const & from,
-        std::size_t offset,
-        PVScalarArrayPtr const & to,
-        std::size_t toOffset,
-        std::size_t length);
-    /**
      * Are from and to valid arguments for copyStructure.
      * They are only compatible if they have the same Structure description.
      * @param from from structure.

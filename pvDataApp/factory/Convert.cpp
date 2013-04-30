@@ -546,8 +546,7 @@ void Convert::copy(PVFieldPtr const & from, PVFieldPtr const & to)
         {
              PVScalarArrayPtr fromArray = static_pointer_cast<PVScalarArray>(from);
              PVScalarArrayPtr toArray = static_pointer_cast<PVScalarArray>(to);
-             size_t length = copyScalarArray(fromArray,0,toArray,0,fromArray->getLength());
-             if(toArray->getLength()!=length) toArray->setLength(length);
+             toArray->assign(*fromArray.get());
              return;
         }
     case structure:
@@ -586,98 +585,7 @@ void Convert::copyScalar(PVScalarPtr const & from, PVScalarPtr const & to)
         String message("Convert.copyScalar destination is immutable");
         throw std::invalid_argument(message);
     }
-    ScalarType fromType = from->getScalar()->getScalarType();
-    ScalarType toType = to->getScalar()->getScalarType();
-    switch(fromType) {
-    case pvBoolean: {
-            if(toType!=pvBoolean) {
-                if(toType!=pvString) {
-                    String message("Convert.copyScalar arguments are not compatible");
-                    throw std::invalid_argument(message);
-                }
-            }
-            PVBooleanPtr data = static_pointer_cast<PVBoolean>(from);
-            if(toType==pvString) {
-                PVStringPtr dataTo = static_pointer_cast<PVString>(to);
-                String buf("");
-                data->toString(&buf);
-                dataTo->put(buf);
-            } else {
-                bool value = data->get();
-                PVBooleanPtr dataTo = static_pointer_cast<PVBoolean>(to);
-                dataTo->put(value);
-            }
-            return;
-        }
-    case pvByte : {
-            PVBytePtr data = static_pointer_cast<PVByte>(from);
-            int8 value = data->get();
-            fromByte(to,value);
-            return;
-        }
-    case pvShort : {
-            PVShortPtr data = static_pointer_cast<PVShort>(from);
-            int16 value = data->get();
-            fromShort(to,value);
-            return;
-        } 
-    case pvInt :{
-            PVIntPtr data = static_pointer_cast<PVInt>(from);
-            int32 value = data->get();
-            fromInt(to,value);
-            return;
-        }    
-    case pvLong : {
-            PVLongPtr data = static_pointer_cast<PVLong>(from);
-            int64 value = data->get();
-            fromLong(to,value);
-            return;
-        }  
-    case pvUByte : {
-            PVUBytePtr data = static_pointer_cast<PVUByte>(from);
-            uint8 value = data->get();
-            fromUByte(to,value);
-            return;
-        }
-    case pvUShort : {
-            PVUShortPtr data = static_pointer_cast<PVUShort>(from);
-            uint16 value = data->get();
-            fromUShort(to,value);
-            return;
-        } 
-    case pvUInt :{
-            PVUIntPtr data = static_pointer_cast<PVUInt>(from);
-            uint32 value = data->get();
-            fromUInt(to,value);
-            return;
-        }    
-    case pvULong : {
-            PVULongPtr data = static_pointer_cast<PVULong>(from);
-            uint64 value = data->get();
-            fromULong(to,value);
-            return;
-        }  
-    case pvFloat : {
-            PVFloatPtr data = static_pointer_cast<PVFloat>(from);
-            float value = data->get();
-            fromFloat(to,value);
-            return;
-        }     
-    case pvDouble : {
-            PVDoublePtr data = static_pointer_cast<PVDouble>(from);
-            double value = data->get();
-            fromDouble(to,value);
-            return;
-        }  
-    case pvString: {
-            PVStringPtr data = static_pointer_cast<PVString>(from);
-            String value = data->get();
-            fromString(to,value);
-            return;
-        }
-    }
-    String message("Convert::copyScalar should never get here");
-    throw std::logic_error(message);
+    to->assign(*from.get());
 }
 
 bool Convert::isCopyScalarArrayCompatible(ScalarArrayConstPtr const &fromArray,
@@ -691,99 +599,6 @@ bool Convert::isCopyScalarArrayCompatible(ScalarArrayConstPtr const &fromArray,
     if(toType==pvString) return true;
     if(fromType==pvString) return true;
     return false;
-}
-
-size_t Convert::copyScalarArray(PVScalarArrayPtr const & from, size_t offset,
-    PVScalarArrayPtr const & to, size_t toOffset, size_t length)
-{
-    
-    if(to->isImmutable()) {
-        if(from==to) return from->getLength();
-        String message("Convert.copyArray destination is immutable");
-        throw std::invalid_argument(message);
-    }
-    ScalarType fromElementType = from->getScalarArray()->getElementType();
-    ScalarType toElementType = to->getScalarArray()->getElementType();
-    
-    if(from->isImmutable() && (fromElementType==toElementType)) {
-        if(offset==0 && toOffset==0 && length==from->getLength()) {
-            return copyArrayDataReference(from.get(),to.get());
-        }
-    }
-    
-    size_t ncopy = 0;
-    if(ScalarTypeFunc::isNumeric(fromElementType)
-    && ScalarTypeFunc::isNumeric(toElementType)) {
-        return copyNumericArray(from.get(),offset,to.get(),toOffset,length);
-    } else if(toElementType==pvBoolean && fromElementType==pvBoolean) {
-        PVBooleanArray *pvfrom = static_cast<PVBooleanArray*>(from.get());
-        PVBooleanArray *pvto = static_cast<PVBooleanArray*>(to.get());
-        while(length>0) {
-            size_t num = 0;
-            size_t fromOffset = 0;
-            BooleanArrayData booleanArrayData;
-            num = pvfrom->get(offset,length,booleanArrayData);
-            boolean * data = pvfrom->get();
-            fromOffset = booleanArrayData.offset;
-            if(num<=0) return ncopy;
-            while(num>0) {
-                size_t n = pvto->put(toOffset,num,data,fromOffset);
-                if(n<=0) return ncopy;
-                length -= n; num -= n; ncopy+=n; offset += n; toOffset += n; 
-            }
-        }
-        return ncopy;
-    } else if(toElementType==pvString && fromElementType==pvString) {
-        PVStringArray *pvfrom = static_cast<PVStringArray*>(from.get());
-        PVStringArray *pvto = static_cast<PVStringArray*>(to.get());
-        while(length>0) {
-            size_t num = 0;
-            String *data;
-            size_t fromOffset = 0;
-            StringArrayData stringArrayData;
-            num = pvfrom->get(offset,length,stringArrayData);
-            data = pvfrom->get();
-            fromOffset = stringArrayData.offset;
-            if(num<=0) return ncopy;
-            while(num>0) {
-                size_t n = pvto->put(toOffset,num,data,fromOffset);
-                if(n<=0) return ncopy;
-                length -= n; num -= n; ncopy+=n; offset += n; toOffset += n; 
-            }
-        }
-        return ncopy;
-    } else if(toElementType==pvString) {
-        PVStringArray *pvto = static_cast<PVStringArray*>(to.get());
-        ncopy = from->getLength();
-        if(ncopy>length) ncopy = length;
-        size_t num = ncopy;
-        StringArray toData(1);
-        while(num>0) {
-            toStringArray(from,offset,1,toData,0);
-            if(pvto->put(toOffset,1,&toData[0],0)<=0) break;
-            num--; offset++; toOffset++;
-        }
-        return ncopy;
-    } else if(fromElementType==pvString) {
-        PVStringArray *pvfrom = static_cast<PVStringArray*>(from.get());
-        while(length>0) {
-            size_t num = 0;
-            size_t fromOffset = 0;
-            StringArrayData stringArrayData;
-            num = pvfrom->get(offset,length,stringArrayData);
-            StringArray const & data = stringArrayData.data;
-            fromOffset = stringArrayData.offset;
-            if(num<=0) return ncopy;
-            while(num>0) {
-                size_t n = fromStringArray(to,toOffset,num,data,fromOffset);
-                if(n<=0) return ncopy;
-                length -= n; num -= n; ncopy+=n; offset += n; toOffset += n; 
-            }
-        }
-        return ncopy;
-    }
-    String message("Convert::copyScalarArray should not get here");
-    throw std::logic_error(message);
 }
 
 bool Convert::isCopyStructureCompatible(
@@ -865,7 +680,7 @@ void Convert::copyStructure(PVStructurePtr const & from, PVStructurePtr const & 
                 && (pvArray->getScalarArray()->getElementType()==pvString)) {
                    PVScalarArrayPtr toArray = 
                        static_pointer_cast<PVScalarArray>(toDatas[1]);
-                   copyScalarArray(pvArray,0,toArray,0,pvArray->getLength());
+                   toArray->assign(*pvArray.get());
                    PVScalarPtr toScalar = static_pointer_cast<PVScalar>(toDatas[0]);
                    copyScalar(pvScalar,toScalar);
                    return;
@@ -894,9 +709,7 @@ void Convert::copyStructure(PVStructurePtr const & from, PVStructurePtr const & 
             {
                 PVScalarArrayPtr fromArray = static_pointer_cast<PVScalarArray>(fromData);
                 PVScalarArrayPtr toArray = static_pointer_cast<PVScalarArray>(toData);
-                size_t length = copyScalarArray(
-                    fromArray,0,toArray,0,fromArray->getLength());
-                if(toArray->getLength()!=length) toArray->setLength(length);
+                toArray->assign(*fromArray.get());
                 break;
             }
         case structure:

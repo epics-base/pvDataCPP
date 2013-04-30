@@ -670,7 +670,7 @@ public:
     }
     virtual void putFrom(ScalarType, const void*, size_t ,size_t) = 0;
 
-    virtual void assign(const PVScalarArray& pv) = 0;
+    virtual void assign(PVScalarArray& pv) = 0;
 
 protected:
     PVScalarArray(ScalarArrayConstPtr const & scalarArray);
@@ -1098,10 +1098,19 @@ public:
         castUnsafeV(count, typeCode, (void*)(get()+offset), dtype, ptr);
     }
 
-    virtual void assign(const PVScalarArray& pv)
+    virtual void assign(PVScalarArray& pv)
     {
-        setLength(pv.getLength());
-        pv.getAs(typeCode, (void*)get(), std::min(getLength(),pv.getLength()), 0);
+        if(this==&pv)
+            return;
+        if(isImmutable())
+            throw std::invalid_argument("Destination is immutable");
+        if(pv.isImmutable() && typeCode==pv.getScalarArray()->getElementType()) {
+            PVValueArray& pvr = static_cast<PVValueArray&>(pv);
+            shareData(pvr.getSharedVector(), pvr.getCapacity(), pvr.getLength());
+        } else {
+            setLength(pv.getLength());
+            pv.getAs(typeCode, (void*)get(), std::min(getLength(),pv.getLength()), 0);
+        }
     }
 
 protected:
