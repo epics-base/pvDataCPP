@@ -446,11 +446,13 @@ public:
      * @return number of elements converted
      * @throws std::invalid_argument if the element type is not numeric
      */
+    inline
     std::size_t toByteArray(PVScalarArrayPtr const & pv,
         std::size_t offset,
         std::size_t length,
         int8* to,
-        std::size_t toOffset);
+        std::size_t toOffset)
+    { pv->getAs<pvByte>(to+toOffset, length, offset); return length; }
     /**
      * Convert a PV array to a short array.
      * @param pv a PV
@@ -461,11 +463,13 @@ public:
      * @return number of elements converted
     * @throws std::invalid_argument if the element type is not numeric
     */
+    inline
     std::size_t toShortArray(PVScalarArrayPtr const & pv,
         std::size_t offset,
         std::size_t length,
         int16* to,
-        std::size_t toOffset);
+        std::size_t toOffset)
+    { pv->getAs<pvShort>(to+toOffset, length, offset); return length; }
     /**
      * Convert a PV array to an int array.
      * @param pv a PV
@@ -476,11 +480,13 @@ public:
      * @return number of elements converted
      * @throws std::invalid_argument if the element type is not numeric
      */
+    inline
     std::size_t toIntArray(PVScalarArrayPtr const & pv,
         std::size_t offset,
         std::size_t length,
         int32* to,
-        std::size_t toOffset);
+        std::size_t toOffset)
+    { pv->getAs<pvInt>(to+toOffset, length, offset); return length; }
     /**
      * Convert a PV array to a long array.
      * @param pv a PV
@@ -491,11 +497,13 @@ public:
      * @return number of elements converted
      * @throws std::invalid_argument if the element type is not numeric
      */
+    inline
     std::size_t toLongArray(PVScalarArrayPtr const & pv,
         std::size_t offset,
         std::size_t length,
         int64* to,
-        std::size_t toOffset);
+        std::size_t toOffset)
+    { pv->getAs<pvLong>(to+toOffset, length, offset); return length; }
     /**
      * Convert a PV array to a ubyte array.
      * @param pv a PV
@@ -506,11 +514,13 @@ public:
      * @return number of elements converted
      * @throws std::invalid_argument if the element type is not numeric
      */
+    inline
     std::size_t toUByteArray(PVScalarArrayPtr const & pv,
         std::size_t offset,
         std::size_t length,
         uint8* to,
-        std::size_t toOffset);
+        std::size_t toOffset)
+    { pv->getAs<pvUByte>(to+toOffset, length, offset); return length; }
     /**
      * Convert a PV array to a ushort array.
      * @param pv a PV
@@ -521,11 +531,13 @@ public:
      * @return number of elements converted
     * @throws std::invalid_argument if the element type is not numeric
     */
+    inline
     std::size_t toUShortArray(PVScalarArrayPtr const & pv,
         std::size_t offset,
         std::size_t length,
         uint16* to,
-        std::size_t toOffset);
+        std::size_t toOffset)
+    { pv->getAs<pvUShort>(to+toOffset, length, offset); return length; }
     /**
      * Convert a PV array to an uint array.
      * @param pv a PV
@@ -536,12 +548,14 @@ public:
      * @return number of elements converted
      * @throws std::invalid_argument if the element type is not numeric
      */
+    inline
     std::size_t toUIntArray(
         PVScalarArrayPtr const & pv,
         std::size_t offset,
         std::size_t length,
         uint32* to,
-        std::size_t toOffset);
+        std::size_t toOffset)
+    { pv->getAs<pvUInt>(to+toOffset, length, offset); return length; }
     /**
      * Convert a PV array to a ulong array.
      * @param pv a PV
@@ -552,12 +566,14 @@ public:
      * @return number of elements converted
      * @throws std::invalid_argument if the element type is not numeric
      */
+    inline
     std::size_t toULongArray(
         PVScalarArrayPtr const & pv,
         std::size_t offset,
         std::size_t length,
         uint64* to,
-        std::size_t toOffset);
+        std::size_t toOffset)
+    { pv->getAs<pvULong>(to+toOffset, length, offset); return length; }
      /**
       * Convert a PV array to a float array.
       * @param pv a PV
@@ -568,12 +584,14 @@ public:
       * @return number of elements converted
       * @throws std::invalid_argument if the element type is not numeric
       */
+    inline
     std::size_t toFloatArray(
         PVScalarArrayPtr const & pv,
         std::size_t offset,
         std::size_t length,
         float* to,
-        std::size_t toOffset);
+        std::size_t toOffset)
+    { pv->getAs<pvFloat>(to+toOffset, length, offset); return length; }
     /**
      * Convert a PV array to a double array.
      * @param pv a PV
@@ -584,12 +602,14 @@ public:
      * @return number of elements converted
      * @throws std::invalid_argument if the element type is not numeric
      */
+    inline
     std::size_t toDoubleArray(
         PVScalarArrayPtr const & pv,
         std::size_t offset,
         std::size_t length,
         double* to, std::size_t
-        toOffset);
+        toOffset)
+    { pv->getAs<pvDouble>(to+toOffset, length, offset); return length; }
     /**
      * Convert a PV array from a byte array.
      * @param pv a PV
@@ -600,12 +620,16 @@ public:
      * @return number of elements converted
      * @throws std::invalid_argument if the element type is not numeric
      */
+    inline
     std::size_t fromByteArray(
         PVScalarArrayPtr & pv, std::size_t offset, std::size_t length,
-        const int8* from, std::size_t fromOffset);
+        const int8* from, std::size_t fromOffset)
+    { pv->putFrom<pvByte>(from+fromOffset, length, offset); return length; }
+    inline
     std::size_t fromByteArray(
         PVScalarArrayPtr & pv, std::size_t offset, std::size_t length,
-        const ByteArray & from, std::size_t fromOffset);
+        const ByteArray & from, std::size_t fromOffset)
+    {return fromByteArray(pv, offset, length, &from[0], fromOffset);}
     /**
      * Convert a PV array from a short array.
      * @param pv a PV
@@ -616,12 +640,16 @@ public:
      * @return number of elements converted
      * @throws std::invalid_argument if the element type is not numeric
      */
+    inline
     std::size_t fromShortArray(
         PVScalarArrayPtr & pv, std::size_t offset, std::size_t length,
-        const int16* from, std::size_t fromOffset);
+        const int16* from, std::size_t fromOffset)
+    { pv->putFrom<pvShort>(from+fromOffset, length, offset); return length; }
+    inline
     std::size_t fromShortArray(
         PVScalarArrayPtr & pv, std::size_t offset, std::size_t length,
-        const ShortArray & from, std::size_t fromOffset);
+        const ShortArray & from, std::size_t fromOffset)
+    {return fromShortArray(pv, offset, length, &from[0], fromOffset);}
     /**
      * Convert a PV array from an int array.
      * @param pv a PV
@@ -632,12 +660,16 @@ public:
      * @return number of elements converted
      * @throws std::invalid_argument if the element type is not numeric
      */
+    inline
     std::size_t fromIntArray(
        PVScalarArrayPtr & pv, std::size_t offset, std::size_t length,
-       const int32* from, std::size_t fromOffset);
+       const int32* from, std::size_t fromOffset)
+    { pv->putFrom<pvInt>(from+fromOffset, length, offset); return length; }
+    inline
     std::size_t fromIntArray(
        PVScalarArrayPtr & pv, std::size_t offset, std::size_t length,
-       const IntArray & from, std::size_t fromOffset);
+       const IntArray & from, std::size_t fromOffset)
+    {return fromIntArray(pv, offset, length, &from[0], fromOffset);}
     /**
      * Convert a PV array from a long array.
      * @param pv a PV
@@ -648,12 +680,16 @@ public:
      * @return number of elements converted
      * @throws std::invalid_argument if the element type is not numeric
      */
+    inline
     std::size_t fromLongArray(
         PVScalarArrayPtr & pv, std::size_t offset, std::size_t length,
-        const int64* from, std::size_t fromOffset);
+        const int64* from, std::size_t fromOffset)
+    { pv->putFrom<pvLong>(from+fromOffset, length, offset); return length; }
+    inline
     std::size_t fromLongArray(
         PVScalarArrayPtr & pv, std::size_t offset, std::size_t length,
-        const LongArray & from, std::size_t fromOffset);
+        const LongArray & from, std::size_t fromOffset)
+    {return fromLongArray(pv, offset, length, &from[0], fromOffset);}
     /**
      * Convert a PV array from a ubyte array.
      * @param pv a PV
@@ -664,12 +700,16 @@ public:
      * @return number of elements converted
      * @throws std::invalid_argument if the element type is not numeric
      */
+    inline
     std::size_t fromUByteArray(
         PVScalarArrayPtr & pv, std::size_t offset, std::size_t length,
-        const uint8* from, std::size_t fromOffset);
+        const uint8* from, std::size_t fromOffset)
+    { pv->putFrom<pvUByte>(from+fromOffset, length, offset); return length; }
+    inline
     std::size_t fromUByteArray(
         PVScalarArrayPtr & pv, std::size_t offset, std::size_t length,
-        const UByteArray & from, std::size_t fromOffset);
+        const UByteArray & from, std::size_t fromOffset)
+    {return fromUByteArray(pv, offset, length, &from[0], fromOffset);}
     /**
      * Convert a PV array from a ushort array.
      * @param pv a PV
@@ -680,12 +720,16 @@ public:
      * @return number of elements converted
      * @throws std::invalid_argument if the element type is not numeric
      */
+    inline
     std::size_t fromUShortArray(
         PVScalarArrayPtr & pv, std::size_t offset, std::size_t length,
-        const uint16* from, std::size_t fromOffset);
+        const uint16* from, std::size_t fromOffset)
+    { pv->putFrom<pvUShort>(from+fromOffset, length, offset); return length; }
+    inline
     std::size_t fromUShortArray(
         PVScalarArrayPtr & pv, std::size_t offset, std::size_t length,
-        const UShortArray & from, std::size_t fromOffset);
+        const UShortArray & from, std::size_t fromOffset)
+    {return fromUShortArray(pv, offset, length, &from[0], fromOffset);}
     /**
      * Convert a PV array from an uint array.
      * @param pv a PV
@@ -696,12 +740,16 @@ public:
      * @return number of elements converted
      * @throws std::invalid_argument if the element type is not numeric
      */
+    inline
     std::size_t fromUIntArray(
         PVScalarArrayPtr & pv, std::size_t offset, std::size_t length,
-        const uint32* from, std::size_t fromOffset);
+        const uint32* from, std::size_t fromOffset)
+    { pv->putFrom<pvUInt>(from+fromOffset, length, offset); return length; }
+    inline
     std::size_t fromUIntArray(
         PVScalarArrayPtr & pv, std::size_t offset, std::size_t length,
-        const UIntArray & from, std::size_t fromOffset);
+        const UIntArray & from, std::size_t fromOffset)
+    {return fromUIntArray(pv, offset, length, &from[0], fromOffset);}
     /**
      * Convert a PV array from a ulong array.
      * @param pv a PV
@@ -712,12 +760,16 @@ public:
      * @return number of elements converted
      * @throws std::invalid_argument if the element type is not numeric
      */
+    inline
     std::size_t fromULongArray(
         PVScalarArrayPtr & pv, std::size_t offset, std::size_t length,
-        const uint64* from, std::size_t fromOffset);
+        const uint64* from, std::size_t fromOffset)
+    { pv->putFrom<pvULong>(from+fromOffset, length, offset); return length; }
+    inline
     std::size_t fromULongArray(
         PVScalarArrayPtr & pv, std::size_t offset, std::size_t length,
-        const ULongArray & from, std::size_t fromOffset);
+        const ULongArray & from, std::size_t fromOffset)
+    {return fromULongArray(pv, offset, length, &from[0], fromOffset);}
     /**
      * Convert a PV array from a float array.
      * @param pv a PV
@@ -728,12 +780,16 @@ public:
      * @return number of elements converted
      * @throws std::invalid_argument if the element type is not numeric
      */
+    inline
     std::size_t fromFloatArray(
         PVScalarArrayPtr & pv, std::size_t offset, std::size_t length,
-        const float* from, std::size_t fromOffset);
+        const float* from, std::size_t fromOffset)
+    { pv->putFrom<pvFloat>(from+fromOffset, length, offset); return length; }
+    inline
     std::size_t fromFloatArray(
         PVScalarArrayPtr & pv, std::size_t offset, std::size_t length,
-        const FloatArray & from, std::size_t fromOffset);
+        const FloatArray & from, std::size_t fromOffset)
+    {return fromFloatArray(pv, offset, length, &from[0], fromOffset);}
     /**
      * Convert a PV array from a double array.
      * @param pv a PV
@@ -744,12 +800,16 @@ public:
      * @return number of elements converted
      * @throws std::invalid_argument if the element type is not numeric
      */
+    inline
     std::size_t fromDoubleArray(
         PVScalarArrayPtr & pv, std::size_t offset, std::size_t length,
-        const double* from, std::size_t fromOffset);
+        const double* from, std::size_t fromOffset)
+    { pv->putFrom<pvDouble>(from+fromOffset, length, offset); return length; }
+    inline
     std::size_t fromDoubleArray(
         PVScalarArrayPtr & pv, std::size_t offset, std::size_t length,
-        const DoubleArray & from, std::size_t fromOffset);
+        const DoubleArray & from, std::size_t fromOffset)
+    {return fromDoubleArray(pv, offset, length, &from[0], fromOffset);}
     /**
      * Convenience method for implementing toString.
      * It generates a newline and inserts blanks at the beginning of the newline.
