@@ -297,145 +297,145 @@ public:
      * @param pv a PV
      * @return converted value
      */
-    int8 toByte(PVScalarPtr const & pv);
+    inline int8 toByte(PVScalarPtr const & pv) { return pv->getAs<pvByte>();}
     /**
      * Convert a PV to a short.
      * @param pv a PV
      * @return converted value
      * @throws std::invalid_argument if the Type is not a numeric scalar
      */
-    int16 toShort(PVScalarPtr const & pv);
+    inline int16 toShort(PVScalarPtr const & pv) { return pv->getAs<pvShort>();}
     /**
      * Convert a PV to a int.
      * @param pv a PV
      * @return converted value
      * @throws std::invalid_argument if the Type is not a numeric scalar
      */
-    int32 toInt(PVScalarPtr const & pv);
+    inline int32 toInt(PVScalarPtr const & pv) { return pv->getAs<pvInt>();}
     /**
      * Convert a PV to an long
      * @param pv a PV
      * @return converted value
      * @throws std::invalid_argument if the Type is not a numeric scalar
      */
-    int64 toLong(PVScalarPtr const & pv);
+    inline int64 toLong(PVScalarPtr const & pv) { return pv->getAs<pvLong>();}
     /**
      * Convert a PV to a ubyte.
      * @param pv a PV
      * @return converted value
      */
-    uint8 toUByte(PVScalarPtr const & pv);
+    inline uint8 toUByte(PVScalarPtr const & pv) { return pv->getAs<pvUByte>();}
     /**
      * Convert a PV to a ushort.
      * @param pv a PV
      * @return converted value
      * @throws std::invalid_argument if the Type is not a numeric scalar
      */
-    uint16 toUShort(PVScalarPtr const & pv);
+    inline uint16 toUShort(PVScalarPtr const & pv) { return pv->getAs<pvUShort>();}
     /**
      * Convert a PV to a uint.
      * @param pv a PV
      * @return converted value
      * @throws std::invalid_argument if the Type is not a numeric scalar
      */
-    uint32 toUInt(PVScalarPtr const & pv);
+    inline uint32 toUInt(PVScalarPtr const & pv) { return pv->getAs<pvUInt>();}
     /**
      * Convert a PV to an ulong
      * @param pv a PV
      * @return converted value
      * @throws std::invalid_argument if the Type is not a numeric scalar
      */
-    uint64 toULong(PVScalarPtr const & pv);
+    inline uint64 toULong(PVScalarPtr const & pv) { return pv->getAs<pvULong>();}
     /**
      * Convert a PV to a float
      * @param pv a PV
      * @return converted value
      * @throws std::invalid_argument if the Type is not a numeric scalar
      */
-    float toFloat(PVScalarPtr const & pv);
+    inline float toFloat(PVScalarPtr const & pv) { return pv->getAs<pvFloat>();}
     /**
      * Convert a PV to a double
      * @param pv a PV
      * @return converted value
      * @throws std::invalid_argument if the Type is not a numeric scalar
      */
-    double toDouble(PVScalarPtr const & pv);
+    inline double toDouble(PVScalarPtr const & pv) { return pv->getAs<pvDouble>();}
     /**
      * Convert a PV to a String
      * @param pv a PV
      * @return converted value
      */
-    String toString(PVScalarPtr const & pv);
+    inline String toString(PVScalarPtr const & pv) { return pv->getAs<pvString>();}
     /**
      * Convert a PV from a byte
      * @param pv a PV
      * @param from value to put into PV
      * @throws std::invalid_argument if the Type is not a numeric scalar
      */
-    void fromByte(PVScalarPtr const & pv,int8 from);
+    inline void fromByte(PVScalarPtr const & pv,int8 from) { pv->putFrom<pvByte>(from); }
     /**
      * Convert a PV from a short
      * @param pv a PV
      * @param from value to put into PV
      * @throws std::invalid_argument if the Type is not a numeric scalar
      */
-    void fromShort(PVScalarPtr const & pv,int16 from);
+    inline void fromShort(PVScalarPtr const & pv,int16 from) { pv->putFrom<pvShort>(from); }
     /**
      * Convert a PV from an int
      * @param pv a PV
      * @param from value to put into PV
      * @throws std::invalid_argument if the Type is not a numeric scalar
      */
-    void fromInt(PVScalarPtr const & pv, int32 from);
+    inline void fromInt(PVScalarPtr const & pv, int32 from) { pv->putFrom<pvInt>(from); }
     /**
      * Convert a PV from a long
      * @param pv a PV
      * @param from value to put into PV
      * @throws std::invalid_argument if the Type is not a numeric scalar
      */
-    void fromLong(PVScalarPtr const & pv, int64 from);
+    inline void fromLong(PVScalarPtr const & pv, int64 from) { pv->putFrom<pvLong>(from); }
     /**
      * Convert a PV from a ubyte
      * @param pv a PV
      * @param from value to put into PV
      * @throws std::invalid_argument if the Type is not a numeric scalar
      */
-    void fromUByte(PVScalarPtr const & pv,uint8 from);
+    inline void fromUByte(PVScalarPtr const & pv,uint8 from) { pv->putFrom<pvUByte>(from); }
     /**
      * Convert a PV from a ushort
      * @param pv a PV
      * @param from value to put into PV
      * @throws std::invalid_argument if the Type is not a numeric scalar
      */
-    void fromUShort(PVScalarPtr const & pv,uint16 from);
+    inline void fromUShort(PVScalarPtr const & pv,uint16 from) { pv->putFrom<pvUShort>(from); }
     /**
      * Convert a PV from an uint
      * @param pv a PV
      * @param from value to put into PV
      * @throws std::invalid_argument if the Type is not a numeric scalar
      */
-    void fromUInt(PVScalarPtr const & pv, uint32 from);
+    inline void fromUInt(PVScalarPtr const & pv, uint32 from) { pv->putFrom<pvUInt>(from); }
     /**
      * Convert a PV from a ulong
      * @param pv a PV
      * @param from value to put into PV
      * @throws std::invalid_argument if the Type is not a numeric scalar
      */
-    void fromULong(PVScalarPtr const & pv, uint64 from);
+    inline void fromULong(PVScalarPtr const & pv, uint64 from) { pv->putFrom<pvULong>(from); }
     /**
      * Convert a PV from a float
      * @param pv a PV
      * @param from value to put into PV
      * @throws std::invalid_argument if the Type is not a numeric scalar
      */
-    void fromFloat(PVScalarPtr const & pv, float from);
+    inline void fromFloat(PVScalarPtr const & pv, float from) { pv->putFrom<pvFloat>(from); }
     /**
      * Convert a PV from a double
      * @param pv a PV
      * @param from value to put into PV
      * @throws std::invalid_argument if the Type is not a numeric scalar
      */
-    void fromDouble(PVScalarPtr const & pv, double from);
+    inline void fromDouble(PVScalarPtr const & pv, double from) { pv->putFrom<pvDouble>(from); }
     /**
      * Convert a PV array to a byte array.
      * @param pv a PV
