@@ -1,4 +1,6 @@
 
+#include <deque>
+
 #include "pv/printer.h"
 
 namespace {
@@ -46,36 +48,79 @@ void PrinterBase::encodeScalar(const PVScalar& pv) {}
 
 void PrinterBase::encodeArray(const PVScalarArray&) {}
 
-void PrinterBase::abortField(const PVField&) {}
-
 void PrinterBase::impl_print(const PVField& pv)
 {
-    try {
-        switch(pv.getField()->getType()) {
-        case scalar: encodeScalar(static_cast<const PVScalar&>(pv)); return;
-        case scalarArray: encodeArray(static_cast<const PVScalarArray&>(pv)); return;
-        case structure: {
-                const PVStructure &fld = static_cast<const PVStructure&>(pv);
-                const PVFieldPtrArray& vals = fld.getPVFields();
+    /* Depth first recursive iteration.
+     * Each PV to be printed is appended to the todo queue.
+     * The last child of a structure is followed by a NULL.
+     * As the tree is walked structures and structarrays
+     * are appended to the inprog queue.
+     */
+    std::deque<const PVField*> todo, inprog;
 
-                beginStructure(fld);
-                for(size_t i=0, nfld=fld.getStructure()->getNumberFields(); i<nfld; i++)
-                    this->print(*vals[i]);
-                endStructure(fld);
+    todo.push_back(&pv);
+
+    while(!todo.empty()) {
+        const PVField *next = todo.front();
+        todo.pop_front();
+
+        if(!next) {
+            // finished with a structure or structarray,
+            // now we fall back to its parent.
+            assert(!inprog.empty());
+            switch(inprog.back()->getField()->getType()) {
+            case structure:
+                endStructure(*static_cast<const PVStructure *>(inprog.back()));
+                break;
+
+            case structureArray:
+                endStructureArray(*static_cast<const PVStructureArray *>(inprog.back()));
+                break;
+
+            default:
+                assert(false); // oops!
+                return;
             }
-        case structureArray: {
-                const PVStructureArray &fld = static_cast<const PVStructureArray&>(pv);
-                const PVStructureArray::pointer vals = fld.get();
+            inprog.pop_back();
 
-                beginStructureArray(fld);
-                for(size_t i=0, nfld=fld.getLength(); i<nfld; i++)
-                    this->print(*vals[i]);
-                endStructureArray(fld);
+        } else {
+            // real field
+
+            switch(next->getField()->getType()) {
+            case scalar:
+                encodeScalar(*static_cast<const PVScalar*>(next));
+                break;
+            case scalarArray:
+                encodeArray(*static_cast<const PVScalarArray*>(next));
+                break;
+            case structure: {
+                    const PVStructure &fld = *static_cast<const PVStructure*>(next);
+                    const PVFieldPtrArray& vals = fld.getPVFields();
+
+                    inprog.push_back(next);
+
+                    beginStructure(fld);
+                    for(size_t i=0, nfld=fld.getStructure()->getNumberFields(); i<nfld; i++)
+                        todo.push_back(vals[i].get());
+
+                    todo.push_back(NULL);
+                    break;
+                }
+            case structureArray: {
+                    const PVStructureArray &fld = *static_cast<const PVStructureArray*>(next);
+                    const PVStructureArray::pointer vals = fld.get();
+
+                    inprog.push_back(next);
+
+                    beginStructureArray(fld);
+                    for(size_t i=0, nfld=fld.getLength(); i<nfld; i++)
+                        todo.push_back(vals[i].get());
+
+                    todo.push_back(NULL);
+                    break;
+                }
             }
         }
-    } catch(...) {
-        abortField(pv);
-        throw;
     }
 }
 

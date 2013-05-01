@@ -28,8 +28,6 @@ protected:
     virtual void encodeScalar(const PVScalar&);
     virtual void encodeArray(const PVScalarArray&);
 
-    virtual void abortField(const PVField&);
-
     inline std::ostream& S() { return *strm; }
 
     void impl_print(const PVField&);
