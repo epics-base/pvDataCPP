@@ -19,11 +19,10 @@
 #include <float.h>
 #include <epicsMath.h>
 
-#include <epicsMath.h>
+#include <epicsUnitTest.h>
+#include <testMain.h>
 
 #include "pv/typeCast.h"
-
-#include <stdint.h>
 
 using epics::pvData::String;
 
@@ -44,8 +43,9 @@ namespace {
 
     template<typename TO, typename FROM>
     struct testcase {
-        static bool op(std::ostream& msg, TO expect, FROM inp)
+        static void op(TO expect, FROM inp)
         {
+            std::ostringstream msg;
             TO actual;
             try {
                 actual = ::epics::pvData::castUnsafe<TO,FROM>(inp);
@@ -54,71 +54,69 @@ namespace {
                 msg<<"Failed to cast "
                    <<inp<<" ("<<typeid(FROM).name()<<") -> "
                    <<expect<<" ("<<typeid(TO).name()<<")\n Error: "
-                   <<typeid(e).name()<<"("<<e.what()<<")\n";
-                return false;
+                   <<typeid(e).name()<<"("<<e.what()<<")";
+                testFail("%s", msg.str().c_str());
+                return;
             }
             if(!testequal<TO>::op(actual, expect)) {
                 msg<<"Failed cast gives unexpected value "
                    <<inp<<" ("<<typeid(FROM).name()<<") -> "
                    <<expect<<" ("<<typeid(TO).name()<<") yields: "
-                   <<actual<<"\n";
-                return false;
+                   <<actual;
+                testFail("%s", msg.str().c_str());
+                return;
             }
-            msg<<"Pass cast "
+            msg<<"cast "
                <<inp<<" ("<<typeid(FROM).name()<<") -> "
                <<expect<<" ("<<typeid(TO).name()<<") yields: "
-               <<actual<<"\n";
-            return true;
+               <<actual;
+            testPass("%s", msg.str().c_str());
+            return;
         }
     };
 
     template<typename TO, typename FROM>
     struct testfail {
-        static bool op(std::ostream& msg, FROM inp)
+        static void op(FROM inp)
         {
+            std::ostringstream msg;
             TO actual;
             try {
                 actual = ::epics::pvData::castUnsafe<TO,FROM>(inp);
                 msg<<"Failed to generate expected error "
                    <<inp<<" ("<<typeid(FROM).name()<<") -> ("
                    <<typeid(TO).name()<<") yields: "
-                   <<actual<<"\n";
-                return false;
+                   <<actual;
+                testFail("%s", msg.str().c_str());
+                return;
             } catch(std::runtime_error& e) {
                 msg<<"Got expected error "
                    <<inp<<" ("<<typeid(FROM).name()<<") -> ("
                    <<typeid(TO).name()<<") fails with: "
-                   <<e.what()<<"\n";
-                return true;
+                   <<e.what();
+                testPass("%s", msg.str().c_str());
+                return;
             }
         }
     };
 
 
 // Test cast
-#define TEST(TTO, VTO, TFRO, VFRO) fail |= !testcase<TTO, TFRO>::op(*out, VTO, VFRO)
+#define TEST(TTO, VTO, TFRO, VFRO) testcase<TTO, TFRO>::op(VTO, VFRO)
 
 // Test cast and reverse
 #define TEST2(TTO, VTO, TFRO, VFRO) TEST(TTO, VTO, TFRO, VFRO); TEST(TFRO, VFRO, TTO, VTO)
 
-#define FAIL(TTO, TFRO, VFRO) fail |= !testfail<TTO,TFRO>::op(*out, VFRO)
+#define FAIL(TTO, TFRO, VFRO) testfail<TTO,TFRO>::op(VFRO)
 
 } // end namespace
 
 
-int main(int argc,char *argv[])
+MAIN(testTypeCast)
 {
-    std::ostream *out = &std::cerr;
-    std::ofstream outf;
-    if(argc>1){
-        outf.open(argv[1]);
-        if(!outf.good()) {
-            std::cerr<<"Failed to open "<<argv[1]<<" for output!\n";
-        } else {
-            out = &outf;
-        }
-    }
-    bool fail=false;
+    testPlan(110);
+
+try {
 
     int8_t xint8=0;
     uint8_t xuint8=0;
@@ -273,14 +271,14 @@ int main(int argc,char *argv[])
     CHECK(String, String);
 #undef CHECK
 
-    *out << "Integer signed <=> unsigned\n";
+    testDiag("Integer signed <=> unsigned");
 
     TEST2(uint8_t,  std::numeric_limits<uint8_t>::max(),  int8_t, -1);
     TEST2(uint16_t, std::numeric_limits<uint16_t>::max(), int8_t, -1);
     TEST2(uint32_t, std::numeric_limits<uint32_t>::max(), int8_t, -1);
     TEST2(uint64_t, std::numeric_limits<uint64_t>::max(), int8_t, -1);
 
-    *out << "Integer unsigned promote (and demote when in range)\n";
+    testDiag("Integer unsigned promote (and demote when in range)");
 
     TEST2(uint16_t, 0xff, uint8_t, 0xff);
     TEST2(uint32_t, 0xffff, uint16_t, 0xffff);
@@ -290,7 +288,7 @@ int main(int argc,char *argv[])
     TEST2(int32_t, 0x7fff, int16_t, 0x7fff);
     TEST2(int64_t, 0x7fffffff, int32_t, 0x7fffffff);
 
-    *out << "Double to int w/ round towards zero (aka truncation)\n";
+    testDiag("Double to int w/ round towards zero (aka truncation)");
 
     TEST(int32_t, 2, double, 2.1);
     TEST(int32_t, 2, double, 2.5);
@@ -299,7 +297,7 @@ int main(int argc,char *argv[])
     TEST(int32_t, -2, double, -2.5);
     TEST(int32_t, -2, double, -2.7);
 
-    *out << "Float to int w/ round towards zero (aka truncation)\n";
+    testDiag("Float to int w/ round towards zero (aka truncation)");
 
     TEST(int32_t, 2, float, 2.1);
     TEST(int32_t, 2, float, 2.5);
@@ -308,7 +306,7 @@ int main(int argc,char *argv[])
     TEST(int32_t, -2, float, -2.5);
     TEST(int32_t, -2, float, -2.7);
 
-    *out << "String Printing/parsing\n";
+    testDiag("String Printing/parsing");
 
     TEST2(String, "1", int32_t, 1);
     TEST2(String, "-1", int32_t, -1);
@@ -339,7 +337,7 @@ int main(int argc,char *argv[])
 
     TEST(double, 1.1e100, String, "1.1E+100");
 
-    *out << "String Parsing\n";
+    testDiag("String Parsing");
 
     TEST(int32_t, 15, String, "0xf");
     TEST(int32_t, 15, String, "0xF");
@@ -363,7 +361,7 @@ int main(int argc,char *argv[])
     TEST(int64_t, -7, String, "-07");
     TEST(int64_t, -8, String, "-010");
 
-    *out << "String parsing errors\n";
+    testDiag("String parsing errors");
 
     FAIL(int32_t, String, "hello!");
     FAIL(int32_t, String, "42 is the answer");
@@ -374,32 +372,36 @@ int main(int argc,char *argv[])
 
     FAIL(int8_t, String, "1000");
     FAIL(int8_t, String, "-1000");
-
+;
     FAIL(double, String, "1e+10000000");
 
-    *out << "Floating point overflows\n";
+    testDiag("Floating point overflows");
 
     TEST(float, FLT_MAX, double, 1e300);
     TEST(float, -FLT_MAX, double, -1e300);
     TEST(float, FLT_MIN, double, 1e-300);
     TEST(float, -FLT_MIN, double, -1e-300);
+
     xfloat = ::epics::pvData::castUnsafe<float,double>(epicsNAN);
-    *out << "Test cast double NAN to float NAN yields: "<<xfloat<<"\n";
-    fail |= !isnan( xfloat );
+    testOk(isnan( xfloat ), "Test cast double NAN to float NAN yields: %f", xfloat);
 
     {
         std::string result[3];
         const int32_t in[3] = { 1234, 506001, 42424242 };
 
-        *out << "Test vcast int32 -> String\n";
+        testDiag("Test vcast int32 -> String");
         epics::pvData::castUnsafeV(3, epics::pvData::pvString, (void*)result,
                                    epics::pvData::pvInt, (void*)in);
-        *out << "Yields "<<result[0]<<" "<<result[1]<<" "<<result[2]<<"\n";
+        testDiag("Yields %s %s %s", result[0].c_str(), result[1].c_str(), result[2].c_str());
 
-        fail |= result[0]!="1234";
-        fail |= result[1]!="506001";
-        fail |= result[2]!="42424242";
+        testOk1(result[0]=="1234");
+        testOk1(result[1]=="506001");
+        testOk1(result[2]=="42424242");
     }
 
-    return fail ? 1 : 0;
+} catch(std::exception& e) {
+    testAbort("Uncaught exception: %s", e.what());
+}
+
+    return testDone();
 }
