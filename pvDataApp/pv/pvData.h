@@ -1099,6 +1099,8 @@ public:
     }
     virtual void putFrom(ScalarType dtype, const void*ptr, size_t count, size_t offset)
     {
+        if(getLength()<offset+count)
+            setLength(offset+count);
         castUnsafeV(count, typeCode, (void*)(get()+offset), dtype, ptr);
     }
 
