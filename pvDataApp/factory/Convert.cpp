@@ -45,7 +45,6 @@ static std::vector<String> split(String commaSeparatedList) {
 }
     
 Convert::Convert()
-: pvDataCreate(getPVDataCreate())
 {}
 
 

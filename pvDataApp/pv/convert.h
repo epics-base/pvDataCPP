@@ -819,7 +819,6 @@ public:
     void newLine(StringBuilder buf, int indentLevel);
 private:
     Convert();
-    PVDataCreatePtr pvDataCreate;
 };
 
 static inline ConvertPtr getConvert() { return Convert::getConvert(); }
