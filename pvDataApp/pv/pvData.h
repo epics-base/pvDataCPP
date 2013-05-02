@@ -9,6 +9,15 @@
  */
 #ifndef PVDATA_H
 #define PVDATA_H
+
+#ifdef __GNUC__
+#define USAGE_DEPRECATED __attribute__((deprecated))
+#define USAGE_ERROR(MSG) __attribute__((error(MSG)))
+#else
+#define USAGE_DEPRECATED
+#define USAGE_ERROR(MSG)
+#endif
+
 #include <string>
 #include <map>
 #include <stdexcept>
@@ -19,6 +28,7 @@
 #include <pv/pvIntrospect.h>
 #include <pv/requester.h>
 #include <pv/typeCast.h>
+#include <pv/sharedVector.h>
 namespace epics { namespace pvData { 
 
 
@@ -657,22 +667,75 @@ public:
      */
     const ScalarArrayConstPtr getScalarArray() const ;
 
+    /**
+     * Fetch the current value and convert to the requeted type.
+     *
+     * A copy is made if the requested type does not match
+     * the element type.  If the types do match then
+     * no copy is made.
+     */
     template<ScalarType ID>
-    inline void getAs(typename ScalarTypeTraits<ID>::type* ptr,
-                      size_t count, size_t offset = 0) const
+    inline void
+    getAs(shared_vector<typename ScalarTypeTraits<ID>::type>& out) const
     {
-        getAs(ID, (void*)ptr, count, offset);
+        shared_vector<void> temp(static_shared_vector_cast<void>(out));
+        getAs(ID, temp);
+        out = static_shared_vector_cast<typename ScalarTypeTraits<ID>::type>(temp);
     }
-    virtual void getAs(ScalarType, void*, size_t, size_t) const = 0;
+    virtual void
+    getAs(ScalarType, shared_vector<void>& out) const = 0;
 
+    /**
+     * Assign the given value after conversion.
+     *
+     * A copy and element-wise conversion is are always performed.
+     */
     template<ScalarType ID>
-    inline void putFrom(const typename ScalarTypeTraits<ID>::type* ptr,
-                 size_t count, size_t offset = 0)
+    inline size_t copyOut(typename ScalarTypeTraits<ID>::type* inp, size_t len) const
     {
-        putFrom(ID, (const void*)ptr, count, offset);
+        return copyOut(ID, (void*)inp, len);
     }
-    virtual void putFrom(ScalarType, const void*, size_t ,size_t) = 0;
+    virtual size_t copyOut(ScalarType, void*, size_t) const = 0;
 
+
+    /**
+     * Assign the given value after conversion.
+     *
+     * A copy and element-wise conversion is performed unless
+     * the element type of the PVScalarArray matches the
+     * type of the provided data.
+     * If the types do match then a new refernce to the provided
+     * data is kept.
+     */
+    template<ScalarType ID>
+    inline void putFrom(const shared_vector<typename ScalarTypeTraits<ID>::type>& inp)
+    {
+        shared_vector<void> temp(static_shared_vector_cast<void>(inp));
+        putFrom(ID, temp);
+    }
+    virtual void putFrom(ScalarType, const shared_vector<void>&) = 0;
+
+    /**
+     * Assign the given value after conversion.
+     *
+     * A copy and element-wise conversion is are always performed.
+     */
+    template<ScalarType ID>
+    inline void copyIn(const typename ScalarTypeTraits<ID>::type* inp, size_t len)
+    {
+        copyIn(ID, (const void*)inp, len);
+    }
+    virtual void copyIn(ScalarType, const void*, size_t) = 0;
+
+    /**
+     * Assign the given PVScalarArray's value.
+     *
+     * A copy and element-wise conversion is performed unless
+     * the element type of the PVScalarArray matches the
+     * type of the provided data.
+     * If the types do match then a new refernce to the provided
+     * data is kept.
+     */
     virtual void assign(PVScalarArray& pv) = 0;
 
 protected:
@@ -1016,6 +1079,19 @@ private:
     friend class PVDataCreate;
 };
 
+namespace detail {
+    // adaptor to allow epics::pvData::shared_vector to hold a reference
+    // to a shared_ptr<std::vector<> >
+    template<typename T>
+    struct shared_ptr_vector_deletor {
+        typedef std::tr1::shared_ptr<std::vector<T> > shared_vector;
+        shared_vector vec;
+        shared_ptr_vector_deletor(const shared_vector& v)
+            :vec(v) {}
+        void operator()(T*){vec.reset();}
+    };
+}
+
 template<typename T>
 class PVValueArray : public PVScalarArray {
 public:
@@ -1023,12 +1099,19 @@ public:
     typedef T  value_type;
     typedef T* pointer;
     typedef const T* const_pointer;
+
+    //TODO: full namespace can be removed along with local typedef 'shared_vector'
+    typedef ::epics::pvData::shared_vector<T> svector;
+    typedef ::epics::pvData::shared_vector<const T> const_svector;
+
+    // begin deprecated
     typedef PVArrayData<T> ArrayDataType;
     typedef std::vector<T> vector;
     typedef const std::vector<T> const_vector;
     typedef std::tr1::shared_ptr<vector> shared_vector;
     typedef PVValueArray & reference;
     typedef const PVValueArray & const_reference;
+    // end deprecated
 
     static const ScalarType typeCode;
 
@@ -1036,40 +1119,122 @@ public:
      * Destructor
      */
     virtual ~PVValueArray() {}
+
+    // Primative array manipulations
+
+    //! unchecked writable reference
+    //! Before you call this directly, consider using one
+    //! other the following methods.
+    virtual const svector& viewUnsafe() const = 0;
+
+    //! Exchange our contents for the provided.
+    //! Fails for Immutable arrays
+    virtual void swap(svector& other) = 0;
+
+    //! Discard current contents and replaced with the provided.
+    //! Fails for Immutable arrays
+    virtual void replace(const svector& next)
+    {
+        svector temp(next);
+        this->swap(temp);
+    }
+
+    // Derived operations
+
+    //! Fetch a read-only view of the current array data
+    inline const_svector view() const
+    {
+        const_svector newref(this->viewUnsafe());
+        return newref;
+    }
+
+    //! Remove and return the current array data
+    inline svector take()
+    {
+        svector result;
+        this->swap(result);
+        return result;
+    }
+
+    //! take() with an implied make_unique()
+    inline svector reuse()
+    {
+        svector result;
+        this->swap(result);
+        result.make_unique();
+        return result;
+    }
+
     /**
      * Get array elements
      * @param offset The offset of the first element,
      * @param length The number of elements to get.
      * @param data The place where the data is placed.
      */
-    virtual std::size_t get(
-         std::size_t offset, std::size_t length, ArrayDataType &data) = 0;
+    std::size_t get(
+         std::size_t offset, std::size_t length, ArrayDataType &data) USAGE_DEPRECATED
+    {
+        const_svector ref = this->view();
+        ref.slice(offset, length);
+        data.data.resize(ref.size());
+        data.offset = 0;
+        std::copy(ref.begin(), ref.end(), data.data.begin());
+        return ref.size();
+    }
+
     /**
-     * Put data into the array.
+     * Copy data into the array growing the length as needed.
      * @param offset The offset of the first element,
      * @param length The number of elements to get.
      * @param from The new values to put into the array.
      * @param fromOffset The offset in from.
      * @return The number of elements put into the array.
      */
-    virtual std::size_t put(std::size_t offset,
-        std::size_t length, const_pointer from, std::size_t fromOffset) = 0;
-    virtual std::size_t put(std::size_t offset,
-        std::size_t length, const_vector &from, std::size_t fromOffset);
+    std::size_t put(std::size_t offset,
+        std::size_t length, const_pointer from, std::size_t fromOffset) USAGE_DEPRECATED
+    {
+        from += fromOffset;
+
+        svector temp;
+        this->swap(temp);
+        if(temp.size() < length+offset)
+            temp.resize(length+offset);
+        else
+            temp.make_unique();
+
+        std::copy(from, from + length, temp.begin() + offset);
+        this->swap(temp);
+        return length;
+    }
+
+    std::size_t put(std::size_t offset,
+        std::size_t length, const_vector &from, std::size_t fromOffset) USAGE_DEPRECATED
+    { return this->put(offset,length, &from[0], fromOffset); }
+
     /**
      * Share data from another source.
      * @param value The data to share.
      * @param capacity The capacity of the array.
      * @param length The length of the array.
      */
-    virtual void shareData(
+    void shareData(
          shared_vector const & value,
          std::size_t capacity,
-         std::size_t length) = 0;
-    virtual pointer get() = 0;
-    virtual pointer get() const = 0;
-    virtual vector const & getVector() = 0;
-    virtual shared_vector const & getSharedVector() = 0;
+         std::size_t length) USAGE_DEPRECATED
+    {
+        vector& vref = *value.get();
+        typename svector::shared_pointer_type p(&vref[0],
+                                                detail::shared_ptr_vector_deletor<T>(value));
+        svector temp(p, 0, std::min(length, vref.size()));
+        this->swap(temp);
+    }
+
+    pointer get() const {
+        return this->viewUnsafe().data();
+    }
+
+    vector const & getVector() USAGE_ERROR("No longer implemented");
+    shared_vector const & getSharedVector() USAGE_ERROR("No longer implemented");
 
     std::ostream& dumpValue(std::ostream& o) const
     {
@@ -1092,30 +1257,67 @@ public:
     	return o << *(get() + index);
     }
 
-    virtual void getAs(ScalarType dtype, void* ptr, size_t count, size_t offset) const
+    virtual void
+    getAs(ScalarType id, ::epics::pvData::shared_vector<void>& out) const
     {
-        castUnsafeV(count, dtype, ptr, typeCode, (const void*)(get()+offset));
+        const svector& data(viewUnsafe());
+        ::epics::pvData::shared_vector<void> temp(static_shared_vector_cast<void>(data));
+        if(id==typeCode) {
+            out = temp; // no convert = no copy
+        } else {
+            //TODO: reuse out if possible??
+            ::epics::pvData::shared_vector<void> vcopy(ScalarTypeFunc::allocArray(id, data.size()));
+
+            castUnsafeV(data.size(), id, vcopy.data(), typeCode, temp.data());
+
+            out.swap(vcopy);
+        }
     }
-    virtual void putFrom(ScalarType dtype, const void*ptr, size_t count, size_t offset)
+
+    virtual size_t copyOut(ScalarType id, void* ptr, size_t olen) const
     {
-        if(getLength()<offset+count)
-            setLength(offset+count);
-        castUnsafeV(count, typeCode, (void*)(get()+offset), dtype, ptr);
+        const svector& data(viewUnsafe());
+        size_t len = std::min(olen, data.size());
+        
+        castUnsafeV(len, id, ptr, typeCode, (const void*)data.data());
+        return len;
+    }
+
+    virtual void
+    putFrom(ScalarType id, const ::epics::pvData::shared_vector<void>& inp)
+    {
+        if(id==typeCode) {
+            svector next(static_shared_vector_cast<T>(inp));
+            this->swap(next); // no convert == no copy
+        } else {
+            size_t len = inp.size() / ScalarTypeFunc::elementSize(id);
+            svector result;
+            this->swap(result);
+            result.resize(len);
+
+            castUnsafeV(len, typeCode, result.data(), id, inp.data());
+
+            this->swap(result);
+        }
+    }
+
+    virtual void copyIn(ScalarType id, const void* ptr, size_t len)
+    {
+        svector data;
+        this->swap(data);
+        data.resize(len);
+        castUnsafeV(len, typeCode, (void*)data.data(), id, ptr);
+        this->swap(data);
     }
 
     virtual void assign(PVScalarArray& pv)
     {
         if(this==&pv)
             return;
-        if(isImmutable())
-            throw std::invalid_argument("Destination is immutable");
-        if(pv.isImmutable() && typeCode==pv.getScalarArray()->getElementType()) {
-            PVValueArray& pvr = static_cast<PVValueArray&>(pv);
-            shareData(pvr.getSharedVector(), pvr.getCapacity(), pvr.getLength());
-        } else {
-            setLength(pv.getLength());
-            pv.getAs(typeCode, (void*)get(), std::min(getLength(),pv.getLength()), 0);
-        }
+        ::epics::pvData::shared_vector<void> temp;
+        pv.getAs(typeCode, temp);
+        svector next(static_shared_vector_cast<T>(temp));
+        this->swap(next);
     }
 
 protected:
@@ -1124,13 +1326,6 @@ protected:
     friend class PVDataCreate;
 };
 
-template<typename T>
-std::size_t PVValueArray<T>::put(
-    std::size_t offset,
-    std::size_t length,
-    const_vector &from,
-    std::size_t fromOffset)
-{ return put(offset,length, &from[0], fromOffset); }
 
 /**
  * Definitions for the various scalarArray types.
@@ -1281,6 +1476,9 @@ private:
  */
 
 extern PVDataCreatePtr getPVDataCreate();
-    
+
+#undef USAGE_DEPRECATED
+#undef USAGE_ERROR
+
 }}
 #endif  /* PVDATA_H */
