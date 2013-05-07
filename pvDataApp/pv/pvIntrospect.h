@@ -192,6 +192,9 @@ namespace ScalarTypeFunc {
      * @param  scalarType    The type.
      */
     void toString(StringBuilder builder,ScalarType scalarType);
+
+    //! gives sizeof(T) where T depends on the scalar type id.
+    size_t elementSize(ScalarType id);
 };
 
 /**

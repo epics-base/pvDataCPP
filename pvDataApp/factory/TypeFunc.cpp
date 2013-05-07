@@ -78,11 +78,33 @@ namespace ScalarTypeFunc {
         *buf += name(scalarType);
     }
 
+    size_t elementSize(ScalarType id)
+    {
+        switch(id) {
+#define OP(ENUM, TYPE) case ENUM: return sizeof(TYPE)
+            OP(pvBoolean, boolean);
+            OP(pvUByte, uint8);
+            OP(pvByte, int8);
+            OP(pvUShort, uint16);
+            OP(pvShort, int16);
+            OP(pvUInt, uint32);
+            OP(pvInt, int32);
+            OP(pvULong, uint64);
+            OP(pvLong, int64);
+            OP(pvFloat, float);
+            OP(pvDouble, double);
+            OP(pvString, String);
+#undef OP
+        default:
+            THROW_EXCEPTION2(std::invalid_argument, "error unknown ScalarType");
+        }
+    }
+
     shared_vector<void> allocArray(ScalarType id, size_t len)
     {
         switch(id) {
-#define OP(ENUM, TYPE) case ENUM: return static_shared_vector_cast<TYPE>(shared_vector<TYPE>(len))
-        OP(pvBoolean, uint8);
+#define OP(ENUM, TYPE) case ENUM: return static_shared_vector_cast<void>(shared_vector<TYPE>(len))
+        OP(pvBoolean, boolean);
         OP(pvUByte, uint8);
         OP(pvByte, int8);
         OP(pvUShort, uint16);
