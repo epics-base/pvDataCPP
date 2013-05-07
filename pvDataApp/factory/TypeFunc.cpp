@@ -78,6 +78,28 @@ namespace ScalarTypeFunc {
         *buf += name(scalarType);
     }
 
+    shared_vector<void> allocArray(ScalarType id, size_t len)
+    {
+        switch(id) {
+#define OP(ENUM, TYPE) case ENUM: return static_shared_vector_cast<TYPE>(shared_vector<TYPE>(len))
+        OP(pvBoolean, uint8);
+        OP(pvUByte, uint8);
+        OP(pvByte, int8);
+        OP(pvUShort, uint16);
+        OP(pvShort, int16);
+        OP(pvUInt, uint32);
+        OP(pvInt, int32);
+        OP(pvULong, uint64);
+        OP(pvLong, int64);
+        OP(pvFloat, float);
+        OP(pvDouble, double);
+        OP(pvString, String);
+#undef OP
+        default:
+            throw std::bad_alloc();
+        }
+    }
+
 } // namespace ScalarTypeFunc
 
 }}
