@@ -22,8 +22,9 @@ testByteBuffer_SRCS += testByteBuffer.cpp
 PROD_HOST += testBaseException
 testBaseException_SRCS += testBaseException.cpp
 
-PROD_HOST += testSerialization
+TESTPROD += testSerialization
 testSerialization_SRCS += testSerialization.cpp
+TESTS += testSerialization
 
 PROD_HOST += testTimeStamp
 testTimeStamp_SRCS += testTimeStamp.cpp
