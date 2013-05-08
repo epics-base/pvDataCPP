@@ -34,9 +34,10 @@ PROD_HOST += testConvert
 testConvert_SRCS += testConvert.cpp
 testConvert_LIBS += pvData Com
 
-PROD_HOST += testPVScalarArray
+TESTPROD += testPVScalarArray
 testPVScalarArray_SRCS += testPVScalarArray.cpp
 testPVScalarArray_LIBS += pvData Com
+TESTS += testPVScalarArray
 
 PROD_HOST += testPVStructureArray
 testPVStructureArray_SRCS += testPVStructureArray.cpp
@@ -45,6 +46,8 @@ testPVStructureArray_LIBS += pvData Com
 PROD_HOST += testOperators
 testOperators_SRCS += testOperators.cpp
 testOperators_LIBS += pvData Com
+
+TESTSCRIPTS_HOST += $(TESTS:%=%.t)
 
 include $(TOP)/configure/RULES
 #----------------------------------------
