@@ -19,9 +19,9 @@
 
 namespace epics { namespace pvData { 
 
-bool operator==(PVField&, PVField&);
+bool operator==(const PVField&, const PVField&);
 
-static inline bool operator!=(PVField& a, PVField& b)
+static inline bool operator!=(const PVField& a, const PVField& b)
 {return !(a==b);}
 
 

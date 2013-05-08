@@ -101,26 +101,26 @@ namespace {
 // fully typed comparisons
 
 template<typename T>
-bool compareScalar(PVScalarValue<T>* left, PVScalarValue<T>* right)
+bool compareScalar(const PVScalarValue<T>* left, const PVScalarValue<T>* right)
 {
     return left->get()==right->get();
 }
 
 template<typename T>
-bool compareArray(PVValueArray<T>* left, PVValueArray<T>* right)
+bool compareArray(const PVValueArray<T>* left, const PVValueArray<T>* right)
 {
     return std::equal(left->get(), left->get()+left->getLength(), right->get());
 }
 
 // partially typed comparisons
 
-bool compareField(PVScalar* left, PVScalar* right)
+bool compareField(const PVScalar* left, const PVScalar* right)
 {
     ScalarType lht = left->getScalar()->getScalarType();
     if(lht != right->getScalar()->getScalarType())
         return false;
     switch(lht) {
-#define OP(ENUM, TYPE) case ENUM: return compareScalar(static_cast<PVScalarValue<TYPE>*>(left), static_cast<PVScalarValue<TYPE>*>(right))
+#define OP(ENUM, TYPE) case ENUM: return compareScalar(static_cast<const PVScalarValue<TYPE>*>(left), static_cast<const PVScalarValue<TYPE>*>(right))
     OP(pvBoolean, uint8);
     OP(pvUByte, uint8);
     OP(pvByte, int8);
@@ -134,14 +134,14 @@ bool compareField(PVScalar* left, PVScalar* right)
     OP(pvDouble, double);
 #undef OP
     case pvString: {
-            PVString *a=static_cast<PVString*>(left), *b=static_cast<PVString*>(right);
+            const PVString *a=static_cast<const PVString*>(left), *b=static_cast<const PVString*>(right);
             return a->get()==b->get();
         }
     }
     throw std::logic_error("PVScalar with invalid scalar type!");
 }
 
-bool compareField(PVScalarArray* left, PVScalarArray* right)
+bool compareField(const PVScalarArray* left, const PVScalarArray* right)
 {
     ScalarType lht = left->getScalarArray()->getElementType();
     if(lht != right->getScalarArray()->getElementType())
@@ -151,7 +151,7 @@ bool compareField(PVScalarArray* left, PVScalarArray* right)
         return false;
 
     switch(lht) {
-#define OP(ENUM, TYPE) case ENUM: return compareArray(static_cast<PVValueArray<TYPE>*>(left), static_cast<PVValueArray<TYPE>*>(right))
+#define OP(ENUM, TYPE) case ENUM: return compareArray(static_cast<const PVValueArray<TYPE>*>(left), static_cast<const PVValueArray<TYPE>*>(right))
     OP(pvBoolean, uint8);
     OP(pvUByte, uint8);
     OP(pvByte, int8);
@@ -169,7 +169,7 @@ bool compareField(PVScalarArray* left, PVScalarArray* right)
     throw std::logic_error("PVScalarArray with invalid element type!");
 }
 
-bool compareField(PVStructure* left, PVStructure* right)
+bool compareField(const PVStructure* left, const PVStructure* right)
 {
     StructureConstPtr ls = left->getStructure();
 
@@ -186,7 +186,7 @@ bool compareField(PVStructure* left, PVStructure* right)
     return true;
 }
 
-bool compareField(PVStructureArray* left, PVStructureArray* right)
+bool compareField(const PVStructureArray* left, const PVStructureArray* right)
 {
     if(left->getLength()!=right->getLength())
         return false;
@@ -216,7 +216,7 @@ bool compareField(PVStructureArray* left, PVStructureArray* right)
 
 // untyped comparison
 
-bool operator==(PVField& left, PVField& right)
+bool operator==(const PVField& left, const PVField& right)
 {
     if(&left == &right)
         return true;
@@ -226,10 +226,10 @@ bool operator==(PVField& left, PVField& right)
         return false;
 
     switch(lht) {
-    case scalar: return compareField(static_cast<PVScalar*>(&left), static_cast<PVScalar*>(&right));
-    case scalarArray: return compareField(static_cast<PVScalarArray*>(&left), static_cast<PVScalarArray*>(&right));
-    case structure: return compareField(static_cast<PVStructure*>(&left), static_cast<PVStructure*>(&right));
-    case structureArray: return compareField(static_cast<PVStructureArray*>(&left), static_cast<PVStructureArray*>(&right));
+    case scalar: return compareField(static_cast<const PVScalar*>(&left), static_cast<const PVScalar*>(&right));
+    case scalarArray: return compareField(static_cast<const PVScalarArray*>(&left), static_cast<const PVScalarArray*>(&right));
+    case structure: return compareField(static_cast<const PVStructure*>(&left), static_cast<const PVStructure*>(&right));
+    case structureArray: return compareField(static_cast<const PVStructureArray*>(&left), static_cast<const PVStructureArray*>(&right));
     }
     throw std::logic_error("PVField with invalid type!");
 }
