@@ -38,6 +38,9 @@ TESTPROD += testTypeCast
 testTypeCast_SRCS += testTypeCast.cpp
 TESTS += testTypeCast
 
+TESTPROD += testSharedVector
+testSharedVector_SRCS += testSharedVector.cpp
+TESTS += testSharedVector
 
 TESTSCRIPTS_HOST += $(TESTS:%=%.t)
 
