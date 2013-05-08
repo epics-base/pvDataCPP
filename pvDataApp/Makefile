@@ -26,6 +26,7 @@ INC += sharedPtr.h
 INC += localStaticLock.h
 INC += typeCast.h
 INC += printer.h
+INC += sharedVector.h
 
 LIBSRCS += byteBuffer.cpp
 LIBSRCS += bitSet.cpp
