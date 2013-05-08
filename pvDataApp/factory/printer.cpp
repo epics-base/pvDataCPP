@@ -166,8 +166,8 @@ void PrinterPlain::encodeScalar(const PVScalar& pv)
 void PrinterPlain::encodeArray(const PVScalarArray& pv)
 {
     indentN(S(), ilvl);
-    StringArray temp(pv.getLength()); // TODO: no copy
-    pv.getAs<pvString>(&temp[0], temp.size());
+    shared_vector<String> temp;
+    pv.getAs<pvString>(temp);
 
     S() << pv.getScalarArray()->getID() << " "
         << pv.getFieldName() << " [";

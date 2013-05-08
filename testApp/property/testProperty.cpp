@@ -229,11 +229,11 @@ static void testEnumerated(FILE * fd,FILE */*auxfd*/)
     assert(result);
     int32 index = pvEnumerated.getIndex();
     String choice = pvEnumerated.getChoice();
-    StringArrayPtr const & choices = pvEnumerated.getChoices();
+    PVStringArray::const_svector choices = pvEnumerated.getChoices();
     int32 numChoices = pvEnumerated.getNumberChoices();
     if(debug) {
         fprintf(fd,"index %d choice %s choices",index,choice.c_str());
-        for(int i=0; i<numChoices; i++ ) fprintf(fd," %s",(*choices)[i].c_str());
+        for(int i=0; i<numChoices; i++ ) fprintf(fd," %s",choices[i].c_str());
         fprintf(fd,"\n");
     }
     pvEnumerated.setIndex(2);

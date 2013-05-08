@@ -114,11 +114,12 @@ size_t Convert::fromStringArray(PVScalarArrayPtr const &pv,
                                 StringArray const & from,
                                 size_t fromOffset)
 {
+    assert(offset==0);
     size_t alen = pv->getLength();
     if(fromOffset>alen) return 0;
     alen -= fromOffset;
     if(length>alen) length=alen;
-    pv->putFrom<pvString>(&from[fromOffset], length, offset);
+    pv->copyIn<pvString>(&from[fromOffset], length);
     return length;
 }
 
@@ -130,7 +131,7 @@ size_t Convert::toStringArray(PVScalarArrayPtr const & pv,
     if(offset>alen) return 0;
     alen -= offset;
     if(length>alen) length=alen;
-    pv->getAs<pvString>(&to[toOffset], length, offset);
+    pv->copyOut<pvString>(&to[toOffset], length);
     return length;
 }
 
