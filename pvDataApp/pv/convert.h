@@ -71,7 +71,6 @@ typedef std::tr1::shared_ptr<Convert> ConvertPtr;
 class Convert {
 public:
     static ConvertPtr getConvert();
-    ~Convert();
     /**
      * Get the full fieldName for the pvField.
      * @param builder The builder that will have the result.
@@ -817,8 +816,6 @@ public:
      * @param indentLevel Indent level, Each level is four spaces.
      */
     void newLine(StringBuilder buf, int indentLevel);
-private:
-    Convert();
 };
 
 static inline ConvertPtr getConvert() { return Convert::getConvert(); }

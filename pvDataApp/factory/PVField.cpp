@@ -26,8 +26,7 @@ PVField::PVField(FieldConstPtr field)
 : notImplemented("not implemented"),
   parent(NULL),field(field),
   fieldOffset(0), nextFieldOffset(0),
-  immutable(false),
-  convert(getConvert())
+  immutable(false)
 {
 }
 
@@ -175,7 +174,7 @@ void PVField::setParentAndName(PVStructure * xxx,String const & name)
 
 bool PVField::equals(PVField &pv)
 {
-    return convert->equals(*this,pv);
+    return pv==*this;
 }
 
 void PVField::toString(StringBuilder buf)
@@ -185,7 +184,7 @@ void PVField::toString(StringBuilder buf)
 
 void PVField::toString(StringBuilder buf,int indentLevel) 
 {
-   convert->getString(buf,this,indentLevel);
+   Convert().getString(buf,this,indentLevel);
    if(pvAuxInfo.get()!=NULL) pvAuxInfo->toString(buf,indentLevel);
 }
 

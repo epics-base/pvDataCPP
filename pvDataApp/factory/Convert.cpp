@@ -43,13 +43,6 @@ static std::vector<String> split(String commaSeparatedList) {
     }
     return valueList;
 }
-    
-Convert::Convert()
-{}
-
-
-
-Convert::~Convert(){}
 
 void Convert::getString(StringBuilder buf,PVField const *pvField,int indentLevel)
 {

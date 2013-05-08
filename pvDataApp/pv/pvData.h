@@ -373,7 +373,6 @@ private:
     bool immutable;
     RequesterPtr requester;
     PostHandlerPtr postHandler;
-    std::tr1::shared_ptr<class Convert> convert;
     friend class PVDataCreate;
     friend class PVStructure;
 };
