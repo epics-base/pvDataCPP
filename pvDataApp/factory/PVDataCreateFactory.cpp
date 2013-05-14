@@ -231,7 +231,7 @@ DefaultPVArray<T>::~DefaultPVArray()
 template<typename T>
 void DefaultPVArray<T>::setCapacity(size_t capacity)
 {
-    if(capacity>value.capacity()) {
+    if(this->isCapacityMutable() && capacity>value.capacity()) {
         value.reserve(capacity);
         PVArray::setCapacityLength(value.capacity(), value.size());
     }
@@ -240,6 +240,8 @@ void DefaultPVArray<T>::setCapacity(size_t capacity)
 template<typename T>
 void DefaultPVArray<T>::setLength(size_t length)
 {
+    if(this->isImmutable())
+        THROW_EXCEPTION2(std::logic_error,"Immutable");
     if(length == value.size())
         return;
     else if(length < value.size())
