@@ -29,9 +29,9 @@ public:
     int getNumberFree();
     int getNumberUsed();
     queueElementPtr & getFree();
-    void setUsed(queueElementPtr &element);
+    void setUsed(queueElementPtr const &element);
     queueElementPtr & getUsed();
-    void releaseUsed(queueElementPtr &element);
+    void releaseUsed(queueElementPtr const &element);
 private:
     queueElementPtr nullElement;
     queueElementPtrArray elements;
@@ -92,7 +92,7 @@ std::tr1::shared_ptr<T> & Queue<T>::getFree()
 }
 
 template <typename T>
-void Queue<T>::setUsed(std::tr1::shared_ptr<T> &element)
+void Queue<T>::setUsed(std::tr1::shared_ptr<T> const &element)
 {
    if(element!=elements[nextSetUsed++]) {
         throw std::logic_error("not correct queueElement");
@@ -112,7 +112,7 @@ std::tr1::shared_ptr<T> & Queue<T>::getUsed()
 }
 
 template <typename T>
-void Queue<T>::releaseUsed(std::tr1::shared_ptr<T> &element)
+void Queue<T>::releaseUsed(std::tr1::shared_ptr<T> const &element)
 {
     if(element!=elements[nextReleaseUsed++]) {
         throw std::logic_error(

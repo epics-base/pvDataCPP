@@ -2,6 +2,10 @@ TOP=../..
 
 include $(TOP)/configure/CONFIG
 
+PROD_HOST += testBitSetUtil
+testBitSetUtil_SRCS += testBitSetUtil.cpp
+testBitSetUtil_LIBS += pvData Com
+
 PROD_HOST += testIntrospect
 testIntrospect_SRCS += testIntrospect.cpp
 testIntrospect_LIBS += pvData Com
