@@ -1319,6 +1319,10 @@ public:
     {
         svector data;
         this->swap(data);
+        // Will have to re-alloc anyway? If so avoid copying
+        // data which will only be over-written
+        if(data.capacity()<len)
+            data.clear();
         data.resize(len);
         castUnsafeV(len, typeCode, (void*)data.data(), id, ptr);
         this->swap(data);
