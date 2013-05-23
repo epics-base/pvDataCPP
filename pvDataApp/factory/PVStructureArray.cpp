@@ -175,8 +175,8 @@ size_t PVStructureArray::put(size_t offset,size_t len,
     	}
     	(*to)[i+offset] = frompv;
     }
-    postPut();
     setLength(length);
+    postPut();
     return len;
 }
 
