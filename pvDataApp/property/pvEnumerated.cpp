@@ -106,7 +106,7 @@ bool PVEnumerated:: setChoices(const StringArray & choices)
     if(pvChoices->isImmutable()) return false;
     PVStringArray::svector data(choices.size());
     std::copy(choices.begin(), choices.end(), data.begin());
-    pvChoices->swap(data);
+    pvChoices->replace(data);
     return true;
 }
 

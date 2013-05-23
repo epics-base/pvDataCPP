@@ -108,6 +108,7 @@ static void testBasic()
     testOk1(!arr1->viewUnsafe().unique());
 
     arr2->swap(data);
+    arr2->postPut();
 
     testOk1(arr2->getLength()==0);
     testOk1(data.size()==arr1->getLength());

@@ -706,6 +706,8 @@ public:
      * type of the provided data.
      * If the types do match then a new refernce to the provided
      * data is kept.
+     *
+     * Calls postPut()
      */
     template<ScalarType ID>
     inline void putFrom(const shared_vector<typename ScalarTypeTraits<ID>::type>& inp)
@@ -719,6 +721,8 @@ public:
      * Assign the given value after conversion.
      *
      * A copy and element-wise conversion is are always performed.
+     *
+     * Calls postPut()
      */
     template<ScalarType ID>
     inline void copyIn(const typename ScalarTypeTraits<ID>::type* inp, size_t len)
@@ -1128,15 +1132,19 @@ public:
     virtual const svector& viewUnsafe() const = 0;
 
     //! Exchange our contents for the provided.
-    //! Fails for Immutable arrays
+    //! Fails for Immutable arrays.
+    //! Callers must ensure that postPut() is called
+    //! after the last swap() operation.
     virtual void swap(svector& other) = 0;
 
     //! Discard current contents and replaced with the provided.
     //! Fails for Immutable arrays
+    //! calls postPut()
     virtual void replace(const svector& next)
     {
         svector temp(next);
         this->swap(temp);
+        this->postPut();
     }
 
     // Derived operations
@@ -1149,6 +1157,7 @@ public:
     }
 
     //! Remove and return the current array data
+    //! Does @b not call postPut()
     inline svector take()
     {
         svector result;
@@ -1157,6 +1166,7 @@ public:
     }
 
     //! take() with an implied make_unique()
+    //! Does @b not call postPut()
     inline svector reuse()
     {
         svector result;
@@ -1189,6 +1199,7 @@ public:
      * @param from The new values to put into the array.
      * @param fromOffset The offset in from.
      * @return The number of elements put into the array.
+     * calls postPut()
      */
     std::size_t put(std::size_t offset,
         std::size_t length, const_pointer from, std::size_t fromOffset) USAGE_DEPRECATED
@@ -1204,6 +1215,7 @@ public:
 
         std::copy(from, from + length, temp.begin() + offset);
         this->swap(temp);
+        this->postPut();
         return length;
     }
 
@@ -1216,6 +1228,7 @@ public:
      * @param value The data to share.
      * @param capacity The capacity of the array.
      * @param length The length of the array.
+     * Does @b not call postPut()
      */
     void shareData(
          shared_vector const & value,
@@ -1299,6 +1312,7 @@ public:
 
             this->swap(result);
         }
+        this->postPut();
     }
 
     virtual void copyIn(ScalarType id, const void* ptr, size_t len)
@@ -1308,6 +1322,7 @@ public:
         data.resize(len);
         castUnsafeV(len, typeCode, (void*)data.data(), id, ptr);
         this->swap(data);
+        this->postPut();
     }
 
     virtual void assign(PVScalarArray& pv)
@@ -1318,6 +1333,7 @@ public:
         pv.getAs(typeCode, temp);
         svector next(static_shared_vector_cast<T>(temp));
         this->swap(next);
+        this->postPut();
     }
 
 protected:
