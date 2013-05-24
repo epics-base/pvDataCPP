@@ -5,6 +5,7 @@ include $(TOP)/configure/CONFIG
 PROD_HOST += testIntrospect
 testIntrospect_SRCS += testIntrospect.cpp
 testIntrospect_LIBS += pvData Com
+TESTS += testIntrospect
 
 PROD_HOST += testPVAppend
 testPVAppend_SRCS += testPVAppend.cpp
