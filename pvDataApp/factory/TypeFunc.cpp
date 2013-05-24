@@ -61,7 +61,7 @@ namespace ScalarTypeFunc {
         "ubyte", "ushort", "uint", "ulong",
         "float", "double", "string",
     };
-    ScalarType getScalarType(String pvalue) {
+    ScalarType getScalarType(const String& pvalue) {
         for(size_t i=0; i<NELEMENTS(names); i++)
             if(pvalue==names[i])
                 return ScalarType(i);

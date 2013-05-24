@@ -66,7 +66,11 @@ struct StructureArrayHashFunction {
 
 
 Scalar::Scalar(ScalarType scalarType)
-       : Field(scalar),scalarType(scalarType){}
+       : Field(scalar),scalarType(scalarType)
+{
+    if(scalarType<pvBoolean || scalarType>pvString)
+        throw std::invalid_argument("Can't construct Scalar from invalid ScalarType");
+}
 
 Scalar::~Scalar(){}
 
@@ -166,7 +170,11 @@ static StructureConstPtr deserializeStructureField(const FieldCreate* fieldCreat
 }
 
 ScalarArray::ScalarArray(ScalarType elementType)
-: Field(scalarArray),elementType(elementType){}
+: Field(scalarArray),elementType(elementType)
+{
+    if(elementType<pvBoolean || elementType>pvString)
+        throw std::invalid_argument("Can't construct ScalarArray from invalid ScalarType");
+}
 
 ScalarArray::~ScalarArray() {}
 
@@ -275,10 +283,12 @@ Structure::Structure (
     }
     size_t number = fields.size();
     for(size_t i=0; i<number; i++) {
-        String name = fieldNames[i];
-        if(name.size()<1) {
+        const String& name = fieldNames[i];
+        if(name.empty()) {
             throw std::invalid_argument("fieldNames has a zero length string");
         }
+        if(fields[i].get()==NULL)
+            throw std::invalid_argument("Can't construct Structure with NULL Field");
         // look for duplicates
         for(size_t j=i+1; j<number; j++) {
             String otherName = fieldNames[j];

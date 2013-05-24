@@ -443,7 +443,7 @@ public:
      * @param fieldIndex The index of the desired field.
      * @return The fieldName.
      */
-    String getFieldName(std::size_t fieldIndex){return fieldNames[fieldIndex];}
+    String getFieldName(std::size_t fieldIndex) const {return fieldNames[fieldIndex];}
     /**
      * Convert the structure to a string and add it to builder.
      * @param  builder The string builder.
