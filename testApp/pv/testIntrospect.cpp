@@ -111,6 +111,18 @@ static void testStructure()
 
     testOk1(fields1 == struct1->getFields()); // vector equality
 
+    StringArray names2(2);
+    names2[0] = "outerA";
+    names2[1] = "outerB";
+    FieldConstPtrArray fields2(2);
+    fields2[0] = fieldCreate->createScalar(pvInt);
+    fields2[1] = std::tr1::static_pointer_cast<const Field>(struct1);
+
+    StructureConstPtr struct2 = fieldCreate->createStructure(names2, fields2);
+
+    testOk1(struct2->getNumberFields()==2); // not recursive
+    testOk1(struct2->getField(1)==fields2[1]);
+
     StructureArrayConstPtr struct1arr = fieldCreate->createStructureArray(struct1);
 
     testOk1(struct1arr->getStructure()==struct1);
@@ -164,7 +176,7 @@ static void testError()
 
 MAIN(testIntrospect)
 {
-    testPlan(122);
+    testPlan(124);
     fieldCreate = getFieldCreate();
     pvDataCreate = getPVDataCreate();
     standardField = getStandardField();
