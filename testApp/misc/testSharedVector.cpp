@@ -206,9 +206,28 @@ static void testConst()
 
     testOk1(rodata[1]==100);
 
+    // intentionally modify shared data!
+    // safe since this thread owns all references.
     writable[1]=200;
 
     testOk1(rodata[1]==200);
+
+    epics::pvData::shared_vector<int>::const_iterator a;
+    epics::pvData::shared_vector<const int>::iterator b;
+    epics::pvData::shared_vector<const int>::const_iterator c;
+
+    a = writable.begin();
+    b = rodata.begin();
+    c = rodata.end();
+
+    testOk1(std::equal(b, c, a));
+
+    a = writable.cbegin();
+    c = rodata.cend();
+
+    epics::pvData::shared_vector<int>::const_reference x = rodata[1];
+
+    testOk1(x==200);
 }
 
 static void testSlice()
@@ -318,7 +337,7 @@ static void testVoid()
 
 MAIN(testSharedVector)
 {
-    testPlan(99);
+    testPlan(101);
     testDiag("Tests for shared_vector");
 
     testDiag("sizeof(shared_vector<int>)=%lu",

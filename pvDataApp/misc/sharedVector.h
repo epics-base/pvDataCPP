@@ -32,6 +32,10 @@ namespace detail {
         }
     };
 
+    // avoid adding 'const' twice
+    template<typename T> struct decorate_const { typedef const T type; };
+    template<typename T> struct decorate_const<const T> { typedef const T type; };
+
     /* All the parts of shared_vector which
      * don't need special handling for E=void
      */
@@ -193,9 +197,12 @@ class shared_vector : public detail::shared_vector_base<E>
 public:
     typedef E value_type;
     typedef E& reference;
+    typedef typename detail::decorate_const<E>::type& const_reference;
     typedef E* pointer;
     typedef E* iterator;
     typedef std::reverse_iterator<iterator> reverse_iterator;
+    typedef typename detail::decorate_const<E>::type* const_iterator;
+    typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
     typedef ptrdiff_t difference_type;
     typedef size_t size_type;
 
@@ -296,7 +303,7 @@ public:
         if(this->m_data && this->m_data.unique()) {
             // we have data and exclusive ownership of it
             if(i<=this->m_total) {
-                // We have room to grow!
+                // We have room to grow (or shrink)!
                 this->m_count = i;
                 return;
             }
@@ -364,12 +371,16 @@ public:
     // STL iterators
 
     iterator begin() const{return this->m_data.get()+this->m_offset;}
+    const_iterator cbegin() const{return begin();}
 
     iterator end() const{return this->m_data.get()+this->m_offset+this->m_count;}
+    const_iterator cend() const{return end();}
 
     reverse_iterator rbegin() const{return reverse_iterator(end());}
+    const_reverse_iterator crbegin() const{return rbegin();}
 
     reverse_iterator rend() const{return reverse_iterator(begin());}
+    const_reverse_iterator crend() const{return rend();}
 
     reference front() const{return (*this)[0];}
     reference back() const{return (*this)[this->m_count-1];}
@@ -635,8 +646,6 @@ std::ostream& operator<<(std::ostream& strm, const epics::pvData::shared_vector<
  * shared_vector does not model an allocator which is bound to the object.
  * Therefore the get_allocator() method and the allocator_type typedef are
  * not provided.
- *
- * shared_vector does not provide the const_* typedefs.
  *
  * The assign() method and the related constructor are not implemented
  * at this time.
