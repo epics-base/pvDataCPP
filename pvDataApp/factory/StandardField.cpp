@@ -65,9 +65,10 @@ StructureConstPtr StandardField::createProperties(String id,FieldConstPtr field,
     StructureConstPtr valueAlarm;
     Type type= field->getType();
     while(gotValueAlarm) {
-        if(type==epics::pvData::scalar) {
-           ScalarConstPtr scalar = static_pointer_cast<const Scalar>(field);
-           ScalarType scalarType = scalar->getScalarType();
+        if(type==epics::pvData::scalar || type==epics::pvData::scalarArray) {
+           ScalarType scalarType = (type==epics::pvData::scalar) ?
+		static_pointer_cast<const Scalar>(field)->getScalarType() :
+		static_pointer_cast<const ScalarArray>(field)->getElementType();
            switch(scalarType) {
                case pvBoolean: valueAlarm = booleanAlarmField; break;
                case pvByte: valueAlarm = byteAlarmField; break;
