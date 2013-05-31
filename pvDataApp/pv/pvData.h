@@ -1126,15 +1126,20 @@ public:
 
     // Primative array manipulations
 
-    //! unchecked writable reference
-    //! Before you call this directly, consider using one
-    //! other the following methods.
+    //! unchecked reference to writable data
+    //! Please consider the view() method instead of viewUnsafe().
     virtual const svector& viewUnsafe() const = 0;
 
-    //! Exchange our contents for the provided.
-    //! Fails for Immutable arrays.
-    //! Callers must ensure that postPut() is called
-    //! after the last swap() operation.
+    /** Exchange our contents for the provided.
+     *
+     @throws std::logic_error for Immutable arrays.
+     *
+     *  Callers must ensure that postPut() is called
+     *  after the last swap() operation.
+     *
+     *  Before you call this directly, consider using
+     *  the take(), reuse(), or replace() methods.
+     */
     virtual void swap(svector& other) = 0;
 
     //! Discard current contents and replaced with the provided.
@@ -1157,7 +1162,7 @@ public:
     }
 
     //! Remove and return the current array data
-    //! Does @b not call postPut()
+    //! Does @b not (and should not) call postPut()
     inline svector take()
     {
         svector result;
@@ -1166,7 +1171,7 @@ public:
     }
 
     //! take() with an implied make_unique()
-    //! Does @b not call postPut()
+    //! Does @b not (and should not) call postPut()
     inline svector reuse()
     {
         svector result;
@@ -1246,8 +1251,8 @@ public:
         return this->viewUnsafe().data();
     }
 
-    vector const & getVector() USAGE_ERROR("No longer implemented");
-    shared_vector const & getSharedVector() USAGE_ERROR("No longer implemented");
+    vector const & getVector() USAGE_ERROR("No longer implemented.  Replace with view()");
+    shared_vector const & getSharedVector() USAGE_ERROR("No longer implemented.  Replace with view()");
 
     std::ostream& dumpValue(std::ostream& o) const
     {
