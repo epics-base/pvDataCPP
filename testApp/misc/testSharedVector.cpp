@@ -160,12 +160,14 @@ static void testShare()
 
     one.make_unique();
 
+    testOk1(one[1]==43);
     one[1] = 143;
     testOk1(two[1]==43);
     testOk1(three[1]==43);
 
     two.resize(two.size());
 
+    testOk1(two[1]==43);
     two[1] = 243;
     testOk1(one[1]==143);
     testOk1(three[1]==43);
@@ -177,11 +179,13 @@ static void testShare()
     one.resize(2);
 
     testOk1(one.size()==2);
+    testOk1(one[1]==143);
     testOk1(two.size()==15);
     testOk1(three.size()==15);
 
     two.resize(20, 5000);
 
+    testOk1(two[1]==243);
     testOk1(one.size()==2);
     testOk1(two.size()==20);
     testOk1(three.size()==15);
@@ -335,9 +339,39 @@ static void testVoid()
     testOk1(typed.size()==2);
 }
 
+struct dummyStruct {};
+
+static void testNonPOD()
+{
+    testDiag("Test vector of non-POD types");
+
+    epics::pvData::shared_vector<std::string> strings(6);
+    epics::pvData::shared_vector<std::tr1::shared_ptr<dummyStruct> > structs(5);
+
+    testOk1(strings[0].empty());
+    testOk1(structs[0].get()==NULL);
+
+    structs[1].reset(new dummyStruct);
+    dummyStruct *temp = structs[1].get();
+
+    epics::pvData::shared_vector<std::tr1::shared_ptr<dummyStruct> > structs2(structs);
+
+    testOk1(!structs.unique());
+    testOk1(structs[1].unique());
+
+    testOk1(structs2[1].get()==temp);
+
+    structs2.make_unique();
+
+    testOk1(structs.unique());
+    testOk1(!structs[1].unique());
+
+    testOk1(structs2[1].get()==temp);
+}
+
 MAIN(testSharedVector)
 {
-    testPlan(101);
+    testPlan(113);
     testDiag("Tests for shared_vector");
 
     testDiag("sizeof(shared_vector<int>)=%lu",
@@ -351,5 +385,6 @@ MAIN(testSharedVector)
     testConst();
     testSlice();
     testVoid();
+    testNonPOD();
     return testDone();
 }

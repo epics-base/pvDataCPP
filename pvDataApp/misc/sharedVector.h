@@ -36,6 +36,31 @@ namespace detail {
     template<typename T> struct decorate_const { typedef const T type; };
     template<typename T> struct decorate_const<const T> { typedef const T type; };
 
+    // How values should be passed as arguments to shared_vector methods
+    // really should use boost::call_traits
+    template<typename T> struct call_with { typedef T type; };
+    template<typename T> struct call_with<std::tr1::shared_ptr<T> >
+    { typedef const std::tr1::shared_ptr<T>& type; };
+    template<> struct call_with<std::string> { typedef const std::string& type; };
+
+    // For lack of C++11's std::move do our own special handling of shared_ptr
+    template<typename T>
+    struct moveme {
+        template<typename arg>
+        static void op(const arg& a, const arg& b, const arg& c)
+        {std::copy(a,b,c);}
+    };
+    template<typename T>
+    struct moveme<std::tr1::shared_ptr<T> > {
+        template<typename arg>
+        static void op(arg a, arg b, arg c)
+        {
+            // "move" with swap to avoid ref counter operations
+            for(;a!=b;a++,c++)
+                c->swap(*a);
+        }
+    };
+
     /* All the parts of shared_vector which
      * don't need special handling for E=void
      */
@@ -194,6 +219,7 @@ template<typename E>
 class shared_vector : public detail::shared_vector_base<E>
 {
     typedef detail::shared_vector_base<E> base_t;
+    typedef typename detail::call_with<E>::type param_type;
 public:
     typedef E value_type;
     typedef E& reference;
@@ -222,7 +248,7 @@ public:
     {}
 
     //! @brief Allocate (with new[]) a new vector of size c and fill with value e
-    shared_vector(size_t c, E e)
+    shared_vector(size_t c, param_type e)
         :base_t(new E[c], 0, c)
     {
         std::fill_n(this->m_data.get(), this->m_count, e);
@@ -277,8 +303,8 @@ public:
             return;
         pointer temp=new E[i];
         try{
-            std::copy(begin(), end(), temp);
-            this->m_data.reset(temp, detail::default_array_deleter<E*>());
+            detail::moveme<E>::op(begin(), end(), temp);
+            this->m_data.reset(temp, detail::default_array_deleter<pointer>());
         }catch(...){
             delete[] temp;
             throw;
@@ -314,10 +340,10 @@ public:
         try{
             // Copy as much as possible from old,
             // remaining elements are uninitialized.
-            std::copy(begin(),
+            detail::moveme<E>::op(begin(),
                       begin()+std::min(i,this->size()),
                       temp);
-            this->m_data.reset(temp, detail::default_array_deleter<E*>());
+            this->m_data.reset(temp, detail::default_array_deleter<pointer>());
         }catch(...){
             delete[] temp;
             throw;
@@ -331,7 +357,7 @@ public:
      *
      * see @ref resize(size_t)
      */
-    void resize(size_t i, E v) {
+    void resize(size_t i, param_type v) {
         size_t oldsize=this->size();
         resize(i);
         if(this->size()>oldsize) {
@@ -360,7 +386,7 @@ public:
         if(this->unique())
             return;
         shared_pointer_type d(new E[this->m_total], detail::default_array_deleter<E*>());
-        std::copy(this->m_data.get()+this->m_offset,
+        detail::moveme<E>::op(this->m_data.get()+this->m_offset,
                   this->m_data.get()+this->m_offset+this->m_count,
                   d.get());
         this->m_data.swap(d);
@@ -387,7 +413,7 @@ public:
 
     // Modifications
 
-    void push_back(const E& v)
+    void push_back(param_type v)
     {
         resize(this->size()+1);
         back() = v;
