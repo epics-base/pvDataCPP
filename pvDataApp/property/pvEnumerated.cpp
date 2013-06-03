@@ -78,7 +78,7 @@ String PVEnumerated::getChoice()
          throw std::logic_error(notAttached);
     }
     int index = pvIndex->get();
-    const PVStringArray::svector& data(pvChoices->viewUnsafe());
+    const PVStringArray::const_svector& data(pvChoices->view());
     return data[index];
 }
 

@@ -51,12 +51,20 @@ static void testFactory()
 }
 
 template<typename PVT>
+bool hasUniqueVector(const typename PVT::shared_pointer& pv)
+{
+    typename PVT::svector data;
+    pv->swap(data);
+    bool ret = data.unique();
+    pv->swap(data);
+    return ret;
+}
+
+template<typename PVT>
 struct basicTestData {
     static inline void fill(typename PVT::svector& data) {
         data.resize(100);
-        for(typename PVT::value_type i=0;
-            (size_t)i<data.size();
-            i++)
+        for(size_t i=0; i<data.size(); i++)
         {
             data[i] = 10*i;
         }
@@ -100,12 +108,12 @@ static void testBasic()
 
     data.clear();
 
-    testOk1(arr1->viewUnsafe().unique());
+    testOk1(hasUniqueVector<PVT>(arr1));
 
     arr2->assign(*arr1);
 
     testOk1(*arr1==*arr2);
-    testOk1(!arr1->viewUnsafe().unique());
+    testOk1(!hasUniqueVector<PVT>(arr1));
 
     arr2->swap(data);
     arr2->postPut();
@@ -123,7 +131,7 @@ static void testBasic()
 
     arr1->PVScalarArray::putFrom<pvInt>(idata);
 
-    testOk1(castUnsafe<PVIntArray::value_type>(arr1->viewUnsafe()[1])==42);
+    testOk1(castUnsafe<PVIntArray::value_type>(arr1->view()[1])==42);
 }
 
 static void testShare()

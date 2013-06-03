@@ -1125,10 +1125,11 @@ public:
     virtual ~PVValueArray() {}
 
     // Primative array manipulations
-
+protected:
     //! unchecked reference to writable data
     //! Please consider the view() method instead of viewUnsafe().
     virtual const svector& viewUnsafe() const = 0;
+public:
 
     /** Exchange our contents for the provided.
      *
