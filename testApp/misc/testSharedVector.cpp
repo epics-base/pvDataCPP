@@ -199,8 +199,18 @@ static void testConst()
 
     epics::pvData::shared_vector<int> writable(15, 100);
 
+    epics::pvData::shared_vector<int>::reference wr = writable[0];
+    epics::pvData::shared_vector<int>::const_reference ror = writable[0];
+
+    testOk1(wr==ror);
+
     // can re-target container, but data is R/O
     epics::pvData::shared_vector<const int> rodata(writable);
+
+    epics::pvData::shared_vector<const int>::reference wcr = rodata[0];
+    epics::pvData::shared_vector<const int>::const_reference rocr = rodata[0];
+
+    testOk1(wcr==rocr);
 
     // Data is R/W, but container can't be re-targeted
     const epics::pvData::shared_vector<int> roref(writable);
@@ -371,7 +381,7 @@ static void testNonPOD()
 
 MAIN(testSharedVector)
 {
-    testPlan(113);
+    testPlan(115);
     testDiag("Tests for shared_vector");
 
     testDiag("sizeof(shared_vector<int>)=%lu",
