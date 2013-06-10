@@ -382,12 +382,15 @@ bool Convert::isCopyStructureArrayCompatible(
 void Convert::copyStructureArray(
     PVStructureArrayPtr const & from, PVStructureArrayPtr const & to)
 {
-    if(to->isImmutable()) {
-        if(from==to) return;
-        String message("Convert.copyStructureArray destination is immutable");
-        throw std::invalid_argument(message);
+    if(from==to) {
+        return;
+    } else if(to->isImmutable()) {
+        throw std::invalid_argument("Convert.copyStructureArray destination is immutable");
     }
-    to->put(0,from->getLength(),from->getVector(),0);
+    PVStructureArray::svector data;
+    from->swap(data);
+    to->replace(data);
+    from->swap(data);
 }
 
 void Convert::newLine(StringBuilder buffer, int indentLevel)

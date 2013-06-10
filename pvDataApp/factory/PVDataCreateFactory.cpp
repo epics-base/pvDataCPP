@@ -231,9 +231,8 @@ DefaultPVArray<T>::~DefaultPVArray()
 template<typename T>
 void DefaultPVArray<T>::setCapacity(size_t capacity)
 {
-    if(this->isCapacityMutable() && capacity>value.capacity()) {
+    if(this->isCapacityMutable()) {
         value.reserve(capacity);
-        PVArray::setCapacityLength(value.capacity(), value.size());
     }
 }
 
@@ -248,7 +247,6 @@ void DefaultPVArray<T>::setLength(size_t length)
         value.slice(0, length);
     else
         value.resize(length);
-    PVArray::setCapacityLength(value.capacity(), value.size());
 }
 
 
@@ -265,7 +263,6 @@ void DefaultPVArray<T>::swap(svector &other)
         THROW_EXCEPTION2(std::logic_error,"Immutable");
 
     value.swap(other);
-    PVArray::setCapacityLength(value.capacity(), value.size());
 }
 
 
@@ -282,7 +279,6 @@ void DefaultPVArray<T>::deserialize(ByteBuffer *pbuffer,
 
     value.resize(size); // TODO: avoid copy of stuff we will then overwrite
 
-    PVArray::setCapacityLength(value.capacity(), value.size());
     T* cur = value.data();
 
     // try to avoid deserializing from the buffer
@@ -378,8 +374,6 @@ void DefaultPVArray<String>::deserialize(ByteBuffer *pbuffer,
         value.resize(size);
     else if(size < value.size())
         value.slice(0, size);
-
-    setCapacityLength(size, size);
 
 
     String * pvalue = value.data();

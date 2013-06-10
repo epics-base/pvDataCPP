@@ -21,44 +21,51 @@ using std::size_t;
 
 namespace epics { namespace pvData {
 
-PVStructureArray::PVStructureArray(StructureArrayConstPtr const & structureArray)
-: PVArray(structureArray),
-  structureArray(structureArray),
-  value(std::tr1::shared_ptr<PVStructurePtrArray>(new PVStructurePtrArray()))
-{
-}
-
 size_t PVStructureArray::append(size_t number)
 {
-    size_t currentLength = getLength();
-    size_t newLength = currentLength + number;
-    setCapacity(newLength);
-    setLength(newLength);
+    svector data;
+    swap(data);
+    data.resize(data.size()+number);
+
     StructureConstPtr structure = structureArray->getStructure();
-    PVStructurePtrArray *to = value.get();
-    for(size_t i=currentLength; i<newLength; i++) {
-        (*to)[i] =getPVDataCreate()->createPVStructure(structure);
-    }
+
+    for(svector::reverse_iterator it = data.rbegin(); number; ++it, --number)
+        *it = getPVDataCreate()->createPVStructure(structure);
+
+    size_t newLength = data.size();
+
+    swap(data);
+
     return newLength;
 }
 
 bool PVStructureArray::remove(size_t offset,size_t number)
 {
-    size_t length = getLength();
-    if(offset+number>length) return false;
-    PVStructurePtrArray vec = *value.get();
+    if(number==0)
+        return true;
+    else if(offset+number>getLength())
+        return false;
+
+    svector vec(reuse());
+
+    size_t length = vec.size();
+
     for(size_t i = offset; i+number < length; i++) {
-         vec[i] =  vec[i + number];
+         vec[i].swap(vec[i + number]);
     }
-    size_t newLength = length - number;
-    setCapacityLength(newLength,newLength);
+
+    vec.resize(length - number);
+    swap(vec);
+
     return true;
 }
 
 void PVStructureArray::compress() {
-    size_t length = getCapacity();
+    svector vec(reuse()); // TODO: check for first NULL before realloc
+
+    size_t length = vec.size();
     size_t newLength = 0;
-    PVStructurePtrArray vec = *value.get();
+
     for(size_t i=0; i<length; i++) {
         if(vec[i].get()!=NULL) {
             newLength++;
@@ -80,113 +87,43 @@ void PVStructureArray::compress() {
          }
          break;
     }
-    setCapacityLength(newLength,newLength);
+
+    vec.resize(newLength);
+    swap(vec);
 }
 
-void PVStructureArray::setCapacity(size_t capacity) {
-    if(getCapacity()==capacity) return;
-    if(!isCapacityMutable()) {
-        std::string message("not capacityMutable");
-        PVField::message(message, errorMessage);
-        return;
+void PVStructureArray::setCapacity(size_t capacity)
+{
+    if(this->isCapacityMutable()) {
+        svector value;
+        swap(value);
+        value.reserve(capacity);
+        swap(value);
     }
-    size_t length = getLength();
-    if(length>capacity) length = capacity;
-    size_t oldCapacity = getCapacity();
-    if(oldCapacity>capacity) {
-        PVStructurePtrArray array;
-        array.reserve(capacity);
-        array.resize(length);
-        PVStructurePtr * from = get();
-        for (size_t i=0; i<length; i++) array[i] = from[i];
-        value->swap(array);
+}
+
+void PVStructureArray::setLength(size_t length)
+{
+    if(this->isImmutable())
+        THROW_EXCEPTION2(std::logic_error,"Immutable");
+    svector value;
+    swap(value);
+    if(length == value.size()) {
+        // nothing
+    } else if(length < value.size()) {
+        value.slice(0, length);
     } else {
-        value->reserve(capacity);
+        value.resize(length);
     }
-    setCapacityLength(capacity,length);
+    swap(value);
 }
 
-void PVStructureArray::setLength(size_t length) {
-    if(PVArray::getLength()==length) return;
-    size_t capacity = PVArray::getCapacity();
-    if(length>capacity) {
-        if(!PVArray::isCapacityMutable()) {
-            std::string message("not capacityMutable");
-            PVField::message(message, errorMessage);
-            return;
-        }
-        setCapacity(length);
-    }
-    value->resize(length);
-    PVArray::setCapacityLength(capacity,length);
-}
-
-StructureArrayConstPtr PVStructureArray::getStructureArray() const
+void PVStructureArray::swap(svector &other)
 {
-    return structureArray;
-}
+    if(this->isImmutable())
+        THROW_EXCEPTION2(std::logic_error,"Immutable");
 
-size_t PVStructureArray::get(
-    size_t offset, size_t len, StructureArrayData &data)
-{
-    size_t n = len;
-    size_t length = getLength();
-    if(offset+len > length) {
-        n = length - offset;
-        //if(n<0) n = 0;
-    }
-    data.data = *value.get();
-    data.offset = offset;
-    return n;
-}
-
-size_t PVStructureArray::put(size_t offset,size_t len,
-    const_vector const & from, size_t fromOffset)
-{
-    if(isImmutable()) {
-        message(String("field is immutable"), errorMessage);
-        return 0;
-    }
-    if(&from==value.get()) return 0;
-    if(len<1) return 0;
-    size_t length = getLength();
-    size_t capacity = getCapacity();
-    if(offset+len > length) {
-        size_t newlength = offset + len;
-        if(newlength>capacity) {
-            setCapacity(newlength);
-            capacity = getCapacity();
-            newlength = capacity;
-            len = newlength - offset;
-            if(len<=0) return 0;
-        }
-        length = newlength;
-        setLength(length);
-    }
-    PVStructurePtrArray *to = value.get();
-    StructureConstPtr structure = structureArray->getStructure();
-    for(size_t i=0; i<len; i++) {
-    	PVStructurePtr frompv = from[i+fromOffset];
-    	if(frompv.get()!=NULL) {
-    	    if(frompv->getStructure()!=structure) {
-                 throw std::invalid_argument(String(
-                   "Element is not a compatible structure"));
-    	    }
-    	}
-    	(*to)[i+offset] = frompv;
-    }
-    setLength(length);
-    postPut();
-    return len;
-}
-
-void PVStructureArray::shareData(
-     std::tr1::shared_ptr<std::vector<PVStructurePtr> > const & sharedValue,
-     std::size_t capacity,
-     std::size_t length)
-{
-    value = sharedValue;
-    setCapacityLength(capacity,length);
+    value.swap(other);
 }
 
 void PVStructureArray::serialize(ByteBuffer *pbuffer,
@@ -196,56 +133,48 @@ void PVStructureArray::serialize(ByteBuffer *pbuffer,
 
 void PVStructureArray::deserialize(ByteBuffer *pbuffer,
         DeserializableControl *pcontrol) {
+    svector data;
+    swap(data);
+
     size_t size = SerializeHelper::readSize(pbuffer, pcontrol);
-    //if(size>=0) {
-        // prepare array, if necessary
-        if(size>getCapacity()) setCapacity(size);
-        setLength(size);
-        PVStructurePtrArray *pvArray = value.get();
-        for(size_t i = 0; i<size; i++) {
-            pcontrol->ensureData(1);
-            size_t temp = pbuffer->getByte();
-            if(temp==0) {
-                (*pvArray)[i].reset();
-            }
-            else {
-                if((*pvArray)[i].get()==NULL) {
-                    StructureConstPtr structure = structureArray->getStructure();
-                    (*pvArray)[i] = getPVDataCreate()->createPVStructure(structure);
-                }
-                (*pvArray)[i]->deserialize(pbuffer, pcontrol);
-            }
+    data.resize(size);
+
+    StructureConstPtr structure = structureArray->getStructure();
+
+    for(size_t i = 0; i<size; i++) {
+        pcontrol->ensureData(1);
+        size_t temp = pbuffer->getByte();
+        if(temp==0) {
+            data[i].reset();
         }
-        postPut();
-    //}
+        else {
+            if(data[i].get()==NULL) {
+                data[i] = getPVDataCreate()->createPVStructure(structure);
+            }
+            data[i]->deserialize(pbuffer, pcontrol);
+        }
+    }
+    replace(data); // calls postPut()
 }
 
 void PVStructureArray::serialize(ByteBuffer *pbuffer,
         SerializableControl *pflusher, size_t offset, size_t count) const {
-    // cache
-    size_t length = getLength();
 
-    // check bounds
-    /*if(offset<0)
-        offset = 0;
-    else*/ if(offset>length) offset = length;
-    //if(count<0) count = length;
+    const_svector temp(view());
+    temp.slice(offset, count);
 
-    size_t maxCount = length-offset;
-    if(count>maxCount) count = maxCount;
+    SerializeHelper::writeSize(temp.size(), pbuffer, pflusher);
 
-    PVStructurePtrArray pvArray = *value.get();
-    // write
-    SerializeHelper::writeSize(count, pbuffer, pflusher);
     for(size_t i = 0; i<count; i++) {
-        if(pbuffer->getRemaining()<1) pflusher->flushSerializeBuffer();
-        PVStructurePtr pvStructure = pvArray[i+offset];
-        if(pvStructure.get()==NULL) {
+        if(pbuffer->getRemaining()<1)
+            pflusher->flushSerializeBuffer();
+
+        if(temp[i].get()==NULL) {
             pbuffer->putByte(0);
         }
         else {
             pbuffer->putByte(1);
-            pvStructure->serialize(pbuffer, pflusher);
+            temp[i]->serialize(pbuffer, pflusher);
         }
     }
 }
@@ -267,9 +196,9 @@ std::ostream& PVStructureArray::dumpValue(std::ostream& o) const
 
 std::ostream& PVStructureArray::dumpValue(std::ostream& o, std::size_t index) const
 {
-    PVStructurePtrArray pvArray = *value.get();
-	PVStructurePtr pvStructure = pvArray[index];
-    return o << *(pvStructure.get());
+    const_svector temp(view());
+    if(index<temp.size())
+        o << temp[index].get();
     return o;
 }
 
