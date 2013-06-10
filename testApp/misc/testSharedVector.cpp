@@ -212,6 +212,9 @@ static void testConst()
 
     testOk1(wcr==rocr);
 
+    rodata = writable;
+    testOk1(rodata.data()==writable.data());
+
     // Data is R/W, but container can't be re-targeted
     const epics::pvData::shared_vector<int> roref(writable);
 
@@ -381,7 +384,7 @@ static void testNonPOD()
 
 MAIN(testSharedVector)
 {
-    testPlan(115);
+    testPlan(116);
     testDiag("Tests for shared_vector");
 
     testDiag("sizeof(shared_vector<int>)=%lu",

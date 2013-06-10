@@ -113,6 +113,11 @@ namespace detail {
             :m_data(d,b), m_offset(o), m_count(c), m_total(c)
         {_null_input();}
 
+        shared_vector_base(const shared_vector_base& O)
+            :m_data(O.m_data), m_offset(O.m_offset)
+            ,m_count(O.m_count), m_total(O.m_total)
+        {}
+
         template<typename E1>
         shared_vector_base(const shared_vector_base<E1>& o)
             : m_data(vector_implicit_cast<E1,E>::cast(o.m_data))
@@ -124,6 +129,19 @@ namespace detail {
         {
             if(&o!=this) {
                 m_data=o.m_data;
+                m_offset=o.m_offset;
+                m_count=o.m_count;
+                m_total=o.m_total;
+            }
+            return *this;
+        }
+
+        //! @brief Copy an existing vector of a related type
+        template<typename E1>
+        shared_vector_base& operator=(const shared_vector_base<E1>& o)
+        {
+            if(&o!=this) {
+                m_data=vector_implicit_cast<E1,E>::cast(o.m_data);
                 m_offset=o.m_offset;
                 m_count=o.m_count;
                 m_total=o.m_total;
@@ -284,7 +302,10 @@ public:
     shared_vector(A d, B b, size_t o, size_t c)
         :base_t(d,b,o,c) {}
 
-    //! @brief Copy an existing vector of same or related type
+    //! @brief Copy an existing vector of same type
+    shared_vector(const shared_vector& o) :base_t(o) {}
+
+    //! @brief Copy an existing vector of a related type
     template<typename E1>
     shared_vector(const shared_vector<E1>& o) :base_t(o) {}
 
