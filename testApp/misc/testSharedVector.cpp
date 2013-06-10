@@ -382,9 +382,34 @@ static void testNonPOD()
     testOk1(structs2[1].get()==temp);
 }
 
+static void testWeak()
+{
+    testDiag("Test weak_ptr counting");
+
+    epics::pvData::shared_vector<int> data(6);
+
+    testOk1(data.unique());
+
+    std::tr1::shared_ptr<int> pdata(data.dataPtr());
+
+    testOk1(!data.unique());
+
+    pdata.reset();
+
+    testOk1(data.unique());
+
+    std::tr1::weak_ptr<int> wdata(data.dataPtr());
+
+    testOk1(data.unique()); // True, but I wish it wasn't!!!
+
+    pdata = wdata.lock();
+
+    testOk1(!data.unique());
+}
+
 MAIN(testSharedVector)
 {
-    testPlan(116);
+    testPlan(121);
     testDiag("Tests for shared_vector");
 
     testDiag("sizeof(shared_vector<int>)=%lu",
@@ -399,5 +424,6 @@ MAIN(testSharedVector)
     testSlice();
     testVoid();
     testNonPOD();
+    testWeak();
     return testDone();
 }

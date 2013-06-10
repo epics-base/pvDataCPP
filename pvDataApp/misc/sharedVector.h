@@ -232,6 +232,13 @@ namespace detail {
  * std::vector are outlined in @ref vectordiff .
  *
  * Also see @ref vectormem
+ *
+ * @warning Due to the implementation of std::tr1::shared_ptr, use of
+ * shared_vector should not be combined with use of weak_ptr.
+ * shared_ptr::unique() and shared_ptr::use_count() do @b not
+ * include weak_ptr instances.  This breaks the assumption made
+ * by make_unique() that unique()==true implies exclusive
+ * ownership.
  */
 template<typename E>
 class shared_vector : public detail::shared_vector_base<E>
@@ -524,53 +531,6 @@ public:
 
     pointer data() const{
         return (pointer)(((char*)this->m_data.get())+this->m_offset);
-    }
-};
-
-template<typename E>
-class weak_vector {
-    std::tr1::weak_ptr<E> m_data;
-    //! Offset in the data array of first element
-    size_t m_offset;
-    //! Number of elements between m_offset and end of data
-    size_t m_count;
-
-public:
-    typedef E element_type;
-
-    weak_vector()
-        :m_data()
-        ,m_offset(0)
-        ,m_count(0)
-    {}
-    weak_vector(const weak_vector& o)
-        :m_data(o.m_data)
-        ,m_offset(o.m_offset)
-        ,m_count(o.m_count)
-    {}
-    weak_vector(const shared_vector<E>& o)
-        :m_data(o.dataPtr())
-        ,m_offset(o.dataOffset())
-        ,m_count(o.dataCount())
-    {}
-
-    bool expired() const{return m_data.expired();}
-    shared_vector<E> lock() const
-    {
-        return shared_vector<E>(m_data.lock(), m_offset, m_count);
-    }
-
-    void reset()
-    {
-        m_data.reset();
-        m_offset = m_count = 0;
-    }
-
-    void swap(weak_vector& o)
-    {
-        m_data.swap(o);
-        std::swap(m_offset, o.m_offset);
-        std::swap(m_count, o.m_count);
     }
 };
 
