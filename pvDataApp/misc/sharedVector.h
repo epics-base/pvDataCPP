@@ -243,6 +243,7 @@ public:
     typedef E& reference;
     typedef typename detail::decorate_const<E>::type& const_reference;
     typedef E* pointer;
+    typedef typename detail::decorate_const<E>::type* const_pointer;
     typedef E* iterator;
     typedef std::reverse_iterator<iterator> reverse_iterator;
     typedef typename detail::decorate_const<E>::type* const_iterator;
