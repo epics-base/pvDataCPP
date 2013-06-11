@@ -43,24 +43,6 @@ namespace detail {
     { typedef const std::tr1::shared_ptr<T>& type; };
     template<> struct call_with<std::string> { typedef const std::string& type; };
 
-    // For lack of C++11's std::move do our own special handling of shared_ptr
-    template<typename T>
-    struct moveme {
-        template<typename arg>
-        static void op(const arg& a, const arg& b, const arg& c)
-        {std::copy(a,b,c);}
-    };
-    template<typename T>
-    struct moveme<std::tr1::shared_ptr<T> > {
-        template<typename arg>
-        static void op(arg a, arg b, arg c)
-        {
-            // "move" with swap to avoid ref counter operations
-            for(;a!=b;a++,c++)
-                c->swap(*a);
-        }
-    };
-
     /* All the parts of shared_vector which
      * don't need special handling for E=void
      */
@@ -332,8 +314,8 @@ public:
             return;
         pointer temp=new E[i];
         try{
-            detail::moveme<E>::op(begin(), end(), temp);
-            this->m_data.reset(temp, detail::default_array_deleter<pointer>());
+            std::copy(begin(), end(), temp);
+            this->m_data.reset(temp, detail::default_array_deleter<E*>());
         }catch(...){
             delete[] temp;
             throw;
@@ -369,7 +351,7 @@ public:
         try{
             // Copy as much as possible from old,
             // remaining elements are uninitialized.
-            detail::moveme<E>::op(begin(),
+            std::copy(begin(),
                       begin()+std::min(i,this->size()),
                       temp);
             this->m_data.reset(temp, detail::default_array_deleter<pointer>());
@@ -415,7 +397,7 @@ public:
         if(this->unique())
             return;
         shared_pointer_type d(new E[this->m_total], detail::default_array_deleter<E*>());
-        detail::moveme<E>::op(this->m_data.get()+this->m_offset,
+        std::copy(this->m_data.get()+this->m_offset,
                   this->m_data.get()+this->m_offset+this->m_count,
                   d.get());
         this->m_data.swap(d);
