@@ -84,8 +84,7 @@ namespace detail {
             ,m_offset(o), m_count(c), m_total(c)
         {_null_input();}
 
-        template<typename E1>
-        shared_vector_base(const std::tr1::shared_ptr<E1>& d, size_t o, size_t c)
+        shared_vector_base(const std::tr1::shared_ptr<E>& d, size_t o, size_t c)
             :m_data(d), m_offset(o), m_count(c), m_total(c)
         {_null_input();}
 
