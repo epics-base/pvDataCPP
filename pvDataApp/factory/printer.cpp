@@ -48,8 +48,12 @@ void PrinterBase::encodeScalar(const PVScalar& pv) {}
 
 void PrinterBase::encodeArray(const PVScalarArray&) {}
 
+void PrinterBase::encodeNull() {}
+
 void PrinterBase::impl_print(const PVField& pv)
 {
+    static const PVField* marker = (const PVField*)&marker;
+
     /* Depth first recursive iteration.
      * Each PV to be printed is appended to the todo queue.
      * The last child of a structure is followed by a NULL.
@@ -64,7 +68,7 @@ void PrinterBase::impl_print(const PVField& pv)
         const PVField *next = todo.front();
         todo.pop_front();
 
-        if(!next) {
+        if(next==marker) {
             // finished with a structure or structarray,
             // now we fall back to its parent.
             assert(!inprog.empty());
@@ -86,6 +90,12 @@ void PrinterBase::impl_print(const PVField& pv)
         } else {
             // real field
 
+            if(!next) {
+                // NULL entry in a structure array
+                encodeNull();
+                continue;
+            }
+
             switch(next->getField()->getType()) {
             case scalar:
                 encodeScalar(*static_cast<const PVScalar*>(next));
@@ -103,7 +113,7 @@ void PrinterBase::impl_print(const PVField& pv)
                     for(size_t i=0, nfld=fld.getStructure()->getNumberFields(); i<nfld; i++)
                         todo.push_back(vals[i].get());
 
-                    todo.push_back(NULL);
+                    todo.push_back(marker);
                     break;
                 }
             case structureArray: {
@@ -116,7 +126,7 @@ void PrinterBase::impl_print(const PVField& pv)
                     for(size_t i=0, nfld=fld.getLength(); i<nfld; i++)
                         todo.push_back(vals[i].get());
 
-                    todo.push_back(NULL);
+                    todo.push_back(marker);
                     break;
                 }
             }
@@ -149,7 +159,7 @@ void PrinterPlain::beginStructureArray(const PVStructureArray& pv)
 {
     indentN(S(), ilvl);
     S() << pv.getStructureArray()->getID() << " "
-        << pv.getFieldName() << " ";
+        << pv.getFieldName() << "[] ";
     ilvl++;
 }
 
@@ -179,5 +189,10 @@ void PrinterPlain::encodeArray(const PVScalarArray& pv)
     S() << "]" << std::endl;
 }
 
+void PrinterPlain::encodeNull()
+{
+    indentN(S(), ilvl);
+    S() << "NULL" << std::endl;
+}
 
 }}

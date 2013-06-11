@@ -27,6 +27,7 @@ protected:
 
     virtual void encodeScalar(const PVScalar&);
     virtual void encodeArray(const PVScalarArray&);
+    virtual void encodeNull();
 
     inline std::ostream& S() { return *strm; }
 
@@ -47,6 +48,7 @@ protected:
 
     virtual void encodeScalar(const PVScalar&);
     virtual void encodeArray(const PVScalarArray&);
+    virtual void encodeNull();
 
 public:
     PrinterPlain();
