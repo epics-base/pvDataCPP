@@ -43,6 +43,7 @@ TESTS += testPVScalarArray
 PROD_HOST += testPVStructureArray
 testPVStructureArray_SRCS += testPVStructureArray.cpp
 testPVStructureArray_LIBS += pvData Com
+TESTS += testPVStructureArray
 
 PROD_HOST += testOperators
 testOperators_SRCS += testOperators.cpp
