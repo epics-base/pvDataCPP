@@ -126,7 +126,17 @@ void serializationTest(PVFieldPtr const & field) {
     deserializedField->deserialize(buffer, control);
 
     // must equal
-    testOk1(*field==*deserializedField);
+    if(*field==*deserializedField)
+        testPass("Serialization round trip OK");
+    else {
+        testFail("Serialization round trip did not match!");
+        std::string buf;
+        field->toString(&buf);
+        testDiag("Expected: %s", buf.c_str());
+        buf.clear();
+        deserializedField->toString(&buf);
+        testDiag("Found: %s", buf.c_str());
+    }
 }
 
 void testEquals() {
@@ -361,6 +371,34 @@ void testStructure() {
     serializationTest(pvStructure);
 }
 
+void testStructureArray() {
+    testDiag("Testing structure array...");
+
+    PVDataCreatePtr factory = getPVDataCreate();
+    testOk1(factory.get()!=NULL);
+
+    StructureArrayConstPtr tstype(
+            getFieldCreate()->createStructureArray(getStandardField()->alarm()));
+    PVStructureArrayPtr pvArr = getPVDataCreate()->createPVStructureArray(tstype);
+
+    testDiag("empty array");
+    serializationTest(pvArr);
+
+    pvArr->setLength(10);
+
+    testDiag("All NULLs");
+    serializationTest(pvArr);
+
+    PVStructureArray::svector data(5);
+
+    data[1] = getPVDataCreate()->createPVStructure(getStandardField()->alarm());
+    data[4] = getPVDataCreate()->createPVStructure(getStandardField()->alarm());
+
+    pvArr->replace(data);
+
+    testDiag("Some NULLs");
+    serializationTest(pvArr);
+}
 
 
 void testStructureId() {
@@ -445,7 +483,7 @@ void testStringCopy() {
 
 MAIN(testSerialization) {
 
-    testPlan(171);
+    testPlan(175);
 
     flusher = new SerializableControlImpl();
     control = new DeserializableControlImpl();
@@ -460,6 +498,7 @@ MAIN(testSerialization) {
     testScalar();
     testArray();
     testStructure();
+    testStructureArray();
 
 
     delete buffer;
