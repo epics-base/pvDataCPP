@@ -70,14 +70,13 @@ int main(int, char **)
     StructureConstPtr structure = standardField->scalar(pvDouble, "alarm,timeStamp");
     pvStructure = standardPVField->structureArray(structure,"alarm,timeStamp");
     size_t num = 2;
-    PVStructurePtrArray pvStructures;
-    pvStructures.reserve(num);
+    PVStructureArray::svector pvStructures(num);
     for(size_t i=0; i<num; i++) {
-        pvStructures.push_back(
-            pvDataCreate->createPVStructure(structure));
+        pvStructures[i]=
+            pvDataCreate->createPVStructure(structure);
     }
     PVStructureArrayPtr pvStructureArray = pvStructure->getStructureArrayField("value");
-    pvStructureArray->put(0, num, pvStructures, 0);
+    pvStructureArray->replace(pvStructures);
     builder.clear();
     pvStructure->toString(&builder);
     print("structureArrayTest");

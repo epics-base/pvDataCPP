@@ -188,26 +188,23 @@ bool compareField(const PVStructure* left, const PVStructure* right)
 
 bool compareField(const PVStructureArray* left, const PVStructureArray* right)
 {
-    if(left->getLength()!=right->getLength())
+    if(*left->getStructureArray()->getStructure()
+        != *right->getStructureArray()->getStructure())
         return false;
 
-    StructureConstPtr ls = left->getStructureArray()->getStructure();
+    PVStructureArray::const_svector ld=left->view(), rd=right->view();
 
-    if(*ls!=*right->getStructureArray()->getStructure())
+    if(ld.size()!=rd.size())
         return false;
 
-    const PVStructureArray::pointer ld=left->get(), rd=right->get();
+    PVStructureArray::const_svector::const_iterator lit, lend, rit;
 
-    for(size_t i=0, ilen=left->getLength(); i<ilen; i++)
+    for(lit=ld.begin(), lend=ld.end(), rit=rd.begin();
+        lit!=lend;
+        ++lit, ++rit)
     {
-        const PVFieldPtrArray& lf = ld[i]->getPVFields();
-        const PVFieldPtrArray& rf = rd[i]->getPVFields();
-
-        for(size_t k=0, klen=ls->getNumberFields(); k<klen; k++)
-        {
-            if(*lf[i]!=*rf[i])
-                return false;
-        }
+        if(**lit != **rit)
+            return false;
     }
     return true;
 }
