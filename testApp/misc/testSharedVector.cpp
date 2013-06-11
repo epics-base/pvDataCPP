@@ -329,6 +329,31 @@ static void testCapacity()
     testOk1(vect[1]==124);
 }
 
+static void testPush()
+{
+    epics::pvData::shared_vector<int> vect;
+
+    testDiag("Test push_back optimizations");
+
+    size_t nallocs = 0;
+    size_t cap = vect.capacity();
+
+    for(size_t s=0; s<16*1024; s++) {
+        vect.push_back(s);
+
+        if(cap!=vect.capacity()) {
+            nallocs++;
+            cap = vect.capacity();
+        }
+    }
+
+    testDiag("push_back %ld times caused %ld re-allocations",
+             (unsigned long)vect.size(),
+             (unsigned long)nallocs);
+
+    testOk1(nallocs==26);
+}
+
 static void testVoid()
 {
     testDiag("Test vecter cast to/from void");
@@ -409,7 +434,7 @@ static void testWeak()
 
 MAIN(testSharedVector)
 {
-    testPlan(121);
+    testPlan(122);
     testDiag("Tests for shared_vector");
 
     testDiag("sizeof(shared_vector<int>)=%lu",
@@ -422,6 +447,7 @@ MAIN(testSharedVector)
     testShare();
     testConst();
     testSlice();
+    testPush();
     testVoid();
     testNonPOD();
     testWeak();

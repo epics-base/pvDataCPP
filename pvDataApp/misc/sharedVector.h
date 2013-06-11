@@ -6,6 +6,8 @@
 #include <stdexcept>
 #include <iterator>
 
+#include <cassert>
+
 #include "pv/sharedPtr.h"
 
 namespace epics { namespace pvData {
@@ -423,9 +425,34 @@ public:
 
     // Modifications
 
+private:
+    void _push_resize() {
+        if(this->m_count==this->m_total || !this->unique()) {
+            size_t next;
+            if(this->m_total<1024) {
+                // round m_total+1 up to the next power of 2
+                next = this->m_total;
+                next |= next >> 1;
+                next |= next >> 2;
+                next |= next >> 4;
+                next |= next >> 8;
+                next++;
+            } else {
+                // pad m_total up to the next multiple of 1024
+                next = this->m_total+1024;
+                next &= ~0x3ff;
+            }
+            assert(next > this->m_total);
+            reserve(next);
+        }
+        resize(this->size()+1);
+    }
+
+public:
+
     void push_back(param_type v)
     {
-        resize(this->size()+1);
+        _push_resize();
         back() = v;
     }
 
