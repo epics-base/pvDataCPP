@@ -17,7 +17,7 @@ namespace epics { namespace pvData {
 
 class BitSetUtil : private NoDefaultMethods {
 public:
-    static bool compress(BitSet *bitSet,PVStructure *pvStructure);
+    static bool compress(BitSetPtr const &bitSet,PVStructurePtr const &pvStructure);
 };
 
 }}
