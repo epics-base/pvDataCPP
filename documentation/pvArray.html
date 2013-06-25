@@ -37,7 +37,7 @@
 <h1>EPICS Array</h1>
 <!-- Maturity: Working Draft or Request for Comments, or Recommendation, and date.  -->
 
-<h2 class="nocount">EPICS v4 Working Group, Working Draft, 18-Jun-2013</h2>
+<h2 class="nocount">EPICS v4 Working Group, Working Draft, 23-Jun-2013</h2>
 
   <dl>
     <dt>Latest version:</dt>
@@ -68,7 +68,18 @@ license.</a></p>
 
 <h2>Introduction</h2>
 <p>This is the documentation for pvData.h as defined by pvDataCPP-md.
-When complete it will be merged into pvDataCPP.html.</p>
+When complete it will be merged into pvDataCPP.html.
+This document proposes an implementation of the PVXXX interfaces that are
+different than the existing pvDataCPP-md interfaces.
+See the next section for a comparison of the four interface descriptions.
+The main reason for proposing a different definition is the primary
+purpose for pvData:<br />
+<b>pvData (Process Variable Data) defines and implements an efficent
+way to store, access, and communicate memory resident data structures.</b><br />
+This statement appears as the first sentence of pvDataJava.html.
+A few sentances later the document makes clear that communication
+includes network communication.
+Thus it is important to keep the Java and C++ descriptions similar.</p>
 <p>
 pvData provides an interface for network accessible structured data.
 The interfaces for C++ and Java are similar.
@@ -82,7 +93,7 @@ Some differences are:
 <dl>
    <dt>shared pointers</dt>
      <dd>Java has a garbage collector. In C++ the implementation manages
-      memory. The primary tool is std::tr1::shared_ptr.</dd>
+      memory. An important tool is std::tr1::shared_ptr.</dd>
    <dt>PVArray</dt>
       <dd>The Java garbage collector allows raw data arrays, e. g. int[],
        to be shared. For C++ a shared_vector holds the raw data.
@@ -92,8 +103,11 @@ Some differences are:
        For C++ operator&lt;&lt; replaces toString</dd>
    <dt>shared_vector</dt>
       <dd>This is similar to std::vector but uses a shared_ptr to wrap the raw
-       data and also supports a window into the raw data. It does follow
-       naming and other conventions for C++ standard library containers.</dd>
+       data and also supports a window into the raw data. It does follow the
+       naming and other conventions for C++ standard library containers.
+      Code that wants to use features of the C++ standard library
+      like iterators and algorithms can get the shared_vector.
+      </dd>
 </dl>
 <p>There is one big difference from the existing Java implelentation:
 The method PVValueArray::get.
@@ -120,13 +134,736 @@ PVScalarArrayPtr createPVScalarArray(const PVScalarArray &amp;, size_t offset, s
      </dd>
    <dt>convert</dt>
      <dd>This will be changed to do conversions itself instead of calling
-      methods like getAs. It will again support methods toXXXArray and fromXXXArray,
-      with a raw array replaced by a shared_vector.
-      Templates should be able to minimize the code required.</dd>
+      methods like getAs. It will again support methods toXXXArray and fromXXXArray.
+      Templates should be used to minimize the code required.</dd>
     <dt>PVStructureArray</dt>
       <dd>Can this also use shared_vector to hold elements?</dd>
 </dl>
 </p>
+<h2>PVXXX: pvDataJava, pvDataCPP, pvDataCPP-md, and proposed interface</h2>
+<p>The following compares the definitions of the following: PVField,
+PVScalar and extensions, PVArray and extensions.
+Note, however, that PVStructureArray is not discussed.
+</p>
+<h3>PVField</h3>
+<p>This is the base for all the PVXXX iterfaces.
+It provides basic methods for allowing network transfer and for 
+traversing structured data.
+The pvDataJava and pvDataCPP definitions are similar.
+pvDataCPP-md added method getFullName.
+The proposed interface is like the existing pvDataCPP except that
+the toString and dumpValue methods are replaced by the stream operator&lt;&lt;.
+</p>
+<h4>Java</h4>
+<pre>interface PVField extends Requester, Serializable {
+    String getFieldName();
+    void setRequester(Requester requester);
+    int getFieldOffset();
+    int getNextFieldOffset();
+    int getNumberFields();
+    PVAuxInfo getPVAuxInfo();
+    boolean isImmutable();
+    void setImmutable();
+    Field getField();
+    PVStructure getParent();
+    void renameField(String newName);
+    void postPut(); // calls PVRecordField.postPut if this is a field of a record
+    void setPostHandler(PostHandler postHandler);
+    void toString(StringBuilder buf);
+    void toString(StringBuilder buf,int indentLevel);
+    String toString();
+}</pre>
+<h4>pvDataCPP</h4>
+<pre>class PVField
+: virtual public Serializable,
+  public std::tr1::enable_shared_from_this&lt;PVField&gt;
+{
+public:
+   POINTER_DEFINITIONS(PVField);
+   virtual ~PVField();
+   virtual void message(String message,MessageType messageType);
+   String getFieldName() const ;
+   virtual void setRequester(RequesterPtr const &amp;prequester);
+   std::size_t getFieldOffset() const;
+   std::size_t getNextFieldOffset() const;
+   std::size_t getNumberFields() const;
+   PVAuxInfoPtr &amp; getPVAuxInfo()
+   bool isImmutable() const;
+   virtual void setImmutable();
+   const FieldConstPtr &amp; getField() const ;
+   PVStructure * getParent() const
+   void replacePVField(const PVFieldPtr&amp;  newPVField);
+   void renameField(String const &amp;newName);
+   void postPut() ;
+   void setPostHandler(PostHandlerPtr const &amp;postHandler);
+   virtual bool equals(PVField &amp;pv);
+   virtual void toString(StringBuilder buf) ;
+   virtual void toString(StringBuilder buf,int indentLevel);
+   std::ostream&amp; dumpValue(std::ostream&amp; o) const;
+ ...
+}
+
+std::ostream&amp; operator&lt;&lt;(std::ostream&amp; o, const PVFieldPtr &amp; f);
+</pre>
+<h4>pvDataCPP-md</h4>
+<pre>class PVField
+: virtual public Serializable,
+  public std::tr1::enable_shared_from_this&lt;PVField&gt;
+{
+public:
+   POINTER_DEFINITIONS(PVField);
+   virtual ~PVField();
+   virtual void message(String message,MessageType messageType);
+   String getFieldName() const ;
+   virtual void setRequester(RequesterPtr const &amp;prequester);
+   std::size_t getFieldOffset() const;
+   std::size_t getNextFieldOffset() const;
+   std::size_t getNumberFields() const;
+   PVAuxInfoPtr &amp; getPVAuxInfo()
+   bool isImmutable() const;
+   virtual void setImmutable();
+   const FieldConstPtr &amp; getField() const ;
+   PVStructure * getParent() const
+   void replacePVField(const PVFieldPtr&amp;  newPVField);
+   void renameField(String const &amp;newName);
+   void postPut() ;
+   void setPostHandler(PostHandlerPtr const &amp;postHandler);
+   virtual bool equals(PVField &amp;pv);
+   virtual void toString(StringBuilder buf) ;
+   virtual void toString(StringBuilder buf,int indentLevel);
+   std::ostream&amp; dumpValue(std::ostream&amp; o) const;
+   // not in pvDataCPP
+   String getFullName() const;
+ ...
+}
+
+std::ostream&amp; operator&lt;&lt;(std::ostream&amp; o, const PVFieldPtr &amp; f);
+</pre>
+<h4>proposed</h4>
+<pre>
+class PVField
+: virtual public Serializable,
+  public std::tr1::enable_shared_from_this<PVField>
+{
+public:
+    POINTER_DEFINITIONS(PVField);
+    virtual ~PVField();
+    virtual void message(String message,MessageType messageType);
+    const String&amp; getFieldName() const;
+    String getFullName() const;
+    virtual void setRequester(RequesterPtr const &amp;prequester);
+    std::size_t getFieldOffset() const;
+    std::size_t getNextFieldOffset() const;
+    std::size_t getNumberFields() const;
+    PVAuxInfoPtr &amp; getPVAuxInfo();
+    bool isImmutable() const;
+    void setImmutable();
+    const FieldConstPtr &amp; getField() const;
+    PVStructure * getParent() const;
+    void replacePVField(const PVFieldPtr&amp;  newPVField);
+    void renameField(String const &amp; newName);
+    void postPut();
+    void setPostHandler(PostHandlerPtr const &amp;postHandler);
+    virtual bool equals(PVField &amp;pv);
+    virtual std::ostream&amp; operator&lt;&lt;(std::ostream&amp; o) const = 0;
+    virtual std::ostream&amp; operator&lt;&lt;(std::ostream&amp; o, size_t index) const = 0;
+...
+};
+
+std::ostream&amp; operator&lt;&lt;(std::ostream&amp; o, const PVFieldPtr &amp; f);
+std::ostream&amp; operator&lt;&lt;(std::ostream&amp; o, const PVFieldPtr &amp; f, size_t index);
+</pre>
+<h3>PVScalar</h3>
+<p>The Java and pvDataCPP versions differ in that Java has an interface definition
+for each scalar type, i. e. PVBoolean, ..., PVString,
+and the CPP versions provide a template PVValue for the implementation.</p>
+<p>
+pvDataCPP-md differs from pvDataCPP in that it implements three additional
+methods:
+<dl>
+   <dt>getAs</dt>
+     <dd>This is used to implement the Convert::toXXX methods.
+        This belongs in the Convert implementation not in PVScalar.</dd>
+   <dt>putFrom</dt>
+      <dd>This is used to implement the Convert::fromXXX scalar methods.
+        This belongs in the Convert implementation not in PVScalar.</dd>
+    <dt>assign</dt>
+       <dd>This does the same thing as the Convert::fromXXX methods except
+       that it does not go through Convert.
+        This belongs in the Convert implementation not in PVScalar.</dd>
+</dl>
+</p>
+<p>The proposed version is like the pvDataCPP version except for dumpValue
+and the stream interators.</p>
+<h4>pvDataJava</h4>
+<pre>
+interface PVScalar extends PVField {
+    Scalar getScalar();
+}
+
+interface PVBoolean extends PVScalar {
+    boolean get();
+    void put(boolean value);
+}
+
+interface PVByte extends PVScalar {
+    byte get();
+    void put(byte value);
+}
+...
+interface PVDouble extends PVScalar {
+    double get();
+    void put(double value);
+}
+interface PVString extends PVScalar, SerializableArray {
+    String get();
+    void put(String value);
+}
+</pre>
+<h4>pvDataCPP</h4>
+<pre>class PVScalar : public PVField {
+public:
+    POINTER_DEFINITIONS(PVScalar);
+    virtual ~PVScalar();
+    typedef PVScalar &amp;reference;
+    typedef const PVScalar&amp; const_reference;
+    const ScalarConstPtr getScalar() const ;
+ ...
+}
+
+template&lt;typename T&gt;
+class PVScalarValue : public PVScalar {
+public:
+    POINTER_DEFINITIONS(PVScalarValue);
+    typedef T value_type;
+    typedef T* pointer;
+    typedef const T* const_pointer;
+    virtual ~PVScalarValue() {}
+    virtual T get() const = 0;
+    virtual void put(T value) = 0;
+    std::ostream&amp; dumpValue(std::ostream&amp; o) const
+    void operator&gt;&gt;=(T&amp; value) const;
+    void operator&lt;&lt;=(T value);
+ ...
+}
+
+typedef PVScalarValue<uint8> PVBoolean;
+typedef PVScalarValue<int8> PVByte;
+...typedef PVScalarValue<double> PVDouble;
+typedef std::tr1::shared_ptr<PVBoolean> PVBooleanPtr;
+typedef std::tr1::shared_ptr<PVByte> PVBytePtr;
+...
+typedef std::tr1::shared_ptr<PVDouble> PVDoublePtr;
+
+
+// PVString is special case, since it implements SerializableArray
+class PVString : public PVScalarValue&lt;String&gt;, SerializableArray {
+public:
+    virtual ~PVString() {}
+ ...
+};</pre>
+
+<h4>pvDataCPP-md</h4>
+<pre>class PVScalar : public PVField {
+public:
+    POINTER_DEFINITIONS(PVScalar);
+    virtual ~PVScalar();
+    typedef PVScalar &amp;reference;
+    typedef const PVScalar&amp; const_reference;
+    const ScalarConstPtr getScalar() const ;
+
+    // not in pvDataCPP
+    template&lt;ScalarType ID&gt;
+    inline typename ScalarTypeTraits&lt;ID&gt;::type getAs() const;
+
+    virtual void getAs(void *, ScalarType) const = 0;
+    template&lt;ScalarType ID&gt;
+    inline void putFrom(typename ScalarTypeTraits&lt;ID&gt;::type val)
+
+    virtual void putFrom(const void *, ScalarType) = 0;
+    virtual void assign(const PVScalar&amp;) = 0;
+
+ ...
+}
+
+template&lt;typename T&gt;
+class PVScalarValue : public PVScalar {
+public:
+    POINTER_DEFINITIONS(PVScalarValue);
+    typedef T value_type;
+    typedef T* pointer;
+    typedef const T* const_pointer;
+    virtual ~PVScalarValue() {}
+    virtual T get() const = 0;
+    virtual void put(T value) = 0;
+    std::ostream&amp; dumpValue(std::ostream&amp; o) const
+    void operator&gt;&gt;=(T&amp; value) const;
+    void operator&lt;&lt;=(T value);
+
+    // not in pvDataCPP
+    static const ScalarType typeCode;
+ ...
+}
+
+typedef PVScalarValue<uint8> PVBoolean;
+typedef PVScalarValue<int8> PVByte;
+...typedef PVScalarValue<double> PVDouble;
+typedef std::tr1::shared_ptr<PVBoolean> PVBooleanPtr;
+typedef std::tr1::shared_ptr<PVByte> PVBytePtr;
+...
+typedef std::tr1::shared_ptr<PVDouble> PVDoublePtr;
+
+
+// PVString is special case, since it implements SerializableArray
+class PVString : public PVScalarValue&lt;String&gt;, SerializableArray {
+public:
+    virtual ~PVString() {}
+ ...
+};</pre>
+<h4>proposed</h4>
+<pre>
+class PVScalar : public PVField {
+public:
+    POINTER_DEFINITIONS(PVScalar);
+    virtual ~PVScalar();
+
+    typedef PVScalar &amp;reference;
+    typedef const PVScalar&amp; const_reference;
+
+    const ScalarConstPtr getScalar() const;
+...
+};
+
+template&lt;typename T&gt;
+class PVScalarValue : public PVScalar {
+public:
+    POINTER_DEFINITIONS(PVScalarValue);
+    typedef T value_type;
+    typedef T* pointer;
+    typedef const T* const_pointer;
+
+    virtual ~PVScalarValue() {}
+    virtual T get() const = 0;
+    virtual void put(T value) = 0;
+
+    void operator&gt;&gt;=(T&amp; value) const;
+    void operator&lt;&lt;=(T value);
+    virtual std::ostream&amp; operator&lt;&lt;(std::ostream&amp; o) const
+    virtual std::ostream&amp; operator&gt;&gt;(std::ostream&amp; o, size_t index) const;
+...
+};
+typedef PVScalarValue&lt;uint8&gt; PVBoolean;
+typedef PVScalarValue&lt;int8&gt; PVByte;
+typedef PVScalarValue&lt;double&gt; PVDouble;
+...
+typedef std::tr1::shared_ptr&lt;PVBoolean&gt; PVBooleanPtr;
+typedef std::tr1::shared_ptr&lt;PVByte&gt; PVBytePtr;
+...
+typedef std::tr1::shared_ptr&lt;PVDouble&gt; PVDoublePtr;
+
+// PVString is special case, since it implements SerializableArray
+class PVString : public PVScalarValue&lt;String&gt;, SerializableArray {
+public:
+    virtual ~PVString() {}
+ ...
+};
+</pre>
+<h3>PVArray</h3>
+<p>The Java and pvDataCPP versions differ in that Java has an interface definition
+for each scalarArray type, i. e. PVBooleanArray, ..., PVStringArray,
+and the CPP versions provide a template PVValueArray for the implementation.</p>
+<p>
+pvDataCPP-md differs from pvDataCPP in that it implements additional
+methods:
+<dl>
+   <dt>getAs</dt>
+     <dd>This is used to implement the Convert::toXXXArray methods.
+        This belongs in the Convert implementation not in PVArray.</dd>
+   <dt>putFrom</dt>
+      <dd>This is used to implement the Convert::fromXXXArray scalar methods.
+        This belongs in the Convert implementation not in PVArray.</dd>
+    <dt>assign</dt>
+       <dd>This does the same thing as the Convert::fromXXXArray methods except
+       that it does not go through Convert.
+        This belongs in the Convert implementation not in PVArray.</dd>
+    <dt>copyOut</dt>
+       <dd>This is used to copy data to a raw array.</dd>
+    <dt>copyIn</dt>
+       <dd>This is used to copy data in from a raw array.</dt>
+</dl>
+</p>
+<p>The proposed version is differs from pvJava, pvDataCPP, and pvCPP-md.
+It is like the Java version if the Java get method is simplified as discussed above.
+For example PVDoubleArray::get becomes:
+<pre>
+    double[] get();
+</pre>
+The corresponding C++ version becomes:
+<pre>
+    const svector &amp; get();
+</pre>
+</p>
+<p>The remaining difference is that dumpValue is replaced by the stream operator&lt;&lt;. </p>
+<p>The main difference from the pvDataJava version is that PVValueArray "wraps" shared_vector.
+Thus shared_vector takes the place of the raw arrays in Java.
+This allows the C++ interface to be more similar to Java.</p>
+<p>The main difference from the pvDataCPP-md version is that it does not implement
+the extra methods and allows
+the client access to the shared_vector.
+The client is then able to perform C++ specific things to the data.
+BUT it also means that if the client modifies the shared_vector the client is also responsibel
+for ensuring that the immutable and capacity related features of PVField and PVArray are
+respected and the postPut is properly handled.
+The new method for PVValueArray:
+</pre>
+    void put(const svector &amp;from);
+</pre>
+helps ensure that shared_vector from the client is kept in sync with the shared_vector wrapped
+by PVValueArray. But the used is still responsible for making sure that
+PVField::isImmutable is honored.
+</p>
+<h4>pvDataJava</h4>
+<pre>interface PVArray extends PVField, SerializableArray {
+    int getLength();
+    void setLength(int length);
+    int getCapacity();
+    void setCapacity(int length);
+    boolean isCapacityMutable();
+    void setCapacityMutable(boolean isMutable);
+}
+
+interface PVScalarArray extends PVArray {
+    ScalarArray getScalarArray();
+}</pre>
+<p>For each scalar type an associated array data interface is defined. Each has
+a get and put method. For example: </p>
+<pre>public class DoubleArrayData {
+    public double[] data;
+    public int offset;
+}
+
+interface PVDoubleArray extends PVArray {
+    int get(int offset, int len, DoubleArrayData data);
+    int put(int offset,int len, double[] from, int fromOffset);
+    void shareData(double[] from);
+}</pre>
+<h4>pvDataCPP</h4>
+<pre>class PVArray : public PVField, public SerializableArray {
+public:
+    POINTER_DEFINITIONS(PVArray);
+    virtual ~PVArray();
+    virtual void setImmutable();
+    std::size_t getLength() const;
+    virtual void setLength(std::size_t length);
+    std::size_t getCapacity() const;
+    bool isCapacityMutable() const;
+    void setCapacityMutable(bool isMutable);
+    virtual void setCapacity(std::size_t capacity) = 0;
+    virtual std::ostream&amp; dumpValue(std::ostream&amp; o, std::size_t index) const = 0;
+
+ ...
+};
+
+std::ostream&amp; operator&lt;&lt;(format::array_at_internal const&amp; manip, const PVArray&amp; array);
+
+
+template&lt;typename T&gt;
+class PVArrayData {
+private:
+    std::vector&lt;T&gt; init;
+public:
+    POINTER_DEFINITIONS(PVArrayData);
+    typedef T  value_type;
+    typedef T* pointer;
+    typedef const T* const_pointer;
+    std::vector&lt;T&gt; &amp; data;
+    std::size_t offset;
+    PVArrayData()
+    : data(init)
+    {}
+};
+
+class PVScalarArray : public PVArray {
+public:
+    POINTER_DEFINITIONS(PVScalarArray);
+    virtual ~PVScalarArray();
+    typedef PVScalarArray &amp;reference;
+    typedef const PVScalarArray&amp; const_reference;
+    const ScalarArrayConstPtr getScalarArray() const ;
+    virtual std::ostream&amp; dumpValue(std::ostream&amp; o, size_t index) const = 0;
+ ...
+}
+
+template&lt;typename T&gt;
+class PVValueArray : public detail::PVVectorStorage&lt;T,PVScalarArray&gt; {
+    typedef detail::PVVectorStorage&lt;T,PVScalarArray&gt; base_t;
+public:
+    POINTER_DEFINITIONS(PVValueArray);
+    typedef T  value_type;
+    typedef T* pointer;
+    typedef const T* const_pointer;
+
+    typedef PVArrayData&lt;T&gt; ArrayDataType;
+    typedef std::vector&lt;T&gt; vector;
+    typedef const std::vector&lt;T&gt; const_vector;
+    typedef std::tr1::shared_ptr&lt;vector&gt; shared_vector;
+    typedef PVValueArray &amp; reference;
+    typedef const PVValueArray &amp; const_reference;
+
+    virtual ~PVValueArray() {}
+    virtual std::size_t get(
+         std::size_t offset, std::size_t length, ArrayDataType &amp;data) = 0;
+    virtual std::size_t put(std::size_t offset,
+        std::size_t length, const_pointer from, std::size_t fromOffset) = 0;
+    virtual std::size_t put(std::size_t offset,
+        std::size_t length, const_vector &amp;from, std::size_t fromOffset);
+    virtual void shareData(
+         shared_vector const &amp; value,
+         std::size_t capacity,
+         std::size_t length) = 0;
+    virtual pointer get() = 0;
+    virtual pointer get() const = 0;
+    virtual vector const &amp; getVector() = 0;
+    virtual shared_vector const &amp; getSharedVector() = 0;
+    std::ostream&amp; dumpValue(std::ostream&amp; o) const;
+    std::ostream&amp; dumpValue(std::ostream&amp; o, size_t index) const;
+
+...
+};
+template&lt;typename T&gt;
+std::size_t PVValueArray&lt;T&gt;::put(
+    std::size_t offset,
+    std::size_t length,
+    const_vector &amp;from,
+    std::size_t fromOffset)
+{ return put(offset,length, &amp;from[0], fromOffset); }
+
+/**
+ * Definitions for the various scalarArray types.
+ */
+typedef PVArrayData&lt;uint8&gt; BooleanArrayData;
+typedef PVValueArray&lt;uint8&gt; PVBooleanArray;
+typedef std::tr1::shared_ptr&lt;PVBooleanArray&gt; PVBooleanArrayPtr;
+...
+typedef PVArrayData&lt;String&gt; StringArrayData;
+typedef PVValueArray&lt;String&gt; PVStringArray;
+typedef std::tr1::shared_ptr&lt;PVStringArray&gt; PVStringArrayPtr;i
+</pre>
+
+<h4>pvDataCPP-md</h4>
+<pre>class PVArray : public PVField, public SerializableArray {
+public:
+    POINTER_DEFINITIONS(PVArray);
+    virtual ~PVArray();
+    virtual void setImmutable();
+    std::size_t getLength() const;
+    virtual void setLength(std::size_t length);
+    std::size_t getCapacity() const;
+    bool isCapacityMutable() const;
+    void setCapacityMutable(bool isMutable);
+    virtual void setCapacity(std::size_t capacity) = 0;
+    virtual std::ostream&amp; dumpValue(std::ostream&amp; o, std::size_t index) const = 0;
+ ...
+};
+
+std::ostream&amp; operator&lt;&lt;(format::array_at_internal const&amp; manip, const PVArray&amp; array);
+
+template&lt;typename T&gt;
+class PVArrayData {
+private:
+    std::vector&lt;T&gt; init;
+public:
+    POINTER_DEFINITIONS(PVArrayData);
+    typedef T  value_type;
+    typedef T* pointer;
+    typedef const T* const_pointer;
+    std::vector&lt;T&gt; &amp; data;
+    std::size_t offset;
+    PVArrayData()
+    : data(init)
+    {}
+};
+
+class PVScalarArray : public PVArray {
+public:
+    POINTER_DEFINITIONS(PVScalarArray);
+    virtual ~PVScalarArray();
+    typedef PVScalarArray &amp;reference;
+    typedef const PVScalarArray&amp; const_reference;
+    const ScalarArrayConstPtr getScalarArray() const ;
+
+    // in pvDataCPP but not in pvDataCPP=md
+    //virtual std::ostream&amp; dumpValue(std::ostream&amp; o, size_t index) const = 0;
+
+    // not in pvDataCPP
+    template&lt;ScalarType ID&gt;
+    virtual void
+    getAs(shared_vector&lt;typename ScalarTypeTraits&lt;ID&gt;::type&gt;&amp; out) const;
+
+    virtual void
+    getAs(ScalarType, shared_vector&lt;void&gt;&amp; out) const = 0;
+
+    template&lt;ScalarType ID&gt;
+    inline size_t copyOut(typename ScalarTypeTraits&lt;ID&gt;::type* inp, size_t len) const;
+
+    virtual size_t copyOut(ScalarType id, void* ptr, size_t olen) const = 0;
+
+    template&lt;ScalarType ID&gt;
+    inline void putFrom(const shared_vector&lt;typename ScalarTypeTraits&lt;ID&gt;::type&gt;&amp; inp);
+
+    virtual void putFrom(ScalarType, const shared_vector&lt;void&gt;&amp;) = 0;
+
+    template&lt;ScalarType ID&gt;
+    inline void copyIn(const typename ScalarTypeTraits&lt;ID&gt;::type* inp, size_t len);
+
+    virtual void copyIn(ScalarType, const void*, size_t) = 0;
+
+    virtual void assign(PVScalarArray&amp; pv) = 0;
+    
+ ...
+}
+
+template&lt;typename T&gt;
+class PVValueArray : public detail::PVVectorStorage<T,PVScalarArray> {
+    typedef detail::PVVectorStorage<T,PVScalarArray> base_t;
+public:
+    POINTER_DEFINITIONS(PVValueArray);
+    typedef T  value_type;
+    typedef T* pointer;
+    typedef const T* const_pointer;
+    typedef PVArrayData&lt;T&gt; ArrayDataType;
+    typedef std::vector&lt;T&gt; vector;
+    typedef const std::vector&lt;T&gt; const_vector;
+    typedef std::tr1::shared_ptr&lt;vector&gt; shared_vector;
+    typedef PVValueArray &amp; reference;
+    typedef const PVValueArray &amp; const_reference;
+
+    virtual ~PVValueArray() {}
+    virtual std::size_t get(
+         std::size_t offset, std::size_t length, ArrayDataType &amp;data) = 0;
+    virtual std::size_t put(std::size_t offset,
+        std::size_t length, const_pointer from, std::size_t fromOffset) = 0;
+    virtual std::size_t put(std::size_t offset,
+        std::size_t length, const_vector &amp;from, std::size_t fromOffset);
+    virtual void shareData(
+         shared_vector const &amp; value,
+         std::size_t capacity,
+         std::size_t length) = 0;
+    virtual pointer get() = 0;
+    virtual pointer get() const = 0;
+    virtual vector const &amp; getVector() = 0;
+    virtual shared_vector const &amp; getSharedVector() = 0;
+    std::ostream&amp; dumpValue(std::ostream&amp; o) const;
+    std::ostream&amp; dumpValue(std::ostream&amp; o, size_t index) const;
+
+    /// not in pvDataCPP
+    static const ScalarType typeCode;
+    typedef ::epics::pvData::shared_vector&lt;T&gt; svector;
+    typedef ::epics::pvData::shared_vector&lt;const T&gt; const_svector;
+
+     virtual void
+    getAs(ScalarType id, ::epics::pvData::shared_vector&lt;void&gt;&amp; out) const;
+    virtual size_t copyOut(ScalarType id, void* ptr, size_t olen) const;
+    virtual void
+    putFrom(ScalarType id, const ::epics::pvData::shared_vector&lt;void&gt;&amp; inp);
+    virtual void copyIn(ScalarType id, const void* ptr, size_t len);
+    virtual void assign(PVScalarArray&amp; pv);
+
+
+protected:
+    PVValueArray(ScalarArrayConstPtr const &amp; scalar)
+    : PVScalarArray(scalar) {}
+    friend class PVDataCreate;
+};
+template&lt;typename T&gt;
+std::size_t PVValueArray&lt;T&gt;::put(
+    std::size_t offset,
+    std::size_t length,
+    const_vector &amp;from,
+    std::size_t fromOffset)
+{ return put(offset,length, &amp;from[0], fromOffset); }
+
+/**
+ * Definitions for the various scalarArray types.
+ */
+typedef PVArrayData&lt;uint8&gt; BooleanArrayData;
+typedef PVValueArray&lt;uint8&gt; PVBooleanArray;
+typedef std::tr1::shared_ptr&lt;PVBooleanArray&gt; PVBooleanArrayPtr;
+...
+typedef PVArrayData&lt;String&gt; StringArrayData;
+typedef PVValueArray&lt;String&gt; PVStringArray;
+typedef std::tr1::shared_ptr&lt;PVStringArray&gt; PVStringArrayPtr;i
+</pre>
+<h4>proposed</h4>
+<pre>class PVArray : public PVField, public SerializableArray {
+public:
+    POINTER_DEFINITIONS(PVArray);
+    virtual ~PVArray();
+    virtual std::size_t getLength() const = 0;
+    virtual void setLength(std::size_t length) = 0;
+    bool isCapacityMutable() const;
+    void setCapacityMutable(bool isMutable);
+    virtual std::size_t getCapacity() const = 0;
+    virtual void setCapacity(std::size_t capacity) = 0;
+ ...
+};
+
+
+class PVScalarArray : public PVArray {
+public:
+    POINTER_DEFINITIONS(PVScalarArray);
+    typedef PVScalarArray &amp;reference;
+    typedef const PVScalarArray&amp; const_reference;
+
+    virtual ~PVScalarArray();
+    const ScalarArrayConstPtr getScalarArray() const;
+ ...
+};
+
+// PVString is special case, since it implements SerializableArray
+class PVString : public PVScalarValue&lt;String&gt;, SerializableArray {
+public:
+    virtual ~PVString() {}
+ ...
+};
+
+template&lt;typename T&gt;
+class PVValueArray :
+public PVScalarArray
+...
+{
+public:
+    POINTER_DEFINITIONS(PVValueArray);
+    typedef T  value_type;
+    typedef T* pointer;
+    typedef const T* const_pointer;
+    typedef PVValueArray &amp; reference;
+    typedef const PVValueArray &amp; const_reference;
+
+    typedef shared_vector&lt;T&gt; svector;
+    typedef shared_vector&lt;const T&gt; const_svector;
+
+    virtual ~PVValueArray() {}
+    const svector &amp; get() const;
+    size_t put(size_t offset,size_t length, const_pointer from, size_t fromOffset);
+    void put(const svector &amp; from);
+
+    void shareData(const svector &amp;from);
+    virtual std::ostream&amp; operator&lt;&lt;(std::ostream&amp; o) const;
+    virtual std::ostream&amp; operator&lt;&lt;(std::ostream&amp; o, size_t index) const;
+
+...
+};
+
+typedef PVValueArray&lt;uint8&gt; PVBooleanArray;
+typedef std::tr1::shared_ptr&lt;PVBooleanArray&gt; PVBooleanArrayPtr;
+...
+typedef PVValueArray&lt;String&gt; PVStringArray;
+typedef std::tr1::shared_ptr&lt;PVStringArray&gt; PVStringArrayPtr;
+</pre>
+
+
+
 <h2>pvDataApp/pv</h2>
 <h3>pvData.h</h3>
 <p>This provides the interface for network accessible data.
@@ -159,8 +896,9 @@ public:
     void renameField(String const &amp; newName);
     void postPut();
     void setPostHandler(PostHandlerPtr const &amp;postHandler);
-    virtual  std::ostream&amp; operator&lt;&lt;(std::ostream&amp; o) const;
-    std::ostream&amp; operator&lt;&lt;(std::ostream&amp; o, size_t index) const;
+    virtual bool equals(PVField &amp;pv);
+    virtual  std::ostream&amp; operator&lt;&lt;(std::ostream&amp; o) const = 0;
+    virtual std::ostream&amp; operator&lt;&lt;(std::ostream&amp; o, size_t index) const = 0;
 ...
 };
 
@@ -255,9 +993,11 @@ public:
     virtual ~PVScalarValue() {}
     virtual T get() const = 0;
     virtual void put(T value) = 0;
+    void operator&gt;&gt;=(T&amp; value) const;
+    void operator&lt;&lt;=(T value);
 
-    std::ostream&amp; operator&lt;&lt;(std::ostream&amp; o) const
-    std::ostream&amp; operator&lt;&lt;(std::ostream&amp; o, size_t index) const;
+    virtual std::ostream&amp; operator&lt;&lt;(std::ostream&amp; o) const
+    virtual std::ostream&amp; operator&lt;&lt;(std::ostream&amp; o, size_t index) const;
 ...
 };
 typedef PVScalarValue&lt;uint8&gt; PVBoolean;
@@ -298,6 +1038,7 @@ public:
   <dt>put</dt>
     <dd>Change the value stored in the object.</dd>
   <dt>operator&lt;&lt;</dt>
+  <dt>operator&gt;&gt;</dt>
      <dd>Methods for stream I/O.</dd>
 </dl>
 
@@ -390,13 +1131,14 @@ public:
     typedef shared_vector&lt;const T&gt; const_svector;
 
     virtual ~PVValueArray() {}
-    const_svector &amp; get();
-    size_t put(size_t offset,size_t length, const_svector &amp;from, size_t fromOffset);
+    const svector &amp; get() const;
+    size_t put(size_t offset,size_t length, const_pointer from, size_t fromOffset);
+    void put(const svector &amp; from);
 
-    void shareData(const_svector &amp;from);
+    void shareData(const svector &amp;from);
 
-    virtual std::ostream&amp; operator&lt;&lt;(std::ostream&amp; o) const;
-    std::ostream&amp; operator&lt;&lt;(std::ostream&amp; o, size_t index) const;
+    virtual std::ostream&amp; operator&lt;&lt;(std::ostream&amp; o) const
+    virtual std::ostream&amp; operator&lt;&lt;(std::ostream&amp; o, size_t index) const;
 ...
 };
 
@@ -446,17 +1188,25 @@ typedef std::tr1::shared_ptr&lt;PVStringArray&gt; PVStringArrayPtr;
      For example it must call postPut after modifying the array elements.
      It must also respect isImmutable().
     </dd>
+    <dt>size_t put(size_t offset,size_t length, const_pointer from, size_t fromOffset);</dt>
    <dt>put</dt>
      <dd>This is the recommended method for modifying the array elements.
        It may change the capacity if len asks for more elements
        than the cureent capacity allows.
        It does not change the current length.
       </dd>
+   <dt>void put(const svector &amp; from);</dt>
+     <dd>This puts data into the PVValueArray from the shared_vector.
+     If the shared_vector holds the same raw array as the PVValueArray then
+     the shared_vector held by the PVValueArray is put in sync with from.
+     If not the  shared_vector will share the data.
+     potsPut will always be called.</dd>
    <dt>shareData</dt>
       <dd>Share data with an existing shared_vector.
-        Note that if capacity is every changed then data will no
+        Note that if capacity is ever changed then data will no
         longer be shared.</dd>
   <dt>operator&lt;&lt;</dt>
+  <dt>operator&gt;&gt;</dt>
      <dd>Methods for stream I/O.</dd>
 </dl>
 
@@ -587,8 +1337,7 @@ for(size_t i=0; i&lt;len; ++i) pint32Array[i] = i;
 </pre>
 <p>A const_pointer is like a pointer except that only read access to the array elements
 is allowed.</p>
-<p><b>Dangorous: data</b> should not be used unless it is necessary to
-call C code. The above code should be:</p>
+<p><b>NOTE: data</b> The above code is better implemented as:</p>
 <pre>
 Int32Array int32Array(5);
 size_t len = int32Array.size();
@@ -826,7 +1575,7 @@ void clear();
      <dd>(true,false) if size is (0,&gt;0)</dd>
    <dt>max_size</dt>
      <dd>Maximum possible number of elements.
-<b>NOTE EXISTING;</b> Should this be sizof(W)/(size_t -1) ?
+<b>NOTE EXISTING;</b> Should be  ((size_t)-1)/sizeof(T)
     </dd>
    <dt>capacity</dt>
      <dd>The maximum size the window can be without reallocating raw array</dd>
@@ -913,7 +1662,7 @@ at()
 <pre>
 Int32Array::pointer pint32= int32Array.data();
 </pre>
-<b>is NOT gauranteed to be the same as</b>
+is guaranteed to be the same as
 <pre>
 int32 * pint32 = int32Array.data();
 </pre>
