@@ -157,8 +157,6 @@ namespace detail {
         size_t size() const{return m_count;}
         bool empty() const{return !m_count;}
 
-        size_t max_size() const{return (size_t)-1;}
-
 
         /** @brief Reduce the view of this shared_vector.
          *
@@ -299,6 +297,8 @@ public:
     //! @brief Copy an existing vector of a related type
     template<typename E1>
     shared_vector(const shared_vector<E1>& o) :base_t(o) {}
+
+    size_t max_size() const{return ((size_t)-1)/sizeof(E);}
 
     size_t capacity() const { return this->m_total; }
 
@@ -504,6 +504,8 @@ public:
     template<typename E1>
     shared_vector(const shared_vector<E1>& o) :base_t(o) {}
 
+    size_t max_size() const{return (size_t)-1;}
+
     pointer data() const{
         return (pointer)(((char*)this->m_data.get())+this->m_offset);
     }
@@ -536,6 +538,8 @@ public:
 
     template<typename E1>
     shared_vector(const shared_vector<E1>& o) :base_t(o) {}
+
+    size_t max_size() const{return (size_t)-1;}
 
     pointer data() const{
         return (pointer)(((char*)this->m_data.get())+this->m_offset);
