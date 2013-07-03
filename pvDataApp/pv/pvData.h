@@ -530,7 +530,7 @@ private:
 /**
  * typedefs for the various possible scalar types.
  */
-typedef PVScalarValue<uint8> PVBoolean;
+typedef PVScalarValue<boolean> PVBoolean;
 typedef PVScalarValue<int8> PVByte;
 typedef PVScalarValue<int16> PVShort;
 typedef PVScalarValue<int32> PVInt;
@@ -1373,8 +1373,8 @@ private:
 /**
  * Definitions for the various scalarArray types.
  */
-typedef PVArrayData<uint8> BooleanArrayData;
-typedef PVValueArray<uint8> PVBooleanArray;
+typedef PVArrayData<boolean> BooleanArrayData;
+typedef PVValueArray<boolean> PVBooleanArray;
 typedef std::tr1::shared_ptr<PVBooleanArray> PVBooleanArrayPtr;
 
 typedef PVArrayData<int8> ByteArrayData;

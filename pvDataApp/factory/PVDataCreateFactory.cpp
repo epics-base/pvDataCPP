@@ -28,7 +28,7 @@ using std::min;
 namespace epics { namespace pvData {
 
 
-//template<> const ScalarType PVBoolean::typeCode = pvBoolean;
+template<> const ScalarType PVBoolean::typeCode = pvBoolean;
 template<> const ScalarType PVByte::typeCode = pvByte;
 template<> const ScalarType PVShort::typeCode = pvShort;
 template<> const ScalarType PVInt::typeCode = pvInt;
@@ -41,7 +41,7 @@ template<> const ScalarType PVFloat::typeCode = pvFloat;
 template<> const ScalarType PVDouble::typeCode = pvDouble;
 template<> const ScalarType PVScalarValue<String>::typeCode = pvString;
 
-//template<> const ScalarType PVBooleanArray::typeCode = pvBoolean;
+template<> const ScalarType PVBooleanArray::typeCode = pvBoolean;
 template<> const ScalarType PVByteArray::typeCode = pvByte;
 template<> const ScalarType PVShortArray::typeCode = pvShort;
 template<> const ScalarType PVIntArray::typeCode = pvInt;
