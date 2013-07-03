@@ -12,7 +12,7 @@
 
 namespace epics { namespace pvData {
 
-template<typename E> class shared_vector;
+template<typename E, class Enable> class shared_vector;
 
 namespace detail {
     template<typename E>
@@ -221,7 +221,7 @@ namespace detail {
  * by make_unique() that unique()==true implies exclusive
  * ownership.
  */
-template<typename E>
+template<typename E, class Enable = void>
 class shared_vector : public detail::shared_vector_base<E>
 {
     typedef detail::shared_vector_base<E> base_t;
@@ -243,7 +243,7 @@ public:
     typedef std::tr1::shared_ptr<E> shared_pointer_type;
 
     // allow specialization for all E to be friends
-    template<typename E1> friend class shared_vector;
+    template<typename E1, class Enable1> friend class shared_vector;
 
 
     //! @brief Empty vector (not very interesting)
@@ -476,17 +476,25 @@ public:
 
 };
 
+namespace detail {
+    template<typename T> struct is_void {};
+    template<> struct is_void<void> { typedef void type; };
+    template<> struct is_void<const void> { typedef void type; };
+}
+
 //! Specialization for storing untyped pointers
 //! Does not allow access or iteration of contents
-template<>
-class shared_vector<void> : public detail::shared_vector_base<void> {
-    typedef detail::shared_vector_base<void> base_t;
+template<typename E>
+class shared_vector<E, typename detail::is_void<E>::type >
+    : public detail::shared_vector_base<E>
+{
+    typedef detail::shared_vector_base<E> base_t;
 public:
-    typedef void* pointer;
+    typedef E* pointer;
     typedef ptrdiff_t difference_type;
     typedef size_t size_type;
 
-    typedef std::tr1::shared_ptr<void> shared_pointer_type;
+    typedef std::tr1::shared_ptr<E> shared_pointer_type;
 
     shared_vector() :base_t() {}
 
@@ -504,40 +512,7 @@ public:
     template<typename E1>
     shared_vector(const shared_vector<E1>& o) :base_t(o) {}
 
-    size_t max_size() const{return (size_t)-1;}
-
-    pointer data() const{
-        return (pointer)(((char*)this->m_data.get())+this->m_offset);
-    }
-};
-
-//! Specialization for storing constant untyped pointers
-//! Does not allow access or iteration of contents
-template<>
-class shared_vector<const void> : public detail::shared_vector_base<const void> {
-    typedef detail::shared_vector_base<const void> base_t;
-public:
-    typedef const void* pointer;
-    typedef ptrdiff_t difference_type;
-    typedef size_t size_type;
-
-    typedef std::tr1::shared_ptr<void> shared_pointer_type;
-
-    shared_vector() :base_t() {}
-
-    template<typename A>
-    shared_vector(A v, size_t o, size_t c) :base_t(v,o,c) {}
-
-    template<typename E1>
-    shared_vector(const std::tr1::shared_ptr<E1>& d, size_t o, size_t c)
-        :base_t(d,o,c) {}
-
-    template<typename A, typename B>
-    shared_vector(A d, B b, size_t o, size_t c)
-        :base_t(d,b,o,c) {}
-
-    template<typename E1>
-    shared_vector(const shared_vector<E1>& o) :base_t(o) {}
+    shared_vector(const shared_vector& o) :base_t(o) {}
 
     size_t max_size() const{return (size_t)-1;}
 
