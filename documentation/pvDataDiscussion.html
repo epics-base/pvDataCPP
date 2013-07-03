@@ -1,0 +1,792 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
+  <title>EPICS pvDataDiscussion</title>
+  <link rel="stylesheet" type="text/css"
+  href="http://epics-pvdata.sourceforge.net/base.css" />
+  <link rel="stylesheet" type="text/css"
+  href="http://epics-pvdata.sourceforge.net/epicsv4.css" />
+  <style type="text/css">
+  /*<![CDATA[*/
+     .about { margin-left: 3em; margin-right: 3em; font-size: .83em}
+     table { margin-left: auto; margin-right: auto }
+     .diagram { text-align: center; margin: 2.5em 0 }
+     span.opt { color: grey }
+     span.nterm { font-style:italic }
+     span.term { font-family:courier }
+     span.user { font-family:courier }
+     span.user:before { content:"<" }
+     span.user:after { content:">" }
+     .nonnorm { font-style:italic }
+     p.ed { color: #AA0000 }
+     span.ed { color: #AA0000 }
+     p.ed.priv { display: inline; }
+     span.ed.priv { display: inline; }
+  /*]]>*/</style>
+  <!-- Script that generates the Table of Contents -->
+  <script type="text/javascript"
+  src="http://epics-pvdata.sourceforge.net/script/tocgen.js">
+  </script>
+</head>
+<body>
+
+<div class="head">
+<h1>EPICS pvDataDiscussion</h1>
+<!-- Maturity: Working Draft or Request for Comments, or Recommendation, and date.  -->
+
+<h2 class="nocount">EPICS v4 Working Group, Working Draft, 03-Jul-2013</h2>
+
+  <dl>
+    <dt>Latest version:</dt>
+    <dd><a
+      href="http://epics-pvdata.hg.sourceforge.net/hgweb/epics-pvdata/pvDataCPP/raw-file/tip/documentation/pvDataDiscussion.html">pvDataDiscussion.html</a>
+    </dd>
+    <dt>This version:</dt>
+    <dd>none</dd>
+    <dt>Previous version:</dt>
+    <dd>None</dd>
+    <dt>Editors:</dt>
+    <dd>Marty Kraimer, BNL<dd />
+  </dl>
+
+  <p class="copyright">This product is made available subject to acceptance of the <a
+href="http://epics-pvdata.sourceforge.net/LICENSE.html">EPICS open source
+license.</a></p>
+<hr />
+</div>
+
+
+<div id="toc">
+<h2 class="nocount" style="page-break-before: always">Table of Contents</h2>
+</div>
+<div id="contents" class="contents">
+
+
+<h2>Introduction</h2>
+<p>As pvDataCPP progressed PVField and derived classes accumulated
+more and more member functions.
+These member functions have nothing to do with the primary primary
+purpose for pvData:
+<blockquote>pvData (Process Variable Data) defines and implements an efficent
+way to store, access, and communicate memory resident data structures.</blockquote>
+This statement appears as the first sentence of pvDataJava.html.
+A few sentances later the document makes it clear that communication
+includes efficent network communication.
+Thus pvData provides an interface for network accessible structured data.
+The problem of adding member functions that have nothing to do with the primary purpose
+started with the Java API.
+It already had extra methods that solved problems that should have had a different solution.
+This document removes the extra methods so that when new problems arise in the future
+the solution will not involve adding new member functions to the introspection and data API.
+</p>
+<p>The introspection and data API for pvData should only encapuslate methods that support the primary purpose
+stated above.
+The interfaces for C++ and Java should be similar so that
+someone who understands the interface in one of the languages
+and knows both languages will quickly understand the interface of the other language.</p>
+<p>There is another problem with the existing API. There are methods that allow the "structure"
+to change after an pvData object is created. An example is PVField::renameField(String newName).
+Such methods should not exist.</p>
+<p>There are methods regarding immutability: setImmutable, isImmutablei, setCapacityMutable, and isCapacityMutable.
+Should they exists? For now lets assume no.
+</p>
+<p>One last issue is the interface for array data. This document proposes a simplified
+version of what currently exists. It requires that the implementation always provides storage for
+the complete raw array. The existing APIs allow the implementation to provide the data in
+"chunks". Giving up this requirement simplifies the array interfaces.
+The existing C++ implementation of PVValueArray has serious problems.
+The shared_vector that is implemented in pvDataCP-md provides the solution to fixing
+the problems. This document describes an API that is very similar to the new Java API
+except that raw arrays are replaced by shared_vector.</p>
+<p>This document will first describe changes to the existing Java interfaces
+and then the corresponding C++ API.</p>
+<h2>Java API</h2>
+<p>The following shows which methods will be removed from the existing interfaces
+and what will be added.
+The methods to be removed are in <font color = "red">red</font>
+and methods to add are in <font color = "blue">blue</font>
+Also the removed methods are at the end with a comment above.
+The new methods also have a comment.
+</p>
+<h3>Introspection Interfaces</h3>
+
+<pre>interface Field extends Serializable {
+    String getId();
+    Type getType();
+    // following will be removed
+    <font color = "red">void toString(StringBuilder buf);</font>
+    <font color = "red">void toString(StringBuilder buf,int indentLevel);</font>
+    <font color = "red">String toString();</font>
+}
+
+<font color = "blue">
+// new interface
+interface FieldToString {
+    String toString(Field field);
+}</font>
+
+interface Scalar extends Field {
+    ScalarType getScalarType();
+}
+
+interface ScalarArray extends Field {
+    ScalarType getElementType();
+}
+
+interface Structure extends Field {
+    Field getField(String fieldName);
+    int getFieldIndex(String fieldName);
+    Field[] getFields();
+    Field getField(int fieldIndex);
+    String[] getFieldNames();
+    String getFieldName(int fieldIndex)
+}
+
+interface StructureArray extends Field {
+    Structure getStructure();
+}
+
+interface FieldCreate {
+    Scalar createScalar(ScalarType scalarType);
+    ScalarArray createScalarArray(ScalarType elementType);
+    StructureArray createStructureArray(Structure elementStructure);
+    Structure createStructure(String[] fieldNames, Field[] field);
+    Structure createStructure(String id,String[] fieldNames, Field[] field);
+    Structure createStructure(Structure structToClone);
+    Field deserialize(ByteBuffer buffer, DeserializableControl control);
+    // following will be removed
+    <font color = "red">Structure appendField(Structure structure,String fieldName, Field field);</font>
+    <font color = "red">Structure appendFields(Structure structure,String[] fieldNames, Field[] fields);</font>
+}
+</pre>
+<h3>Data Interfaces</h3>
+<pre>
+interface PVField extends Requester, Serializable {
+    String getFieldName();
+    void setRequester(Requester requester);
+    int getFieldOffset();
+    int getNextFieldOffset();
+    int getNumberFields();
+    Field getField();
+    PVStructure getParent();
+    void postPut();
+    void setPostHandler(PostHandler postHandler);
+    // following will be removed
+    <font color = "red">PVAuxInfo getPVAuxInfo();</font>
+    <font color = "red">boolean isImmutable();</font>
+    <font color = "red">void setImmutable();</font>
+    <font color = "red">void renameField(String newName);</font>
+    <font color = "red">void toString(StringBuilder buf);</font>
+    <font color = "red">void toString(StringBuilder buf,int indentLevel);</font>
+    <font color = "red">String toString();</font>
+}
+
+<font color = "blue">
+// The following is a new interface
+interface PVFieldToString {
+    String toString(PVField pvField);
+    void setMaxInitialArrayElements(int num);
+    void setMaxFinalArrayElements(int num);
+    int getMaxInitialArrayElements();
+    int getMaxFinalArrayElements();
+}</font>
+    
+interface PVScalar extends PVField{
+    Scalar getScalar();
+}
+
+interface PVDouble extends PVScalar{
+    double get();
+    void put(double value);
+}
+// also PVBoolean, PVByte, PVShort, PVInt, PVLong, PVFloat, and PVString
+
+interface PVArray extends PVField, SerializableArray {
+    int getLength();
+    void setLength(int length);
+    int getCapacity();
+    void setCapacity(int length);
+    // following will be removed
+    <font color = "red">boolean isCapacityMutable();</font>
+    <font color = "red">void setCapacityMutable(boolean isMutable);</font>
+}
+
+interface PVScalarArray extends PVArray {
+    ScalarArray getScalarArray();
+}
+
+<font color = "red">
+//following will be removed
+public class DoubleArrayData {
+    public double[] data;
+    public int offset;
+}</font>
+
+interface PVDoubleArray extends PVArray {
+    // following are new
+<font color = "blue">    double[] get();</font>
+<font color = "blue">    void swap(double[] value);</font>
+    //following will be removed
+<font color = "red">    int get(int offset, int len, DoubleArrayData data);</font>
+<font color = "red">    int put(int offset,int len, double[] from, int fromOffset)</font>;
+<font color = "red">    void shareData(double[] from);</font>
+}
+
+// also PVBooleanArray, ..., PVStringArray
+
+
+interface PVStructure extends PVField , BitSetSerializable{
+    Structure getStructure();
+    PVField[] getPVFields();
+    PVField getSubField(String fieldName);
+    PVField getSubField(int fieldOffset);
+    // The following are convenience methods
+    PVBoolean getBooleanField(String fieldName);
+    PVByte getByteField(String fieldName);
+    PVShort getShortField(String fieldName);
+    PVInt getIntField(String fieldName);
+    PVLong getLongField(String fieldName);
+    PVFloat getFloatField(String fieldName);
+    PVDouble getDoubleField(String fieldName);
+    PVString getStringField(String fieldName);
+    PVScalarArray getScalarArrayField(String fieldName);
+    PVStructureArray getStructureArrayField(String fieldName);
+    PVStructure getStructureField(String fieldName);
+    PVArray getArrayField(String fieldName,ScalarType elementType);
+    // following will be removed
+<font color = "red">    void appendPVField(String fieldName,PVField pvField);</font>
+<font color = "red">    void appendPVFields(String[] fieldNames,PVField[] pvFields);</font>
+<font color = "red">    void removePVField(String fieldName);</font>
+<font color = "red">    void replacePVField(PVField oldPVField,PVField newPVField);</font>
+<font color = "red">    String getExtendsStructureName();</font>
+<font color = "red">    boolean putExtendsStructureName(String extendsStructureName);</font>
+<font color = "red">    public boolean checkValid();</font>
+}
+ 
+<font color = "red">
+//following will be removed
+public class StructureArrayData {
+    public PVStructure[] data;
+    public int offset;
+}
+</font>
+
+interface PVStructureArray extends PVArray{
+    StructureArray getStructureArray();
+    // following are new
+<font color = "blue">    PVStructure[] get();</font>
+<font color = "blue">    void swap(PVStructure[] value);</font>
+    // following will be removed
+<font color = "red">    int get(int offset, int length, StructureArrayData data);</font>
+<font color = "red">    int put(int offset,int length, PVStructure[] from, int fromOffset);</font>
+<font color = "red">    void shareData(PVStructure[] from);</font>
+}
+
+
+public interface PVDataCreate {
+    PVField createPVField(Field field);
+    PVField createPVField(PVField fieldToClone);
+    PVScalar createPVScalar(Scalar scalar);
+    PVScalar createPVScalar(ScalarType fieldType);
+    PVScalar createPVScalar(PVScalar scalarToClone);
+    PVScalarArray createPVScalarArray(ScalarArray array);
+    PVScalarArray createPVScalarArray(ScalarType elementType);
+    PVScalarArray createPVScalarArray(PVScalarArray arrayToClone;
+    PVStructureArray createPVStructureArray(StructureArray structureArray);
+    PVStructure createPVStructure(Structure structure);
+    PVStructure createPVStructure(String[] fieldNames,Field[] fields);
+    PVStructure createPVStructure(PVStructure structToClone);
+    // following will be removed
+    <font color = "red">PVField[] flattenPVStructure(PVStructure pvStructure);</font>
+}
+</pre>
+<h3>PVFieldToString</h3>
+<p>In addition to toString this has methods to limit the number of array element to display.
+The existing Java implementation of toString displayed all elements.
+For large arrays this is not desirable.
+The new methods provide a way for the client to limit the number of elements.
+The default might be set to something like display up to 10 elements with 5 fron the beginning and 5 from the end.</p>
+<p>For C++ this can be a replacement for dumpValue.</p>
+<h3>PVBooleanArray, ..., PVStructureArray</h3>
+<p>The old get and put are replaced by two new and simpler methods:
+<dl>
+   <dt>get</dt>
+     <dd>Returns the raw array. If the client code modifies the elements in the array then
+      the client must call postPut. The client also has to realize that if the raw array held by the PVXXXArray changes
+      then the client is no longer sharing data
+   <dt>swap</dt>
+      <dd>This exchanges the old raw data with the new raw data.</dd>
+</dl>
+</p>
+<p>
+The method <b>setCapacity</b> will always create a new raw array and copy old data from the old to the new array.
+This is not true now since the implementation does not create a new array if the old capacity is equal to the requested capacity.
+</p>
+<h2>C++ API</h2>
+<p>The C++ class definitions are similar to the Java definitions with two main exceptions:
+<dl>
+   <dt>toString</dt>
+     <dd>In c++ this is replaced by std::ostream.</dd>
+   <dt>raw array data</dt>
+      <dd>Java supports array data like <b>double[]</b>
+       The C++ replacement is shared_vector&lt;double&gt;, which  is implemented
+       in pvDataCPP-md.</dd
+</dl>
+<h3>Introspection Interfaces</h3>
+
+<pre>
+class Field :
+    virtual public Serializable,
+    public std::tr1::enable_shared_from_this&lt;Field&gt;
+{
+public:
+    POINTER_DEFINITIONS(Field);
+    virtual ~Field();
+    Type getType() const{return m_type;}
+    virtual String getID() const = 0;
+    <font color = "red">
+    // following will be removed
+    virtual void toString(StringBuilder buf) const{toString(buf,0);}
+    virtual void toString(StringBuilder buf,int indentLevel) const;
+    </font>
+ ...
+};
+<font color = "blue">
+// new function
+std::ostream &amp;toString(Field::const_reference field, std::ostream&amp; o);
+</font>
+
+class Scalar : public Field{
+public:
+    POINTER_DEFINITIONS(Scalar);
+    virtual ~Scalar();
+    typedef Scalar&amp; reference;
+    typedef const Scalar&amp; const_reference;
+
+    ScalarType getScalarType() const {return scalarType;}
+    virtual void serialize(ByteBuffer *buffer, SerializableControl *control) const;
+    virtual void deserialize(ByteBuffer *buffer, DeserializableContol *control);
+    <font color = "red">
+    // following will be removed
+    virtual void toString(StringBuilder buf) const{toString(buf,0);}
+    virtual void toString(StringBuilder buf,int indentLevel) const;
+    virtual String getID() const;
+    </font>
+ ...
+};
+class ScalarArray : public Field{
+public:
+    POINTER_DEFINITIONS(ScalarArray);
+    typedef ScalarArray&amp; reference;
+    typedef const ScalarArray&amp; const_reference;
+
+    ScalarArray(ScalarType scalarType);
+    ScalarType  getElementType() const {return elementType;}
+    virtual void serialize(ByteBuffer *buffer, SerializableControl *control) const;
+    virtual void deserialize(ByteBuffer *buffer, DeserializableControl *control);
+    <font color = "red">
+    // following will be removed
+    virtual void toString(StringBuilder buf) const{toString(buf,0);}
+    virtual void toString(StringBuilder buf,int indentLevel) const;
+    virtual String getID() const;
+    </font>
+ ...
+};
+
+class Structure : public Field {
+public:
+    POINTER_DEFINITIONS(Structure);
+    typedef Structure&amp; reference;
+    typedef const Structure&amp; const_reference;
+
+   std::size_t getNumberFields() const {return numberFields;}
+   FieldConstPtr getField(String const &amp; fieldName) const;
+   FieldConstPtr getField(std::size_t index) const;
+   std::size_t getFieldIndex(String const &amp;fieldName) const;
+   FieldConstPtrArray const &amp; getFields() const {return fields;}
+   StringArray const &amp; getFieldNames() const;
+   String getFieldName(std::size_t fieldIndex);
+   virtual void serialize(ByteBuffer *buffer, SerializableControl *control) const;
+   virtual void deserialize(ByteBuffer *buffer, DeserializableControl *control);
+    <font color = "red">
+    // following will be removed
+   void renameField(std::size_t fieldIndex,String const &amp;newName);
+   virtual void toString(StringBuilder buf,int indentLevel) const;
+   virtual String getID() const;
+   </font>
+ ...
+};
+
+class StructureArray : public Field{
+public:
+    POINTER_DEFINITIONS(StructureArray);
+    typedef StructureArray&amp; reference;
+    typedef const StructureArray&amp; const_reference;
+
+    StructureConstPtr  getStructure() const {return pstructure;}
+    virtual void serialize(ByteBuffer *buffer, SerializableControl *control) const;
+    virtual void deserialize(ByteBuffer *buffer, DeserializableControl *control);
+    <font color = "red">
+    // following will be removed
+    virtual void toString(StringBuilder buf,int indentLevel=0) const;
+    virtual String getID() const;
+    </font>
+ ...
+};
+
+class FieldCreate  {
+public:
+    static FieldCreatePtr getFieldCreate();
+    ScalarConstPtr  createScalar(ScalarType scalarType) const
+    ScalarArrayConstPtr createScalarArray(ScalarType elementType) const;
+    StructureArrayConstPtr createStructureArray(StructureConstPtr const &amp; structure) const;
+    StructureConstPtr createStructure (
+        StringArray const &amp; fieldNames,
+        FieldConstPtrArray const &amp; fields) const;
+    StructureConstPtr createStructure (
+        String const &amp;id,
+        StringArray const &amp; fieldNames,
+        FieldConstPtrArray const &amp; fields) const;
+    FieldConstPtr deserialize(ByteBuffer* buffer, DeserializableControl* control) const;
+    <font color = "red">
+    // following will be removed
+    StructureConstPtr appendField(
+        StructureConstPtr const &amp; structure,
+        String const &amp;fieldName, FieldConstPtr const &amp; field) const;
+    StructureConstPtr appendFields(
+        StructureConstPtr const &amp; structure,
+        StringArray const &amp; fieldNames,
+        FieldConstPtrArray const &amp; fields) const;
+    </font>
+ ...
+};
+
+extern FieldCreatePtr getFieldCreate();
+ </pre>
+<h3>Data Interfaces</h3>
+<pre>
+class PVField
+: virtual public Serializable,
+  public std::tr1::enable_shared_from_this&lt;PVField&gt;
+{
+public:
+   POINTER_DEFINITIONS(PVField);
+   virtual ~PVField();
+   inline const String &amp;getFieldName() const ;
+   virtual void setRequester(RequesterPtr const &amp;prequester);
+   std::size_t getFieldOffset() const;
+   std::size_t getNextFieldOffset() const;
+   std::size_t getNumberFields() const;
+   const FieldConstPtr &amp; getField() const ;
+   PVStructure * getParent() const
+   void postPut() ;
+   void setPostHandler(PostHandlerPtr const &amp;postHandler);
+    // following will be removed
+    <font color = "red">
+   virtual void message(String message,MessageType messageType);
+   void replacePVField(const PVFieldPtr&amp;  newPVField);
+   String getFullName() const;
+   virtual bool equals(PVField &amp;pv);
+   PVAuxInfoPtr &amp; getPVAuxInfo()
+   bool isImmutable() const;
+   virtual void setImmutable();
+   void replacePVField(const PVFieldPtr&amp;  newPVField);
+   void renameField(String const &amp;newName);
+   virtual void toString(StringBuilder buf) ;
+   virtual void toString(StringBuilder buf,int indentLevel);
+   std::ostream&amp; dumpValue(std::ostream&amp; o) const;
+   </font>
+ ...
+};
+
+<font color = "blue">
+// The following is a new class
+class PVFieldToString {
+    String toString(const PVFieldPtr &amp;pvField);
+    void setMaxInitialArrayElements(size_t num);
+    void setMaxFinalArrayElements(size_t num);
+    size_t getMaxInitialArrayElements();
+    size_t getMaxFinalArrayElements();
+...
+}</font>
+
+class PVScalar : public PVField {
+public:
+    POINTER_DEFINITIONS(PVScalar);
+    virtual ~PVScalar();
+    typedef PVScalar &amp;reference;
+    typedef const PVScalar&amp; const_reference;
+
+    const ScalarConstPtr getScalar() const ;
+ ...
+}
+
+
+template&lt;typename T&gt;
+class PVScalarValue : public PVScalar {
+public:
+    POINTER_DEFINITIONS(PVScalarValue);
+    typedef T value_type;
+    typedef T* pointer;
+    typedef const T* const_pointer;
+
+    virtual ~PVScalarValue() {}
+    virtual T get() const = 0;
+    virtual void put(T value) = 0;
+    <font color = "red">
+    // following will be removed
+    std::ostream&amp; dumpValue(std::ostream&amp; o)
+    void operator&gt;&gt;=(T&amp; value) const;
+    void operator&lt;&lt;=(T value);
+    </font>
+ ...
+}
+
+// PVString is special case, since it implements SerializableArray
+class PVString : public PVScalarValue&lt;String&gt;, SerializableArray {
+public:
+    virtual ~PVString() {}
+ ...
+}
+class PVArray : public PVField, public SerializableArray {
+public:
+    POINTER_DEFINITIONS(PVArray);
+    virtual ~PVArray();
+    std::size_t getLength() const;
+    virtual void setLength(std::size_t length);
+    std::size_t getCapacity() const;
+    virtual void setCapacity(std::size_t capacity) = 0;
+    <font color = "red">
+    // following will be removed
+    virtual void setImmutable();
+    bool isCapacityMutable() const;
+    void setCapacityMutable(bool isMutable);
+    virtual std::ostream&amp; dumpValue(std::ostream&amp; o, std::size_t index) const = 0;
+    </font>
+ ...
+};
+
+class PVScalarArray : public PVArray {
+public:
+    POINTER_DEFINITIONS(PVScalarArray);
+    virtual ~PVScalarArray();
+    typedef PVScalarArray &amp;reference;
+    typedef const PVScalarArray&amp; const_reference;
+
+    const ScalarArrayConstPtr getScalarArray() const ;
+    <font color = "red">
+    // following will be removed
+    virtual std::ostream&amp; dumpValue(std::ostream&amp; o, size_t index) const = 0;
+    </font>
+ ...
+}
+
+<font color = "red">
+// following will be removed
+template&lt;typename T&gt;
+class PVArrayData {
+private:
+    std::vector&lt;T&gt; init;
+public:
+    POINTER_DEFINITIONS(PVArrayData);
+    typedef T  value_type;
+    typedef T* pointer;
+    typedef const T* const_pointer;
+    std::vector&lt;T&gt; &amp; data;
+    std::size_t offset;
+    PVArrayData()
+    : data(init)
+    {}
+};
+</font>
+
+template&lt;typename T&gt;
+class PVValueArray : public PVScalarArray {
+public:
+    POINTER_DEFINITIONS(PVValueArray);
+    typedef T  value_type;
+    typedef T* pointer;
+    typedef const T* const_pointer;
+    // following are new typeDefs
+    <font color = "blue">typedef shared_vector&lt;T&gt; svector;</font>
+    <font color = "blue">typedef shared_vector&lt;const T&gt; const_svector; </font>
+
+    virtual ~PVValueArray() {}
+    // following are added
+    <font color = "blue">svector get();</font>
+    <font color = "blue">void swap(svector&amp; value);</font>
+    <font color = "red">
+    // following are removed
+    typedef PVValueArray &amp; reference;
+    typedef const PVValueArray &amp; const_reference;
+    typedef PVArrayData&lt;T&gt; ArrayDataType;
+    typedef std::vector&lt;T&gt; vector;
+    typedef const std::vector&lt;T&gt; const_vector;
+    typedef std::tr1::shared_ptr&lt;vector&gt; shared_vector;
+
+    virtual std::size_t get(
+         std::size_t offset, std::size_t length, ArrayDataType &amp;data) = 0;
+    virtual std::size_t put(std::size_t offset,
+        std::size_t length, const_pointer from, std::size_t fromOffset) = 0;
+    virtual std::size_t put(std::size_t offset,
+        std::size_t length, const_vector &amp;from, std::size_t fromOffset);
+    virtual void shareData(
+         shared_vector const &amp; value,
+         std::size_t capacity,
+         std::size_t length) = 0;
+    virtual pointer get() = 0;
+    virtual pointer get() const = 0;
+    virtual vector const &amp; getVector() = 0;
+    virtual shared_vector const &amp; getSharedVector() = 0;
+    std::ostream&amp; dumpValue(std::ostream&amp; o) const;
+    std::ostream&amp; dumpValue(std::ostream&amp; o, size_t index) const;
+    </font>
+...
+};
+
+typedef PVValueArray&lt;uint8&gt; PVBooleanArray;
+typedef std::tr1::shared_ptr&lt;PVBooleanArray&gt; PVBooleanArrayPtr;
+...
+typedef PVValueArray&lt;String&gt; PVStringArray;
+typedef std::tr1::shared_ptr&lt;PVStringArray&gt; PVStringArrayPtr;
+
+class PVStructure : public PVField,public BitSetSerializable {
+public:
+    POINTER_DEFINITIONS(PVStructure);
+    virtual ~PVStructure();
+    typedef PVStructure &amp; reference;
+    typedef const PVStructure &amp; const_reference;
+
+    StructureConstPtr getStructure() const;
+    const PVFieldPtrArray &amp; getPVFields() const;
+    PVFieldPtr getSubField(String const &amp;fieldName) const;
+    PVFieldPtr getSubField(std::size_t fieldOffset) const;
+    PVBooleanPtr getBooleanField(String const &amp;fieldName) ;
+    PVBytePtr getByteField(String const &amp;fieldName) ;
+    PVShortPtr getShortField(String const &amp;fieldName) ;
+    PVIntPtr getIntField(String const &amp;fieldName) ;
+    PVLongPtr getLongField(String const &amp;fieldName) ;
+    PVUBytePtr getUByteField(String const &amp;fieldName) ;
+    PVUShortPtr getUShortField(String const &amp;fieldName) ;
+    PVUIntPtr getUIntField(String const &amp;fieldName) ;
+    PVULongPtr getULongField(String const &amp;fieldName) ;
+    PVFloatPtr getFloatField(String const &amp;fieldName) ;
+    PVDoublePtr getDoubleField(String const &amp;fieldName) ;
+    PVStringPtr getStringField(String const &amp;fieldName) ;
+    PVStructurePtr getStructureField(String const &amp;fieldName) ;
+    PVScalarArrayPtr getScalarArrayField(
+        String const &amp;fieldName,ScalarType elementType) ;
+    PVStructureArrayPtr getStructureArrayField(String const &amp;fieldName) ;
+    virtual void serialize(
+        ByteBuffer *pbuffer,SerializableControl *pflusher) const ;
+    virtual void deserialize(
+        ByteBuffer *pbuffer,DeserializableControl *pflusher);
+    virtual void serialize(ByteBuffer *pbuffer,
+        SerializableControl *pflusher,BitSet *pbitSet) const;
+    virtual void deserialize(ByteBuffer *pbuffer,
+        DeserializableControl*pflusher,BitSet *pbitSet);
+    PVStructure(StructureConstPtr const &amp; structure);
+    PVStructure(StructureConstPtr const &amp; structure,PVFieldPtrArray const &amp; pvFields);
+    <font color = "red">
+    // following are removed
+    void appendPVField(
+        String const &amp;fieldName,
+        PVFieldPtr const &amp; pvField);
+    void appendPVFields(
+        StringArray const &amp; fieldNames,
+        PVFieldPtrArray const &amp; pvFields);
+    void removePVField(String const &amp;fieldName);
+    virtual void setImmutable();
+    String getExtendsStructureName() const;
+    bool putExtendsStructureName(
+        String const &amp;extendsStructureName);
+    </font>
+};
+
+<font color = "red">
+// following will be removed
+typedef PVArrayData&lt;PVStructurePtr&gt; StructureArrayData;
+</font>
+
+class PVStructureArray : public PVArray
+{
+public:
+    POINTER_DEFINITIONS(PVStructureArray);
+    typedef PVStructurePtr  value_type;
+    typedef PVStructurePtr* pointer;
+    typedef const PVStructurePtr* const_pointer;
+    <font color = "blue">
+    // following are new typeDefs
+    typedef shared_vector&lt;PVStructurePtr&gt; svector;
+    typedef shared_vector&lt;const PVStructurePtr&gt; const_svector;
+    </font>
+
+    virtual ~PVStructureArray() {}
+    virtual void setCapacity(size_t capacity);
+    virtual void setLength(std::size_t length);
+    virtual StructureArrayConstPtr getStructureArray() const ;
+    virtual void serialize(ByteBuffer *pbuffer,
+        SerializableControl *pflusher) const;
+    virtual void deserialize(ByteBuffer *buffer,
+    virtual void serialize(ByteBuffer *pbuffer,
+        SerializableControl *pflusher, std::size_t offset, std::size_t count) const ;
+    // following are new
+<font color = "blue">    svector get();</font>
+<font color = "blue">    void swap(svector &amp; value);</font>
+    <font color = "red">
+    // following are removed
+    typedef PVArrayData&lt;PVStructurePtr&gt; ArrayDataType;
+    typedef std::vector&lt;PVStructurePtr&gt; vector;
+    typedef const std::vector&lt;PVStructurePtr&gt; const_vector;
+    typedef std::tr1::shared_ptr&lt;vector&gt; shared_vector;
+    typedef PVStructureArray &amp;reference;
+    typedef const PVStructureArray&amp; const_reference;
+    
+    virtual std::size_t append(std::size_t number);
+    virtual bool remove(std::size_t offset,std::size_t number);
+    virtual void compress();
+    virtual std::size_t get(std::size_t offset, std::size_t length,
+        StructureArrayData &amp;data);
+    virtual std::size_t put(std::size_t offset,std::size_t length,
+        const_vector const &amp; from, std::size_t fromOffset);
+    virtual void shareData(
+         shared_vector const &amp; value,
+         std::size_t capacity,
+         std::size_t length);
+    virtual pointer get() { return &amp;((*value.get())[0]); }
+    virtual pointer get() const { return &amp;((*value.get())[0]); }
+    virtual vector const &amp; getVector() {return *value;}
+    virtual shared_vector const &amp; getSharedVector() {return value;}
+    </font>
+ ...
+};
+
+class PVDataCreate {
+public:
+    static PVDataCreatePtr getPVDataCreate();
+    PVFieldPtr createPVField(FieldConstPtr const &amp; field);
+    PVFieldPtr createPVField(PVFieldPtr const &amp; fieldToClone);
+    PVScalarPtr createPVScalar(ScalarConstPtr const &amp; scalar);
+    PVScalarPtr createPVScalar(ScalarType scalarType);
+    PVScalarPtr createPVScalar(PVScalarPtr const &amp; scalarToClone);
+    PVScalarArrayPtr createPVScalarArray(ScalarArrayConstPtr const &amp; scalarArray);
+    PVScalarArrayPtr createPVScalarArray(ScalarType elementType);
+    PVScalarArrayPtr createPVScalarArray(PVScalarArrayPtr const  &amp; scalarArrayToClone);
+    PVStructureArrayPtr createPVStructureArray(StructureArrayConstPtr const &amp; structureArray);
+    PVStructurePtr createPVStructure(StructureConstPtr const &amp; structure);
+    PVStructurePtr createPVStructure(
+        StringArray const &amp; fieldNames,PVFieldPtrArray const &amp; pvFields);
+   PVStructurePtr createPVStructure(PVStructurePtr const &amp; structToClone);
+ ...
+};
+
+extern PVDataCreatePtr getPVDataCreate();
+</pre>
+
+
+</div>
+</body>
+</html>
