@@ -1241,8 +1241,7 @@ public:
             this->swap(next); // no convert == no copy
         } else {
             size_t len = inp.size() / ScalarTypeFunc::elementSize(id);
-            svector result;
-            this->swap(result);
+            svector result(this->take());
             result.resize(len);
 
             castUnsafeV(len, typeCode, result.data(), id, inp.data());
@@ -1254,8 +1253,7 @@ public:
 
     virtual void copyIn(ScalarType id, const void* ptr, size_t len)
     {
-        svector data;
-        this->swap(data);
+        svector data(this->take());
         // Will have to re-alloc anyway? If so avoid copying
         // data which will only be over-written
         if(data.capacity()<len)
