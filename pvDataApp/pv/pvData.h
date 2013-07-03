@@ -1040,9 +1040,9 @@ namespace detail {
         //! Discard current contents and replaced with the provided.
         //! Fails for Immutable arrays
         //! calls postPut()
-        virtual void replace(const svector& next)
+        virtual void replace(const const_svector& next)
         {
-            svector temp(next);
+            svector temp(const_shared_vector_cast<T>(next));
             this->swap(temp);
             this->postPut();
         }
