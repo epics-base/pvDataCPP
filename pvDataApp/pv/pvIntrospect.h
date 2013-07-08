@@ -16,7 +16,6 @@
 #include <pv/pvType.h>
 #include <pv/byteBuffer.h>
 #include <pv/serialize.h>
-#include <pv/sharedVector.h>
 
 namespace epics { namespace pvData { 
 
@@ -582,22 +581,6 @@ OP(pvFloat, float);
 OP(pvDouble, double);
 OP(pvString, String);
 #undef OP
-
-
-namespace ScalarTypeFunc {
-    //! Allocate an untyped array based on ScalarType
-    shared_vector<void> allocArray(ScalarType id, size_t len);
-
-    //! Allocate an untyped array based on ScalarType
-    template<ScalarType ID>
-    inline
-    shared_vector<typename ScalarTypeTraits<ID>::type>
-    allocArray(size_t len)
-    {
-        shared_vector<void> raw(allocArray(ID, len));
-        return static_shared_vector_cast<typename ScalarTypeTraits<ID>::type>(raw);
-    }
-}
 
 }}
 #endif  /* PVINTROSPECT_H */

@@ -14,6 +14,7 @@
 
 #include <pv/pvIntrospect.h>
 #include <pv/epicsException.h>
+#include <pv/sharedVector.h>
 
 #include "dbDefs.h" // for NELEMENTS
 

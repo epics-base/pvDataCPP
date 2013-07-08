@@ -9,6 +9,7 @@
 #include <cassert>
 
 #include "pv/sharedPtr.h"
+#include "pv/pvIntrospect.h"
 
 namespace epics { namespace pvData {
 
@@ -572,6 +573,22 @@ const_shared_vector_cast(const shared_vector<const TYPE>& src)
             src.dataCount());
 }
 
+
+
+namespace ScalarTypeFunc {
+    //! Allocate an untyped array based on ScalarType
+    shared_vector<void> allocArray(ScalarType id, size_t len);
+
+    //! Allocate an untyped array based on ScalarType
+    template<ScalarType ID>
+    inline
+    shared_vector<typename ScalarTypeTraits<ID>::type>
+    allocArray(size_t len)
+    {
+        shared_vector<void> raw(allocArray(ID, len));
+        return static_shared_vector_cast<typename ScalarTypeTraits<ID>::type>(raw);
+    }
+}
 
 }} // namespace epics::pvData
 
