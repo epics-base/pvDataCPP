@@ -476,11 +476,13 @@ public:
 
 //! Specialization for storing untyped pointers
 //! Does not allow access or iteration of contents
+//! other than as void* or const void*
 template<typename E>
 class shared_vector<E, typename meta::is_void<E>::type >
     : public detail::shared_vector_base<E>
 {
     typedef detail::shared_vector_base<E> base_t;
+    ScalarType m_vtype;
 public:
     typedef E* pointer;
     typedef ptrdiff_t difference_type;
@@ -488,29 +490,53 @@ public:
 
     typedef std::tr1::shared_ptr<E> shared_pointer_type;
 
-    shared_vector() :base_t() {}
+    shared_vector() :base_t(), m_vtype((ScalarType)-1) {}
 
-    template<typename A>
-    shared_vector(A v, size_t o, size_t c) :base_t(v,o,c) {}
+    shared_vector(pointer v, size_t o, size_t c)
+        :base_t(v,o,c), m_vtype((ScalarType)-1) {}
+
+    template<typename B>
+    shared_vector(pointer d, B b, size_t o, size_t c)
+        :base_t(d,b,o,c), m_vtype((ScalarType)-1) {}
 
     template<typename E1>
     shared_vector(const std::tr1::shared_ptr<E1>& d, size_t o, size_t c)
-        :base_t(d,o,c) {}
-
-    template<typename A, typename B>
-    shared_vector(A d, B b, size_t o, size_t c)
-        :base_t(d,b,o,c) {}
+        :base_t(d,o,c), m_vtype((ScalarType)-1) {}
 
     template<typename E1>
-    shared_vector(const shared_vector<E1>& o) :base_t(o) {}
+    shared_vector(const shared_vector<E1>& o)
+        :base_t(o), m_vtype(o.m_vtype) {}
 
-    shared_vector(const shared_vector& o) :base_t(o) {}
+    shared_vector(const shared_vector& o)
+        :base_t(o), m_vtype(o.m_vtype) {}
+
+    shared_vector& operator=(const shared_vector& o)
+    {
+        if(&o!=this) {
+            this->base_t::operator=(o);
+            m_vtype = o.m_vtype;
+        }
+        return *this;
+    }
+
+    template<typename E1>
+    shared_vector& operator=(const shared_vector<E1>& o)
+    {
+        if(&o!=this) {
+            this->base_t::operator=(o);
+            m_vtype = o.m_vtype;
+        }
+        return *this;
+    }
 
     size_t max_size() const{return (size_t)-1;}
 
     pointer data() const{
         return (pointer)(((char*)this->m_data.get())+this->m_offset);
     }
+
+    shared_vector& set_original_type(ScalarType t) { m_vtype=t; return *this; }
+    ScalarType original_type() const {return m_vtype;}
 };
 
 namespace detail {
