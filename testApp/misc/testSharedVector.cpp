@@ -407,6 +407,50 @@ static void testNonPOD()
     testOk1(structs2[1].get()==temp);
 }
 
+static void testVectorConvert()
+{
+    testDiag("Test shared_vector_convert");
+
+    epics::pvData::shared_vector<int> ints(6, 42), moreints;
+    epics::pvData::shared_vector<float> floats;
+    epics::pvData::shared_vector<std::string> strings;
+    epics::pvData::shared_vector<void> voids;
+
+    testOk1(ints.unique());
+
+    // no-op convert.  Just returns another reference
+    moreints = epics::pvData::shared_vector_convert<int>(ints);
+
+    testOk1(!ints.unique());
+    moreints.clear();
+
+    // conversion when both types are known.
+    // returns a new vector
+    floats = epics::pvData::shared_vector_convert<float>(ints);
+
+    testOk1(ints.unique());
+    testOk1(floats.size()==ints.size());
+    testOk1(floats.at(0)==42.0);
+
+    // convert to void is static_shared_vector_cast<void>()
+    // returns a reference
+    voids = epics::pvData::shared_vector_convert<void>(ints);
+
+    testOk1(!ints.unique());
+    testOk1(voids.size()==ints.size()*sizeof(int));
+
+    // convert from void uses shared_vector<void>::original_type()
+    // to find that the actual type is 'int'.
+    // returns a new vector
+    strings = epics::pvData::shared_vector_convert<std::string>(voids);
+
+    voids.clear();
+
+    testOk1(ints.unique());
+    testOk1(strings.size()==ints.size());
+    testOk1(strings.at(0)=="42");
+}
+
 static void testWeak()
 {
     testDiag("Test weak_ptr counting");
@@ -434,7 +478,7 @@ static void testWeak()
 
 MAIN(testSharedVector)
 {
-    testPlan(122);
+    testPlan(132);
     testDiag("Tests for shared_vector");
 
     testDiag("sizeof(shared_vector<int>)=%lu",
@@ -450,6 +494,7 @@ MAIN(testSharedVector)
     testPush();
     testVoid();
     testNonPOD();
+    testVectorConvert();
     testWeak();
     return testDone();
 }
