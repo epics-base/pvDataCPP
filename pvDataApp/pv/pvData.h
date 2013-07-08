@@ -693,23 +693,27 @@ public:
      */
     const ScalarArrayConstPtr getScalarArray() const ;
 
+protected:
+    virtual void _getAsVoid(shared_vector<const void>&) const = 0;
+    virtual void _putFromVoid(const shared_vector<const void>&) = 0;
+public:
+
     /**
-     * Fetch the current value and convert to the requeted type.
+     * Fetch the current value and convert to the requested type.
      *
      * A copy is made if the requested type does not match
      * the element type.  If the types do match then
      * no copy is made.
      */
     template<ScalarType ID>
-    inline void
-    getAs(shared_vector<typename ScalarTypeTraits<ID>::type>& out) const
+    void
+    getAs(shared_vector<const typename ScalarTypeTraits<ID>::type>& out) const
     {
-        shared_vector<void> temp(static_shared_vector_cast<void>(out));
-        getAs(ID, temp);
-        out = static_shared_vector_cast<typename ScalarTypeTraits<ID>::type>(temp);
+        typedef typename ScalarTypeTraits<ID>::type dest_type;
+        shared_vector<const void> temp;
+        _getAsVoid(temp);
+        out = shared_vector_convert<const dest_type>(temp);
     }
-    virtual void
-    getAs(ScalarType, shared_vector<void>& out) const = 0;
 
     /**
      * Assign the given value after conversion.
@@ -736,12 +740,11 @@ public:
      * Calls postPut()
      */
     template<ScalarType ID>
-    inline void putFrom(const shared_vector<typename ScalarTypeTraits<ID>::type>& inp)
+    inline void putFrom(const shared_vector<const typename ScalarTypeTraits<ID>::type>& inp)
     {
-        shared_vector<void> temp(static_shared_vector_cast<void>(inp));
-        putFrom(ID, temp);
+        shared_vector<const void> temp(static_shared_vector_cast<const void>(inp));
+        _putFromVoid(temp);
     }
-    virtual void putFrom(ScalarType, const shared_vector<void>&) = 0;
 
     /**
      * Assign the given value after conversion.
@@ -766,7 +769,11 @@ public:
      * If the types do match then a new refernce to the provided
      * data is kept.
      */
-    virtual void assign(PVScalarArray& pv) = 0;
+    void assign(PVScalarArray& pv) {
+        shared_vector<const void> temp;
+        pv._getAsVoid(temp);
+        _putFromVoid(temp);
+    }
 
 protected:
     PVScalarArray(ScalarArrayConstPtr const & scalarArray);
@@ -1230,22 +1237,19 @@ public:
     	return o << *(this->get() + index);
     }
 
-    virtual void
-    getAs(ScalarType id, ::epics::pvData::shared_vector<void>& out) const
+protected:
+    virtual void _getAsVoid(epics::pvData::shared_vector<const void>& out) const
     {
-        const svector& data(this->viewUnsafe());
-        ::epics::pvData::shared_vector<void> temp(static_shared_vector_cast<void>(data));
-        if(id==typeCode) {
-            out = temp; // no convert = no copy
-        } else {
-            //TODO: reuse out if possible??
-            ::epics::pvData::shared_vector<void> vcopy(ScalarTypeFunc::allocArray(id, data.size()));
-
-            castUnsafeV(data.size(), id, vcopy.data(), typeCode, temp.data());
-
-            out.swap(vcopy);
-        }
+        out = static_shared_vector_cast<const void>(this->view());
     }
+
+    virtual void _putFromVoid(const epics::pvData::shared_vector<const void>& in)
+    {
+        // TODO: try to re-use storage
+        replace(shared_vector_convert<const T>(in));
+    }
+
+public:
 
     virtual size_t copyOut(ScalarType id, void* ptr, size_t olen) const
     {
@@ -1254,24 +1258,6 @@ public:
         
         castUnsafeV(len, id, ptr, typeCode, (const void*)data.data());
         return len;
-    }
-
-    virtual void
-    putFrom(ScalarType id, const ::epics::pvData::shared_vector<void>& inp)
-    {
-        if(id==typeCode) {
-            svector next(static_shared_vector_cast<T>(inp));
-            this->swap(next); // no convert == no copy
-        } else {
-            size_t len = inp.size() / ScalarTypeFunc::elementSize(id);
-            svector result(this->take());
-            result.resize(len);
-
-            castUnsafeV(len, typeCode, result.data(), id, inp.data());
-
-            this->swap(result);
-        }
-        this->postPut();
     }
 
     virtual void copyIn(ScalarType id, const void* ptr, size_t len)
@@ -1284,17 +1270,6 @@ public:
         data.resize(len);
         castUnsafeV(len, typeCode, (void*)data.data(), id, ptr);
         this->swap(data);
-        this->postPut();
-    }
-
-    virtual void assign(PVScalarArray& pv)
-    {
-        if(this==&pv)
-            return;
-        ::epics::pvData::shared_vector<void> temp;
-        pv.getAs(typeCode, temp);
-        svector next(static_shared_vector_cast<T>(temp));
-        this->swap(next);
         this->postPut();
     }
 

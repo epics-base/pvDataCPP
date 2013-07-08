@@ -176,7 +176,7 @@ void PrinterPlain::encodeScalar(const PVScalar& pv)
 void PrinterPlain::encodeArray(const PVScalarArray& pv)
 {
     indentN(S(), ilvl);
-    shared_vector<String> temp;
+    shared_vector<const String> temp;
     pv.getAs<pvString>(temp);
 
     S() << pv.getScalarArray()->getID() << " "
