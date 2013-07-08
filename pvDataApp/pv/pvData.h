@@ -103,6 +103,8 @@ class PVScalarArray;
 
 class PVStructure;
 
+
+template<typename T> class PVScalarValue;
 template<typename T> class PVValueArray;
 
 
@@ -397,6 +399,10 @@ std::ostream& operator<<(std::ostream& o, const PVField& f);
  * PVScalar is the base class for each scalar field.
  */
 class PVScalar : public PVField {
+    // friend our child class(s) so that it
+    // can call protected methods of other
+    // PVScalar instances.
+    template<typename E> friend class PVScalarValue;
 public:
     POINTER_DEFINITIONS(PVScalar);
     /**
@@ -427,7 +433,9 @@ public:
         this->getAs((void*)&result, ID);
         return result;
     }
+protected:
     virtual void getAs(void *, ScalarType) const = 0;
+public:
 
     /**
      * Convert and assign the provided value.
@@ -443,7 +451,9 @@ public:
     inline void putFrom(typename ScalarTypeTraits<ID>::type val) {
         this->putFrom((const void*)&val, ID);
     }
+protected:
     virtual void putFrom(const void *, ScalarType) = 0;
+public:
 
     virtual void assign(const PVScalar&) = 0;
 
@@ -497,6 +507,19 @@ public:
 	{
     	put(value);
 	}
+
+    template<ScalarType ID>
+    inline typename ScalarTypeTraits<ID>::type getAs() const {
+        typedef typename ScalarTypeTraits<ID>::type to_t;
+        to_t result(castUnsafe<to_t,T>(get()));
+        return result;
+    }
+
+    template<ScalarType ID>
+    inline void putFrom(typename ScalarTypeTraits<ID>::type val) {
+        typedef typename ScalarTypeTraits<ID>::type from_t;
+        put(castUnsafe<T,from_t>(val));
+    }
 
 protected:
     PVScalarValue(ScalarConstPtr const & scalar)
