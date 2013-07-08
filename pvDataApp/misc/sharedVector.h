@@ -10,6 +10,7 @@
 
 #include "pv/sharedPtr.h"
 #include "pv/pvIntrospect.h"
+#include "pv/templateMeta.h"
 
 namespace epics { namespace pvData {
 
@@ -34,10 +35,6 @@ namespace detail {
             return std::tr1::shared_ptr<const E>(input);
         }
     };
-
-    // avoid adding 'const' twice
-    template<typename T> struct decorate_const { typedef const T type; };
-    template<typename T> struct decorate_const<const T> { typedef const T type; };
 
     // How values should be passed as arguments to shared_vector methods
     // really should use boost::call_traits
@@ -230,12 +227,12 @@ class shared_vector : public detail::shared_vector_base<E>
 public:
     typedef E value_type;
     typedef E& reference;
-    typedef typename detail::decorate_const<E>::type& const_reference;
+    typedef typename meta::decorate_const<E>::type& const_reference;
     typedef E* pointer;
-    typedef typename detail::decorate_const<E>::type* const_pointer;
+    typedef typename meta::decorate_const<E>::type* const_pointer;
     typedef E* iterator;
     typedef std::reverse_iterator<iterator> reverse_iterator;
-    typedef typename detail::decorate_const<E>::type* const_iterator;
+    typedef typename meta::decorate_const<E>::type* const_iterator;
     typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
     typedef ptrdiff_t difference_type;
     typedef size_t size_type;
@@ -477,16 +474,10 @@ public:
 
 };
 
-namespace detail {
-    template<typename T> struct is_void {};
-    template<> struct is_void<void> { typedef void type; };
-    template<> struct is_void<const void> { typedef void type; };
-}
-
 //! Specialization for storing untyped pointers
 //! Does not allow access or iteration of contents
 template<typename E>
-class shared_vector<E, typename detail::is_void<E>::type >
+class shared_vector<E, typename meta::is_void<E>::type >
     : public detail::shared_vector_base<E>
 {
     typedef detail::shared_vector_base<E> base_t;

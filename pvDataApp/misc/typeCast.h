@@ -14,15 +14,7 @@
 
 #include <pv/pvType.h>
 #include <pv/pvIntrospect.h>
-
-// gently nudge the compiler to inline our wrappers
-#if defined(__GNUC__) && __GNUC__>=3
-# define FORCE_INLINE __attribute__((always_inline)) inline
-#elif defined(_MSC_VER)
-# define FORCE_INLINE __forceinline
-#else
-# define FORCE_INLINE inline
-#endif
+#include <pv/templateMeta.h>
 
 namespace epics { namespace pvData {
 
@@ -50,12 +42,6 @@ namespace detail {
     struct cast_arg { typedef ARG arg; };
     template<>
     struct cast_arg<String> { typedef const String& arg; };
-
-    // test to allow specialization only when A!=B
-    template<typename A, typename B, typename R = void>
-    struct not_same_type {typedef R type;};
-    template<typename A>
-    struct not_same_type<A,A> {};
 
     // trick std::ostream into treating char's as numbers
     // by promoting char to int
@@ -87,7 +73,7 @@ namespace detail {
     // print POD to string
     // when String!=FROM
     template<typename FROM>
-    struct cast_helper<String, FROM, typename not_same_type<String,FROM>::type> {
+    struct cast_helper<String, FROM, typename meta::not_same_type<String,FROM>::type> {
         static String op(FROM from) {
             typedef typename print_cast<FROM>::type ptype;
             std::ostringstream strm;
@@ -101,7 +87,7 @@ namespace detail {
     // parse POD from string
     // TO!=String
     template<typename TO>
-    struct cast_helper<TO, String, typename not_same_type<TO,String>::type> {
+    struct cast_helper<TO, String, typename meta::not_same_type<TO,String>::type> {
         static FORCE_INLINE TO op(const String& from) {
             TO ret;
             parseToPOD(from, &ret);
@@ -174,7 +160,5 @@ static FORCE_INLINE TO castUnsafe(const FROM& from)
 void castUnsafeV(size_t count, ScalarType to, void *dest, ScalarType from, const void *src);
 
 }} // end namespace
-
-#undef FORCE_INLINE
 
 #endif // PVTYPECAST_H

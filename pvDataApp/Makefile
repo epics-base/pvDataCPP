@@ -27,6 +27,7 @@ INC += localStaticLock.h
 INC += typeCast.h
 INC += printer.h
 INC += sharedVector.h
+INC += templateMeta.h
 
 LIBSRCS += byteBuffer.cpp
 LIBSRCS += bitSet.cpp
