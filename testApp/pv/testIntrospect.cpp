@@ -174,9 +174,32 @@ static void testError()
     testOk1(fieldCreate->createStructure(names,fields).get()!=NULL);
 }
 
+static void testMapping()
+{
+#define OP(TYPE, ENUM) \
+    testOk1(typeid(ScalarTypeTraits<ENUM>::type)==typeid(TYPE)); \
+            testOk1(ENUM==(ScalarType)ScalarTypeID<TYPE>::value); \
+            testOk1(ENUM==(ScalarType)ScalarTypeID<const TYPE>::value);
+    OP(boolean, pvBoolean)
+    OP(int8, pvByte)
+    OP(int16, pvShort)
+    OP(int32, pvInt)
+    OP(int64, pvLong)
+    OP(uint8, pvUByte)
+    OP(uint16, pvUShort)
+    OP(uint32, pvUInt)
+    OP(uint64, pvULong)
+    OP(float, pvFloat)
+    OP(double, pvDouble)
+    OP(String, pvString)
+#undef OP
+
+    testOk1((ScalarType)ScalarTypeID<PVField>::value==(ScalarType)-1);
+}
+
 MAIN(testIntrospect)
 {
-    testPlan(124);
+    testPlan(161);
     fieldCreate = getFieldCreate();
     pvDataCreate = getPVDataCreate();
     standardField = getStandardField();
@@ -184,5 +207,6 @@ MAIN(testIntrospect)
     testScalarArray();
     testStructure();
     testError();
+    testMapping();
     return testDone();
 }

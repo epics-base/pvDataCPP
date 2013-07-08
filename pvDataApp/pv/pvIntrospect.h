@@ -558,6 +558,19 @@ private:
  */
 extern FieldCreatePtr getFieldCreate();
 
+/** Define a compile time mapping from
+ * type to enum value.
+ @code
+  ScalarType code = (ScalarType)ScalarTypeID<int8>::value;
+  assert(code==pvByte);
+ @endcode
+ *
+ * For unspecified types this evaluates to an invalid ScalarType
+ * value (eg -1).
+ */
+template<typename T>
+struct ScalarTypeID { enum {value=-1}; };
+
 /**
  * Static mapping from ScalarType enum to value type.
  @code
@@ -567,19 +580,23 @@ extern FieldCreatePtr getFieldCreate();
 template<ScalarType ID>
 struct ScalarTypeTraits {};
 
-#define OP(ENUM, TYPE) template<> struct ScalarTypeTraits<ENUM> {typedef TYPE type;}
-OP(pvBoolean, boolean);
-OP(pvByte, int8);
-OP(pvShort, int16);
-OP(pvInt, int32);
-OP(pvLong, int64);
-OP(pvUByte, uint8);
-OP(pvUShort, uint16);
-OP(pvUInt, uint32);
-OP(pvULong, uint64);
-OP(pvFloat, float);
-OP(pvDouble, double);
-OP(pvString, String);
+#define OP(ENUM, TYPE) \
+template<> struct ScalarTypeTraits<ENUM> {typedef TYPE type;}; \
+template<> struct ScalarTypeID<TYPE> { enum {value=ENUM}; }; \
+template<> struct ScalarTypeID<const TYPE> { enum {value=ENUM}; };
+
+OP(pvBoolean, boolean)
+OP(pvByte, int8)
+OP(pvShort, int16)
+OP(pvInt, int32)
+OP(pvLong, int64)
+OP(pvUByte, uint8)
+OP(pvUShort, uint16)
+OP(pvUInt, uint32)
+OP(pvULong, uint64)
+OP(pvFloat, float)
+OP(pvDouble, double)
+OP(pvString, String)
 #undef OP
 
 }}
