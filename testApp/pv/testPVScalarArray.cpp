@@ -102,6 +102,13 @@ static void testBasic()
     arr1->replace(data);
     testOk1(!data.unique());
 
+    {
+        typename PVT::const_svector avoid;
+        arr1->PVScalarArray::getAs<(ScalarType)ScalarTypeID<typename PVT::value_type>::value>(avoid);
+        testOk1(avoid.data()==data.data());
+        testOk1(avoid.data()==arr1->view().data());
+    }
+
     testOk1(arr1->getLength()==data.size());
 
     testOk1(*arr1!=*arr2);
@@ -121,15 +128,18 @@ static void testBasic()
     testOk1(arr2->getLength()==0);
     testOk1(data.size()==arr1->getLength());
 
-    PVIntArray::svector idata;
+    PVIntArray::const_svector idata;
     arr1->PVScalarArray::getAs<pvInt>(idata);
 
-    testOk1(idata[1]==10);
+    testOk1(idata.at(1)==10);
 
-    idata.make_unique();
-    idata[1] = 42;
+    PVIntArray::svector wdata(const_shared_vector_cast<int32>(idata));
+    idata.clear();
+    wdata.make_unique();
 
-    arr1->PVScalarArray::putFrom<pvInt>(idata);
+    wdata.at(1) = 42;
+
+    arr1->PVScalarArray::putFrom<pvInt>(wdata);
 
     testOk1(castUnsafe<PVIntArray::value_type>(arr1->view()[1])==42);
 }
@@ -152,21 +162,22 @@ static void testShare()
     testOk1(!idata.unique());
 
     idata.clear();
+    PVIntArray::const_svector cdata;
 
-    sarr->PVScalarArray::getAs<pvInt>(idata); // copy and convert
+    sarr->PVScalarArray::getAs<pvInt>(cdata); // copy and convert
 
-    testOk1(idata.unique());
+    testOk1(cdata.unique());
 
-    iarr->PVScalarArray::getAs<pvInt>(idata); // take a reference
+    iarr->PVScalarArray::getAs<pvInt>(cdata); // take a reference
 
-    testOk1(!idata.unique());
+    testOk1(!cdata.unique());
 }
 
 } // end namespace
 
 MAIN(testPVScalarArray)
 {
-    testPlan(146);
+    testPlan(156);
     testFactory();
     testBasic<PVByteArray>();
     testBasic<PVUByteArray>();
