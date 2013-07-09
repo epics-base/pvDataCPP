@@ -10,6 +10,7 @@
 
 #include "pv/sharedPtr.h"
 #include "pv/pvIntrospect.h"
+#include "pv/typeCast.h"
 #include "pv/templateMeta.h"
 
 namespace epics { namespace pvData {
@@ -540,27 +541,96 @@ public:
 };
 
 namespace detail {
-    template<typename TO, typename FROM> struct shared_vector_caster {};
+    template<typename TO, typename FROM, class Enable = void>
+    struct shared_vector_caster {};
 
-    template<typename FROM>
-    struct shared_vector_caster<void,FROM> {
-        static inline shared_vector<void> op(const shared_vector<FROM>& src) {
-            return shared_vector<void>(
-                    std::tr1::static_pointer_cast<void>(src.dataPtr()),
+    // Cast from non-void to 'void' or 'const void'
+    template<typename TO, typename FROM>
+    struct shared_vector_caster<TO,FROM,
+            typename meta::_and<meta::is_void<TO>, meta::is_not_void<FROM> >::type
+            >
+    {
+        static inline shared_vector<TO> op(const shared_vector<FROM>& src) {
+            return shared_vector<TO>(
+                    std::tr1::static_pointer_cast<TO>(src.dataPtr()),
                     src.dataOffset()*sizeof(FROM),
-                    src.dataCount()*sizeof(FROM));
+                    src.dataCount()*sizeof(FROM))
+                    .set_original_type((ScalarType)ScalarTypeID<FROM>::value);
         }
     };
 
-    template<typename TO>
-    struct shared_vector_caster<TO,void> {
-        static inline shared_vector<TO> op(const shared_vector<void>& src) {
+    // Cast from 'void' or 'const void' to non-void
+    template<typename TO, typename FROM>
+    struct shared_vector_caster<TO,FROM,
+            typename meta::_and<meta::is_not_void<TO>, meta::is_void<FROM> >::type
+            >
+    {
+        static inline shared_vector<TO> op(const shared_vector<FROM>& src) {
             return shared_vector<TO>(
                     std::tr1::static_pointer_cast<TO>(src.dataPtr()),
                     src.dataOffset()/sizeof(TO),
                     src.dataCount()/sizeof(TO));
         }
     };
+
+
+    // Default to type conversion using castUnsafe (C++ type casting) on each element
+    template<typename TO, typename FROM, class Enable = void>
+    struct shared_vector_converter {
+        static inline shared_vector<TO> op(const shared_vector<FROM>& src)
+        {
+            shared_vector<TO> ret(src.size());
+            std::transform(src.begin(), src.end(), ret.begin(), castUnsafe<TO,FROM>);
+            return ret;
+        }
+    };
+
+    // copy reference when types are the same (excluding const qualifiers)
+    template<typename TO, typename FROM>
+    struct shared_vector_converter<TO,FROM, typename meta::same_root<TO,FROM>::type > {
+        static FORCE_INLINE shared_vector<TO> op(const shared_vector<FROM>& src) {
+            return src;
+        }
+    };
+
+    // "convert" to 'void' or 'const void from non-void
+    // is an alias for shared_vector_cast<void>()
+    template<typename TO, typename FROM>
+    struct shared_vector_converter<TO,FROM,
+            typename meta::_and<meta::is_void<TO>, meta::is_not_void<FROM> >::type
+            >
+    {
+        static FORCE_INLINE shared_vector<TO> op(const shared_vector<FROM>& src) {
+            return shared_vector_caster<TO,FROM>::op(src);
+        }
+    };
+    
+    // convert from void uses original type or throws an exception.
+    template<typename TO, typename FROM>
+    struct shared_vector_converter<TO,FROM,
+            typename meta::_and<meta::is_not_void<TO>, meta::is_void<FROM> >::type
+            >
+    {
+        static shared_vector<TO> op(const shared_vector<FROM>& src) {
+            typedef typename meta::strip_const<TO>::type to_t;
+            ScalarType stype = src.original_type(),
+                       dtype = (ScalarType)ScalarTypeID<TO>::value;
+            if(stype==dtype) {
+                // no convert needed
+                return shared_vector_caster<TO,FROM>::op(src);
+            } else {
+                // alloc and convert
+                shared_vector<to_t> ret(src.size()/ScalarTypeFunc::elementSize(stype));
+                castUnsafeV(ret.size(),
+                            (ScalarType)ScalarTypeID<TO>::value,
+                            static_cast<void*>(ret.data()),
+                            stype,
+                            static_cast<const void*>(src.data()));
+                return ret;
+            }
+        }
+    };
+    
 }
 
 /** @brief Allow casting of shared_vector between types
@@ -576,6 +646,23 @@ shared_vector<TO>
 static_shared_vector_cast(const shared_vector<FROM>& src)
 {
     return detail::shared_vector_caster<TO,FROM>::op(src);
+}
+
+/** @brief Allow converting of shared_vector between types
+ *
+ * Conversion utilizes castUnsafe<TO,FROM>().
+ *
+ * Converting to/from void is supported.  Convert to void
+ * is an alias for static_shared_vector_cast<void>().
+ * Convert from void utilizes shared_vector<void>::original_type()
+ * and throws std::runtime_error if this is not valid.
+ */
+template<typename TO, typename FROM>
+static inline
+shared_vector<TO>
+shared_vector_convert(const shared_vector<FROM>& src)
+{
+    return detail::shared_vector_converter<TO,FROM>::op(src);
 }
 
 //! Allows casting from const TYPE -> TYPE.
