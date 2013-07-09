@@ -133,9 +133,7 @@ static void testBasic()
 
     testOk1(idata.at(1)==10);
 
-    PVIntArray::svector wdata(const_shared_vector_cast<int32>(idata));
-    idata.clear();
-    wdata.make_unique();
+    PVIntArray::svector wdata(thaw(idata));
 
     wdata.at(1) = 42;
 

@@ -670,6 +670,42 @@ const_shared_vector_cast(const shared_vector<const TYPE>& src)
             src.dataCount());
 }
 
+/** @brief transform a shared_vector<T> to shared_vector<const T>
+ *
+ * Transform a reference to mutable data into a reference to read-only data.
+ * Throws an exception unless the reference to mutable data is unique.
+ * On success the reference to mutable data is cleared.
+ */
+template<typename SRC>
+static FORCE_INLINE
+shared_vector<typename meta::decorate_const<typename SRC::value_type>::type>
+freeze(SRC& src)
+{
+    if(!src.unique())
+        throw std::runtime_error("Can't freeze non-unique vector");
+    typedef typename meta::decorate_const<typename SRC::value_type>::type const_value;
+    shared_vector<const_value> ret(src);
+    src.clear();
+    return ret;
+}
+
+/** @brief transform a shared_vector<const T> to shared_vector<T>
+ *
+ * Transform a reference to read-only data into a unique reference to mutable data.
+ *
+ * The reference to read-only data is cleared.
+ */
+template<typename SRC>
+static FORCE_INLINE
+shared_vector<typename meta::strip_const<typename SRC::value_type>::type>
+thaw(SRC& src)
+{
+    typedef typename meta::strip_const<typename SRC::value_type>::type value;
+    shared_vector<value> ret(const_shared_vector_cast<value>(src));
+    src.clear();
+    ret.make_unique();
+    return ret;
+}
 
 
 namespace ScalarTypeFunc {
