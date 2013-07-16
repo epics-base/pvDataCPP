@@ -476,9 +476,73 @@ static void testWeak()
     testOk1(!data.unique());
 }
 
+static void testICE()
+{
+    testDiag("Test freeze and thaw");
+
+    epics::pvData::shared_vector<int> A(6, 42), C;
+    epics::pvData::shared_vector<const int> B, D;
+
+    int *check = A.data();
+
+    // check freeze w/ unique reference
+
+    // clears A and moves reference to B
+    // no copy
+    B = epics::pvData::freeze(A);
+
+    testOk1(A.unique());
+    testOk1(B.unique());
+    testOk1(A.size()==0);
+    testOk1(B.size()==6);
+    testOk1(A.data()!=check);
+    testOk1(B.data()==check);
+    
+    D = B; // create second const reference
+
+    // clears D, but reference to B refrence
+    // to B remains, so a copy is made
+    C = epics::pvData::thaw(D);
+
+    testOk1(B.unique());
+    testOk1(C.unique());
+    testOk1(B.size()==6);
+    testOk1(C.size()==6);
+    testOk1(B.data()==check);
+    testOk1(C.data()!=NULL);
+    testOk1(C.at(0)==42);
+
+    C.clear();
+
+    // clears B and moves reference to A
+    // no copy
+    A = epics::pvData::thaw(B);
+
+    testOk1(A.unique());
+    testOk1(B.unique());
+    testOk1(A.size()==6);
+    testOk1(B.size()==0);
+    testOk1(A.data()==check);
+    testOk1(B.data()!=check);
+
+    C = A; // create second non-const reference
+
+    testOk1(!A.unique());
+
+    try {
+        // would clear A, but remaining reference C
+        // fails operation.  A not cleared
+        // and exception thrown
+        B = epics::pvData::freeze(A);
+        testFail("Froze non-unique vector!");
+    } catch(std::runtime_error& e) {
+        testPass("freeze of non-unique throws runtime_error as expected");
+    }
+}
+
 MAIN(testSharedVector)
 {
-    testPlan(132);
+    testPlan(153);
     testDiag("Tests for shared_vector");
 
     testDiag("sizeof(shared_vector<int>)=%lu",
@@ -496,5 +560,6 @@ MAIN(testSharedVector)
     testNonPOD();
     testVectorConvert();
     testWeak();
+    testICE();
     return testDone();
 }
