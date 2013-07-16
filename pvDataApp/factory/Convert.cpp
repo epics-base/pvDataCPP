@@ -114,13 +114,20 @@ size_t Convert::fromStringArray(PVScalarArrayPtr const &pv,
                                 StringArray const & from,
                                 size_t fromOffset)
 {
-    assert(offset==0);
     size_t alen = pv->getLength();
-    if(fromOffset>alen) return 0;
-    alen -= fromOffset;
-    if(length>alen) length=alen;
-    pv->copyIn<pvString>(&from[fromOffset], length);
-    return length;
+
+    if(offset==0 && length>=alen) {
+        // replace all existing elements
+        assert(from.size()>=fromOffset+length);
+        if(length>alen)
+            pv->setLength(length);
+        pv->copyIn<pvString>(&from[fromOffset], length);
+        return length;
+
+    } else {
+        // partial update.
+        throw std::runtime_error("fromStringArray: partial update not implemented");
+    }
 }
 
 size_t Convert::toStringArray(PVScalarArrayPtr const & pv,
