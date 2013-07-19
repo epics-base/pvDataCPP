@@ -119,9 +119,13 @@ size_t Convert::fromStringArray(PVScalarArrayPtr const &pv,
     if(offset==0 && length>=alen) {
         // replace all existing elements
         assert(from.size()>=fromOffset+length);
-        if(length>alen)
-            pv->setLength(length);
-        pv->copyIn<pvString>(&from[fromOffset], length);
+
+        PVStringArray::svector data(length);
+        std::copy(from.begin()+fromOffset,
+                  from.begin()+fromOffset+length,
+                  data.begin());
+
+        pv->putFrom<pvString>(data);
         return length;
 
     } else {
@@ -134,12 +138,13 @@ size_t Convert::toStringArray(PVScalarArrayPtr const & pv,
                               size_t offset, size_t length,
                               StringArray  &to, size_t toOffset)
 {
-    size_t alen = pv->getLength();
-    if(offset>alen) return 0;
-    alen -= offset;
-    if(length>alen) length=alen;
-    pv->copyOut<pvString>(&to[toOffset], length);
-    return length;
+    PVStringArray::const_svector data;
+    pv->getAs<pvString>(data);
+    data.slice(offset, length);
+    if(toOffset+data.size() > to.size())
+        to.resize(toOffset+data.size());
+    std::copy(data.begin()+toOffset, data.end(), to.begin());
+    return data.size();
 }
 
 bool Convert::isCopyCompatible(FieldConstPtr const &from, FieldConstPtr const &to)
