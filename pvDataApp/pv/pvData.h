@@ -718,19 +718,6 @@ public:
     /**
      * Assign the given value after conversion.
      *
-     * A copy and element-wise conversion is are always performed.
-     */
-    template<ScalarType ID>
-    inline size_t copyOut(typename ScalarTypeTraits<ID>::type* inp, size_t len) const
-    {
-        return copyOut(ID, (void*)inp, len);
-    }
-    virtual size_t copyOut(ScalarType, void*, size_t) const = 0;
-
-
-    /**
-     * Assign the given value after conversion.
-     *
      * A copy and element-wise conversion is performed unless
      * the element type of the PVScalarArray matches the
      * type of the provided data.
@@ -745,20 +732,6 @@ public:
         shared_vector<const void> temp(static_shared_vector_cast<const void>(inp));
         _putFromVoid(temp);
     }
-
-    /**
-     * Assign the given value after conversion.
-     *
-     * A copy and element-wise conversion is are always performed.
-     *
-     * Calls postPut()
-     */
-    template<ScalarType ID>
-    inline void copyIn(const typename ScalarTypeTraits<ID>::type* inp, size_t len)
-    {
-        copyIn(ID, (const void*)inp, len);
-    }
-    virtual void copyIn(ScalarType, const void*, size_t) = 0;
 
     /**
      * Assign the given PVScalarArray's value.
@@ -1063,7 +1036,7 @@ namespace detail {
          *  after the last swap() operation.
          *
          *  Before you call this directly, consider using
-         *  the take(), reuse(), or replace() methods.
+         *  the reuse(), or replace() methods.
          */
         virtual void swap(svector& other) = 0;
 
@@ -1091,17 +1064,14 @@ namespace detail {
             return newref;
         }
 
-        //! Remove and return the current array data
-        //! Does @b not (and should not) call postPut()
-        inline svector take()
-        {
-            svector result;
-            this->swap(result);
-            return result;
-        }
-
-        //! take() with an implied make_unique()
-        //! Does @b not (and should not) call postPut()
+        /** Remove and return the current array data
+         * or an unique copy if shared.
+         *
+         * Does @b not (and should not) call postPut()
+         *
+         * The returned shared_vector<T> will
+         * have unique()==true.
+         */
         inline svector reuse()
         {
             svector result;
@@ -1249,31 +1219,6 @@ protected:
         replace(shared_vector_convert<const T>(in));
     }
 
-public:
-
-    virtual size_t copyOut(ScalarType id, void* ptr, size_t olen) const
-    {
-        const svector& data(this->viewUnsafe());
-        size_t len = std::min(olen, data.size());
-        
-        castUnsafeV(len, id, ptr, typeCode, (const void*)data.data());
-        return len;
-    }
-
-    virtual void copyIn(ScalarType id, const void* ptr, size_t len)
-    {
-        svector data(this->take());
-        // Will have to re-alloc anyway? If so avoid copying
-        // data which will only be over-written
-        if(data.capacity()<len)
-            data.clear();
-        data.resize(len);
-        castUnsafeV(len, typeCode, (void*)data.data(), id, ptr);
-        this->swap(data);
-        this->postPut();
-    }
-
-protected:
     PVValueArray(ScalarArrayConstPtr const & scalar)
     : base_t(scalar) {}
     friend class PVDataCreate;
