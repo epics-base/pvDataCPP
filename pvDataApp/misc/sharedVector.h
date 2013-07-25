@@ -15,27 +15,16 @@
 
 namespace epics { namespace pvData {
 
-template<typename E, class Enable> class shared_vector;
+template<typename E, class Enable = void> class shared_vector;
+
+template<typename TO, typename FROM>
+static FORCE_INLINE
+shared_vector<TO>
+const_shared_vector_cast(shared_vector<FROM>& src);
 
 namespace detail {
     template<typename E>
     struct default_array_deleter {void operator()(E a){delete[] a;}};
-
-    // Implicit casts allowed during copy construction of shared_vector
-    template<typename FROM, typename TO>
-    struct vector_implicit_cast {
-        // There is intentionally no implmentation here to cause
-        // compile errors for illegal casts.
-        //static std::tr1::shared_ptr<TO> cast(const std::tr1::shared_ptr<FROM>);
-    };
-    // non-const -> const
-    template<typename E>
-    struct vector_implicit_cast<E,const E> {
-        static std::tr1::shared_ptr<const E> cast(const std::tr1::shared_ptr<E> input)
-        {
-            return std::tr1::shared_ptr<const E>(input);
-        }
-    };
 
     // How values should be passed as arguments to shared_vector methods
     // really should use boost::call_traits
@@ -43,6 +32,10 @@ namespace detail {
     template<typename T> struct call_with<std::tr1::shared_ptr<T> >
     { typedef const std::tr1::shared_ptr<T>& type; };
     template<> struct call_with<std::string> { typedef const std::string& type; };
+
+    struct _shared_vector_freeze_tag {};
+    struct _shared_vector_thaw_tag {};
+    struct _shared_vector_cast_tag {};
 
     /* All the parts of shared_vector which
      * don't need special handling for E=void
@@ -100,30 +93,39 @@ namespace detail {
             ,m_count(O.m_count), m_total(O.m_total)
         {}
 
-        template<typename E1>
-        shared_vector_base(const shared_vector_base<E1>& o)
-            : m_data(vector_implicit_cast<E1,E>::cast(o.m_data))
-            , m_offset(o.m_offset), m_count(o.m_count), m_total(o.m_total)
-        {_null_input();}
+    protected:
+        typedef typename meta::strip_const<E>::type _E_non_const;
+    public:
+        shared_vector_base(shared_vector_base<_E_non_const>& O,
+                           _shared_vector_freeze_tag)
+            :m_data()
+            ,m_offset(O.m_offset)
+            ,m_count(O.m_count)
+            ,m_total(O.m_total)
+        {
+            if(!O.unique())
+                throw std::runtime_error("Can't freeze non-unique vector");
+            m_data = O.m_data;
+            O.clear();
+        }
+
+        shared_vector_base(shared_vector<const E>& O,
+                           _shared_vector_thaw_tag)
+            :m_data()
+            ,m_offset(O.m_offset)
+            ,m_count(O.m_count)
+            ,m_total(O.m_total)
+        {
+            O.make_unique();
+            m_data = std::tr1::const_pointer_cast<E>(O.m_data);
+            O.clear();
+        }
 
         //! @brief Copy an existing vector
         shared_vector_base& operator=(const shared_vector_base& o)
         {
             if(&o!=this) {
                 m_data=o.m_data;
-                m_offset=o.m_offset;
-                m_count=o.m_count;
-                m_total=o.m_total;
-            }
-            return *this;
-        }
-
-        //! @brief Copy an existing vector of a related type
-        template<typename E1>
-        shared_vector_base& operator=(const shared_vector_base<E1>& o)
-        {
-            if(&o!=this) {
-                m_data=vector_implicit_cast<E1,E>::cast(o.m_data);
                 m_offset=o.m_offset;
                 m_count=o.m_count;
                 m_total=o.m_total;
@@ -200,9 +202,6 @@ namespace detail {
         size_t dataCount() const { return m_count; }
         size_t dataTotal() const { return m_total; }
     };
-
-
-    struct _shared_vector_cast_tag {};
 }
 
 /** @brief A holder for a contigious piece of memory.
@@ -223,11 +222,12 @@ namespace detail {
  * by make_unique() that unique()==true implies exclusive
  * ownership.
  */
-template<typename E, class Enable = void>
+template<typename E, class Enable>
 class shared_vector : public detail::shared_vector_base<E>
 {
     typedef detail::shared_vector_base<E> base_t;
     typedef typename detail::call_with<E>::type param_type;
+    typedef typename meta::strip_const<E>::type _E_non_const;
 public:
     typedef E value_type;
     typedef E& reference;
@@ -253,14 +253,14 @@ public:
 
     //! @brief Allocate (with new[]) a new vector of size c
     explicit shared_vector(size_t c)
-        :base_t(new E[c], 0, c)
+        :base_t(new _E_non_const[c], 0, c)
     {}
 
     //! @brief Allocate (with new[]) a new vector of size c and fill with value e
     shared_vector(size_t c, param_type e)
-        :base_t(new E[c], 0, c)
+        :base_t(new _E_non_const[c], 0, c)
     {
-        std::fill_n(this->m_data.get(), this->m_count, e);
+        std::fill_n((_E_non_const*)this->m_data.get(), this->m_count, e);
     }
 
     /** @brief Build vector from a raw pointer
@@ -296,10 +296,6 @@ public:
     //! @brief Copy an existing vector of same type
     shared_vector(const shared_vector& o) :base_t(o) {}
 
-    //! @brief Copy an existing vector of a related type
-    template<typename E1>
-    shared_vector(const shared_vector<E1>& o) :base_t(o) {}
-
     //! @internal
     //! Internal for static_shared_vector_cast
     template<typename FROM>
@@ -308,6 +304,17 @@ public:
         :base_t(std::tr1::static_pointer_cast<E>(src.dataPtr()),
                 src.dataOffset()/sizeof(E),
                 src.dataCount()/sizeof(E))
+    {}
+
+
+    shared_vector(shared_vector<typename base_t::_E_non_const>& O,
+                  detail::_shared_vector_freeze_tag t)
+        :base_t(O,t)
+    {}
+
+    shared_vector(shared_vector<const E>& O,
+                  detail::_shared_vector_thaw_tag t)
+        :base_t(O,t)
     {}
 
     size_t max_size() const{return ((size_t)-1)/sizeof(E);}
@@ -325,7 +332,7 @@ public:
     void reserve(size_t i) {
         if(this->unique() && i<=this->m_total)
             return;
-        pointer temp=new E[i];
+        _E_non_const* temp=new _E_non_const[i];
         try{
             std::copy(begin(), end(), temp);
             this->m_data.reset(temp, detail::default_array_deleter<E*>());
@@ -360,7 +367,7 @@ public:
         }
         // must re-allocate :(
         size_t new_total = std::max(this->m_total, i);
-        pointer temp=new E[new_total];
+        _E_non_const* temp=new _E_non_const[new_total];
         try{
             // Copy as much as possible from old,
             // remaining elements are uninitialized.
@@ -409,11 +416,17 @@ public:
     void make_unique() {
         if(this->unique())
             return;
-        shared_pointer_type d(new E[this->m_total], detail::default_array_deleter<E*>());
-        std::copy(this->m_data.get()+this->m_offset,
-                  this->m_data.get()+this->m_offset+this->m_count,
-                  d.get());
-        this->m_data.swap(d);
+        typedef typename meta::strip_const<E>::type nE;
+        nE *d = new nE[this->m_total];
+        try {
+            std::copy(this->m_data.get()+this->m_offset,
+                      this->m_data.get()+this->m_offset+this->m_count,
+                      d);
+        }catch(...){
+            delete[] d;
+            throw;
+        }
+        this->m_data.reset(d, detail::default_array_deleter<E*>());
         this->m_offset=0;
     }
 
@@ -517,10 +530,6 @@ public:
     shared_vector(const std::tr1::shared_ptr<E1>& d, size_t o, size_t c)
         :base_t(d,o,c), m_vtype((ScalarType)-1) {}
 
-    template<typename E1>
-    shared_vector(const shared_vector<E1>& o)
-        :base_t(o), m_vtype(o.m_vtype) {}
-
     shared_vector(const shared_vector& o)
         :base_t(o), m_vtype(o.m_vtype) {}
 
@@ -533,6 +542,16 @@ public:
                 src.dataOffset()*sizeof(FROM),
                 src.dataCount()*sizeof(FROM))
         ,m_vtype((ScalarType)ScalarTypeID<FROM>::value)
+    {}
+
+    shared_vector(shared_vector<void>& O,
+                  detail::_shared_vector_freeze_tag t)
+        :base_t(O,t)
+    {}
+
+    shared_vector(shared_vector<const void>& O,
+                  detail::_shared_vector_thaw_tag t)
+        :base_t(O,t)
     {}
 
     shared_vector& operator=(const shared_vector& o)
@@ -614,15 +633,14 @@ namespace detail {
                 // alloc and convert
                 shared_vector<to_t> ret(src.size()/ScalarTypeFunc::elementSize(stype));
                 castUnsafeV(ret.size(),
-                            (ScalarType)ScalarTypeID<TO>::value,
+                            dtype,
                             static_cast<void*>(ret.data()),
                             stype,
                             static_cast<const void*>(src.data()));
-                return ret;
+                return const_shared_vector_cast<TO>(ret);
             }
         }
     };
-    
 }
 
 /** @brief Allow casting of shared_vector between types
@@ -658,18 +676,6 @@ shared_vector_convert(const shared_vector<FROM>& src)
     return detail::shared_vector_converter<TO,FROM>::op(src);
 }
 
-//! Allows casting from const TYPE -> TYPE.
-template<typename TYPE>
-static FORCE_INLINE
-shared_vector<TYPE>
-const_shared_vector_cast(const shared_vector<const TYPE>& src)
-{
-    return shared_vector<TYPE>(
-            std::tr1::const_pointer_cast<TYPE>(src.dataPtr()),
-            src.dataOffset(),
-            src.dataCount());
-}
-
 /** @brief transform a shared_vector<T> to shared_vector<const T>
  *
  * Transform a reference to mutable data into a reference to read-only data.
@@ -681,12 +687,8 @@ static FORCE_INLINE
 shared_vector<typename meta::decorate_const<typename SRC::value_type>::type>
 freeze(SRC& src)
 {
-    if(!src.unique())
-        throw std::runtime_error("Can't freeze non-unique vector");
     typedef typename meta::decorate_const<typename SRC::value_type>::type const_value;
-    shared_vector<const_value> ret(src);
-    src.clear();
-    return ret;
+    return shared_vector<const_value>(src, detail::_shared_vector_freeze_tag());
 }
 
 /** @brief transform a shared_vector<const T> to shared_vector<T>
@@ -701,10 +703,47 @@ shared_vector<typename meta::strip_const<typename SRC::value_type>::type>
 thaw(SRC& src)
 {
     typedef typename meta::strip_const<typename SRC::value_type>::type value;
-    shared_vector<value> ret(const_shared_vector_cast<value>(src));
-    src.clear();
-    ret.make_unique();
-    return ret;
+    return shared_vector<value>(src, detail::_shared_vector_thaw_tag());
+}
+
+namespace detail {
+    template<typename TO, typename FROM, class Enable = void>
+    struct const_caster {};
+
+    template<typename TYPE>
+    struct const_caster<TYPE,const TYPE> {
+        static FORCE_INLINE shared_vector<TYPE> op(shared_vector<const TYPE>& src)
+        {
+            return thaw(src);
+        }
+    };
+
+    template<typename TYPE>
+    struct const_caster<const TYPE,TYPE> {
+        static FORCE_INLINE shared_vector<const TYPE> op(shared_vector<TYPE>& src)
+        {
+            return freeze(src);
+        }
+    };
+
+    template<typename TYPE>
+    struct const_caster<TYPE,TYPE> {
+        static FORCE_INLINE shared_vector<TYPE> op(shared_vector<TYPE>& src)
+        {
+            shared_vector<TYPE> ret(src);
+            src.clear();
+            return ret;
+        }
+    };
+}
+
+//! Allows casting from const TYPE -> TYPE.
+template<typename TO, typename FROM>
+static FORCE_INLINE
+shared_vector<TO>
+const_shared_vector_cast(shared_vector<FROM>& src)
+{
+    return detail::const_caster<TO,FROM>::op(src);
 }
 
 
