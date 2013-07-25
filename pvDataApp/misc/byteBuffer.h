@@ -379,7 +379,7 @@ public:
      * @param  count  The number of elements.
      */
     template<typename T>
-    inline void putArray(T* values, std::size_t count);
+    inline void putArray(const T* values, std::size_t count);
     /**
      * Get an array of type {@code T} from the byte buffer.
      * The position is adjusted.
@@ -842,7 +842,7 @@ private:
     }
 
     template<typename T>
-    inline void ByteBuffer::putArray(T* values, std::size_t count)
+    inline void ByteBuffer::putArray(const T* values, std::size_t count)
     {
         // this avoids int8 specialization, compiler will take care if optimization, -O2 or more
         if (sizeof(T) == 1)

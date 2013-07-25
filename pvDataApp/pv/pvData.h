@@ -1022,11 +1022,9 @@ namespace detail {
         virtual ~PVVectorStorage(){};
 
         // Primative array manipulations
-    protected:
-        //! unchecked reference to writable data
-        //! Please consider the view() method instead of viewUnsafe().
-        virtual const svector& viewUnsafe() const = 0;
-    public:
+
+        //! Fetch a read-only view of the current array data
+        virtual const_svector view() const = 0;
 
         /** Exchange our contents for the provided.
          *
@@ -1038,31 +1036,14 @@ namespace detail {
          *  Before you call this directly, consider using
          *  the reuse(), or replace() methods.
          */
-        virtual void swap(svector& other) = 0;
+        virtual void swap(const_svector& other) = 0;
 
         //! Discard current contents and replaced with the provided.
         //! Fails for Immutable arrays
         //! calls postPut()
-        virtual void replace(const const_svector& next)
-        {
-            svector temp(const_shared_vector_cast<T>(next));
-            this->swap(temp);
-            this->postPut();
-        }
-
-        // methods from PVArray
-
-        virtual size_t getLength() const {return viewUnsafe().size();}
-        virtual size_t getCapacity() const {return viewUnsafe().capacity();}
+        virtual void replace(const const_svector& next) = 0;
 
         // Derived operations
-
-        //! Fetch a read-only view of the current array data
-        inline const_svector view() const
-        {
-            const_svector newref(this->viewUnsafe());
-            return newref;
-        }
 
         /** Remove and return the current array data
          * or an unique copy if shared.
@@ -1074,10 +1055,9 @@ namespace detail {
          */
         inline svector reuse()
         {
-            svector result;
+            const_svector result;
             this->swap(result);
-            result.make_unique();
-            return result;
+            return thaw(result);
         }
 
         /**
@@ -1111,16 +1091,14 @@ namespace detail {
         {
             from += fromOffset;
 
-            svector temp;
-            this->swap(temp);
+            svector temp(this->reuse());
             if(temp.size() < length+offset)
                 temp.resize(length+offset);
             else
                 temp.make_unique();
 
             std::copy(from, from + length, temp.begin() + offset);
-            this->swap(temp);
-            this->postPut();
+            this->replace(freeze(temp));
             return length;
         }
 
@@ -1143,12 +1121,13 @@ namespace detail {
             vector& vref = *value.get();
             typename svector::shared_pointer_type p(&vref[0],
                                                     detail::shared_ptr_vector_deletor<T>(value));
-            svector temp(p, 0, std::min(length, vref.size()));
+            const_svector temp(p, 0, std::min(length, vref.size()));
             this->swap(temp);
         }
 
-        pointer get() const {
-            return this->viewUnsafe().data();
+        pointer get() const USAGE_DEPRECATED {
+            // evil unsafe cast!
+            return (pointer)this->view().data();
         }
 
         vector const & getVector() USAGE_ERROR("No longer implemented.  Replace with view()");
@@ -1255,6 +1234,10 @@ public:
      * Destructor
      */
     virtual ~PVValueArray() {}
+
+    virtual size_t getLength() const {return value.size();}
+    virtual size_t getCapacity() const {return value.capacity();}
+
     /**
      * Set the array capacity.
      * @param capacity The length.
@@ -1289,8 +1272,12 @@ public:
      */
     virtual void compress();
 
-    virtual const svector& viewUnsafe() const { return value; }
-    virtual void swap(svector &other);
+    virtual const_svector view() const { return value; }
+    virtual void swap(const_svector &other);
+    virtual void replace(const const_svector &other) {
+        value = other;
+        PVField::postPut();
+    }
 
     virtual void serialize(ByteBuffer *pbuffer,
         SerializableControl *pflusher) const;
@@ -1309,7 +1296,7 @@ protected:
     {}
 private:
     StructureArrayConstPtr structureArray;
-    svector value;
+    const_svector value;
     friend class PVDataCreate;
 };
 
