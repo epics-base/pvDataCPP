@@ -204,47 +204,34 @@ static void testConst()
 
     testOk1(wr==ror);
 
+    int *compare = writable.data();
+
+    testOk1(writable.unique());
+
     // can re-target container, but data is R/O
-    epics::pvData::shared_vector<const int> rodata(writable);
+    epics::pvData::shared_vector<const int> rodata(freeze(writable));
 
     epics::pvData::shared_vector<const int>::reference wcr = rodata[0];
     epics::pvData::shared_vector<const int>::const_reference rocr = rodata[0];
 
     testOk1(wcr==rocr);
 
-    rodata = writable;
-    testOk1(rodata.data()==writable.data());
+    testOk1(rodata.data()==compare);
+    writable = thaw(rodata);
 
-    // Data is R/W, but container can't be re-targeted
-    const epics::pvData::shared_vector<int> roref(writable);
+    testOk1(writable.data()==compare);
 
-    // Can't change anything.
-    const epics::pvData::shared_vector<const int> fixed(writable);
+    rodata = freeze(writable);
 
-    testOk1(rodata[1]==100);
+    testOk1(rodata.data()==compare);
 
-    // intentionally modify shared data!
-    // safe since this thread owns all references.
-    writable[1]=200;
+    epics::pvData::shared_vector<const int> rodata2(rodata);
 
-    testOk1(rodata[1]==200);
+    testOk1(rodata.data()==rodata2.data());
 
-    epics::pvData::shared_vector<int>::const_iterator a;
-    epics::pvData::shared_vector<const int>::iterator b;
-    epics::pvData::shared_vector<const int>::const_iterator c;
+    rodata2.make_unique();
 
-    a = writable.begin();
-    b = rodata.begin();
-    c = rodata.end();
-
-    testOk1(std::equal(b, c, a));
-
-    a = writable.cbegin();
-    c = rodata.cend();
-
-    epics::pvData::shared_vector<int>::const_reference x = rodata[1];
-
-    testOk1(x==200);
+    testOk1(rodata.data()!=rodata2.data());
 }
 
 static void testSlice()
@@ -359,10 +346,6 @@ static void testVoid()
     testDiag("Test vecter cast to/from void");
 
     epics::pvData::shared_vector<int> typed(4);
-    epics::pvData::shared_vector<void> untyped;
-    epics::pvData::shared_vector<const void> constuntyped;
-
-    untyped = epics::pvData::const_shared_vector_cast<void>(constuntyped);
 
     epics::pvData::shared_vector<void> untyped2(epics::pvData::static_shared_vector_cast<void>(typed));
 
@@ -542,7 +525,7 @@ static void testICE()
 
 MAIN(testSharedVector)
 {
-    testPlan(153);
+    testPlan(154);
     testDiag("Tests for shared_vector");
 
     testDiag("sizeof(shared_vector<int>)=%lu",
