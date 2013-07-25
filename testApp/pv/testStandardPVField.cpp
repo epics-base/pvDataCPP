@@ -76,7 +76,7 @@ int main(int, char **)
             pvDataCreate->createPVStructure(structure);
     }
     PVStructureArrayPtr pvStructureArray = pvStructure->getStructureArrayField("value");
-    pvStructureArray->replace(pvStructures);
+    pvStructureArray->replace(freeze(pvStructures));
     builder.clear();
     pvStructure->toString(&builder);
     print("structureArrayTest");

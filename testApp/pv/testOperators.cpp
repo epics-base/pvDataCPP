@@ -69,7 +69,7 @@ int main(int, char**)
     PVDoubleArray::svector values(3);
     values[0] = 1.1; values[1] = 2.2; values[2] = 3.3;
     PVDoubleArrayPtr darray = std::tr1::dynamic_pointer_cast<PVDoubleArray>(pvStructure->getScalarArrayField("value", pvDouble));
-    darray->replace(values);
+    darray->replace(freeze(values));
     std::cout << *darray << std::endl;
     std::cout << format::array_at(1) << *darray << std::endl;
 
@@ -83,7 +83,7 @@ int main(int, char**)
             pvDataCreate->createPVStructure(structure);
     }
     PVStructureArrayPtr pvStructureArray = pvStructure->getStructureArrayField("value");
-    pvStructureArray->replace(pvStructures);
+    pvStructureArray->replace(freeze(pvStructures));
     std::cout << *pvStructure << std::endl;
 
     return 0;

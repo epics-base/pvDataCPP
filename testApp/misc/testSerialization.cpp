@@ -259,9 +259,9 @@ void testArrayType(const typename PVT::value_type* rdata, size_t len)
 
     typename PVT::shared_pointer pv = std::tr1::static_pointer_cast<PVT>(getPVDataCreate()->createPVScalarArray(PVT::typeCode));
 
-    pv->replace(empty);
+    pv->replace(freeze(empty));
     serializationTest(pv);
-    pv->replace(data);
+    pv->replace(freeze(data));
     serializationTest(pv);
 }
 
@@ -394,7 +394,7 @@ void testStructureArray() {
     data[1] = getPVDataCreate()->createPVStructure(getStandardField()->alarm());
     data[4] = getPVDataCreate()->createPVStructure(getStandardField()->alarm());
 
-    pvArr->replace(data);
+    pvArr->replace(freeze(data));
 
     testDiag("Some NULLs");
     serializationTest(pvArr);

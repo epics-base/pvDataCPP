@@ -53,7 +53,7 @@ static void testFactory()
 template<typename PVT>
 bool hasUniqueVector(const typename PVT::shared_pointer& pv)
 {
-    typename PVT::svector data;
+    typename PVT::const_svector data;
     pv->swap(data);
     bool ret = data.unique();
     pv->swap(data);
@@ -98,22 +98,24 @@ static void testBasic()
     data.reserve(200);
     basicTestData<PVT>::fill(data);
 
-    testOk1(data.unique());
-    arr1->replace(data);
-    testOk1(!data.unique());
+    typename PVT::const_svector cdata(freeze(data));
+
+    testOk1(cdata.unique());
+    arr1->replace(cdata);
+    testOk1(!cdata.unique());
 
     {
         typename PVT::const_svector avoid;
         arr1->PVScalarArray::getAs<(ScalarType)ScalarTypeID<typename PVT::value_type>::value>(avoid);
-        testOk1(avoid.data()==data.data());
+        testOk1(avoid.data()==cdata.data());
         testOk1(avoid.data()==arr1->view().data());
     }
 
-    testOk1(arr1->getLength()==data.size());
+    testOk1(arr1->getLength()==cdata.size());
 
     testOk1(*arr1!=*arr2);
 
-    data.clear();
+    cdata.clear();
 
     testOk1(hasUniqueVector<PVT>(arr1));
 
@@ -122,11 +124,11 @@ static void testBasic()
     testOk1(*arr1==*arr2);
     testOk1(!hasUniqueVector<PVT>(arr1));
 
-    arr2->swap(data);
+    arr2->swap(cdata);
     arr2->postPut();
 
     testOk1(arr2->getLength()==0);
-    testOk1(data.size()==arr1->getLength());
+    testOk1(cdata.size()==arr1->getLength());
 
     PVIntArray::const_svector idata;
     arr1->PVScalarArray::getAs<pvInt>(idata);
@@ -137,7 +139,9 @@ static void testBasic()
 
     wdata.at(1) = 42;
 
-    arr1->PVScalarArray::putFrom<pvInt>(wdata);
+    idata = freeze(wdata);
+
+    arr1->PVScalarArray::putFrom<pvInt>(idata);
 
     testOk1(castUnsafe<PVIntArray::value_type>(arr1->view()[1])==42);
 }
@@ -149,7 +153,7 @@ static void testShare()
     PVIntArrayPtr iarr = static_pointer_cast<PVIntArray>(getPVDataCreate()->createPVScalarArray(pvInt));
     PVStringArrayPtr sarr = static_pointer_cast<PVStringArray>(getPVDataCreate()->createPVScalarArray(pvString));
 
-    PVIntArray::svector idata(4, 1);
+    PVIntArray::const_svector idata(4, 1);
 
     sarr->PVScalarArray::putFrom<pvInt>(idata); // copy and convert
 

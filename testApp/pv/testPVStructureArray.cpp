@@ -92,22 +92,24 @@ static void testCompress()
     contents[5] = pvDataCreate->createPVStructure(standardField->alarm());
     contents[8] = pvDataCreate->createPVStructure(standardField->alarm());
 
-    alarmarr->replace(contents);
+    PVStructureArray::const_svector scont(freeze(contents));
 
-    testOk1(!contents.unique());
+    alarmarr->replace(scont);
+
+    testOk1(!scont.unique());
     testOk1(alarmarr->getLength()==10);
 
     alarmarr->compress();
 
-    testOk1(contents.unique()); // a realloc happened
+    testOk1(scont.unique()); // a realloc happened
     testOk1(alarmarr->getLength()==4);
 
     PVStructureArray::svector compressed(alarmarr->reuse());
 
-    testOk1(contents[2]==compressed[0]);
-    testOk1(contents[4]==compressed[1]);
-    testOk1(contents[5]==compressed[2]);
-    testOk1(contents[8]==compressed[3]);
+    testOk1(scont[2]==compressed[0]);
+    testOk1(scont[4]==compressed[1]);
+    testOk1(scont[5]==compressed[2]);
+    testOk1(scont[8]==compressed[3]);
 }
 
 static void testRemove()
@@ -123,21 +125,23 @@ static void testRemove()
         fieldCreate->createStructureArray(standardField->alarm()));
     PVStructureArrayPtr alarmarr(pvDataCreate->createPVStructureArray(alarmtype));
 
-    alarmarr->replace(contents);
+    PVStructureArray::const_svector scont(freeze(contents));
+
+    alarmarr->replace(scont);
 
     alarmarr->remove(0, 10); // all
 
     testOk1(alarmarr->getLength()==0);
 
-    alarmarr->replace(contents);
+    alarmarr->replace(scont);
 
     alarmarr->remove(1, 1);
 
     PVStructureArray::const_svector check(alarmarr->view());
 
-    testOk1(contents[0]==check[0]);
-    testOk1(contents[2]==check[1]);
-    testOk1(contents[3]==check[2]);
+    testOk1(scont[0]==check[0]);
+    testOk1(scont[2]==check[1]);
+    testOk1(scont[3]==check[2]);
 }
 
 MAIN(testPVStructureArray)
