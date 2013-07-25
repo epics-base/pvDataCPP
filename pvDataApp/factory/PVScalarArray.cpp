@@ -28,16 +28,4 @@ namespace epics { namespace pvData {
        return static_pointer_cast<const ScalarArray>(PVField::getField());
     }
 
-    template<>
-    std::ostream& PVValueArray<int8>::dumpValue(std::ostream& o, size_t index) const
-    {
-    	return o << static_cast<int>(*(get() + index));
-    }
-
-    template<>
-    std::ostream& PVValueArray<uint8>::dumpValue(std::ostream& o, size_t index) const
-    {
-    	return o << static_cast<unsigned int>(*(get() + index));
-    }
-
 }}

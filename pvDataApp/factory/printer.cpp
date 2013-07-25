@@ -118,13 +118,16 @@ void PrinterBase::impl_print(const PVField& pv)
                 }
             case structureArray: {
                     const PVStructureArray &fld = *static_cast<const PVStructureArray*>(next);
-                    const PVStructureArray::pointer vals = fld.get();
+                    PVStructureArray::const_svector vals(fld.view());
 
                     inprog.push_back(next);
 
                     beginStructureArray(fld);
-                    for(size_t i=0, nfld=fld.getLength(); i<nfld; i++)
-                        todo.push_back(vals[i].get());
+                    for(PVStructureArray::const_svector::const_iterator it=vals.begin();
+                        it!=vals.end(); ++it)
+                    {
+                        todo.push_back(it->get());
+                    }
 
                     todo.push_back(marker);
                     break;

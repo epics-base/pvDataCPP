@@ -109,7 +109,8 @@ bool compareScalar(const PVScalarValue<T>* left, const PVScalarValue<T>* right)
 template<typename T>
 bool compareArray(const PVValueArray<T>* left, const PVValueArray<T>* right)
 {
-    return std::equal(left->get(), left->get()+left->getLength(), right->get());
+    typename PVValueArray<T>::const_svector lhs(left->view()), rhs(right->view());
+    return std::equal(lhs.begin(), lhs.end(), rhs.begin());
 }
 
 // partially typed comparisons

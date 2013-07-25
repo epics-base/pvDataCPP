@@ -1167,23 +1167,22 @@ public:
 
     std::ostream& dumpValue(std::ostream& o) const
     {
+        const_svector v(this->view());
+        typename const_svector::const_iterator it(v.begin()),
+                                      end(v.end());
     	o << '[';
-    	std::size_t len = this->getLength();
-    	bool first = true;
-    	for (std::size_t i = 0; i < len; i++)
-    	{
-    		if (first)
-    			first = false;
-    		else
-    			o << ',';
-    		dumpValue(o, i);
-    	}
+        if(it!=end) {
+            o << print_cast(*it++);
+            for(; it!=end; ++it)
+                o << ',' << print_cast(*it);
+
+        }
     	return o << ']';
     }
 
     std::ostream& dumpValue(std::ostream& o, size_t index) const
     {
-    	return o << *(this->get() + index);
+        return o << print_cast(this->view().at(index));
     }
 
 protected:
