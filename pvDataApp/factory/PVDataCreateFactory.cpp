@@ -202,11 +202,15 @@ public:
     DefaultPVArray(ScalarArrayConstPtr const & scalarArray);
     virtual ~DefaultPVArray();
 
+    virtual size_t getLength() const {return value.size();}
+    virtual size_t getCapacity() const {return value.capacity();}
+
     virtual void setCapacity(size_t capacity);
     virtual void setLength(size_t length);
 
-    virtual const svector& viewUnsafe() const;
-    virtual void swap(svector &other);
+    virtual const_svector view() const {return value;}
+    virtual void swap(const_svector &other);
+    virtual void replace(const const_svector& next);
 
     // from Serializable
     virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) const;
@@ -214,7 +218,7 @@ public:
     virtual void serialize(ByteBuffer *pbuffer,
          SerializableControl *pflusher, size_t offset, size_t count) const;
 private:
-    svector value;
+    const_svector value;
 };
 
 template<typename T>
@@ -227,7 +231,6 @@ DefaultPVArray<T>::DefaultPVArray(ScalarArrayConstPtr const & scalarArray)
 template<typename T>
 DefaultPVArray<T>::~DefaultPVArray()
 { }
-
 template<typename T>
 void DefaultPVArray<T>::setCapacity(size_t capacity)
 {
@@ -249,15 +252,15 @@ void DefaultPVArray<T>::setLength(size_t length)
         value.resize(length);
 }
 
-
 template<typename T>
-const typename DefaultPVArray<T>::svector& DefaultPVArray<T>::viewUnsafe() const
+void DefaultPVArray<T>::replace(const const_svector& next)
 {
-    return value;
+    value = next;
+    this->postPut();
 }
 
 template<typename T>
-void DefaultPVArray<T>::swap(svector &other)
+void DefaultPVArray<T>::swap(const_svector &other)
 {
     if(this->isImmutable())
         THROW_EXCEPTION2(std::logic_error,"Immutable");
@@ -277,9 +280,10 @@ void DefaultPVArray<T>::deserialize(ByteBuffer *pbuffer,
         DeserializableControl *pcontrol) {
     size_t size = SerializeHelper::readSize(pbuffer, pcontrol);
 
-    value.resize(size); // TODO: avoid copy of stuff we will then overwrite
+    svector nextvalue(thaw(value));
+    nextvalue.resize(size); // TODO: avoid copy of stuff we will then overwrite
 
-    T* cur = value.data();
+    T* cur = nextvalue.data();
 
     // try to avoid deserializing from the buffer
     // this is only possible if we do not need to do endian-swapping
@@ -318,6 +322,7 @@ void DefaultPVArray<T>::deserialize(ByteBuffer *pbuffer,
         cur += n2read;
         remaining -= n2read;
     }
+    value = freeze(nextvalue);
     // inform about the change?
     PVField::postPut();
 }
@@ -327,13 +332,13 @@ void DefaultPVArray<T>::serialize(ByteBuffer *pbuffer,
         SerializableControl *pflusher, size_t offset, size_t count) const
 {
     //TODO: avoid incrementing the ref counter...
-    svector temp(value);
+    const_svector temp(value);
     temp.slice(offset, count);
     count = temp.size();
 
     SerializeHelper::writeSize(temp.size(), pbuffer, pflusher);
 
-    T* cur = temp.data();
+    const T* cur = temp.data();
 
     // try to avoid copying into the buffer
     // this is only possible if we do not need to do endian-swapping
@@ -369,18 +374,21 @@ void DefaultPVArray<String>::deserialize(ByteBuffer *pbuffer,
         DeserializableControl *pcontrol) {
     size_t size = SerializeHelper::readSize(pbuffer, pcontrol);
 
+    svector nextvalue(thaw(value));
+
     // Decide if we must re-allocate
-    if(size > value.size() || !value.unique())
-        value.resize(size);
-    else if(size < value.size())
-        value.slice(0, size);
+    if(size > nextvalue.size() || !nextvalue.unique())
+        nextvalue.resize(size);
+    else if(size < nextvalue.size())
+        nextvalue.slice(0, size);
 
 
-    String * pvalue = value.data();
+    String * pvalue = nextvalue.data();
     for(size_t i = 0; i<size; i++) {
         pvalue[i] = SerializeHelper::deserializeString(pbuffer,
                                                        pcontrol);
     }
+    value = freeze(nextvalue);
     // inform about the change?
     postPut();
 }
@@ -389,12 +397,12 @@ template<>
 void DefaultPVArray<String>::serialize(ByteBuffer *pbuffer,
         SerializableControl *pflusher, size_t offset, size_t count) const {
 
-    svector temp(value);
+    const_svector temp(value);
     temp.slice(offset, count);
 
     SerializeHelper::writeSize(temp.size(), pbuffer, pflusher);
 
-    String * pvalue = temp.data();
+    const String * pvalue = temp.data();
     for(size_t i = 0; i<temp.size(); i++) {
         SerializeHelper::serializeString(pvalue[i], pbuffer, pflusher);
     }

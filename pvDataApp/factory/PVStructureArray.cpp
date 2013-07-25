@@ -23,8 +23,7 @@ namespace epics { namespace pvData {
 
 size_t PVStructureArray::append(size_t number)
 {
-    svector data;
-    swap(data);
+    svector data(reuse());
     data.resize(data.size()+number);
 
     StructureConstPtr structure = structureArray->getStructure();
@@ -34,7 +33,8 @@ size_t PVStructureArray::append(size_t number)
 
     size_t newLength = data.size();
 
-    swap(data);
+    const_svector cdata(freeze(data));
+    swap(cdata);
 
     return newLength;
 }
@@ -55,7 +55,8 @@ bool PVStructureArray::remove(size_t offset,size_t number)
     }
 
     vec.resize(length - number);
-    swap(vec);
+    const_svector cdata(freeze(vec));
+    swap(cdata);
 
     return true;
 }
@@ -89,15 +90,20 @@ void PVStructureArray::compress() {
     }
 
     vec.resize(newLength);
-    swap(vec);
+    const_svector cdata(freeze(vec));
+    swap(cdata);
 }
 
 void PVStructureArray::setCapacity(size_t capacity)
 {
     if(this->isCapacityMutable()) {
-        svector value;
+        const_svector value;
         swap(value);
-        value.reserve(capacity);
+        if(value.capacity()<capacity) {
+            svector mvalue(thaw(value));
+            mvalue.reserve(capacity);
+            value = freeze(mvalue);
+        }
         swap(value);
     }
 }
@@ -106,19 +112,21 @@ void PVStructureArray::setLength(size_t length)
 {
     if(this->isImmutable())
         THROW_EXCEPTION2(std::logic_error,"Immutable");
-    svector value;
+    const_svector value;
     swap(value);
     if(length == value.size()) {
         // nothing
     } else if(length < value.size()) {
         value.slice(0, length);
     } else {
-        value.resize(length);
+        svector mvalue(thaw(value));
+        mvalue.resize(length);
+        value = freeze(mvalue);
     }
     swap(value);
 }
 
-void PVStructureArray::swap(svector &other)
+void PVStructureArray::swap(const_svector &other)
 {
     if(this->isImmutable())
         THROW_EXCEPTION2(std::logic_error,"Immutable");
@@ -133,8 +141,7 @@ void PVStructureArray::serialize(ByteBuffer *pbuffer,
 
 void PVStructureArray::deserialize(ByteBuffer *pbuffer,
         DeserializableControl *pcontrol) {
-    svector data;
-    swap(data);
+    svector data(reuse());
 
     size_t size = SerializeHelper::readSize(pbuffer, pcontrol);
     data.resize(size);
@@ -154,7 +161,7 @@ void PVStructureArray::deserialize(ByteBuffer *pbuffer,
             data[i]->deserialize(pbuffer, pcontrol);
         }
     }
-    replace(data); // calls postPut()
+    replace(freeze(data)); // calls postPut()
 }
 
 void PVStructureArray::serialize(ByteBuffer *pbuffer,

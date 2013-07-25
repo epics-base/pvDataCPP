@@ -125,7 +125,8 @@ size_t Convert::fromStringArray(PVScalarArrayPtr const &pv,
                   from.begin()+fromOffset+length,
                   data.begin());
 
-        pv->putFrom<pvString>(data);
+        PVStringArray::const_svector temp(freeze(data));
+        pv->putFrom<pvString>(temp);
         return length;
 
     } else {
@@ -399,10 +400,7 @@ void Convert::copyStructureArray(
     } else if(to->isImmutable()) {
         throw std::invalid_argument("Convert.copyStructureArray destination is immutable");
     }
-    PVStructureArray::svector data;
-    from->swap(data);
-    to->replace(data);
-    from->swap(data);
+    to->replace(from->view());
 }
 
 void Convert::newLine(StringBuilder buffer, int indentLevel)
