@@ -159,6 +159,14 @@ static FORCE_INLINE TO castUnsafe(const FROM& from)
 
 void castUnsafeV(size_t count, ScalarType to, void *dest, ScalarType from, const void *src);
 
+//! Cast value to printable type
+//! A no-op except for char types, which are cast to int
+//! so that they are printed as numbers std::ostream operators.
+template<typename T>
+static FORCE_INLINE
+typename detail::print_cast<T>::type
+print_cast(const T& v) { return v; }
+
 }} // end namespace
 
 #endif // PVTYPECAST_H
