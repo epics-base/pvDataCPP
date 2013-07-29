@@ -213,7 +213,7 @@ namespace detail {
  * The ways in which shared_vector is intended to differ from
  * std::vector are outlined in @ref vectordiff .
  *
- * Also see @ref vectormem
+ * Also see @ref vectormem and @ref vectorconst
  *
  * @warning Due to the implementation of std::tr1::shared_ptr, use of
  * shared_vector should not be combined with use of weak_ptr.
@@ -327,7 +327,7 @@ public:
      * as if make_unique() was called.  This holds even if the capacity
      * does not increase.
      *
-     * For notes on copying see docs for make_exlcusive().
+     * For notes on copying see docs for make_unique().
      */
     void reserve(size_t i) {
         if(this->unique() && i<=this->m_total)
@@ -348,9 +348,9 @@ public:
     /** @brief Grow or shrink array
      *
      * A side effect is that array data will be uniquely owned by this instance
-     * as if make_unique() was called.  This holds even if the size does not change.
+     * as if make_unique() were called.  This holds even if the size does not change.
      *
-     * For notes on copying see docs for make_exlcusive().
+     * For notes on copying see docs for make_unique().
      */
     void resize(size_t i) {
         if(i==this->m_count) {
@@ -925,3 +925,75 @@ std::ostream& operator<<(std::ostream& strm, const epics::pvData::shared_vector<
    }
  @endcode
  */
+
+/** @page vectorconst Value const-ness and shared_vector
+
+The type 'shared_vector<T>' can be thought of as 'T*'.
+Like the T pointer there are three related constant types:
+
+@code
+  shared_vector<int> v_mutable; // 1
+  const shared_vector<int> v_const_ref; // 2
+  shared_vector<const int> v_const_data; // 3
+  const shared_vector<const int> v_const_ref_data; // 4
+@endcode
+
+The distinction between these types is what "part" of the type is constant,
+the "reference" (pointer) or the "value" (location being pointed to).
+
+Type #2 is constant reference to a mutable value.
+Type #3 is a mutable reference to a constant value.
+Type #4 is a constant reference to a constant value.
+
+Casting between const and non-const references of the same value type
+is governed by the normal C++ casting rules.
+
+Casting between const and non-const values does @b not follow the normal
+C++ casting rules.
+
+For casting between shared_vector<T> and shared_vector<const T>
+explicit casting operations are required.  These operations are
+@b freeze() (non-const to const) and @b thaw() (const to non-const).
+
+A shared_vector<const T> is "frozen" as its value can not be modified.
+
+These functions are defined like:
+
+@code
+namespace epics{namespace pvData{
+  template<typename T>
+  shared_vector<const T> freeze(shared_vector<T>&);
+
+  template<typename T>
+  shared_vector<T> thaw(shared_vector<const T>&);
+}}
+@endcode
+
+So each consumes a shared_vector with a certain value
+const-ness, and returns one with the other.
+
+The following guarantees are provided by both functions:
+
+# The returned reference points to a value which is equal to the value referenced
+ by the argument.
+# The returned reference points to a value which is only referenced by
+ shared_vectors with the same value const-ness as the returned reference.
+
+Please note that the argument of both freeze and thaw is a non-const
+reference which will always be cleared.
+
+@section vfreeze Freezing
+
+The act of freezing a shared_vector requires that the shared_vector
+passed in must be unique() or an exception is thrown.  This is
+done to reduce the possibility of accidental copying.
+
+This possibility can be avoided by calling the make_unique() on a
+shared_vector before passing it to freeze().
+
+@section vthaw Thawing
+
+The act of thawing a shared_vector may make a copy of the value
+referenced by its argument if this reference is not unique().
+
+*/
