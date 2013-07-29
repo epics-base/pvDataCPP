@@ -173,14 +173,14 @@ void PrinterPlain::encodeScalar(const PVScalar& pv)
     indentN(S(), ilvl);
     S() << pv.getScalar()->getID() << " "
         << pv.getFieldName() << " "
-        << pv.getAs<pvString>() << std::endl;
+        << pv.getAs<String>() << std::endl;
 }
 
 void PrinterPlain::encodeArray(const PVScalarArray& pv)
 {
     indentN(S(), ilvl);
     shared_vector<const String> temp;
-    pv.getAs<pvString>(temp);
+    pv.getAs<String>(temp);
 
     S() << pv.getScalarArray()->getID() << " "
         << pv.getFieldName() << " [";

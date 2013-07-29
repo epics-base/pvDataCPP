@@ -126,7 +126,7 @@ size_t Convert::fromStringArray(PVScalarArrayPtr const &pv,
                   data.begin());
 
         PVStringArray::const_svector temp(freeze(data));
-        pv->putFrom<pvString>(temp);
+        pv->putFrom<String>(temp);
         return length;
 
     } else {
@@ -140,7 +140,7 @@ size_t Convert::toStringArray(PVScalarArrayPtr const & pv,
                               StringArray  &to, size_t toOffset)
 {
     PVStringArray::const_svector data;
-    pv->getAs<pvString>(data);
+    pv->getAs<String>(data);
     data.slice(offset, length);
     if(toOffset+data.size() > to.size())
         to.resize(toOffset+data.size());
