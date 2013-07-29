@@ -427,10 +427,10 @@ public:
       uint32 val = pv->getAs<pvInt>();
      @endcode
      */
-    template<ScalarType ID>
-    inline typename ScalarTypeTraits<ID>::type getAs() const {
-        typename ScalarTypeTraits<ID>::type result;
-        this->getAs((void*)&result, ID);
+    template<typename T>
+    inline T getAs() const {
+        T result;
+        this->getAs((void*)&result, (ScalarType)ScalarTypeID<T>::value);
         return result;
     }
 protected:
@@ -447,9 +447,9 @@ public:
       pv->putFrom<pvInt>((int32)42);
      @endcode
      */
-    template<ScalarType ID>
-    inline void putFrom(typename ScalarTypeTraits<ID>::type val) {
-        this->putFrom((const void*)&val, ID);
+    template<typename T>
+    inline void putFrom(T val) {
+        this->putFrom((const void*)&val, (ScalarType)ScalarTypeID<T>::value);
     }
 protected:
     virtual void putFrom(const void *, ScalarType) = 0;
@@ -508,17 +508,15 @@ public:
     	put(value);
 	}
 
-    template<ScalarType ID>
-    inline typename ScalarTypeTraits<ID>::type getAs() const {
-        typedef typename ScalarTypeTraits<ID>::type to_t;
-        to_t result(castUnsafe<to_t,T>(get()));
+    template<typename T1>
+    inline T1 getAs() const {
+        T1 result(castUnsafe<T1,T>(get()));
         return result;
     }
 
-    template<ScalarType ID>
-    inline void putFrom(typename ScalarTypeTraits<ID>::type val) {
-        typedef typename ScalarTypeTraits<ID>::type from_t;
-        put(castUnsafe<T,from_t>(val));
+    template<typename T1>
+    inline void putFrom(T1 val) {
+        put(castUnsafe<T,T1>(val));
     }
 
 protected:
@@ -705,14 +703,13 @@ public:
      * the element type.  If the types do match then
      * no copy is made.
      */
-    template<ScalarType ID>
+    template<typename T>
     void
-    getAs(shared_vector<const typename ScalarTypeTraits<ID>::type>& out) const
+    getAs(shared_vector<const T>& out) const
     {
-        typedef typename ScalarTypeTraits<ID>::type dest_type;
         shared_vector<const void> temp;
         _getAsVoid(temp);
-        out = shared_vector_convert<const dest_type>(temp);
+        out = shared_vector_convert<const T>(temp);
     }
 
     /**
@@ -726,8 +723,8 @@ public:
      *
      * Calls postPut()
      */
-    template<ScalarType ID>
-    inline void putFrom(const shared_vector<const typename ScalarTypeTraits<ID>::type>& inp)
+    template<typename T>
+    inline void putFrom(const shared_vector<const T>& inp)
     {
         shared_vector<const void> temp(static_shared_vector_cast<const void>(inp));
         _putFromVoid(temp);
