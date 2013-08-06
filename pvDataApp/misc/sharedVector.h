@@ -416,8 +416,7 @@ public:
     void make_unique() {
         if(this->unique())
             return;
-        typedef typename meta::strip_const<E>::type nE;
-        nE *d = new nE[this->m_total];
+        _E_non_const *d = new _E_non_const[this->m_total];
         try {
             std::copy(this->m_data.get()+this->m_offset,
                       this->m_data.get()+this->m_offset+this->m_count,
