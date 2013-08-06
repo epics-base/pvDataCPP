@@ -250,7 +250,13 @@ static void testSlice()
     testOk1(half2.dataOffset()==5);
     testOk1(half2a.dataOffset()==5);
 
-    testOk1(half2.size() == half2a.size());
+    testOk1(half1.size()==5);
+    testOk1(half2.size()==5);
+    testOk1(half2a.size()==5);
+
+    testOk1(half1.dataTotal()==10);
+    testOk1(half2.dataTotal()==5);
+    testOk1(half2a.dataTotal()==5);
 
     testOk1(original.data() == half1.data());
     testOk1(half2.data() == half2a.data());
@@ -259,13 +265,17 @@ static void testSlice()
     half2.slice(1);
     half2a.slice(1,1);
 
+    testOk1(half1.dataOffset()==5);
+    testOk1(half2.dataOffset()==6);
+    testOk1(half2a.dataOffset()==6);
+
     testOk1(half1.size()==0);
     testOk1(half2.size()==4);
     testOk1(half2a.size()==1);
 
-    testOk1(half1.dataOffset()==10);
-    testOk1(half2.dataOffset()==6);
-    testOk1(half2a.dataOffset()==6);
+    testOk1(half1.dataTotal()==5);
+    testOk1(half2.dataTotal()==4);
+    testOk1(half2a.dataTotal()==4);
 
     half2.clear();
     testOk1(half2.dataOffset()==0);
@@ -525,7 +535,7 @@ static void testICE()
 
 MAIN(testSharedVector)
 {
-    testPlan(154);
+    testPlan(162);
     testDiag("Tests for shared_vector");
 
     testDiag("sizeof(shared_vector<int>)=%lu",

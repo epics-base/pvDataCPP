@@ -47,12 +47,17 @@ namespace detail {
         template<typename E1> friend class shared_vector_base;
     protected:
         std::tr1::shared_ptr<E> m_data;
-        //! Offset in the data array of first element
+        //! Offset in the data array of first visible element
         size_t m_offset;
         //! Number of visible elements between m_offset and end of data
         size_t m_count;
         //! Total number of elements between m_offset and the end of data
         size_t m_total;
+
+        /* invariants
+         *  m_count <= m_total (enforced)
+         *  m_offset + m_total <= (size_t)-1 (checked w/ assert())
+         */
 
     public:
 
@@ -68,6 +73,9 @@ namespace detail {
         {
             if(!m_data.get()) {
                 m_offset = m_total = m_count = 0;
+            } else {
+                // ensure we won't have integer overflows later
+                assert( m_offset <= ((size_t)-1) - m_total);
             }
         }
     public:
@@ -96,6 +104,8 @@ namespace detail {
     protected:
         typedef typename meta::strip_const<E>::type _E_non_const;
     public:
+        //! Constructor used to implement freeze().
+        //! Should not be called directly.
         shared_vector_base(shared_vector_base<_E_non_const>& O,
                            _shared_vector_freeze_tag)
             :m_data()
@@ -109,6 +119,8 @@ namespace detail {
             O.clear();
         }
 
+        //! Constructor used to implement thaw().
+        //! Should not be called directly.
         shared_vector_base(shared_vector<const E>& O,
                            _shared_vector_thaw_tag)
             :m_data()
@@ -180,20 +192,16 @@ namespace detail {
          */
         void slice(size_t offset, size_t length=(size_t)-1)
         {
-            if(offset>m_total)
-                offset = m_total;
+            if(offset>m_count)
+                offset = m_count; // will slice down to zero length
+
+            const size_t max_count = m_count - offset;
 
             m_offset += offset;
 
             m_total -= offset;
 
-            if(offset>m_count) {
-                m_count = 0;
-            } else {
-                if(length > m_count - offset)
-                    length = m_count - offset;
-                m_count = length;
-            }
+            m_count = std::min(length, max_count);
         }
 
         // Access to members.
