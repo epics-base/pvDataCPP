@@ -570,16 +570,6 @@ public:
         return *this;
     }
 
-    template<typename E1>
-    shared_vector& operator=(const shared_vector<E1>& o)
-    {
-        if(&o!=this) {
-            this->base_t::operator=(o);
-            m_vtype = o.m_vtype;
-        }
-        return *this;
-    }
-
     size_t max_size() const{return (size_t)-1;}
 
     pointer data() const{
