@@ -17,7 +17,8 @@
 #include <string>
 #include <vector>
 
-#ifdef __vxworks
+#if defined(__vxworks) && \
+    (_WRS_VXWORKS_MAJOR+0 <= 6) && (_WRS_VXWORKS_MINOR+0 < 9)
 typedef int intptr_t;
 typedef unsigned int uintptr_t;
 #define INT64_MAX (0x7fffffffffffffffLL)

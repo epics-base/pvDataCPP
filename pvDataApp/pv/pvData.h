@@ -18,6 +18,11 @@
 #include <iomanip>
 #include <pv/pvIntrospect.h>
 #include <pv/requester.h>
+
+#if defined(__vxworks) && !defined(_WRS_VXWORKS_MAJOR)
+typedef class std::ios std::ios_base;
+#endif
+
 namespace epics { namespace pvData { 
 
 
