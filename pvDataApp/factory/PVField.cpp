@@ -26,8 +26,7 @@ PVField::PVField(FieldConstPtr field)
 : notImplemented("not implemented"),
   parent(NULL),field(field),
   fieldOffset(0), nextFieldOffset(0),
-  immutable(false),
-  convert(getConvert())
+  immutable(false)
 {
 }
 
@@ -62,11 +61,6 @@ void PVField::message(
 void PVField::message(String message,MessageType messageType)  
 {
     PVField::message(message,messageType,"");
-}
-
-String PVField::getFieldName() const
-{
-    return fieldName;
 }
 
 void PVField::setRequester(RequesterPtr const &req)
@@ -180,7 +174,7 @@ void PVField::setParentAndName(PVStructure * xxx,String const & name)
 
 bool PVField::equals(PVField &pv)
 {
-    return convert->equals(*this,pv);
+    return pv==*this;
 }
 
 void PVField::toString(StringBuilder buf)
@@ -190,7 +184,7 @@ void PVField::toString(StringBuilder buf)
 
 void PVField::toString(StringBuilder buf,int indentLevel) 
 {
-   convert->getString(buf,this,indentLevel);
+   Convert().getString(buf,this,indentLevel);
    if(pvAuxInfo.get()!=NULL) pvAuxInfo->toString(buf,indentLevel);
 }
 
@@ -222,6 +216,31 @@ namespace format
 		return array_at_internal(manip.index, str);
 	}
 };
+
+String PVField::getFullName() const
+{
+    size_t size=fieldName.size();
+
+    for(PVField *fld=getParent(); fld; fld=fld->getParent())
+    {
+        size+=fld->fieldName.size()+1;
+    }
+
+    String ret(size, '.');
+    size_t pos=size - fieldName.size();
+
+    ret.replace(pos, String::npos, fieldName);
+
+    for(PVField *fld=getParent(); fld; fld=fld->getParent())
+    {
+        const String& nref = fld->fieldName;
+        assert(pos >= nref.size()+1);
+        pos -= nref.size()+1;
+        ret.replace(pos, String::npos, nref);
+    }
+    assert(pos==0);
+    return ret;
+}
 
 void PVField::computeOffset(const PVField   *  pvField) {
     const PVStructure * pvTop = pvField->getParent();

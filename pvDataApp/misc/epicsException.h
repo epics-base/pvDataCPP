@@ -103,7 +103,7 @@ namespace detail {
      *
      * Takes advantage of the requirement that all exception classes
      * must be copy constructable.  Of course this also requires
-     * the and extra copy be constructed...
+     * that an extra copy be constructed...
      */
     template<typename E>
     class ExceptionMixed : public E, public ExceptionMixin {

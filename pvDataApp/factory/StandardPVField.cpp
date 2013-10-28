@@ -59,11 +59,9 @@ PVStructurePtr StandardPVField::enumerated(StringArray const &choices)
     PVStructurePtr pvStructure = pvDataCreate->createPVStructure(field);
     PVScalarArrayPtr pvScalarArray = pvStructure->getScalarArrayField(
         "choices",pvString);
-    if(pvScalarArray.get()==NULL) {
-        throw std::logic_error(String("StandardPVField::enumerated"));
-    }
-    PVStringArray * pvChoices = static_cast<PVStringArray *>(pvScalarArray.get());
-    pvChoices->put(0,choices.size(),get(choices),0);
+    PVStringArray::svector cdata(choices.size());
+    std::copy(choices.begin(), choices.end(), cdata.begin());
+    static_cast<PVStringArray&>(*pvScalarArray).replace(freeze(cdata));
     return pvStructure;
 }
 
@@ -74,11 +72,9 @@ PVStructurePtr StandardPVField::enumerated(
     PVStructurePtr pvStructure =  pvDataCreate->createPVStructure(field);
     PVScalarArrayPtr pvScalarArray = pvStructure->getScalarArrayField(
         "value.choices",pvString);
-    if(pvScalarArray.get()==NULL) {
-        throw std::logic_error(String("StandardPVField::enumerated"));
-    }
-    PVStringArray * pvChoices = static_cast<PVStringArray *>(pvScalarArray.get());
-    pvChoices->put(0,choices.size(),get(choices),0);
+    PVStringArray::svector cdata(choices.size());
+    std::copy(choices.begin(), choices.end(), cdata.begin());
+    static_cast<PVStringArray&>(*pvScalarArray).replace(freeze(cdata));
     return pvStructure;
 }
 

@@ -14,6 +14,7 @@
 
 #include <pv/pvIntrospect.h>
 #include <pv/epicsException.h>
+#include <pv/sharedVector.h>
 
 #include "dbDefs.h" // for NELEMENTS
 
@@ -61,7 +62,7 @@ namespace ScalarTypeFunc {
         "ubyte", "ushort", "uint", "ulong",
         "float", "double", "string",
     };
-    ScalarType getScalarType(String pvalue) {
+    ScalarType getScalarType(const String& pvalue) {
         for(size_t i=0; i<NELEMENTS(names); i++)
             if(pvalue==names[i])
                 return ScalarType(i);
@@ -76,6 +77,50 @@ namespace ScalarTypeFunc {
 
     void toString(StringBuilder buf,const ScalarType scalarType) {
         *buf += name(scalarType);
+    }
+
+    size_t elementSize(ScalarType id)
+    {
+        switch(id) {
+#define OP(ENUM, TYPE) case ENUM: return sizeof(TYPE)
+            OP(pvBoolean, boolean);
+            OP(pvUByte, uint8);
+            OP(pvByte, int8);
+            OP(pvUShort, uint16);
+            OP(pvShort, int16);
+            OP(pvUInt, uint32);
+            OP(pvInt, int32);
+            OP(pvULong, uint64);
+            OP(pvLong, int64);
+            OP(pvFloat, float);
+            OP(pvDouble, double);
+            OP(pvString, String);
+#undef OP
+        default:
+            THROW_EXCEPTION2(std::invalid_argument, "error unknown ScalarType");
+        }
+    }
+
+    shared_vector<void> allocArray(ScalarType id, size_t len)
+    {
+        switch(id) {
+#define OP(ENUM, TYPE) case ENUM: return static_shared_vector_cast<void>(shared_vector<TYPE>(len))
+        OP(pvBoolean, boolean);
+        OP(pvUByte, uint8);
+        OP(pvByte, int8);
+        OP(pvUShort, uint16);
+        OP(pvShort, int16);
+        OP(pvUInt, uint32);
+        OP(pvInt, int32);
+        OP(pvULong, uint64);
+        OP(pvLong, int64);
+        OP(pvFloat, float);
+        OP(pvDouble, double);
+        OP(pvString, String);
+#undef OP
+        default:
+            throw std::bad_alloc();
+        }
     }
 
 } // namespace ScalarTypeFunc

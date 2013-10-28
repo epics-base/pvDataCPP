@@ -9,6 +9,7 @@ testBitSetUtil_LIBS += pvData Com
 PROD_HOST += testIntrospect
 testIntrospect_SRCS += testIntrospect.cpp
 testIntrospect_LIBS += pvData Com
+TESTS += testIntrospect
 
 PROD_HOST += testPVAppend
 testPVAppend_SRCS += testPVAppend.cpp
@@ -38,17 +39,21 @@ PROD_HOST += testConvert
 testConvert_SRCS += testConvert.cpp
 testConvert_LIBS += pvData Com
 
-PROD_HOST += testPVScalarArray
+TESTPROD += testPVScalarArray
 testPVScalarArray_SRCS += testPVScalarArray.cpp
 testPVScalarArray_LIBS += pvData Com
+TESTS += testPVScalarArray
 
 PROD_HOST += testPVStructureArray
 testPVStructureArray_SRCS += testPVStructureArray.cpp
 testPVStructureArray_LIBS += pvData Com
+TESTS += testPVStructureArray
 
 PROD_HOST += testOperators
 testOperators_SRCS += testOperators.cpp
 testOperators_LIBS += pvData Com
+
+TESTSCRIPTS_HOST += $(TESTS:%=%.t)
 
 include $(TOP)/configure/RULES
 #----------------------------------------

@@ -66,9 +66,10 @@ int main(int, char **)
     pvStructure = standardPVField->scalarArray(pvDouble,"alarm,timeStamp");
     std::cout << *pvStructure << std::endl;
     
-    double values[] = { 1.1, 2.2, 3.3 };
+    PVDoubleArray::svector values(3);
+    values[0] = 1.1; values[1] = 2.2; values[2] = 3.3;
     PVDoubleArrayPtr darray = std::tr1::dynamic_pointer_cast<PVDoubleArray>(pvStructure->getScalarArrayField("value", pvDouble));
-    darray->put(0, 3, values, 0);
+    darray->replace(freeze(values));
     std::cout << *darray << std::endl;
     std::cout << format::array_at(1) << *darray << std::endl;
 
@@ -76,14 +77,13 @@ int main(int, char **)
     StructureConstPtr structure = standardField->scalar(pvDouble, "alarm,timeStamp");
     pvStructure = standardPVField->structureArray(structure,"alarm,timeStamp");
     size_t num = 2;
-    PVStructurePtrArray pvStructures;
-    pvStructures.reserve(num);
+    PVStructureArray::svector pvStructures(num);
     for(size_t i=0; i<num; i++) {
-        pvStructures.push_back(
-            pvDataCreate->createPVStructure(structure));
+        pvStructures[i]=
+            pvDataCreate->createPVStructure(structure);
     }
     PVStructureArrayPtr pvStructureArray = pvStructure->getStructureArrayField("value");
-    pvStructureArray->put(0, num, pvStructures, 0);
+    pvStructureArray->replace(freeze(pvStructures));
     std::cout << *pvStructure << std::endl;
 
     return 0;

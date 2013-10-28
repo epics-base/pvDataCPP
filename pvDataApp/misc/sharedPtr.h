@@ -4,7 +4,7 @@
  * in file LICENSE that is included with this distribution.
  */
 /**
- *  @author Michael DavidSaver
+ *  @author Michael Davidsaver
  */
 
 #ifndef SHAREDPTR_H

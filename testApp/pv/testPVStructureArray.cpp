@@ -22,101 +22,138 @@
 #include <pv/standardField.h>
 #include <pv/standardPVField.h>
 
-using namespace epics::pvData;
+#include <epicsUnitTest.h>
+#include <testMain.h>
 
-static bool debug = false;
+using namespace epics::pvData;
 
 static FieldCreatePtr fieldCreate;
 static PVDataCreatePtr pvDataCreate;
 static StandardFieldPtr standardField;
 static StandardPVFieldPtr standardPVField;
 static ConvertPtr convert;
-static String buffer;
 
-static void testPVStructureArray(FILE * fd) {
-    if(debug) fprintf(fd,"/ntestPVStructureArray\n");
-    StructureArrayConstPtr alarm(
-        fieldCreate->createStructureArray(standardField->alarm()));
-    PVStructureArrayPtr pvAlarmStructure(
-         pvDataCreate->createPVStructureArray(alarm));
-    PVStructurePtrArray palarms;
-    size_t na=2;
-    palarms.reserve(na);
-    for(size_t i=0; i<na; i++) {
-        palarms.push_back(
-            pvDataCreate->createPVStructure(standardField->alarm()));
-    }
-    pvAlarmStructure->put(0,2,palarms,0);
-    buffer.clear();
-    pvAlarmStructure->toString(&buffer);
-    if(debug) fprintf(fd,"pvAlarmStructure\n%s\n",buffer.c_str());
-    PVStructureArrayPtr copy(pvDataCreate->createPVStructureArray(alarm));
-    convert->copyStructureArray(pvAlarmStructure,copy);
-    buffer.clear();
-    copy->toString(&buffer);
-    if(debug) fprintf(fd,"copy\n%s\n",buffer.c_str());
-    fprintf(fd,"testPVStructureArray PASSED\n");
-}
-
-static StructureConstPtr getPowerSupplyStructure() {
-    String properties("alarm");
-    FieldConstPtrArray  fields;
-    StringArray fieldNames;
-    fields.reserve(3);
-    fieldNames.reserve(3);
-    fieldNames.push_back("voltage");
-    fieldNames.push_back("power");
-    fieldNames.push_back("current");
-    fields.push_back(standardField->scalar(pvDouble,properties));
-    fields.push_back(standardField->scalar(pvDouble,properties));
-    fields.push_back(standardField->scalar(pvDouble,properties));
-    StructureConstPtr structure = fieldCreate->createStructure(
-        "powerSupply_t",fieldNames,fields);
-    return structure;
-}
-
-static void testPowerSupplyArray(FILE * fd) {
-    if(debug) fprintf(fd,"/ntestPowerSupplyArray\n");
-    PVStructurePtr powerSupplyArrayStruct = standardPVField->structureArray(
-        getPowerSupplyStructure(),String("alarm,timeStamp"));
-    PVStructureArrayPtr powerSupplyArray =
-        powerSupplyArrayStruct->getStructureArrayField(String("value"));
-    assert(powerSupplyArray.get()!=NULL);
-    int offset = powerSupplyArray->append(5);
-    if(debug) fprintf(fd,"offset %d\n",offset);
-    buffer.clear();
-    powerSupplyArrayStruct->toString(&buffer);
-    if(debug) fprintf(fd,"after append 5\n%s\n",buffer.c_str());
-    powerSupplyArray->remove(0,2);
-    buffer.clear();
-    powerSupplyArrayStruct->toString(&buffer);
-    if(debug) fprintf(fd,"after remove(0,2)\n%s\n",buffer.c_str());
-    powerSupplyArray->remove(2,1);
-    buffer.clear();
-    powerSupplyArrayStruct->toString(&buffer);
-    if(debug) fprintf(fd,"after remove 2,1%s\n",buffer.c_str());
-    powerSupplyArray->compress();
-    buffer.clear();
-    powerSupplyArrayStruct->toString(&buffer);
-    if(debug) fprintf(fd,"after compress%s\n",buffer.c_str());
-    fprintf(fd,"testPowerSupplyArray PASSED\n");
-}
-
-int main(int argc,char *argv[])
+static void testBasic()
 {
-    char *fileName = 0;
-    if(argc>1) fileName = argv[1];
-    FILE * fd = stdout;
-    if(fileName!=0 && fileName[0]!=0) {
-        fd = fopen(fileName,"w+");
-    }
+    testDiag("Basic structure array ops");
+
+    StructureArrayConstPtr alarmtype(
+        fieldCreate->createStructureArray(standardField->alarm()));
+
+    PVStructureArrayPtr alarmarr(pvDataCreate->createPVStructureArray(alarmtype));
+
+    testOk1(alarmarr->getLength()==0);
+
+    alarmarr->setLength(5);
+
+    testOk1(alarmarr->getLength()==5);
+
+    PVStructureArray::const_svector aview = alarmarr->view();
+
+    testOk1(aview.size()==5);
+    testOk1(aview[4].get()==NULL);
+
+    alarmarr->append(2);
+
+    testOk1(alarmarr->getLength()==7);
+
+    aview = alarmarr->view();
+
+    testOk1(aview[4].get()==NULL);
+    testOk1(aview[5].get()!=NULL);
+    testOk1(aview[6].get()!=NULL);
+}
+
+static void testCompress()
+{
+    testDiag("Test structure array compress");
+
+    StructureArrayConstPtr alarmtype(
+        fieldCreate->createStructureArray(standardField->alarm()));
+
+    PVStructureArrayPtr alarmarr(pvDataCreate->createPVStructureArray(alarmtype));
+
+    alarmarr->setLength(5);
+
+    testOk1(alarmarr->getLength()==5);
+
+    alarmarr->compress();
+
+    testOk1(alarmarr->getLength()==0);
+
+    alarmarr->setLength(4);
+
+    testOk1(alarmarr->getLength()==4);
+
+    PVStructureArray::svector contents(10);
+
+    contents[2] = pvDataCreate->createPVStructure(standardField->alarm());
+    contents[4] = pvDataCreate->createPVStructure(standardField->alarm());
+    contents[5] = pvDataCreate->createPVStructure(standardField->alarm());
+    contents[8] = pvDataCreate->createPVStructure(standardField->alarm());
+
+    PVStructureArray::const_svector scont(freeze(contents));
+
+    alarmarr->replace(scont);
+
+    testOk1(!scont.unique());
+    testOk1(alarmarr->getLength()==10);
+
+    alarmarr->compress();
+
+    testOk1(scont.unique()); // a realloc happened
+    testOk1(alarmarr->getLength()==4);
+
+    PVStructureArray::svector compressed(alarmarr->reuse());
+
+    testOk1(scont[2]==compressed[0]);
+    testOk1(scont[4]==compressed[1]);
+    testOk1(scont[5]==compressed[2]);
+    testOk1(scont[8]==compressed[3]);
+}
+
+static void testRemove()
+{
+    testDiag("Test structure array remove");
+    
+    PVStructureArray::svector contents(10);
+    
+    for(size_t i=0; i<contents.size(); i++)
+        contents[i] = pvDataCreate->createPVStructure(standardField->alarm());
+
+    StructureArrayConstPtr alarmtype(
+        fieldCreate->createStructureArray(standardField->alarm()));
+    PVStructureArrayPtr alarmarr(pvDataCreate->createPVStructureArray(alarmtype));
+
+    PVStructureArray::const_svector scont(freeze(contents));
+
+    alarmarr->replace(scont);
+
+    alarmarr->remove(0, 10); // all
+
+    testOk1(alarmarr->getLength()==0);
+
+    alarmarr->replace(scont);
+
+    alarmarr->remove(1, 1);
+
+    PVStructureArray::const_svector check(alarmarr->view());
+
+    testOk1(scont[0]==check[0]);
+    testOk1(scont[2]==check[1]);
+    testOk1(scont[3]==check[2]);
+}
+
+MAIN(testPVStructureArray)
+{
+    testPlan(0);
+    testDiag("Testing structure array handling");
     fieldCreate = getFieldCreate();
     pvDataCreate = getPVDataCreate();
     standardField = getStandardField();
     standardPVField = getStandardPVField();
-    convert = getConvert();
-    testPVStructureArray(fd);
-    testPowerSupplyArray(fd);
-    return(0);
+    testBasic();
+    testCompress();
+    testRemove();
+    return testDone();
 }
-

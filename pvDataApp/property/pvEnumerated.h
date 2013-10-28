@@ -30,9 +30,9 @@ public:
     int32 getIndex();
     String getChoice();
     bool choicesMutable();
-    StringArrayPtr const & getChoices();
+    inline PVStringArray::const_svector getChoices(){return pvChoices->view();}
     int32 getNumberChoices();
-    bool setChoices(StringArray & choices);
+    bool setChoices(const StringArray & choices);
 private:
     static String notFound;
     static String notAttached;

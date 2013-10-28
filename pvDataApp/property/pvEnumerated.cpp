@@ -78,9 +78,8 @@ String PVEnumerated::getChoice()
          throw std::logic_error(notAttached);
     }
     int index = pvIndex->get();
-    StringArrayData data;
-    pvChoices->get(0,pvChoices->getLength(),data);
-    return data.data[index];
+    const PVStringArray::const_svector& data(pvChoices->view());
+    return data[index];
 }
 
 bool PVEnumerated::choicesMutable()
@@ -91,15 +90,6 @@ bool PVEnumerated::choicesMutable()
     return pvChoices->isImmutable();
 }
 
-StringArrayPtr const & PVEnumerated:: getChoices()
-{
-    if(pvIndex.get()==NULL ) {
-         throw std::logic_error(notAttached);
-    }
-    StringArrayData data;
-    return pvChoices->getSharedVector();
-}
-
 int32 PVEnumerated::getNumberChoices()
 {
     if(pvIndex.get()==NULL ) {
@@ -108,13 +98,15 @@ int32 PVEnumerated::getNumberChoices()
     return pvChoices->getLength();
 }
 
-bool PVEnumerated:: setChoices(StringArray & choices)
+bool PVEnumerated:: setChoices(const StringArray & choices)
 {
     if(pvIndex.get()==NULL ) {
          throw std::logic_error(notAttached);
     }
     if(pvChoices->isImmutable()) return false;
-    pvChoices->put(0,choices.size(),get(choices),0);
+    PVStringArray::svector data(choices.size());
+    std::copy(choices.begin(), choices.end(), data.begin());
+    pvChoices->replace(freeze(data));
     return true;
 }
 

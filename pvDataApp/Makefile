@@ -24,6 +24,10 @@ INC += destroyable.h
 INC += status.h
 INC += sharedPtr.h
 INC += localStaticLock.h
+INC += typeCast.h
+INC += printer.h
+INC += sharedVector.h
+INC += templateMeta.h
 
 LIBSRCS += byteBuffer.cpp
 LIBSRCS += bitSet.cpp
@@ -37,6 +41,8 @@ LIBSRCS += timer.cpp
 LIBSRCS += status.cpp
 LIBSRCS += messageQueue.cpp
 LIBSRCS += localStaticLock.cpp
+LIBSRCS += typeCast.cpp
+LIBSRCS += parseToPOD.cpp
 
 SRC_DIRS += $(PVDATA)/pv
 
@@ -64,6 +70,7 @@ LIBSRCS += Convert.cpp
 LIBSRCS += Compare.cpp
 LIBSRCS += StandardField.cpp
 LIBSRCS += StandardPVField.cpp
+LIBSRCS += printer.cpp
 
 SRC_DIRS += $(PVDATA)/property
 

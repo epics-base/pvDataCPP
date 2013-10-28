@@ -21,8 +21,10 @@
     (_WRS_VXWORKS_MAJOR+0 <= 6) && (_WRS_VXWORKS_MINOR+0 < 9)
 typedef int intptr_t;
 typedef unsigned int uintptr_t;
+#ifndef INT64_MAX
 #define INT64_MAX (0x7fffffffffffffffLL)
 #define UINT64_MAX (0xffffffffffffffffLL)
+#endif
 #else
 #include <stdint.h>
 #endif
@@ -32,6 +34,14 @@ typedef unsigned int uintptr_t;
 
 namespace epics { namespace pvData { 
 
+namespace detail {
+    // Pick either type If or type Else to not be Cond
+    template<typename Cond, typename If, typename Else>
+    struct pick_type { typedef If type; };
+    template<typename Cond, typename Else>
+    struct pick_type<Cond,Cond,Else> { typedef Else type; };
+}
+
 /**
  * This is a set of typdefs used by pvData.
  */
@@ -39,7 +49,9 @@ namespace epics { namespace pvData {
 /**
  * boolean, i.e. can only have the values {@code false} or {@code true}
  */
-typedef uint8_t     boolean;
+typedef detail::pick_type<int8_t, signed char,
+                          detail::pick_type<uint8_t, char, unsigned char>::type
+                          >::type boolean;
 /**
  * A 8 bit signed integer
  */

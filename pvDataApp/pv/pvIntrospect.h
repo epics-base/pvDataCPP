@@ -191,6 +191,9 @@ namespace ScalarTypeFunc {
      * @param  scalarType    The type.
      */
     void toString(StringBuilder builder,ScalarType scalarType);
+
+    //! gives sizeof(T) where T depends on the scalar type id.
+    size_t elementSize(ScalarType id);
 };
 
 /**
@@ -439,7 +442,7 @@ public:
      * @param fieldIndex The index of the desired field.
      * @return The fieldName.
      */
-    String getFieldName(std::size_t fieldIndex){return fieldNames[fieldIndex];}
+    String getFieldName(std::size_t fieldIndex) const {return fieldNames[fieldIndex];}
     /**
      * Convert the structure to a string and add it to builder.
      * @param  builder The string builder.
@@ -554,6 +557,47 @@ private:
  * @param The fieldCreate factory.
  */
 extern FieldCreatePtr getFieldCreate();
+
+/** Define a compile time mapping from
+ * type to enum value.
+ @code
+  ScalarType code = (ScalarType)ScalarTypeID<int8>::value;
+  assert(code==pvByte);
+ @endcode
+ *
+ * For unspecified types this evaluates to an invalid ScalarType
+ * value (eg -1).
+ */
+template<typename T>
+struct ScalarTypeID { enum {value=-1}; };
+
+/**
+ * Static mapping from ScalarType enum to value type.
+ @code
+   typename ScalarTypeTraits<pvByte>::type value = 4;
+ @endcode
+ */
+template<ScalarType ID>
+struct ScalarTypeTraits {};
+
+#define OP(ENUM, TYPE) \
+template<> struct ScalarTypeTraits<ENUM> {typedef TYPE type;}; \
+template<> struct ScalarTypeID<TYPE> { enum {value=ENUM}; }; \
+template<> struct ScalarTypeID<const TYPE> { enum {value=ENUM}; };
+
+OP(pvBoolean, boolean)
+OP(pvByte, int8)
+OP(pvShort, int16)
+OP(pvInt, int32)
+OP(pvLong, int64)
+OP(pvUByte, uint8)
+OP(pvUShort, uint16)
+OP(pvUInt, uint32)
+OP(pvULong, uint64)
+OP(pvFloat, float)
+OP(pvDouble, double)
+OP(pvString, String)
+#undef OP
 
 }}
 #endif  /* PVINTROSPECT_H */

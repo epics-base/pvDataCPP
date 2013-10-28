@@ -14,6 +14,8 @@
 
 #include <epicsAssert.h>
 #include <epicsExit.h>
+#include <epicsUnitTest.h>
+#include <testMain.h>
 
 #include <pv/requester.h>
 #include <pv/pvIntrospect.h>
@@ -25,352 +27,165 @@
 using namespace epics::pvData;
 using std::tr1::static_pointer_cast;
 
-static bool debug = false;
+namespace {
 
-static FieldCreatePtr fieldCreate = getFieldCreate();
-static PVDataCreatePtr pvDataCreate = getPVDataCreate();
-static StandardFieldPtr standardField = getStandardField();
-static StandardPVFieldPtr standardPVField = getStandardPVField();
-static ConvertPtr convert = getConvert();
-static String builder;
-static String alarmTimeStamp("alarm,timeStamp");
-static String alarmTimeStampValueAlarm("alarm,timeStamp,valueAlarm");
-static String allProperties("alarm,timeStamp,display,control,valueAlarm");
-static FILE * fd = NULL;
-static size_t length = 4;
-
-static void byteArray()
+static void testFactory()
 {
-    if(debug) fprintf(fd,"\nbyteArray\n");
-    PVScalarArrayPtr pvScalarArray = pvDataCreate->createPVScalarArray(pvByte);;
-    PVByteArrayPtr pvByteArray = static_pointer_cast<PVByteArray>(pvScalarArray);
-    ByteArray value;
-    value.reserve(length);
-    int8 xxx = 0x7f;
-    for(size_t i = 0; i<length; i++) value.push_back(xxx++);
-    pvByteArray->put(0,length,value,0);
-    builder.clear();
-    pvByteArray->toString(&builder);
-    if(debug) fprintf(fd,"put\n%s\n",builder.c_str());
-    convert->fromByteArray(pvScalarArray,0,length,value,0);
-    builder.clear();
-    pvByteArray->toString(&builder);
-    if(debug) fprintf(fd,"convert\n%s\n",builder.c_str());
-    ByteArrayData data;
-    pvByteArray->get(0,length,data);
-    ByteArray_iterator iter = data.data.begin();
-    if(debug) fprintf(fd,"iter  [");
-    for(iter=data.data.begin();iter!=data.data.end();++iter) {
-         if(debug) fprintf(fd,"%d ",*iter);
+    testDiag("Check array creation");
+
+    for(ScalarType e=pvBoolean; e<=pvString; e=(ScalarType)(1+(int)e))
+    {
+        testDiag("Check type %s", ScalarTypeFunc::name(e));
+        PVScalarArrayPtr arr = getPVDataCreate()->createPVScalarArray(e);
+        testOk1(arr.get()!=NULL);
+        if(!arr.get())
+            continue;
+        testOk1(arr->getScalarArray()->getElementType()==e);
+        testOk1(arr->getLength()==0);
+        arr->setLength(10);
+        testOk1(arr->getLength()==10);
+        testOk1(arr->getCapacity()>=10);
+        arr->setLength(0);
+        testOk1(arr->getLength()==0);
     }
-    if(debug) fprintf(fd,"]\n");
-    if(debug) fprintf(fd,"raw   [");
-    int8 * pdata = get(data.data);
-    for(size_t i=0; i<length; i++) {
-         int val = pdata[i];
-         if(debug) fprintf(fd,"%d  ",val);
-    }
-    if(debug) fprintf(fd,"]\n");
-    if(debug) fprintf(fd,"direct[");
-    for(size_t i=0; i<length; i++) {
-         int val = data.data[i];
-         if(debug) fprintf(fd,"%d ",val);
-    }
-    if(debug) fprintf(fd,"]\n");
-    fprintf(fd,"byteArray PASSED\n");
 }
 
-static void ubyteArray()
+template<typename PVT>
+bool hasUniqueVector(const typename PVT::shared_pointer& pv)
 {
-    if(debug) fprintf(fd,"\nubyteArray\n");
-    PVScalarArrayPtr pvScalarArray = pvDataCreate->createPVScalarArray(pvUByte);;
-    PVUByteArrayPtr pvUByteArray = static_pointer_cast<PVUByteArray>(pvScalarArray);
-    UByteArray value;
-    value.reserve(length);
-    uint8 xxx = 0x7f;
-    for(size_t i = 0; i<length; i++) value.push_back(xxx++);
-    pvUByteArray->put(0,length,value,0);
-    builder.clear();
-    pvUByteArray->toString(&builder);
-    if(debug) fprintf(fd,"put\n%s\n",builder.c_str());
-    convert->fromUByteArray(pvScalarArray,0,length,value,0);
-    builder.clear();
-    pvUByteArray->toString(&builder);
-    if(debug) fprintf(fd,"convert\n%s\n",builder.c_str());
-    UByteArrayData data;
-    pvUByteArray->get(0,length,data);
-    UByteArray_iterator iter = data.data.begin();
-    if(debug) fprintf(fd,"iter  [");
-    for(iter=data.data.begin();iter!=data.data.end();++iter) {
-         if(debug) fprintf(fd,"%u ",*iter);
-    }
-    if(debug) fprintf(fd,"]\n");
-    if(debug) fprintf(fd,"raw   [");
-    uint8 * pdata = get(data.data);
-    for(size_t i=0; i<length; i++) {
-         unsigned int val = pdata[i];
-         if(debug) fprintf(fd,"%d  ",val);
-    }
-    if(debug) fprintf(fd,"]\n");
-    if(debug) fprintf(fd,"direct[");
-    for(size_t i=0; i<length; i++) {
-         unsigned int val = data.data[i];
-         if(debug) fprintf(fd,"%d ",val);
-    }
-    if(debug) fprintf(fd,"]\n");
-    fprintf(fd,"ubyteArray PASSED\n");
+    typename PVT::const_svector data;
+    pv->swap(data);
+    bool ret = data.unique();
+    pv->swap(data);
+    return ret;
 }
 
-static void longArray()
+template<typename PVT>
+struct basicTestData {
+    static inline void fill(typename PVT::svector& data) {
+        data.resize(100);
+        for(size_t i=0; i<data.size(); i++)
+        {
+            data[i] = 10*i;
+        }
+    }
+};
+
+
+template<>
+struct basicTestData<PVStringArray> {
+    static inline void fill(PVStringArray::svector& data) {
+        PVIntArray::svector idata;
+        basicTestData<PVIntArray>::fill(idata);
+        data.resize(idata.size());
+        castUnsafeV(data.size(), pvString, data.data(), pvInt, idata.data());
+    }
+};
+
+template<typename PVT>
+static void testBasic()
 {
-    if(debug) fprintf(fd,"\nlongArray\n");
-    PVScalarArrayPtr pvScalarArray = pvDataCreate->createPVScalarArray(pvLong);;
-    PVLongArrayPtr pvLongArray = static_pointer_cast<PVLongArray>(pvScalarArray);
-    LongArray value;
-    value.reserve(length);
-    int64 xxx = 0x7fffffffffffffffLL;
-    for(size_t i = 0; i<length; i++) value.push_back(xxx++);
-    pvLongArray->put(0,length,value,0);
-    builder.clear();
-    pvLongArray->toString(&builder);
-    if(debug) fprintf(fd,"put\n%s\n",builder.c_str());
-    convert->fromLongArray(pvScalarArray,0,length,value,0);
-    builder.clear();
-    pvLongArray->toString(&builder);
-    if(debug) fprintf(fd,"convert\n%s\n",builder.c_str());
-    LongArrayData data;
-    pvLongArray->get(0,length,data);
-    LongArray_iterator iter = data.data.begin();
-    if(debug) fprintf(fd,"iter  [");
-    for(iter=data.data.begin();iter!=data.data.end();++iter) {
-         if(debug) fprintf(fd,"%lli ",(long long)*iter);
+    testDiag("Check basic array operations for %s", typeid(PVT).name());
+
+    typename PVT::shared_pointer arr1 = static_pointer_cast<PVT>(getPVDataCreate()->createPVScalarArray(PVT::typeCode));
+    typename PVT::shared_pointer arr2 = static_pointer_cast<PVT>(getPVDataCreate()->createPVScalarArray(PVT::typeCode));
+
+    testOk1(*arr1==*arr2);
+    testOk1(*arr1==*arr1);
+    testOk1(*arr1->getScalarArray()==*arr2->getScalarArray());
+
+    typename PVT::svector data;
+    data.reserve(200);
+    basicTestData<PVT>::fill(data);
+
+    typename PVT::const_svector cdata(freeze(data));
+
+    testOk1(cdata.unique());
+    arr1->replace(cdata);
+    testOk1(!cdata.unique());
+
+    {
+        typename PVT::const_svector avoid;
+        arr1->PVScalarArray::getAs<typename PVT::value_type>(avoid);
+        testOk1(avoid.data()==cdata.data());
+        testOk1(avoid.data()==arr1->view().data());
     }
-    if(debug) fprintf(fd,"]\n");
-    if(debug) fprintf(fd,"raw   [");
-    int64 * pdata = get(data.data);
-    for(size_t i=0; i<length; i++) {
-         int64 val = pdata[i];
-         if(debug) fprintf(fd,"%lli  ",(long long)val);
-    }
-    if(debug) fprintf(fd,"]\n");
-    if(debug) fprintf(fd,"direct[");
-    for(size_t i=0; i<length; i++) {
-         int64 val = data.data[i];
-         if(debug) fprintf(fd,"%lli ",(long long)val);
-    }
-    if(debug) fprintf(fd,"]\n");
-    fprintf(fd,"longArray PASSED\n");
+
+    testOk1(arr1->getLength()==cdata.size());
+
+    testOk1(*arr1!=*arr2);
+
+    cdata.clear();
+
+    testOk1(hasUniqueVector<PVT>(arr1));
+
+    arr2->assign(*arr1);
+
+    testOk1(*arr1==*arr2);
+    testOk1(!hasUniqueVector<PVT>(arr1));
+
+    arr2->swap(cdata);
+    arr2->postPut();
+
+    testOk1(arr2->getLength()==0);
+    testOk1(cdata.size()==arr1->getLength());
+
+    PVIntArray::const_svector idata;
+    arr1->PVScalarArray::getAs<int32>(idata);
+
+    testOk1(idata.at(1)==10);
+
+    PVIntArray::svector wdata(thaw(idata));
+
+    wdata.at(1) = 42;
+
+    idata = freeze(wdata);
+
+    arr1->PVScalarArray::putFrom<int32>(idata);
+
+    testOk1(castUnsafe<PVIntArray::value_type>(arr1->view()[1])==42);
 }
 
-static void ulongArray()
+static void testShare()
 {
-    if(debug) fprintf(fd,"\nulongArray\n");
-    PVScalarArrayPtr pvScalarArray = pvDataCreate->createPVScalarArray(pvULong);;
-    PVULongArrayPtr pvULongArray = static_pointer_cast<PVULongArray>(pvScalarArray);
-    ULongArray value;
-    value.reserve(length);
-    uint64 xxx = 0x7fffffffffffffffLL;
-    for(size_t i = 0; i<length; i++) value.push_back(xxx++);
-    pvULongArray->put(0,length,value,0);
-    builder.clear();
-    pvULongArray->toString(&builder);
-    if(debug) fprintf(fd,"put\n%s\n",builder.c_str());
-    convert->fromULongArray(pvScalarArray,0,length,value,0);
-    builder.clear();
-    pvULongArray->toString(&builder);
-    if(debug) fprintf(fd,"convert\n%s\n",builder.c_str());
-    ULongArrayData data;
-    pvULongArray->get(0,length,data);
-    ULongArray_iterator iter = data.data.begin();
-    if(debug) fprintf(fd,"iter  [");
-    for(iter=data.data.begin();iter!=data.data.end();++iter) {
-         if(debug) fprintf(fd,"%llu ",(long long unsigned)*iter);
-    }
-    if(debug) fprintf(fd,"]\n");
-    if(debug) fprintf(fd,"raw   [");
-    uint64 * pdata = get(data.data);
-    for(size_t i=0; i<length; i++) {
-         uint64 val = pdata[i];
-         if(debug) fprintf(fd,"%llu  ",(long long unsigned)val);
-    }
-    if(debug) fprintf(fd,"]\n");
-    if(debug) fprintf(fd,"direct[");
-    for(size_t i=0; i<length; i++) {
-         uint64 val = data.data[i];
-         if(debug) fprintf(fd,"%llu ",(long long unsigned)val);
-    }
-    if(debug) fprintf(fd,"]\n");
-    fprintf(fd,"ulongArray PASSED\n");
+    testDiag("Check array data sharing");
+
+    PVIntArrayPtr iarr = static_pointer_cast<PVIntArray>(getPVDataCreate()->createPVScalarArray(pvInt));
+    PVStringArrayPtr sarr = static_pointer_cast<PVStringArray>(getPVDataCreate()->createPVScalarArray(pvString));
+
+    PVIntArray::const_svector idata(4, 1);
+
+    sarr->PVScalarArray::putFrom<int32>(idata); // copy and convert
+
+    testOk1(idata.unique());
+
+    iarr->PVScalarArray::putFrom<int32>(idata); // take a reference
+
+    testOk1(!idata.unique());
+
+    idata.clear();
+    PVIntArray::const_svector cdata;
+
+    sarr->PVScalarArray::getAs<int32>(cdata); // copy and convert
+
+    testOk1(cdata.unique());
+
+    iarr->PVScalarArray::getAs<int32>(cdata); // take a reference
+
+    testOk1(!cdata.unique());
 }
 
-static void floatArray()
-{
-    if(debug) fprintf(fd,"\nfloatArray\n");
-    PVScalarArrayPtr pvScalarArray = pvDataCreate->createPVScalarArray(pvFloat);;
-    PVFloatArrayPtr pvFloatArray = static_pointer_cast<PVFloatArray>(pvScalarArray);
-    FloatArray value;
-    value.reserve(length);
-    for(size_t i = 0; i<length; i++) value.push_back(10.0*i);
-    pvFloatArray->put(0,length,value,0);
-    builder.clear();
-    pvFloatArray->toString(&builder);
-    if(debug) fprintf(fd,"put\n%s\n",builder.c_str());
-    convert->fromFloatArray(pvScalarArray,0,length,value,0);
-    builder.clear();
-    pvFloatArray->toString(&builder);
-    if(debug) fprintf(fd,"convert\n%s\n",builder.c_str());
-    FloatArrayData data;
-    pvFloatArray->get(0,length,data);
-    FloatArray_iterator iter = data.data.begin();
-    if(debug) fprintf(fd,"iter  [");
-    for(iter=data.data.begin();iter!=data.data.end();++iter) {
-         if(debug) fprintf(fd,"%f ",*iter);
-    }
-    if(debug) fprintf(fd,"]\n");
-    if(debug) fprintf(fd,"raw   [");
-    float * pdata = get(data.data);
-    for(size_t i=0; i<length; i++) {
-         float val = pdata[i];
-         if(debug) fprintf(fd,"%f  ",val);
-    }
-    if(debug) fprintf(fd,"]\n");
-    if(debug) fprintf(fd,"direct[");
-    for(size_t i=0; i<length; i++) {
-         float val = data.data[i];
-         if(debug) fprintf(fd,"%f ",val);
-    }
-    if(debug) fprintf(fd,"]\n");
-    fprintf(fd,"floatArray PASSED\n");
-}
+} // end namespace
 
-static void doubleArray()
+MAIN(testPVScalarArray)
 {
-    if(debug) fprintf(fd,"\ndoubleArray\n");
-    PVScalarArrayPtr pvScalarArray = pvDataCreate->createPVScalarArray(pvDouble);;
-    PVDoubleArrayPtr pvDoubleArray = static_pointer_cast<PVDoubleArray>(pvScalarArray);
-    DoubleArray value;
-    value.reserve(length);
-    for(size_t i = 0; i<length; i++) value.push_back(10.0*i);
-    pvDoubleArray->put(0,length,value,0);
-    builder.clear();
-    pvDoubleArray->toString(&builder);
-    if(debug) fprintf(fd,"put\n%s\n",builder.c_str());
-    convert->fromDoubleArray(pvScalarArray,0,length,value,0);
-    builder.clear();
-    pvDoubleArray->toString(&builder);
-    if(debug) fprintf(fd,"convert\n%s\n",builder.c_str());
-    DoubleArrayData data;
-    pvDoubleArray->get(0,length,data);
-    DoubleArray_iterator iter = data.data.begin();
-    if(debug) fprintf(fd,"iter  [");
-    for(iter=data.data.begin();iter!=data.data.end();++iter) {
-         if(debug) fprintf(fd,"%lf ",*iter);
-    }
-    if(debug) fprintf(fd,"]\n");
-    if(debug) fprintf(fd,"raw   [");
-    double * pdata = get(data.data);
-    for(size_t i=0; i<length; i++) {
-         double val = pdata[i];
-         if(debug) fprintf(fd,"%lf  ",val);
-    }
-    if(debug) fprintf(fd,"]\n");
-    if(debug) fprintf(fd,"direct[");
-    for(size_t i=0; i<length; i++) {
-         double val = data.data[i];
-         if(debug) fprintf(fd,"%lf ",val);
-    }
-    if(debug) fprintf(fd,"]\n");
-    fprintf(fd,"doubleArray PASSED\n");
+    testPlan(156);
+    testFactory();
+    testBasic<PVByteArray>();
+    testBasic<PVUByteArray>();
+    testBasic<PVIntArray>();
+    testBasic<PVDoubleArray>();
+    testBasic<PVStringArray>();
+    testShare();
+    return testDone();
 }
-
-static void stringArray()
-{
-    if(debug) fprintf(fd,"\nstringArray\n");
-    PVScalarArrayPtr pvScalarArray = pvDataCreate->createPVScalarArray(pvString);;
-    PVStringArrayPtr pvStringArray = static_pointer_cast<PVStringArray>(pvScalarArray);
-    StringArray value;
-    value.reserve(length);
-    for(size_t i = 0; i<length; i++) {
-        char val[20];
-        sprintf(val,"value%d",(int)i);
-        value.push_back(val);
-    }
-    pvStringArray->put(0,length,value,0);
-    builder.clear();
-    pvStringArray->toString(&builder);
-    if(debug) fprintf(fd,"put\n%s\n",builder.c_str());
-    convert->fromStringArray(pvScalarArray,0,length,value,0);
-    builder.clear();
-    pvStringArray->toString(&builder);
-    if(debug) fprintf(fd,"convert\n%s\n",builder.c_str());
-    StringArrayData data;
-    pvStringArray->get(0,length,data);
-    StringArray_iterator iter = data.data.begin();
-    if(debug) fprintf(fd,"iter  [");
-    for(iter=data.data.begin();iter!=data.data.end();++iter) {
-         String val = *iter;
-         if(debug) fprintf(fd,"%s ",val.c_str());
-    }
-    if(debug) fprintf(fd,"]\n");
-    if(debug) fprintf(fd,"raw   [");
-    String*  pdata = get(data.data);
-    for(size_t i=0; i<length; i++) {
-         String val = pdata[i];
-         if(debug) fprintf(fd,"%s  ",val.c_str());
-    }
-    if(debug) fprintf(fd,"]\n");
-    if(debug) fprintf(fd,"direct[");
-    for(size_t i=0; i<length; i++) {
-         String val = data.data[i];
-         if(debug) fprintf(fd,"%s ",val.c_str());
-    }
-    if(debug) fprintf(fd,"]\n");
-    fprintf(fd,"stringArray PASSED\n");
-}
-
-static void shareArray()
-{
-    if(debug) fprintf(fd,"\nshareArray\n");
-    PVScalarArrayPtr pvScalarArray = pvDataCreate->createPVScalarArray(pvDouble);;
-    PVDoubleArrayPtr pvDoubleArray = static_pointer_cast<PVDoubleArray>(pvScalarArray);
-    DoubleArray value;
-    value.reserve(length);
-    for(size_t i = 0; i<length; i++) value.push_back(10.0*i);
-    pvDoubleArray->put(0,length,value,0);
-    PVDoubleArrayPtr pvShareArray = static_pointer_cast<PVDoubleArray>(
-          pvDataCreate->createPVScalarArray(pvDouble));
-    pvShareArray->shareData(
-        pvDoubleArray->getSharedVector(),
-        pvDoubleArray->getCapacity(),
-        pvDoubleArray->getLength());
-    printf("pvDoubleArray->get() %p pvShareArray->get() %p\n",pvDoubleArray->get(),pvShareArray->get());
-    printf("pvDoubleArray->getVector() %p pvShareArray->getVector() %p\n",
-        &(pvDoubleArray->getVector()),&(pvShareArray->getVector()));
-    printf("pvDoubleArray->getSharedVector() %p pvShareArray->getSharedVector() %p\n",
-        &(pvDoubleArray->getSharedVector()),&(pvShareArray->getSharedVector()));
-    assert(pvDoubleArray->get()==pvShareArray->get());
-    builder.clear();
-    pvShareArray->toString(&builder);
-    if(debug) fprintf(fd,"pvShare\n%s\n",builder.c_str());
-    fprintf(fd,"shareArray PASSED\n");
-}
-
-int main(int argc,char *argv[])
-{
-    char *fileName = 0;
-    if(argc>1) fileName = argv[1];
-    fd = stdout;
-    if(fileName!=0 && fileName[0]!=0) {
-        fd = fopen(fileName,"w+");
-    }
-    byteArray();
-    ubyteArray();
-    longArray();
-    ulongArray();
-    floatArray();
-    doubleArray();
-    stringArray();
-    shareArray();
-    return(0);
-}
-

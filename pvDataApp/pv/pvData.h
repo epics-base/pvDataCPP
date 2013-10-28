@@ -9,6 +9,15 @@
  */
 #ifndef PVDATA_H
 #define PVDATA_H
+
+#ifdef __GNUC__
+#define USAGE_DEPRECATED __attribute__((deprecated))
+#define USAGE_ERROR(MSG) __attribute__((error(MSG)))
+#else
+#define USAGE_DEPRECATED
+#define USAGE_ERROR(MSG)
+#endif
+
 #include <string>
 #include <map>
 #include <stdexcept>
@@ -18,6 +27,8 @@
 #include <iomanip>
 #include <pv/pvIntrospect.h>
 #include <pv/requester.h>
+#include <pv/typeCast.h>
+#include <pv/sharedVector.h>
 
 #if defined(__vxworks) && !defined(_WRS_VXWORKS_MAJOR)
 typedef class std::ios std::ios_base;
@@ -96,7 +107,11 @@ class PVScalar;
 class PVScalarArray;
 
 class PVStructure;
-class PVStructureArray;
+
+
+template<typename T> class PVScalarValue;
+template<typename T> class PVValueArray;
+
 
 /**
  * typedef for a pointer to a PVAuxInfo.
@@ -143,6 +158,8 @@ typedef std::vector<PVStructurePtr>::const_iterator PVStructurePtrArray_const__i
 /**
  * typedef for a pointer to a PVStructureArray.
  */
+
+typedef PVValueArray<PVStructurePtr> PVStructureArray;
 typedef std::tr1::shared_ptr<PVStructureArray> PVStructureArrayPtr;
 typedef std::vector<PVStructureArrayPtr> PVStructureArrayPtrArray;
 typedef std::tr1::shared_ptr<PVStructureArrayPtrArray> PVStructureArrayPtrArrayPtr;
@@ -249,7 +266,13 @@ public:
      * Get the fieldName for this field.
      * @return The name or empty string if top level field.
      */
-    String getFieldName() const ;
+    inline const String& getFieldName() const {return fieldName;}
+    /**
+     * Fully expand the name of this field using the
+     * names of its parent fields with a dot '.' seperating
+     * each name.
+     */
+    String getFullName() const;
     /**
      * Register the message requester.
      * At most one requester can be registered.
@@ -348,6 +371,7 @@ public:
      */
     virtual std::ostream& dumpValue(std::ostream& o) const = 0;
 
+
 protected:
     PVField::shared_pointer getPtrSelf()
     {
@@ -370,7 +394,6 @@ private:
     bool immutable;
     RequesterPtr requester;
     PostHandlerPtr postHandler;
-    std::tr1::shared_ptr<class Convert> convert;
     friend class PVDataCreate;
     friend class PVStructure;
 };
@@ -381,6 +404,10 @@ std::ostream& operator<<(std::ostream& o, const PVField& f);
  * PVScalar is the base class for each scalar field.
  */
 class PVScalar : public PVField {
+    // friend our child class(s) so that it
+    // can call protected methods of other
+    // PVScalar instances.
+    template<typename E> friend class PVScalarValue;
 public:
     POINTER_DEFINITIONS(PVScalar);
     /**
@@ -394,6 +421,47 @@ public:
      * @return the interface.
      */
     const ScalarConstPtr getScalar() const ;
+
+    /**
+     * Convert and return the scalar value in the requested type.
+     * Result type is determined from the function template argument
+     * which must be one of the ScalarType enums.
+     * Uses castUnsafe<TO>() for value conversion.
+     @code
+      PVScalar* pv = ...;
+      uint32 val = pv->getAs<pvInt>();
+     @endcode
+     */
+    template<typename T>
+    inline T getAs() const {
+        T result;
+        this->getAs((void*)&result, (ScalarType)ScalarTypeID<T>::value);
+        return result;
+    }
+protected:
+    virtual void getAs(void *, ScalarType) const = 0;
+public:
+
+    /**
+     * Convert and assign the provided value.
+     * The value type is determined from the function template argument
+     * which must be one of the ScalarType enums.
+     * Uses castUnsafe<TO>() for value conversion.
+     @code
+      PVScalar* pv = ...;
+      pv->putFrom<pvInt>((int32)42);
+     @endcode
+     */
+    template<typename T>
+    inline void putFrom(T val) {
+        this->putFrom((const void*)&val, (ScalarType)ScalarTypeID<T>::value);
+    }
+protected:
+    virtual void putFrom(const void *, ScalarType) = 0;
+public:
+
+    virtual void assign(const PVScalar&) = 0;
+
 protected:
     PVScalar(ScalarConstPtr const & scalar);
 };
@@ -408,6 +476,9 @@ public:
     typedef T value_type;
     typedef T* pointer;
     typedef const T* const_pointer;
+
+    static const ScalarType typeCode;
+
     /**
      * Destructor
      */
@@ -442,9 +513,42 @@ public:
     	put(value);
 	}
 
+    template<typename T1>
+    inline T1 getAs() const {
+        T1 result(castUnsafe<T1,T>(get()));
+        return result;
+    }
+
+    template<typename T1>
+    inline void putFrom(T1 val) {
+        put(castUnsafe<T,T1>(val));
+    }
+
 protected:
     PVScalarValue(ScalarConstPtr const & scalar)
     : PVScalar(scalar) {}
+    virtual void getAs(void * result, ScalarType rtype) const
+    {
+        const T src = get();
+        castUnsafeV(1, rtype, result, typeCode, (const void*)&src);
+    }
+    virtual void putFrom(const void *src, ScalarType stype)
+    {
+        T result;
+        castUnsafeV(1, typeCode, (void*)&result, stype, src);
+        put(result);
+    }
+    virtual void assign(const PVScalar& scalar)
+    {
+        if(this==&scalar)
+            return;
+        if(isImmutable())
+            throw std::invalid_argument("Destination is immutable");
+        T result;
+        scalar.getAs((void*)&result, typeCode);
+        put(result);
+    }
+
 private:
     friend class PVDataCreate;
 };
@@ -452,7 +556,7 @@ private:
 /**
  * typedefs for the various possible scalar types.
  */
-typedef PVScalarValue<uint8> PVBoolean;
+typedef PVScalarValue<boolean> PVBoolean;
 typedef PVScalarValue<int8> PVByte;
 typedef PVScalarValue<int16> PVShort;
 typedef PVScalarValue<int32> PVInt;
@@ -500,7 +604,7 @@ public:
     /**
      * Destructor
      */
-    virtual ~PVArray();
+    virtual ~PVArray(){};
     /**
      * Set the field to be immutable, i. e. it can no longer be modified.
      * This is permanent, i.e. once done the field can onot be made mutable.
@@ -510,17 +614,17 @@ public:
      * Get the array length.
      * @return The length.
      */
-    std::size_t getLength() const;
+    virtual std::size_t getLength() const = 0;
     /**
      * Set the array length.
      * @param The length.
      */
-    virtual void setLength(std::size_t length);
+    virtual void setLength(std::size_t length) = 0;
     /**
      * Get the array capacity.
      * @return The capacity.
      */
-    std::size_t getCapacity() const;
+    virtual std::size_t getCapacity() const = 0;
     /**
      * Can the capacity be changed.
      * @return (false,true) if (can not, can) be changed.
@@ -541,9 +645,8 @@ public:
 
 protected:
     PVArray(FieldConstPtr const & field);
-    void setCapacityLength(std::size_t capacity,std::size_t length);
 private:
-    class PVArrayPvt * pImpl;
+    bool capacityMutable;
     friend class PVDataCreate;
 };
 
@@ -594,115 +697,62 @@ public:
     const ScalarArrayConstPtr getScalarArray() const ;
 
 protected:
-    PVScalarArray(ScalarArrayConstPtr const & scalarArray);
-private:
-    friend class PVDataCreate;
-};
-
-/**
- * This is provided by code that calls get.
- */
-typedef PVArrayData<PVStructurePtr> StructureArrayData;
-
-/**
- * Data class for a structureArray
- */
-class PVStructureArray : public PVArray
-{
+    virtual void _getAsVoid(shared_vector<const void>&) const = 0;
+    virtual void _putFromVoid(const shared_vector<const void>&) = 0;
 public:
-    POINTER_DEFINITIONS(PVStructureArray);
-    typedef PVStructurePtr  value_type;
-    typedef PVStructurePtr* pointer;
-    typedef const PVStructurePtr* const_pointer;
-    typedef PVArrayData<PVStructurePtr> ArrayDataType;
-    typedef std::vector<PVStructurePtr> vector;
-    typedef const std::vector<PVStructurePtr> const_vector;
-    typedef std::tr1::shared_ptr<vector> shared_vector;
-    typedef PVStructureArray &reference;
-    typedef const PVStructureArray& const_reference;
-    /**
-     * Destructor
-     */
-    virtual ~PVStructureArray() {}
-    /**
-     * Set the array capacity.
-     * @param capacity The length.
-     */
-    virtual void setCapacity(size_t capacity);
-    /**
-     * Set the array length.
-     * @param length The length.
-     */
-    virtual void setLength(std::size_t length);
-    /**
-     * Get the introspection interface
-     * @return The interface.
-     */
-    virtual StructureArrayConstPtr getStructureArray() const ;
-    /**
-     * Append new elements to the end of the array.
-     * @param number The number of elements to add.
-     * @return the new length of the array.
-     */
-    virtual std::size_t append(std::size_t number);
-    /**
-     * Remove elements from the array.
-     * @param offset The offset of the first element to remove.
-     * @param number The number of elements to remove.
-     * @return (false,true) if the elements were removed.
-     */
-    virtual bool remove(std::size_t offset,std::size_t number);
-    /**
-     * Compress. This removes all null elements from the array.
-     */
-    virtual void compress();
-    /**
-     * Get array elements
-     * @param offset The offset of the first element,
-     * @param length The number of elements to get.
-     * @param data The place where the data is placed.
-     */
-    virtual std::size_t get(std::size_t offset, std::size_t length,
-        StructureArrayData &data);
-    /**
-     * Put data into the array.
-     * @param offset The offset of the first element,
-     * @param length The number of elements to get.
-     * @param from The new values to put into the array.
-     * @param fromOffset The offset in from.
-     * @return The number of elements put into the array.
-     */
-    virtual std::size_t put(std::size_t offset,std::size_t length,
-        const_vector const & from, std::size_t fromOffset);
-    /**
-     * Share data from another source.
-     * @param value The data to share.
-     * @param capacity The capacity of the array.
-     * @param length The length of the array.
-     */
-    virtual void shareData(
-         shared_vector const & value,
-         std::size_t capacity,
-         std::size_t length);
-    virtual void serialize(ByteBuffer *pbuffer,
-        SerializableControl *pflusher) const;
-    virtual void deserialize(ByteBuffer *buffer,
-        DeserializableControl *pflusher);
-    virtual void serialize(ByteBuffer *pbuffer,
-        SerializableControl *pflusher, std::size_t offset, std::size_t count) const ;
-    virtual pointer get() { return &((*value.get())[0]); }
-    virtual pointer get() const { return &((*value.get())[0]); }
-    virtual vector const & getVector() {return *value;}
-    virtual shared_vector const & getSharedVector() {return value;}
 
-    virtual std::ostream& dumpValue(std::ostream& o) const;
-    virtual std::ostream& dumpValue(std::ostream& o, std::size_t index) const;
+    /**
+     * Fetch the current value and convert to the requested type.
+     *
+     * A copy is made if the requested type does not match
+     * the element type.  If the types do match then
+     * no copy is made.
+     */
+    template<typename T>
+    void
+    getAs(shared_vector<const T>& out) const
+    {
+        shared_vector<const void> temp;
+        _getAsVoid(temp);
+        out = shared_vector_convert<const T>(temp);
+    }
+
+    /**
+     * Assign the given value after conversion.
+     *
+     * A copy and element-wise conversion is performed unless
+     * the element type of the PVScalarArray matches the
+     * type of the provided data.
+     * If the types do match then a new refernce to the provided
+     * data is kept.
+     *
+     * Calls postPut()
+     */
+    template<typename T>
+    inline void putFrom(const shared_vector<const T>& inp)
+    {
+        shared_vector<const void> temp(static_shared_vector_cast<const void>(inp));
+        _putFromVoid(temp);
+    }
+
+    /**
+     * Assign the given PVScalarArray's value.
+     *
+     * A copy and element-wise conversion is performed unless
+     * the element type of the PVScalarArray matches the
+     * type of the provided data.
+     * If the types do match then a new refernce to the provided
+     * data is kept.
+     */
+    void assign(PVScalarArray& pv) {
+        shared_vector<const void> temp;
+        pv._getAsVoid(temp);
+        _putFromVoid(temp);
+    }
 
 protected:
-    PVStructureArray(StructureArrayConstPtr const & structureArray);
+    PVScalarArray(ScalarArrayConstPtr const & scalarArray);
 private:
-    StructureArrayConstPtr structureArray;
-    shared_vector value;
     friend class PVDataCreate;
 };
 
@@ -934,99 +984,328 @@ private:
     friend class PVDataCreate;
 };
 
+namespace detail {
+    // adaptor to allow epics::pvData::shared_vector to hold a reference
+    // to a shared_ptr<std::vector<> >
+    template<typename T>
+    struct shared_ptr_vector_deletor {
+        typedef std::tr1::shared_ptr<std::vector<T> > shared_vector;
+        shared_vector vec;
+        shared_ptr_vector_deletor(const shared_vector& v)
+            :vec(v) {}
+        void operator()(T*){vec.reset();}
+    };
+
+    template<typename T, class Base>
+    class PVVectorStorage : public Base
+    {
+    public:
+        typedef T  value_type;
+        typedef T* pointer;
+        typedef const T* const_pointer;
+
+        //TODO: full namespace can be removed along with local typedef 'shared_vector'
+        typedef ::epics::pvData::shared_vector<T> svector;
+        typedef ::epics::pvData::shared_vector<const T> const_svector;
+
+        // begin deprecated
+        typedef PVArrayData<T> ArrayDataType;
+        typedef std::vector<T> vector;
+        typedef const std::vector<T> const_vector;
+        typedef std::tr1::shared_ptr<vector> shared_vector;
+        // end deprecated
+
+    protected:
+        PVVectorStorage() : Base() {}
+
+        template<typename A>
+        PVVectorStorage(A a) : Base(a) {}
+    public:
+        virtual ~PVVectorStorage(){};
+
+        // Primative array manipulations
+
+        //! Fetch a read-only view of the current array data
+        virtual const_svector view() const = 0;
+
+        /** Exchange our contents for the provided.
+         *
+         @throws std::logic_error for Immutable arrays.
+         *
+         *  Callers must ensure that postPut() is called
+         *  after the last swap() operation.
+         *
+         *  Before you call this directly, consider using
+         *  the reuse(), or replace() methods.
+         */
+        virtual void swap(const_svector& other) = 0;
+
+        //! Discard current contents and replaced with the provided.
+        //! Fails for Immutable arrays
+        //! calls postPut()
+        virtual void replace(const const_svector& next) = 0;
+
+        // Derived operations
+
+        /** Remove and return the current array data
+         * or an unique copy if shared.
+         *
+         * Does @b not (and should not) call postPut()
+         *
+         * The returned shared_vector<T> will
+         * have unique()==true.
+         */
+        inline svector reuse()
+        {
+            const_svector result;
+            this->swap(result);
+            return thaw(result);
+        }
+
+        /**
+         * Get array elements
+         * @param offset The offset of the first element,
+         * @param length The number of elements to get.
+         * @param data The place where the data is placed.
+         */
+        std::size_t get(
+             std::size_t offset, std::size_t length, ArrayDataType &data) USAGE_DEPRECATED
+        {
+            const_svector ref = this->view();
+            ref.slice(offset, length);
+            data.data.resize(ref.size());
+            data.offset = 0;
+            std::copy(ref.begin(), ref.end(), data.data.begin());
+            return ref.size();
+        }
+
+        /**
+         * Copy data into the array growing the length as needed.
+         * @param offset The offset of the first element,
+         * @param length The number of elements to get.
+         * @param from The new values to put into the array.
+         * @param fromOffset The offset in from.
+         * @return The number of elements put into the array.
+         * calls postPut()
+         */
+        std::size_t put(std::size_t offset,
+            std::size_t length, const_pointer from, std::size_t fromOffset) USAGE_DEPRECATED
+        {
+            from += fromOffset;
+
+            svector temp(this->reuse());
+            if(temp.size() < length+offset)
+                temp.resize(length+offset);
+            else
+                temp.make_unique();
+
+            std::copy(from, from + length, temp.begin() + offset);
+            this->replace(freeze(temp));
+            return length;
+        }
+
+        std::size_t put(std::size_t offset,
+            std::size_t length, const_vector &from, std::size_t fromOffset) USAGE_DEPRECATED
+        { return this->put(offset,length, &from[0], fromOffset); }
+
+        /**
+         * Share data from another source.
+         * @param value The data to share.
+         * @param capacity The capacity of the array.
+         * @param length The length of the array.
+         * Does @b not call postPut()
+         */
+        void shareData(
+             shared_vector const & value,
+             std::size_t capacity,
+             std::size_t length) USAGE_DEPRECATED
+        {
+            vector& vref = *value.get();
+            typename svector::shared_pointer_type p(&vref[0],
+                                                    detail::shared_ptr_vector_deletor<T>(value));
+            const_svector temp(p, 0, std::min(length, vref.size()));
+            this->swap(temp);
+        }
+
+        pointer get() const USAGE_DEPRECATED {
+            // evil unsafe cast!
+            return (pointer)this->view().data();
+        }
+
+        vector const & getVector() USAGE_ERROR("No longer implemented.  Replace with view()");
+        shared_vector const & getSharedVector() USAGE_ERROR("No longer implemented.  Replace with view()");
+
+    };
+} // namespace detail
+
 template<typename T>
-class PVValueArray : public PVScalarArray {
+class PVValueArray : public detail::PVVectorStorage<T,PVScalarArray> {
+    typedef detail::PVVectorStorage<T,PVScalarArray> base_t;
 public:
     POINTER_DEFINITIONS(PVValueArray);
     typedef T  value_type;
     typedef T* pointer;
     typedef const T* const_pointer;
+
+    //TODO: full namespace can be removed along with local typedef 'shared_vector'
+    typedef ::epics::pvData::shared_vector<T> svector;
+    typedef ::epics::pvData::shared_vector<const T> const_svector;
+
+    // begin deprecated
     typedef PVArrayData<T> ArrayDataType;
     typedef std::vector<T> vector;
     typedef const std::vector<T> const_vector;
     typedef std::tr1::shared_ptr<vector> shared_vector;
     typedef PVValueArray & reference;
     typedef const PVValueArray & const_reference;
+    // end deprecated
+
+    static const ScalarType typeCode;
 
     /**
      * Destructor
      */
     virtual ~PVValueArray() {}
-    /**
-     * Get array elements
-     * @param offset The offset of the first element,
-     * @param length The number of elements to get.
-     * @param data The place where the data is placed.
-     */
-    virtual std::size_t get(
-         std::size_t offset, std::size_t length, ArrayDataType &data) = 0;
-    /**
-     * Put data into the array.
-     * @param offset The offset of the first element,
-     * @param length The number of elements to get.
-     * @param from The new values to put into the array.
-     * @param fromOffset The offset in from.
-     * @return The number of elements put into the array.
-     */
-    virtual std::size_t put(std::size_t offset,
-        std::size_t length, const_pointer from, std::size_t fromOffset) = 0;
-    virtual std::size_t put(std::size_t offset,
-        std::size_t length, const_vector &from, std::size_t fromOffset);
-    /**
-     * Share data from another source.
-     * @param value The data to share.
-     * @param capacity The capacity of the array.
-     * @param length The length of the array.
-     */
-    virtual void shareData(
-         shared_vector const & value,
-         std::size_t capacity,
-         std::size_t length) = 0;
-    virtual pointer get() = 0;
-    virtual pointer get() const = 0;
-    virtual vector const & getVector() = 0;
-    virtual shared_vector const & getSharedVector() = 0;
 
     std::ostream& dumpValue(std::ostream& o) const
     {
+        const_svector v(this->view());
+        typename const_svector::const_iterator it(v.begin()),
+                                      end(v.end());
     	o << '[';
-    	std::size_t len = getLength();
-    	bool first = true;
-    	for (std::size_t i = 0; i < len; i++)
-    	{
-    		if (first)
-    			first = false;
-    		else
-    			o << ',';
-    		dumpValue(o, i);
-    	}
+        if(it!=end) {
+            o << print_cast(*it++);
+            for(; it!=end; ++it)
+                o << ',' << print_cast(*it);
+
+        }
     	return o << ']';
     }
 
     std::ostream& dumpValue(std::ostream& o, size_t index) const
     {
-    	return o << *(get() + index);
+        return o << print_cast(this->view().at(index));
     }
 
 protected:
+    virtual void _getAsVoid(epics::pvData::shared_vector<const void>& out) const
+    {
+        out = static_shared_vector_cast<const void>(this->view());
+    }
+
+    virtual void _putFromVoid(const epics::pvData::shared_vector<const void>& in)
+    {
+        // TODO: try to re-use storage
+        replace(shared_vector_convert<const T>(in));
+    }
+
     PVValueArray(ScalarArrayConstPtr const & scalar)
-    : PVScalarArray(scalar) {}
+    : base_t(scalar) {}
     friend class PVDataCreate;
 };
 
-template<typename T>
-std::size_t PVValueArray<T>::put(
-    std::size_t offset,
-    std::size_t length,
-    const_vector &from,
-    std::size_t fromOffset)
-{ return put(offset,length, &from[0], fromOffset); }
+/**
+ * This is provided by code that calls get.
+ */
+typedef PVArrayData<PVStructurePtr> StructureArrayData;
+
+/**
+ * Data class for a structureArray
+ */
+template<>
+class PVValueArray<PVStructurePtr> : public detail::PVVectorStorage<PVStructurePtr,PVArray>
+{
+    typedef detail::PVVectorStorage<PVStructurePtr,PVArray> base_t;
+public:
+    POINTER_DEFINITIONS(PVStructureArray);
+    typedef PVStructurePtr  value_type;
+    typedef PVStructurePtr* pointer;
+    typedef const PVStructurePtr* const_pointer;
+    typedef PVArrayData<PVStructurePtr> ArrayDataType;
+    typedef std::vector<PVStructurePtr> vector;
+    typedef const std::vector<PVStructurePtr> const_vector;
+    typedef std::tr1::shared_ptr<vector> shared_vector;
+    typedef PVStructureArray &reference;
+    typedef const PVStructureArray& const_reference;
+
+    //TODO: full namespace can be removed along with local typedef 'shared_vector'
+    typedef ::epics::pvData::shared_vector<PVStructurePtr> svector;
+    typedef ::epics::pvData::shared_vector<const PVStructurePtr> const_svector;
+    /**
+     * Destructor
+     */
+    virtual ~PVValueArray() {}
+
+    virtual size_t getLength() const {return value.size();}
+    virtual size_t getCapacity() const {return value.capacity();}
+
+    /**
+     * Set the array capacity.
+     * @param capacity The length.
+     */
+    virtual void setCapacity(size_t capacity);
+    /**
+     * Set the array length.
+     * @param length The length.
+     */
+    virtual void setLength(std::size_t length);
+
+    /**
+     * Get the introspection interface
+     * @return The interface.
+     */
+    StructureArrayConstPtr getStructureArray() const {return structureArray;}
+    /**
+     * Append new elements to the end of the array.
+     * @param number The number of elements to add.
+     * @return the new length of the array.
+     */
+    virtual std::size_t append(std::size_t number);
+    /**
+     * Remove elements from the array.
+     * @param offset The offset of the first element to remove.
+     * @param number The number of elements to remove.
+     * @return (false,true) if the elements were removed.
+     */
+    virtual bool remove(std::size_t offset,std::size_t number);
+    /**
+     * Compress. This removes all null elements from the array.
+     */
+    virtual void compress();
+
+    virtual const_svector view() const { return value; }
+    virtual void swap(const_svector &other);
+    virtual void replace(const const_svector &other) {
+        value = other;
+        PVField::postPut();
+    }
+
+    virtual void serialize(ByteBuffer *pbuffer,
+        SerializableControl *pflusher) const;
+    virtual void deserialize(ByteBuffer *buffer,
+        DeserializableControl *pflusher);
+    virtual void serialize(ByteBuffer *pbuffer,
+        SerializableControl *pflusher, std::size_t offset, std::size_t count) const ;
+
+    virtual std::ostream& dumpValue(std::ostream& o) const;
+    virtual std::ostream& dumpValue(std::ostream& o, std::size_t index) const;
+
+protected:
+    PVValueArray(StructureArrayConstPtr const & structureArray)
+        :base_t(structureArray)
+        ,structureArray(structureArray)
+    {}
+private:
+    StructureArrayConstPtr structureArray;
+    const_svector value;
+    friend class PVDataCreate;
+};
 
 /**
  * Definitions for the various scalarArray types.
  */
-typedef PVArrayData<uint8> BooleanArrayData;
-typedef PVValueArray<uint8> PVBooleanArray;
+typedef PVArrayData<boolean> BooleanArrayData;
+typedef PVValueArray<boolean> PVBooleanArray;
 typedef std::tr1::shared_ptr<PVBooleanArray> PVBooleanArrayPtr;
 
 typedef PVArrayData<int8> ByteArrayData;
@@ -1171,6 +1450,9 @@ private:
  */
 
 extern PVDataCreatePtr getPVDataCreate();
-    
+
+#undef USAGE_DEPRECATED
+#undef USAGE_ERROR
+
 }}
 #endif  /* PVDATA_H */
