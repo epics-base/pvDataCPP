@@ -1196,7 +1196,7 @@ protected:
     virtual void _putFromVoid(const epics::pvData::shared_vector<const void>& in)
     {
         // TODO: try to re-use storage
-        replace(shared_vector_convert<const T>(in));
+        this->replace(shared_vector_convert<const T>(in));
     }
 
     PVValueArray(ScalarArrayConstPtr const & scalar)
