@@ -46,34 +46,28 @@ namespace detail {
     // Handle mangling of type/value when printing
     template<typename T>
     struct print_convolute {
-        static FORCE_INLINE T op(const T& i) { return i; }
+        typedef T return_t;
+        static FORCE_INLINE return_t op(const T& i) { return i; }
     };
     // trick std::ostream into treating char's as numbers
     // by promoting char to int
     template<>
     struct print_convolute<int8> {
-        static FORCE_INLINE signed int op(int8 i) { return i; }
+        typedef signed int return_t;
+        static FORCE_INLINE return_t op(int8 i) { return i; }
     };
     template<>
     struct print_convolute<uint8> {
-        static FORCE_INLINE unsigned int op(uint8 i) { return i; }
+        typedef unsigned int return_t;
+        static FORCE_INLINE return_t op(uint8 i) { return i; }
     };
     // Turn boolean into a string
     template<>
     struct print_convolute<boolean> {
-        static FORCE_INLINE String op(boolean i) { return i ? "true" : "false"; }
+        typedef const char* return_t;
+        static FORCE_INLINE return_t op(boolean i) { return i ? "true" : "false"; }
     };
 
-    // trick std::ostream into treating char's as numbers
-    // by promoting char to int
-    template<typename T>
-    struct print_cast { typedef T type; };
-    template<>
-    struct print_cast<char> { typedef int type; };
-    template<>
-    struct print_cast<signed char> { typedef signed int type; };
-    template<>
-    struct print_cast<unsigned char> { typedef unsigned int type; };
 
     // default to C++ type casting
     template<typename TO, typename FROM, class Enable = void>
@@ -180,12 +174,13 @@ static FORCE_INLINE TO castUnsafe(const FROM& from)
 void castUnsafeV(size_t count, ScalarType to, void *dest, ScalarType from, const void *src);
 
 //! Cast value to printable type
-//! A no-op except for char types, which are cast to int
-//! so that they are printed as numbers std::ostream operators.
+//! A no-op except for int8 and uint8, which are cast to int
+//! so that they are printed as numbers std::ostream operators,
+//! and boolean which is transformed into a const char*
 template<typename T>
 static FORCE_INLINE
-typename detail::print_cast<T>::type
-print_cast(const T& v) { return v; }
+typename detail::print_convolute<T>::return_t
+print_cast(const T& v) { return detail::print_convolute<T>::op(v); }
 
 }} // end namespace
 
