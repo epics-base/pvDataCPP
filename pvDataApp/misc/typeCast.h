@@ -23,9 +23,9 @@ typedef std::string String;
 namespace detail {
     // parseToPOD wraps the epicsParse*() functions in one name
     // and throws exceptions
-    void parseToPOD(const std::string&, char *out);
-    void parseToPOD(const std::string&, int8_t *out);
-    void parseToPOD(const std::string&, uint8_t *out);
+    void parseToPOD(const std::string&, boolean *out);
+    void parseToPOD(const std::string&, int8 *out);
+    void parseToPOD(const std::string&, uint8 *out);
     void parseToPOD(const std::string&, int16_t *out);
     void parseToPOD(const std::string&, uint16_t *out);
     void parseToPOD(const std::string&, int32_t *out);
@@ -42,6 +42,27 @@ namespace detail {
     struct cast_arg { typedef ARG arg; };
     template<>
     struct cast_arg<String> { typedef const String& arg; };
+
+    // Handle mangling of type/value when printing
+    template<typename T>
+    struct print_convolute {
+        static FORCE_INLINE T op(const T& i) { return i; }
+    };
+    // trick std::ostream into treating char's as numbers
+    // by promoting char to int
+    template<>
+    struct print_convolute<int8> {
+        static FORCE_INLINE signed int op(int8 i) { return i; }
+    };
+    template<>
+    struct print_convolute<uint8> {
+        static FORCE_INLINE unsigned int op(uint8 i) { return i; }
+    };
+    // Turn boolean into a string
+    template<>
+    struct print_convolute<boolean> {
+        static FORCE_INLINE String op(boolean i) { return i ? "true" : "false"; }
+    };
 
     // trick std::ostream into treating char's as numbers
     // by promoting char to int
@@ -75,9 +96,8 @@ namespace detail {
     template<typename FROM>
     struct cast_helper<String, FROM, typename meta::not_same_type<String,FROM>::type> {
         static String op(FROM from) {
-            typedef typename print_cast<FROM>::type ptype;
             std::ostringstream strm;
-            strm << (ptype)from;
+            strm << print_convolute<FROM>::op(from);
             if(strm.fail())
                 throw std::runtime_error("Cast to string failed");
             return strm.str();

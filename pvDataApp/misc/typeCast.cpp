@@ -44,7 +44,7 @@ typedef void (*convertfn)(size_t, void*, const void*);
 static convertfn converters[pvString+1][pvString+1] =
 {
     // to pvBoolean
-    { &noconvert,
+    { &copyV<epics::pvData::boolean>,
       &noconvert,
       &noconvert,
       &noconvert,
@@ -55,7 +55,7 @@ static convertfn converters[pvString+1][pvString+1] =
       &noconvert,
       &noconvert,
       &noconvert,
-      &noconvert
+      &castVTyped<epics::pvData::boolean, String>,
     },
     // to pvByte
     {&noconvert,
@@ -198,7 +198,7 @@ static convertfn converters[pvString+1][pvString+1] =
      &castVTyped<double, String>,
     },
     // to pvString
-    {&noconvert,
+    {&castVTyped<String, epics::pvData::boolean>,
      &castVTyped<String, int8_t>,
      &castVTyped<String, int16_t>,
      &castVTyped<String, int32_t>,

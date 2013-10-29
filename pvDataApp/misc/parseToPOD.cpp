@@ -420,6 +420,16 @@ void handleParseError(int err)
 
 namespace epics { namespace pvData { namespace detail {
 
+void parseToPOD(const std::string & in, boolean *out)
+{
+    if(epicsStrCaseCmp(in.c_str(),"true")==0)
+        *out = 1;
+    else if(epicsStrCaseCmp(in.c_str(),"false")==0)
+        *out = 0;
+    else
+        throw std::runtime_error("parseToPOD: String no match true/false");
+}
+
 #define INTFN(T, S) \
 void parseToPOD(const std::string& in, T *out) { \
     epics ## S temp; \
@@ -428,9 +438,8 @@ void parseToPOD(const std::string& in, T *out) { \
     else      *out = temp; \
 }
 
-INTFN(char, Int8);
-INTFN(int8_t, Int8);
-INTFN(uint8_t, UInt8);
+INTFN(int8, Int8);
+INTFN(uint8, UInt8);
 INTFN(int16_t, Int16);
 INTFN(uint16_t, UInt16);
 INTFN(int32_t, Int32);

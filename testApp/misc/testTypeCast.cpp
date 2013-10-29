@@ -114,7 +114,7 @@ namespace {
 
 MAIN(testTypeCast)
 {
-    testPlan(110);
+    testPlan(122);
 
 try {
 
@@ -313,7 +313,6 @@ try {
     TEST2(String, "1", int8_t, 1);
     TEST2(String, "-1", int8_t, -1);
     TEST2(String, "1", uint8_t, 1);
-    TEST2(String, "-1", char, -1);
 
     TEST2(String, "127", int32_t, std::numeric_limits<int8_t>::max());
     TEST2(String, "-128", int32_t, std::numeric_limits<int8_t>::min());
@@ -336,6 +335,18 @@ try {
     TEST2(String, "1.1e-100", double, 1.1e-100);
 
     TEST(double, 1.1e100, String, "1.1E+100");
+
+    // any non-zero value is true
+    TEST(String, "true", epics::pvData::boolean, 100);
+
+    TEST2(String, "true", epics::pvData::boolean, 1);
+    TEST2(String, "false", epics::pvData::boolean, 0);
+
+    // Case insensitive
+    TEST(epics::pvData::boolean, 1, String, "True");
+    TEST(epics::pvData::boolean, 0, String, "False");
+    TEST(epics::pvData::boolean, 1, String, "TRUE");
+    TEST(epics::pvData::boolean, 0, String, "FALSE");
 
     testDiag("String Parsing");
 
@@ -372,8 +383,14 @@ try {
 
     FAIL(int8_t, String, "1000");
     FAIL(int8_t, String, "-1000");
-;
+
     FAIL(double, String, "1e+10000000");
+
+    FAIL(epics::pvData::boolean, String, "hello");
+    FAIL(epics::pvData::boolean, String, "1");
+    FAIL(epics::pvData::boolean, String, "0");
+    FAIL(epics::pvData::boolean, String, "T");
+    FAIL(epics::pvData::boolean, String, "F");
 
     testDiag("Floating point overflows");
 
