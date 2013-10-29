@@ -10,7 +10,7 @@
 #ifndef PVDATA_H
 #define PVDATA_H
 
-#ifdef __GNUC__
+#if defined(__GNUC__) && !(defined(__vxworks) && !defined(_WRS_VXWORKS_MAJOR))
 #define USAGE_DEPRECATED __attribute__((deprecated))
 #define USAGE_ERROR(MSG) __attribute__((error(MSG)))
 #else
