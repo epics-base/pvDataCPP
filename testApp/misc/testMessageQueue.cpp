@@ -24,13 +24,11 @@
 #include <pv/requester.h>
 #include <pv/messageQueue.h>
 #include <pv/event.h>
-#include <pv/thread.h>
-#include <pv/executor.h>
 
 
 using namespace epics::pvData;
 
-static void testBasic(FILE * fd,FILE */*auxfd*/) {
+static void testBasic(FILE * fd,FILE *auxfd) {
     int queueSize = 3;
     StringArray messages;
     messages.reserve(5);

@@ -27,8 +27,14 @@
 
 using namespace epics::pvData;
 
+static String actionName("action");
+
+class Action;
+typedef std::tr1::shared_ptr<Action> ActionPtr;
+
 class Action : public Runnable {
 public:
+    virtual ~Action() {}
     FILE *out;
     bool actuallyRan;
     Event begin, end;
@@ -42,19 +48,23 @@ public:
     }
 };
 
+typedef std::tr1::shared_ptr<Thread> ThreadPtr;
 static void testThreadRun(FILE *fd) {
     // show that we can control thread start and stop
-    Action ax(fd);
+    ActionPtr ax(new Action(fd));
     {
-        Thread tr("Action", lowPriority, &ax);
-        bool w=ax.begin.wait();
+        ThreadPtr tr(new Thread(actionName,lowPriority,ax.get()));
+        bool w=ax->begin.wait();
         fprintf(fd, "main %s\n", w?"true":"false");
-        fprintf(fd, "Action is %s\n", ax.actuallyRan?"true":"false");
-        ax.end.signal();
+        fprintf(fd, "Action is %s\n", ax->actuallyRan?"true":"false");
+        ax->end.signal();
     }
-    fprintf(fd, "Action is %s\n", ax.actuallyRan?"true":"false");
+    fprintf(fd, "Action is %s\n", ax->actuallyRan?"true":"false");
     fprintf(fd,"testThreadRun PASSED\n");
 }
+
+class Basic;
+typedef std::tr1::shared_ptr<Basic> BasicPtr;
 
 class Basic :
      public Command,
@@ -62,10 +72,21 @@ class Basic :
 {
 public:
     POINTER_DEFINITIONS(Basic);
-    Basic(ExecutorPtr const &executor);
-    ~Basic();
-    void run();
-    virtual void command();
+    Basic(ExecutorPtr const &executor)
+    : executor(executor) {}
+    ~Basic()
+    {
+    }
+    void run()
+    {
+        executor->execute(getPtrSelf());
+        bool result = wait.wait();
+        if(result==false) printf("basic::run wait returned false\n");
+    }
+    virtual void command()
+    {
+        wait.signal();
+    }
 private:
     Basic::shared_pointer getPtrSelf()
     {
@@ -77,29 +98,8 @@ private:
 
 typedef std::tr1::shared_ptr<Basic> BasicPtr;
 
-Basic::Basic(ExecutorPtr const &executor)
-: executor(executor)
-{
-}
-
-Basic::~Basic() {
-}
-
-void Basic::run()
-{
-    executor->execute(getPtrSelf());
-    bool result = wait.wait();
-    if(result==false) printf("basic::run wait returned false\n");
-}
-
-void Basic::command()
-{
-    wait.signal();
-}
-
-
 static void testBasic(FILE *fd) {
-    ExecutorPtr executor( new Executor(String("basic"),middlePriority));
+    ExecutorPtr executor(new Executor(String("basic"),middlePriority));
     BasicPtr basic( new Basic(executor));
     basic->run();
     fprintf(fd,"testBasic PASSED\n");
@@ -125,6 +125,8 @@ void MyFunc::function()
 
 typedef std::tr1::shared_ptr<MyFunc> MyFuncPtr;
 
+#ifdef TESTTHREADCONTEXT
+
 static void testThreadContext(FILE *fd,FILE *auxFd) {
     ExecutorPtr executor(new Executor(String("basic"),middlePriority));
     BasicPtr basic(new Basic(executor));
@@ -135,6 +137,7 @@ static void testThreadContext(FILE *fd,FILE *auxFd) {
     fprintf(auxFd,"time per call %f microseconds\n",perCall);
     fprintf(fd,"testThreadContext PASSED\n");
 }
+#endif
 
 int main(int argc, char *argv[]) {
      char *fileName = 0;
@@ -151,7 +154,8 @@ int main(int argc, char *argv[]) {
     }
     testThreadRun(fd);
     testBasic(fd);
+#ifdef TESTTHREADCONTEXT
     testThreadContext(fd,auxFd);
-    epicsExitCallAtExits();
+#endif
     return 0;
 }

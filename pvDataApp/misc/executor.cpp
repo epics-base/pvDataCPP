@@ -57,6 +57,7 @@ void Executor::run()
             xx.lock();
         }
         CommandPtr command = head;
+        head = command->next;
         if(command.get()==NULL) continue;
         if(command.get()==shutdown.get()) break;
         xx.unlock();
@@ -83,7 +84,8 @@ void Executor::execute(CommandPtr const & command)
         moreWork.signal();
         return;
     }
-    if(tail.get()==NULL) return;
+    CommandPtr tail = head;
+    while(tail->next!=NULL) tail = tail->next;
     tail->next = command;   
 }
 

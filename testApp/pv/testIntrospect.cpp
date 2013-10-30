@@ -16,7 +16,6 @@
 #include <testMain.h>
 
 #include <pv/requester.h>
-#include <pv/executor.h>
 #include <pv/pvIntrospect.h>
 #include <pv/pvData.h>
 #include <pv/standardField.h>

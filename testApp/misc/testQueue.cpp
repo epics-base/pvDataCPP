@@ -18,13 +18,12 @@
 
 #include <epicsAssert.h>
 #include <epicsExit.h>
+#include <epicsThread.h>
 
 #include <pv/lock.h>
 #include <pv/timeStamp.h>
 #include <pv/queue.h>
 #include <pv/event.h>
-#include <pv/thread.h>
-#include <pv/executor.h>
 
 
 using namespace epics::pvData;
@@ -43,7 +42,7 @@ typedef Queue<Data> DataQueue;
 class Sink;
 typedef std::tr1::shared_ptr<Sink> SinkPtr;
 
-class Sink : public Runnable {
+class Sink : public epicsThreadRunable {
 public:
     static SinkPtr create(DataQueue &queue,FILE *auxfd);
     Sink(DataQueue &queue,FILE *auxfd);
@@ -59,7 +58,7 @@ private:
     Event *stopped;
     Event *waitReturn;
     Event *waitEmpty;
-    Thread *thread;
+    epicsThread *thread;
 };
 
 SinkPtr Sink::create(DataQueue &queue,FILE *auxfd)
@@ -75,8 +74,9 @@ Sink::Sink(DataQueue &queue,FILE *auxfd)
   stopped(new Event()),
   waitReturn(new Event()),
   waitEmpty(new Event()),
-  thread(new Thread(String("sink"),middlePriority,this))
+  thread(new epicsThread(*this,"sink",epicsThreadGetStackSize(epicsThreadStackSmall)))
 {
+   thread->start();
 }
 
 Sink::~Sink() {

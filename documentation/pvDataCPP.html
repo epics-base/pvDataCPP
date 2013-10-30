@@ -37,7 +37,7 @@
 <h1>EPICS pvDataCPP</h1>
 <!-- Maturity: Working Draft or Request for Comments, or Recommendation, and date.  -->
 
-<h2 class="nocount">EPICS v4 Working Group, Working Draft, 16-May-2013</h2>
+<h2 class="nocount">EPICS v4 Working Group, Working Draft, 28-Oct-2013</h2>
 
   <dl>
     <dt>Latest version:</dt>
@@ -46,14 +46,16 @@
     </dd>
     <dt>This version:</dt>
     <dd><a
-      href="pvDataCPP_20130516.html">pvDataCPP_20130516.html</a>
+      href="pvDataCPP_20131023.html">pvDataCPP_20131023.html</a>
     </dd>
     <dt>Previous version:</dt>
     <dd><a
-      href="pvDataCPP_20121212.html">pvDataCPP_20121212.html</a>
+      href="pvDataCPP_20130516.html">pvDataCPP_20130516.html</a>
     </dd>
     <dt>Editors:</dt>
     <dd>Marty Kraimer, BNL</dd>
+    <dd>Michael Davidsaver, BNL</dd>
+    <dd>Matej Sekoranja, CosyLab</dd>
   </dl>
 
   <p class="copyright">This product is made available subject to acceptance of the <a
@@ -64,9 +66,10 @@ license.</a></p>
 
 <h2 class="nocount">Abstract</h2>
 
-<p>pvDataCPP is a computer software package for the efficient
-storage, access, and communication, of structured data. It is specifically the
-C++ implementation of pvData, which is one part of the set of related products in the EPICS
+<p>PVData is a computer software package for the efficient
+storage, access, and communication, of structured data.
+pvDataCPP is the C++ implementation of pvData.
+It is one part of the set of related products in the EPICS
 V4 control system programming environment:<br />
 <a href="http://epics-pvdata.sourceforge.net/relatedDocumentsV4.html">relatedDocumentsV4.html</a>
 </p>
@@ -74,54 +77,21 @@ V4 control system programming environment:<br />
 
 <h2 class="nocount">Status of this Document</h2>
 
-<p>This is the 16-May-2013 version of the C++ implementation of pvData.
-Since the last version changes were made to queue and to bitSetUtil.
+<p>This is the 28-Oct-2013 version of the C++ implementation of pvData.
+This version describes the changes since the 4.3.0 release of Epics Version 4.
 </p>
 
 <p> The text describes software which is a complete implementation of pvData as
 currently planned by the EPICS V4 Working Group. </p> </p>
 
-<p>The following is a list of unresolved issues for pvDataCPP:</p>
+<p>The major changes since the 4.3.0 release are:</p>
 <dl>
-  <dt>PVArray</dt>
-    <dd>The implementation of the different array types (PVBooleanArray, ...,
-      PVStructureArray) all store the data as a shared pointer holding a
-      vector. A test case should be created to make sure that vector.size() is
-      the same as getLength()</dd>
-  <dt>PVArray Examples</dt>
-    <dd>The following examples should be provided: 1) use all the get methods.
-      2) create an example that makes  data available in chunks.</dd>
-  <dt>pvType Example</dt>
-    <dd>Create an example of how to use the array typedefs</dd>
-  <dt>Convert test</dt>
-    <dd>How can this be better tested?</dd>
-  <dt>Structure and PVStructure</dt>
-    <dd>These two classes still keep data via std::vector.
-     Should they keep it as std::tr1::shared_ptr&lt;std::vector&lt;... ?<br />
-    In particular change
-<pre>
-class Structure
-...
-StringArray fieldNames;
-FieldConstPtrArray fields
-
-class PVStructure
-...
-PVFieldPtrArray pvFields;
-</pre>
-To
-<pre>
-class Structure
-...
-StringArrayPtr fieldNames;
-FieldConstPtrArrayPtr fields
-
-class PVStructure
-...
-PVFieldPtrArrayPtr pvFields;
-</pre>
-If these are changed several methods also change so that raw vectors are never passed as
-argument or returned from methods.</dd>
+  <dt>shared_vector</dt>
+    <dd>This provides many of the features of std:vector but uses std::shared_ptr
+     for the raw array.</dd>
+  <dt>Arrays</dt>
+    <p>The implementation of PVValueArray and PVStructureArray now inforce Copy On Write (COW)
+    and use shared_vector for the raw array.</p>
 </dl>
 
 <div id="toc">
@@ -129,13 +99,12 @@ argument or returned from methods.</dd>
 </div>
 <div id="contents" class="contents">
 
-
 <h2>Introduction</h2>
 
 <p>pvData is one of a set of related projects. It describes and implements the
 data that the other projects support. Thus it is not useful by itself but
 understanding pvData is required in order to understand the other projects. The
-reader should also become familar with projects pvAccess and pvIOC, which are
+reader should also become familar with project pvAccess, which is
 located via the same sourceforge site as this project.</p>
 
 <p>The Java and C++ implementation of pvData implement the same data model but
@@ -168,7 +137,7 @@ href="./html/index.html">doxygenDoc</a></p>
 
 <p>pvDataCPP introspection and data objects are designed to be shared. They are
 made availiable via <b>std::tr1::shared_ptr</b>. In addition arrays are
-implemented via <b>std::vector</b>. The following naming conventions are used
+implemented via <b>shared_vector</b>. The following naming conventions are used
 in typedefs:</p>
 <dl>
   <dt>Ptr</dt>
@@ -210,9 +179,9 @@ typedef std::vector&lt;double&gt;::const_iterator DoubleArray_const_iterator;</p
 
 <h3>Overview</h3>
 
-<p>Directory pvDataApp/pv has header files that completely describe pvData. The
-implementation is provided in directory pvDataApp/factory. Test programs
-appears in testApp/pv.</p>
+<p>Directory <b>pvDataApp/pv</b> has header files that completely describe pvData.
+The implementation is provided in directory <b>pvDataApp/factory</b>.
+Test programs appears in <b>testApp/pv</b>.</p>
 
 <p><b>NOTES</b>:</p>
 <dl>
@@ -266,7 +235,11 @@ proper semantics for the primitive types.</p>
 <p>pvType.h provides the proper semantics.</p>
 
 <p>It has the definitions:</p>
-<pre>typedef uint8_t  boolean;
+<pre>
+typedef detail::pick_type&lt;int8_t, signed char,
+     detail::pick_type&lt;uint8_t, char, unsigned char&gt;::type
+     &gt;::type boolean;
+
 typedef int8_t   int8;
 typedef int16_t  int16;
 typedef int32_t  int32;
@@ -301,7 +274,8 @@ inline ByteArray const &amp; getVector(ByteArrayPtr const &amp;value);
 typedef std::vector&lt;int8&gt;::iterator ByteArray_iterator;
 typedef std::vector&lt;int8&gt;::const_iterator ByteArray_const_iterator;
 
-/* similar definitions are present for ALL the primitive types */</pre>
+/* similar definitions are present for ALL the primitive types */
+</pre>
 
 <p>where</p>
 <dl>
@@ -330,6 +304,19 @@ typedef std::vector&lt;int8&gt;::const_iterator ByteArray_const_iterator;
     <dd>typedefs are provided for an array of each of the primitive types. Note
       that string is treated like a primitive type/</dd>
 </dl>
+<p><b>TBD</b> 
+<dl>
+   <dt>boolean</dt>
+     <dd>Question for Michael. Why isn't the definition of <b>boolean</b> just
+    <pre>
+typedef uint8_t boolean;
+    </pre>
+   <dt>StringBuilder</dt>
+     <dd>Should this go away?</dd>
+   <dt>Array definitions</dt>
+     <dd>These should all be removed.</dd>
+</dl>
+</p>
 
 <h3>pvIntrospect.h</h3>
 
@@ -382,6 +369,7 @@ public:
     ScalarType getScalarType(String const &amp;value);
     const char* name(ScalarType);
     void toString(StringBuilder buf,ScalarType scalarType);
+    size_t elementSize(ScalarType id);
 };</pre>
 
 <p>Type is one of the following:</p>
@@ -452,7 +440,21 @@ public:
       return the scalarType.</dd>
   <dt>toString</dt>
     <dd>Convert the scalar type to a string.</dd>
+  <dt>elementSize</dt>
+     <dd>Returns the size in bytes of an instance of the scalarType.</dd>
 </dl>
+<p><b>TBD</b>
+<dl>
+   <dt>union</dt>
+     <dd>Types pvUnion and pvUnionArray should be added</dd>
+   <dt>toString</dt>
+      <dd>Should this be changed to
+      <pre>
+String toString(ScalarType scalarType);
+      </pre>
+      </dd>
+</dl>
+</p>
 
 <h4>Introspection Description</h4>
 
@@ -472,12 +474,16 @@ following: </p>
     <dd>A scalar has a scalarType</dd>
   <dt>ScalarArray</dt>
     <dd>The element type is a scalarType</dd>
+  <dt>Structure</dt>
+    <dd>Has fields that can be any of the supported types.</dd>
   <dt>StructureArray</dt>
     <dd>The field holds an array of structures. Each element has the same
       Structure interspection interface. A pvAccess client can only get/put
       entire PVStructure elements NOT subfields of array elements.</dd>
-  <dt>Structure</dt>
-    <dd>Has fields that can be any of the supported types.</dd>
+   <dt>Union</dt>
+      <dd><b>TBD</b></dd>
+   <dt>UnionArray</dt>
+      <dd><b>TBD</b></dd>
   <dt>FieldCreate</dt>
     <dd>This is an interface that provides methods to create introspection
       interfaces. A factory is provides to create FieldCreate.</dd>
@@ -570,8 +576,7 @@ public:
    std::size_t getFieldIndex(String const &amp;fieldName) const;
    FieldConstPtrArray const &amp; getFields() const {return fields;}
    StringArray const &amp; getFieldNames() const;
-   void renameField(std::size_t fieldIndex,String const &amp;newName);
-   String getFieldName(std::size_t fieldIndex);
+   String getFieldName(std::size_t fieldIndex) const;
    virtual void toString(StringBuilder buf,int indentLevel) const;
    virtual String getID() const;
    virtual void serialize(ByteBuffer *buffer, SerializableControl *control) const;
@@ -590,13 +595,6 @@ public:
         FieldConstPtrArray const &amp; fields) const;
     StructureConstPtr createStructure (
         String const &amp;id,
-        StringArray const &amp; fieldNames,
-        FieldConstPtrArray const &amp; fields) const;
-    StructureConstPtr appendField(
-        StructureConstPtr const &amp; structure,
-        String const &amp;fieldName, FieldConstPtr const &amp; field) const;
-    StructureConstPtr appendFields(
-        StructureConstPtr const &amp; structure,
         StringArray const &amp; fieldNames,
         FieldConstPtrArray const &amp; fields) const;
     FieldConstPtr deserialize(ByteBuffer* buffer, DeserializableControl* control) const;
@@ -666,8 +664,6 @@ extern FieldCreatePtr getFieldCreate(); </pre>
     <dd>Get the array of introspection interfaces for the field,</dd>
   <dt>getFieldNames</dt>
     <dd>Get the array of field names for the subfields.</dd>
-  <dt>renameField</dt>
-    <dd>Rename the field.</dd>
   <dt>getFieldName</dt>
     <dd>Get the field name for the specified index.</dd>
 </dl>
@@ -686,13 +682,19 @@ extern FieldCreatePtr getFieldCreate(); </pre>
       not. The one without will result in ID "structure".</dd>
   <dt>createStructureArray</dt>
     <dd>Create a structure array introspection instance. </dd>
-  <dt>appendField</dt>
-    <dd>Append a field to a structure.</dd>
-  <dt>appendFields</dt>
-    <dd>Append fields to a structure.</dd>
   <dt>deserialize</dt>
     <dd>Deserialize from given byte buffer.</dd>
 </dl>
+<p><b>TBD</b>
+<dl>
+    <dt>toString</dt>
+      <dd>Should all the toString methods be changed to just return String?</dd>
+    <dt>ScalarTypeTraits and ScalarTypeID</dt>
+      <dd>These seem to only be used by shared_vector. Do they need to be documented?</dd>
+     <dt>appendField and appendFields</dt>
+       <dd>These methods of FieldCreate should be removed.</dd>
+</dl>
+</p>
 
 <h3>standardField.h</h3>
 
@@ -801,6 +803,13 @@ public:
     <dd>The above provide introspection interfaces for standard properties. See
       the section on Properties for a description of how these are defined.</dd>
 </dl>
+<p><b>TBD</b>
+<dl>
+    <dt>union</dt>
+    <dt>unionArray</dt>
+    <dd>When union is supported also add these.</dd>
+</dl>
+</p>
 
 <h3>pvData.h</h3>
 
@@ -811,20 +820,13 @@ showing the entire file, it will be described in parts. </p>
 
 <p>These are typedefs for Array and Ptr for the various pvData class
 definitions, i.e. typdefs for "std::vector" and "std::tr1::shared_ptr".</p>
-<pre>class PVAuxInfo;
-class PostHandler;
-
+<pre>
 class PVField;
 class PVScalar;
-
 class PVScalarArray;
-
 class PVStructure;
 class PVStructureArray;
 
-typedef std::tr1::shared_ptr&lt;PVAuxInfo&gt; PVAuxInfoPtr;
-
-typedef std::tr1::shared_ptr&lt;PostHandler&gt; PostHandlerPtr;
 
 typedef std::tr1::shared_ptr&lt;PVField&gt; PVFieldPtr;
 typedef std::vector&lt;PVFieldPtr&gt; PVFieldPtrArray;
@@ -839,45 +841,108 @@ typedef std::vector&lt;PVStructurePtr&gt; PVStructurePtrArray;
 typedef std::vector&lt;PVStructurePtr&gt;::iterator PVStructurePtrArray_iterator;
 typedef std::vector&lt;PVStructurePtr&gt;::const_iterator PVStructurePtrArray_const__iterator;
 
-typedef std::tr1::shared_ptr&lt;PostHandler&gt; PostHandlerPtr</pre>
+typedef PVValueArray&lt;PVStructurePtr&gt; PVStructureArray;
+typedef std::tr1::shared_ptr&lt;PVStructureArray&gt; PVStructureArrayPtr;
+typedef std::vector&lt;PVStructureArrayPtr&gt; PVStructureArrayPtrArray;
+typedef std::tr1::shared_ptr&lt;PVStructureArrayPtrArray&gt; PVStructureArrayPtrArrayPtr;
 
-<p>PostHandler is a class that must be implemented by any code that calls
-setPostHandler. It's single virtual method. postPut is called whenever
-PVField::postPut is called.</p>
-<pre>class PostHandler 
-{
-public:
-    POINTER_DEFINITIONS(PostHandler);
-    virtual ~PostHandler(){}
-    virtual void postPut() = 0;
-};</pre>
+/**
+ * typedefs for the various possible scalar types.
+ */
+typedef PVScalarValue&lt;boolean&gt; PVBoolean;
+typedef PVScalarValue&lt;int8&gt; PVByte;
+typedef PVScalarValue&lt;int16&gt; PVShort;
+typedef PVScalarValue&lt;int32&gt; PVInt;
+typedef PVScalarValue&lt;int64&gt; PVLong;
+typedef PVScalarValue&lt;uint8&gt; PVUByte;
+typedef PVScalarValue&lt;uint16&gt; PVUShort;
+typedef PVScalarValue&lt;uint32&gt; PVUInt;
+typedef PVScalarValue&lt;uint64&gt; PVULong;
+typedef PVScalarValue&lt;float&gt; PVFloat;
+typedef PVScalarValue&lt;double&gt; PVDouble;
+class PVString;
+typedef std::tr1::shared_ptr&lt;PVBoolean&gt; PVBooleanPtr;
+typedef std::tr1::shared_ptr&lt;PVByte&gt; PVBytePtr;
+typedef std::tr1::shared_ptr&lt;PVShort&gt; PVShortPtr;
+typedef std::tr1::shared_ptr&lt;PVInt&gt; PVIntPtr;
+typedef std::tr1::shared_ptr&lt;PVLong&gt; PVLongPtr;
+typedef std::tr1::shared_ptr&lt;PVUByte&gt; PVUBytePtr;
+typedef std::tr1::shared_ptr&lt;PVUShort&gt; PVUShortPtr;
+typedef std::tr1::shared_ptr&lt;PVUInt&gt; PVUIntPtr;
+typedef std::tr1::shared_ptr&lt;PVULong&gt; PVULongPtr;
+typedef std::tr1::shared_ptr&lt;PVFloat&gt; PVFloatPtr;
+typedef std::tr1::shared_ptr&lt;PVDouble&gt; PVDoublePtr;
+typedef std::tr1::shared_ptr&lt;PVString&gt; PVStringPtr;
+
+/**
+ * Definitions for the various scalarArray types.
+ */
+typedef PVValueArray&lt;boolean&gt; PVBooleanArray;
+typedef PVValueArray&lt;int8&gt; PVByteArray;
+typedef PVValueArray&lt;int16&gt; PVShortArray;
+typedef PVValueArray&lt;int32&gt; PVIntArray;
+typedef PVValueArray&lt;int64&gt; PVLongArray;
+typedef PVValueArray&lt;uint8&gt; PVUByteArray;
+typedef PVValueArray&lt;uint16&gt; PVUShortArray;
+typedef PVValueArray&lt;uint32&gt; PVUIntArray;
+typedef PVValueArray&lt;uint64&gt; PVULongArray;
+typedef PVValueArray&lt;float&gt; PVFloatArray;
+typedef PVValueArray&lt;double&gt; PVDoubleArray;
+typedef PVValueArray&lt;String&gt; PVStringArray;
+
+typedef std::tr1::shared_ptr&lt;PVBooleanArray&gt; PVBooleanArrayPtr;
+typedef std::tr1::shared_ptr&lt;PVByteArray&gt; PVByteArrayPtr;
+typedef std::tr1::shared_ptr&lt;PVShortArray&gt; PVShortArrayPtr;
+typedef std::tr1::shared_ptr&lt;PVIntArray&gt; PVIntArrayPtr;
+typedef std::tr1::shared_ptr&lt;PVLongArray&gt; PVLongArrayPtr;
+typedef std::tr1::shared_ptr&lt;PVUByteArray&gt; PVUByteArrayPtr;
+typedef std::tr1::shared_ptr&lt;PVUShortArray&gt; PVUShortArrayPtr;
+typedef std::tr1::shared_ptr&lt;PVUIntArray&gt; PVUIntArrayPtr;
+typedef std::tr1::shared_ptr&lt;PVULongArray&gt; PVULongArrayPtr;
+typedef std::tr1::shared_ptr&lt;PVFloatArray&gt; PVFloatArrayPtr;
+typedef std::tr1::shared_ptr&lt;PVDoubleArray&gt; PVDoubleArrayPtr;
+typedef std::tr1::shared_ptr&lt;PVStringArray&gt; PVStringArrayPtr;
+
+</pre>
+<p><b>TBD</b>
+<dl>
+    <dt>PVUnion</dt>
+    <dt>PVUnionArray</dt>
+      <dd>When union is supported.</dd>
+    <dt>WPtr</dt>
+       <dd>Should definitions for std::tr1::weak_ptr also be added.</dd>
+</dl>
 
 <h4>PVField</h4>
 
 <p>PVField is the base interface for accessing data. A data structure consists
 of a top level PVStructure. Every field of every structure of every top level
 structure has a PVField associated with it.</p>
-<pre>class PVField
+<pre>
+class PostHandler
+{
+public:
+    POINTER_DEFINITIONS(PostHandler);
+    virtual ~PostHandler(){}
+    virtual void postPut() = 0;
+};
+
+class PVField
 : virtual public Serializable,
   public std::tr1::enable_shared_from_this&lt;PVField&gt;
 {
 public:
    POINTER_DEFINITIONS(PVField);
    virtual ~PVField();
-   virtual void message(String message,MessageType messageType);
    String getFieldName() const ;
-   virtual void setRequester(RequesterPtr const &amp;prequester);
    std::size_t getFieldOffset() const;
    std::size_t getNextFieldOffset() const;
    std::size_t getNumberFields() const;
-   PVAuxInfoPtr &amp; getPVAuxInfo()
    bool isImmutable() const;
    virtual void setImmutable();
    const FieldConstPtr &amp; getField() const ;
    PVStructure * getParent() const 
-   void replacePVField(const PVFieldPtr&amp;  newPVField);
-   void renameField(String const &amp;newName);
-   void postPut() ;
+   void postPut();
    void setPostHandler(PostHandlerPtr const &amp;postHandler);
    virtual bool equals(PVField &amp;pv);
    virtual void toString(StringBuilder buf) ;
@@ -891,15 +956,14 @@ public:
   <dt>~PVField</dt>
     <dd>Destructor. Since shared pointers are used it should never be called by
       user code.</dd>
-  <dt>message</dt>
-    <dd>Code attached to this field can call this method to report
-    problems.</dd>
   <dt>getFieldName</dt>
     <dd>Get the field name. If the field is a top level structure the field
       name will be an empty string.</dd>
-  <dt>setRequester</dt>
-    <dd>Sets a requester to be called when message or getRequesterName are
-      called. This is only legal for the top level PVField. </dd>
+  <dt>getFullName</dt>
+     <dd>Fully expand the name of this field using the
+     names of its parent fields with a dot '.' seperating
+     each name.
+     </dd>
   <dt>getFieldOffset</dt>
     <dd>Get offset of the PVField field within top level structure. Every field
       within the PVStructure has a unique offset. The top level structure has
@@ -914,8 +978,6 @@ public:
   <dt>getNumberFields</dt>
     <dd>Get the total number of fields in this field. This is nextFieldOffset -
       fieldOffset. </dd>
-  <dt>getPVAuxInfo</dt>
-    <dd>Get the PVAuxInfo for this field. PVAuxInfo is described below.</dd>
   <dt>isImmutable</dt>
     <dd>Is the field immutable?</dd>
   <dt>setImmutable</dt>
@@ -928,16 +990,15 @@ public:
   <dt>getParent</dt>
     <dd>Get the interface for the parent or null if this is the top level
       PVStructure.</dd>
-  <dt>replacePVField</dt>
-    <dd>Replace the data implementation for the field.</dd>
-  <dt>renameField</dt>
-    <dd>Rename the field name. </dd>
   <dt>postPut</dt>
     <dd>If a postHandler is registered it is called otherwise no action is
       taken.</dd>
   <dt>setPostHandler</dt>
     <dd>Set the postHandler for the record. Only a single handler can be
-      registered.</dd>
+      registered.
+      PostHandler is a class that must be implemented by any code that calls setPostHandler.
+      It's single virtual method. postPut is called whenever PVField::postPut is called.
+     </dd>
   <dt>equals</dt>
     <dd>Compare this field with another field. The result will be true only if
       the fields have exactly the same field types and if the data values are
@@ -948,47 +1009,22 @@ public:
   <dt>dumpValue</dt>
      <dd>Method for streams I/O.</dd>
 </dl>
+<p><b>TBD</b>
 
-<h4>PVAuxInfo</h4>
-
-<p>AuxInfo (Auxillary Information) is information about a field that is
-application specific. It will not be available outside the application that
-implements the database. In particular it will not be made available to Channel
-Access. It is used by the database itself to override the default
-implementation of fields. The JavaIOC uses it for attaching support code.
-Database Configuration and other tools can use it for configuration
-information. Each Field and each PVField can have have an arbitrary number of
-auxInfos. An auxInfo is a (key,PVScalar) pair where key is a string.</p>
-<pre>class PVAuxInfo : private NoDefaultMethods {
-public:
-    typedef std::map&lt;String,PVScalarPtr&gt; PVInfoMap;
-    typedef std::map&lt;String,PVScalarPtr&gt;::iterator PVInfoIter;
-    typedef std::pair&lt;String,PVScalarPtr&gt; PVInfoPair;
-
-    PVAuxInfo(PVField *pvField);
-    ~PVAuxInfo();
-    PVField * getPVField();
-    PVScalarPtr createInfo(String const &amp;key,ScalarType scalarType);
-    PVScalarPtr getInfo(String const &amp;key);
-    PVInfoMap &amp; getInfoMap();
-    void toString(StringBuilder buf);
-    void toString(StringBuilder buf,int indentLevel);
- ...
-};</pre>
-
-<p>where</p>
 <dl>
-  <dt>getPVField</dt>
-    <dd>Get the PVField to which this PVAuxInfo is attached.</dd>
-  <dt>createInfo</dt>
-    <dd>Create a new PVScalar of type scalarType.</dd>
-  <dt>getInfo</dt>
-    <dd>Get the PVScalar with the specified key.</dd>
-  <dt>getInfoMap</dt>
-    <dd>Get the map of all the PVScalars that hold the info.</dd>
-  <dt>toString</dt>
-    <dd>Print all the auxInfos</dd>
+   <dt>getFullName</dt>
+     <dd>Should this be removed?</dd>
+   <dt>toString and dumpValue</dt>
+      <dd>Should these be replaced by:
+<pre>
+virtual String toString() const;
+virtual std::ostream&amp; operator&lt;&lt;(std::ostream&amp; o) const = 0;
+</pre>
+       </dd>
+   <dt>replaceField</dt>
+      <dd>This is a protected member that should be removed.</dd>
 </dl>
+</p>
 
 <h4>PVScalar</h4>
 
@@ -1000,6 +1036,8 @@ public:
     typedef PVScalar &amp;reference;
     typedef const PVScalar&amp; const_reference;
     const ScalarConstPtr getScalar() const ;
+    template&lt;typename T&gt;
+    T getAs() const;
  ...
 }</pre>
 
@@ -1007,6 +1045,16 @@ public:
 <dl>
   <dt>getScalar</dt>
     <dd>Get the introspection interface for the PVScalar.</dd>
+  <dt>getAs</dt>
+     <dd>Convert and return the scalar value in the requested type.
+     Result type is determined from the function template argument
+     which must be one of the ScalarType enums.
+     For example:
+<pre>
+uint32 val = pv-&gt;getAs<pvInt>();
+</pre>
+     </dd>
+
 </dl>
 
 <h4>PVScalarValue</h4>
@@ -1019,9 +1067,18 @@ public:
     typedef T value_type;
     typedef T* pointer;
     typedef const T* const_pointer;
+    static const ScalarType typeCode;
+
     virtual ~PVScalarValue() {}
     virtual T get() const = 0;
     virtual void put(T value) = 0;
+    std::ostream&amp; dumpValue(std::ostream&amp; o) const;
+    void operator&gt;&gt;=(T&amp; value) const;
+    void operator&lt;&lt;=(T value);
+    template&lt;typename T1&gt;
+    T1 getAs() const;
+    template&lt;typename T1&gt;
+    void putFrom(T1 val);
  ...
 }
 
@@ -1038,13 +1095,60 @@ public:
     <dd>Get the value stored in the object.</dd>
   <dt>put</dt>
     <dd>Change the value stored in the object.</dd>
+  <dt>dumpValue</dt>
+     <dd>ostream method.</dd>
+  <dt>operator&gt;&gt;=</dt>
+      <dd>get operator. For example:
+<pre>
+double value;
+PVDoublePtr pvDouble;
+...
+pvDouble&gt;&gt;=value;
+</pre>
+        </dd>
+   <dt>operator&lt;&lt;=</dt>
+      <dd>put operator. For example:
+<pre>
+double value;
+PVDoublePtr pvDouble;
+...
+pvDouble&lt;&lt;=value;
+</pre>
+        </dd>
+  <dt>getAs</dt>
+     <dd>Convert and return the scalar value in the requested type.
+     Result type is determined from the function template argument
+     which must be one of the ScalarType enums.
+     For example:
+<pre>
+int32 val = pv-&gt;getAs&lt;pvInt&gt;>();
+</pre>
+     </dd>
+   <dt>putFrom</dt>
+     <dd>Convert the scalar value in the requested type
+      and put the value into this PVScalarValue.
+     The source type is determined from the function template argument
+     which must be one of the ScalarType enums.
+     For example:
+<pre>
+int32 val;
+pv-&gt;putFrom&lt;pvInt&gt;(val);
+</pre>
+     </dd>
 </dl>
+<p><b>TBD</b>
+<dl>
+   <dt>dumpvalue</dt>
+     <dd>replace this with ostream operator&lt;&lt;</dd>
+</dl>
+</p>
 
 <h4>PVArray</h4>
 
 <p>PVArray is the base interface for all the other PV Array interfaces. It
 extends PVField and provides the additional methods:</p>
-<pre>class PVArray : public PVField, public SerializableArray {
+<pre>
+class PVArray : public PVField, public SerializableArray {
 public:
     POINTER_DEFINITIONS(PVArray);
     virtual ~PVArray();
@@ -1055,6 +1159,7 @@ public:
     bool isCapacityMutable() const;
     void setCapacityMutable(bool isMutable);
     virtual void setCapacity(std::size_t capacity) = 0;
+    virtual std::ostream&amp; dumpValue(std::ostream&amp; o, std::size_t index) const;
  ...
 };</pre>
 <dl>
@@ -1080,49 +1185,61 @@ public:
     <dd>Specify if the capacity can be changed.</dd>
   <dt>setCapacity</dt>
     <dd>Set the capaciity.</dd>
+  <dt>dumpValue</dt>
+    <dd>ostream method</dd>
 </dl>
+<p><b>TBD</b>
+<dl>
+   <dt>dumpvalue</dt>
+     <dd>replace this with ostream operator&lt;&lt;</dd>
+</dl>
+</p>
 
-<h4>PVArrayData</h4>
-
-<p>This is the argument to one of the get methods of PVValueArray.</p>
-<pre>template&lt;typename T&gt;
-class PVArrayData {
-private:
-    std::vector&lt;T&gt; init;
-public:
-    POINTER_DEFINITIONS(PVArrayData);
-    typedef T  value_type;
-    typedef T* pointer;
-    typedef const T* const_pointer;
-    std::vector&lt;T&gt; &amp; data;
-    std::size_t offset;
-    PVArrayData()
-    : data(init)
-    {}
-};</pre>
 
 <h4>PVScalarArray</h4>
 
 <p>PVScalarArray is the base class for scalar array data. PVValueArray is a
 templete for the various scalar array data classes. There is a class for each
 possible scalar type, i. e. PVBooleanArray, ..., PVStringArray.</p>
-<pre>class PVScalarArray : public PVArray {
+<pre>
+class PVScalarArray : public PVArray {
 public:
     POINTER_DEFINITIONS(PVScalarArray);
     virtual ~PVScalarArray();
     typedef PVScalarArray &amp;reference;
     typedef const PVScalarArray&amp; const_reference;
+
     const ScalarArrayConstPtr getScalarArray() const ;
-    virtual std::ostream&amp; dumpValue(std::ostream&amp; o, size_t index) const = 0;
+    template&lt;typename T&gt;
+    void getAs(shared_vector&lt;const T&gt;&amp; out) const
+    template&lt;typename T&gt;
+    void putFrom(const shared_vector&lt;const T&gt;&amp; inp)
+    void assign(PVScalarArray&amp; pv);
  ...
-}</pre>
+}
+</pre>
 
 <p>where</p>
 <dl>
   <dt>getScalarArray</dt>
     <dd>Get the introspection interface.</dd>
-  <dt>dumpValue</dt>
-     <dd>Method for streams I/O.</dd>
+  <dt>getAs</dt>
+    <dd>Fetch the current value and convert to the requested type.
+      A copy is made if the requested type does not match the element type.
+      If the types do match then no copy is made.
+    </dd>
+  <dt>putFrom</dt>
+     <dd>Assign the given value after conversion.
+      A copy and element-wise conversion is performed unless the element type
+      of the PVScalarArray matches the type of the provided data.
+     If the types do match then a new refernce to the provided data is kept.
+     </dd>
+  <dt>assign</dt>
+    <dd>Assign the given PVScalarArray's value.
+     A copy and element-wise conversion is performed unless the element type
+     of the PVScalarArray matches the type of the provided data.
+     If the types do match then a new refernce to the provided data is kept.
+    </dd>
 </dl>
 
 <h4>PVValueArray</h4>
@@ -1130,184 +1247,54 @@ public:
 <p>This is a template class plus instances for PVBooleanArray, ...,
 PVStringArray.</p>
 <pre>template&lt;typename T&gt;
-class PVValueArray : public PVScalarArray {
+class PVValueArray : public detail::PVVectorStorage&lt;T,PVScalarArray&gt; 
+{
 public:
     POINTER_DEFINITIONS(PVValueArray);
     typedef T  value_type;
     typedef T* pointer;
     typedef const T* const_pointer;
-    typedef PVArrayData&lt;T&gt; ArrayDataType;
-    typedef std::vector&lt;T&gt; vector;
-    typedef const std::vector&lt;T&gt; const_vector;
-    typedef std::tr1::shared_ptr&lt;vector&gt; shared_vector;
-    typedef PVValueArray &amp; reference;
-    typedef const PVValueArray &amp; const_reference;
+    typedef ::epics::pvData::shared_vector&lt;T&gt; svector;
+    typedef ::epics::pvData::shared_vector&lt;const T&gt; const_svector;
+    static const ScalarType typeCode;
 
     virtual ~PVValueArray() {}
-    virtual std::size_t get(
-         std::size_t offset, std::size_t length, ArrayDataType &amp;data) = 0;
-    virtual std::size_t put(std::size_t offset,
-        std::size_t length, const_pointer from, std::size_t fromOffset) = 0;
-    virtual std::size_t put(std::size_t offset,
-        std::size_t length, const_vector &amp;from, std::size_t fromOffset);
-    virtual void shareData(
-         shared_vector const &amp; value,
-         std::size_t capacity,
-         std::size_t length) = 0;
-    virtual pointer get() = 0;
-    virtual pointer get() const = 0;
-    virtual vector const &amp; getVector() = 0;
-    virtual shared_vector const &amp; getSharedVector() = 0;
     std::ostream&amp; dumpValue(std::ostream&amp; o) const;
     std::ostream&amp; dumpValue(std::ostream&amp; o, size_t index) const;
-protected:
-    PVValueArray(ScalarArrayConstPtr const &amp; scalar)
-    : PVScalarArray(scalar) {}
-    friend class PVDataCreate;
+    // inherited from PVVectorStorage
+    const_svector view();
+    void swap(const_svector& other);
+    void replace(const const_svector& next);
+    svector reuse();
+    ...
 };
-
-template&lt;typename T&gt;
-std::size_t PVValueArray&lt;T&gt;::put(
-    std::size_t offset,
-    std::size_t length,
-    const_vector &amp;from,
-    std::size_t fromOffset)
-{ return put(offset,length, &amp;from[0], fromOffset); }
-
-/**
- * Definitions for the various scalarArray types.
- */
-typedef PVArrayData&lt;uint8&gt; BooleanArrayData;
-typedef PVValueArray&lt;uint8&gt; PVBooleanArray;
-typedef std::tr1::shared_ptr&lt;PVBooleanArray&gt; PVBooleanArrayPtr;
-
-typedef PVArrayData&lt;int8&gt; ByteArrayData;
-typedef PVValueArray&lt;int8&gt; PVByteArray;
-typedef std::tr1::shared_ptr&lt;PVByteArray&gt; PVByteArrayPtr;
-
-typedef PVArrayData&lt;int16&gt; ShortArrayData;
-typedef PVValueArray&lt;int16&gt; PVShortArray;
-typedef std::tr1::shared_ptr&lt;PVShortArray&gt; PVShortArrayPtr;
-
-typedef PVArrayData&lt;int32&gt; IntArrayData;
-typedef PVValueArray&lt;int32&gt; PVIntArray;
-typedef std::tr1::shared_ptr&lt;PVIntArray&gt; PVIntArrayPtr;
-
-typedef PVArrayData&lt;int64&gt; LongArrayData;
-typedef PVValueArray&lt;int64&gt; PVLongArray;
-typedef std::tr1::shared_ptr&lt;PVLongArray&gt; PVLongArrayPtr;
-
-typedef PVArrayData&lt;uint8&gt; UByteArrayData;
-typedef PVValueArray&lt;uint8&gt; PVUByteArray;
-typedef std::tr1::shared_ptr&lt;PVUByteArray&gt; PVUByteArrayPtr;
-
-typedef PVArrayData&lt;uint16&gt; UShortArrayData;
-typedef PVValueArray&lt;uint16&gt; PVUShortArray;
-typedef std::tr1::shared_ptr&lt;PVUShortArray&gt; PVUShortArrayPtr;
-
-typedef PVArrayData&lt;uint32&gt; UIntArrayData;
-typedef PVValueArray&lt;uint32&gt; PVUIntArray;
-typedef std::tr1::shared_ptr&lt;PVUIntArray&gt; PVUIntArrayPtr;
-
-typedef PVArrayData&lt;uint64&gt; ULongArrayData;
-typedef PVValueArray&lt;uint64&gt; PVULongArray;
-typedef std::tr1::shared_ptr&lt;PVULongArray&gt; PVULongArrayPtr;
-
-typedef PVArrayData&lt;float&gt; FloatArrayData;
-typedef PVValueArray&lt;float&gt; PVFloatArray;
-typedef std::tr1::shared_ptr&lt;PVFloatArray&gt; PVFloatArrayPtr;
-
-typedef PVArrayData&lt;double&gt; DoubleArrayData;
-typedef PVValueArray&lt;double&gt; PVDoubleArray;
-typedef std::tr1::shared_ptr&lt;PVDoubleArray&gt; PVDoubleArrayPtr;
-
-typedef PVArrayData&lt;String&gt; StringArrayData;
-typedef PVValueArray&lt;String&gt; PVStringArray;
-typedef std::tr1::shared_ptr&lt;PVStringArray&gt; PVStringArrayPtr;</pre>
+</pre>
 
 <p>where</p>
 <dl>
-  <dt>get( std::size_t offset, std::size_t length, ArrayDataType &amp;data)
-  </dt>
-    <dd>This method "exposes" it's internal array by setting data.data and
-      data.offset. The caller is responsible for copying the array elements.
-      This violates the principle that objects should not expose their internal
-      data but is done for efficency. For example it makes it possible to copy
-      between arrays with identical element types without requiring an
-      intermediate array.</dd>
-  <dt>put(std::size_t offset, std::size_t length, const_pointer from,
-  std::size_t fromOffset)</dt>
-    <dd>Put data into the array. from is a raw array.</dd>
-  <dt>put(std::size_t offset, std::size_t length, const_vector &amp;from,
-  std::size_t fromOffset)</dt>
-    <dd>Put data into the array from a vector holding the raw array.</dd>
-  <dt>shareData( shared_vector const &amp; value, std::size_t capacity,
-  std::size_t length)</dt>
-    <dd>Make the instance share the raw data from value.<br />
-      One use is
-      for immutable arrays. In this case the caller must set the PVArray to be
-      immutable. In the PVArray is not immutable then it is the applications
-      responsibility to coordinate access to the array. Again this violates the
-      principle that objects should not expose their internal data but is
-      important for immutable arrays. For example pvData and the javaIOC define
-      many enumerated structures where an enumerated structure has two fields:
-      index and choices. Choices is a PVStringArray that holds the enumerated
-      choices. Index is a PVInt that is the index of the currently selected
-      choice. For many enumerated structures choices is immutable. Allowing the
-      choices internal String[] to be shared between all the instances of an
-      enumerated structure saves on storage.<br />
-      Another use for shared data is  an application which processes an
-      array via multiple modules. Each accesses the internal data array of a
-      PVArray. In this case it is the applications responsibility
-      to coordinate access to the array.</dd>
-  <dt>get()</dt>
-    <dd>Get the raw array.</dd>
-  <dt>getVector()</dt>
-    <dd>Get the vector holding the raw array.</dd>
-  <dt>getSharedVector()</dt>
-    <dd>Get the shared vector holding the data.</dd>
   <dt>dumpValue</dt>
      <dd>Method for streams I/O.</dd>
+  <dt>view</dt>
+     <dd>Fetch a read-only view of the current array data.</dd>
+  <dt>swap</dt>
+     <dd>
+      Callers must ensure that postPut() is called after the last swap() operation.
+      Before you call this directly, consider using the reuse(), or replace() methods.
+     </dd>
+  <dt>replace</dt>
+     <dd> Discard current contents and replaced with the provided.</dd>
+  <dt>reuse</dt>
+     <dd>Remove and return the current array data or an unique copy if shared.</dd>
 </dl>
-
-<p>Both get and put return the number of elements actually transfered. The
-arguments are:</p>
+<p><b>TBD</b>
 <dl>
-  <dt>offset</dt>
-    <dd>The offset in the PV array.</dd>
-  <dt>len</dt>
-    <dd>The maximum number of elements to transfer. The number actually
-      transfered will be less than or equal to this value.</dd>
-  <dt>data</dt>
-    <dd>Get sets data.data to it's internal array and data.offset to the offset
-      into the array. The caller is responsible for the actual data
-    transfer.</dd>
-  <dt>from</dt>
-    <dd>The array from which the data is taken. This array is supplied by the
-      caller</dd>
-  <dt>fromOffset</dt>
-    <dd>The offset in from</dd>
+   <dt>dumpvalue</dt>
+     <dd>replace this with ostream operator&lt;&lt;</dd>
+   <dt>Check for completeness</dt>
+     <dd>Michael should check that PVScalarArray and PVValueArray
+      have the correct set of methods and that the descriptions are correct.</dd>
 </dl>
-
-<p>The caller must be prepared to make multiple calls to retrieve or put an
-entire array. A caller should accept or put partial arrays. For example the
-following reads an entire array:</p>
-<pre>void getArray(PVDoubleArrayPtr &amp; pv,DoubleArray const &amp; to)
-{
-    size_t len = pv-&gt;getLength();
-    if(to.size()&lt;len) to.resize(len);
-    DoubleArrayData data;
-    size_t offset = 0;
-    while(offset&lt;len) {
-        size_t num = pv-&gt;get(offset,(len-offset),data);
-        DoubleArray &amp;from = data.data;
-        size_t fromOffset = data.offset;
-        for(size_t i=0; i&lt;num; i++) to[i+offset] = from[i + fromOffset];
-        offset += num;
-    }
-} </pre>
-
-<p></p>
+</p>
 
 <h4>PVStructure</h4>
 
@@ -1318,18 +1305,12 @@ public:
     virtual ~PVStructure();
     typedef PVStructure &amp; reference;
     typedef const PVStructure &amp; const_reference;
+
     virtual void setImmutable();
     StructureConstPtr getStructure() const;
     const PVFieldPtrArray &amp; getPVFields() const;
     PVFieldPtr getSubField(String const &amp;fieldName) const;
     PVFieldPtr getSubField(std::size_t fieldOffset) const;
-    void appendPVField(
-        String const &amp;fieldName,
-        PVFieldPtr const &amp; pvField);
-    void appendPVFields(
-        StringArray const &amp; fieldNames,
-        PVFieldPtrArray const &amp; pvFields);
-    void removePVField(String const &amp;fieldName);
     PVBooleanPtr getBooleanField(String const &amp;fieldName) ;
     PVBytePtr getByteField(String const &amp;fieldName) ;
     PVShortPtr getShortField(String const &amp;fieldName) ;
@@ -1346,9 +1327,6 @@ public:
     PVScalarArrayPtr getScalarArrayField(
         String const &amp;fieldName,ScalarType elementType) ;
     PVStructureArrayPtr getStructureArrayField(String const &amp;fieldName) ;
-    String getExtendsStructureName() const;
-    bool putExtendsStructureName(
-        String const &amp;extendsStructureName);
     virtual void serialize(
         ByteBuffer *pbuffer,SerializableControl *pflusher) const ;
     virtual void deserialize(
@@ -1359,6 +1337,7 @@ public:
         DeserializableControl*pflusher,BitSet *pbitSet);
     PVStructure(StructureConstPtr const &amp; structure);
     PVStructure(StructureConstPtr const &amp; structure,PVFieldPtrArray const &amp; pvFields);
+    virtual std::ostream&amp; dumpValue(std::ostream&amp; o) const;
 };</pre>
 
 <p>where</p>
@@ -1379,20 +1358,6 @@ public:
     <dd>Get the field located a fieldOffset, where fieldOffset is relative to
       the top level structure. This returns null if the specified field is not
       located within this PVStructure.</dd>
-  <dt>appendPVField</dt>
-    <dd>Append pvField to the end of this PVStructure. This should NOT be
-      called if any code is attached to any of the fields in the top level
-      structure.</dd>
-  <dt>appendPVFields</dt>
-    <dd>Append an array of pvFields to the end of this structure. Note that if
-      the original number of fields is 0 than pvFields replaces the original.
-      Thus the caller must NOT reuse pvFields after calling this method. This
-      should NOT be called if any code is attached to any of the fields in the
-      top level structure</dd>
-  <dt>removePVField</dt>
-    <dd>Remove the specified field from this structure. This should NOT be
-      called if any code is attached to any of the fields in the top level
-      structure.</dd>
   <dt>getBooleanField</dt>
     <dd>Look for fieldName. If found and it has the correct type return the
       interface. This and the following methods are convenience methods that
@@ -1443,56 +1408,58 @@ public:
   <dt>getStructureArrayField</dt>
     <dd>Look for fieldName. If found and it has the correct type return the
       interface.</dd>
-  <dt>getExtendsStructureName</dt>
-    <dd>Get the name of structure that this structure extends.</dd>
-  <dt>putExtendsStructureName</dt>
-    <dd>Specify the structure that this structure extends.</dd>
+  <dt>dumpValue</dt>
+     <dd>Method for streams I/O.</dd>
 </dl>
+<p><b>TBD</b>
+<dl>
+   <dt>dumpvalue</dt>
+     <dd>replace this with ostream operator&lt;&lt;</dd>
+</dl>
+</p>
 
 <h4>PVStructureArray</h4>
 
 <p>The interface for an array of structures is:</p>
-<pre>typedef PVArrayData&lt;PVStructurePtr&gt; StructureArrayData;
-
-class PVStructureArray : public PVArray
+<pre>
+template&lt;&gt;
+class PVValueArray&lt;PVStructurePtr&gt; : public detail::PVVectorStorage&lt;PVStructurePtr,PVArray&gt;
 {
 public:
     POINTER_DEFINITIONS(PVStructureArray);
     typedef PVStructurePtr  value_type;
     typedef PVStructurePtr* pointer;
     typedef const PVStructurePtr* const_pointer;
-    typedef PVArrayData&lt;PVStructurePtr&gt; ArrayDataType;
-    typedef std::vector&lt;PVStructurePtr&gt; vector;
-    typedef const std::vector&lt;PVStructurePtr&gt; const_vector;
-    typedef std::tr1::shared_ptr&lt;vector&gt; shared_vector;
     typedef PVStructureArray &amp;reference;
     typedef const PVStructureArray&amp; const_reference;
+    typedef ::epics::pvData::shared_vector&lt;PVStructurePtr&gt; svector;
+    typedef ::epics::pvData::shared_vector&lt;const PVStructurePtr&gt; const_svector;
 
     virtual ~PVStructureArray() {}
+    virtual size_t getLength();
+    virtual size_t getCapacity();
     virtual void setCapacity(size_t capacity);
     virtual void setLength(std::size_t length);
     virtual StructureArrayConstPtr getStructureArray() const ;
     virtual std::size_t append(std::size_t number);
     virtual bool remove(std::size_t offset,std::size_t number);
     virtual void compress();
-    virtual std::size_t get(std::size_t offset, std::size_t length,
-        StructureArrayData &amp;data);
-    virtual std::size_t put(std::size_t offset,std::size_t length,
-        const_vector const &amp; from, std::size_t fromOffset);
-    virtual void shareData(
-         shared_vector const &amp; value,
-         std::size_t capacity,
-         std::size_t length);
     virtual void serialize(ByteBuffer *pbuffer,
+    virtual const_svector view() const;
+    virtual void swap(const_svector &amp;other);
+    virtual void replace(const const_svector &amp;other);
         SerializableControl *pflusher) const;
     virtual void deserialize(ByteBuffer *buffer,
         DeserializableControl *pflusher);
     virtual void serialize(ByteBuffer *pbuffer,
         SerializableControl *pflusher, std::size_t offset, std::size_t count) const ;
-    virtual pointer get() { return &amp;((*value.get())[0]); }
-    virtual pointer get() const { return &amp;((*value.get())[0]); }
-    virtual vector const &amp; getVector() {return *value;}
-    virtual shared_vector const &amp; getSharedVector() {return value;}
+    virtual std::ostream&amp; dumpValue(std::ostream&amp; o) const;
+    virtual std::ostream&amp; dumpValue(std::ostream&amp; o, std::size_t index) const;
+    // inherited from PVVectorStorage
+    const_svector view();
+    void swap(const_svector& other);
+    void replace(const const_svector& next);
+    svector reuse();
  ...
 }</pre>
 
@@ -1596,10 +1563,20 @@ public:
  ...
 }
 
+extern StandardPVFieldPtr getStandardPVField();
+</pre>
 
-extern StandardPVFieldPtr getStandardPVField();</pre>
-
-<h3>convert.h</h3>
+<h3>Conversion</h3>
+<p>There are two facilities for converting between two different PVData
+objects:</p>
+<dl>
+   <dt>Convert</dt>
+     <dd>This preforms all conversions except for coping subarrays.</dd>
+   <dt>PVSubArray</dt>
+     <dd>This copies a subarray from one PVArray to another.
+      The two arrays must have the same element type.</dd>
+</dl>
+<h4>convert.h</h4>
 
 <p>NOTE about copying immutable array fields. If an entire immutable array
 field is copied to another array that has the same elementType, both offsets
@@ -1632,11 +1609,10 @@ Thus the source and target share the same primitive array.</p>
   <li>Conversion between compatible structures.</li>
   <li>A utility method the returns the full field name of a field</li>
 </ul>
-<pre>bool operator==(PVField&amp;, PVField&amp;);
+<pre>
+bool operator==(PVField&amp;, PVField&amp;);
 
-static inline bool operator!=(PVField&amp; a, PVField&amp; b)
-{return !(a==b);}
-
+static bool operator!=(PVField&amp; a, PVField&amp; b);
 
 bool operator==(const Field&amp;, const Field&amp;);
 bool operator==(const Scalar&amp;, const Scalar&amp;);
@@ -1644,16 +1620,12 @@ bool operator==(const ScalarArray&amp;, const ScalarArray&amp;);
 bool operator==(const Structure&amp;, const Structure&amp;);
 bool operator==(const StructureArray&amp;, const StructureArray&amp;);
 
-static inline bool operator!=(const Field&amp; a, const Field&amp; b)
-{return !(a==b);}
-static inline bool operator!=(const Scalar&amp; a, const Scalar&amp; b)
-{return !(a==b);}
-static inline bool operator!=(const ScalarArray&amp; a, const ScalarArray&amp; b)
-{return !(a==b);}
-static inline bool operator!=(const Structure&amp; a, const Structure&amp; b)
-{return !(a==b);}
-static inline bool operator!=(const StructureArray&amp; a, const StructureArray&amp; b)
-{return !(a==b);}
+static inline bool operator!=(const Field&amp; a, const Field&amp; b);
+static inline bool operator!=(const Scalar&amp; a, const Scalar&amp; b);
+static inline bool operator!=(const ScalarArray&amp; a, const ScalarArray&amp; b);
+static inline bool operator!=(const Structure&amp; a, const Structure&amp; b);
+static inline bool operator!=(const StructureArray&amp; a, const StructureArray&amp; b);
+
 class Convert;
 typedef std::tr1::shared_ptr&lt;Convert&gt; ConvertPtr;
 
@@ -1727,132 +1699,74 @@ public:
     void fromULong(PVScalarPtr const &amp; pv, uint64 from);
     void fromFloat(PVScalarPtr const &amp; pv, float from);
     void fromDouble(PVScalarPtr const &amp; pv, double from);
-    std::size_t toByteArray(PVScalarArrayPtr const &amp; pv,
-        std::size_t offset,
-        std::size_t length,
-        int8* to,
-        std::size_t toOffset);
-    std::size_t toShortArray(PVScalarArrayPtr const &amp; pv,
-        std::size_t offset,
-        std::size_t length,
-        int16* to,
-        std::size_t toOffset);
-    std::size_t toIntArray(PVScalarArrayPtr const &amp; pv,
-        std::size_t offset,
-        std::size_t length,
-        int32* to,
-        std::size_t toOffset);
-    std::size_t toLongArray(PVScalarArrayPtr const &amp; pv,
-        std::size_t offset,
-        std::size_t length,
-        int64* to,
-        std::size_t toOffset);
-    std::size_t toUByteArray(PVScalarArrayPtr const &amp; pv,
-        std::size_t offset,
-        std::size_t length,
-        uint8* to,
-        std::size_t toOffset);
-    std::size_t toUShortArray(PVScalarArrayPtr const &amp; pv,
-        std::size_t offset,
-        std::size_t length,
-        uint16* to,
-        std::size_t toOffset);
-    std::size_t toUIntArray(
-        PVScalarArrayPtr const &amp; pv,
-        std::size_t offset,
-        std::size_t length,
-        uint32* to,
-        std::size_t toOffset);
-    std::size_t toULongArray(
-        PVScalarArrayPtr const &amp; pv,
-        std::size_t offset,
-        std::size_t length,
-        uint64* to,
-        std::size_t toOffset);
-    std::size_t toFloatArray(
-        PVScalarArrayPtr const &amp; pv,
-        std::size_t offset,
-        std::size_t length,
-        float* to,
-        std::size_t toOffset);
-    std::size_t toDoubleArray(
-        PVScalarArrayPtr const &amp; pv,
-        std::size_t offset,
-        std::size_t length,
-        double* to, std::size_t
-        toOffset);
-    std::size_t fromByteArray(
-        PVScalarArrayPtr &amp; pv, std::size_t offset, std::size_t length,
-        const int8* from, std::size_t fromOffset);
-    std::size_t fromByteArray(
-        PVScalarArrayPtr &amp; pv, std::size_t offset, std::size_t length,
-        const ByteArray &amp; from, std::size_t fromOffset);
-    std::size_t fromShortArray(
-        PVScalarArrayPtr &amp; pv, std::size_t offset, std::size_t length,
-        const int16* from, std::size_t fromOffset);
-    std::size_t fromShortArray(
-        PVScalarArrayPtr &amp; pv, std::size_t offset, std::size_t length,
-        const ShortArray &amp; from, std::size_t fromOffset);
-    std::size_t fromIntArray(
-       PVScalarArrayPtr &amp; pv, std::size_t offset, std::size_t length,
-       const int32* from, std::size_t fromOffset);
-    std::size_t fromIntArray(
-       PVScalarArrayPtr &amp; pv, std::size_t offset, std::size_t length,
-       const IntArray &amp; from, std::size_t fromOffset);
-    std::size_t fromLongArray(
-        PVScalarArrayPtr &amp; pv, std::size_t offset, std::size_t length,
-        const int64* from, std::size_t fromOffset);
-    std::size_t fromLongArray(
-        PVScalarArrayPtr &amp; pv, std::size_t offset, std::size_t length,
-        const LongArray &amp; from, std::size_t fromOffset);
-    std::size_t fromUByteArray(
-        PVScalarArrayPtr &amp; pv, std::size_t offset, std::size_t length,
-        const uint8* from, std::size_t fromOffset);
-    std::size_t fromUByteArray(
-        PVScalarArrayPtr &amp; pv, std::size_t offset, std::size_t length,
-        const UByteArray &amp; from, std::size_t fromOffset);
-    std::size_t fromUShortArray(
-        PVScalarArrayPtr &amp; pv, std::size_t offset, std::size_t length,
-        const uint16* from, std::size_t fromOffset);
-    std::size_t fromUShortArray(
-        PVScalarArrayPtr &amp; pv, std::size_t offset, std::size_t length,
-        const UShortArray &amp; from, std::size_t fromOffset);
-    std::size_t fromUIntArray(
-        PVScalarArrayPtr &amp; pv, std::size_t offset, std::size_t length,
-        const uint32* from, std::size_t fromOffset);
-    std::size_t fromUIntArray(
-        PVScalarArrayPtr &amp; pv, std::size_t offset, std::size_t length,
-        const UIntArray &amp; from, std::size_t fromOffset);
-    std::size_t fromULongArray(
-        PVScalarArrayPtr &amp; pv, std::size_t offset, std::size_t length,
-        const uint64* from, std::size_t fromOffset);
-    std::size_t fromULongArray(
-        PVScalarArrayPtr &amp; pv, std::size_t offset, std::size_t length,
-        const ULongArray &amp; from, std::size_t fromOffset);
-    std::size_t fromFloatArray(
-        PVScalarArrayPtr &amp; pv, std::size_t offset, std::size_t length,
-        const float* from, std::size_t fromOffset);
-    std::size_t fromFloatArray(
-        PVScalarArrayPtr &amp; pv, std::size_t offset, std::size_t length,
-        const FloatArray &amp; from, std::size_t fromOffset);
-    std::size_t fromDoubleArray(
-        PVScalarArrayPtr &amp; pv, std::size_t offset, std::size_t length,
-        const double* from, std::size_t fromOffset);
-    std::size_t fromDoubleArray(
-        PVScalarArrayPtr &amp; pv, std::size_t offset, std::size_t length,
-        const DoubleArray &amp; from, std::size_t fromOffset);
     void newLine(StringBuilder buf, int indentLevel);
  ...
 }
 
-extern ConvertPtr getConvert();</pre>
-
-<p>The array methods all return the number of elements copied or converted.
-This can be less than len if the PVField array contains less than len
-elements.</p>
-
+extern ConvertPtr getConvert();
+</pre>
 <p>newLine is a convenience method for code that implements toString It
 generates a newline and inserts blanks at the beginning of the newline.</p>
+
+<h4>pvSubArrayCopy.h</h4>
+<pre>
+template&lt;typename T&gt;
+void copy(
+    PVValueArray&lt;T&gt; &amp; pvFrom,
+    size_t fromOffset,
+    PVValueArray&lt;T&gt; &amp; pvTo,
+    size_t toOffset,
+    size_t len);
+
+void copy(
+    PVScalarArray &amp; from,
+    size_t fromOffset,
+    PVScalarArray &amp; to,
+    size_t toOffset,
+    size_t len);
+
+void copy(
+    PVStructureArray &amp; from,
+    size_t fromOffset,
+    PVStructureArray &amp; to,
+    size_t toOffset,
+    size_t len);
+
+void copy(
+    PVArray &amp; from,
+    size_t fromOffset,
+    PVArray &amp; to,
+    size_t toOffset,
+    size_t len);
+</pre>
+<p>The last copy is the only one most client need to call.
+It either throws an error of the element types do not match or calls the 
+other copy functions. The arguments are:</p>
+<dl>
+   <dt>from</dt>
+     <dd>The source array.</dd>
+   <dt>fromOffset</dt>
+      <dd>The offset into the source array.</dd>
+   <dt>to</dt>
+      <dd>The destination array. The element type must be the same
+      as for the source array. If the element type is structure then
+      the introspection interface for the element types must be the same.
+      </dd>
+   <dt>toOffset</dt>
+      <dd>The offset into the destination array.</dd>
+   <dt>len</dt>
+      <dd>The  number of elements to copy.</dd>
+</dl>
+<p>An exception is thrown if:</p>
+<dl>
+   <dt>type  mismatch</dt>
+     <dd>The element types for the source and destination differ.</dd>
+   <dt>immutable</dt>
+      <dd>The destination array is immutable.</dt>
+   <dt>capacity immutable</dt>
+      <dd>The destination array needs to have it's capacity extentended
+        but the capacity is immutable.</dd>
+</dl>
 
 <h2>pvDataApp/property</h2>
 
@@ -2669,7 +2583,6 @@ FieldCreate and implements getFieldCreate.</p>
 <p>PVDataCreateFactory.cpp automatically creates a single instance of
 PVDataCreate and implements getPVDataCreate.</p>
 
-<p>PVAuxInfoImpl.cpp implements auxInfo.</p>
 
 <p>Convert.cpp automatically creates a single instance of Convert and
 implements getConvert.</p>
@@ -2694,6 +2607,8 @@ implements getConvert.</p>
     <dd>Signal and wait for an event.</dd>
   <dt>executor.h</dt>
     <dd>Provides a thread for executing commands.</dd>
+  <dt>localStaticLock.h</dt>
+     <dd><b>TBD</b> Matej can You explain what this does?</dd>
   <dt>lock.h</dt>
     <dd>Support for locking and unlocking.</dd>
   <dt>messageQueue.h</dt>
@@ -2712,8 +2627,13 @@ implements getConvert.</p>
     <dd>More support for serializing objects.</dd>
   <dt>sharedPtr.h</dt>
     <dd>Defines POINTER_DEFINITIONS.</dd>
+  <dt>sharedVector.h</dd>
+     <dd>Like std::vector except that std::shared_ptr is used for
+      the data array.</dd>
   <dt>status.h</dt>
     <dd>A way to pass status information to a client.</dd>
+  <dt>templateMeta.h</dt>
+    <dd><b>TBD</b> Michael can You provide an explaination?</dd>
   <dt>thread.h</dt>
     <dd>Provides thread support.</dd>
   <dt>timeFunction.h</dt>
@@ -2721,6 +2641,8 @@ implements getConvert.</p>
   <dt>timer.h</dt>
     <dd>An implementation of Timer that does not require an object to be
       created for each timer request.</dd>
+  <dt>typeCast.h</dt>
+    <dd><b>TBD</b> Michael can You provide an explaination?</dd>
 </dl>
 
 <p>Note that directory testApp/misc has test code for all the classes in misc.
@@ -2729,9 +2651,13 @@ The test code also can be used as examples.</p>
 <h3>bitSet.h</h3>
 
 <p>This is adapted from the java.util.BitSet. bitSet.h is:</p>
-<pre>class BitSet : public Serializable {
+<pre>
+class BitSet;
+typedef std::tr1::shared_ptr&lt;BitSet&gt; BitSetPtr;
+
+class BitSet : public Serializable {
 public:
-    static BitSet::shared_pointer create(uint32 nbits);
+    static BitSetPtr create(uint32 nbits);
     BitSet();
     BitSet(uint32 nbits);
     virtual ~BitSet();
@@ -2754,8 +2680,12 @@ public:
     void or_and(const BitSet&amp; set1, const BitSet&amp; set2);
     bool operator==(const BitSet &amp;set) const;
     bool operator!=(const BitSet &amp;set) const;
-    void toString(StringBuilder buffer);
-    void toString(StringBuilder buffer, int indentLevel) const;
+    void toString(StringBuilder buffer, int indentLevel = 0) const;
+    virtual void serialize(
+        ByteBuffer *buffer,SerializableControl *flusher) const;
+    virtual void deserialize(
+        ByteBuffer *buffer,DeserializableControl *flusher);
+
 private:
 };</pre>
 
@@ -2816,8 +2746,6 @@ private:
     <dd>Does this bitSet have the same values as the argument.</dd>
   <dt>operator!=(const BitSet &amp;set)</dt>
     <dd>Is this bitSet different than the argument.</dd>
-  <dt>toString(StringBuilder buffer)</dt>
-    <dd>Show the current values of the bitSet.</dd>
   <dt>toString(StringBuilder buffer, int indentLevel)</dt>
     <dd>Show the current values of the bitSet.</dd>
   <dt>virtual void serialize(ByteBuffer *buffer,SerializableControl *flusher)
@@ -2827,6 +2755,14 @@ private:
   *flusher);</dt>
     <dd>Deserialize the bitSet.</dd>
 </dl>
+<p><b>TBD</b>
+<dl>
+   <dt>implemantation</dt>
+     <dd>This should be changed so that capacity can not change.</dd>
+   <dt>toString</dt>
+     <dd>Should this change and also implement ostream operator?</dd>
+</dl>
+</p>
 
 <h3>byteBuffer.h</h3>
 
@@ -2941,8 +2877,7 @@ public:
     bool wait (); /* blocks until full */
     bool wait ( double timeOut ); /* false if empty at time out */
     bool tryWait (); /* false if empty */
-private:
-    epicsEventId id;
+...
 }; </pre>
 
 <p>where</p>
@@ -2965,7 +2900,8 @@ private:
 
 <p>An Executor is a thread that can execute commands. The user can request that
 a single command be executed.</p>
-<pre>class Command;
+<pre>
+class Command;
 class Executor;
 typedef std::tr1::shared_ptr&lt;Command&gt; CommandPtr;
 typedef std::tr1::shared_ptr&lt;Executor&gt; ExecutorPtr;
@@ -3006,8 +2942,21 @@ execute.</p>
       nothing is done.</dd>
 </dl>
 
+<h3>localStaticLock.h</h3>
+<pre>
+extern epics::pvData::Mutex&amp; getLocalStaticInitMutex();
+
+static class MutexInitializer {
+  public:
+    MutexInitializer ();
+    ~MutexInitializer ();
+} localStaticMutexInitializer; // Note object here in the header.
+</pre>
+<p><b>TBD</b> Matej will explain.  </p>
+
 <h3>lock.h</h3>
-<pre>typedef epicsMutex Mutex;
+<pre>
+typedef epicsMutex Mutex;
 
 class Lock : private NoDefaultMethods {
 public:
@@ -3034,7 +2983,8 @@ public
     {
         Lock xx(mutex);
         ...
-    }</pre>
+    }
+</pre>
 
 <p>The method will take the lock when xx is created and release the lock when
 the current code block completes.</p>
@@ -3043,10 +2993,50 @@ the current code block completes.</p>
 once. This can be implemented as follows:</p>
 <pre>    static void init(void) {
         static Mutex mutex;
-        Lock xx(mutex);
+        Lock guard(mutex);
         if(alreadyInitialized) return;
         // initialization
     }</pre>
+<p>
+<p>Lock has a private variable:
+<pre>
+bool locked;
+</pre>
+and improves efficency by checking the local variable before calling the
+mutex methods. This is <b>not</b> thread safe if any methods are called by a thread other than
+the thread that created the Lock.
+</p>
+<p>It is thread safe if used as follows:</p>
+<pre>
+{
+    Lock guard(mutex);
+    ...
+    /* the following can optionally be called
+    guard.unlock();
+    guard.lock();
+    */
+}
+</pre>
+<p>It is <b>not</b> thread safe if used as follows:</p>
+<pre>
+class SomeClass
+{
+private:
+    Mutex mutex;
+    Lock lock;
+public:
+    SomeClass: lock(mutex) {}
+    ...
+    void someMethod() {
+        lock.unlock();
+        ...
+    }
+    ...
+};
+</pre>
+<p>It is only safe if all methods of Lock, including <b>~Lock()</b>,
+are called by the same thread.
+</p>
 
 <h3>messageQueue.h</h3>
 
@@ -3141,10 +3131,11 @@ assignment contructor.</p>
 
 <h3>queue.h</h3>
 
-<p>This provides a queue which has an immutable capacity. When the queue is
+<p>This provides a bounded queue. When the queue is
 full the user code is expected to keep using the current element until a new
 free element becomes avalable.</p>
-<pre>template &lt;typename T&gt;
+<pre>
+template &lt;typename T&gt;
 class Queue
 {   
 public:
@@ -3224,9 +3215,16 @@ public:
 
 <h3>requester.h</h3>
 
-<p>A PVField extends Requester. Requester is present so that when database
-errors are found there is someplace to send a message.</p>
-<pre>enum MessageType {
+<p>Requester is present so that when
+errors are found there is someplace to send a message.
+At one time PVField extended Requester but it no longer does.
+Requester is, however, used by pvAccess.
+</p>
+<pre>
+class Requester;
+typedef std::tr1::shared_ptr&lt;Requester&gt; RequesterPtr;
+
+enum MessageType {
    infoMessage,warningMessage,errorMessage,fatalErrorMessage
 };
 
@@ -3255,7 +3253,8 @@ public:
 </dl>
 
 <h3>serialize.h</h3>
-<pre>    class SerializableControl;
+<pre>
+    class SerializableControl;
     class DeserializableControl;
     class Serializable;
     class BitSetSerializable;
@@ -3279,7 +3278,8 @@ public:
         virtual ~DeserializableControl(){}
         virtual void ensureData(std::size_t size) =0;
         virtual void alignData(std::size_t alignment) =0;
-        virtual std::tr1::shared_ptr&lt;const Field&gt; cachedDeserialize(ByteBuffer* buffer) = 0;
+        virtual std::tr1::shared_ptr&lt;const Field&gt; cachedDeserialize(
+            ByteBuffer* buffer) = 0;
     };
 
     class Serializable {
@@ -3305,7 +3305,8 @@ public:
     public:
         virtual ~SerializableArray(){}
         virtual void serialize(ByteBuffer *buffer,
-            SerializableControl *flusher, std::size_t offset, std::size_t count) const = 0;
+            SerializableControl *flusher, std::size_t offset,
+            std::size_t count) const = 0;
     };</pre>
 
 <h3>serializeHelper.h</h3>
@@ -3343,11 +3344,206 @@ public:
 </dl>
 
 <h3>sharedPtr.h</h3>
-<pre>#define POINTER_DEFINITIONS(clazz) \
+<pre>
+#define POINTER_DEFINITIONS(clazz) \
     typedef std::tr1::shared_ptr&lt;clazz&gt; shared_pointer; \
     typedef std::tr1::shared_ptr&lt;const clazz&gt; const_shared_pointer; \
     typedef std::tr1::weak_ptr&lt;clazz&gt; weak_pointer; \
     typedef std::tr1::weak_ptr&lt;const clazz&gt; const_weak_pointer;</pre>
+
+<h3>sharedVector.h</h3>
+<p>
+shared_vector is a holder for a contigious piece of memory.
+Data is shared, but offset and length are not.
+This allows one vector to have access to only a subset of a piece of memory.
+</p>
+<p>
+shared_vector differs from std::vector as follows:</p>
+<dl>
+   <dt>Differences in behavior</dt>
+      <dd>
+      shared_vector models const-ness like shared_ptr.
+      An equivalent of 'const std::vector&lt;E&gt;' is
+      'const shared_vector&lt;const E&gt;'.
+      However, it is also possible to have 'const shared_vector&lt;E&gt;'
+      analogous to 'E* const' and 'shared_vector&lt;const E&gt;&gt;'
+      which is analogous to 'const E*'.i
+      <br />
+      Copying a shared_vector, by construction or assignment, does not copy
+      its contents.
+      Modifications to one such "copy" effect all
+      associated shared_vector instances.
+      <br />
+      std::vector::reserve(N) has no effect if N&lt;=std::vector::capacity().
+      However, like resize(), shared_vector&lt;E&gt;::reserve() has the side effect
+      of always calling make_unique().
+      </dd>
+   <dt>Parts of std::vector interface not implemented</dt>
+      <dd>
+      Mutating methods insert(), erase(), shrink_to_fit(), emplace(), and emplace_back() are not implemented.
+      <br />
+      shared_vector does not model an allocator which is bound to the object. Therefore the get_allocator() method and the allocator_type typedef are not provided.
+      <br />
+      The assign() method and the related constructor are not implemented at this time.
+      <br />
+      The comparison operators are not implemented at this time.
+      </dd>
+   <dt>Parts not found in std::vector</dt>
+     <dd>
+     shared_vector has additional constructors from raw pointers and shared_ptr s.
+     The copy constructor and assignment operator allow implicit castings
+      from type 'shared_vector&lt;T&gt;' to 'shared_vector&lt;const T>&gt;'.
+      To faciliate safe modification the methods unique() and make_unique() are provided
+     The slice() method selects a sub-set of the shared_vector.
+     The low level accessors dataPtr(), dataOffset(), dataCount(), and dataTotal().
+     </dd>
+</dl>
+
+
+<pre>
+template&lt;typename E, class Enable = void&amp; class shared_vector;
+
+template&lt;typename E, class Enable&amp;
+class shared_vector : public detail::shared_vector_base&lt;E&amp;
+{
+    typedef detail::shared_vector_base&lt;E&amp; base_t;
+    typedef typename detail::call_with&lt;E&amp;::type param_type;
+    typedef typename meta::strip_const&lt;E&amp;::type _E_non_const;
+public:
+    typedef E value_type;
+    typedef E&amp; reference;
+    typedef typename meta::decorate_const&lt;E&amp;::type&amp; const_reference;
+    typedef E* pointer;
+    typedef typename meta::decorate_const&lt;E&amp;::type* const_pointer;
+    typedef E* iterator;
+    typedef std::reverse_iterator&lt;iterator&amp; reverse_iterator;
+    typedef typename meta::decorate_const&lt;E&amp;::type* const_iterator;
+    typedef std::reverse_iterator&lt;const_iterator&amp; const_reverse_iterator;
+    typedef ptrdiff_t difference_type;
+    typedef size_t size_type;
+
+    typedef E element_type;
+    typedef std::tr1::shared_ptr&lt;E&amp; shared_pointer_type;
+
+    // allow specialization for all E to be friends
+    template&lt;typename E1, class Enable1&amp; friend class shared_vector;
+
+    shared_vector() :base_t();
+    explicit shared_vector(size_t c)
+        :base_t(new _E_non_const[c], 0, c);
+    shared_vector(size_t c, param_type e);
+    template&lt;typename A&amp;
+    shared_vector(A v, size_t o, size_t c) :base_t(v,o,c);
+    template&lt;typename E1&amp;
+    shared_vector(const std::tr1::shared_ptr&lt;E1&amp;&amp; d, size_t o, size_t c);
+    template&lt;typename A, typename B&amp;
+    shared_vector(A d, B b, size_t o, size_t c);
+    shared_vector(const shared_vector&amp; o) :base_t(o);
+    
+    size_t max_size() const;
+    size_t capacity() const;
+    void reserve(size_t i);
+    void resize(size_t i);
+    void resize(size_t i, param_type v);
+    void make_unique();
+    
+    iterator begin() const;
+    iterator end() const;
+    reverse_iterator rbegin() const;
+    reverse_iterator rend() const;
+    reference front() const;
+    reference back() const;
+
+    void push_back(param_type v);
+    void pop_back();
+    pointer data() const;
+    reference operator[](size_t i) const;
+    reference at(size_t i) const;
+    // inherited from detail
+    shared_vector_base&amp; operator=(const shared_vector_base&amp; o);
+    void swap(shared_vector_base&amp; o);
+    void clear();
+    bool unique() const;
+    size_t size() const;
+    bool empty() const;
+    void slice(size_t offset, size_t length=(size_t)-1);
+    const std::tr1::shared_ptr&lt;E&amp;&amp; dataPtr();
+    size_t dataOffset() const;
+    size_t dataCount() const;
+    size_t dataTotal() const;
+</pre>
+where
+<dl>
+   <dt>shared_vector</dt>
+      <dd>Several flavors of constructor are provided. The most commingly used is:
+       <pre>
+shared_vector(size_t c);
+       </pre>
+       This creates a shared_vector of the specified size/
+      </dd>
+   <dt>max_size</dt>
+     <dd>The maximum size the C++ implementation allows, i.e.,
+      the maximum possible capacity.
+      Note that units are number of elements not number of bytes.
+     </dd>
+   <dt>capacity</dt>
+      <dd>The current capacity.</dd>
+   <dt>reserve</dt>
+      <dd>Set array capacity.</dd>
+   <dt>resize</dt>
+      <dd>Grow or shrink array.
+      It the second argument is given it is the value to assign to
+      and new elements.
+     </dd>
+   <dt>make_unique</dt>
+      <dd>Ensure (by copying) that this shared_vector
+         is the sole owner of the data array.
+      </dd>
+   <dt>begin,...,rend</dt>
+       <dd>Standard interators.</dd>
+   <dt>front</dt>
+       <dd>Return a reference to the first element.</dd>
+   <dt>back</dt>
+       <dd>Return a reference to the last element.</dd>
+   <dt>push_back</dt>
+       <dd>Add an element to the end of the array.</dd>
+   <dt>pop_back</dt>
+       <dd>Remove an element from the end of the array.</dd>
+   <dt>data</dt>
+       <dd>Return a pointer to the raw array.</dd>
+   <dt>operator[](size_t i)</dt>
+      <dd>Return a reference to the specified element.</dd>
+   <dt>at</dt>
+       <dd>Like the previous except that it throws a range-error if
+      the specified element is out of range.</dd>
+   <dt>operator=</dt>
+      <dd>Copy an existing shared_vector.</dd>
+   <dt>swap</dt>
+      <dd>Swap the contents of this vector with another.</dd>
+   <dt>clear</dt>
+      <dd>Clear contents.</dd>
+   <dt>unique</dt>
+     <dd>returns (true,false) if data (is not, is) shared.</dd>
+   <dt>size</dt>
+      <dd>Number of elements visible through this vector.</dd>
+   <dt>empty</dt>
+      <dd>Is the number of elements zero?</dd>
+   <dt>slice</dt>
+      <dd>Reduce the view of this shared_vector.</dd>
+   <dt>dataPtr</dt>
+      <dd>A readonly shared_ptr to the array.</dd>
+   <dt>dataOffset</dt>
+      <dd>Offset in the data array of first visible element.</dd>
+   <dt>dataCount</dt>
+      <dd>Number of visible elements between dataOffset and end of data.</dd>
+   <dt>dataTotal</dt>
+      <dd>The total number of elements between dataOffset and the end of data</dd>
+</dl>
+<p><b>TBD</b>
+Michael should decide if this is the correct set of methods to describe.
+Also he should check for correct descriptions.
+</p>
+
 
 <h3>status.h</h3>
 
@@ -3404,6 +3600,8 @@ public:
     <dd>Use this method instead of Status.deserialize(), since this allows OK
       status optimization.</dd>
 </dl>
+<h3>templateMeta.h</h3>
+<p><b>TBD</b> Michael will explain.</p>
 
 <h3>thread.h</h3>
 
@@ -3419,7 +3617,12 @@ public:
 };</pre>
 
 <h4>Thread</h4>
-<pre>class Runnable {
+<pre>
+class Thread;
+typedef std::tr1::shared_ptr&lt;Thread&gt; ThreadPtr;
+typedef std::tr1::shared_ptr&lt;epicsThread&gt; EpicsThreadPtr;
+
+class Runnable {
 public:
     virtual void run() = 0;
 };
@@ -3590,6 +3793,8 @@ be used to schedule multiple callbacks. It has the methods:</p>
   <dt>schedulePeriodic</dt>
     <dd>Schedule a periodic callback.</dd>
 </dl>
+<h3>typeCast.h</h3>
+<p><b>TBD</b> Michael will explain.</p>
 
 <h2>pvDataApp/pvMisc</h2>
 

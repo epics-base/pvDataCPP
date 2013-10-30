@@ -27,6 +27,10 @@ enum ThreadPriority {
     highestPriority =epicsThreadPriorityHigh
 };
 
+class Thread;
+typedef std::tr1::shared_ptr<Thread> ThreadPtr;
+typedef std::tr1::shared_ptr<epicsThread> EpicsThreadPtr;
+
 typedef epicsThreadRunable Runnable;
 
 class Thread : public epicsThread, private NoDefaultMethods {
@@ -61,6 +65,7 @@ public:
         this->exitWait();
     }
 };
+
 
 }}
 #endif  /* THREAD_H */
