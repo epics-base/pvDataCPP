@@ -52,6 +52,7 @@ INC += pvData.h
 INC += convert.h
 INC += standardField.h
 INC += standardPVField.h
+INC += pvSubArrayCopy.h
 
 SRC_DIRS += $(PVDATA)/factory
 
@@ -67,6 +68,7 @@ LIBSRCS += PVStructure.cpp
 LIBSRCS += PVStructureArray.cpp
 LIBSRCS += PVDataCreateFactory.cpp
 LIBSRCS += Convert.cpp
+LIBSRCS += pvSubArrayCopy.cpp
 LIBSRCS += Compare.cpp
 LIBSRCS += StandardField.cpp
 LIBSRCS += StandardPVField.cpp
