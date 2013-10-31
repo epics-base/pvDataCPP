@@ -13,6 +13,9 @@ testTimer_SRCS += testTimer.cpp
 PROD_HOST += testBitSet
 testBitSet_SRCS += testBitSet.cpp
 
+PROD_HOST += testOverrunBitSet
+testOverrunBitSet_SRCS += testOverrunBitSet.cpp
+
 PROD_HOST += testByteOrder
 testByteOrder_SRCS += testByteOrder.cpp
 
@@ -21,6 +24,10 @@ testByteBuffer_SRCS += testByteBuffer.cpp
 
 PROD_HOST += testBaseException
 testBaseException_SRCS += testBaseException.cpp
+
+TESTPROD += testSharedVector
+testSharedVector_SRCS += testSharedVector.cpp
+TESTS += testSharedVector
 
 TESTPROD += testSerialization
 testSerialization_SRCS += testSerialization.cpp
@@ -38,10 +45,6 @@ testMessageQueue_SRCS += testMessageQueue.cpp
 TESTPROD += testTypeCast
 testTypeCast_SRCS += testTypeCast.cpp
 TESTS += testTypeCast
-
-TESTPROD += testSharedVector
-testSharedVector_SRCS += testSharedVector.cpp
-TESTS += testSharedVector
 
 TESTSCRIPTS_HOST += $(TESTS:%=%.t)
 

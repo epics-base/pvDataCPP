@@ -6,6 +6,7 @@
  */
 /* Author:  Matej Sekoranja Date: 2010.10.18 */
 
+#include <iostream>
 #include <stddef.h>
 #include <stdlib.h>
 #include <stddef.h>
@@ -96,11 +97,15 @@ void testOperators(FILE *fd) {
     assert(b1 == b2);
 
     // OR test
-    b1.set(65);
-    b1.set(106);
+    b2.set(65);
+    b2.set(106);
     b2.set(105);
     b1 |= b2;
     std::string str; b1.toString(&str);
+    assert(str == "{1, 65, 105, 106}");
+    b1.clear();
+    b1 |= b2;
+    str.clear(); b1.toString(&str);
     assert(str == "{1, 65, 105, 106}");
 
     // AND test
@@ -112,15 +117,13 @@ void testOperators(FILE *fd) {
     b1.set(128);
     b1 ^= b2;
     assert(b1.cardinality() == 1 && b1.get(128) == true);
-
-    // a AND (NOT b)
-    b2 -= b1;
-    str.clear(); b2.toString(&str);
-    assert(str == "{1, 105}");
+    b1.clear();
+    b2.clear();
     b1.set(1);
-    b2 -= b1;
-    str.clear(); b2.toString(&str);
-    assert(b2.cardinality() == 1 && b2.get(105) == true);
+    b2.set(256);
+    b1 ^= b2;
+    assert(b1.cardinality() == 2 && b1.get(1) == true && b1.get(256) == true);
+    
 
     // assign
     b1 = b2;

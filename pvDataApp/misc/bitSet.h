@@ -45,7 +45,7 @@ namespace epics { namespace pvData {
     class BitSet : public Serializable {
     public:
         POINTER_DEFINITIONS(BitSet);
-        static BitSet::shared_pointer create(uint32 nbits);
+        static BitSetPtr create(uint32 nbits);
         /**
          * Creates a new bit set. All bits are initially {@code false}.
          */
@@ -200,15 +200,6 @@ namespace epics { namespace pvData {
          * @param  set a bit set
          */
         BitSet& operator^=(const BitSet& set);
-
-        /**
-         * Clears all of the bits in this {@code BitSet} whose corresponding
-         * bit is set in the specified {@code BitSet}.
-         *
-         * @param  set the {@code BitSet} with which to mask this
-         *         {@code BitSet}
-         */
-        BitSet& operator-=(const BitSet& set);
 
         /**
           * Assigment operator.

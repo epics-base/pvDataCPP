@@ -9,6 +9,7 @@
  */
 #include "string.h"
 #include "stdio.h"
+#include <iostream>
 #include <pv/bitSet.h>
 #include <pv/lock.h>
 #include <pv/serializeHelper.h>
@@ -199,6 +200,8 @@ namespace epics { namespace pvData {
     }
 
     BitSet& BitSet::operator&=(const BitSet& set) {
+        // Check for self-assignment!
+        if (this == &set) return *this;
 
         while (wordsInUse > set.wordsInUse)
             words[--wordsInUse] = 0;
@@ -213,76 +216,49 @@ namespace epics { namespace pvData {
     }
 
     BitSet& BitSet::operator|=(const BitSet& set) {
-
-        uint32 wordsInCommon;
+        // Check for self-assignment!
+        if (this == &set) return *this;
+        uint32 wordsInCommon = wordsInUse;
+        if(wordsInUse>set.wordsInUse) wordsInCommon = set.wordsInUse;
         if (wordsInUse < set.wordsInUse) {
-            wordsInCommon = wordsInUse;
-            //ensureCapacity(set.wordsInUse);
-            //wordsInUse = set.wordsInUse;
+            ensureCapacity(set.wordsInUse);
+            wordsInUse = set.wordsInUse;
         }
-        else
-            wordsInCommon = set.wordsInUse;
-
         // Perform logical OR on words in common
-        uint32 i = 0;
-        for (; i < wordsInCommon; i++)
+        for (uint32 i =0; i < wordsInCommon; i++) {
             words[i] |= set.words[i];
-
-        // TODO what to do if BitSets are not the same size !!!
-
+         }
+        // Copy any remaining words
+        for(uint32 i=wordsInCommon; i<set.wordsInUse; ++i) {
+            words[i] = set.words[i];
+        }
         // recalculateWordsInUse() is not needed
-
         return *this;
     }
 
     BitSet& BitSet::operator^=(const BitSet& set) {
-
-        uint32 wordsInCommon;
+        uint32 wordsInCommon = wordsInUse;
+        if(wordsInUse>set.wordsInUse) wordsInCommon = set.wordsInUse;
         if (wordsInUse < set.wordsInUse) {
-            wordsInCommon = wordsInUse;
-            //ensureCapacity(set.wordsInUse);
-            //wordsInUse = set.wordsInUse;
+            ensureCapacity(set.wordsInUse);
+            wordsInUse = set.wordsInUse;
         }
-        else
-            wordsInCommon = set.wordsInUse;
-
-        // Perform logical XOR on words in common
-        uint32 i = 0;
-        for (; i < wordsInCommon; i++)
+        // Perform logical OR on words in common
+        for (uint32 i =0; i < wordsInCommon; i++) {
             words[i] ^= set.words[i];
-
-        // TODO what to do if BitSets are not the same size !!!
-
-        recalculateWordsInUse();
-
-        return *this;
-    }
-
-    BitSet& BitSet::operator-=(const BitSet& set) {
-
-        uint32 wordsInCommon;
-        if (wordsInUse < set.wordsInUse) {
-            wordsInCommon = wordsInUse;
-            //ensureCapacity(set.wordsInUse);
-            //wordsInUse = set.wordsInUse;
+         }
+        // Copy any remaining words
+        for(uint32 i=wordsInCommon; i<set.wordsInUse; ++i) {
+            words[i] = set.words[i];
         }
-        else
-            wordsInCommon = set.wordsInUse;
-
-        // Perform logical (a & !b) on words in common
-        uint32 i = 0;
-        for (; i < wordsInCommon; i++)
-            words[i] &= ~set.words[i];
-
         recalculateWordsInUse();
-
         return *this;
     }
+
 
     BitSet& BitSet::operator=(const BitSet &set) {
         // Check for self-assignment!
-        if (this == &set)
-            return *this;
+        if (this == &set) return *this;
 
         // we ensure that words array size is adequate (and not wordsInUse to ensure capacity to the future)
         if (wordsLength < set.wordsLength)
