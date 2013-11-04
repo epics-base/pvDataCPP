@@ -11,6 +11,7 @@
 #define PVINTROSPECT_H
 #include <string>
 #include <stdexcept>
+#include <map>
 
 #include <pv/noDefaultMethods.h>
 #include <pv/pvType.h>
@@ -476,16 +477,162 @@ private:
 class FieldCreate;
 typedef std::tr1::shared_ptr<FieldCreate> FieldCreatePtr;
 
+class FieldBuilder;
+typedef std::tr1::shared_ptr<FieldBuilder> FieldBuilderPtr;
+
+/**
+ * Interface for in-line creating of introspection interfaces.
+ * One instance can be used to create multiple {@code Field} instances.
+ * An instance of this object must not be used concurrently (an object has a state).
+ * @author mse
+ */
+class FieldBuilder :
+    public std::tr1::enable_shared_from_this<FieldBuilder>
+{
+public:
+	/**
+	 * Set ID of an object to be created.
+	 * @param id id to be set.
+     * @return this instance of a {@code FieldBuilder}.
+	 */
+	FieldBuilderPtr setId(std::string const & id);
+
+    /**
+     * Add a {@code Scalar}.
+     * @param name name of the array.
+     * @param scalarType type of a scalar to add.
+     * @return this instance of a {@code FieldBuilder}.
+     */
+    FieldBuilderPtr add(std::string const & name, ScalarType scalarType);
+
+    /**
+     * Add a {@code Field} (e.g. {@code Structure}, {@code Union}).
+     * @param name name of the array.
+     * @param field a field to add.
+     * @return this instance of a {@code FieldBuilder}.
+     */
+    FieldBuilderPtr add(std::string const & name, FieldConstPtr const & field);
+
+    /**
+     * Add array of {@code Scalar} elements.
+     * @param name name of the array.
+     * @param scalarType type of a scalar element.
+     * @return this instance of a {@code FieldBuilder}.
+     */
+    FieldBuilderPtr addArray(std::string const & name, ScalarType scalarType);
+    
+    /**
+     * Add array of {@code Field} elements.
+     * @param name name of the array.
+     * @param field a type of an array element.
+     * @return this instance of a {@code FieldBuilder}.
+     */
+    FieldBuilderPtr addArray(std::string const & name, FieldConstPtr const & element);
+
+    /**
+     * Create a {@code Structure}.
+     * This resets this instance state and allows new {@code Field} instance to be created.
+     * @return a new instance of a {@code Structure}.
+     */
+    StructureConstPtr createStructure();
+    
+    /**
+     * Create an {@code Union}.
+     * This resets this instance state and allows new {@code Field} instance to be created.
+     * @return a new instance of an {@code Union}.
+     */
+    //UnionConstPtr createUnion();
+
+    /**
+     * Add new nested {@code Structure}.
+     * {@code createNested()} method must be called
+     * to complete creation of the nested {@code Structure}.
+     * @param name nested structure name.
+     * @return a new instance of a {@code FieldBuilder} is returned.
+     * @see #createNested()
+     */
+    FieldBuilderPtr addStructure(std::string const & name); 
+    
+    /**
+     * Add new nested {@code Union}.
+     * {@code createNested()} method must be called
+     * to complete creation of the nested {@code Union}.
+     * @param name nested union name.
+     * @return a new instance of a {@code FieldBuilder} is returned.
+     * @see #createNested()
+     */
+    FieldBuilderPtr addUnion(std::string const & name);
+    
+    /**
+     * Add new nested {@code Structure[]}.
+     * {@code createNested()} method must be called
+     * to complete creation of the nested {@code Structure}.
+     * @param name nested structure name.
+     * @return a new instance of a {@code FieldBuilder} is returned.
+     * @see #createNested()
+     */
+    FieldBuilderPtr addStructureArray(std::string const & name); 
+    
+    /**
+     * Add new nested {@code Union[]}.
+     * {@code createNested()} method must be called
+     * to complete creation of the nested {@code Union}.
+     * @param name nested union name.
+     * @return a new instance of a {@code FieldBuilder} is returned.
+     * @see #createNested()
+     */
+    //FieldBuilderPtr addUnionArray(std::string const & name);
+
+    /**
+     * Complete the creation of a nested object.
+     * @see #addStructure(String)
+     * @see #addUnion(String)
+     * @return a previous (parent) {@code FieldBuilder}.
+     */
+    FieldBuilderPtr createNested();
+
+private:
+    FieldBuilder();
+    FieldBuilder(FieldBuilderPtr const & parentBuilder,
+			std::string const & nestedName,
+			Type nestedClassToBuild, bool nestedArray);
+			
+	void reset();
+	FieldConstPtr createFieldInternal(Type type);
+			
+    friend class FieldCreate;
+    
+    FieldCreatePtr fieldCreate;
+
+	std::string id;
+	bool idSet;
+	
+	// NOTE: this preserves order, however it does not handle duplicates
+    StringArray fieldNames;
+    FieldConstPtrArray fields;
+    
+	FieldBuilderPtr parentBuilder;
+	Type nestedClassToBuild;
+	std::string nestedName;
+	bool nestedArray;
+   
+};
+
 class FieldCreate {
 public:
-     static FieldCreatePtr getFieldCreate();
+    static FieldCreatePtr getFieldCreate();
+	/**
+	 * Create a new instance of in-line {@code Field} builder.
+	 * @return a new instance of a {@code FieldBuilder}.
+	 */
+	FieldBuilderPtr createFieldBuilder() const;
     /**
      * Create a {@code ScalarField}.
      * @param scalarType The scalar type.
      * @return a {@code Scalar} interface for the newly created object.
      * @throws An {@code IllegalArgumentException} if an illegal type is specified.
      */
-    ScalarConstPtr  createScalar(ScalarType scalarType) const;
+    ScalarConstPtr createScalar(ScalarType scalarType) const;
     /**
      * Create an {@code Array} field.
      * @param elementType The {@code scalarType} for array elements
@@ -549,7 +696,7 @@ public:
     FieldConstPtr deserialize(ByteBuffer* buffer, DeserializableControl* control) const;
         
 private:
-   FieldCreate();
+    FieldCreate();
 };
 
 /**

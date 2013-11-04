@@ -11,6 +11,7 @@
 #include <cstdlib>
 #include <string>
 #include <cstdio>
+#include <stdexcept>
 #include <pv/lock.h>
 #include <pv/pvIntrospect.h>
 #include <pv/convert.h>
@@ -369,6 +370,167 @@ void Structure::serialize(ByteBuffer *buffer, SerializableControl *control) cons
 
 void Structure::deserialize(ByteBuffer */*buffer*/, DeserializableControl */*control*/) {
     throw std::runtime_error("not valid operation, use FieldCreate::deserialize instead");
+}
+
+FieldBuilder::FieldBuilder() : fieldCreate(getFieldCreate()), idSet(false) {}
+
+FieldBuilder::FieldBuilder(FieldBuilderPtr const & _parentBuilder,
+			std::string const & _nestedName,
+			Type _nestedClassToBuild, bool _nestedArray) :
+		fieldCreate(getFieldCreate()),
+		idSet(false),
+		parentBuilder(_parentBuilder),
+		nestedClassToBuild(_nestedClassToBuild),
+		nestedName(_nestedName),
+		nestedArray(_nestedArray)
+{}
+
+void FieldBuilder::reset()
+{
+	id.erase();
+    idSet = false;
+	fieldNames.clear();
+	fields.clear();
+}
+
+FieldBuilderPtr FieldBuilder::setId(std::string const & id)
+{
+    this->id = id;
+    idSet = true; 
+    return shared_from_this();
+}
+
+FieldBuilderPtr FieldBuilder::add(std::string const & name, ScalarType scalarType)
+{
+    fields.push_back(fieldCreate->createScalar(scalarType)); fieldNames.push_back(name); 
+	return shared_from_this();
+}
+
+FieldBuilderPtr FieldBuilder::add(std::string const & name, FieldConstPtr const & field)
+{
+    fields.push_back(field); fieldNames.push_back(name);
+	return shared_from_this();
+}
+
+FieldBuilderPtr FieldBuilder::addArray(std::string const & name, ScalarType scalarType)
+{
+    fields.push_back(fieldCreate->createScalarArray(scalarType)); fieldNames.push_back(name);
+	return shared_from_this();
+}
+
+FieldBuilderPtr FieldBuilder::addArray(std::string const & name, FieldConstPtr const & element)
+{
+    switch (element->getType())
+    {
+        case structure:
+            fields.push_back(fieldCreate->createStructureArray(static_pointer_cast<const Structure>(element)));
+            break;
+        // TODO case union:
+        //    fields.push_back(fieldCreate->createUnionArray(static_pointer_cast<const Union>(element)));
+        //    break;
+        case scalar:
+            fields.push_back(fieldCreate->createScalarArray(static_pointer_cast<const Scalar>(element)->getScalarType()));
+            break;
+        default:
+            throw std::invalid_argument("unsupported array element type:" + element->getType());
+    }
+    
+    fieldNames.push_back(name);
+	return shared_from_this();
+}
+
+FieldConstPtr FieldBuilder::createFieldInternal(Type type)
+{
+/* TODO
+    // minor optimization
+    if (fieldNames.size() == 0 && type == union)
+        return fieldCreate->createVariantUnion();
+*/
+    if (type == structure)
+    {
+        return (idSet) ?
+            fieldCreate->createStructure(id, fieldNames, fields) :
+            fieldCreate->createStructure(fieldNames, fields);
+    }
+    /* TODO
+    else if (type == union)
+    {
+        return (idSet) ?
+            fieldCreate->createUnion(id, fieldNames, fields) :
+            fieldCreate->createUnion(fieldNames, fields);
+    }
+    */
+    else
+        throw std::invalid_argument("unsupported type: " + type);    
+}
+
+
+StructureConstPtr FieldBuilder::createStructure()
+{
+    if (parentBuilder.get())
+        throw std::runtime_error("createStructure() called in nested FieldBuilder");
+	
+    StructureConstPtr field(static_pointer_cast<const Structure>(createFieldInternal(structure)));
+    reset();
+    return field;
+}
+
+/*
+UnionConstPtr FieldBuilder::createUnion()
+{
+    if (parentBuilder.get())
+        throw std::runtime_error("createUnion() called in nested FieldBuilder");
+	
+    UnionConstPtr field(static_pointer_cast<const Union>(createFieldInternal(union)));
+    reset();
+    return field;
+}
+*/
+
+FieldBuilderPtr FieldBuilder::addStructure(std::string const & name)
+{
+    return FieldBuilderPtr(new FieldBuilder(shared_from_this(), name, structure, false));
+}
+
+/*
+FieldBuilderPtr FieldBuilder::addUnion(std::string const & name)
+{
+    return FieldBuilderPtr(new FieldBuilder(shared_from_this(), name, union, false));
+}
+*/
+
+FieldBuilderPtr FieldBuilder::addStructureArray(std::string const & name)
+{
+    return FieldBuilderPtr(new FieldBuilder(shared_from_this(), name, structure, true));
+}
+
+/*
+FieldBuilderPtr FieldBuilder::addUnionArray(std::string const & name)
+{
+    return FieldBuilderPtr(new FieldBuilder(shared_from_this(), name, union, true));
+}
+*/
+
+
+FieldBuilderPtr FieldBuilder::createNested()
+{
+    if (!parentBuilder.get())
+        throw std::runtime_error("this method can only be called to create nested fields");
+        
+    FieldConstPtr nestedField = createFieldInternal(nestedClassToBuild);
+    if (nestedArray)
+        parentBuilder->addArray(nestedName, nestedField);
+    else
+        parentBuilder->add(nestedName, nestedField);
+        
+    return parentBuilder;
+}
+
+
+FieldBuilderPtr FieldCreate::createFieldBuilder() const
+{
+    FieldBuilderPtr builder(new FieldBuilder());
+    return builder;
 }
 
 ScalarConstPtr FieldCreate::createScalar(ScalarType scalarType) const
