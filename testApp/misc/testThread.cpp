@@ -48,7 +48,6 @@ public:
     }
 };
 
-typedef std::tr1::shared_ptr<Thread> ThreadPtr;
 static void testThreadRun(FILE *fd) {
     // show that we can control thread start and stop
     ActionPtr ax(new Action(fd));
@@ -146,15 +145,15 @@ int main(int argc, char *argv[]) {
     if(fileName!=0 && fileName[0]!=0) {
         fd = fopen(fileName,"w+");
     }
+    testThreadRun(fd);
+    testBasic(fd);
+#ifdef TESTTHREADCONTEXT
     char *auxFileName = 0;
     if(argc>2) auxFileName = argv[2];
     FILE *auxFd = stdout;
     if(auxFileName!=0 && auxFileName[0]!=0) {
         auxFd = fopen(auxFileName,"w+");
     }
-    testThreadRun(fd);
-    testBasic(fd);
-#ifdef TESTTHREADCONTEXT
     testThreadContext(fd,auxFd);
 #endif
     return 0;
