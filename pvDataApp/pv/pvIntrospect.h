@@ -24,6 +24,8 @@ class Scalar;
 class ScalarArray;
 class Structure;
 class StructureArray;
+class Union;
+class UnionArray;
 
 /**
  * typedef for a shared pointer to an immutable Field.
@@ -49,6 +51,14 @@ typedef std::tr1::shared_ptr<const Structure> StructureConstPtr;
  * typedef for a shared pointer to an immutable StructureArray.
  */
 typedef std::tr1::shared_ptr<const StructureArray> StructureArrayConstPtr;
+/**
+ * typedef for a shared pointer to an immutable Union.
+ */
+typedef std::tr1::shared_ptr<const Union> UnionConstPtr;
+/**
+ * typedef for a shared pointer to an immutable UnionArray.
+ */
+typedef std::tr1::shared_ptr<const UnionArray> UnionArrayConstPtr;
 
 /**
  * Definition of support field types.
@@ -69,7 +79,15 @@ enum Type {
     /**
      * The type is structureArray. Each element is a structure.
      */
-    structureArray
+    structureArray,
+    /**
+     * The type is an union.
+     */
+    union_,
+    /**
+     * The type is an array of unions.
+     */
+    unionArray
 };
 
 /**
@@ -143,6 +161,8 @@ enum ScalarType {
      */
     pvString
 };
+
+#define MAX_SCALAR_TYPE pvString
 
 /**
  * Convenience functions for ScalarType.
@@ -382,6 +402,48 @@ private:
 };
 
 /**
+ * This class implements introspection object for a unionArray
+ */
+class UnionArray : public Field{
+public:
+    POINTER_DEFINITIONS(UnionArray);
+    typedef UnionArray& reference;
+    typedef const UnionArray& const_reference;
+
+    /**
+     * Get the introspection interface for the array elements.
+     * @return The introspection interface.
+     */
+    UnionConstPtr  getUnion() const {return punion;}
+
+    /**
+     * Convert the scalarType to a string and add it to builder.
+     * @param  builder The string builder.
+     * @param  indentLevel The number of blanks at the beginning of new lines.
+     */
+    virtual void toString(StringBuilder buf,int indentLevel=0) const;
+    
+    virtual String getID() const;
+
+    virtual void serialize(ByteBuffer *buffer, SerializableControl *control) const;
+    virtual void deserialize(ByteBuffer *buffer, DeserializableControl *control);
+
+protected:
+    /**
+     * Constructor.
+     * @param union The introspection interface for the elements.
+     */
+    UnionArray(UnionConstPtr const & _punion);
+    /**
+     * Destructor.
+     */
+    virtual ~UnionArray();
+private:
+    UnionConstPtr punion;
+    friend class FieldCreate;
+};
+
+/**
  * This class implements introspection object for a structure.
  */
 class Structure : public Field {
@@ -401,7 +463,7 @@ public:
     typedef const Structure& const_reference;
 
     /**
-     * Get the number of immediate subfields in the structure/
+     * Get the number of immediate subfields in the structure.
      * @return The number of fields.
      */
     std::size_t getNumberFields() const {return fieldNames.size();}
@@ -468,6 +530,108 @@ private:
     FieldConstPtrArray fields;
     String id;
    friend class FieldCreate;
+   friend class Union;
+};
+
+/**
+ * This class implements introspection object for a union.
+ */
+class Union : public Field {
+public:
+    POINTER_DEFINITIONS(Union);
+
+    /**
+     * Default union ID.
+     */
+    static epics::pvData::String DEFAULT_ID;
+
+    /**
+     * Default variant union ID.
+     */
+    static epics::pvData::String ANY_ID;
+
+    /**
+     * Destructor.
+     */
+    virtual ~Union();
+    typedef Union& reference;
+    typedef const Union& const_reference;
+
+    /**
+     * Get the number of immediate subfields in the union.
+     * @return The number of fields.
+     */
+    std::size_t getNumberFields() const {return fieldNames.size();}
+    /**
+     * Get the field for the specified fieldName.
+     * @param fieldName The name of the field to get;
+     * @return The introspection interface.
+     * This will hold a null pointer if the field is not in the union.
+     */
+    FieldConstPtr getField(String const &fieldName) const;
+    /**
+     * Get the field for the specified fieldName.
+     * @param fieldName The index of the field to get;
+     * @return The introspection interface.
+     * This will hold a null pointer if the field is not in the union.
+     */
+    FieldConstPtr getField(std::size_t index) const {return fields[index];}
+    /**
+     * Get the field index for the specified fieldName.
+     * @return The introspection interface.
+     * This will be -1 if the field is not in the union.
+     */
+    std::size_t getFieldIndex(String const &fieldName) const;
+    /**
+     * Get the fields in the union.
+     * @return The array of fields.
+     */
+    FieldConstPtrArray const & getFields() const {return fields;}
+    /**
+     * Get the names of the fields in the union.
+     * @return The array of fieldNames.
+     */
+    StringArray const & getFieldNames() const {return fieldNames;}
+    void renameField(std::size_t fieldIndex,String const & newName)
+        {fieldNames[fieldIndex] = newName;}
+    /**
+     * Get the name of the field with the specified index;
+     * @param fieldIndex The index of the desired field.
+     * @return The fieldName.
+     */
+    String getFieldName(std::size_t fieldIndex) const {return fieldNames[fieldIndex];}
+    /**
+     * Check if this union is variant union (aka any type).
+     * @return <code>true</code> if this union is variant union, otherwise <code>false</code>.
+     */
+    bool isVariant() const {return (fieldNames.size() == 0);}
+    /**
+     * Convert the union to a string and add it to builder.
+     * @param  builder The string builder.
+     */
+    virtual void toString(StringBuilder buf) const{toString(buf,0);}
+    /**
+     * Convert the union to a string and add it to builder.
+     * @param  builder The string builder.
+     * @param  indentLevel The number of blanks at the beginning of new lines.
+     */
+    virtual void toString(StringBuilder buf,int indentLevel) const;
+    
+    virtual String getID() const;
+
+    virtual void serialize(ByteBuffer *buffer, SerializableControl *control) const;
+    virtual void deserialize(ByteBuffer *buffer, DeserializableControl *control);
+    
+protected:
+   Union();
+   Union(StringArray const & fieldNames, FieldConstPtrArray const & fields, String const & id = DEFAULT_ID);
+private:
+    void toStringCommon(StringBuilder buf,int indentLevel) const;
+    StringArray fieldNames;
+    FieldConstPtrArray fields;
+    String id;
+   friend class FieldCreate;
+   friend class Structure;
 };
 
 /**
@@ -476,16 +640,162 @@ private:
 class FieldCreate;
 typedef std::tr1::shared_ptr<FieldCreate> FieldCreatePtr;
 
+class FieldBuilder;
+typedef std::tr1::shared_ptr<FieldBuilder> FieldBuilderPtr;
+
+/**
+ * Interface for in-line creating of introspection interfaces.
+ * One instance can be used to create multiple {@code Field} instances.
+ * An instance of this object must not be used concurrently (an object has a state).
+ * @author mse
+ */
+class FieldBuilder :
+    public std::tr1::enable_shared_from_this<FieldBuilder>
+{
+public:
+	/**
+	 * Set ID of an object to be created.
+	 * @param id id to be set.
+     * @return this instance of a {@code FieldBuilder}.
+	 */
+	FieldBuilderPtr setId(std::string const & id);
+
+    /**
+     * Add a {@code Scalar}.
+     * @param name name of the array.
+     * @param scalarType type of a scalar to add.
+     * @return this instance of a {@code FieldBuilder}.
+     */
+    FieldBuilderPtr add(std::string const & name, ScalarType scalarType);
+
+    /**
+     * Add a {@code Field} (e.g. {@code Structure}, {@code Union}).
+     * @param name name of the array.
+     * @param field a field to add.
+     * @return this instance of a {@code FieldBuilder}.
+     */
+    FieldBuilderPtr add(std::string const & name, FieldConstPtr const & field);
+
+    /**
+     * Add array of {@code Scalar} elements.
+     * @param name name of the array.
+     * @param scalarType type of a scalar element.
+     * @return this instance of a {@code FieldBuilder}.
+     */
+    FieldBuilderPtr addArray(std::string const & name, ScalarType scalarType);
+    
+    /**
+     * Add array of {@code Field} elements.
+     * @param name name of the array.
+     * @param field a type of an array element.
+     * @return this instance of a {@code FieldBuilder}.
+     */
+    FieldBuilderPtr addArray(std::string const & name, FieldConstPtr const & element);
+
+    /**
+     * Create a {@code Structure}.
+     * This resets this instance state and allows new {@code Field} instance to be created.
+     * @return a new instance of a {@code Structure}.
+     */
+    StructureConstPtr createStructure();
+    
+    /**
+     * Create an {@code Union}.
+     * This resets this instance state and allows new {@code Field} instance to be created.
+     * @return a new instance of an {@code Union}.
+     */
+    UnionConstPtr createUnion();
+
+    /**
+     * Add new nested {@code Structure}.
+     * {@code createNested()} method must be called
+     * to complete creation of the nested {@code Structure}.
+     * @param name nested structure name.
+     * @return a new instance of a {@code FieldBuilder} is returned.
+     * @see #createNested()
+     */
+    FieldBuilderPtr addStructure(std::string const & name); 
+    
+    /**
+     * Add new nested {@code Union}.
+     * {@code createNested()} method must be called
+     * to complete creation of the nested {@code Union}.
+     * @param name nested union name.
+     * @return a new instance of a {@code FieldBuilder} is returned.
+     * @see #createNested()
+     */
+    FieldBuilderPtr addUnion(std::string const & name);
+    
+    /**
+     * Add new nested {@code Structure[]}.
+     * {@code createNested()} method must be called
+     * to complete creation of the nested {@code Structure}.
+     * @param name nested structure name.
+     * @return a new instance of a {@code FieldBuilder} is returned.
+     * @see #createNested()
+     */
+    FieldBuilderPtr addStructureArray(std::string const & name); 
+    
+    /**
+     * Add new nested {@code Union[]}.
+     * {@code createNested()} method must be called
+     * to complete creation of the nested {@code Union}.
+     * @param name nested union name.
+     * @return a new instance of a {@code FieldBuilder} is returned.
+     * @see #createNested()
+     */
+    FieldBuilderPtr addUnionArray(std::string const & name);
+
+    /**
+     * Complete the creation of a nested object.
+     * @see #addStructure(String)
+     * @see #addUnion(String)
+     * @return a previous (parent) {@code FieldBuilder}.
+     */
+    FieldBuilderPtr createNested();
+
+private:
+    FieldBuilder();
+    FieldBuilder(FieldBuilderPtr const & parentBuilder,
+			std::string const & nestedName,
+			Type nestedClassToBuild, bool nestedArray);
+			
+	void reset();
+	FieldConstPtr createFieldInternal(Type type);
+			
+    friend class FieldCreate;
+    
+    FieldCreatePtr fieldCreate;
+
+	std::string id;
+	bool idSet;
+	
+	// NOTE: this preserves order, however it does not handle duplicates
+    StringArray fieldNames;
+    FieldConstPtrArray fields;
+    
+	FieldBuilderPtr parentBuilder;
+	Type nestedClassToBuild;
+	std::string nestedName;
+	bool nestedArray;
+   
+};
+
 class FieldCreate {
 public:
-     static FieldCreatePtr getFieldCreate();
+    static FieldCreatePtr getFieldCreate();
+	/**
+	 * Create a new instance of in-line {@code Field} builder.
+	 * @return a new instance of a {@code FieldBuilder}.
+	 */
+	FieldBuilderPtr createFieldBuilder() const;
     /**
      * Create a {@code ScalarField}.
      * @param scalarType The scalar type.
      * @return a {@code Scalar} interface for the newly created object.
      * @throws An {@code IllegalArgumentException} if an illegal type is specified.
      */
-    ScalarConstPtr  createScalar(ScalarType scalarType) const;
+    ScalarConstPtr createScalar(ScalarType scalarType) const;
     /**
      * Create an {@code Array} field.
      * @param elementType The {@code scalarType} for array elements
@@ -519,6 +829,43 @@ public:
     	String const & id,
         StringArray const & fieldNames,
         FieldConstPtrArray const & fields) const;
+     /**
+      * Create an {@code Array} field that is has element type <i>Union</i>
+      * @param fieldName The field name
+      * @param elementUnion The {@code Union} for each array element.
+      * @return An {@code Array} Interface for the newly created object.
+      */
+    UnionArrayConstPtr createUnionArray(UnionConstPtr const & punion) const;
+    /**
+     * Create a variant {@code UnionArray} (aka any type) field.
+     * @return a {@code UnionArray} interface for the newly created object.
+     */
+    UnionArrayConstPtr createVariantUnionArray() const;
+    /**
+     * Create a variant {@code Union} (aka any type) field.
+     * @return a {@code Union} interface for the newly created object.
+     */
+    UnionConstPtr createVariantUnion() const;
+    /**
+     * Create a {@code Union} field.
+     * @param fieldNames The array of {@code fieldNames} for the union.
+     * @param fields The array of {@code fields} for the union.
+     * @return a {@code Union} interface for the newly created object.
+     */
+    UnionConstPtr createUnion (
+        StringArray const & fieldNames,
+        FieldConstPtrArray const & fields) const;
+    /**
+     * Create a {@code Union} field with identification string.
+     * @param id The identification string for the union.
+     * @param fieldNames The array of {@code fieldNames} for the union.
+     * @param fields The array of {@code fields} for the union.
+     * @return a {@code Union} interface for the newly created object.
+     */
+    UnionConstPtr createUnion (
+    	String const & id,
+        StringArray const & fieldNames,
+        FieldConstPtrArray const & fields) const;
     /**
      * Append a field to a structure.
      * @param structure The structure to which the field is appended.
@@ -549,7 +896,12 @@ public:
     FieldConstPtr deserialize(ByteBuffer* buffer, DeserializableControl* control) const;
         
 private:
-   FieldCreate();
+    FieldCreate();
+    
+    std::vector<ScalarConstPtr> scalars;
+    std::vector<ScalarArrayConstPtr> scalarArrays;
+    UnionConstPtr variantUnion;
+    UnionArrayConstPtr variantUnionArray;
 };
 
 /**

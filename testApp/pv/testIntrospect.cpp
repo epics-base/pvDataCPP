@@ -128,6 +128,62 @@ static void testStructure()
     testOk1(struct1arr->getID()=="structure[]");
 }
 
+static void testUnion()
+{
+    testDiag("testUnion");
+    StringArray names1(2);
+    names1[0] = "innerA";
+    names1[1] = "innerB";
+    FieldConstPtrArray fields1(2);
+    fields1[0] = fieldCreate->createScalar(pvDouble);
+    fields1[1] = fieldCreate->createScalarArray(pvString);
+
+    UnionConstPtr union1 = fieldCreate->createUnion(names1, fields1);
+
+    testOk1(union1->getNumberFields()==2);
+    testOk1(union1->getField("innerA")==fields1[0]);
+    testOk1(union1->getField("innerB")==fields1[1]);
+    testOk1(union1->getFieldIndex("innerA")==0);
+    testOk1(union1->getFieldIndex("innerB")==1);
+    testOk1(union1->getField(0)==fields1[0]);
+    testOk1(union1->getField(1)==fields1[1]);
+    testOk1(union1->getFieldName(0)==names1[0]);
+    testOk1(union1->getFieldName(1)==names1[1]);
+
+    testOk1(union1->getID() == Union::DEFAULT_ID);
+
+    testOk1(fields1 == union1->getFields()); // vector equality
+
+    StringArray names2(2);
+    names2[0] = "outerA";
+    names2[1] = "outerB";
+    FieldConstPtrArray fields2(2);
+    fields2[0] = fieldCreate->createScalar(pvInt);
+    fields2[1] = std::tr1::static_pointer_cast<const Field>(union1);
+
+    UnionConstPtr union2 = fieldCreate->createUnion(names2, fields2);
+
+    testOk1(union2->getNumberFields()==2); // not recursive
+    testOk1(union2->getField(1)==fields2[1]);
+
+    UnionArrayConstPtr union1arr = fieldCreate->createUnionArray(union1);
+
+    testOk1(union1arr->getUnion()==union1);
+    testOk1(union1arr->getID()=="union[]");
+    
+    UnionConstPtr variantUnion1 = fieldCreate->createVariantUnion();
+
+    testOk1(variantUnion1->getNumberFields()==0);
+    testOk1(variantUnion1->getID() == Union::ANY_ID);
+    
+    UnionArrayConstPtr variantUnion1arr = fieldCreate->createVariantUnionArray();
+
+    testOk1(variantUnion1arr->getUnion()==variantUnion1);
+    testOk1(variantUnion1arr->getID()=="any[]");
+    
+}
+
+
 #define testExcept(EXCEPT, CMD) try{ CMD; testFail( "No exception from: " #CMD); } \
 catch(EXCEPT& e) {testPass("Got expected exception from: " #CMD);} \
 catch(std::exception& e) {testFail("Got wrong exception %s(%s) from: " #CMD, typeid(e).name(),e.what());} \
@@ -198,13 +254,14 @@ static void testMapping()
 
 MAIN(testIntrospect)
 {
-    testPlan(161);
+    testPlan(180);
     fieldCreate = getFieldCreate();
     pvDataCreate = getPVDataCreate();
     standardField = getStandardField();
     testScalar();
     testScalarArray();
     testStructure();
+    testUnion();
     testError();
     testMapping();
     return testDone();

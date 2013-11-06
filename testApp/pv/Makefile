@@ -53,6 +53,10 @@ PROD_HOST += testOperators
 testOperators_SRCS += testOperators.cpp
 testOperators_LIBS += pvData Com
 
+PROD_HOST += testFieldBuilder
+testFieldBuilder_SRCS += testFieldBuilder.cpp
+testFieldBuilder_LIBS += pvData Com
+
 TESTSCRIPTS_HOST += $(TESTS:%=%.t)
 
 include $(TOP)/configure/RULES
