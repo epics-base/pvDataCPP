@@ -15,6 +15,7 @@ testBitSet_SRCS += testBitSet.cpp
 
 PROD_HOST += testOverrunBitSet
 testOverrunBitSet_SRCS += testOverrunBitSet.cpp
+TESTS += testOverrunBitSet
 
 PROD_HOST += testByteOrder
 testByteOrder_SRCS += testByteOrder.cpp

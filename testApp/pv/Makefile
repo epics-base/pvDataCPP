@@ -56,6 +56,7 @@ testOperators_LIBS += pvData Com
 PROD_HOST += testFieldBuilder
 testFieldBuilder_SRCS += testFieldBuilder.cpp
 testFieldBuilder_LIBS += pvData Com
+TESTS += testFieldBuilder
 
 TESTSCRIPTS_HOST += $(TESTS:%=%.t)
 
