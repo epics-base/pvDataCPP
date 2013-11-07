@@ -56,7 +56,7 @@ struct ScalarArrayHashFunction {
 
 struct StructureHashFunction {
     size_t operator() (const Structure& /*structure*/) const { return 0; }
-    // TODO
+    // TODO hash
 //        final int PRIME = 31;
 //        return PRIME * Arrays.hashCode(fieldNames) + Arrays.hashCode(fields);
 };
@@ -934,7 +934,7 @@ FieldConstPtr FieldCreate::deserialize(ByteBuffer* buffer, DeserializableControl
     if (code == -1)
         return FieldConstPtr();
 
-    int typeCode = code & 0xE0;
+    int typeCode = code & 0xEF;
     bool notArray = ((code & 0x10) == 0);
     if (notArray)
     {

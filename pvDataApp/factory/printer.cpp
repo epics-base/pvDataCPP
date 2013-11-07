@@ -44,7 +44,13 @@ void PrinterBase::endStructure(const PVStructure&) {}
 void PrinterBase::beginStructureArray(const PVStructureArray&) {}
 void PrinterBase::endStructureArray(const PVStructureArray&) {}
 
-void PrinterBase::encodeScalar(const PVScalar& pv) {}
+void PrinterBase::beginUnion(const PVUnion&) {}
+void PrinterBase::endUnion(const PVUnion&) {}
+
+void PrinterBase::beginUnionArray(const PVUnionArray&) {}
+void PrinterBase::endUnionArray(const PVUnionArray&) {}
+
+void PrinterBase::encodeScalar(const PVScalar&) {}
 
 void PrinterBase::encodeArray(const PVScalarArray&) {}
 
@@ -79,6 +85,14 @@ void PrinterBase::impl_print(const PVField& pv)
 
             case structureArray:
                 endStructureArray(*static_cast<const PVStructureArray *>(inprog.back()));
+                break;
+
+            case union_:
+                endUnion(*static_cast<const PVUnion *>(inprog.back()));
+                break;
+
+            case unionArray:
+                endUnionArray(*static_cast<const PVUnionArray *>(inprog.back()));
                 break;
 
             default:
@@ -132,6 +146,35 @@ void PrinterBase::impl_print(const PVField& pv)
                     todo.push_back(marker);
                     break;
                 }
+            case union_: {
+                    const PVUnion &fld = *static_cast<const PVUnion*>(next);
+
+                    inprog.push_back(next);
+
+                    beginUnion(fld);
+                    PVFieldPtr val = fld.get();
+                    if (val.get())          // TODO print "(none)" ?
+                        todo.push_back(val.get());
+
+                    todo.push_back(marker);
+                    break;
+                }
+            case unionArray: {
+                    const PVUnionArray &fld = *static_cast<const PVUnionArray*>(next);
+                    PVUnionArray::const_svector vals(fld.view());
+
+                    inprog.push_back(next);
+
+                    beginUnionArray(fld);
+                    for(PVUnionArray::const_svector::const_iterator it=vals.begin();
+                        it!=vals.end(); ++it)
+                    {
+                        todo.push_back(it->get());
+                    }
+
+                    todo.push_back(marker);
+                    break;
+                }
             }
         }
     }
@@ -167,6 +210,25 @@ void PrinterPlain::beginStructureArray(const PVStructureArray& pv)
 }
 
 void PrinterPlain::endStructureArray(const PVStructureArray&) {ilvl--;}
+
+void PrinterPlain::beginUnion(const PVUnion& pv)
+{
+    indentN(S(), ilvl);
+    S() << pv.getUnion()->getID() << " " << pv.getFieldName() << std::endl;
+    ilvl++;
+}
+
+void PrinterPlain::endUnion(const PVUnion&) {ilvl--;}
+
+void PrinterPlain::beginUnionArray(const PVUnionArray& pv)
+{
+    indentN(S(), ilvl);
+    S() << pv.getUnionArray()->getID() << " "
+        << pv.getFieldName() << "[] ";
+    ilvl++;
+}
+
+void PrinterPlain::endUnionArray(const PVUnionArray&) {ilvl--;}
 
 void PrinterPlain::encodeScalar(const PVScalar& pv)
 {

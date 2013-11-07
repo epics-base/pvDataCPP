@@ -446,6 +446,14 @@ PVFieldPtr PVDataCreate::createPVField(FieldConstPtr const & field)
          StructureArrayConstPtr xx = static_pointer_cast<const StructureArray>(field);
          return createPVStructureArray(xx);
      }
+     case union_: {
+         UnionConstPtr xx = static_pointer_cast<const Union>(field);
+         return createPVUnion(xx);
+     }
+     case unionArray: {
+         UnionArrayConstPtr xx = static_pointer_cast<const UnionArray>(field);
+         return createPVUnionArray(xx);
+     }
      }
      throw std::logic_error("PVDataCreate::createPVField should never get here");
 }
@@ -480,6 +488,21 @@ PVFieldPtr PVDataCreate::createPVField(PVFieldPtr const & fieldToClone)
              PVStructureArrayPtr to = createPVStructureArray(
                  structureArray);
              getConvert()->copyStructureArray(from, to);
+             return to;
+         }
+     case union_:
+         {
+             PVUnionPtr pvUnion
+                   = static_pointer_cast<PVUnion>(fieldToClone);
+             return createPVUnion(pvUnion);
+         }
+     case unionArray:
+         {
+             PVUnionArrayPtr from
+                 = static_pointer_cast<PVUnionArray>(fieldToClone);
+             UnionArrayConstPtr unionArray = from->getUnionArray();
+             PVUnionArrayPtr to = createPVUnionArray(unionArray);
+             getConvert()->copyUnionArray(from, to);
              return to;
          }
      }
@@ -614,6 +637,28 @@ PVStructurePtr PVDataCreate::createPVStructure(
      return PVStructurePtr(new PVStructure(structure));
 }
 
+PVUnionArrayPtr PVDataCreate::createPVUnionArray(
+        UnionArrayConstPtr const & unionArray)
+{
+     return PVUnionArrayPtr(new PVUnionArray(unionArray));
+}
+
+PVUnionPtr PVDataCreate::createPVUnion(
+        UnionConstPtr const & punion)
+{
+     return PVUnionPtr(new PVUnion(punion));
+}
+
+PVUnionPtr PVDataCreate::createPVVariantUnion()
+{
+     return PVUnionPtr(new PVUnion(getFieldCreate()->createVariantUnion()));
+}
+
+PVUnionArrayPtr PVDataCreate::createPVVariantUnionArray()
+{
+     return PVUnionArrayPtr(new PVUnionArray(getFieldCreate()->createVariantUnionArray()));
+}
+
 PVStructurePtr PVDataCreate::createPVStructure(
         StringArray const & fieldNames,PVFieldPtrArray const & pvFields)
 {
@@ -629,6 +674,7 @@ PVStructurePtr PVDataCreate::createPVStructure(PVStructurePtr const & structToCl
 {
     FieldConstPtrArray field;
     if(structToClone==0) {
+        // is this correct?!
         FieldConstPtrArray fields(0);
         StringArray fieldNames(0);
         StructureConstPtr structure = fieldCreate->createStructure(fieldNames,fields);
@@ -638,6 +684,14 @@ PVStructurePtr PVDataCreate::createPVStructure(PVStructurePtr const & structToCl
     PVStructurePtr pvStructure(new PVStructure(structure));
     getConvert()->copyStructure(structToClone,pvStructure);
     return pvStructure;
+}
+
+PVUnionPtr PVDataCreate::createPVUnion(PVUnionPtr const & unionToClone)
+{
+    PVUnionPtr punion(new PVUnion(unionToClone->getUnion()));
+    // set cloned value
+    punion->set(unionToClone->getSelectedIndex(), createPVField(unionToClone->get()));
+    return punion;
 }
 
 PVDataCreatePtr PVDataCreate::getPVDataCreate()

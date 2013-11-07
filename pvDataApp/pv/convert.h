@@ -30,6 +30,8 @@ bool operator==(const Scalar&, const Scalar&);
 bool operator==(const ScalarArray&, const ScalarArray&);
 bool operator==(const Structure&, const Structure&);
 bool operator==(const StructureArray&, const StructureArray&);
+bool operator==(const Union&, const Union&);
+bool operator==(const UnionArray&, const UnionArray&);
 
 static inline bool operator!=(const Field& a, const Field& b)
 {return !(a==b);}
@@ -40,6 +42,10 @@ static inline bool operator!=(const ScalarArray& a, const ScalarArray& b)
 static inline bool operator!=(const Structure& a, const Structure& b)
 {return !(a==b);}
 static inline bool operator!=(const StructureArray& a, const StructureArray& b)
+{return !(a==b);}
+static inline bool operator!=(const Union& a, const Union& b)
+{return !(a==b);}
+static inline bool operator!=(const UnionArray& a, const UnionArray& b)
 {return !(a==b);}
 
 
@@ -291,6 +297,38 @@ public:
       */
     void copyStructureArray(
         PVStructureArrayPtr const & from, PVStructureArrayPtr const & to);
+    /**
+     * Are from and to valid arguments for copyUnion.
+     * They are only compatible if they have the same Union description.
+     * @param from from union.
+     * @param to union.
+     * @return (false,true) If the arguments (are not, are) compatible.
+     */
+    bool isCopyUnionCompatible(
+        UnionConstPtr const & from, UnionConstPtr const & to);
+    /**
+     * Copy from a union pv to another union pv.
+     * NOTE: Only compatible nodes are copied.
+     * @param from The source.
+     * @param to The destination.
+     * @throws std::invalid_argument if the arguments are not compatible.
+     */
+    void copyUnion(PVUnionPtr const & from, PVUnionPtr const & to);
+    /**
+     * Are from and to valid for copyUnionArray.
+     * @param from The from UnionArray.
+     * @param to The to UnionArray.
+     * @return (false,true) If the arguments (are not, are) compatible.
+     */
+    bool isCopyUnionArrayCompatible(
+        UnionArrayConstPtr const & from, UnionArrayConstPtr const & to);
+     /**
+      * Copy from a union array to another union array.
+      * @param from The source array.
+      * @param to The destination array.
+      */
+    void copyUnionArray(
+        PVUnionArrayPtr const & from, PVUnionArrayPtr const & to);
     /**
      * Convert a PV to a <byte>.
      * @param pv a PV

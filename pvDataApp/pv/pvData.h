@@ -108,6 +108,9 @@ class PVScalarArray;
 
 class PVStructure;
 
+class PVUnion;
+
+
 
 template<typename T> class PVScalarValue;
 template<typename T> class PVValueArray;
@@ -163,6 +166,29 @@ typedef PVValueArray<PVStructurePtr> PVStructureArray;
 typedef std::tr1::shared_ptr<PVStructureArray> PVStructureArrayPtr;
 typedef std::vector<PVStructureArrayPtr> PVStructureArrayPtrArray;
 typedef std::tr1::shared_ptr<PVStructureArrayPtrArray> PVStructureArrayPtrArrayPtr;
+
+/**
+ * typedef for a pointer to a PVUnion.
+ */
+typedef std::tr1::shared_ptr<PVUnion> PVUnionPtr;
+/**
+ * typedef for a pointer to a array of pointer to PVUnion.
+ */
+typedef std::vector<PVUnionPtr> PVUnionPtrArray;
+typedef std::vector<PVUnionPtr>::iterator PVUnionPtrArray_iterator;
+typedef std::vector<PVUnionPtr>::const_iterator PVUnionPtrArray_const__iterator;
+
+/**
+ * typedef for a pointer to a PVUnionArray.
+ */
+
+typedef PVValueArray<PVUnionPtr> PVUnionArray;
+typedef std::tr1::shared_ptr<PVUnionArray> PVUnionArrayPtr;
+typedef std::vector<PVUnionArrayPtr> PVUnionArrayPtrArray;
+typedef std::tr1::shared_ptr<PVUnionArrayPtrArray> PVUnionArrayPtrArrayPtr;
+
+class PVDataCreate;
+typedef std::tr1::shared_ptr<PVDataCreate> PVDataCreatePtr;
 
 /**
  * This class provides auxillary information about a PVField.
@@ -891,6 +917,12 @@ public:
      */
     PVStructurePtr getStructureField(String const &fieldName) ;
     /**
+     * Get a union field with the specified name.
+     * @param fieldName The name of the field to get.
+     * @return Pointer to the field of null if a field with that name and type does not exist.
+     */
+    PVUnionPtr getUnionField(String const &fieldName) ;
+    /**
      * Get a scalarArray field with the specified name.
      * @param fieldName The name of the field to get.
      * @param elementType The element type.
@@ -904,6 +936,12 @@ public:
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
     PVStructureArrayPtr getStructureArrayField(String const &fieldName) ;
+    /**
+     * Get a unionArray field with the specified name.
+     * @param fieldName The name of the field to get.
+     * @return Pointer to the field of null if a field with that name and type does not exist.
+     */
+    PVUnionArrayPtr getUnionArrayField(String const &fieldName) ;
     /**
      * Get the name if this structure extends another structure.
      * @return The string which may be null.
@@ -976,6 +1014,8 @@ private:
     static PVStringPtr nullPVString;
     static PVStructurePtr nullPVStructure;
     static PVStructureArrayPtr nullPVStructureArray;
+    static PVUnionPtr nullPVUnion;
+    static PVUnionArrayPtr nullPVUnionArray;
     static PVScalarArrayPtr nullPVScalarArray;
 
     PVFieldPtrArray pvFields;
@@ -983,6 +1023,142 @@ private:
     String extendsStructureName;
     friend class PVDataCreate;
 };
+
+
+class PVUnion : public PVField
+{
+public:
+    POINTER_DEFINITIONS(PVUnion);
+    /**
+     * Destructor
+     */
+    virtual ~PVUnion();
+    typedef PVUnion & reference;
+    typedef const PVUnion & const_reference;
+
+	/**
+	 * Undefined index.
+	 * Default value upon PVUnion construction. Can be set by the user.
+	 * Corresponds to {@code null} value.
+	 */
+	static int32 UNDEFINED_INDEX;
+
+    /**
+     * Get the introspection interface
+     * @return The interface.
+     */
+    UnionConstPtr getUnion() const;
+
+    /**
+     * Get the {@code PVField} value stored in the field.
+     * @return {@code PVField} value of field, {@code null} if {@code getSelectedIndex() == UNDEFINED_INDEX}.
+     */
+    PVFieldPtr get() const;
+    
+    // TODO dynamic vs static cast?
+    template<typename PVT>
+    std::tr1::shared_ptr<PVT> get() const {
+        return std::tr1::static_pointer_cast<PVT>(get());
+    }
+        
+    /**
+     * Select field (set index) and get the field at the index.
+     * @param index index of the field to select.
+     * @return corresponding PVField (of undetermined value), {@code null} if {@code index == UNDEFINED_INDEX}.
+     * @throws {@code std::invalid_argument} if index is invalid (out of range).
+     */
+    PVFieldPtr select(int32 index);
+    
+    // TODO dynamic vs static cast?
+    template<typename PVT>
+    std::tr1::shared_ptr<PVT> select(int32 index) {
+        return std::tr1::static_pointer_cast<PVT>(select(index));
+    }
+
+    /**
+     * Select field (set index) and get the field by given name.
+     * @param fieldName the name of the field to select.
+     * @return corresponding PVField (of undetermined value).
+     * @throws {@code std::invalid_argument} if field does not exist.
+     */
+    PVFieldPtr select(String const & fieldName);
+    
+    // TODO dynamic vs static cast?
+    template<typename PVT>
+    std::tr1::shared_ptr<PVT> select(String const & fieldName) {
+        return std::tr1::static_pointer_cast<PVT>(select(fieldName));
+    }
+
+    /**
+     * Get selected field index.
+     * @return selected field index.
+     */
+    int32 getSelectedIndex() const;
+    
+    /**
+     * Get selected field name.
+     * @return selected field name, empty string if field does not exist.
+     */
+    String getSelectedFieldName() const;
+    
+    /**
+     * Set the {@code PVField} (by reference!) as selected field.
+     * If a value is not a valid union field an {@code std::invalid_argument} exception is thrown.
+     * @param value the field to set.
+     */
+    void set(PVFieldPtr const & value);
+    /**
+     * Set the {@code PVField} (by reference!) as field at given index.
+     * If a value is not a valid union field an {@code std::invalid_argument} exception is thrown.
+     * Use {@code select(int)} to put by value.
+     * @param index index of a field to put.
+     * @param value the field to set.
+     * @see #select(int)
+     */
+    void set(int32 index, PVFieldPtr const & value);
+    /**
+     * Set the {@code PVField} (by reference!) as field by given name.
+     * If a value is not a valid union field an {@code std::invalid_argument} exception is thrown.
+     * Use {@code select(String)} to put by value.
+     * @param fieldName Name of the field to put.
+     * @param value the field to set.
+     * @see #select(String)
+     */
+    void set(String const & fieldName, PVFieldPtr const & value);
+
+    /**
+     * Serialize.
+     * @param pbuffer The byte buffer.
+     * @param pflusher Interface to call when buffer is full.
+     */
+    virtual void serialize(
+        ByteBuffer *pbuffer,SerializableControl *pflusher) const ;
+    /**
+     * Deserialize
+     * @param pbuffer The byte buffer.
+     * @param pflusher Interface to call when buffer is empty.
+     */
+    virtual void deserialize(
+        ByteBuffer *pbuffer,DeserializableControl *pflusher);
+    /**
+     * Constructor
+     * @param punion The introspection interface.
+     */
+    PVUnion(UnionConstPtr const & punion);
+
+    virtual std::ostream& dumpValue(std::ostream& o) const;
+
+private:
+    friend class PVDataCreate;
+    static PVDataCreatePtr pvDataCreate;
+    
+    UnionConstPtr unionPtr;
+
+	int32 selector;
+	PVFieldPtr value;
+	bool variant;  
+};
+
 
 namespace detail {
     // adaptor to allow epics::pvData::shared_vector to hold a reference
@@ -1301,6 +1477,105 @@ private:
     friend class PVDataCreate;
 };
 
+
+/**
+ * This is provided by code that calls get.
+ */
+typedef PVArrayData<PVUnionPtr> UnionArrayData;
+
+/**
+ * Data class for a unionArray
+ */
+template<>
+class PVValueArray<PVUnionPtr> : public detail::PVVectorStorage<PVUnionPtr,PVArray>
+{
+    typedef detail::PVVectorStorage<PVUnionPtr,PVArray> base_t;
+public:
+    POINTER_DEFINITIONS(PVUnionArray);
+    typedef PVUnionPtr  value_type;
+    typedef PVUnionPtr* pointer;
+    typedef const PVUnionPtr* const_pointer;
+    typedef PVArrayData<PVUnionPtr> ArrayDataType;
+    typedef std::vector<PVUnionPtr> vector;
+    typedef const std::vector<PVUnionPtr> const_vector;
+    typedef std::tr1::shared_ptr<vector> shared_vector;
+    typedef PVUnionArray &reference;
+    typedef const PVUnionArray& const_reference;
+
+    //TODO: full namespace can be removed along with local typedef 'shared_vector'
+    typedef ::epics::pvData::shared_vector<PVUnionPtr> svector;
+    typedef ::epics::pvData::shared_vector<const PVUnionPtr> const_svector;
+    /**
+     * Destructor
+     */
+    virtual ~PVValueArray() {}
+
+    virtual size_t getLength() const {return value.size();}
+    virtual size_t getCapacity() const {return value.capacity();}
+
+    /**
+     * Set the array capacity.
+     * @param capacity The length.
+     */
+    virtual void setCapacity(size_t capacity);
+    /**
+     * Set the array length.
+     * @param length The length.
+     */
+    virtual void setLength(std::size_t length);
+
+    /**
+     * Get the introspection interface
+     * @return The interface.
+     */
+    UnionArrayConstPtr getUnionArray() const {return unionArray;}
+    /**
+     * Append new elements to the end of the array.
+     * @param number The number of elements to add.
+     * @return the new length of the array.
+     */
+    virtual std::size_t append(std::size_t number);
+    /**
+     * Remove elements from the array.
+     * @param offset The offset of the first element to remove.
+     * @param number The number of elements to remove.
+     * @return (false,true) if the elements were removed.
+     */
+    virtual bool remove(std::size_t offset,std::size_t number);
+    /**
+     * Compress. This removes all null elements from the array.
+     */
+    virtual void compress();
+
+    virtual const_svector view() const { return value; }
+    virtual void swap(const_svector &other);
+    virtual void replace(const const_svector &other) {
+        value = other;
+        PVField::postPut();
+    }
+
+    virtual void serialize(ByteBuffer *pbuffer,
+        SerializableControl *pflusher) const;
+    virtual void deserialize(ByteBuffer *buffer,
+        DeserializableControl *pflusher);
+    virtual void serialize(ByteBuffer *pbuffer,
+        SerializableControl *pflusher, std::size_t offset, std::size_t count) const ;
+
+    virtual std::ostream& dumpValue(std::ostream& o) const;
+    virtual std::ostream& dumpValue(std::ostream& o, std::size_t index) const;
+
+protected:
+    PVValueArray(UnionArrayConstPtr const & unionArray)
+        :base_t(unionArray)
+        ,unionArray(unionArray)
+    {}
+private:
+    UnionArrayConstPtr unionArray;
+    const_svector value;
+    friend class PVDataCreate;
+};
+
+
 /**
  * Definitions for the various scalarArray types.
  */
@@ -1352,8 +1627,6 @@ typedef PVArrayData<String> StringArrayData;
 typedef PVValueArray<String> PVStringArray;
 typedef std::tr1::shared_ptr<PVStringArray> PVStringArrayPtr;
 
-class PVDataCreate;
-typedef std::tr1::shared_ptr<PVDataCreate> PVDataCreatePtr;
 /**
  * This is a singlton class for creating data instances.
  */
@@ -1439,6 +1712,36 @@ public:
       * @return The PVStructure implementation.
       */
    PVStructurePtr createPVStructure(PVStructurePtr const & structToClone);
+    /**
+     * Create an implementation of an array with union elements.
+     * @param unionArray The introspection interface.
+     * All elements share the same introspection interface.
+     * @return The PVUnionArray implementation.
+     */
+    PVUnionArrayPtr createPVUnionArray(UnionArrayConstPtr const & unionArray);
+    /**
+     * Create implementation for PVUnion.
+     * @param union The introspection interface.
+     * @return The PVUnion implementation
+     */
+    PVUnionPtr createPVUnion(UnionConstPtr const & punion);
+     /**
+      * Create implementation for PVUnion.
+      * @param unionToClone A union. Each subfield is cloned and added to the newly created union.
+      * @return The PVUnion implementation.
+      */
+   PVUnionPtr createPVUnion(PVUnionPtr const & unionToClone);
+    /**
+     * Create variant union implementation.
+     * @return The variant PVUnion implementation. 
+     */
+    PVUnionPtr createPVVariantUnion();
+    /**
+     * Create variant union array implementation.
+     * @return The variant PVUnionArray implementation. 
+     */
+    PVUnionArrayPtr createPVVariantUnionArray();
+   
 private:
    PVDataCreate();
    FieldCreatePtr fieldCreate;

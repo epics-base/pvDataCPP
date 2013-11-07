@@ -48,6 +48,16 @@ bool operator==(const Field& a, const Field& b)
             const StructureArray &B=static_cast<const StructureArray&>(b);
             return A==B;
         }
+    case union_: {
+            const Union &A=static_cast<const Union&>(a);
+            const Union &B=static_cast<const Union&>(b);
+            return A==B;
+        }
+    case unionArray: {
+            const UnionArray &A=static_cast<const UnionArray&>(a);
+            const UnionArray &B=static_cast<const UnionArray&>(b);
+            return A==B;
+        }
     default:
         throw std::logic_error("Invalid Field type in comparision");
     }
@@ -92,6 +102,33 @@ bool operator==(const Structure& a, const Structure& b)
 bool operator==(const StructureArray& a, const StructureArray& b)
 {
     return *(a.getStructure().get())==*(b.getStructure().get());
+}
+
+bool operator==(const Union& a, const Union& b)
+{
+    if(&a==&b)
+        return true;
+    if (a.getID()!=b.getID())
+    	return false;
+    size_t nflds=a.getNumberFields();
+    if (b.getNumberFields()!=nflds)
+        return false;
+
+    // std::equals does not work, since FieldConstPtrArray is an array of shared_pointers
+    FieldConstPtrArray af = a.getFields();
+    FieldConstPtrArray bf = b.getFields();
+    for (size_t i = 0; i < nflds; i++)
+        if (*(af[i].get()) != *(bf[i].get()))
+            return false;
+
+    StringArray an = a.getFieldNames();
+    StringArray bn = b.getFieldNames();
+    return std::equal( an.begin(), an.end(), bn.begin() );
+}
+
+bool operator==(const UnionArray& a, const UnionArray& b)
+{
+    return *(a.getUnion().get())==*(b.getUnion().get());
 }
 
 // PVXXX object comparison
@@ -210,6 +247,59 @@ bool compareField(const PVStructureArray* left, const PVStructureArray* right)
     return true;
 }
 
+bool compareField(const PVUnion* left, const PVUnion* right)
+{
+    UnionConstPtr ls = left->getUnion();
+
+    if(*ls!=*right->getUnion())
+        return false;
+        
+    if (ls->isVariant())
+    {
+        PVFieldPtr lval = left->get();
+        if (lval.get() == 0)
+            return right->get().get() == 0;
+        else
+            return *(lval.get()) == *(right->get().get());
+    }
+    else
+    {
+        int32 lix = left->getSelectedIndex();
+        if (lix == right->getSelectedIndex())
+        {
+            if (lix == PVUnion::UNDEFINED_INDEX || *(left->get()) == *(right->get().get()))
+                return true;
+            else
+                return false;
+        }
+        else
+            return false;
+    }
+}
+
+bool compareField(const PVUnionArray* left, const PVUnionArray* right)
+{
+    if(*left->getUnionArray()->getUnion()
+        != *right->getUnionArray()->getUnion())
+        return false;
+
+    PVUnionArray::const_svector ld=left->view(), rd=right->view();
+
+    if(ld.size()!=rd.size())
+        return false;
+
+    PVUnionArray::const_svector::const_iterator lit, lend, rit;
+
+    for(lit=ld.begin(), lend=ld.end(), rit=rd.begin();
+        lit!=lend;
+        ++lit, ++rit)
+    {
+        if(**lit != **rit)
+            return false;
+    }
+    return true;
+}
+
 } // end namespace
 
 // untyped comparison
@@ -228,6 +318,8 @@ bool operator==(const PVField& left, const PVField& right)
     case scalarArray: return compareField(static_cast<const PVScalarArray*>(&left), static_cast<const PVScalarArray*>(&right));
     case structure: return compareField(static_cast<const PVStructure*>(&left), static_cast<const PVStructure*>(&right));
     case structureArray: return compareField(static_cast<const PVStructureArray*>(&left), static_cast<const PVStructureArray*>(&right));
+    case union_: return compareField(static_cast<const PVUnion*>(&left), static_cast<const PVUnion*>(&right));
+    case unionArray: return compareField(static_cast<const PVUnionArray*>(&left), static_cast<const PVUnionArray*>(&right));
     }
     throw std::logic_error("PVField with invalid type!");
 }

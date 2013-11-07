@@ -265,7 +265,9 @@ void PVField::computeOffset(const PVField   *  pvField) {
         switch(field->getType()) {
         case scalar:
         case scalarArray:
-        case structureArray:{
+        case structureArray:
+        case union_:
+        case unionArray: {
             nextOffset++;
             pvField->fieldOffset = offset;
             pvField->nextFieldOffset = nextOffset;
@@ -295,7 +297,9 @@ void PVField::computeOffset(const PVField   *  pvField,size_t offset) {
         switch(field->getType()) {
             case scalar:
             case scalarArray:
-            case structureArray: {
+            case structureArray:
+            case union_:
+            case unionArray: {
                 nextOffset++;
                 pvSubField->fieldOffset = offset;
                 pvSubField->nextFieldOffset = nextOffset;

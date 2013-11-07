@@ -84,7 +84,7 @@ size_t Convert::fromString(PVStructurePtr const &pvStructure, StringArray const 
                 processed++;
             }
             else {
-                // structureArray not supported
+                // union, structureArray, unionArray not supported
                 String message("Convert::fromString unsupported fieldType ");
                 TypeFunc::toString(&message,type);
                 throw std::logic_error(message);
@@ -176,6 +176,18 @@ bool Convert::isCopyCompatible(FieldConstPtr const &from, FieldConstPtr const &t
              StructureArrayConstPtr yyy = static_pointer_cast<const StructureArray>(to);
              return isCopyStructureArrayCompatible(xxx,yyy);
         }
+    case union_:
+        {
+             UnionConstPtr xxx = static_pointer_cast<const Union>(from);
+             UnionConstPtr yyy = static_pointer_cast<const Union>(to);
+             return isCopyUnionCompatible(xxx,yyy);
+        }
+    case unionArray:
+        {
+             UnionArrayConstPtr xxx = static_pointer_cast<const UnionArray>(from);
+             UnionArrayConstPtr yyy = static_pointer_cast<const UnionArray>(to);
+             return isCopyUnionArrayCompatible(xxx,yyy);
+        }
     }
     String message("Convert::isCopyCompatible should never get here");
     throw std::logic_error(message);
@@ -209,6 +221,19 @@ void Convert::copy(PVFieldPtr const & from, PVFieldPtr const & to)
             PVStructureArrayPtr fromArray = static_pointer_cast<PVStructureArray>(from);
             PVStructureArrayPtr toArray = static_pointer_cast<PVStructureArray>(to);
             copyStructureArray(fromArray,toArray);
+            return;
+        }
+    case union_:
+        {
+             PVUnionPtr xxx = static_pointer_cast<PVUnion>(from);
+             PVUnionPtr yyy = static_pointer_cast<PVUnion>(to);
+             copyUnion(xxx,yyy);
+             return;
+        }
+    case unionArray: {
+            PVUnionArrayPtr fromArray = static_pointer_cast<PVUnionArray>(from);
+            PVUnionArrayPtr toArray = static_pointer_cast<PVUnionArray>(to);
+            copyUnionArray(fromArray,toArray);
             return;
         }
     }
@@ -290,6 +315,19 @@ bool Convert::isCopyStructureCompatible(
 		StructureArrayConstPtr xxx = static_pointer_cast<const StructureArray>(from);
                 StructureArrayConstPtr yyy = static_pointer_cast<const StructureArray>(to);
                 if(!isCopyStructureArrayCompatible(xxx,yyy)) return false;
+            }
+        case union_:
+            {
+		UnionConstPtr xxx = static_pointer_cast<const Union>(from);
+                UnionConstPtr yyy = static_pointer_cast<const Union>(to);
+                if(!isCopyUnionCompatible(xxx,yyy)) return false;
+            }
+            break;
+        case unionArray:
+            {
+		UnionArrayConstPtr xxx = static_pointer_cast<const UnionArray>(from);
+                UnionArrayConstPtr yyy = static_pointer_cast<const UnionArray>(to);
+                if(!isCopyUnionArrayCompatible(xxx,yyy)) return false;
             }
             break;
         }
@@ -380,7 +418,57 @@ void Convert::copyStructure(PVStructurePtr const & from, PVStructurePtr const & 
                 copyStructureArray(fromArray,toArray);
                 break;
             }
+        case union_:
+            {
+                PVUnionPtr xxx = static_pointer_cast<PVUnion>(fromData);
+                PVUnionPtr yyy = static_pointer_cast<PVUnion>(toData);
+                copyUnion(xxx,yyy);
+                break;
+            }
+        case unionArray:
+            {
+                PVUnionArrayPtr fromArray = 
+                    static_pointer_cast<PVUnionArray>(fromData);
+                PVUnionArrayPtr toArray = 
+                    static_pointer_cast<PVUnionArray>(toData);
+                copyUnionArray(fromArray,toArray);
+                break;
+            }
         }
+    }
+}
+
+bool Convert::isCopyUnionCompatible(
+    UnionConstPtr const &from, UnionConstPtr const &to)
+{
+    return *(from.get()) == *(to.get());
+}
+
+void Convert::copyUnion(PVUnionPtr const & from, PVUnionPtr const & to)
+{
+    if(to->isImmutable()) {
+        if(from==to) return;
+        throw std::invalid_argument("Convert.copyUnion destination is immutable");
+    }
+    if(from==to) return;
+    if(!isCopyUnionCompatible(from->getUnion(), to->getUnion())) {
+        throw std::invalid_argument("Illegal copyUnion");
+    }
+            
+    PVFieldPtr fromValue = from->get();
+    if (from->getUnion()->isVariant())
+    {
+        if (fromValue.get() == 0)
+            to->set(PVFieldPtr());
+        else
+            to->set(getPVDataCreate()->createPVField(fromValue));	// clone value // TODO
+    }
+    else
+    {
+        if (fromValue.get() == 0)
+            to->select(PVUnion::UNDEFINED_INDEX);
+        else
+            copy(fromValue, to->select(from->getSelectedIndex()));
     }
 }
 
@@ -399,6 +487,25 @@ void Convert::copyStructureArray(
         return;
     } else if(to->isImmutable()) {
         throw std::invalid_argument("Convert.copyStructureArray destination is immutable");
+    }
+    to->replace(from->view());
+}
+
+bool Convert::isCopyUnionArrayCompatible(
+    UnionArrayConstPtr const &from, UnionArrayConstPtr const &to)
+{
+    UnionConstPtr xxx = from->getUnion();
+    UnionConstPtr yyy = to->getUnion();
+    return isCopyUnionCompatible(xxx,yyy);
+}
+
+void Convert::copyUnionArray(
+    PVUnionArrayPtr const & from, PVUnionArrayPtr const & to)
+{
+    if(from==to) {
+        return;
+    } else if(to->isImmutable()) {
+        throw std::invalid_argument("Convert.copyUnionArray destination is immutable");
     }
     to->replace(from->view());
 }

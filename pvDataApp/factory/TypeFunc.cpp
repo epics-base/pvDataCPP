@@ -22,10 +22,10 @@ namespace epics { namespace pvData {
 
 namespace TypeFunc {
     static const char* names[] = {
-        "scalar", "scalarArray", "structure", "structureArray",
+        "scalar", "scalarArray", "structure", "structureArray", "union", "unionArray"
     };
     const char* name(Type t) {
-        if (t<int(pvBoolean) || t>int(pvString))
+        if (t<int(scalar) || t>int(unionArray))
             THROW_EXCEPTION2(std::invalid_argument, "logic error unknown Type");
         return names[t];
     }

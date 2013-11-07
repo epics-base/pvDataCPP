@@ -25,6 +25,12 @@ protected:
     virtual void beginStructureArray(const PVStructureArray&);
     virtual void endStructureArray(const PVStructureArray&);
 
+    virtual void beginUnion(const PVUnion&);
+    virtual void endUnion(const PVUnion&);
+
+    virtual void beginUnionArray(const PVUnionArray&);
+    virtual void endUnionArray(const PVUnionArray&);
+
     virtual void encodeScalar(const PVScalar&);
     virtual void encodeArray(const PVScalarArray&);
     virtual void encodeNull();
@@ -45,6 +51,12 @@ protected:
 
     virtual void beginStructureArray(const PVStructureArray&);
     virtual void endStructureArray(const PVStructureArray&);
+
+    virtual void beginUnion(const PVUnion&);
+    virtual void endUnion(const PVUnion&);
+
+    virtual void beginUnionArray(const PVUnionArray&);
+    virtual void endUnionArray(const PVUnionArray&);
 
     virtual void encodeScalar(const PVScalar&);
     virtual void encodeArray(const PVScalarArray&);

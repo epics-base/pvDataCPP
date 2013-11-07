@@ -38,6 +38,8 @@ PVDoublePtr PVStructure::nullPVDouble;
 PVStringPtr PVStructure::nullPVString;
 PVStructurePtr PVStructure::nullPVStructure;
 PVStructureArrayPtr PVStructure::nullPVStructureArray;
+PVUnionPtr PVStructure::nullPVUnion;
+PVUnionArrayPtr PVStructure::nullPVUnionArray;
 PVScalarArrayPtr PVStructure::nullPVScalarArray;
 
 static PVFieldPtr findSubField(
@@ -520,6 +522,24 @@ PVStructurePtr PVStructure::getStructureField(String const &fieldName)
     return nullPVStructure;
 }
 
+PVUnionPtr PVStructure::getUnionField(String const &fieldName)
+{
+    PVFieldPtr pvField  = findSubField(fieldName,this);
+    if(pvField.get()==NULL) {
+        String message("fieldName ");
+        message +=  fieldName + " does not exist";
+        this->message(message, errorMessage);
+        return nullPVUnion;
+    }
+    if(pvField->getField()->getType()==union_) {
+        return std::tr1::static_pointer_cast<PVUnion>(pvField);
+    }
+    String message("fieldName ");
+    message +=  fieldName + " does not have type union ";
+    this->message(message, errorMessage);
+    return nullPVUnion;
+}
+
 PVScalarArrayPtr PVStructure::getScalarArrayField(
     String const &fieldName,ScalarType elementType)
 {
@@ -567,6 +587,25 @@ PVStructureArrayPtr PVStructure::getStructureArrayField(
     message +=  fieldName + " does not have type structureArray ";
     this->message(message, errorMessage);
     return nullPVStructureArray;
+}
+
+PVUnionArrayPtr PVStructure::getUnionArrayField(
+    String const &fieldName)
+{
+    PVFieldPtr pvField  = findSubField(fieldName,this);
+    if(pvField.get()==NULL) {
+        String message("fieldName ");
+        message +=  fieldName + " does not exist";
+        this->message(message, errorMessage);
+        return nullPVUnionArray;
+    }
+    if(pvField->getField()->getType()==unionArray) {
+        return std::tr1::static_pointer_cast<PVUnionArray>(pvField);
+    }
+    String message("fieldName ");
+    message +=  fieldName + " does not have type unionArray ";
+    this->message(message, errorMessage);
+    return nullPVUnionArray;
 }
 
 String PVStructure::getExtendsStructureName() const

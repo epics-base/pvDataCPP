@@ -140,7 +140,7 @@ void serializationTest(PVFieldPtr const & field) {
 }
 
 void testEquals() {
-    testDiag("Testing equals...");
+    testDiag("Testing equals...");  // and non-initialized
     PVDataCreatePtr factory = getPVDataCreate();
     testOk1(factory.get()!=NULL);
 
@@ -167,6 +167,59 @@ void testEquals() {
     PVStructureArrayPtr structureArray1 = factory->createPVStructureArray(getFieldCreate()->createStructureArray(structure1->getStructure()));
     PVStructureArrayPtr structureArray2 = factory->createPVStructureArray(getFieldCreate()->createStructureArray(structure2->getStructure()));
 	testOk1((*structureArray1)==(*structureArray2));
+	
+	// variant union
+	PVUnionPtr variantUnion1 = factory->createPVVariantUnion();
+	PVUnionPtr variantUnion2 = factory->createPVVariantUnion();
+	testOk1((*variantUnion1)==(*variantUnion2));
+	
+	variantUnion1->set(structure1);
+	variantUnion2->set(structure1);
+	testOk1((*variantUnion1)==(*variantUnion2));
+
+	variantUnion2->set(structureArray1);
+	testOk1((*variantUnion1)!=(*variantUnion2));
+	
+	// variant union array
+	PVUnionArrayPtr variantUnionArray1 = factory->createPVVariantUnionArray();
+	PVUnionArrayPtr variantUnionArray2 = factory->createPVVariantUnionArray();
+	testOk1((*variantUnionArray1)==(*variantUnionArray2));
+
+    // union	
+    UnionConstPtr punion = getFieldCreate()->createFieldBuilder()->
+                            add("double", pvDouble)->
+                            add("double2", pvDouble)->
+                            addStructureArray("nested")->
+                                setId("nestedId")->
+                                add("short", pvShort)->
+                                add("long", pvLong)->
+                                createNested()->
+                            addArray("intArray", pvInt)->
+                            createUnion();
+	PVUnionPtr union1 = factory->createPVUnion(punion);
+	PVUnionPtr union2 = factory->createPVUnion(punion);
+	testOk1((*union1)==(*union2));
+	
+	union1->select<PVDouble>("double")->put(1.2);
+	union2->select<PVDouble>("double")->put(1.2);
+	testOk1((*union1)==(*union2));
+	
+	union2->select<PVDouble>("double")->put(2.2);
+	testOk1((*union1)!=(*union2));
+
+	union2->select<PVDouble>("double2")->put(1.2);
+	testOk1((*union1)!=(*union2));
+
+	union2->select("nested");
+	testOk1((*union1)!=(*union2));
+
+	testOk1((*union1)!=(*variantUnion2));
+	
+	PVUnionArrayPtr unionArray1 = factory->createPVUnionArray(getFieldCreate()->createUnionArray(punion));
+	PVUnionArrayPtr unionArray2 = factory->createPVUnionArray(getFieldCreate()->createUnionArray(punion));
+	testOk1((*unionArray1)==(*unionArray2));
+
+	testOk1((*variantUnionArray1)!=(*unionArray2));
 }
 
 template<typename PVT>
@@ -322,32 +375,6 @@ void testArray() {
     testArrayType<PVStringArray>(sdata, NELEMENTS(sdata));
 }
 
-void testNonInitialized() {
-    testDiag("Testing non-initialized...");
-    PVDataCreatePtr factory = getPVDataCreate();
-    testOk1(factory.get()!=NULL);
-
-	 // be sure all is covered
-	 for (int i = pvBoolean; i < pvString; i++)
-	 {
-		 ScalarType scalarType = static_cast<ScalarType>(i);
-
-		 PVScalarPtr scalar = factory->createPVScalar(scalarType);
-		 serializationTest(scalar);
-
-		 PVScalarArrayPtr array = factory->createPVScalarArray(scalarType);
-		 serializationTest(array);
-	}
-
-	// and a structure
-	PVStructurePtr structure = factory->createPVStructure(getStandardField()->timeStamp());
-	serializationTest(structure);
-
-	// and a structure array
-	PVStructureArrayPtr structureArray = factory->createPVStructureArray(getFieldCreate()->createStructureArray(structure->getStructure()));
-	serializationTest(structureArray);
-}
-
 void testStructure() {
     testDiag("Testing structure...");
 
@@ -369,6 +396,196 @@ void testStructure() {
 			);
 	// TODO fill with data
     serializationTest(pvStructure);
+}
+
+template<typename PVT>
+std::tr1::shared_ptr<PVT> createPVScalar()
+{
+    return std::tr1::static_pointer_cast<PVT>(
+        getPVDataCreate()->createPVScalar(PVT::typeCode)
+    );   
+}
+
+template<typename PVAT>
+std::tr1::shared_ptr<PVAT> createPVScalarArray()
+{
+    return std::tr1::static_pointer_cast<PVAT>(
+        getPVDataCreate()->createPVScalarArray(PVAT::typeCode)
+    );   
+}
+
+void testUnion() {
+    testDiag("Testing union...");
+
+    PVDataCreatePtr factory = getPVDataCreate();
+    testOk1(factory.get()!=NULL);
+
+
+    PVDoublePtr doubleValue = createPVScalar<PVDouble>();
+    PVIntPtr intValue = createPVScalar<PVInt>();
+
+    testDiag("\tVariant union test");
+
+    PVUnionPtr variant = factory->createPVVariantUnion();
+    testOk1(variant.get()!=NULL);
+    testOk1(PVUnion::UNDEFINED_INDEX == variant->getSelectedIndex());
+    testOk1("" == variant->getSelectedFieldName());
+    serializationTest(variant);
+
+    variant->set(doubleValue);
+    testOk1(doubleValue.get() == variant->get().get());
+    testOk1(PVUnion::UNDEFINED_INDEX == variant->getSelectedIndex());
+    testOk1("" == variant->getSelectedFieldName());
+    serializationTest(variant);
+
+    variant->set(intValue);
+    testOk1(intValue.get() == variant->get().get());
+    testOk1(PVUnion::UNDEFINED_INDEX == variant->getSelectedIndex());
+    testOk1("" == variant->getSelectedFieldName());
+    serializationTest(variant);
+
+    variant->set(PVUnion::UNDEFINED_INDEX, doubleValue);
+    testOk1(doubleValue.get() == variant->get().get());
+    testOk1(PVUnion::UNDEFINED_INDEX == variant->getSelectedIndex());
+
+    variant->set(PVFieldPtr());
+    testOk1(NULL == variant->get().get());
+
+    testDiag("\tVariant union array test");
+
+    PVUnionArrayPtr variantArray = factory->createPVVariantUnionArray();
+    testOk1(variantArray.get()!=NULL);
+    
+    variantArray->setLength(6);
+    PVUnionArray::svector data;
+
+    PVUnionPtr u = factory->createPVVariantUnion();
+    data.push_back(u);
+  
+    u = factory->createPVVariantUnion();
+    u->set(factory->createPVStructure(getStandardField()->timeStamp()));
+    data.push_back(u);
+    
+    u = factory->createPVVariantUnion();
+    u->set(factory->createPVStructure(getStandardField()->control()));
+    data.push_back(u);
+
+    data.push_back(PVUnionPtr());
+
+    variantArray->replace(freeze(data));
+    serializationTest(variantArray);
+    
+    testDiag("\tVariant union test");
+    
+    UnionConstPtr punion = getFieldCreate()->createFieldBuilder()->
+                            add("doubleValue", pvDouble)->
+                            add("intValue", pvInt)->
+                            createUnion();
+                            
+    u = factory->createPVUnion(punion);
+    testOk1(NULL!=u.get());       
+
+	// null union test
+    testOk1(NULL==u->get().get());
+    testOk1(PVUnion::UNDEFINED_INDEX == u->getSelectedIndex());
+    testOk1("" == u->getSelectedFieldName());
+    serializationTest(u);
+
+    u->select<PVDouble>("doubleValue")->put(12);
+    testOk1(12 == u->get<PVDouble>()->get());
+    testOk1(0 == u->getSelectedIndex());
+    testOk1("doubleValue" == u->getSelectedFieldName());
+    serializationTest(u);
+    
+    u->select<PVInt>("intValue")->put(543);
+    testOk1(543 == u->get<PVInt>()->get());
+    testOk1(1 == u->getSelectedIndex());
+    testOk1("intValue" == u->getSelectedFieldName());
+    serializationTest(u);
+    
+    u->select<PVInt>(1)->put(5432);
+    testOk1(5432 == u->get<PVInt>()->get());
+    serializationTest(u);
+
+    testOk1(NULL==u->select(PVUnion::UNDEFINED_INDEX).get());
+    testOk1(NULL==u->get().get());
+    testOk1(PVUnion::UNDEFINED_INDEX == u->getSelectedIndex());
+    testOk1("" == u->getSelectedFieldName());
+    serializationTest(u);
+        
+    u->set("doubleValue", doubleValue);
+    testOk1(doubleValue.get() == u->get().get());
+    testOk1(0 == u->getSelectedIndex());
+    serializationTest(u);
+    
+    try
+    {
+        u->set(1, doubleValue);
+        testFail("field type does not match, but set allowed");
+    }
+    catch (std::invalid_argument& ia)
+    {
+        // expected
+        testPass("PVUnion.set(int32, PVFieldPtr const&) field type does not match test");
+    }
+
+    try
+    {
+        u->select(120);
+        testFail("index out of bounds allowed");
+    }
+    catch (std::invalid_argument& ia)
+    {
+        // expected
+        testPass("PVUnion.select(int32) index out of bounds test");
+    }
+    
+    try
+    {
+        u->select(-2);
+        testFail("index out of bounds allowed");
+    }
+    catch (std::invalid_argument& ia)
+    {
+        // expected
+        testPass("PVUnion.select(int32) index out of bounds test");
+    }
+
+    try
+    {
+        u->set(120, doubleValue);
+        testFail("index out of bounds allowed");
+    }
+    catch (std::invalid_argument& ia)
+    {
+        // expected
+        testPass("PVUnion.set(int32, PVFieldPtr const&) index out of bounds test");
+    }
+    
+    testDiag("\tUnion array test");
+
+    PVUnionArrayPtr unionArray = factory->createPVUnionArray(getFieldCreate()->createUnionArray(punion));
+    testOk1(unionArray.get()!=NULL);
+    
+    unionArray->setLength(6);
+    data.clear();
+
+    u = factory->createPVUnion(punion);
+    data.push_back(u);
+  
+    u = factory->createPVUnion(punion);
+    u->select<PVDouble>(0)->put(12);
+    data.push_back(u);
+    
+    u = factory->createPVUnion(punion);
+    u->select<PVInt>(1)->put(421);
+    data.push_back(u);
+
+    data.push_back(PVUnionPtr());
+
+    unionArray->replace(freeze(data));
+    serializationTest(unionArray);
+    
 }
 
 void testStructureArray() {
@@ -461,7 +678,7 @@ void testIntrospectionSerialization()
 
 		 ScalarArrayConstPtr array = factory->createScalarArray(scalarType);
 		 serializatioTest(array);
-	}
+	 }
 
      // and a structure
      StructureConstPtr structure = getStandardField()->timeStamp();
@@ -470,7 +687,31 @@ void testIntrospectionSerialization()
      // and a structure array
      StructureArrayConstPtr structureArray = factory->createStructureArray(structure);
      serializatioTest(structureArray);
- }
+
+     // variant union
+     UnionConstPtr variant = factory->createVariantUnion();
+     serializatioTest(variant);
+     
+     // variant array union
+     UnionArrayConstPtr variantArray = factory->createVariantUnionArray();
+     serializatioTest(variantArray);
+     
+     // union
+     UnionConstPtr punion = factory->createFieldBuilder()->
+                            add("double", pvDouble)->
+                            addStructureArray("nested")->
+                                setId("nestedId")->
+                                add("short", pvShort)->
+                                add("long", pvLong)->
+                                createNested()->
+                            addArray("intArray", pvInt)->
+                            createUnion();
+     serializatioTest(punion);
+     
+     // union array
+     UnionArrayConstPtr punionArray = factory->createUnionArray(punion);
+     serializatioTest(punionArray);
+}
 
 void testStringCopy() {
     String s1 = "abc";
@@ -483,7 +724,7 @@ void testStringCopy() {
 
 MAIN(testSerialization) {
 
-    testPlan(175);
+    testPlan(213);
 
     flusher = new SerializableControlImpl();
     control = new DeserializableControlImpl();
@@ -493,12 +734,13 @@ MAIN(testSerialization) {
 
     testIntrospectionSerialization();
     testEquals();
-    testNonInitialized();
 
     testScalar();
     testArray();
     testStructure();
     testStructureArray();
+    
+    testUnion();
 
 
     delete buffer;
