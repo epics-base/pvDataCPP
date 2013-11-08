@@ -208,7 +208,7 @@ std::ostream& PVStructureArray::dumpValue(std::ostream& o, std::size_t index) co
 {
     const_svector temp(view());
     if(index<temp.size())
-        o << temp[index].get();
+        o << *temp[index].get();
     return o;
 }
 
