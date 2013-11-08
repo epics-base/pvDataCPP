@@ -651,12 +651,12 @@ PVUnionPtr PVDataCreate::createPVUnion(
 
 PVUnionPtr PVDataCreate::createPVVariantUnion()
 {
-     return PVUnionPtr(new PVUnion(getFieldCreate()->createVariantUnion()));
+     return PVUnionPtr(new PVUnion(fieldCreate->createVariantUnion()));
 }
 
 PVUnionArrayPtr PVDataCreate::createPVVariantUnionArray()
 {
-     return PVUnionArrayPtr(new PVUnionArray(getFieldCreate()->createVariantUnionArray()));
+     return PVUnionArrayPtr(new PVUnionArray(fieldCreate->createVariantUnionArray()));
 }
 
 PVStructurePtr PVDataCreate::createPVStructure(
@@ -694,6 +694,8 @@ PVUnionPtr PVDataCreate::createPVUnion(PVUnionPtr const & unionToClone)
     return punion;
 }
 
+// TODO not thread-safe (local static initializers)
+// TODO replace with non-locking singleton pattern
 PVDataCreatePtr PVDataCreate::getPVDataCreate()
 {
     static PVDataCreatePtr pvDataCreate;

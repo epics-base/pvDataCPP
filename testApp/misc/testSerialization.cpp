@@ -398,22 +398,6 @@ void testStructure() {
     serializationTest(pvStructure);
 }
 
-template<typename PVT>
-std::tr1::shared_ptr<PVT> createPVScalar()
-{
-    return std::tr1::static_pointer_cast<PVT>(
-        getPVDataCreate()->createPVScalar(PVT::typeCode)
-    );   
-}
-
-template<typename PVAT>
-std::tr1::shared_ptr<PVAT> createPVScalarArray()
-{
-    return std::tr1::static_pointer_cast<PVAT>(
-        getPVDataCreate()->createPVScalarArray(PVAT::typeCode)
-    );   
-}
-
 void testUnion() {
     testDiag("Testing union...");
 
@@ -421,8 +405,8 @@ void testUnion() {
     testOk1(factory.get()!=NULL);
 
 
-    PVDoublePtr doubleValue = createPVScalar<PVDouble>();
-    PVIntPtr intValue = createPVScalar<PVInt>();
+    PVDoublePtr doubleValue = factory->createPVScalar<PVDouble>();
+    PVIntPtr intValue = factory->createPVScalar<PVInt>();
 
     testDiag("\tVariant union test");
 

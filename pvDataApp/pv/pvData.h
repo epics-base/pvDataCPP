@@ -814,12 +814,34 @@ public:
      * @return Pointer to the field or null if field does not exist.
      */
     PVFieldPtr getSubField(String const &fieldName) const;
+
+    template<typename PVT>
+    std::tr1::shared_ptr<PVT> getSubField(String const &fieldName) const
+    {
+        PVFieldPtr pvField = getSubField(fieldName);
+        if (pvField.get())
+            return std::tr1::dynamic_pointer_cast<PVT>(pvField);
+        else
+            return std::tr1::shared_ptr<PVT>();
+    }
+    
     /**
      * Get the subfield with the specified offset.
      * @param fieldOffset The offset.
      * @return Pointer to the field or null if field does not exist.
      */
     PVFieldPtr getSubField(std::size_t fieldOffset) const;
+    
+    template<typename PVT>
+    std::tr1::shared_ptr<PVT> getSubField(std::size_t fieldOffset) const
+    {
+        PVFieldPtr pvField = getSubField(fieldOffset);
+        if (pvField.get())
+            return std::tr1::dynamic_pointer_cast<PVT>(pvField);
+        else
+            return std::tr1::shared_ptr<PVT>();
+    }
+
     /**
      * Append a field to the structure.
      * @param fieldName The name of the field to append.
@@ -910,6 +932,7 @@ public:
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
     PVStringPtr getStringField(String const &fieldName) ;
+    
     /**
      * Get a structure field with the specified name.
      * @param fieldName The name of the field to get.
@@ -1054,11 +1077,10 @@ public:
      * @return {@code PVField} value of field, {@code null} if {@code getSelectedIndex() == UNDEFINED_INDEX}.
      */
     PVFieldPtr get() const;
-    
-    // TODO dynamic vs static cast?
+   
     template<typename PVT>
     std::tr1::shared_ptr<PVT> get() const {
-        return std::tr1::static_pointer_cast<PVT>(get());
+        return std::tr1::dynamic_pointer_cast<PVT>(get());
     }
         
     /**
@@ -1068,11 +1090,10 @@ public:
      * @throws {@code std::invalid_argument} if index is invalid (out of range).
      */
     PVFieldPtr select(int32 index);
-    
-    // TODO dynamic vs static cast?
+
     template<typename PVT>
     std::tr1::shared_ptr<PVT> select(int32 index) {
-        return std::tr1::static_pointer_cast<PVT>(select(index));
+        return std::tr1::dynamic_pointer_cast<PVT>(select(index));
     }
 
     /**
@@ -1082,11 +1103,10 @@ public:
      * @throws {@code std::invalid_argument} if field does not exist.
      */
     PVFieldPtr select(String const & fieldName);
-    
-    // TODO dynamic vs static cast?
+
     template<typename PVT>
     std::tr1::shared_ptr<PVT> select(String const & fieldName) {
-        return std::tr1::static_pointer_cast<PVT>(select(fieldName));
+        return std::tr1::dynamic_pointer_cast<PVT>(select(fieldName));
     }
 
     /**
@@ -1150,7 +1170,6 @@ public:
 
 private:
     friend class PVDataCreate;
-    static PVDataCreatePtr pvDataCreate;
     
     UnionConstPtr unionPtr;
 
@@ -1741,6 +1760,29 @@ public:
      * @return The variant PVUnionArray implementation. 
      */
     PVUnionArrayPtr createPVVariantUnionArray();
+    
+    
+    template<typename PVT>
+    std::tr1::shared_ptr<PVT> createPVScalar()
+    {
+        return std::tr1::static_pointer_cast<PVT>(createPVScalar(PVT::typeCode));   
+    }
+    
+    template<typename PVAT>
+    std::tr1::shared_ptr<PVAT> createPVScalarArray()
+    {
+        return std::tr1::static_pointer_cast<PVAT>(createPVScalarArray(PVAT::typeCode));   
+    }
+
+    PVStructureArrayPtr createPVStructureArray(StructureConstPtr const & structure)
+    {
+        return createPVStructureArray(fieldCreate->createStructureArray(structure));
+    }
+    
+    PVUnionArrayPtr createPVUnionArray(UnionConstPtr const & punion)
+    {
+        return createPVUnionArray(fieldCreate->createUnionArray(punion));
+    }
    
 private:
    PVDataCreate();

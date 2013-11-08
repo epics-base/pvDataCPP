@@ -460,17 +460,20 @@ void Structure::deserialize(ByteBuffer */*buffer*/, DeserializableControl */*con
     throw std::runtime_error("not valid operation, use FieldCreate::deserialize instead");
 }
 
-
 String Union::DEFAULT_ID = "union";
-String Union::ANY_ID = "any";
+
+#define UNION_ANY_ID "any"
+String Union::ANY_ID = UNION_ANY_ID;
 
 Union::Union ()
 : Field(union_),
       fieldNames(),
       fields(),
-      id(ANY_ID)
+      id(UNION_ANY_ID)
 {
 }
+
+#undef UNION_ANY_ID
 
 Union::Union (
     StringArray const & fieldNames,
@@ -996,6 +999,7 @@ FieldConstPtr FieldCreate::deserialize(ByteBuffer* buffer, DeserializableControl
     }
 }
 
+// TODO replace with non-locking singleton pattern
 FieldCreatePtr FieldCreate::getFieldCreate()
 {
 	LOCAL_STATIC_LOCK;

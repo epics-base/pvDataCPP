@@ -461,7 +461,7 @@ void Convert::copyUnion(PVUnionPtr const & from, PVUnionPtr const & to)
         if (fromValue.get() == 0)
             to->set(PVFieldPtr());
         else
-            to->set(getPVDataCreate()->createPVField(fromValue));	// clone value // TODO
+            to->set(getPVDataCreate()->createPVField(fromValue));	// clone value // TODO cache getPVDataCreate()
     }
     else
     {

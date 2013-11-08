@@ -28,8 +28,9 @@ size_t PVStructureArray::append(size_t number)
 
     StructureConstPtr structure = structureArray->getStructure();
 
+    PVDataCreatePtr pvDataCreate = getPVDataCreate();
     for(svector::reverse_iterator it = data.rbegin(); number; ++it, --number)
-        *it = getPVDataCreate()->createPVStructure(structure);
+        *it = pvDataCreate->createPVStructure(structure);
 
     size_t newLength = data.size();
 
@@ -148,6 +149,8 @@ void PVStructureArray::deserialize(ByteBuffer *pbuffer,
 
     StructureConstPtr structure = structureArray->getStructure();
 
+    PVDataCreatePtr pvDataCreate = getPVDataCreate();
+
     for(size_t i = 0; i<size; i++) {
         pcontrol->ensureData(1);
         size_t temp = pbuffer->getByte();
@@ -156,7 +159,7 @@ void PVStructureArray::deserialize(ByteBuffer *pbuffer,
         }
         else {
             if(data[i].get()==NULL) {
-                data[i] = getPVDataCreate()->createPVStructure(structure);
+                data[i] = pvDataCreate->createPVStructure(structure);
             }
             data[i]->deserialize(pbuffer, pcontrol);
         }

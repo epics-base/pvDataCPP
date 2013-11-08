@@ -23,18 +23,19 @@ using std::size_t;
 
 namespace epics { namespace pvData {
 	
-int32 PVUnion::UNDEFINED_INDEX = -1;
-PVDataCreatePtr PVUnion::pvDataCreate = getPVDataCreate();
-
+#define PVUNION_UNDEFINED_INDEX -1
+int32 PVUnion::UNDEFINED_INDEX = PVUNION_UNDEFINED_INDEX;
 
 PVUnion::PVUnion(UnionConstPtr const & unionPtr)
 : PVField(unionPtr),
   unionPtr(unionPtr),
-  selector(UNDEFINED_INDEX),
+  selector(PVUNION_UNDEFINED_INDEX),    // to allow out-of-order static initialization
   value(),
   variant(unionPtr->isVariant())
 {
 }
+
+#undef PVUNION_UNDEFINED_INDEX
 
 PVUnion::~PVUnion()
 {
@@ -83,8 +84,8 @@ PVFieldPtr PVUnion::select(int32 index)
 
     FieldConstPtr field = unionPtr->getField(index);
     selector = index;
-    value = pvDataCreate->createPVField(field);
-    
+    value = getPVDataCreate()->createPVField(field);
+
     return value;
 }
 	
@@ -93,7 +94,6 @@ PVFieldPtr PVUnion::select(String const & fieldName)
     int32 index = variant ? -1 : unionPtr->getFieldIndex(fieldName);
 	if (index == -1)
         throw std::invalid_argument("no such fieldName");
-        
 	return select(index);
 }
 	
@@ -165,7 +165,7 @@ void PVUnion::deserialize(ByteBuffer *pbuffer, DeserializableControl *pcontrol)
         FieldConstPtr field = pcontrol->cachedDeserialize(pbuffer);
         if (field.get())
         {
-            value = pvDataCreate->createPVField(field);
+            value = getPVDataCreate()->createPVField(field);
             value->deserialize(pbuffer, pcontrol);
         }
         else
@@ -177,7 +177,7 @@ void PVUnion::deserialize(ByteBuffer *pbuffer, DeserializableControl *pcontrol)
         if (selector != UNDEFINED_INDEX)
         {
             FieldConstPtr field = unionPtr->getField(selector);
-            value = pvDataCreate->createPVField(field);
+            value = getPVDataCreate()->createPVField(field);
             value->deserialize(pbuffer, pcontrol);
         }
         else

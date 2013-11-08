@@ -28,8 +28,9 @@ size_t PVUnionArray::append(size_t number)
 
     UnionConstPtr punion = unionArray->getUnion();
 
+    PVDataCreatePtr pvDataCreate = getPVDataCreate();
     for(svector::reverse_iterator it = data.rbegin(); number; ++it, --number)
-        *it = getPVDataCreate()->createPVUnion(punion);
+        *it = pvDataCreate->createPVUnion(punion);
 
     size_t newLength = data.size();
 
@@ -148,6 +149,8 @@ void PVUnionArray::deserialize(ByteBuffer *pbuffer,
 
     UnionConstPtr punion = unionArray->getUnion();
 
+    PVDataCreatePtr pvDataCreate = getPVDataCreate();
+
     for(size_t i = 0; i<size; i++) {
         pcontrol->ensureData(1);
         size_t temp = pbuffer->getByte();
@@ -156,7 +159,7 @@ void PVUnionArray::deserialize(ByteBuffer *pbuffer,
         }
         else {
             if(data[i].get()==NULL) {
-                data[i] = getPVDataCreate()->createPVUnion(punion);
+                data[i] = pvDataCreate->createPVUnion(punion);
             }
             data[i]->deserialize(pbuffer, pcontrol);
         }
