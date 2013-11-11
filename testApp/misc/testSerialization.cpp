@@ -189,11 +189,11 @@ void testEquals() {
     UnionConstPtr punion = getFieldCreate()->createFieldBuilder()->
                             add("double", pvDouble)->
                             add("double2", pvDouble)->
-                            addStructureArray("nested")->
+                            addNestedStructureArray("nested")->
                                 setId("nestedId")->
                                 add("short", pvShort)->
                                 add("long", pvLong)->
-                                createNested()->
+                                addNested()->
                             addArray("intArray", pvInt)->
                             createUnion();
 	PVUnionPtr union1 = factory->createPVUnion(punion);
@@ -683,11 +683,11 @@ void testIntrospectionSerialization()
      // union
      UnionConstPtr punion = factory->createFieldBuilder()->
                             add("double", pvDouble)->
-                            addStructureArray("nested")->
+                            addNestedStructureArray("nested")->
                                 setId("nestedId")->
                                 add("short", pvShort)->
                                 add("long", pvLong)->
-                                createNested()->
+                                addNested()->
                             addArray("intArray", pvInt)->
                             createUnion();
      serializatioTest(punion);

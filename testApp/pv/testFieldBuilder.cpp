@@ -86,19 +86,19 @@ void test_invalid()
     {
         fieldCreate->createFieldBuilder()->
             add("f1", pvByte)->
-            createNested();
-        testFail("createNested() allowed in non-nested FieldBuilder");
+            addNested();
+        testFail("addNested() allowed in non-nested FieldBuilder");
     }
     catch (std::runtime_error& re) {
         // ok
-        testPass("createNested() disallowed in non-nested FieldBuilder");
+        testPass("addNested() disallowed in non-nested FieldBuilder");
     }
 
     try
     {
         fieldCreate->createFieldBuilder()->
             add("f1", pvByte)->
-            addStructure("nested")->
+            addNestedStructure("nested")->
                 add("n1", pvUInt)->
                 createStructure();
         testFail("createStructure() allowed in nested FieldBuilder");
@@ -119,11 +119,11 @@ void test_nestedStructure()
     std::string NESTED_ID = "nestedID";
     StructureConstPtr s = fieldCreate->createFieldBuilder()->
                             add("double", pvDouble)->
-                            addStructure("nested")->
+                            addNestedStructure("nested")->
                                 setId(NESTED_ID)->
                                 add("short", pvShort)->
                                 add("long", pvLong)->
-                                createNested()->
+                                addNested()->
                             addArray("intArray", pvInt)->
                             createStructure();
     testOk1(s.get() != 0);
@@ -175,11 +175,11 @@ void test_nestedStructureArray()
     std::string NESTED_ID = "nestedID";
     StructureConstPtr s = fieldCreate->createFieldBuilder()->
                             add("double", pvDouble)->
-                            addStructureArray("nested")->
+                            addNestedStructureArray("nested")->
                                 setId(NESTED_ID)->
                                 add("short", pvShort)->
                                 add("long", pvLong)->
-                                createNested()->
+                                addNested()->
                             addArray("intArray", pvInt)->
                             createStructure();
     testOk1(s.get() != 0);

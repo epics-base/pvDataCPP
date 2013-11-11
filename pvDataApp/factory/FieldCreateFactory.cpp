@@ -716,29 +716,29 @@ UnionConstPtr FieldBuilder::createUnion()
     return field;
 }
 
-FieldBuilderPtr FieldBuilder::addStructure(std::string const & name)
+FieldBuilderPtr FieldBuilder::addNestedStructure(std::string const & name)
 {
     return FieldBuilderPtr(new FieldBuilder(shared_from_this(), name, structure, false));
 }
 
 
-FieldBuilderPtr FieldBuilder::addUnion(std::string const & name)
+FieldBuilderPtr FieldBuilder::addNestedUnion(std::string const & name)
 {
     return FieldBuilderPtr(new FieldBuilder(shared_from_this(), name, union_, false));
 }
 
 
-FieldBuilderPtr FieldBuilder::addStructureArray(std::string const & name)
+FieldBuilderPtr FieldBuilder::addNestedStructureArray(std::string const & name)
 {
     return FieldBuilderPtr(new FieldBuilder(shared_from_this(), name, structure, true));
 }
 
-FieldBuilderPtr FieldBuilder::addUnionArray(std::string const & name)
+FieldBuilderPtr FieldBuilder::addNestedUnionArray(std::string const & name)
 {
     return FieldBuilderPtr(new FieldBuilder(shared_from_this(), name, union_, true));
 }
 
-FieldBuilderPtr FieldBuilder::createNested()
+FieldBuilderPtr FieldBuilder::addNested()
 {
     if (!parentBuilder.get())
         throw std::runtime_error("this method can only be called to create nested fields");

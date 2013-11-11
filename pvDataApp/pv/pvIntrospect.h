@@ -708,51 +708,51 @@ public:
 
     /**
      * Add new nested {@code Structure}.
-     * {@code createNested()} method must be called
+     * {@code addNested()} method must be called
      * to complete creation of the nested {@code Structure}.
      * @param name nested structure name.
      * @return a new instance of a {@code FieldBuilder} is returned.
-     * @see #createNested()
+     * @see #addNested()
      */
-    FieldBuilderPtr addStructure(std::string const & name); 
+    FieldBuilderPtr addNestedStructure(std::string const & name); 
     
     /**
      * Add new nested {@code Union}.
-     * {@code createNested()} method must be called
+     * {@code addNested()} method must be called
      * to complete creation of the nested {@code Union}.
      * @param name nested union name.
      * @return a new instance of a {@code FieldBuilder} is returned.
-     * @see #createNested()
+     * @see #addNested()
      */
-    FieldBuilderPtr addUnion(std::string const & name);
+    FieldBuilderPtr addNestedUnion(std::string const & name);
     
     /**
      * Add new nested {@code Structure[]}.
-     * {@code createNested()} method must be called
+     * {@code addNested()} method must be called
      * to complete creation of the nested {@code Structure}.
      * @param name nested structure name.
      * @return a new instance of a {@code FieldBuilder} is returned.
-     * @see #createNested()
+     * @see #addNested()
      */
-    FieldBuilderPtr addStructureArray(std::string const & name); 
+    FieldBuilderPtr addNestedStructureArray(std::string const & name); 
     
     /**
      * Add new nested {@code Union[]}.
-     * {@code createNested()} method must be called
+     * {@code addNested()} method must be called
      * to complete creation of the nested {@code Union}.
      * @param name nested union name.
      * @return a new instance of a {@code FieldBuilder} is returned.
-     * @see #createNested()
+     * @see #addNested()
      */
-    FieldBuilderPtr addUnionArray(std::string const & name);
+    FieldBuilderPtr addNestedUnionArray(std::string const & name);
 
     /**
      * Complete the creation of a nested object.
-     * @see #addStructure(String)
-     * @see #addUnion(String)
+     * @see #addNestedStructure(String)
+     * @see #addNestedUnion(String)
      * @return a previous (parent) {@code FieldBuilder}.
      */
-    FieldBuilderPtr createNested();
+    FieldBuilderPtr addNested();
 
 private:
     FieldBuilder();
