@@ -208,7 +208,7 @@ std::ostream& PVUnionArray::dumpValue(std::ostream& o, std::size_t index) const
 {
     const_svector temp(view());
     if(index<temp.size())
-        o << temp[index].get();
+        o << *temp[index];
     return o;
 }
 
