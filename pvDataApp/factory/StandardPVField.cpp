@@ -9,8 +9,6 @@
  */
 #include <string>
 #include <stdexcept>
-#include <epicsThread.h>
-#include <epicsExit.h>
 
 #define epicsExportSharedSymbols
 #include <pv/lock.h>

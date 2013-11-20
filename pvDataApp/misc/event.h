@@ -12,7 +12,18 @@
 
 #include <memory>
 #include <vector>
+
+#ifdef epicsExportSharedSymbols
+#define eventepicsExportSharedSymbols
+#undef epicsExportSharedSymbols
+#endif
+
 #include <epicsEvent.h>
+
+#ifdef eventepicsExportSharedSymbols
+#define epicsExportSharedSymbols
+#undef eventepicsExportSharedSymbols
+#endif
 
 #include <pv/pvType.h>
 #include <pv/sharedPtr.h>

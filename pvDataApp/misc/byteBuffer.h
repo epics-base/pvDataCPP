@@ -12,8 +12,6 @@
 
 #include <string>
 #include <string.h>
-#include <pv/pvType.h>
-#include <pv/epicsException.h>
 
 #ifdef epicsExportSharedSymbols
 #define byteBufferepicsExportSharedSymbols
@@ -26,6 +24,10 @@
 #define epicsExportSharedSymbols
 #undef byteBufferepicsExportSharedSymbols
 #endif
+
+#include <pv/pvType.h>
+#include <pv/epicsException.h>
+
 #include <shareLib.h>
 
 namespace epics { 

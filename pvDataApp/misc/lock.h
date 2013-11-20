@@ -11,7 +11,18 @@
 #define LOCK_H
 
 #include <stdexcept>
+
+#ifdef epicsExportSharedSymbols
+#define lockepicsExportSharedSymbols
+#undef epicsExportSharedSymbols
+#endif
+
 #include <epicsMutex.h>
+
+#ifdef lockepicsExportSharedSymbols
+#define epicsExportSharedSymbols
+#undef lockepicsExportSharedSymbols
+#endif
 
 #include <pv/noDefaultMethods.h>
 

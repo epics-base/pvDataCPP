@@ -10,7 +10,17 @@
 #include <stdexcept>
 #include <sstream>
 
+#ifdef epicsExportSharedSymbols
+#define typeCastepicsExportSharedSymbols
+#undef epicsExportSharedSymbols
+#endif
+
 #include <epicsConvert.h>
+
+#ifdef typeCastepicsExportSharedSymbols
+#define epicsExportSharedSymbols
+#undef typeCastepicsExportSharedSymbols
+#endif
 
 #include <pv/pvType.h>
 #include <pv/pvIntrospect.h>

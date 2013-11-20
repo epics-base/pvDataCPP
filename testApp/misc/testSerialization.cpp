@@ -9,6 +9,9 @@
  *  Created on: Oct 25, 2010
  *      Author: Miha Vitorovic
  */
+#ifdef _WIN32
+#define NOMINMAX
+#endif
 #include <iostream>
 #include <fstream>
 

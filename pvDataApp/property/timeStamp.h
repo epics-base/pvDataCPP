@@ -11,7 +11,18 @@
 #define TIMESTAMP_H
 
 #include <ctime>
+
+#ifdef epicsExportSharedSymbols
+#define timeStampepicsExportSharedSymbols
+#undef epicsExportSharedSymbols
+#endif
+
 #include <epicsTime.h>
+
+#ifdef timeStampepicsExportSharedSymbols
+#define epicsExportSharedSymbols
+#undef timeStampepicsExportSharedSymbols
+#endif
 
 #include <pv/pvType.h>
 
