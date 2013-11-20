@@ -10,7 +10,7 @@
 #ifndef NO_DEFAULT_METHODS_H
 #define NO_DEFAULT_METHODS_H
 
-#include <sharelib.h>
+#include <shareLib.h>
 
 namespace epics { namespace pvData { 
 /* This is based on Item 6 of 

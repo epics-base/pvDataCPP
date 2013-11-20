@@ -15,7 +15,7 @@
 
 #include <pv/noDefaultMethods.h>
 
-#include <sharelib.h>
+#include <shareLib.h>
 
 /* This is based on item 14 of 
  * Effective C++, Third Edition, Scott Meyers

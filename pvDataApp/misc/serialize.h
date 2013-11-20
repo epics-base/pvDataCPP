@@ -13,7 +13,7 @@
 #include <pv/byteBuffer.h>
 #include <pv/sharedPtr.h>
 
-#include <sharelib.h>
+#include <shareLib.h>
 
 namespace epics { namespace pvData { 
 

@@ -18,7 +18,7 @@
 #include <pv/requester.h>
 #include <pv/queue.h>
 
-#include <sharelib.h>
+#include <shareLib.h>
 
 namespace epics { namespace pvData { 
 

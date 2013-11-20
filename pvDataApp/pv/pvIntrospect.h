@@ -18,7 +18,7 @@
 #include <pv/byteBuffer.h>
 #include <pv/serialize.h>
 
-#include <sharelib.h>
+#include <shareLib.h>
 
 namespace epics { namespace pvData { 
 

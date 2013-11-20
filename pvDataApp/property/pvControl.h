@@ -13,7 +13,7 @@
 #include <pv/pvData.h>
 #include <pv/control.h>
 
-#include <sharelib.h>
+#include <shareLib.h>
 
 namespace epics { namespace pvData { 
 

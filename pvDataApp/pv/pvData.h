@@ -31,7 +31,7 @@
 #include <pv/typeCast.h>
 #include <pv/sharedVector.h>
 
-#include <sharelib.h>
+#include <shareLib.h>
 
 #if defined(__vxworks) && !defined(_WRS_VXWORKS_MAJOR)
 typedef class std::ios std::ios_base;
@@ -97,7 +97,7 @@ struct array_at_internal
     array_at_internal(std::size_t ix, std::ostream& str) : index(ix), stream(str) {}
 };
 
-array_at_internal operator<<(std::ostream& str, array_at const& manip);
+epicsShareExtern array_at_internal operator<<(std::ostream& str, array_at const& manip);
 
 };
 
@@ -500,7 +500,7 @@ protected:
  * Class that holds the data for each posssible scalar type.
  */
 template<typename T>
-class PVScalarValue : public PVScalar {
+class epicsShareClass PVScalarValue : public PVScalar {
 public:
     POINTER_DEFINITIONS(PVScalarValue);
     typedef T value_type;
@@ -1052,7 +1052,7 @@ private:
 };
 
 
-class PVUnion : public PVField
+class epicsShareClass PVUnion : public PVField
 {
 public:
     POINTER_DEFINITIONS(PVUnion);
@@ -1338,7 +1338,7 @@ namespace detail {
 } // namespace detail
 
 template<typename T>
-class PVValueArray : public detail::PVVectorStorage<T,PVScalarArray> {
+class epicsShareClass PVValueArray : public detail::PVVectorStorage<T,PVScalarArray> {
     typedef detail::PVVectorStorage<T,PVScalarArray> base_t;
 public:
     POINTER_DEFINITIONS(PVValueArray);

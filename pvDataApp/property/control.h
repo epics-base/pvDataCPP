@@ -10,7 +10,7 @@
 #ifndef CONTROL_H
 #define CONTROL_H
 
-#include <sharelib.h>
+#include <shareLib.h>
 
 namespace epics { namespace pvData { 
 

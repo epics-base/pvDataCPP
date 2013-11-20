@@ -17,7 +17,7 @@
 #include <pv/pvData.h>
 #include <pv/timeStamp.h>
 
-#include <sharelib.h>
+#include <shareLib.h>
 
 namespace epics { namespace pvData { 
 

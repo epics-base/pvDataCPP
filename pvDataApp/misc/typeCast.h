@@ -16,6 +16,8 @@
 #include <pv/pvIntrospect.h>
 #include <pv/templateMeta.h>
 
+#include <shareLib.h>
+
 namespace epics { namespace pvData {
 
 typedef std::string String;
@@ -23,17 +25,17 @@ typedef std::string String;
 namespace detail {
     // parseToPOD wraps the epicsParse*() functions in one name
     // and throws exceptions
-    void parseToPOD(const std::string&, boolean *out);
-    void parseToPOD(const std::string&, int8 *out);
-    void parseToPOD(const std::string&, uint8 *out);
-    void parseToPOD(const std::string&, int16_t *out);
-    void parseToPOD(const std::string&, uint16_t *out);
-    void parseToPOD(const std::string&, int32_t *out);
-    void parseToPOD(const std::string&, uint32_t *out);
-    void parseToPOD(const std::string&, int64_t *out);
-    void parseToPOD(const std::string&, uint64_t *out);
-    void parseToPOD(const std::string&, float *out);
-    void parseToPOD(const std::string&, double *out);
+    epicsShareExtern void parseToPOD(const std::string&, boolean *out);
+    epicsShareExtern void parseToPOD(const std::string&, int8 *out);
+    epicsShareExtern void parseToPOD(const std::string&, uint8 *out);
+    epicsShareExtern void parseToPOD(const std::string&, int16_t *out);
+    epicsShareExtern void parseToPOD(const std::string&, uint16_t *out);
+    epicsShareExtern void parseToPOD(const std::string&, int32_t *out);
+    epicsShareExtern void parseToPOD(const std::string&, uint32_t *out);
+    epicsShareExtern void parseToPOD(const std::string&, int64_t *out);
+    epicsShareExtern void parseToPOD(const std::string&, uint64_t *out);
+    epicsShareExtern void parseToPOD(const std::string&, float *out);
+    epicsShareExtern void parseToPOD(const std::string&, double *out);
 
     /* want to pass POD types by value,
      * and String by const reference
@@ -171,7 +173,7 @@ static FORCE_INLINE TO castUnsafe(const FROM& from)
     return detail::cast_helper<TO,FROM>::op(from);
 }
 
-void castUnsafeV(size_t count, ScalarType to, void *dest, ScalarType from, const void *src);
+epicsShareExtern void castUnsafeV(size_t count, ScalarType to, void *dest, ScalarType from, const void *src);
 
 //! Cast value to printable type
 //! A no-op except for int8 and uint8, which are cast to int

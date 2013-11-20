@@ -23,7 +23,7 @@
 #include <pv/lock.h>
 #include <pv/sharedPtr.h>
 
-#include <sharelib.h>
+#include <shareLib.h>
 
 namespace epics { namespace pvData { 
 

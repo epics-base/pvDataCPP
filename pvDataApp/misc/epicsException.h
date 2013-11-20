@@ -43,7 +43,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <sharelib.h>
+#include <shareLib.h>
 
 // Users may redefine this for a large size if desired
 #ifndef EXCEPT_DEPTH

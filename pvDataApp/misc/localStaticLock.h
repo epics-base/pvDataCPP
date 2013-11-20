@@ -12,7 +12,7 @@
 
 #include <pv/lock.h>
 
-#include <sharelib.h>
+#include <shareLib.h>
 
 epicsShareExtern epics::pvData::Mutex& getLocalStaticInitMutex();
 

@@ -18,7 +18,7 @@
 #include <pv/noDefaultMethods.h>
 #include <pv/pvIntrospect.h>
 
-#include <sharelib.h>
+#include <shareLib.h>
 
 namespace epics {
     namespace pvData {

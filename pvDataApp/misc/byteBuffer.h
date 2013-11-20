@@ -11,6 +11,7 @@
 #define BYTEBUFFER_H
 
 #include <string>
+#include <string.h>
 #include <pv/pvType.h>
 #include <pv/epicsException.h>
 
