@@ -18,10 +18,12 @@
 #include <pv/noDefaultMethods.h>
 #include <pv/pvIntrospect.h>
 
+#include <sharelib.h>
+
 namespace epics {
     namespace pvData {
 
-        class SerializeHelper : public NoDefaultMethods {
+        class epicsShareClass SerializeHelper : public NoDefaultMethods {
         public:
 
             /**

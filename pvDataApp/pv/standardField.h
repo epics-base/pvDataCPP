@@ -10,9 +10,13 @@
  */
 #ifndef STANDARDFIELD_H
 #define STANDARDFIELD_H
+
 #include <string>
 #include <stdexcept>
+
 #include <pv/pvIntrospect.h>
+
+#include <sharelib.h>
 
 namespace epics { namespace pvData { 
 
@@ -57,7 +61,7 @@ namespace epics { namespace pvData {
 class StandardField;
 typedef std::tr1::shared_ptr<StandardField> StandardFieldPtr;
 
-class StandardField {
+class epicsShareClass StandardField {
 public:
     static StandardFieldPtr getStandardField();
     ~StandardField();
@@ -124,7 +128,7 @@ private:
     friend StandardFieldPtr getStandardField();
 };
 
-extern StandardFieldPtr getStandardField();
+epicsShareExtern StandardFieldPtr getStandardField();
     
 }}
 #endif  /* STANDARDFIELD_H */

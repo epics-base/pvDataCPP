@@ -10,28 +10,31 @@
  */
 #ifndef CONVERT_H
 #define CONVERT_H
+
 #include <string>
 #include <stdexcept>
+#include <vector>
 
 #include <pv/pvIntrospect.h>
 #include <pv/pvData.h>
-#include <vector>
+
+#include <sharelib.h>
 
 namespace epics { namespace pvData { 
 
-bool operator==(const PVField&, const PVField&);
+bool epicsShareExtern operator==(const PVField&, const PVField&);
 
 static inline bool operator!=(const PVField& a, const PVField& b)
 {return !(a==b);}
 
 
-bool operator==(const Field&, const Field&);
-bool operator==(const Scalar&, const Scalar&);
-bool operator==(const ScalarArray&, const ScalarArray&);
-bool operator==(const Structure&, const Structure&);
-bool operator==(const StructureArray&, const StructureArray&);
-bool operator==(const Union&, const Union&);
-bool operator==(const UnionArray&, const UnionArray&);
+bool epicsShareExtern operator==(const Field&, const Field&);
+bool epicsShareExtern operator==(const Scalar&, const Scalar&);
+bool epicsShareExtern operator==(const ScalarArray&, const ScalarArray&);
+bool epicsShareExtern operator==(const Structure&, const Structure&);
+bool epicsShareExtern operator==(const StructureArray&, const StructureArray&);
+bool epicsShareExtern operator==(const Union&, const Union&);
+bool epicsShareExtern operator==(const UnionArray&, const UnionArray&);
 
 static inline bool operator!=(const Field& a, const Field& b)
 {return !(a==b);}
@@ -74,7 +77,7 @@ static inline bool operator!=(const UnionArray& a, const UnionArray& b)
 class Convert;
 typedef std::tr1::shared_ptr<Convert> ConvertPtr;
 
-class Convert {
+class epicsShareClass Convert {
 public:
     static ConvertPtr getConvert();
     /**

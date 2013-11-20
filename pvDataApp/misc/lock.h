@@ -9,9 +9,14 @@
  */
 #ifndef LOCK_H
 #define LOCK_H
+
 #include <stdexcept>
 #include <epicsMutex.h>
+
 #include <pv/noDefaultMethods.h>
+
+#include <sharelib.h>
+
 /* This is based on item 14 of 
  * Effective C++, Third Edition, Scott Meyers
  */
@@ -22,7 +27,7 @@ namespace epics { namespace pvData {
 
 typedef epicsMutex Mutex;
 
-class Lock : private NoDefaultMethods {
+class epicsShareClass Lock : private NoDefaultMethods {
 public:
     explicit Lock(Mutex &m)
     : mutexPtr(m), locked(true)

@@ -13,6 +13,7 @@
 #include <string>
 #include <cstdio>
 
+#define epicsExportSharedSymbols
 #include <pv/executor.h>
 
 namespace epics { namespace pvData {

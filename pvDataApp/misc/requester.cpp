@@ -9,15 +9,18 @@
  */
 #include <string>
 #include <cstdio>
+
+#define epicsExportSharedSymbols
 #include <pv/lock.h>
 #include <pv/requester.h>
+
 namespace epics { namespace pvData { 
 
-const size_t messageTypeCount = 4; 
-static StringArray messageTypeName(messageTypeCount);
+static StringArray messageTypeName(MESSAGE_TYPE_COUNT);
 
 String getMessageTypeName(MessageType messageType)
 {
+    // TODO not thread-safe
     static Mutex mutex;
     Lock xx(mutex);
     if(messageTypeName[0].size()==0) {

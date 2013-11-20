@@ -10,7 +10,10 @@
  */
 #ifndef PVSUBARRAYCOPY_H
 #define PVSUBARRAYCOPY_H
+
 #include <pv/pvData.h>
+
+#include <sharelib.h>
 
 namespace epics { namespace pvData { 
 
@@ -38,7 +41,7 @@ void copy(
  * @param toOffset The offset in the destination
  * @param len The total number of elements to copy
  */
-void copy(
+epicsShareExtern void copy(
     PVScalarArray & from,
     size_t fromOffset,
     PVScalarArray & to,
@@ -54,7 +57,7 @@ void copy(
  * @param toOffset The offset in the destination
  * @param len The total number of elements to copy
  */
-void copy(
+epicsShareExtern void copy(
     PVStructureArray & from,
     size_t fromOffset,
     PVStructureArray & to,
@@ -70,7 +73,7 @@ void copy(
  * @param toOffset The offset in the destination
  * @param len The total number of elements to copy
  */
-void copy(
+epicsShareExtern void copy(
     PVArray & from,
     size_t fromOffset,
     PVArray & to,

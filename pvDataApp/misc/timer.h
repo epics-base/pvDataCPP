@@ -23,6 +23,8 @@
 #include <pv/lock.h>
 #include <pv/sharedPtr.h>
 
+#include <sharelib.h>
+
 namespace epics { namespace pvData { 
 
 class TimerCallback;
@@ -30,7 +32,7 @@ class Timer;
 typedef std::tr1::shared_ptr<TimerCallback> TimerCallbackPtr;
 typedef std::tr1::shared_ptr<Timer> TimerPtr;
 
-class TimerCallback {
+class epicsShareClass TimerCallback {
 public:
     POINTER_DEFINITIONS(TimerCallback);
     TimerCallback();
@@ -45,7 +47,7 @@ private:
     friend class Timer;
 };
 
-class Timer : public Runnable {
+class epicsShareClass Timer : public Runnable {
 public:
     POINTER_DEFINITIONS(Timer);
     Timer(String threadName, ThreadPriority priority);

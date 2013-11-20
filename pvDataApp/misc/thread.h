@@ -9,11 +9,15 @@
  */
 #ifndef THREAD_H
 #define THREAD_H
+
 #include <memory>
+
+#include <epicsThread.h>
+
 #include <pv/noDefaultMethods.h>
 #include <pv/pvType.h>
 
-#include <epicsThread.h>
+#include <sharelib.h>
 
 namespace epics { namespace pvData {
 
@@ -33,7 +37,7 @@ typedef std::tr1::shared_ptr<epicsThread> EpicsThreadPtr;
 
 typedef epicsThreadRunable Runnable;
 
-class Thread : public epicsThread, private NoDefaultMethods {
+class epicsShareClass Thread : public epicsThread, private NoDefaultMethods {
 public:
 
     Thread(String name,

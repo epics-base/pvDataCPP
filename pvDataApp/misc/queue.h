@@ -7,12 +7,15 @@
 /**
  *  @author mrk
  */
+#ifndef QUEUE_H
+#define QUEUE_H
+
 #include <vector>
 #include <cstddef>
 #include <stdexcept>
+
 #include <pv/sharedPtr.h>
-#ifndef QUEUE_H
-#define QUEUE_H
+
 namespace epics { namespace pvData { 
 
 template <typename T>

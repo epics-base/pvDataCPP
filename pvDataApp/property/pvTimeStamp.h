@@ -7,16 +7,21 @@
 /**
  *  @author mrk
  */
-#include <string>
-#include <stdexcept>
-#include <pv/pvType.h>
-#include <pv/timeStamp.h>
-#include <pv/pvData.h>
 #ifndef PVTIMESTAMP_H
 #define PVTIMESTAMP_H
+
+#include <string>
+#include <stdexcept>
+
+#include <pv/pvType.h>
+#include <pv/pvData.h>
+#include <pv/timeStamp.h>
+
+#include <sharelib.h>
+
 namespace epics { namespace pvData { 
 
-class PVTimeStamp {
+class epicsShareClass PVTimeStamp {
 public:
     PVTimeStamp(){}
     //default constructors and destructor are OK

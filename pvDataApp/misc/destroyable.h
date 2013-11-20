@@ -12,6 +12,8 @@
 
 #include <pv/sharedPtr.h>
 
+#include <sharelib.h>
+
 namespace epics { namespace pvData { 
 
 
@@ -19,7 +21,7 @@ namespace epics { namespace pvData {
          * Instance declaring destroy method.
          * @author mse
          */
-        class Destroyable  {
+        class epicsShareClass Destroyable {
             public:
             POINTER_DEFINITIONS(Destroyable);
             /**

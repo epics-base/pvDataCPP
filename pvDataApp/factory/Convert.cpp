@@ -12,6 +12,8 @@
 #include <vector>
 #include <stdexcept>
 #include <typeinfo>
+
+#define epicsExportSharedSymbols
 #include <pv/lock.h>
 #include <pv/pvIntrospect.h>
 #include <pv/pvData.h>

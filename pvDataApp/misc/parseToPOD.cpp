@@ -13,6 +13,7 @@
 #include "typeCast.h"
 
 // need to use "long long" when sizeof(int)==sizeof(long)
+// TODO does not work on Darwin 10.6
 #if ULONG_MAX == 0xfffffffful
 #define NEED_LONGLONG
 #endif

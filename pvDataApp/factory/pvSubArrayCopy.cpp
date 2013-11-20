@@ -11,6 +11,7 @@
 #include <stdexcept>
 #include <memory>
 
+#define epicsExportSharedSymbols
 #include <pv/pvSubArrayCopy.h>
 
 namespace epics { namespace pvData { 

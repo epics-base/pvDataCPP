@@ -10,8 +10,11 @@
 #ifndef REQUESTER_H
 #define REQUESTER_H
 #include <string>
+
 #include <pv/pvType.h>
 #include <pv/sharedPtr.h>
+
+#include <sharelib.h>
 
 namespace epics { namespace pvData { 
 
@@ -21,10 +24,11 @@ typedef std::tr1::shared_ptr<Requester> RequesterPtr;
 enum MessageType {
    infoMessage,warningMessage,errorMessage,fatalErrorMessage
 };
+#define MESSAGE_TYPE_COUNT 4
 
-extern String getMessageTypeName(MessageType messageType);
-extern const size_t messageTypeCount;
-class Requester {
+epicsShareExtern String getMessageTypeName(MessageType messageType);
+
+class epicsShareClass Requester {
 public:
     POINTER_DEFINITIONS(Requester);
     virtual ~Requester(){}

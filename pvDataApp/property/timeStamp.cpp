@@ -14,6 +14,8 @@
 #include <cstdio>
 
 #include <epicsTime.h>
+
+#define epicsExportSharedSymbols
 #include <pv/noDefaultMethods.h>
 #include <pv/pvType.h>
 #include <pv/timeStamp.h>

@@ -7,14 +7,15 @@
  *  @author mes
  */
 
-#include <pv/epicsException.h>
-
 #include <sstream>
-
 #include <cstdio>
 #include <cstring>
 
-namespace epics{namespace pvData{
+#define epicsExportSharedSymbols
+#include <pv/epicsException.h>
+
+
+namespace epics{ namespace pvData {
 
 void
 ExceptionMixin::print(FILE *fp) const

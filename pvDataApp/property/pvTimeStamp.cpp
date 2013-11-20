@@ -9,10 +9,13 @@
  */
 #include <string>
 #include <stdexcept>
+
+#define epicsExportSharedSymbols
 #include <pv/pvType.h>
 #include <pv/timeStamp.h>
 #include <pv/pvData.h>
 #include <pv/pvTimeStamp.h>
+
 namespace epics { namespace pvData { 
 
 using std::tr1::static_pointer_cast;

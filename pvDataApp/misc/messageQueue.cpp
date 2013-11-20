@@ -8,7 +8,10 @@
  *  @author mrk
  */
 #include <string>
+
+#define epicsExportSharedSymbols
 #include <pv/messageQueue.h>
+
 namespace epics { namespace pvData { 
 
 MessageNode::MessageNode()

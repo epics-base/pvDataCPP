@@ -9,11 +9,15 @@
  */
 #ifndef STANDARDPVFIELD_H
 #define STANDARDPVFIELD_H
+
 #include <string>
 #include <stdexcept>
+
 #include <pv/pvIntrospect.h>
 #include <pv/pvData.h>
 #include <pv/standardField.h>
+
+#include <sharelib.h>
 
 namespace epics { namespace pvData { 
 /**
@@ -31,7 +35,7 @@ namespace epics { namespace pvData {
 class StandardPVField;
 typedef std::tr1::shared_ptr<StandardPVField> StandardPVFieldPtr;
 
-class StandardPVField : private NoDefaultMethods {
+class epicsShareClass StandardPVField : private NoDefaultMethods {
 public:
     static StandardPVFieldPtr getStandardPVField();
     ~StandardPVField();
@@ -48,7 +52,7 @@ private:
     String notImplemented;
 };
 
-extern StandardPVFieldPtr getStandardPVField();
+epicsShareExtern StandardPVFieldPtr getStandardPVField();
     
 }}
 #endif  /* STANDARDPVFIELD_H */

@@ -9,13 +9,15 @@
  */
 #include <string>
 #include <stdexcept>
+
+#define epicsExportSharedSymbols
 #include <pv/lock.h>
 #include <pv/pvType.h>
 #include <pv/pvIntrospect.h>
 #include <pv/pvData.h>
 #include <pv/alarm.h>
-namespace epics { namespace pvData { 
 
+namespace epics { namespace pvData { 
 
 AlarmSeverity AlarmSeverityFunc::getSeverity(int value)
 {
@@ -34,7 +36,7 @@ AlarmSeverity AlarmSeverityFunc::getSeverity(int value)
 
 StringArrayPtr AlarmSeverityFunc::getSeverityNames()
 {
-    static  size_t severityCount = 5;
+    static size_t severityCount = 5;
     static StringArrayPtr severityNames;
     static Mutex mutex;
     Lock xx(mutex);
@@ -82,7 +84,7 @@ AlarmStatus AlarmStatusFunc::getStatus(int value)
 
 StringArrayPtr AlarmStatusFunc::getStatusNames()
 {
-    static  size_t statusCount = 8;
+    static size_t statusCount = 8;
     static StringArrayPtr statusNames;
     static Mutex mutex;
     Lock xx(mutex);

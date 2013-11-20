@@ -14,13 +14,15 @@
 #include <pv/byteBuffer.h>
 #include <pv/sharedPtr.h>
 
+#include <sharelib.h>
+
 namespace epics { namespace pvData { 
 
         /**
          * Status.
          * @author mse
          */
-        class Status : public epics::pvData::Serializable {
+        class epicsShareClass Status : public epics::pvData::Serializable {
             public:
                 POINTER_DEFINITIONS(Status);
         	/**

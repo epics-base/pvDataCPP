@@ -7,14 +7,19 @@
 /**
  *  @author mrk
  */
-#include <string>
-#include <pv/pvType.h>
-#include <pv/pvData.h>
 #ifndef DISPLAY_H
 #define DISPLAY_H
+
+#include <string>
+
+#include <pv/pvType.h>
+#include <pv/pvData.h>
+
+#include <sharelib.h>
+
 namespace epics { namespace pvData { 
 
-class Display {
+class epicsShareClass Display {
 public:
     Display()
     : description(String("")),format(String("")),units(String("")),

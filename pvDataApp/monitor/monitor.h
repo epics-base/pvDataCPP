@@ -16,6 +16,8 @@
 #include <pv/sharedPtr.h>
 #include <pv/bitSet.h>
 
+#include <sharelib.h>
+
 namespace epics { namespace pvData { 
 
 class MonitorElement;
@@ -30,7 +32,7 @@ typedef std::tr1::shared_ptr<Monitor> MonitorPtr;
  * Class instance representing monitor element.
  * @author mrk
  */
-class MonitorElement {
+class epicsShareClass MonitorElement {
     public:
     POINTER_DEFINITIONS(MonitorElement);
     MonitorElement(){}
@@ -48,7 +50,7 @@ class MonitorElement {
  * Interface for Monitor.
  * @author mrk
  */
-class Monitor : public Destroyable{
+class epicsShareClass Monitor : public Destroyable{
     public:
     POINTER_DEFINITIONS(Monitor);
     virtual ~Monitor(){}
@@ -80,7 +82,7 @@ class Monitor : public Destroyable{
  * Requester for ChannelMonitor.
  * @author mrk
  */
-class MonitorRequester : public virtual Requester {
+class epicsShareClass MonitorRequester : public virtual Requester {
     public:
     POINTER_DEFINITIONS(MonitorRequester);
     virtual ~MonitorRequester(){}

@@ -8,6 +8,7 @@
  *  @author mse
  */
 
+#define epicsExportSharedSymbols
 #include <pv/localStaticLock.h>
 
 static int nifty_counter;

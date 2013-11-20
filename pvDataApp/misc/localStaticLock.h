@@ -12,7 +12,9 @@
 
 #include <pv/lock.h>
 
-extern epics::pvData::Mutex& getLocalStaticInitMutex();
+#include <sharelib.h>
+
+epicsShareExtern epics::pvData::Mutex& getLocalStaticInitMutex();
 
 #if defined(__GNUC__) && __GNUC__ >= 4
 // noop
@@ -21,7 +23,7 @@ extern epics::pvData::Mutex& getLocalStaticInitMutex();
 #define LOCAL_STATIC_LOCK epics::pvData::Lock localStaticInitMutexLock(getLocalStaticInitMutex());
 #endif
 
-static class MutexInitializer {
+static class epicsShareClass MutexInitializer {
   public:
     MutexInitializer ();
     ~MutexInitializer ();

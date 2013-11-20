@@ -14,8 +14,9 @@
 #include <stdio.h>
 #include <stdexcept>
 
-#include <pv/timer.h>
+#define epicsExportSharedSymbols
 #include <pv/convert.h>
+#include <pv/timer.h>
 
 namespace epics { namespace pvData { 
 

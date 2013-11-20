@@ -67,7 +67,7 @@ public:
         buffer->align(alignment);
     }
     
-    virtual bool directSerialize(ByteBuffer */*existingBuffer*/, const char* /*toSerialize*/,
+    virtual bool directSerialize(ByteBuffer* /*existingBuffer*/, const char* /*toSerialize*/,
                                  std::size_t /*elementCount*/, std::size_t /*elementSize*/)
     {
         return false;
@@ -95,7 +95,7 @@ public:
         buffer->align(alignment);
     }
 
-    virtual bool directDeserialize(ByteBuffer */*existingBuffer*/, char* /*deserializeTo*/,
+    virtual bool directDeserialize(ByteBuffer* /*existingBuffer*/, char* /*deserializeTo*/,
                                    std::size_t /*elementCount*/, std::size_t /*elementSize*/)
     {
         return false;

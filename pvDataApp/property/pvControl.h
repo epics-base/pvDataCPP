@@ -7,13 +7,17 @@
 /**
  *  @author mrk
  */
-#include <pv/control.h>
-#include <pv/pvData.h>
 #ifndef PVCONTROL_H
 #define PVCONTROL_H
+
+#include <pv/pvData.h>
+#include <pv/control.h>
+
+#include <sharelib.h>
+
 namespace epics { namespace pvData { 
 
-class PVControl {
+class epicsShareClass PVControl {
 public:
     PVControl(){}
     //default constructors and destructor are OK

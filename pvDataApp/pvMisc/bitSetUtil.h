@@ -9,13 +9,16 @@
  */
 #ifndef BITSETUTIL_H
 #define BITSETUTIL_H
+
 #include <pv/noDefaultMethods.h>
 #include <pv/pvData.h>
 #include <pv/bitSet.h>
 
+#include <sharelib.h>
+
 namespace epics { namespace pvData {
 
-class BitSetUtil : private NoDefaultMethods {
+class epicsShareClass BitSetUtil : private NoDefaultMethods {
 public:
     static bool compress(BitSetPtr const &bitSet,PVStructurePtr const &pvStructure);
 };
