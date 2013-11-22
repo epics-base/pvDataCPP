@@ -36,10 +36,16 @@ static void castVTyped(size_t count, void *draw, const void *sraw)
           ++dest; ++src;
         }    
     } catch (std::exception& ex) {
-        std::ostringstream os;
-        os << "failed to parse element at index " << (src - (FROM*)sraw);
-        os << ": " << ex.what();
-        throw std::runtime_error(os.str());
+        // do not report index for scalars (or arrays with one element)
+        if (count > 1)
+        {
+            std::ostringstream os;
+            os << "failed to parse element at index " << (src - (FROM*)sraw);
+            os << ": " << ex.what();
+            throw std::runtime_error(os.str());
+        }
+        else
+            throw;
     }
 }
 
