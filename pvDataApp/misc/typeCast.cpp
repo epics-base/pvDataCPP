@@ -5,6 +5,7 @@
  */
 /* Author:  Michael Davidsaver */
 #include <algorithm>
+#include <sstream>
 
 #include "typeCast.h"
 
@@ -25,7 +26,21 @@ static void castVTyped(size_t count, void *draw, const void *sraw)
 {
     TO *dest=(TO*)draw;
     const FROM *src=(FROM*)sraw;
-    std::transform(src, src+count, dest, castUnsafe<TO,FROM>);
+    
+    //std::transform(src, src+count, dest, castUnsafe<TO,FROM>);
+    
+    const FROM *last = src+count;
+    try {
+        while (src != last) {
+          *dest = castUnsafe<TO,FROM>(*src);
+          ++dest; ++src;
+        }    
+    } catch (std::exception& ex) {
+        std::ostringstream os;
+        os << "failed to parse element at index " << (src - (FROM*)sraw);
+        os << ": " << ex.what();
+        throw std::runtime_error(os.str());
+    }
 }
 
 template<typename T>
