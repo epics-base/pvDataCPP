@@ -21,7 +21,7 @@ using namespace epics::pvData;
 
 static void testGetSetClearFlip()
 {
-    printf("testGetSetClearFlip... ");
+    testDiag("testGetSetClearFlip... ");
 
     // empty
     BitSet* b1 = new BitSet();
@@ -80,7 +80,7 @@ static void testGetSetClearFlip()
 
 static void testOperators()
 {
-    printf("testOperators... ");
+    testDiag("testOperators... ");
 
     BitSet b1;
     testOk1(b1 == b1);
