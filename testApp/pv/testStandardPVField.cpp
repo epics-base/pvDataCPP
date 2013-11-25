@@ -12,8 +12,8 @@
 #include <string>
 #include <cstdio>
 
-#include <epicsAssert.h>
-#include <epicsExit.h>
+#include <epicsUnitTest.h>
+#include <testMain.h>
 
 #include <pv/requester.h>
 #include <pv/pvIntrospect.h>
@@ -37,8 +37,9 @@ static void print(String name)
     if(debug) printf("\n%s\n%s\n",name.c_str(),builder.c_str());
 }
 
-int main(int, char **)
+MAIN(testStandardPVField)
 {
+    testPlan(1);
     PVStructurePtr pvStructure = standardPVField->scalar(pvDouble,
         "alarm,timeStamp,display,control,valueAlarm");
     PVDoublePtr pvValue = pvStructure->getDoubleField("value");
@@ -80,7 +81,7 @@ int main(int, char **)
     builder.clear();
     pvStructure->toString(&builder);
     print("structureArrayTest");
-    printf("PASSED\n");
-    return(0);
+    testPass("testStandardPVField");
+    return testDone();
 }
 

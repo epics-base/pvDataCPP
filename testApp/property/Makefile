@@ -2,10 +2,13 @@ TOP=../..
 
 include $(TOP)/configure/CONFIG
 
-PROD_HOST += testProperty
+TESTPROD += testProperty
 testProperty_SRCS += testProperty.cpp
+TESTS += testProperty
+
 testProperty_LIBS += pvData  Com
 
+TESTSCRIPTS_HOST += $(TESTS:%=%.t)
 
 include $(TOP)/configure/RULES
 #----------------------------------------

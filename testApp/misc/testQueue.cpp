@@ -16,8 +16,9 @@
 #include <string>
 #include <cstdio>
 
-#include <epicsAssert.h>
-#include <epicsExit.h>
+#include <epicsUnitTest.h>
+#include <testMain.h>
+
 #include <epicsThread.h>
 
 #include <pv/lock.h>
@@ -44,15 +45,14 @@ typedef std::tr1::shared_ptr<Sink> SinkPtr;
 
 class Sink : public epicsThreadRunable {
 public:
-    static SinkPtr create(DataQueue &queue,FILE *auxfd);
-    Sink(DataQueue &queue,FILE *auxfd);
+    static SinkPtr create(DataQueue &queue);
+    Sink(DataQueue &queue);
     ~Sink();
     void stop();
     void look();
     virtual void run();
 private:
     DataQueue &queue;
-    FILE *auxfd;
     bool isStopped;
     Event *wait;
     Event *stopped;
@@ -61,14 +61,13 @@ private:
     epicsThread *thread;
 };
 
-SinkPtr Sink::create(DataQueue &queue,FILE *auxfd)
+SinkPtr Sink::create(DataQueue &queue)
 {
-    return SinkPtr(new Sink(queue,auxfd));
+    return SinkPtr(new Sink(queue));
 }
 
-Sink::Sink(DataQueue &queue,FILE *auxfd)
+Sink::Sink(DataQueue &queue)
 : queue(queue),
-  auxfd(auxfd),
   isStopped(false),
   wait(new Event()),
   stopped(new Event()),
@@ -111,14 +110,14 @@ void Sink::run()
                  waitEmpty->signal();
                  break;
             }
-            fprintf(auxfd,"  sink a %d b %d\n",data->a,data->b);
+            printf("  sink a %d b %d\n",data->a,data->b);
             queue.releaseUsed(data);
         }
     }
     stopped->signal();
 }
 
-static void testBasic(FILE * fd,FILE *auxfd ) {
+static void testBasic() {
     DataPtrArray dataArray;
     dataArray.reserve(numElements);
     for(int i=0; i<numElements; i++)  {
@@ -134,42 +133,33 @@ static void testBasic(FILE * fd,FILE *auxfd ) {
          queue.setUsed(data);
          data = queue.getFree();
     }
-    SinkPtr sink = SinkPtr(new Sink(queue,auxfd));
+    SinkPtr sink = SinkPtr(new Sink(queue));
     queue.clear();
     while(true) {
         data = queue.getFree();
         if(data.get()==NULL) break;
-        fprintf(auxfd,"source a %d b %d\n",data->a,data->b);
+        printf("source a %d b %d\n",data->a,data->b);
         queue.setUsed(data);
     }
     sink->look();
     // now alternate 
     for(int i=0; i<numElements; i++) {
         data = queue.getFree();
-        assert(data.get()!=NULL);
-        fprintf(auxfd,"source a %d b %d\n",data->a,data->b);
+        testOk1(data.get()!=NULL);
+        printf("source a %d b %d\n",data->a,data->b);
         queue.setUsed(data);
         sink->look();
     }
     sink->stop();
-    fprintf(fd,"PASSED\n");
+    printf("PASSED\n");
 }
 
 
-int main(int argc, char *argv[]) {
-     char *fileName = 0;
-    if(argc>1) fileName = argv[1];
-    FILE * fd = stdout;
-    if(fileName!=0 && fileName[0]!=0) {
-        fd = fopen(fileName,"w+");
-    }
-    char *auxFileName = 0;
-    if(argc>2) auxFileName = argv[2];
-    FILE *auxfd = stdout;
-    if(auxFileName!=0 && auxFileName[0]!=0) {
-        auxfd = fopen(auxFileName,"w+");
-    }
-    testBasic(fd,auxfd);
-    return (0);
+MAIN(testQueue)
+{
+    testPlan(5);
+    testDiag("Tests queue");
+    testBasic();
+    return testDone();
 }
  

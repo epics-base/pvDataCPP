@@ -12,8 +12,8 @@
 #include <string>
 #include <cstdio>
 
-#include <epicsAssert.h>
-#include <epicsExit.h>
+#include <epicsUnitTest.h>
+#include <testMain.h>
 
 #include <pv/requester.h>
 #include <pv/pvIntrospect.h>
@@ -34,9 +34,9 @@ static StandardPVFieldPtr standardPVField;
 static ConvertPtr convert;
 static String buffer;
 
-static void printOffsets(PVStructurePtr pvStructure,FILE *fd)
+static void printOffsets(PVStructurePtr pvStructure)
 {
-    fprintf(fd,"%s offset %lu next %lu number %lu\n",
+    printf("%s offset %lu next %lu number %lu\n",
         pvStructure->getFieldName().c_str(),
         (long unsigned)pvStructure->getFieldOffset(),
         (long unsigned)pvStructure->getNextFieldOffset(),
@@ -47,10 +47,10 @@ static void printOffsets(PVStructurePtr pvStructure,FILE *fd)
         PVFieldPtr pvField = fields[i];
         if(pvField->getField()->getType()==structure) {
              PVStructurePtr xxx = static_pointer_cast<PVStructure>(pvField);
-             printOffsets(xxx,fd);
+             printOffsets(xxx);
              continue;
         }
-        fprintf(fd,"%s offset %lli next %lli number %lli\n",
+        printf("%s offset %lli next %lli number %lli\n",
             pvField->getFieldName().c_str(),
             (long long)pvField->getFieldOffset(),
             (long long)pvField->getNextFieldOffset(),
@@ -58,44 +58,40 @@ static void printOffsets(PVStructurePtr pvStructure,FILE *fd)
     }
 }
 
-static void testPVAuxInfo(FILE * fd) {
-    if(debug) fprintf(fd,"\ntestPVAuxInfo\n");
+static void testPVAuxInfo()
+{
+    if(debug) printf("\ntestPVAuxInfo\n");
     PVStructurePtr pvStructure = standardPVField->scalar(
         pvDouble,"alarm,timeStamp,display,control");
     PVStructurePtr display
         = pvStructure->getStructureField("display");
-    assert(display.get()!=NULL);
+    testOk1(display.get()!=NULL);
     PVAuxInfoPtr auxInfo = display->getPVAuxInfo();
     auxInfo->createInfo("factory",pvString);
     auxInfo->createInfo("junk",pvDouble);
     PVScalarPtr pscalar = auxInfo->getInfo(String("factory"));
-    assert(pscalar.get()!=0);
+    testOk1(pscalar.get()!=0);
     convert->fromString(pscalar,"factoryName");
     pscalar = auxInfo->getInfo("junk");
-    assert(pscalar.get()!=0);
+    testOk1(pscalar.get()!=0);
     convert->fromString(pscalar,"3.0");
     buffer.clear();
     pvStructure->toString(&buffer);
-    if(debug) fprintf(fd,"%s\n",buffer.c_str());
+    if(debug) printf("%s\n",buffer.c_str());
     // now show field offsets
-    if(debug) printOffsets(pvStructure,fd);
-    fprintf(fd,"testPVAuxInfo PASSED\n");
+    if(debug) printOffsets(pvStructure);
+    printf("testPVAuxInfo PASSED\n");
 }
 
-int main(int argc,char *argv[])
+MAIN(testPVAuxInfo)
 {
-    char *fileName = 0;
-    if(argc>1) fileName = argv[1];
-    FILE * fd = stdout;
-    if(fileName!=0 && fileName[0]!=0) {
-        fd = fopen(fileName,"w+");
-    }
+    testPlan(3);
     fieldCreate = getFieldCreate();
     pvDataCreate = getPVDataCreate();
     standardField = getStandardField();
     standardPVField = getStandardPVField();
     convert = getConvert();
-    testPVAuxInfo(fd);
-    return(0);
+    testPVAuxInfo();
+    return testDone();
 }
 

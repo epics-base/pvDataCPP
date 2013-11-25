@@ -12,8 +12,8 @@
 #include <string>
 #include <cstdio>
 
-#include <epicsAssert.h>
-#include <epicsExit.h>
+#include <epicsUnitTest.h>
+#include <testMain.h>
 
 #include <pv/requester.h>
 #include <pv/pvIntrospect.h>
@@ -39,24 +39,24 @@ static String alarmTimeStampValueAlarm("alarm,timeStamp,valueAlarm");
 static String allProperties("alarm,timeStamp,display,control,valueAlarm");
 
 static void checkNameAndParent(
-    FILE *fd,PVStructurePtr & pvStructure, int indentLevel)
+    PVStructurePtr & pvStructure, int indentLevel)
 {
     builder.clear();
     if(debug) {
         convert->newLine(&builder,indentLevel);
-        fprintf(fd,"%s this %p indentLevel %d",
+        printf("%s this %p indentLevel %d",
             builder.c_str(),pvStructure.get(),indentLevel);
     }
     PVFieldPtrArray pvFields = pvStructure->getPVFields();
     StringArray fieldNames = pvStructure->getStructure()->getFieldNames();
     for(size_t i = 0; i<pvFields.size(); i++) {
         PVFieldPtr pvField = pvFields[i];
-        assert(pvField->getParent()==pvStructure.get());
-        assert(pvField->getFieldName().compare(fieldNames[i])==0);
+        testOk1(pvField->getParent()==pvStructure.get());
+        testOk1(pvField->getFieldName().compare(fieldNames[i])==0);
         builder.clear();
         if(debug) {
             convert->newLine(&builder,indentLevel);
-            fprintf(fd,"%s this %p name %s parent %p",
+            printf("%s this %p name %s parent %p",
                 builder.c_str(),
                 pvField.get(),
                 pvField->getFieldName().c_str(),
@@ -64,15 +64,15 @@ static void checkNameAndParent(
         }
         if(pvField->getField()->getType()==structure) {
             PVStructurePtr xxx = static_pointer_cast<PVStructure>(pvField);
-            checkNameAndParent(fd,xxx,indentLevel+1);
+            checkNameAndParent(xxx,indentLevel+1);
         }
     }
     builder.clear();
 }
 
-static void testAppendSimple(FILE * fd)
+static void testAppendSimple()
 {
-    if(debug) fprintf(fd,"\ntestAppendSimple\n");
+    if(debug) printf("\ntestAppendSimple\n");
     PVFieldPtrArray fields;
     StringArray names;
     PVStructurePtr pvParent = pvDataCreate->createPVStructure(names,fields);
@@ -88,13 +88,13 @@ static void testAppendSimple(FILE * fd)
     pvParent->appendPVField("extra",pvField);
     builder.clear();
     pvParent->toString(&builder);
-    if(debug) fprintf(fd,"%s\n",builder.c_str());
-    fprintf(fd,"testAppendSimple PASSED\n");
+    if(debug) printf("%s\n",builder.c_str());
+    printf("testAppendSimple PASSED\n");
 }
 
-static void testAppendMore(FILE * fd)
+static void testAppendMore()
 {
-    if(debug) fprintf(fd,"\ntestAppendMore\n");
+    if(debug) printf("\ntestAppendMore\n");
     PVFieldPtrArray fields;
     StringArray names;
     PVStructurePtr pvStructure = pvDataCreate->createPVStructure(names,fields);
@@ -116,14 +116,14 @@ static void testAppendMore(FILE * fd)
     pvStructure->appendPVField("child2",pvField);
     builder.clear();
     pvStructure->toString(&builder);
-    if(debug) fprintf(fd,"%s\n",builder.c_str());
-    checkNameAndParent(fd,pvStructure,0);
-    fprintf(fd,"testAppendMore PASSED\n");
+    if(debug) printf("%s\n",builder.c_str());
+    checkNameAndParent(pvStructure,0);
+    printf("testAppendMore PASSED\n");
 }
 
-static void testAppendStructures(FILE * fd)
+static void testAppendStructures()
 {
-    if(debug) fprintf(fd,"\ntestAppendStructures\n");
+    if(debug) printf("\ntestAppendStructures\n");
     PVFieldPtrArray fields;
     StringArray names;
     PVStructurePtr pvParent = pvDataCreate->createPVStructure(names,fields);
@@ -141,11 +141,11 @@ static void testAppendStructures(FILE * fd)
     pvValue->appendPVField("index",pvIndex);
     builder.clear();
     pvParent->toString(&builder);
-    if(debug) fprintf(fd,"%s\n",builder.c_str());
+    if(debug) printf("%s\n",builder.c_str());
     builder.clear();
     pvParent->getField()->toString(&builder);
-    if(debug) fprintf(fd,"field\n%s\n",builder.c_str());
-    fprintf(fd,"testAppendStructures PASSED\n");
+    if(debug) printf("field\n%s\n",builder.c_str());
+    printf("testAppendStructures PASSED\n");
 }
 
 static void append2(PVStructurePtr &pvStructure,
@@ -168,9 +168,9 @@ static void append2(PVStructurePtr &pvStructure,
     pvFields.push_back(pvStringField);
     pvStructure->appendPVFields(names,pvFields);
 }
-static void testAppends(FILE * fd)
+static void testAppends()
 {
-    if(debug) fprintf(fd,"\ntestAppends\n");
+    if(debug) printf("\ntestAppends\n");
     PVFieldPtrArray emptyPVFields;
     StringArray emptyNames;
     PVFieldPtrArray pvFields;
@@ -191,39 +191,34 @@ static void testAppends(FILE * fd)
         names,pvFields);
     builder.clear();
     pvStructure->toString(&builder);
-    if(debug) fprintf(fd,"%s\n",builder.c_str());
-    checkNameAndParent(fd,pvStructure,0);
+    if(debug) printf("%s\n",builder.c_str());
+    checkNameAndParent(pvStructure,0);
     PVFieldPtr pvField = pvStructure->getSubField("child2.Bill");
-    assert(pvField.get()!=NULL);
+    testOk1(pvField.get()!=NULL);
     pvField->renameField("Joe");
     builder.clear();
     pvStructure->toString(&builder);
-    if(debug) fprintf(fd,"%s\n",builder.c_str());
+    if(debug) printf("%s\n",builder.c_str());
     pvField->getParent()->removePVField("Joe");
     builder.clear();
     pvStructure->toString(&builder);
-    if(debug) fprintf(fd,"%s\n",builder.c_str());
-    checkNameAndParent(fd,pvStructure,0);
-    fprintf(fd,"testAppends PASSED\n");
+    if(debug) printf("%s\n",builder.c_str());
+    checkNameAndParent(pvStructure,0);
+    printf("testAppends PASSED\n");
 }
 
-int main(int argc,char *argv[])
+MAIN(testPVAppend)
 {
-    char *fileName = 0;
-    if(argc>1) fileName = argv[1];
-    FILE * fd = stdout;
-    if(fileName!=0 && fileName[0]!=0) {
-        fd = fopen(fileName,"w+");
-    }
+    testPlan(31);
     fieldCreate = getFieldCreate();
     pvDataCreate = getPVDataCreate();
     standardField = getStandardField();
     standardPVField = getStandardPVField();
     convert = getConvert();
-    testAppendStructures(fd);
-    testAppendSimple(fd);
-    testAppendMore(fd);
-    testAppends(fd);
-    return(0);
+    testAppendStructures();
+    testAppendSimple();
+    testAppendMore();
+    testAppends();
+    return testDone();
 }
 

@@ -13,8 +13,8 @@
 #include <cstring>
 #include <cstdio>
 
-#include <epicsAssert.h>
-#include <epicsExit.h>
+#include <epicsUnitTest.h>
+#include <testMain.h>
 
 #include <pv/requester.h>
 #include <pv/pvIntrospect.h>
@@ -48,13 +48,13 @@ static String allProperties("alarm,timeStamp,display,control");
 static PVStructurePtr doubleRecord;
 static PVStructurePtr enumeratedRecord;
 
-static void createRecords(FILE * fd,FILE* /*auxfd*/)
+static void createRecords()
 {
     doubleRecord = standardPVField->scalar(pvDouble,allProperties);
     if(debug) {
         builder.clear();
         doubleRecord->toString(&builder);
-        fprintf(fd,"doubleRecord\n%s\n",builder.c_str());
+        printf("doubleRecord\n%s\n",builder.c_str());
     }
     StringArray choices;
     choices.reserve(4);
@@ -66,25 +66,25 @@ static void createRecords(FILE * fd,FILE* /*auxfd*/)
     if(debug) {
         builder.clear();
         enumeratedRecord->toString(&builder);
-        fprintf(fd,"enumeratedRecord\n%s\n",builder.c_str());
+        printf("enumeratedRecord\n%s\n",builder.c_str());
     }
 }
 
-static void printRecords(FILE * fd,FILE* /*auxfd*/)
+static void printRecords()
 {
-    fprintf(fd,"doubleRecord\n");
+    printf("doubleRecord\n");
     builder.clear();
     doubleRecord->toString(&builder);
-    fprintf(fd,"%s\n",builder.c_str());
-    fprintf(fd,"enumeratedRecord\n");
+    printf("%s\n",builder.c_str());
+    printf("enumeratedRecord\n");
     builder.clear();
     enumeratedRecord->toString(&builder);
-    fprintf(fd,"%s\n",builder.c_str());
+    printf("%s\n",builder.c_str());
 }
 
-static void testAlarm(FILE * fd,FILE* /*auxfd*/)
+static void testAlarm()
 {
-    if(debug) fprintf(fd,"testAlarm\n");
+    if(debug) printf("testAlarm\n");
     Alarm alarm;
     PVAlarm pvAlarm; 
     bool result;
@@ -94,30 +94,30 @@ static void testAlarm(FILE * fd,FILE* /*auxfd*/)
         return;
     }
     result = pvAlarm.attach(pvField);
-    assert(result);
+    testOk1(result);
     Alarm al;
     al.setMessage(String("testMessage"));
     al.setSeverity(majorAlarm);
     al.setStatus(clientStatus);
     result = pvAlarm.set(al);
-    assert(result);
+    testOk1(result);
     pvAlarm.get(alarm);
-    assert(al.getMessage().compare(alarm.getMessage())==0);
-    assert(al.getSeverity()==alarm.getSeverity());
-    assert(al.getStatus()==alarm.getStatus());
+    testOk1(al.getMessage().compare(alarm.getMessage())==0);
+    testOk1(al.getSeverity()==alarm.getSeverity());
+    testOk1(al.getStatus()==alarm.getStatus());
     String message = alarm.getMessage();
     String severity = (*AlarmSeverityFunc::getSeverityNames())[alarm.getSeverity()];
     String status = (*AlarmStatusFunc::getStatusNames())[alarm.getStatus()];
     if(debug) {
-        fprintf(fd," message %s severity %s status %s\n",
+        printf(" message %s severity %s status %s\n",
             message.c_str(),severity.c_str(),status.c_str());
     }
-    fprintf(fd,"testAlarm PASSED\n");
+    printf("testAlarm PASSED\n");
 }
 
-static void testTimeStamp(FILE * fd,FILE *auxfd)
+static void testTimeStamp()
 {
-    if(debug) fprintf(fd,"testTimeStamp\n");
+    if(debug) printf("testTimeStamp\n");
     TimeStamp timeStamp;
     PVTimeStamp pvTimeStamp; 
     bool result;
@@ -127,22 +127,22 @@ static void testTimeStamp(FILE * fd,FILE *auxfd)
         return;
     }
     result = pvTimeStamp.attach(pvField);
-    assert(result);
+    testOk1(result);
     TimeStamp ts;
     ts.getCurrent();
     ts.setUserTag(32);
     result = pvTimeStamp.set(ts);
-    assert(result);
+    testOk1(result);
     pvTimeStamp.get(timeStamp);
-    assert(ts.getSecondsPastEpoch()==timeStamp.getSecondsPastEpoch());
-    assert(ts.getNanoSeconds()==timeStamp.getNanoSeconds());
-    assert(ts.getUserTag()==timeStamp.getUserTag());
+    testOk1(ts.getSecondsPastEpoch()==timeStamp.getSecondsPastEpoch());
+    testOk1(ts.getNanoSeconds()==timeStamp.getNanoSeconds());
+    testOk1(ts.getUserTag()==timeStamp.getUserTag());
     time_t tt;
     timeStamp.toTime_t(tt);
     struct tm ctm;
     memcpy(&ctm,localtime(&tt),sizeof(struct tm));
     if(debug) {
-        fprintf(auxfd,
+        printf(
             "%4.4d.%2.2d.%2.2d %2.2d:%2.2d:%2.2d %d nanoSeconds isDst %s userTag %d\n",
             ctm.tm_year+1900,ctm.tm_mon + 1,ctm.tm_mday,
             ctm.tm_hour,ctm.tm_min,ctm.tm_sec,
@@ -152,12 +152,12 @@ static void testTimeStamp(FILE * fd,FILE *auxfd)
     }
     timeStamp.put(0,0);
     pvTimeStamp.set(timeStamp);
-    fprintf(fd,"testTimeStamp PASSED\n");
+    printf("testTimeStamp PASSED\n");
 }
 
-static void testControl(FILE * fd,FILE* /*auxfd*/)
+static void testControl()
 {
-    if(debug) fprintf(fd,"testControl\n");
+    if(debug) printf("testControl\n");
     Control control;
     PVControl pvControl; 
     bool result;
@@ -167,24 +167,24 @@ static void testControl(FILE * fd,FILE* /*auxfd*/)
         return;
     }
     result = pvControl.attach(pvField);
-    assert(result);
+    testOk1(result);
     Control cl;
     cl.setLow(1.0);
     cl.setHigh(10.0);
     result = pvControl.set(cl);
-    assert(result);
+    testOk1(result);
     pvControl.get(control);
-    assert(cl.getLow()==control.getLow());
-    assert(cl.getHigh()==control.getHigh());
+    testOk1(cl.getLow()==control.getLow());
+    testOk1(cl.getHigh()==control.getHigh());
     double low = control.getLow();
     double high = control.getHigh();
-    if(debug) fprintf(fd," low %f high %f\n",low,high);
-    fprintf(fd,"testControl PASSED\n");
+    if(debug) printf(" low %f high %f\n",low,high);
+    printf("testControl PASSED\n");
 }
 
-static void testDisplay(FILE * fd,FILE* /*auxfd*/)
+static void testDisplay()
 {
-    if(debug) fprintf(fd,"testDisplay\n");
+    if(debug) printf("testDisplay\n");
     Display display;
     PVDisplay pvDisplay; 
     bool result;
@@ -194,7 +194,7 @@ static void testDisplay(FILE * fd,FILE* /*auxfd*/)
         return;
     }
     result = pvDisplay.attach(pvField);
-    assert(result);
+    testOk1(result);
     Display dy;
     dy.setLow(-10.0);
     dy.setHigh(-1.0);
@@ -202,22 +202,22 @@ static void testDisplay(FILE * fd,FILE* /*auxfd*/)
     dy.setFormat(String("%f10.0"));
     dy.setUnits(String("volts"));
     result = pvDisplay.set(dy);
-    assert(result);
+    testOk1(result);
     pvDisplay.get(display);
-    assert(dy.getLow()==display.getLow());
-    assert(dy.getHigh()==display.getHigh());
-    assert(dy.getDescription().compare(display.getDescription())==0);
-    assert(dy.getFormat().compare(display.getFormat())==0);
-    assert(dy.getUnits().compare(display.getUnits())==0);
+    testOk1(dy.getLow()==display.getLow());
+    testOk1(dy.getHigh()==display.getHigh());
+    testOk1(dy.getDescription().compare(display.getDescription())==0);
+    testOk1(dy.getFormat().compare(display.getFormat())==0);
+    testOk1(dy.getUnits().compare(display.getUnits())==0);
     double low = display.getLow();
     double high = display.getHigh();
-    if(debug) fprintf(fd," low %f high %f\n",low,high);
-    fprintf(fd,"testDisplay PASSED\n");
+    if(debug) printf(" low %f high %f\n",low,high);
+    printf("testDisplay PASSED\n");
 }
 
-static void testEnumerated(FILE * fd,FILE* /*auxfd*/)
+static void testEnumerated()
 {
-    if(debug) fprintf(fd,"testEnumerated\n");
+    if(debug) printf("testEnumerated\n");
     PVEnumerated pvEnumerated; 
     bool result;
     PVFieldPtr pvField = enumeratedRecord->getSubField(String("value"));
@@ -226,50 +226,39 @@ static void testEnumerated(FILE * fd,FILE* /*auxfd*/)
         return;
     }
     result = pvEnumerated.attach(pvField);
-    assert(result);
+    testOk1(result);
     int32 index = pvEnumerated.getIndex();
     String choice = pvEnumerated.getChoice();
     PVStringArray::const_svector choices = pvEnumerated.getChoices();
     int32 numChoices = pvEnumerated.getNumberChoices();
     if(debug) {
-        fprintf(fd,"index %d choice %s choices",index,choice.c_str());
-        for(int i=0; i<numChoices; i++ ) fprintf(fd," %s",choices[i].c_str());
-        fprintf(fd,"\n");
+        printf("index %d choice %s choices",index,choice.c_str());
+        for(int i=0; i<numChoices; i++ ) printf(" %s",choices[i].c_str());
+        printf("\n");
     }
     pvEnumerated.setIndex(2);
     index = pvEnumerated.getIndex();
     choice = pvEnumerated.getChoice();
-    if(debug) fprintf(fd,"index %d choice %s\n",index,choice.c_str());
-    fprintf(fd,"testEnumerated PASSED\n");
+    if(debug) printf("index %d choice %s\n",index,choice.c_str());
+    printf("testEnumerated PASSED\n");
 }
 
-int main(int argc,char *argv[])
+MAIN(testProperty)
 {
-    char *fileName = 0;
-    if(argc>1) fileName = argv[1];
-    FILE * fd = stdout;
-    if(fileName!=0 && fileName[0]!=0) {
-        fd = fopen(fileName,"w+");
-    }
-    char *auxFileName = 0;
-    if(argc>2) auxFileName = argv[2];
-    FILE *auxfd = stdout;
-    if(auxFileName!=0 && auxFileName[0]!=0) {
-        auxfd = fopen(auxFileName,"w+");
-    }
+    testPlan(22);
+    testDiag("Tests property");
     fieldCreate = getFieldCreate();
     pvDataCreate = getPVDataCreate();
     standardField = getStandardField();
     standardPVField = getStandardPVField();
     convert = getConvert();
-    createRecords(fd,auxfd);
-    testAlarm(fd,auxfd);
-    testTimeStamp(fd,auxfd);
-    testControl(fd,auxfd);
-    testDisplay(fd,auxfd);
-    testEnumerated(fd,auxfd);
-    if(debug) printRecords(fd,auxfd);
-    fprintf(fd,"ALL PASSED\n");
-    return(0);
+    createRecords();
+    testAlarm();
+    testTimeStamp();
+    testControl();
+    testDisplay();
+    testEnumerated();
+    if(debug) printRecords();
+    return testDone();;
 }
 

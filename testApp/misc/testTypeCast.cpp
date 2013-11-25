@@ -14,7 +14,6 @@
 #include <stdlib.h>
 #include <stddef.h>
 #include <string.h>
-#include <assert.h>
 #include <stdio.h>
 #include <float.h>
 #include <epicsMath.h>

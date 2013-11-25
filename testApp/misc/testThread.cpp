@@ -17,8 +17,9 @@
 #include <cstdio>
 #include <list>
 
-#include <epicsAssert.h>
-#include <epicsExit.h>
+#include <epicsUnitTest.h>
+#include <testMain.h>
+
 
 #include <pv/event.h>
 #include <pv/thread.h>
@@ -38,28 +39,29 @@ public:
     FILE *out;
     bool actuallyRan;
     Event begin, end;
-    Action(FILE* fp): out(fp), actuallyRan(false) {}
+    Action(): actuallyRan(false) {}
     virtual void run() {
-        fprintf(out, "Action waiting\n");
+        printf("Action waiting\n");
         begin.signal();
         bool waited=end.wait();
         actuallyRan=true;
-        fprintf(out, "Action %s\n", waited?"true":"false");
+        printf("Action %s\n", waited?"true":"false");
     }
 };
 
-static void testThreadRun(FILE *fd) {
+static void testThreadRun() {
     // show that we can control thread start and stop
-    ActionPtr ax(new Action(fd));
+    ActionPtr ax(new Action());
     {
         ThreadPtr tr(new Thread(actionName,lowPriority,ax.get()));
         bool w=ax->begin.wait();
-        fprintf(fd, "main %s\n", w?"true":"false");
-        fprintf(fd, "Action is %s\n", ax->actuallyRan?"true":"false");
+        printf( "main %s\n", w?"true":"false");
+        printf( "Action is %s\n", ax->actuallyRan?"true":"false");
         ax->end.signal();
     }
-    fprintf(fd, "Action is %s\n", ax->actuallyRan?"true":"false");
-    fprintf(fd,"testThreadRun PASSED\n");
+    testOk1(ax->actuallyRan==true);
+    printf( "Action is %s\n", ax->actuallyRan?"true":"false");
+    printf("testThreadRun PASSED\n");
 }
 
 class Basic;
@@ -80,6 +82,7 @@ public:
     {
         executor->execute(getPtrSelf());
         bool result = wait.wait();
+        testOk1(result==true);
         if(result==false) printf("basic::run wait returned false\n");
     }
     virtual void command()
@@ -97,11 +100,11 @@ private:
 
 typedef std::tr1::shared_ptr<Basic> BasicPtr;
 
-static void testBasic(FILE *fd) {
+static void testBasic() {
     ExecutorPtr executor(new Executor(String("basic"),middlePriority));
     BasicPtr basic( new Basic(executor));
     basic->run();
-    fprintf(fd,"testBasic PASSED\n");
+    printf("testBasic PASSED\n");
 }
 
 class MyFunc : public TimeFunctionRequester {
@@ -126,35 +129,26 @@ typedef std::tr1::shared_ptr<MyFunc> MyFuncPtr;
 
 #ifdef TESTTHREADCONTEXT
 
-static void testThreadContext(FILE *fd,FILE *auxFd) {
+static void testThreadContext() {
     ExecutorPtr executor(new Executor(String("basic"),middlePriority));
     BasicPtr basic(new Basic(executor));
     MyFuncPtr myFunc(new MyFunc(basic));
     TimeFunctionPtr timeFunction(new TimeFunction(myFunc));
     double perCall = timeFunction->timeCall();
     perCall *= 1e6;
-    fprintf(auxFd,"time per call %f microseconds\n",perCall);
-    fprintf(fd,"testThreadContext PASSED\n");
+    printf("time per call %f microseconds\n",perCall);
+    printf("testThreadContext PASSED\n");
 }
 #endif
 
-int main(int argc, char *argv[]) {
-     char *fileName = 0;
-    if(argc>1) fileName = argv[1];
-    FILE * fd = stdout;
-    if(fileName!=0 && fileName[0]!=0) {
-        fd = fopen(fileName,"w+");
-    }
-    testThreadRun(fd);
-    testBasic(fd);
+MAIN(testThread)
+{
+    testPlan(2);
+    testDiag("Tests thread");
+    testThreadRun();
+    testBasic();
 #ifdef TESTTHREADCONTEXT
-    char *auxFileName = 0;
-    if(argc>2) auxFileName = argv[2];
-    FILE *auxFd = stdout;
-    if(auxFileName!=0 && auxFileName[0]!=0) {
-        auxFd = fopen(auxFileName,"w+");
-    }
-    testThreadContext(fd,auxFd);
+    testThreadContext();
 #endif
-    return 0;
+    return testDone();
 }

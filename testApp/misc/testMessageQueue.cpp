@@ -16,8 +16,8 @@
 #include <string>
 #include <cstdio>
 
-#include <epicsAssert.h>
-#include <epicsExit.h>
+#include <epicsUnitTest.h>
+#include <testMain.h>
 
 #include <pv/lock.h>
 #include <pv/timeStamp.h>
@@ -28,7 +28,7 @@
 
 using namespace epics::pvData;
 
-static void testBasic(FILE * fd,FILE *auxfd) {
+static void testBasic() {
     int queueSize = 3;
     StringArray messages;
     messages.reserve(5);
@@ -41,53 +41,44 @@ static void testBasic(FILE * fd,FILE *auxfd) {
     bool result;
     MessageNodePtr messageNode;
     result = queue->isEmpty();
-    assert(result);
+    testOk1(result);
     result = queue->put(messages[0],infoMessage,true);
-    assert(result);
+    testOk1(result);
     result = queue->put(messages[1],infoMessage,true);
-    assert(result);
+    testOk1(result);
     result = queue->put(messages[2],warningMessage,true);
-    assert(result);
-    assert(queue->isFull());
+    testOk1(result);
+    testOk1(queue->isFull());
     result = queue->put(messages[3],infoMessage,true);
-    assert(result==true);
+    testOk1(result==true);
     messageNode = queue->get();
-    assert(messageNode.get()!=NULL);
-    fprintf(fd,"message %s messageType %s\n",
+    testOk1(messageNode.get()!=NULL);
+    printf("message %s messageType %s\n",
         messageNode->getMessage().c_str(),
         getMessageTypeName(messageNode->getMessageType()).c_str());
-    assert(messageNode->getMessage().compare(messages[0])==0);
+    testOk1(messageNode->getMessage().compare(messages[0])==0);
     queue->release();
     messageNode = queue->get();
-    assert(messageNode.get()!=NULL);
-    assert(messageNode->getMessage().compare(messages[1])==0);
+    testOk1(messageNode.get()!=NULL);
+    testOk1(messageNode->getMessage().compare(messages[1])==0);
     queue->release();
     messageNode = queue->get();
-    assert(messageNode.get()!=NULL);
-    fprintf(fd,"message %s messageType %s\n",
+    testOk1(messageNode.get()!=NULL);
+    printf("message %s messageType %s\n",
         messageNode->getMessage().c_str(),
         getMessageTypeName(messageNode->getMessageType()).c_str());
-    assert(messageNode->getMessage().compare(messages[3])==0);
+    testOk1(messageNode->getMessage().compare(messages[3])==0);
     queue->release();
     result = queue->isEmpty();
-    assert(result);
-    fprintf(fd,"PASSED\n");
+    testOk1(result);
+    printf("PASSED\n");
 }
 
-int main(int argc, char *argv[]) {
-     char *fileName = 0;
-    if(argc>1) fileName = argv[1];
-    FILE * fd = stdout;
-    if(fileName!=0 && fileName[0]!=0) {
-        fd = fopen(fileName,"w+");
-    }
-    char *auxFileName = 0;
-    if(argc>2) auxFileName = argv[2];
-    FILE *auxfd = stdout;
-    if(auxFileName!=0 && auxFileName[0]!=0) {
-        auxfd = fopen(auxFileName,"w+");
-    }
-    testBasic(fd,auxfd);
-    return (0);
+MAIN(testMessageQueue)
+{
+    testPlan(13);
+    testDiag("Tests messageQueue");
+    testBasic();
+    return testDone();
 }
  

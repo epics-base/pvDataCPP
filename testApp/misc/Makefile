@@ -6,12 +6,15 @@ PROD_LIBS += pvData Com
 
 PROD_HOST += testThread
 testThread_SRCS += testThread.cpp
+TESTS += testThread
 
 PROD_HOST += testTimer
 testTimer_SRCS += testTimer.cpp
+TESTS += testTimer
 
 PROD_HOST += testBitSet
 testBitSet_SRCS += testBitSet.cpp
+TESTS += testBitSet
 
 PROD_HOST += testOverrunBitSet
 testOverrunBitSet_SRCS += testOverrunBitSet.cpp
@@ -22,28 +25,33 @@ testByteOrder_SRCS += testByteOrder.cpp
 
 PROD_HOST += testByteBuffer
 testByteBuffer_SRCS += testByteBuffer.cpp
+TESTS += testByteBuffer
 
 PROD_HOST += testBaseException
 testBaseException_SRCS += testBaseException.cpp
+TESTS += testBaseException
 
-TESTPROD += testSharedVector
+PROD_HOST += testSharedVector
 testSharedVector_SRCS += testSharedVector.cpp
 TESTS += testSharedVector
 
-TESTPROD += testSerialization
+PROD_HOST += testSerialization
 testSerialization_SRCS += testSerialization.cpp
 TESTS += testSerialization
 
 PROD_HOST += testTimeStamp
 testTimeStamp_SRCS += testTimeStamp.cpp
+TESTS += testTimeStamp
 
 PROD_HOST += testQueue
 testQueue_SRCS += testQueue.cpp
+TESTS += testQueue
 
 PROD_HOST += testMessageQueue
 testMessageQueue_SRCS += testMessageQueue.cpp
+TESTS += testMessageQueue
 
-TESTPROD += testTypeCast
+PROD_HOST += testTypeCast
 testTypeCast_SRCS += testTypeCast.cpp
 TESTS += testTypeCast
 

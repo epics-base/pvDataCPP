@@ -11,10 +11,11 @@
 #include <stddef.h>
 #include <string.h>
 #include <stdio.h>
+
+#include <epicsUnitTest.h>
+#include <testMain.h>
+
 #include <pv/epicsException.h>
-
-
-#include <epicsAssert.h>
 
 using namespace epics::pvData;
 
@@ -41,13 +42,13 @@ void internalTestBaseException(int /*unused*/ = 0)
     }
 }
 
-void testBaseException(FILE *fp) {
-    fprintf(fp,"testBaseException... ");
+void testBaseException() {
+    printf("testBaseException... ");
 
     try {
         THROW_BASE_EXCEPTION("all is OK");
     } catch (BaseException& be) {
-        fprintf(fp,"\n\n%s\n\n", be.what());
+        printf("\n\n%s\n\n", be.what());
     }
 
     try {
@@ -57,38 +58,35 @@ void testBaseException(FILE *fp) {
             THROW_BASE_EXCEPTION_CAUSE("exception 2", be2);
         }
     } catch (BaseException& be) {
-        fprintf(fp,"\n\n%s\n\n", be.what());
+        printf("\n\n%s\n\n", be.what());
     }
 
-    fprintf(fp,"PASSED\n");
+    testPass("testBaseException");
 }
 
-void testLogicException(FILE *fp) {
+void testLogicException() {
     try {
         THROW_EXCEPTION(std::logic_error("There is a logic_error"));
     } catch (std::logic_error& be) {
-        fprintf(fp,"\n\n%s\n\n", be.what());
-        PRINT_EXCEPTION2(be, fp);
+        printf("\n\n%s\n\n", be.what());
+        PRINT_EXCEPTION2(be, stdout);
     }
 
     try {
         THROW_EXCEPTION2(std::logic_error, "There is another logic_error");
     } catch (std::logic_error& be) {
-        fprintf(fp,"\n\n%s\n\n", be.what());
-        fprintf(fp,"%s\n", SHOW_EXCEPTION(be).c_str());
+        printf("\n\n%s\n\n", be.what());
+        printf("%s\n", SHOW_EXCEPTION(be).c_str());
     }
+    testPass("testLogicException");
 }
 
-int main(int argc,char *argv[])
+MAIN(testBaseException)
 {
-    FILE *fp=NULL;
-    if(argc>1){
-        fp=fopen(argv[1], "w");
-        if(!fp) fprintf(stderr,"Failed to open test output file\n");
-    }
-    if(!fp) fp=stdout;
-    testLogicException(fp);
-    testBaseException(fp);
-    return(0);
+    testPlan(2);
+    testDiag("Tests base exception");
+    testLogicException();
+    testBaseException();
+    return testDone();
 }
 

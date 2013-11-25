@@ -12,7 +12,8 @@
 #include <pv/standardField.h>
 #include <pv/standardPVField.h>
 
-#include <epicsAssert.h>
+#include <epicsUnitTest.h>
+#include <testMain.h>
 
 using namespace epics::pvData;
 
@@ -20,8 +21,9 @@ static PVDataCreatePtr pvDataCreate = getPVDataCreate();
 static StandardFieldPtr standardField = getStandardField();
 static StandardPVFieldPtr standardPVField = getStandardPVField();
 
-int main(int, char **)
+MAIN(testOperators)
 {
+    testPlan(2);
     PVStructurePtr pvStructure = standardPVField->scalar(pvDouble,
         "alarm,timeStamp,display,control,valueAlarm");
 
@@ -32,7 +34,7 @@ int main(int, char **)
 
     double dv;
     *pvValue >>= dv;
-    assert(testDV == dv);
+    testOk1(testDV == dv);
 
 
     const std::string testSV = "test message";
@@ -42,7 +44,7 @@ int main(int, char **)
 
     std::string sv;
     *pvMessage >>= sv;
-    assert(testSV == sv);
+    testOk1(testSV == sv);
 
     //
     // to stream tests
@@ -86,6 +88,6 @@ int main(int, char **)
     pvStructureArray->replace(freeze(pvStructures));
     std::cout << *pvStructure << std::endl;
 
-    return 0;
+   return testDone();
 }
 

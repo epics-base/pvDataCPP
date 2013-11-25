@@ -12,8 +12,8 @@
 #include <string>
 #include <cstdio>
 
-#include <epicsAssert.h>
-#include <epicsExit.h>
+#include <epicsUnitTest.h>
+#include <testMain.h>
 
 #include <pv/requester.h>
 #include <pv/bitSetUtil.h>
@@ -33,9 +33,9 @@ static StandardPVFieldPtr standardPVField;
 static ConvertPtr convert;
 static String builder("");
 
-static void test(FILE * fd)
+static void test()
 {
-    if(debug) fprintf(fd,"\ntestBitSetUtil\n");
+    if(debug) printf("\ntestBitSetUtil\n");
     StringArray fieldNames;
     PVFieldPtrArray pvFields;
     fieldNames.reserve(5);
@@ -62,17 +62,17 @@ static void test(FILE * fd)
          fieldNames,pvFields);
     builder.clear();
     pvs->toString(&builder);
-    if(debug) fprintf(fd,"pvs\n%s\n",builder.c_str());
+    if(debug) printf("pvs\n%s\n",builder.c_str());
     int32 nfields = pvs->getNumberFields();
     BitSetPtr bitSet = BitSet::create(nfields);
     for(int32 i=0; i<nfields; i++) bitSet->set(i);
     builder.clear();
     bitSet->toString(&builder);
-    if(debug) fprintf(fd,"bitSet\n%s\n",builder.c_str());
+    if(debug) printf("bitSet\n%s\n",builder.c_str());
     BitSetUtil::compress(bitSet,pvs);
     builder.clear();
     bitSet->toString(&builder);
-    if(debug) fprintf(fd,"bitSet\n%s\n",builder.c_str());
+    if(debug) printf("bitSet\n%s\n",builder.c_str());
     bitSet->clear();
     PVFieldPtr pvField = pvs->getSubField("timeStamp");
     int32 offsetTimeStamp = pvField->getFieldOffset();
@@ -84,18 +84,18 @@ static void test(FILE * fd)
     int32 offsetUserTag = pvField->getFieldOffset();
     bitSet->set(offsetSeconds);
     BitSetUtil::compress(bitSet,pvs);
-    assert(bitSet->get(offsetSeconds)==true);
+    testOk1(bitSet->get(offsetSeconds)==true);
     bitSet->set(offsetNano);
     bitSet->set(offsetUserTag);
     builder.clear();
     bitSet->toString(&builder);
-    if(debug) fprintf(fd,"bitSet\n%s\n",builder.c_str());
+    if(debug) printf("bitSet\n%s\n",builder.c_str());
     BitSetUtil::compress(bitSet,pvs);
-    assert(bitSet->get(offsetSeconds)==false);
-    assert(bitSet->get(offsetTimeStamp)==true);
+    testOk1(bitSet->get(offsetSeconds)==false);
+    testOk1(bitSet->get(offsetTimeStamp)==true);
     builder.clear();
     bitSet->toString(&builder);
-    if(debug) fprintf(fd,"bitSet\n%s\n",builder.c_str());
+    if(debug) printf("bitSet\n%s\n",builder.c_str());
     bitSet->clear();
 
     pvField = pvs->getSubField("current");
@@ -116,42 +116,37 @@ static void test(FILE * fd)
     bitSet->set(offsetMessage);
     builder.clear();
     bitSet->toString(&builder);
-    if(debug) fprintf(fd,"bitSet\n%s\n",builder.c_str());
+    if(debug) printf("bitSet\n%s\n",builder.c_str());
     BitSetUtil::compress(bitSet,pvs);
     builder.clear();
     bitSet->toString(&builder);
-    if(debug) fprintf(fd,"bitSet\n%s\n",builder.c_str());
-    assert(bitSet->get(offsetCurrent)==true);
+    if(debug) printf("bitSet\n%s\n",builder.c_str());
+    testOk1(bitSet->get(offsetCurrent)==true);
     bitSet->clear();
     bitSet->set(offsetSeverity);
     bitSet->set(offsetStatus);
     bitSet->set(offsetMessage);
     builder.clear();
     bitSet->toString(&builder);
-    if(debug) fprintf(fd,"bitSet\n%s\n",builder.c_str());
+    if(debug) printf("bitSet\n%s\n",builder.c_str());
     BitSetUtil::compress(bitSet,pvs);
     builder.clear();
     bitSet->toString(&builder);
-    if(debug) fprintf(fd,"bitSet\n%s\n",builder.c_str());
-    assert(bitSet->get(offsetAlarm)==true);
+    if(debug) printf("bitSet\n%s\n",builder.c_str());
+    testOk1(bitSet->get(offsetAlarm)==true);
     bitSet->clear();
-    fprintf(fd,"testBitSetUtil PASSED\n");
+    printf("testBitSetUtil PASSED\n");
 }
 
-int main(int argc,char *argv[])
+MAIN(testBitSetUtil)
 {
-    char *fileName = 0;
-    if(argc>1) fileName = argv[1];
-    FILE * fd = stdout;
-    if(fileName!=0 && fileName[0]!=0) {
-        fd = fopen(fileName,"w+");
-    }
+    testPlan(5);
     fieldCreate = getFieldCreate();
     pvDataCreate = getPVDataCreate();
     standardField = getStandardField();
     standardPVField = getStandardPVField();
     convert = getConvert();
-    test(fd);
-    return(0);
+    test();
+    return testDone();
 }
 
