@@ -323,21 +323,21 @@ void testArrayType(const typename PVT::value_type* rdata, size_t len)
 
 static const boolean bdata[] = {0, 1, 0, 1, 1};
 
-static const int8 i8data[] = { 0, 1, 2, -1, BYTE_MAX_VALUE, BYTE_MAX_VALUE-1,
-                               BYTE_MIN_VALUE+1, BYTE_MIN_VALUE };
-static const uint8 u8data[] = { 0, 1, 2, -1, UBYTE_MAX_VALUE, UBYTE_MAX_VALUE-1 };
+static const int8 i8data[] = { 0, 1, 2, -1, BYTE_MAX_VALUE, static_cast<int8>(BYTE_MAX_VALUE-1),
+                               static_cast<int8>(BYTE_MIN_VALUE+1), BYTE_MIN_VALUE };
+static const uint8 u8data[] = { 0, 1, 2, static_cast<uint8>(-1), UBYTE_MAX_VALUE, static_cast<uint8>(UBYTE_MAX_VALUE-1) };
 
-static const int16 i16data[] = { 0, 1, 2, -1, SHORT_MAX_VALUE, SHORT_MAX_VALUE-1,
-                               SHORT_MIN_VALUE+1, SHORT_MIN_VALUE };
-static const uint16 u16data[] = { 0, 1, 2, -1, USHORT_MAX_VALUE, USHORT_MAX_VALUE-1 };
+static const int16 i16data[] = { 0, 1, 2, -1, SHORT_MAX_VALUE, static_cast<int16>(SHORT_MAX_VALUE-1),
+                               static_cast<int16>(SHORT_MIN_VALUE+1), SHORT_MIN_VALUE };
+static const uint16 u16data[] = { 0, 1, 2, static_cast<uint16>(-1), USHORT_MAX_VALUE, static_cast<uint16>(USHORT_MAX_VALUE-1) };
 
 static const int32 i32data[] = { 0, 1, 2, -1, INT_MAX_VALUE, INT_MAX_VALUE-1,
                                INT_MIN_VALUE+1, INT_MIN_VALUE };
-static const uint32 u32data[] = { 0, 1, 2, -1, UINT_MAX_VALUE, UINT_MAX_VALUE-1 };
+static const uint32 u32data[] = { 0, 1, 2, static_cast<uint32>(-1), UINT_MAX_VALUE, UINT_MAX_VALUE-1 };
 
-static const int64 i64data[] = { 0, 1, 2, -1, LONG_MAX_VALUE, LONG_MAX_VALUE-1,
-                               LONG_MIN_VALUE+1, LONG_MIN_VALUE };
-static const uint64 u64data[] = { 0, 1, 2, -1, ULONG_MAX_VALUE, ULONG_MAX_VALUE-1 };
+static const int64 i64data[] = { 0, 1, 2, -1, LONG_MAX_VALUE, static_cast<int64>(LONG_MAX_VALUE-1),
+                               static_cast<int64>(LONG_MIN_VALUE+1), LONG_MIN_VALUE };
+static const uint64 u64data[] = { 0, 1, 2, static_cast<uint64>(-1), ULONG_MAX_VALUE, static_cast<uint64>(ULONG_MAX_VALUE-1) };
 
 static const double ddata[] = { (double)0.0, (double)1.1, (double)2.3, (double)-1.4,
                                 DOUBLE_MAX_VALUE, DOUBLE_MAX_VALUE-(double)123456.789,
