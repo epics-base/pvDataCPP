@@ -740,7 +740,7 @@ FieldBuilderPtr FieldBuilder::addNestedUnionArray(std::string const & name)
     return FieldBuilderPtr(new FieldBuilder(shared_from_this(), name, union_, true));
 }
 
-FieldBuilderPtr FieldBuilder::addNested()
+FieldBuilderPtr FieldBuilder::endNested()
 {
     if (!parentBuilder.get())
         throw std::runtime_error("this method can only be called to create nested fields");

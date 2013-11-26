@@ -196,7 +196,7 @@ void testEquals() {
                                 setId("nestedId")->
                                 add("short", pvShort)->
                                 add("long", pvLong)->
-                                addNested()->
+                                endNested()->
                             addArray("intArray", pvInt)->
                             createUnion();
 	PVUnionPtr union1 = factory->createPVUnion(punion);
@@ -690,7 +690,7 @@ void testIntrospectionSerialization()
                                 setId("nestedId")->
                                 add("short", pvShort)->
                                 add("long", pvLong)->
-                                addNested()->
+                                endNested()->
                             addArray("intArray", pvInt)->
                             createUnion();
      serializatioTest(punion);

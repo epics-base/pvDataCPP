@@ -711,41 +711,41 @@ public:
 
     /**
      * Add new nested {@code Structure}.
-     * {@code addNested()} method must be called
+     * {@code endNested()} method must be called
      * to complete creation of the nested {@code Structure}.
      * @param name nested structure name.
      * @return a new instance of a {@code FieldBuilder} is returned.
-     * @see #addNested()
+     * @see #endNested()
      */
     FieldBuilderPtr addNestedStructure(std::string const & name); 
     
     /**
      * Add new nested {@code Union}.
-     * {@code addNested()} method must be called
+     * {@code endNested()} method must be called
      * to complete creation of the nested {@code Union}.
      * @param name nested union name.
      * @return a new instance of a {@code FieldBuilder} is returned.
-     * @see #addNested()
+     * @see #endNested()
      */
     FieldBuilderPtr addNestedUnion(std::string const & name);
     
     /**
      * Add new nested {@code Structure[]}.
-     * {@code addNested()} method must be called
+     * {@code endNested()} method must be called
      * to complete creation of the nested {@code Structure}.
      * @param name nested structure name.
      * @return a new instance of a {@code FieldBuilder} is returned.
-     * @see #addNested()
+     * @see #endNested()
      */
     FieldBuilderPtr addNestedStructureArray(std::string const & name); 
     
     /**
      * Add new nested {@code Union[]}.
-     * {@code addNested()} method must be called
+     * {@code endNested()} method must be called
      * to complete creation of the nested {@code Union}.
      * @param name nested union name.
      * @return a new instance of a {@code FieldBuilder} is returned.
-     * @see #addNested()
+     * @see #endNested()
      */
     FieldBuilderPtr addNestedUnionArray(std::string const & name);
 
@@ -755,7 +755,7 @@ public:
      * @see #addNestedUnion(String)
      * @return a previous (parent) {@code FieldBuilder}.
      */
-    FieldBuilderPtr addNested();
+    FieldBuilderPtr endNested();
 
 private:
     FieldBuilder();

@@ -86,12 +86,12 @@ void test_invalid()
     {
         fieldCreate->createFieldBuilder()->
             add("f1", pvByte)->
-            addNested();
-        testFail("addNested() allowed in non-nested FieldBuilder");
+            endNested();
+        testFail("endNested() allowed in non-nested FieldBuilder");
     }
     catch (std::runtime_error& re) {
         // ok
-        testPass("addNested() disallowed in non-nested FieldBuilder");
+        testPass("endNested() disallowed in non-nested FieldBuilder");
     }
 
     try
@@ -123,7 +123,7 @@ void test_nestedStructure()
                                 setId(NESTED_ID)->
                                 add("short", pvShort)->
                                 add("long", pvLong)->
-                                addNested()->
+                                endNested()->
                             addArray("intArray", pvInt)->
                             createStructure();
     testOk1(s.get() != 0);
@@ -179,7 +179,7 @@ void test_nestedStructureArray()
                                 setId(NESTED_ID)->
                                 add("short", pvShort)->
                                 add("long", pvLong)->
-                                addNested()->
+                                endNested()->
                             addArray("intArray", pvInt)->
                             createStructure();
     testOk1(s.get() != 0);
