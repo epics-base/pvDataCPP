@@ -66,7 +66,7 @@ struct basicTestData {
         data.resize(100);
         for(size_t i=0; i<data.size(); i++)
         {
-            data[i] = static_cast<int32>(10*i);
+            data[i] = static_cast<typename PVT::svector::element_type>(10*i);
         }
     }
 };
