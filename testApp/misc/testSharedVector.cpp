@@ -336,7 +336,7 @@ static void testPush()
     size_t cap = vect.capacity();
 
     for(size_t s=0; s<16*1024; s++) {
-        vect.push_back(s);
+        vect.push_back((int)s);
 
         if(cap!=vect.capacity()) {
             nallocs++;

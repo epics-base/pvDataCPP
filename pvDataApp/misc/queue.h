@@ -38,6 +38,7 @@ public:
 private:
     queueElementPtr nullElement;
     queueElementPtrArray elements;
+    // TODO use size_t instead
     int size;
     int numberFree;
     int numberUsed;
@@ -49,7 +50,7 @@ private:
 
 template <typename T>
 Queue<T>::Queue(std::vector<queueElementPtr> &xxx)
-: size(xxx.size()),
+: size(static_cast<int>(xxx.size())),
   numberFree(size),
   numberUsed(0),
   nextGetFree(0),

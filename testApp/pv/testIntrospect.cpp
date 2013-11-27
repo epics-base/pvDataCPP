@@ -235,7 +235,7 @@ static void testMapping()
     testOk1(typeid(ScalarTypeTraits<ENUM>::type)==typeid(TYPE)); \
             testOk1(ENUM==(ScalarType)ScalarTypeID<TYPE>::value); \
             testOk1(ENUM==(ScalarType)ScalarTypeID<const TYPE>::value);
-    OP(boolean, pvBoolean)
+    OP(epics::pvData::boolean, pvBoolean)
     OP(int8, pvByte)
     OP(int16, pvShort)
     OP(int32, pvInt)

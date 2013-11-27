@@ -33,11 +33,11 @@ namespace epics {
             if(s==(std::size_t)-1) // null    // TODO remove
                 buffer->putByte(-1);
             else if(s<254)
-                buffer->putByte(s);
+                buffer->putByte((int8)s);
             else
             {
                 buffer->putByte(-2);
-                buffer->putInt(s); // (byte)-2 + size
+                buffer->putInt((int8)s); // (byte)-2 + size
             }
         }
 

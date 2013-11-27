@@ -21,7 +21,7 @@ static bool checkBitSetPVField(
     PVFieldPtr const &pvField,BitSetPtr const &bitSet,int32 initialOffset)
 {
     int32 offset = initialOffset;
-    int32 nbits = pvField->getNumberFields();
+    int32 nbits = static_cast<int32>(pvField->getNumberFields());
     if(nbits==1) return bitSet->get(offset);
     int32 nextSetBit = bitSet->nextSetBit(offset);
     if(nextSetBit>=(offset+nbits)) return false;
@@ -36,10 +36,10 @@ static bool checkBitSetPVField(
     bool atLeastOneBitSet = false;
     bool allBitsSet = true;
     PVStructurePtr pvStructure = static_pointer_cast<PVStructure>(pvField);
-    offset = pvStructure->getFieldOffset() + 1;
+    offset = static_cast<int32>(pvStructure->getFieldOffset()) + 1;
     while(offset<initialOffset + nbits) {
         PVFieldPtr pvSubField = pvStructure->getSubField(offset);
-        int32 nbitsNow = pvSubField->getNumberFields();
+        int32 nbitsNow = static_cast<int32>(pvSubField->getNumberFields());
         if(nbitsNow==1) {
             if(bitSet->get(offset)) {
                 atLeastOneBitSet = true;
@@ -57,7 +57,7 @@ static bool checkBitSetPVField(
             } else {
                 allBitsSet = false;
             }
-            offset += pvSubField->getNumberFields();
+            offset += static_cast<int32>(pvSubField->getNumberFields());
         }
     }
     if(allBitsSet) {

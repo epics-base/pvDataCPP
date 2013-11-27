@@ -38,8 +38,8 @@ class epicsShareClass MonitorElement {
     MonitorElement(){}
     MonitorElement(PVStructurePtr const & pvStructurePtr)
     : pvStructurePtr(pvStructurePtr),
-      changedBitSet(BitSet::create(pvStructurePtr->getNumberFields())),
-      overrunBitSet(BitSet::create(pvStructurePtr->getNumberFields()))
+      changedBitSet(BitSet::create(static_cast<uint32>(pvStructurePtr->getNumberFields()))),
+      overrunBitSet(BitSet::create(static_cast<uint32>(pvStructurePtr->getNumberFields())))
     {}
     PVStructurePtr pvStructurePtr;
     BitSet::shared_pointer changedBitSet;

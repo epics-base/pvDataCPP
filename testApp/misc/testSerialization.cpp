@@ -9,9 +9,11 @@
  *  Created on: Oct 25, 2010
  *      Author: Miha Vitorovic
  */
+
 #ifdef _WIN32
 #define NOMINMAX
 #endif
+
 #include <iostream>
 #include <fstream>
 
@@ -321,7 +323,7 @@ void testArrayType(const typename PVT::value_type* rdata, size_t len)
     serializationTest(pv);
 }
 
-static const boolean bdata[] = {0, 1, 0, 1, 1};
+static const epics::pvData::boolean bdata[] = {0, 1, 0, 1, 1};
 
 static const int8 i8data[] = { 0, 1, 2, -1, BYTE_MAX_VALUE, static_cast<int8>(BYTE_MAX_VALUE-1),
                                static_cast<int8>(BYTE_MIN_VALUE+1), BYTE_MIN_VALUE };

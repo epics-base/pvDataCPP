@@ -7,6 +7,11 @@
 /**
  *  @author mrk
  */
+
+#ifdef _WIN32
+#define NOMINMAX
+#endif
+
 #include <cstddef>
 #include <cstdlib>
 #include <string>
@@ -269,7 +274,7 @@ void ScalarArray::toString(StringBuilder buffer,int /*indentLevel*/) const{
 
 void ScalarArray::serialize(ByteBuffer *buffer, SerializableControl *control) const {
     control->ensureBuffer(1);
-    buffer->putByte(0x10 | getTypeCodeLUT());
+    buffer->putByte((int8)0x10 | getTypeCodeLUT());
 }
 
 void ScalarArray::deserialize(ByteBuffer* /*buffer*/, DeserializableControl* /*control*/) {
@@ -298,7 +303,7 @@ void StructureArray::toString(StringBuilder buffer,int indentLevel) const {
 
 void StructureArray::serialize(ByteBuffer *buffer, SerializableControl *control) const {
     control->ensureBuffer(1);
-    buffer->putByte(0x90);
+    buffer->putByte((int8)0x90);
     control->cachedSerialize(pstructure, buffer);
 }
 
@@ -331,11 +336,11 @@ void UnionArray::serialize(ByteBuffer *buffer, SerializableControl *control) con
     if (punion->isVariant())
     {
         // unrestricted/variant union
-        buffer->putByte(0x92);
+        buffer->putByte((int8)0x92);
     }
     else
     {
-        buffer->putByte(0x91);
+        buffer->putByte((int8)0x91);
         control->cachedSerialize(punion, buffer);
     }
 }
@@ -454,7 +459,7 @@ void Structure::toStringCommon(StringBuilder buffer,int indentLevel) const{
 
 void Structure::serialize(ByteBuffer *buffer, SerializableControl *control) const {
     control->ensureBuffer(1);
-    buffer->putByte(0x80);
+    buffer->putByte((int8)0x80);
     serializeStructureField(this, buffer, control);
 }
 
@@ -594,11 +599,11 @@ void Union::serialize(ByteBuffer *buffer, SerializableControl *control) const {
     if (fields.size() == 0)
     {
         // unrestricted/variant union
-        buffer->putByte(0x82);
+        buffer->putByte((int8)0x82);
     }
     else
     {
-        buffer->putByte(0x81);
+        buffer->putByte((int8)0x81);
         serializeUnionField(this, buffer, control);
     }
 }

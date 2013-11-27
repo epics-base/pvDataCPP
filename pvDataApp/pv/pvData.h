@@ -10,12 +10,16 @@
 #ifndef PVDATA_H
 #define PVDATA_H
 
+#ifdef _WIN32
+#define NOMINMAX
+#endif
+
 #if defined(__GNUC__) && !(defined(__vxworks) && !defined(_WRS_VXWORKS_MAJOR))
 #define USAGE_DEPRECATED __attribute__((deprecated))
 #define USAGE_ERROR(MSG) __attribute__((error(MSG)))
 #else
 #define USAGE_DEPRECATED
-#define USAGE_ERROR(MSG)
+#define USAGE_ERROR(MSG) { throw std::runtime_error(MSG); }
 #endif
 
 #include <string>
@@ -283,6 +287,10 @@ class epicsShareClass PVField
 public:
     POINTER_DEFINITIONS(PVField);
     /**
+     * Constructor
+     */
+    PVField() {};
+    /**
      * Destructor
      */
     virtual ~PVField();
@@ -531,14 +539,16 @@ public:
 
     // get operator
     // double value; doubleField >>= value;
-    void operator>>=(T& value) const
+    // NOTE: virtual is needed for MS C++ compiler to get this operator exported
+    virtual void operator>>=(T& value) const
 	{
     	value = get();
 	}
 
     // put operator
     // double value = 12.8; doubleField <<= value;
-    void operator<<=(T value)
+    // NOTE: virtual is needed for MS C++ compiler to get this operator exported
+    virtual void operator<<=(T value)
 	{
     	put(value);
 	}
@@ -632,6 +642,10 @@ class epicsShareClass PVArray : public PVField, public SerializableArray {
 public:
     POINTER_DEFINITIONS(PVArray);
     /**
+     * Constructor
+     */
+    PVArray(){};
+    /**
      * Destructor
      */
     virtual ~PVArray(){};
@@ -714,6 +728,10 @@ public:
 class epicsShareClass PVScalarArray : public PVArray {
 public:
     POINTER_DEFINITIONS(PVScalarArray);
+    /**
+     * Constructor
+     */
+    PVScalarArray() {};
     /**
      * Destructor
      */

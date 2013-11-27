@@ -14,6 +14,12 @@
 
 #ifndef PVTYPE_H
 #define PVTYPE_H
+
+#ifdef _WIN32
+#define NOMINMAX
+#pragma warning(disable: 4251)
+#endif
+
 #include <string>
 #include <vector>
 

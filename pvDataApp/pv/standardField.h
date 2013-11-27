@@ -125,7 +125,7 @@ private:
     void createFloatAlarm();
     void createDoubleAlarm();
     void createEnumeratedAlarm();
-    friend StandardFieldPtr getStandardField();
+    //friend StandardFieldPtr getStandardField();
 };
 
 epicsShareExtern StandardFieldPtr getStandardField();

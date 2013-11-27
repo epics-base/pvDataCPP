@@ -257,8 +257,8 @@ void PVField::computeOffset(const PVField   *  pvField) {
     } else {
         while(pvTop->getParent()!=NULL) pvTop = pvTop->getParent();
     }
-    int offset = 0;
-    int nextOffset = 1;
+    size_t offset = 0;
+    size_t nextOffset = 1;
     PVFieldPtrArray  pvFields = pvTop->getPVFields();
     for(size_t i=0; i < pvTop->getStructure()->getNumberFields(); i++) {
         offset = nextOffset;
@@ -288,8 +288,8 @@ void PVField::computeOffset(const PVField   *  pvField) {
 }
 
 void PVField::computeOffset(const PVField   *  pvField,size_t offset) {
-    int beginOffset = offset;
-    int nextOffset = offset + 1;
+    size_t beginOffset = offset;
+    size_t nextOffset = offset + 1;
     const PVStructure *pvStructure = static_cast<const PVStructure *>(pvField);
     const PVFieldPtrArray  pvFields = pvStructure->getPVFields();
     for(size_t i=0; i < pvStructure->getStructure()->getNumberFields(); i++) {

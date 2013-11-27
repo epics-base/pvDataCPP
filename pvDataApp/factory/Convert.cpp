@@ -46,7 +46,7 @@ static std::vector<String> split(String commaSeparatedList) {
     return valueList;
 }
 
-void Convert::getString(StringBuilder buf,PVField const *pvField,int indentLevel)
+void Convert::getString(StringBuilder buf,PVField const *pvField,int /*indentLevel*/)
 {
     // TODO indextLevel ignored
     std::ostringstream strm;

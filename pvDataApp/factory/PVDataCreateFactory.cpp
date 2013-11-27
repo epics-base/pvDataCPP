@@ -7,9 +7,11 @@
 /**
  *  @author mrk
  */
+
 #ifdef _WIN32
 #define NOMINMAX
 #endif
+
 #include <cstddef>
 #include <cstdlib>
 #include <string>

@@ -643,7 +643,7 @@ void PVStructure::serialize(ByteBuffer *pbuffer,
 	PVStructure* nonConstThis = const_cast<PVStructure*>(this);
     size_t numberFields = nonConstThis->getNumberFields();
     size_t offset = nonConstThis->getFieldOffset();
-    int32 next = pbitSet->nextSetBit(offset);
+    int32 next = pbitSet->nextSetBit(static_cast<uint32>(offset));
 
     // no more changes or no changes in this structure
     if(next<0||next>=static_cast<int32>(offset+numberFields)) return;
@@ -658,8 +658,8 @@ void PVStructure::serialize(ByteBuffer *pbuffer,
     for(size_t i = 0; i<fieldsSize; i++) {
         PVFieldPtr pvField = pvFields[i];
         offset = pvField->getFieldOffset();
-        int32 inumberFields = pvField->getNumberFields();
-        next = pbitSet->nextSetBit(offset);
+        int32 inumberFields = static_cast<int32>(pvField->getNumberFields());
+        next = pbitSet->nextSetBit(static_cast<uint32>(offset));
 
         // no more changes
         if(next<0) return;
@@ -680,7 +680,7 @@ void PVStructure::deserialize(ByteBuffer *pbuffer,
         DeserializableControl *pcontrol, BitSet *pbitSet) {
     size_t offset = getFieldOffset();
     size_t numberFields = getNumberFields();
-    int32 next = pbitSet->nextSetBit(offset);
+    int32 next = pbitSet->nextSetBit(static_cast<uint32>(offset));
 
     // no more changes or no changes in this structure
     if(next<0||next>=static_cast<int32>(offset+numberFields)) return;
@@ -695,8 +695,8 @@ void PVStructure::deserialize(ByteBuffer *pbuffer,
     for(size_t i = 0; i<fieldsSize; i++) {
         PVFieldPtr pvField = pvFields[i];
         offset = pvField->getFieldOffset();
-        int32 inumberFields = pvField->getNumberFields();
-        next = pbitSet->nextSetBit(offset);
+        int32 inumberFields = static_cast<int32>(pvField->getNumberFields());
+        next = pbitSet->nextSetBit(static_cast<uint32>(offset));
         // no more changes
         if(next<0) return;
         //  no change in this pvField

@@ -10,11 +10,12 @@
 #include <epicsString.h>
 #include <epicsConvert.h>
 
+#define epicsExportSharedSymbols
 #include "typeCast.h"
 
 // need to use "long long" when sizeof(int)==sizeof(long)
-// TODO does not work on Darwin 10.6
-#if ULONG_MAX == 0xfffffffful
+//#if ULONG_MAX == 0xfffffffful
+#if ULONG_MAX != UINT_MAX
 #define NEED_LONGLONG
 #endif
 
@@ -138,7 +139,7 @@ epicsParseInt8(const char *str, epicsInt8 *to, int base, char **units)
     if (value < -0x80 || value > 0x7f)
         return S_stdlib_overflow;
 
-    *to = value;
+    *to = (epicsInt8)value;
     return 0;
 }
 
@@ -154,7 +155,7 @@ epicsParseUInt8(const char *str, epicsUInt8 *to, int base, char **units)
     if (value > 0xff && value <= ~0xffUL)
         return S_stdlib_overflow;
 
-    *to = value;
+    *to = (epicsUInt8)value;
     return 0;
 }
 
@@ -170,7 +171,7 @@ epicsParseInt16(const char *str, epicsInt16 *to, int base, char **units)
     if (value < -0x8000 || value > 0x7fff)
         return S_stdlib_overflow;
 
-    *to = value;
+    *to = (epicsInt16)value;
     return 0;
 }
 
@@ -186,7 +187,7 @@ epicsParseUInt16(const char *str, epicsUInt16 *to, int base, char **units)
     if (value > 0xffff && value <= ~0xffffUL)
         return S_stdlib_overflow;
 
-    *to = value;
+    *to = (epicsUInt16)value;
     return 0;
 }
 
@@ -204,7 +205,7 @@ epicsParseInt32(const char *str, epicsInt32 *to, int base, char **units)
         return S_stdlib_overflow;
 #endif
 
-    *to = value;
+    *to = (epicsInt32)value;
     return 0;
 }
 
@@ -222,7 +223,7 @@ epicsParseUInt32(const char *str, epicsUInt32 *to, int base, char **units)
         return S_stdlib_overflow;
 #endif
 
-    *to = value;
+    *to = (epicsUInt32)value;
     return 0;
 }
 
@@ -241,12 +242,12 @@ epicsParseFloat(const char *str, float *to, char **units)
     if (finite(value) && abs >= FLT_MAX)
         return S_stdlib_overflow;
 
-    *to = value;
+    *to = (float)value;
     return 0;
 }
 #endif
 
-#if defined(NEED_LONGLONG) && defined(__vxworks)
+#if defined(NEED_LONGLONG) && (defined(__vxworks) || defined (_WIN32))
 static
 long long strtoll(const char *ptr, char ** endp, int base)
 {

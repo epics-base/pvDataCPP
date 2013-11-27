@@ -7,6 +7,10 @@
 #ifndef SHAREDVECTOR_H
 #define SHAREDVECTOR_H
 
+#ifdef _WIN32
+#define NOMINMAX
+#endif
+
 #include <ostream>
 #include <algorithm>
 #include <stdexcept>
@@ -86,12 +90,19 @@ namespace detail {
         }
     public:
 
+#ifdef _WIN32
+        template<typename A>
+        shared_vector_base(A* v, size_t o, size_t c)
+            :m_data(v, detail::default_array_deleter<A*>())
+            ,m_offset(o), m_count(c), m_total(c)
+        {_null_input();}
+#else
         template<typename A>
         shared_vector_base(A v, size_t o, size_t c)
             :m_data(v, detail::default_array_deleter<A>())
             ,m_offset(o), m_count(c), m_total(c)
         {_null_input();}
-
+#endif
         shared_vector_base(const std::tr1::shared_ptr<E>& d, size_t o, size_t c)
             :m_data(d), m_offset(o), m_count(c), m_total(c)
         {_null_input();}

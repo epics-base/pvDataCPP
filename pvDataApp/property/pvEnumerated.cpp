@@ -98,7 +98,7 @@ int32 PVEnumerated::getNumberChoices()
     if(pvIndex.get()==NULL ) {
          throw std::logic_error(notAttached);
     }
-    return pvChoices->getLength();
+    return static_cast<int32>(pvChoices->getLength());
 }
 
 bool PVEnumerated:: setChoices(const StringArray & choices)

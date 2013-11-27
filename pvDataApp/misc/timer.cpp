@@ -7,11 +7,11 @@
 /**
  *  @author mrk
  */
-#include <stddef.h>
-#include <stdlib.h>
-#include <stddef.h>
-#include <string.h>
-#include <stdio.h>
+ 
+#ifdef _WIN32
+#define NOMINMAX
+#endif
+
 #include <stdexcept>
 
 #define epicsExportSharedSymbols

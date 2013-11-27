@@ -93,7 +93,7 @@ PVFieldPtr PVUnion::select(int32 index)
 	
 PVFieldPtr PVUnion::select(String const & fieldName)
 {
-    int32 index = variant ? -1 : unionPtr->getFieldIndex(fieldName);
+    int32 index = variant ? -1 : static_cast<int32>(unionPtr->getFieldIndex(fieldName));
 	if (index == -1)
         throw std::invalid_argument("no such fieldName");
 	return select(index);
@@ -175,7 +175,7 @@ void PVUnion::deserialize(ByteBuffer *pbuffer, DeserializableControl *pcontrol)
     }
     else
     {
-        selector = SerializeHelper::readSize(pbuffer, pcontrol);
+        selector = static_cast<int32>(SerializeHelper::readSize(pbuffer, pcontrol));
         if (selector != UNDEFINED_INDEX)
         {
             FieldConstPtr field = unionPtr->getField(selector);

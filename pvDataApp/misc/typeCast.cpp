@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <sstream>
 
+#define epicsExportSharedSymbols
 #include "typeCast.h"
 
 using epics::pvData::castUnsafe;

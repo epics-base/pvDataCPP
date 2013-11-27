@@ -52,7 +52,7 @@ void testBasicOperations() {
     testOk1(buff->getPosition()==16);
     testOk1(buff->getRemaining()==16);
 
-    float testFloat = 34.67;
+    float testFloat = 34.67f;
     buff->putFloat(testFloat);
     testOk1(buff->getPosition()==20);
     testOk1(buff->getRemaining()==12);

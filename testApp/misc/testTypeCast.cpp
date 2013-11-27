@@ -5,6 +5,10 @@
  */
 /* Author:  Michael Davidsaver */
 
+#ifdef _WIN32
+#define NOMINMAX
+#endif
+
 #include <fstream>
 #include <iostream>
 #include <algorithm>
@@ -298,12 +302,12 @@ try {
 
     testDiag("Float to int w/ round towards zero (aka truncation)");
 
-    TEST(int32_t, 2, float, 2.1);
-    TEST(int32_t, 2, float, 2.5);
-    TEST(int32_t, 2, float, 2.7);
-    TEST(int32_t, -2, float, -2.1);
-    TEST(int32_t, -2, float, -2.5);
-    TEST(int32_t, -2, float, -2.7);
+    TEST(int32_t, 2, float, 2.1f);
+    TEST(int32_t, 2, float, 2.5f);
+    TEST(int32_t, 2, float, 2.7f);
+    TEST(int32_t, -2, float, -2.1f);
+    TEST(int32_t, -2, float, -2.5f);
+    TEST(int32_t, -2, float, -2.7f);
 
     testDiag("String Printing/parsing");
 

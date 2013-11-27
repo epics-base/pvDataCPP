@@ -347,7 +347,7 @@ namespace epics { namespace pvData {
     
     void BitSet::deserialize(ByteBuffer* buffer, DeserializableControl* control) {
     
-        uint32 bytes = SerializeHelper::readSize(buffer, control);	// in bytes
+        uint32 bytes = static_cast<uint32>(SerializeHelper::readSize(buffer, control));	// in bytes
     
         wordsInUse = (bytes + 7) / 8;
         if (wordsInUse > wordsLength)

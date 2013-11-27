@@ -34,6 +34,9 @@
 #ifndef EPICSEXCEPTION_H_
 #define EPICSEXCEPTION_H_
 
+#ifdef _WIN32
+#pragma warning(disable: 4251)
+#endif
 
 #include <stdexcept>
 #include <string>
