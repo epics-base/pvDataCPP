@@ -14,8 +14,7 @@
 #include "typeCast.h"
 
 // need to use "long long" when sizeof(int)==sizeof(long)
-//#if ULONG_MAX == 0xfffffffful
-#if ULONG_MAX != UINT_MAX
+#if (ULONG_MAX == 0xfffffffful) || defined(_WIN32)
 #define NEED_LONGLONG
 #endif
 
