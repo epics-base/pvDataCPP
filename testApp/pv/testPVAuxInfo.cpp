@@ -42,7 +42,7 @@ static void printOffsets(PVStructurePtr pvStructure)
         (long unsigned)pvStructure->getNextFieldOffset(),
         (long unsigned)pvStructure->getNumberFields());
     PVFieldPtrArray fields = pvStructure->getPVFields();
-    int number = pvStructure->getStructure()->getNumberFields();
+    int number = (int)pvStructure->getStructure()->getNumberFields();
     for(int i=0; i<number; i++) {
         PVFieldPtr pvField = fields[i];
         if(pvField->getField()->getType()==structure) {

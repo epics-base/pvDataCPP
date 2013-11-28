@@ -35,7 +35,8 @@
 #define EPICSEXCEPTION_H_
 
 #ifdef _WIN32
-#pragma warning(disable: 4251)
+#pragma warning( push )
+#pragma warning(disable: 4275) // warning C4275: non dll-interface class used as base for dll-interface class (std::logic_error)
 #endif
 
 #include <stdexcept>
@@ -213,6 +214,10 @@ public:
 private:
     mutable std::string base_msg;
 };
+
+#ifdef _WIN32
+#pragma warning( pop )
+#endif
 
 #define THROW_BASE_EXCEPTION(msg) THROW_EXCEPTION2(::epics::pvData::BaseException, msg)
 #define THROW_BASE_EXCEPTION_CAUSE(msg, cause) THROW_EXCEPTION2(::epics::pvData::BaseException, msg)
