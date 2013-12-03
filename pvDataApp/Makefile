@@ -28,6 +28,7 @@ INC += typeCast.h
 INC += printer.h
 INC += sharedVector.h
 INC += templateMeta.h
+INC += current_function.h
 
 LIBSRCS += byteBuffer.cpp
 LIBSRCS += bitSet.cpp
