@@ -357,6 +357,7 @@ public:
     void reserve(size_t i) {
         if(this->unique() && i<=this->m_total)
             return;
+        size_t new_count = std::min(this->m_count, i);
         _E_non_const* temp=new _E_non_const[i];
         try{
             std::copy(begin(), end(), temp);
@@ -366,8 +367,8 @@ public:
             throw;
         }
         this->m_offset = 0;
+        this->m_count = new_count;
         this->m_total = i;
-        // m_count is unchanged
     }
 
     /** @brief Grow or shrink array
