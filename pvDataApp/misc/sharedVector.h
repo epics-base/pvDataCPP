@@ -360,7 +360,7 @@ public:
         size_t new_count = std::min(this->m_count, i);
         _E_non_const* temp=new _E_non_const[i];
         try{
-            std::copy(begin(), end(), temp);
+            std::copy(begin(), begin()+new_count, temp);
             this->m_data.reset(temp, detail::default_array_deleter<E*>());
         }catch(...){
             delete[] temp;
