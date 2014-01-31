@@ -14,7 +14,7 @@
 #include "typeCast.h"
 
 // need to use "long long" when sizeof(int)==sizeof(long)
-#if (ULONG_MAX == 0xfffffffful) || defined(_WIN32)
+#if (ULONG_MAX == 0xfffffffful) || defined(_WIN32) || defined(__rtems__)
 #define NEED_LONGLONG
 #endif
 

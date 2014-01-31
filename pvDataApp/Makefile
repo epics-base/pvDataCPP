@@ -108,5 +108,7 @@ LIBSRCS += monitor.cpp
 LIBRARY = pvData
 pvData_LIBS += Com
 
+USR_CXXFLAGS_RTEMS = -D__rtems__
+
 include $(TOP)/configure/RULES
 
