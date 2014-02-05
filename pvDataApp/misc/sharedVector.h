@@ -56,7 +56,8 @@ namespace detail {
         // allow specialization for all E to be friends
         template<typename E1> friend class shared_vector_base;
     protected:
-        std::tr1::shared_ptr<E> m_data;
+        // NOTE: Do no use m_data, since VxWorks has a 'm_data' macro defined
+        std::tr1::shared_ptr<E> m_sdata;
         //! Offset in the data array of first visible element
         size_t m_offset;
         //! Number of visible elements between m_offset and end of data
@@ -73,7 +74,7 @@ namespace detail {
 
         //! @brief Empty vector (not very interesting)
         shared_vector_base()
-            :m_data(), m_offset(0), m_count(0), m_total(0)
+            :m_sdata(), m_offset(0), m_count(0), m_total(0)
         {}
 
     protected:
@@ -81,7 +82,7 @@ namespace detail {
         // Ensure that offset and size are zero when we are constructed with NULL
         void _null_input()
         {
-            if(!m_data.get()) {
+            if(!m_sdata.get()) {
                 m_offset = m_total = m_count = 0;
             } else {
                 // ensure we won't have integer overflows later
@@ -93,28 +94,28 @@ namespace detail {
 #ifdef _WIN32
         template<typename A>
         shared_vector_base(A* v, size_t o, size_t c)
-            :m_data(v, detail::default_array_deleter<A*>())
+            :m_sdata(v, detail::default_array_deleter<A*>())
             ,m_offset(o), m_count(c), m_total(c)
         {_null_input();}
 #else
         template<typename A>
         shared_vector_base(A v, size_t o, size_t c)
-            :m_data(v, detail::default_array_deleter<A>())
+            :m_sdata(v, detail::default_array_deleter<A>())
             ,m_offset(o), m_count(c), m_total(c)
         {_null_input();}
 #endif
         shared_vector_base(const std::tr1::shared_ptr<E>& d, size_t o, size_t c)
-            :m_data(d), m_offset(o), m_count(c), m_total(c)
+            :m_sdata(d), m_offset(o), m_count(c), m_total(c)
         {_null_input();}
 
 
         template<typename A, typename B>
         shared_vector_base(A d, B b, size_t o, size_t c)
-            :m_data(d,b), m_offset(o), m_count(c), m_total(c)
+            :m_sdata(d,b), m_offset(o), m_count(c), m_total(c)
         {_null_input();}
 
         shared_vector_base(const shared_vector_base& O)
-            :m_data(O.m_data), m_offset(O.m_offset)
+            :m_sdata(O.m_sdata), m_offset(O.m_offset)
             ,m_count(O.m_count), m_total(O.m_total)
         {}
 
@@ -125,14 +126,14 @@ namespace detail {
         //! Should not be called directly.
         shared_vector_base(shared_vector_base<_E_non_const>& O,
                            _shared_vector_freeze_tag)
-            :m_data()
+            :m_sdata()
             ,m_offset(O.m_offset)
             ,m_count(O.m_count)
             ,m_total(O.m_total)
         {
             if(!O.unique())
                 throw std::runtime_error("Can't freeze non-unique vector");
-            m_data = O.m_data;
+            m_sdata = O.m_sdata;
             O.clear();
         }
 
@@ -140,13 +141,13 @@ namespace detail {
         //! Should not be called directly.
         shared_vector_base(shared_vector<const E>& O,
                            _shared_vector_thaw_tag)
-            :m_data()
+            :m_sdata()
             ,m_offset(O.m_offset)
             ,m_count(O.m_count)
             ,m_total(O.m_total)
         {
             O.make_unique();
-            m_data = std::tr1::const_pointer_cast<E>(O.m_data);
+            m_sdata = std::tr1::const_pointer_cast<E>(O.m_sdata);
             O.clear();
         }
 
@@ -154,7 +155,7 @@ namespace detail {
         shared_vector_base& operator=(const shared_vector_base& o)
         {
             if(&o!=this) {
-                m_data=o.m_data;
+                m_sdata=o.m_sdata;
                 m_offset=o.m_offset;
                 m_count=o.m_count;
                 m_total=o.m_total;
@@ -165,7 +166,7 @@ namespace detail {
         //! @brief Swap the contents of this vector with another
         void swap(shared_vector_base& o) {
             if(&o!=this) {
-                m_data.swap(o.m_data);
+                m_sdata.swap(o.m_sdata);
                 std::swap(m_count, o.m_count);
                 std::swap(m_offset, o.m_offset);
                 std::swap(m_total, o.m_total);
@@ -175,12 +176,12 @@ namespace detail {
         //! @brief Clear contents.
         //! size() becomes 0
         void clear() {
-            m_data.reset();
+            m_sdata.reset();
             m_offset = m_total = m_count = 0;
         }
 
         //! @brief Data is not shared?
-        bool unique() const {return !m_data || m_data.unique();}
+        bool unique() const {return !m_sdata || m_sdata.unique();}
 
 
         //! @brief Number of elements visible through this vector
@@ -222,7 +223,7 @@ namespace detail {
         }
 
         // Access to members.
-        const std::tr1::shared_ptr<E>& dataPtr() const { return m_data; }
+        const std::tr1::shared_ptr<E>& dataPtr() const { return m_sdata; }
         size_t dataOffset() const { return m_offset; }
         size_t dataCount() const { return m_count; }
         size_t dataTotal() const { return m_total; }
@@ -285,7 +286,7 @@ public:
     shared_vector(size_t c, param_type e)
         :base_t(new _E_non_const[c], 0, c)
     {
-        std::fill_n((_E_non_const*)this->m_data.get(), this->m_count, e);
+        std::fill_n((_E_non_const*)this->m_sdata.get(), this->m_count, e);
     }
 
     /** @brief Build vector from a raw pointer
@@ -361,7 +362,7 @@ public:
         _E_non_const* temp=new _E_non_const[i];
         try{
             std::copy(begin(), begin()+new_count, temp);
-            this->m_data.reset(temp, detail::default_array_deleter<E*>());
+            this->m_sdata.reset(temp, detail::default_array_deleter<E*>());
         }catch(...){
             delete[] temp;
             throw;
@@ -383,7 +384,7 @@ public:
             make_unique();
             return;
         }
-        if(this->m_data && this->m_data.unique()) {
+        if(this->m_sdata && this->m_sdata.unique()) {
             // we have data and exclusive ownership of it
             if(i<=this->m_total) {
                 // We have room to grow (or shrink)!
@@ -400,7 +401,7 @@ public:
             std::copy(begin(),
                       begin()+std::min(i,this->size()),
                       temp);
-            this->m_data.reset(temp, detail::default_array_deleter<pointer>());
+            this->m_sdata.reset(temp, detail::default_array_deleter<pointer>());
         }catch(...){
             delete[] temp;
             throw;
@@ -444,24 +445,24 @@ public:
             return;
         _E_non_const *d = new _E_non_const[this->m_total];
         try {
-            std::copy(this->m_data.get()+this->m_offset,
-                      this->m_data.get()+this->m_offset+this->m_count,
+            std::copy(this->m_sdata.get()+this->m_offset,
+                      this->m_sdata.get()+this->m_offset+this->m_count,
                       d);
         }catch(...){
             delete[] d;
             throw;
         }
-        this->m_data.reset(d, detail::default_array_deleter<E*>());
+        this->m_sdata.reset(d, detail::default_array_deleter<E*>());
         this->m_offset=0;
     }
 
 
     // STL iterators
 
-    iterator begin() const{return this->m_data.get()+this->m_offset;}
+    iterator begin() const{return this->m_sdata.get()+this->m_offset;}
     const_iterator cbegin() const{return begin();}
 
-    iterator end() const{return this->m_data.get()+this->m_offset+this->m_count;}
+    iterator end() const{return this->m_sdata.get()+this->m_offset+this->m_count;}
     const_iterator cend() const{return end();}
 
     reverse_iterator rbegin() const{return reverse_iterator(end());}
@@ -513,9 +514,9 @@ public:
 
     // data access
 
-    pointer data() const{return this->m_data.get()+this->m_offset;}
+    pointer data() const{return this->m_sdata.get()+this->m_offset;}
 
-    reference operator[](size_t i) const {return this->m_data.get()[this->m_offset+i];}
+    reference operator[](size_t i) const {return this->m_sdata.get()[this->m_offset+i];}
 
     reference at(size_t i) const
     {
@@ -591,7 +592,7 @@ public:
     size_t max_size() const{return (size_t)-1;}
 
     pointer data() const{
-        return (pointer)(((char*)this->m_data.get())+this->m_offset);
+        return (pointer)(((char*)this->m_sdata.get())+this->m_offset);
     }
 
     shared_vector& set_original_type(ScalarType t) { m_vtype=t; return *this; }

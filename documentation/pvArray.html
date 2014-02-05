@@ -1188,7 +1188,7 @@ It is like std::vector but provides two additional features
 <p>To support these two features a shared_vector keeps the following
 private data:
 <dl>
-   <dt>m_data</dt>
+   <dt>m_sdata</dt>
      <dd>This is a std::tr1::shared_ptr for the actual data array.
      </dd>
    <dt>m_offset</dt>
@@ -1197,9 +1197,9 @@ private data:
       <dd>This is the size, i. e. total number of elements, seen by the window.</dd>
    <dt>m_total</dt>
       <dd>This is the number of elements between offset and the end of the array referenced
-        by m_data.</dd>
+        by m_sdata.</dd>
 </dl>
-Note that only m_data is shared. Thus each shared_vector has it's own window.</p>
+Note that only m_sdata is shared. Thus each shared_vector has it's own window.</p>
 <p>The following subsections are organized as follows:
 <dl>
    <dt>shared_vector example</dt>
