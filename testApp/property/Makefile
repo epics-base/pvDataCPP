@@ -2,7 +2,7 @@ TOP=../..
 
 include $(TOP)/configure/CONFIG
 
-TESTPROD += testProperty
+TESTPROD_HOST += testProperty
 testProperty_SRCS += testProperty.cpp
 TESTS += testProperty
 
