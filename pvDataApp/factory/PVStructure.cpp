@@ -208,9 +208,6 @@ void PVStructure::removePVField(String const &fieldName)
 {
     PVFieldPtr pvField = getSubField(fieldName);
     if(pvField.get()==NULL) {
-        String message("removePVField ");
-        message +=  fieldName + " does not exist";
-        this->message(message, errorMessage);
         return;
     }
     size_t origLength = pvFields.size();
@@ -244,302 +241,72 @@ void PVStructure::removePVField(String const &fieldName)
 
 PVBooleanPtr PVStructure::getBooleanField(String const &fieldName)
 {
-    PVFieldPtr pvField = findSubField(fieldName,this);
-    if(pvField.get()==NULL) {
-        String message("fieldName ");
-        message +=  fieldName + " does not exist";
-        this->message(message, errorMessage);
-        return nullPVBoolean;
-    }
-    if(pvField->getField()->getType()==scalar) {
-        ScalarConstPtr pscalar = static_pointer_cast<const Scalar>(
-            pvField->getField());
-        if(pscalar->getScalarType()==pvBoolean) {
-            return std::tr1::static_pointer_cast<PVBoolean>(pvField);
-        }
-    }
-    String message("fieldName ");
-    message +=  fieldName + " does not have type boolean ";
-    this->message(message, errorMessage);
-    return nullPVBoolean;
+    return getSubField<PVBoolean>(fieldName);
 }
 
 PVBytePtr PVStructure::getByteField(String const &fieldName)
 {
-    PVFieldPtr pvField = findSubField(fieldName,this);
-    if(pvField.get()==NULL) {
-        String message("fieldName ");
-        message +=  fieldName + " does not exist";
-        this->message(message, errorMessage);
-        return nullPVByte;
-    }
-    if(pvField->getField()->getType()==scalar) {
-        ScalarConstPtr pscalar = static_pointer_cast<const Scalar>(
-            pvField->getField());
-        if(pscalar->getScalarType()==pvByte) {
-            return std::tr1::static_pointer_cast<PVByte>(pvField);
-        }
-    }
-    String message("fieldName ");
-    message +=  fieldName + " does not have type byte ";
-    this->message(message, errorMessage);
-    return nullPVByte;
+    return getSubField<PVByte>(fieldName);
 }
 
 PVShortPtr PVStructure::getShortField(String const &fieldName)
 {
-    PVFieldPtr pvField  = findSubField(fieldName,this);
-    if(pvField.get()==NULL) {
-        String message("fieldName ");
-        message +=  fieldName + " does not exist";
-        this->message(message, errorMessage);
-        return nullPVShort;
-    }
-    if(pvField->getField()->getType()==scalar) {
-        ScalarConstPtr pscalar = static_pointer_cast<const Scalar>(
-            pvField->getField());
-        if(pscalar->getScalarType()==pvShort) {
-            return std::tr1::static_pointer_cast<PVShort>(pvField);
-        }
-    }
-    String message("fieldName ");
-    message +=  fieldName + " does not have type short ";
-    this->message(message, errorMessage);
-    return nullPVShort;
+    return getSubField<PVShort>(fieldName);
 }
 
 PVIntPtr PVStructure::getIntField(String const &fieldName)
 {
-    PVFieldPtr pvField  = findSubField(fieldName,this);
-    if(pvField.get()==NULL) {
-        String message("fieldName ");
-        message +=  fieldName + " does not exist";
-        this->message(message, errorMessage);
-        return nullPVInt;
-    }
-    if(pvField->getField()->getType()==scalar) {
-        ScalarConstPtr pscalar = static_pointer_cast<const Scalar>(
-            pvField->getField());
-        if(pscalar->getScalarType()==pvInt) {
-            return std::tr1::static_pointer_cast<PVInt>(pvField);
-        }
-    }
-    String message("fieldName ");
-    message +=  fieldName + " does not have type int ";
-    this->message(message, errorMessage);
-    return nullPVInt;
+    return getSubField<PVInt>(fieldName);
 }
 
 PVLongPtr PVStructure::getLongField(String const &fieldName)
 {
-    PVFieldPtr pvField  = findSubField(fieldName,this);
-    if(pvField.get()==NULL) {
-        String message("fieldName ");
-        message +=  fieldName + " does not exist";
-        this->message(message, errorMessage);
-        return nullPVLong;
-    }
-    if(pvField->getField()->getType()==scalar) {
-        ScalarConstPtr pscalar = static_pointer_cast<const Scalar>(
-            pvField->getField());
-        if(pscalar->getScalarType()==pvLong) {
-            return std::tr1::static_pointer_cast<PVLong>(pvField);
-        }
-    }
-    String message("fieldName ");
-    message +=  fieldName + " does not have type long ";
-    this->message(message, errorMessage);
-    return nullPVLong;
+    return getSubField<PVLong>(fieldName);
 }
 
 PVUBytePtr PVStructure::getUByteField(String const &fieldName)
 {
-    PVFieldPtr pvField  = findSubField(fieldName,this);
-    if(pvField.get()==NULL) {
-        String message("fieldName ");
-        message +=  fieldName + " does not exist";
-        this->message(message, errorMessage);
-        return nullPVUByte;
-    }
-    if(pvField->getField()->getType()==scalar) {
-        ScalarConstPtr pscalar = static_pointer_cast<const Scalar>(
-            pvField->getField());
-        if(pscalar->getScalarType()==pvUByte) {
-            return std::tr1::static_pointer_cast<PVUByte>(pvField);
-        }
-    }
-    String message("fieldName ");
-    message +=  fieldName + " does not have type byte ";
-    this->message(message, errorMessage);
-    return nullPVUByte;
+    return getSubField<PVUByte>(fieldName);
 }
 
 PVUShortPtr PVStructure::getUShortField(String const &fieldName)
 {
-    PVFieldPtr pvField  = findSubField(fieldName,this);
-    if(pvField.get()==NULL) {
-        String message("fieldName ");
-        message +=  fieldName + " does not exist";
-        this->message(message, errorMessage);
-        return nullPVUShort;
-    }
-    if(pvField->getField()->getType()==scalar) {
-        ScalarConstPtr pscalar = static_pointer_cast<const Scalar>(
-            pvField->getField());
-        if(pscalar->getScalarType()==pvUShort) {
-            return std::tr1::static_pointer_cast<PVUShort>(pvField);
-        }
-    }
-    String message("fieldName ");
-    message +=  fieldName + " does not have type short ";
-    this->message(message, errorMessage);
-    return nullPVUShort;
+    return getSubField<PVUShort>(fieldName);
 }
 
 PVUIntPtr PVStructure::getUIntField(String const &fieldName)
 {
-    PVFieldPtr pvField  = findSubField(fieldName,this);
-    if(pvField.get()==NULL) {
-        String message("fieldName ");
-        message +=  fieldName + " does not exist";
-        this->message(message, errorMessage);
-        return nullPVUInt;
-    }
-    if(pvField->getField()->getType()==scalar) {
-        ScalarConstPtr pscalar = static_pointer_cast<const Scalar>(
-            pvField->getField());
-        if(pscalar->getScalarType()==pvUInt) {
-            return std::tr1::static_pointer_cast<PVUInt>(pvField);
-        }
-    }
-    String message("fieldName ");
-    message +=  fieldName + " does not have type int ";
-    this->message(message, errorMessage);
-    return nullPVUInt;
+    return getSubField<PVUInt>(fieldName);
 }
 
 PVULongPtr PVStructure::getULongField(String const &fieldName)
 {
-    PVFieldPtr pvField  = findSubField(fieldName,this);
-    if(pvField.get()==NULL) {
-        String message("fieldName ");
-        message +=  fieldName + " does not exist";
-        this->message(message, errorMessage);
-        return nullPVULong;
-    }
-    if(pvField->getField()->getType()==scalar) {
-        ScalarConstPtr pscalar = static_pointer_cast<const Scalar>(
-            pvField->getField());
-        if(pscalar->getScalarType()==pvULong) {
-            return std::tr1::static_pointer_cast<PVULong>(pvField);
-        }
-    }
-    String message("fieldName ");
-    message +=  fieldName + " does not have type long ";
-    this->message(message, errorMessage);
-    return nullPVULong;
+    return getSubField<PVULong>(fieldName);
 }
 
 PVFloatPtr PVStructure::getFloatField(String const &fieldName)
 {
-    PVFieldPtr pvField  = findSubField(fieldName,this);
-    if(pvField.get()==NULL) {
-        String message("fieldName ");
-        message +=  fieldName + " does not exist";
-        this->message(message, errorMessage);
-        return nullPVFloat;
-    }
-    if(pvField->getField()->getType()==scalar) {
-        ScalarConstPtr pscalar = static_pointer_cast<const Scalar>(
-            pvField->getField());
-        if(pscalar->getScalarType()==pvFloat) {
-            return std::tr1::static_pointer_cast<PVFloat>(pvField);
-        }
-    }
-    String message("fieldName ");
-    message +=  fieldName + " does not have type float ";
-    this->message(message, errorMessage);
-    return nullPVFloat;
+    return getSubField<PVFloat>(fieldName);
 }
 
 PVDoublePtr PVStructure::getDoubleField(String const &fieldName)
 {
-    PVFieldPtr pvField  = findSubField(fieldName,this);
-    if(pvField.get()==NULL) {
-        String message("fieldName ");
-        message +=  fieldName + " does not exist";
-        this->message(message, errorMessage);
-        return nullPVDouble;
-    }
-    if(pvField->getField()->getType()==scalar) {
-        ScalarConstPtr pscalar = static_pointer_cast<const Scalar>(
-            pvField->getField());
-        if(pscalar->getScalarType()==pvDouble) {
-            return std::tr1::static_pointer_cast<PVDouble>(pvField);
-        }
-    }
-    String message("fieldName ");
-    message +=  fieldName + " does not have type double ";
-    this->message(message, errorMessage);
-    return nullPVDouble;
+    return getSubField<PVDouble>(fieldName);
 }
 
 PVStringPtr PVStructure::getStringField(String const &fieldName)
 {
-    PVFieldPtr pvField  = findSubField(fieldName,this);
-    if(pvField.get()==NULL) {
-        String message("fieldName ");
-        message +=  fieldName + " does not exist";
-        this->message(message, errorMessage);
-        return nullPVString;
-    }
-    if(pvField->getField()->getType()==scalar) {
-        ScalarConstPtr pscalar = static_pointer_cast<const Scalar>(
-            pvField->getField());
-        if(pscalar->getScalarType()==pvString) {
-            return std::tr1::static_pointer_cast<PVString>(pvField);
-        }
-    }
-    String message("fieldName ");
-    message +=  fieldName + " does not have type string ";
-    this->message(message, errorMessage);
-    return nullPVString;
+    return getSubField<PVString>(fieldName);
 }
 
 PVStructurePtr PVStructure::getStructureField(String const &fieldName)
 {
-    PVFieldPtr pvField  = findSubField(fieldName,this);
-    if(pvField.get()==NULL) {
-        String message("fieldName ");
-        message +=  fieldName + " does not exist";
-        this->message(message, errorMessage);
-        return nullPVStructure;
-    }
-    if(pvField->getField()->getType()==structure) {
-        return std::tr1::static_pointer_cast<PVStructure>(pvField);
-    }
-    String message("fieldName ");
-    message +=  fieldName + " does not have type structure ";
-    this->message(message, errorMessage);
-    return nullPVStructure;
+    return getSubField<PVStructure>(fieldName);
 }
 
 PVUnionPtr PVStructure::getUnionField(String const &fieldName)
 {
-    PVFieldPtr pvField  = findSubField(fieldName,this);
-    if(pvField.get()==NULL) {
-        String message("fieldName ");
-        message +=  fieldName + " does not exist";
-        this->message(message, errorMessage);
-        return nullPVUnion;
-    }
-    if(pvField->getField()->getType()==union_) {
-        return std::tr1::static_pointer_cast<PVUnion>(pvField);
-    }
-    String message("fieldName ");
-    message +=  fieldName + " does not have type union ";
-    this->message(message, errorMessage);
-    return nullPVUnion;
+    return getSubField<PVUnion>(fieldName);
 }
 
 PVScalarArrayPtr PVStructure::getScalarArrayField(
@@ -547,26 +314,16 @@ PVScalarArrayPtr PVStructure::getScalarArrayField(
 {
     PVFieldPtr pvField  = findSubField(fieldName,this);
     if(pvField.get()==NULL) {
-        String message("fieldName ");
-        message +=  fieldName + " does not exist";
-        this->message(message, errorMessage);
         return nullPVScalarArray;
     }
     FieldConstPtr field = pvField->getField();
     Type type = field->getType();
     if(type!=scalarArray) {
-        String message("fieldName ");
-        message +=  fieldName + " does not have type array ";
-        this->message(message, errorMessage);
         return nullPVScalarArray;
     }
     ScalarArrayConstPtr pscalarArray
         = static_pointer_cast<const ScalarArray>(pvField->getField());
     if(pscalarArray->getElementType()!=elementType) {
-        String message("fieldName ");
-        message +=  fieldName + " is array but does not have elementType ";
-        ScalarTypeFunc::toString(&message,elementType);
-        this->message(message, errorMessage);
         return nullPVScalarArray;
     }
     return std::tr1::static_pointer_cast<PVScalarArray>(pvField);
@@ -575,39 +332,13 @@ PVScalarArrayPtr PVStructure::getScalarArrayField(
 PVStructureArrayPtr PVStructure::getStructureArrayField(
     String const &fieldName)
 {
-    PVFieldPtr pvField  = findSubField(fieldName,this);
-    if(pvField.get()==NULL) {
-        String message("fieldName ");
-        message +=  fieldName + " does not exist";
-        this->message(message, errorMessage);
-        return nullPVStructureArray;
-    }
-    if(pvField->getField()->getType()==structureArray) {
-        return std::tr1::static_pointer_cast<PVStructureArray>(pvField);
-    }
-    String message("fieldName ");
-    message +=  fieldName + " does not have type structureArray ";
-    this->message(message, errorMessage);
-    return nullPVStructureArray;
+    return getSubField<PVStructureArray>(fieldName);
 }
 
 PVUnionArrayPtr PVStructure::getUnionArrayField(
     String const &fieldName)
 {
-    PVFieldPtr pvField  = findSubField(fieldName,this);
-    if(pvField.get()==NULL) {
-        String message("fieldName ");
-        message +=  fieldName + " does not exist";
-        this->message(message, errorMessage);
-        return nullPVUnionArray;
-    }
-    if(pvField->getField()->getType()==unionArray) {
-        return std::tr1::static_pointer_cast<PVUnionArray>(pvField);
-    }
-    String message("fieldName ");
-    message +=  fieldName + " does not have type unionArray ";
-    this->message(message, errorMessage);
-    return nullPVUnionArray;
+    return getSubField<PVUnionArray>(fieldName);
 }
 
 String PVStructure::getExtendsStructureName() const

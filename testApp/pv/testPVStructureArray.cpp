@@ -144,6 +144,19 @@ static void testRemove()
     testOk1(scont[3]==check[2]);
 }
 
+static void testFromRaw()
+{
+    testDiag("Test structure array external allocation for shared_vector");
+
+    PVStructurePtr* raw = new PVStructurePtr[4];
+    raw[0] = pvDataCreate->createPVStructure(standardField->alarm());
+    raw[1] = pvDataCreate->createPVStructure(standardField->alarm());
+    raw[2] = pvDataCreate->createPVStructure(standardField->alarm());
+    raw[3] = pvDataCreate->createPVStructure(standardField->alarm());
+
+    PVStructureArray::svector cont(raw, 1, 2);
+}
+
 MAIN(testPVStructureArray)
 {
     testPlan(0);
@@ -155,5 +168,6 @@ MAIN(testPVStructureArray)
     testBasic();
     testCompress();
     testRemove();
+    testFromRaw();
     return testDone();
 }
