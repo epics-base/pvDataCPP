@@ -367,8 +367,6 @@ void DefaultPVArray<T>::serialize(ByteBuffer *pbuffer,
         cur += n2send;
         count -= n2send;
     }
-
-    pflusher->flushSerializeBuffer();
 }
 
 // specializations for String
