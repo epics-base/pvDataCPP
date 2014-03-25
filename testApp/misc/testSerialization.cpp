@@ -307,8 +307,6 @@ void testScalar() {
 template<typename PVT>
 void testArrayType(const typename PVT::value_type* rdata, size_t len)
 {
-    typedef typename PVT::value_type value_type;
-
     typename PVT::svector empty(0), data(len);
 
     std::copy(rdata, rdata+len, data.begin());
