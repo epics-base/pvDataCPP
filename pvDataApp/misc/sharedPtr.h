@@ -77,6 +77,6 @@
     typedef std::tr1::shared_ptr<clazz> shared_pointer; \
     typedef std::tr1::shared_ptr<const clazz> const_shared_pointer; \
     typedef std::tr1::weak_ptr<clazz> weak_pointer; \
-    typedef std::tr1::weak_ptr<const clazz> const_weak_pointer;
+    typedef std::tr1::weak_ptr<const clazz> const_weak_pointer
 
 #endif // SHAREDPTR_H
