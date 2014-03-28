@@ -1,6 +1,6 @@
 # This is a Makefile fragment, see ../Makefile
 
-SRC_DIRS += $(PVDATAAPP)/factory
+SRC_DIRS += $(PVDATASRC)/factory
 
 INC += factory.h
 LIBSRCS += TypeFunc.cpp

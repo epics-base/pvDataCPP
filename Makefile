@@ -5,10 +5,10 @@ include $(TOP)/configure/CONFIG
 
 DIRS += configure
 
-DIRS += pvDataApp
+DIRS += src
 pvDataApp_DEPEND_DIRS = configure
 
 DIRS += testApp
-testApp_DEPEND_DIRS = pvDataApp
+testApp_DEPEND_DIRS = src
 
 include $(TOP)/configure/RULES_TOP

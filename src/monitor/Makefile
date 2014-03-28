@@ -1,6 +1,6 @@
 # This is a Makefile fragment, see ../Makefile
 
-SRC_DIRS += $(PVDATAAPP)/monitor
+SRC_DIRS += $(PVDATASRC)/monitor
 
 INC += monitor.h
 

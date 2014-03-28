@@ -1,6 +1,6 @@
 # This is a Makefile fragment, see ../Makefile
 
-SRC_DIRS += $(PVDATAAPP)/pvMisc
+SRC_DIRS += $(PVDATASRC)/pvMisc
 
 INC += bitSetUtil.h
 
