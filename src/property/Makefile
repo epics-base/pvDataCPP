@@ -1,6 +1,6 @@
 # This is a Makefile fragment, see ../Makefile
 
-SRC_DIRS += $(PVDATASRC)/property
+SRC_DIRS += $(PVDATA_SRC)/property
 
 INC += alarm.h
 INC += pvAlarm.h

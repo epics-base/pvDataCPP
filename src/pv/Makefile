@@ -1,6 +1,6 @@
 # This is a Makefile fragment, see ../Makefile
 
-SRC_DIRS += $(PVDATASRC)/pv
+SRC_DIRS += $(PVDATA_SRC)/pv
 
 INC += pvType.h
 INC += pvIntrospect.h

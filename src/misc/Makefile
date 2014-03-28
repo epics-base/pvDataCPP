@@ -1,6 +1,6 @@
 # This is a Makefile fragment, see ../Makefile
 
-SRC_DIRS += $(PVDATASRC)/misc
+SRC_DIRS += $(PVDATA_SRC)/misc
 
 INC += noDefaultMethods.h
 INC += lock.h

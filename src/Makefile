@@ -3,14 +3,14 @@
 TOP = ..
 include $(TOP)/configure/CONFIG
 
-PVDATASRC = $(TOP)/src
+PVDATA_SRC = $(TOP)/src
 
-include $(PVDATASRC)/misc/Makefile
-include $(PVDATASRC)/pv/Makefile
-include $(PVDATASRC)/factory/Makefile
-include $(PVDATASRC)/property/Makefile
-include $(PVDATASRC)/pvMisc/Makefile
-include $(PVDATASRC)/monitor/Makefile
+include $(PVDATA_SRC)/misc/Makefile
+include $(PVDATA_SRC)/pv/Makefile
+include $(PVDATA_SRC)/factory/Makefile
+include $(PVDATA_SRC)/property/Makefile
+include $(PVDATA_SRC)/pvMisc/Makefile
+include $(PVDATA_SRC)/monitor/Makefile
 
 LIBRARY = pvData
 pvData_LIBS += Com

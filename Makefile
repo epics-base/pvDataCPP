@@ -6,7 +6,7 @@ include $(TOP)/configure/CONFIG
 DIRS += configure
 
 DIRS += src
-pvDataApp_DEPEND_DIRS = configure
+src_DEPEND_DIRS = configure
 
 DIRS += testApp
 testApp_DEPEND_DIRS = src
