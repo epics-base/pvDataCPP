@@ -814,6 +814,11 @@ public:
     StructureArrayConstPtr createStructureArray(StructureConstPtr const & structure) const;
     /**
      * Create a {@code Structure} field.
+     * @return a {@code Structure} interface for the newly created object.
+     */
+    StructureConstPtr createStructure () const;
+    /**
+     * Create a {@code Structure} field.
      * @param fieldNames The array of {@code fieldNames} for the structure.
      * @param fields The array of {@code fields} for the structure.
      * @return a {@code Structure} interface for the newly created object.

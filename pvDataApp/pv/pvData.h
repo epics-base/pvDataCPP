@@ -14,14 +14,6 @@
 #define NOMINMAX
 #endif
 
-#if defined(__GNUC__) && !(defined(__vxworks) && !defined(_WRS_VXWORKS_MAJOR))
-#define USAGE_DEPRECATED __attribute__((deprecated))
-#define USAGE_ERROR(MSG) __attribute__((error(MSG)))
-#else
-#define USAGE_DEPRECATED
-#define USAGE_ERROR(MSG) { throw std::runtime_error(MSG); }
-#endif
-
 #include <string>
 #include <map>
 #include <stdexcept>
@@ -31,7 +23,6 @@
 #include <iomanip>
 
 #include <pv/pvIntrospect.h>
-#include <pv/requester.h>
 #include <pv/typeCast.h>
 #include <pv/sharedVector.h>
 
@@ -106,7 +97,6 @@ epicsShareExtern array_at_internal operator<<(std::ostream& str, array_at const&
 };
 
 
-class PVAuxInfo;
 class PostHandler;
 
 class PVField;
@@ -123,11 +113,6 @@ class PVUnion;
 template<typename T> class PVScalarValue;
 template<typename T> class PVValueArray;
 
-
-/**
- * typedef for a pointer to a PVAuxInfo.
- */
-typedef std::tr1::shared_ptr<PVAuxInfo> PVAuxInfoPtr;
 
 /**
  * typedef for a pointer to a PostHandler.
@@ -199,67 +184,6 @@ class PVDataCreate;
 typedef std::tr1::shared_ptr<PVDataCreate> PVDataCreatePtr;
 
 /**
- * This class provides auxillary information about a PVField.
- * Each item is stored as a PVScalar.
- * A (key,value) is provided for accessing the items where the key is a String.
- */
-class epicsShareClass PVAuxInfo : private NoDefaultMethods {
-public:
-    typedef std::map<String,PVScalarPtr> PVInfoMap;
-    typedef std::map<String,PVScalarPtr>::iterator PVInfoIter;
-    typedef std::pair<String,PVScalarPtr> PVInfoPair;
-
-    /**
-     * Constructor
-     * @param The fields to which the Auxinfo is attached.
-     */
-    PVAuxInfo(PVField *pvField);
-    /**
-     * Destructor
-     */
-    ~PVAuxInfo();
-    /**
-     * Get the PVField to which the Auxinfo is attached.
-     * @return The fields to which the Auxinfo is attached.
-     */
-    PVField * getPVField();
-    /**
-     * Add a new auxiliary item or retrieve the interface to an existing item. 
-     *
-     * @param key The key.
-     * @param scalarType The scalarType for the new item being added/
-     * @return The new PVScalar that has been added to the Auxinfo.
-     */
-    PVScalarPtr createInfo(String const & key,ScalarType scalarType);
-    /**
-     * Get the Auxinfo with the specified key.
-     * @return The PVScalar or null if it does not exist.
-     */
-    PVScalarPtr getInfo(String const & key);
-    /**
-     * Get the map for the info.
-     * @return The map;
-     */
-    PVInfoMap & getInfoMap();
-    /**
-     * Convert the Auxinfo to a string and add it to builder.
-     * @param  builder The string builder.
-     */
-    void toString(StringBuilder buf);
-    /**
-     * Convert the Auxinfo to a string and add it to builder.
-     * @param  builder The string builder.
-     * @param  indentLevel The number of blanks at the beginning of new lines.
-     */
-    void toString(StringBuilder buf,int indentLevel);
-private:
-    PVScalarPtr nullPVScalar;
-    PVField * pvField;
-    PVInfoMap pvInfos;
-    friend class PVDataCreate;
-};
-
-/**
  * This class is implemented by code that calls setPostHander
  */
 class epicsShareClass PostHandler 
@@ -295,12 +219,6 @@ public:
      */
     virtual ~PVField();
     /**
-     * Called to report errors associated with the field.
-     * @param message The message.
-     * @param messageType The message type.
-     */
-    virtual void message(String message,MessageType messageType) ;
-    /**
      * Get the fieldName for this field.
      * @return The name or empty string if top level field.
      */
@@ -311,12 +229,6 @@ public:
      * each name.
      */
     String getFullName() const;
-    /**
-     * Register the message requester.
-     * At most one requester can be registered.
-     * @param prequester The requester.
-     */
-    virtual void setRequester(RequesterPtr const &prequester);
     /**
      * Get offset of the PVField field within top level structure.
      * Every field within the PVStructure has a unique offset.
@@ -339,11 +251,6 @@ public:
      */
     std::size_t getNumberFields() const;
     /**
-     * Get the PVAuxInfo interface for the PVField.
-     * @return The PVAuxInfo interface.
-     */
-    PVAuxInfoPtr & getPVAuxInfo();
-    /**
      * Is the field immutable, i.e. does it not allow changes.
      * @return (false,true) if it (is not, is) immutable.
      */
@@ -363,16 +270,6 @@ public:
      * @return The parent interface or null if this is PVRecord
      */
     PVStructure * getParent() const ;
-    /**
-     * Replace the data implementation for the field.
-     * @param newPVField The new implementation
-     */
-    void replacePVField(const PVFieldPtr&  newPVField);
-    /**
-     * Rename the field name.
-     * @param newName The new name.
-     */
-    void renameField(String const & newName);
     /**
      * postPut. Called when the field is updated by the implementation.
      */
@@ -417,20 +314,16 @@ protected:
     }
     PVField(FieldConstPtr field);
     void setParentAndName(PVStructure *parent, String const & fieldName);
-    void replaceField(FieldConstPtr &field);
 private:
-    void message(String  message,MessageType messageType,String fullFieldName);
     static void computeOffset(const PVField *pvField);
     static void computeOffset(const PVField *pvField,std::size_t offset);
     String notImplemented;
-    PVAuxInfoPtr pvAuxInfo;
     String fieldName;
     PVStructure *parent;
     FieldConstPtr field;
     size_t fieldOffset;
     size_t nextFieldOffset;
     bool immutable;
-    RequesterPtr requester;
     PostHandlerPtr postHandler;
     friend class PVDataCreate;
     friend class PVStructure;
@@ -696,31 +589,6 @@ private:
 
 epicsShareExtern std::ostream& operator<<(format::array_at_internal const& manip, const PVArray& array);
 
-/**
- * Class provided by caller of get
- */
-template<typename T>
-class PVArrayData {
-private:
-    std::vector<T> init;
-public:
-    POINTER_DEFINITIONS(PVArrayData);
-    typedef T  value_type;
-    typedef T* pointer;
-    typedef const T* const_pointer;
-    /**
-     * The data array.
-     */
-    std::vector<T> & data;
-    /**
-     * The offset. This is the offset into the actual array of the first element in data,
-     */
-    std::size_t offset;
-    PVArrayData()
-    : data(init)
-    {}
-};
-
 
 /**
  * Base class for a scalarArray.
@@ -865,24 +733,6 @@ public:
     }
 
     /**
-     * Append a field to the structure.
-     * @param fieldName The name of the field to append.
-     * @param pvField The field to append.
-     */
-    void appendPVField(String const &fieldName,PVFieldPtr const & pvField);
-    /**
-     * Append fields to the structure.
-     * @param fieldNames The names of the fields to add.
-     * @param pvFields The fields to append.
-     * @return Pointer to the field or null if field does not exist.
-     */
-    void appendPVFields(StringArray const & fieldNames,PVFieldPtrArray const & pvFields);
-    /**
-     * Remove a field from the structure.
-     * @param fieldName The name of the field to remove.
-     */
-    void removePVField(String const &fieldName);
-    /**
      * Get a boolean field with the specified name.
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
@@ -988,17 +838,6 @@ public:
      */
     PVUnionArrayPtr getUnionArrayField(String const &fieldName) ;
     /**
-     * Get the name if this structure extends another structure.
-     * @return The string which may be null.
-     */
-    String getExtendsStructureName() const;
-    /**
-     * Put the extends name.
-     * @param extendsStructureName The name.
-     */
-    bool putExtendsStructureName(
-        String const &extendsStructureName);
-    /**
      * Serialize.
      * @param pbuffer The byte buffer.
      * @param pflusher Interface to call when buffer is full.
@@ -1043,7 +882,6 @@ public:
     virtual std::ostream& dumpValue(std::ostream& o) const;
 
 private:
-    void   fixParentStructure();
     static PVFieldPtr nullPVField;
     static PVBooleanPtr nullPVBoolean;
     static PVBytePtr nullPVByte;
@@ -1225,12 +1063,6 @@ namespace detail {
         typedef ::epics::pvData::shared_vector<T> svector;
         typedef ::epics::pvData::shared_vector<const T> const_svector;
 
-        // begin deprecated
-        typedef PVArrayData<T> ArrayDataType;
-        typedef std::vector<T> vector;
-        typedef const std::vector<T> const_vector;
-        typedef std::tr1::shared_ptr<vector> shared_vector;
-        // end deprecated
 
     protected:
         PVVectorStorage() : Base() {}
@@ -1279,79 +1111,6 @@ namespace detail {
             return thaw(result);
         }
 
-        /**
-         * Get array elements
-         * @param offset The offset of the first element,
-         * @param length The number of elements to get.
-         * @param data The place where the data is placed.
-         */
-        std::size_t get(
-             std::size_t offset, std::size_t length, ArrayDataType &data) USAGE_DEPRECATED
-        {
-            const_svector ref = this->view();
-            ref.slice(offset, length);
-            data.data.resize(ref.size());
-            data.offset = 0;
-            std::copy(ref.begin(), ref.end(), data.data.begin());
-            return ref.size();
-        }
-
-        /**
-         * Copy data into the array growing the length as needed.
-         * @param offset The offset of the first element,
-         * @param length The number of elements to get.
-         * @param from The new values to put into the array.
-         * @param fromOffset The offset in from.
-         * @return The number of elements put into the array.
-         * calls postPut()
-         */
-        std::size_t put(std::size_t offset,
-            std::size_t length, const_pointer from, std::size_t fromOffset) USAGE_DEPRECATED
-        {
-            from += fromOffset;
-
-            svector temp(this->reuse());
-            if(temp.size() < length+offset)
-                temp.resize(length+offset);
-            else
-                temp.make_unique();
-
-            std::copy(from, from + length, temp.begin() + offset);
-            this->replace(freeze(temp));
-            return length;
-        }
-
-        std::size_t put(std::size_t offset,
-            std::size_t length, const_vector &from, std::size_t fromOffset) USAGE_DEPRECATED
-        { return this->put(offset,length, &from[0], fromOffset); }
-
-        /**
-         * Share data from another source.
-         * @param value The data to share.
-         * @param capacity The capacity of the array.
-         * @param length The length of the array.
-         * Does @b not call postPut()
-         */
-        void shareData(
-             shared_vector const & value,
-             std::size_t capacity,
-             std::size_t length) USAGE_DEPRECATED
-        {
-            vector& vref = *value.get();
-            typename svector::shared_pointer_type p(&vref[0],
-                                                    detail::shared_ptr_vector_deletor<T>(value));
-            const_svector temp(p, 0, std::min(length, vref.size()));
-            this->swap(temp);
-        }
-
-        pointer get() const USAGE_DEPRECATED {
-            // evil unsafe cast!
-            return (pointer)this->view().data();
-        }
-
-        vector const & getVector() USAGE_ERROR("No longer implemented.  Replace with view()");
-        shared_vector const & getSharedVector() USAGE_ERROR("No longer implemented.  Replace with view()");
-
     };
 } // namespace detail
 
@@ -1368,14 +1127,6 @@ public:
     typedef ::epics::pvData::shared_vector<T> svector;
     typedef ::epics::pvData::shared_vector<const T> const_svector;
 
-    // begin deprecated
-    typedef PVArrayData<T> ArrayDataType;
-    typedef std::vector<T> vector;
-    typedef const std::vector<T> const_vector;
-    typedef std::tr1::shared_ptr<vector> shared_vector;
-    typedef PVValueArray & reference;
-    typedef const PVValueArray & const_reference;
-    // end deprecated
 
     static const ScalarType typeCode;
 
@@ -1421,10 +1172,6 @@ protected:
     friend class PVDataCreate;
 };
 
-/**
- * This is provided by code that calls get.
- */
-typedef PVArrayData<PVStructurePtr> StructureArrayData;
 
 /**
  * Data class for a structureArray
@@ -1438,10 +1185,6 @@ public:
     typedef PVStructurePtr  value_type;
     typedef PVStructurePtr* pointer;
     typedef const PVStructurePtr* const_pointer;
-    typedef PVArrayData<PVStructurePtr> ArrayDataType;
-    typedef std::vector<PVStructurePtr> vector;
-    typedef const std::vector<PVStructurePtr> const_vector;
-    typedef std::tr1::shared_ptr<vector> shared_vector;
     typedef PVStructureArray &reference;
     typedef const PVStructureArray& const_reference;
 
@@ -1519,10 +1262,6 @@ private:
 };
 
 
-/**
- * This is provided by code that calls get.
- */
-typedef PVArrayData<PVUnionPtr> UnionArrayData;
 
 /**
  * Data class for a unionArray
@@ -1536,10 +1275,6 @@ public:
     typedef PVUnionPtr  value_type;
     typedef PVUnionPtr* pointer;
     typedef const PVUnionPtr* const_pointer;
-    typedef PVArrayData<PVUnionPtr> ArrayDataType;
-    typedef std::vector<PVUnionPtr> vector;
-    typedef const std::vector<PVUnionPtr> const_vector;
-    typedef std::tr1::shared_ptr<vector> shared_vector;
     typedef PVUnionArray &reference;
     typedef const PVUnionArray& const_reference;
 
@@ -1620,51 +1355,39 @@ private:
 /**
  * Definitions for the various scalarArray types.
  */
-typedef PVArrayData<boolean> BooleanArrayData;
 typedef PVValueArray<boolean> PVBooleanArray;
 typedef std::tr1::shared_ptr<PVBooleanArray> PVBooleanArrayPtr;
 
-typedef PVArrayData<int8> ByteArrayData;
 typedef PVValueArray<int8> PVByteArray;
 typedef std::tr1::shared_ptr<PVByteArray> PVByteArrayPtr;
 
-typedef PVArrayData<int16> ShortArrayData;
 typedef PVValueArray<int16> PVShortArray;
 typedef std::tr1::shared_ptr<PVShortArray> PVShortArrayPtr;
 
-typedef PVArrayData<int32> IntArrayData;
 typedef PVValueArray<int32> PVIntArray;
 typedef std::tr1::shared_ptr<PVIntArray> PVIntArrayPtr;
 
-typedef PVArrayData<int64> LongArrayData;
 typedef PVValueArray<int64> PVLongArray;
 typedef std::tr1::shared_ptr<PVLongArray> PVLongArrayPtr;
 
-typedef PVArrayData<uint8> UByteArrayData;
 typedef PVValueArray<uint8> PVUByteArray;
 typedef std::tr1::shared_ptr<PVUByteArray> PVUByteArrayPtr;
 
-typedef PVArrayData<uint16> UShortArrayData;
 typedef PVValueArray<uint16> PVUShortArray;
 typedef std::tr1::shared_ptr<PVUShortArray> PVUShortArrayPtr;
 
-typedef PVArrayData<uint32> UIntArrayData;
 typedef PVValueArray<uint32> PVUIntArray;
 typedef std::tr1::shared_ptr<PVUIntArray> PVUIntArrayPtr;
 
-typedef PVArrayData<uint64> ULongArrayData;
 typedef PVValueArray<uint64> PVULongArray;
 typedef std::tr1::shared_ptr<PVULongArray> PVULongArrayPtr;
 
-typedef PVArrayData<float> FloatArrayData;
 typedef PVValueArray<float> PVFloatArray;
 typedef std::tr1::shared_ptr<PVFloatArray> PVFloatArrayPtr;
 
-typedef PVArrayData<double> DoubleArrayData;
 typedef PVValueArray<double> PVDoubleArray;
 typedef std::tr1::shared_ptr<PVDoubleArray> PVDoubleArrayPtr;
 
-typedef PVArrayData<String> StringArrayData;
 typedef PVValueArray<String> PVStringArray;
 typedef std::tr1::shared_ptr<PVStringArray> PVStringArrayPtr;
 
@@ -1818,8 +1541,6 @@ private:
 
 epicsShareExtern PVDataCreatePtr getPVDataCreate();
 
-#undef USAGE_DEPRECATED
-#undef USAGE_ERROR
 
 }}
 #endif  /* PVDATA_H */

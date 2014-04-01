@@ -199,9 +199,6 @@ void PrinterPlain::beginStructure(const PVStructure& pv)
 {
     indentN(S(), ilvl);
     S() << pv.getStructure()->getID() << " " << pv.getFieldName();
-    String ename(pv.getExtendsStructureName());
-    if(!ename.empty())
-        S() << " extends " << ename;
     S() << std::endl;
     ilvl++;
 }

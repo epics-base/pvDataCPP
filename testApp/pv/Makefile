@@ -12,20 +12,10 @@ testIntrospect_SRCS += testIntrospect.cpp
 testIntrospect_LIBS += pvData Com
 TESTS += testIntrospect
 
-PROD_HOST += testPVAppend
-testPVAppend_SRCS += testPVAppend.cpp
-testPVAppend_LIBS += pvData Com
-TESTS += testPVAppend
-
 PROD_HOST += testPVType
 testPVType_SRCS += testPVType.cpp
 testPVType_LIBS += pvData Com
 TESTS += testPVType
-
-PROD_HOST += testPVAuxInfo
-testPVAuxInfo_SRCS += testPVAuxInfo.cpp
-testPVAuxInfo_LIBS += pvData Com
-TESTS += testPVAuxInfo
 
 PROD_HOST += testStandardField
 testStandardField_SRCS += testStandardField.cpp

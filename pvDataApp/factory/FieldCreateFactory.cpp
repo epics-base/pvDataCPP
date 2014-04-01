@@ -781,6 +781,13 @@ ScalarArrayConstPtr FieldCreate::createScalarArray(ScalarType elementType) const
     return scalarArrays[elementType];
 }
 
+StructureConstPtr FieldCreate::createStructure () const
+{
+      StringArray fieldNames;
+      FieldConstPtrArray fields;
+      return createStructure(fieldNames,fields);
+}
+
 StructureConstPtr FieldCreate::createStructure (
     StringArray const & fieldNames,FieldConstPtrArray const & fields) const
 {

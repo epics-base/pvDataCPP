@@ -60,7 +60,6 @@ SRC_DIRS += $(PVDATA)/factory
 INC += factory.h
 LIBSRCS += TypeFunc.cpp
 LIBSRCS += FieldCreateFactory.cpp
-LIBSRCS += PVAuxInfoImpl.cpp
 LIBSRCS += PVField.cpp
 LIBSRCS += PVScalar.cpp
 LIBSRCS += PVArray.cpp
@@ -96,6 +95,14 @@ LIBSRCS += pvDisplay.cpp
 LIBSRCS += pvEnumerated.cpp 
 LIBSRCS += timeStamp.cpp
 LIBSRCS += pvTimeStamp.cpp
+
+
+SRC_DIRS += $(PVDATA)/copy
+INC += createRequest.h
+INC += pvCopy.h
+LIBSRCS += createRequest.cpp
+LIBSRCS += pvCopy.cpp
+
 
 SRC_DIRS += $(PVDATA)/pvMisc
 INC += bitSetUtil.h

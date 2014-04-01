@@ -25,20 +25,13 @@ String PVControl::notAttached("Not attached to an control structure");
 
 bool PVControl::attach(PVFieldPtr const & pvField)
 {
-    if(pvField->getField()->getType()!=structure) {
-            pvField->message(noControlFound,errorMessage);
-            return false;
-    }
+    if(pvField->getField()->getType()!=structure) return false;
     PVStructurePtr pvStructure = static_pointer_cast<PVStructure>(pvField);
     pvLow = pvStructure->getDoubleField("limitLow");
-    if(pvLow.get()==NULL) {
-        pvField->message(noControlFound,errorMessage);
-        return false;
-    }
+    if(pvLow.get()==NULL) return false;
     pvHigh = pvStructure->getDoubleField(String("limitHigh"));
     if(pvHigh.get()==NULL) {
         pvLow.reset();
-        pvField->message(noControlFound,errorMessage);
         return false;
     }
     return true;

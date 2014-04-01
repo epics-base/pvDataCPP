@@ -25,21 +25,14 @@ String PVEnumerated::notAttached("Not attached to an enumerated structure");
 
 bool PVEnumerated::attach(PVFieldPtr const & pvField)
 {
-    if(pvField->getField()->getType()!=structure) {
-            pvField->message(notFound,errorMessage);
-            return false;
-    }
+    if(pvField->getField()->getType()!=structure) return false;
     PVStructurePtr pvStructure = static_pointer_cast<PVStructure>(pvField);
     pvIndex = pvStructure->getIntField("index");
-    if(pvIndex.get()==NULL) {
-        pvField->message(notFound,errorMessage);
-        return false;
-    }
+    if(pvIndex.get()==NULL) return false;
     PVScalarArrayPtr pvScalarArray = pvStructure->getScalarArrayField(
         "choices",pvString);
     if(pvScalarArray.get()==NULL) {
         pvIndex.reset();
-        pvField->message(notFound,errorMessage);
         return false;
     }
     pvChoices = static_pointer_cast<PVStringArray>(pvScalarArray);
