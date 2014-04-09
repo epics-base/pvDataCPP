@@ -308,15 +308,8 @@ void DefaultPVArray<T>::deserialize(ByteBuffer *pbuffer,
         const size_t available = have_bytes/sizeof(T);
 
         if(available == 0) {
-            size_t want = sizeof(T);
-            if(remaining==1 && sizeof(T)>1) {
-                // Need to wait for the last few bytes
-                // of the final element.
-                // available==0 implies have_bytes<sizeof(T)
-                want = sizeof(T) - have_bytes;
-            }
-            // recv() at least one element, or remaining buffer
-            pcontrol->ensureData(want);
+            // get at least one element
+            pcontrol->ensureData(sizeof(T));
             continue;
         }
 
