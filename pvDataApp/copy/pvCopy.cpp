@@ -127,9 +127,9 @@ PVStructurePtr PVCopy::createPVStructure()
     return pvStructure;
 }
 
-PVStructurePtr PVCopy::getOptions(
-    PVStructurePtr const &copyPVStructure,std::size_t fieldOffset)
+PVStructurePtr PVCopy::getOptions(std::size_t fieldOffset)
 {
+    if(fieldOffset==0) return headNode->options;
     CopyNodePtr node = headNode;
     while(true) {
         if(!node->isStructure) {
@@ -158,6 +158,7 @@ PVStructurePtr PVCopy::getOptions(
 
 size_t PVCopy::getCopyOffset(PVFieldPtr const &masterPVField)
 {
+    if(masterPVField->getFieldOffset()==0) return 0;
     if(!headNode->isStructure) {
         CopyMasterNodePtr masterNode = static_pointer_cast<CopyMasterNode>(headNode);
         if((masterNode->masterPVField.get())==masterPVField.get()) {

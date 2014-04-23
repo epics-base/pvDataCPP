@@ -413,11 +413,20 @@ pvTop->toString(&buffer);
 cout << buffer.c_str() << endl;
 cout << pvTop->dumpValue(cout) << endl;
 
+String subName("record._options.process");
+PVFieldPtr pvField = pvTop->getSubField(subName);
+String fieldName = pvField->getFieldName();
+String fullName = pvField->getFullName();
+cout << "fieldName " << fieldName << " fullName " << fullName << endl;
+
+    testOk1(fieldName.compare("process")==0);
+    testOk1(fullName.compare(subName)==0);
+
 }
 
 MAIN(testPVData)
 {
-    testPlan(187);
+    testPlan(189);
     fieldCreate = getFieldCreate();
     pvDataCreate = getPVDataCreate();
     standardField = getStandardField();

@@ -129,26 +129,12 @@ namespace format
 
 String PVField::getFullName() const
 {
-    size_t size=fieldName.size();
-
+    String ret(fieldName);
     for(PVField *fld=getParent(); fld; fld=fld->getParent())
     {
-        size+=fld->fieldName.size()+1;
+        if(fld->getFieldName().size()==0) break;
+        ret = fld->getFieldName() + '.' + ret;
     }
-
-    String ret(size, '.');
-    size_t pos=size - fieldName.size();
-
-    ret.replace(pos, String::npos, fieldName);
-
-    for(PVField *fld=getParent(); fld; fld=fld->getParent())
-    {
-        const String& nref = fld->fieldName;
-        assert(pos >= nref.size()+1);
-        pos -= nref.size()+1;
-        ret.replace(pos, String::npos, nref);
-    }
-    assert(pos==0);
     return ret;
 }
 

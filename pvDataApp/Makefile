@@ -109,8 +109,9 @@ INC += bitSetUtil.h
 LIBSRCS += bitSetUtil.cpp 
 
 SRC_DIRS += $(PVDATA)/monitor
-INC += monitor.h
+INC += monitorPlugin.h
 LIBSRCS += monitor.cpp
+LIBSRCS += monitorPlugin.cpp
 
 LIBRARY = pvData
 pvData_LIBS += Com

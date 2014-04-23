@@ -28,9 +28,16 @@
 
 namespace epics { namespace pvData {
 
+/**
+ * Class to create pvRequest structures to pass to pvAccess Channel methods.
+ */
 class epicsShareClass CreateRequest {
     public:
     POINTER_DEFINITIONS(CreateRequest);
+    /**
+     * Create s new instance of CreateRequest
+     * @returns A shared pointer to the new instance.
+     */
     static CreateRequest::shared_pointer create();
     virtual ~CreateRequest() {};
     /**
