@@ -45,11 +45,6 @@ doxygen
 # EPICS Test Harness tests
 make runtests
 
-# non-EPICS Test Harness tests
-for t in bin/linux-x86_64/test*; do
-$t
-done
-
 ###########################################
 # Create distribution
 
