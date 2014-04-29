@@ -1,12 +1,14 @@
-#Makefile at top of application tree
+# Makefile for the EPICS V4 pvData module
+
 TOP = .
 include $(TOP)/configure/CONFIG
+
 DIRS += configure
-DIRS += pvDataApp
-pvDataApp_DEPEND_DIRS = configure
+
+DIRS += src
+src_DEPEND_DIRS = configure
+
 DIRS += testApp
-testApp_DEPEND_DIRS = pvDataApp
+testApp_DEPEND_DIRS = src
 
 include $(TOP)/configure/RULES_TOP
-
-

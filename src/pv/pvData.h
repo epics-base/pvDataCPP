@@ -14,11 +14,10 @@
 #define NOMINMAX
 #endif
 
-#if defined(__GNUC__) && !(defined(__vxworks) && !defined(_WRS_VXWORKS_MAJOR))
-#define USAGE_DEPRECATED __attribute__((deprecated))
+#if defined(__GNUC__) && __GNUC__ >= 4 && __GNUC_MINOR__ >= 3
+/* error attribute was introduced in gcc 4.3.x */
 #define USAGE_ERROR(MSG) __attribute__((error(MSG)))
 #else
-#define USAGE_DEPRECATED
 #define USAGE_ERROR(MSG) { throw std::runtime_error(MSG); }
 #endif
 
@@ -36,6 +35,7 @@
 #include <pv/sharedVector.h>
 
 #include <shareLib.h>
+#include <compilerDependencies.h>
 
 #if defined(__vxworks) && !defined(_WRS_VXWORKS_MAJOR)
 typedef class std::ios std::ios_base;
@@ -1286,7 +1286,7 @@ namespace detail {
          * @param data The place where the data is placed.
          */
         std::size_t get(
-             std::size_t offset, std::size_t length, ArrayDataType &data) USAGE_DEPRECATED
+             std::size_t offset, std::size_t length, ArrayDataType &data) EPICS_DEPRECATED
         {
             const_svector ref = this->view();
             ref.slice(offset, length);
@@ -1306,7 +1306,7 @@ namespace detail {
          * calls postPut()
          */
         std::size_t put(std::size_t offset,
-            std::size_t length, const_pointer from, std::size_t fromOffset) USAGE_DEPRECATED
+            std::size_t length, const_pointer from, std::size_t fromOffset) EPICS_DEPRECATED
         {
             from += fromOffset;
 
@@ -1322,7 +1322,7 @@ namespace detail {
         }
 
         std::size_t put(std::size_t offset,
-            std::size_t length, const_vector &from, std::size_t fromOffset) USAGE_DEPRECATED
+            std::size_t length, const_vector &from, std::size_t fromOffset) EPICS_DEPRECATED
         { return this->put(offset,length, &from[0], fromOffset); }
 
         /**
@@ -1335,7 +1335,7 @@ namespace detail {
         void shareData(
              shared_vector const & value,
              std::size_t capacity,
-             std::size_t length) USAGE_DEPRECATED
+             std::size_t length) EPICS_DEPRECATED
         {
             vector& vref = *value.get();
             typename svector::shared_pointer_type p(&vref[0],
@@ -1344,7 +1344,7 @@ namespace detail {
             this->swap(temp);
         }
 
-        pointer get() const USAGE_DEPRECATED {
+        pointer get() const EPICS_DEPRECATED {
             // evil unsafe cast!
             return (pointer)this->view().data();
         }
@@ -1818,7 +1818,6 @@ private:
 
 epicsShareExtern PVDataCreatePtr getPVDataCreate();
 
-#undef USAGE_DEPRECATED
 #undef USAGE_ERROR
 
 }}
