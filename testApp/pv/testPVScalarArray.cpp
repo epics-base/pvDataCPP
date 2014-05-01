@@ -26,6 +26,8 @@
 
 using namespace epics::pvData;
 using std::tr1::static_pointer_cast;
+using std::cout;
+using std::endl;
 
 namespace {
 

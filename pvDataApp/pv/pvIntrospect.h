@@ -500,8 +500,6 @@ public:
      * @return The array of fieldNames.
      */
     StringArray const & getFieldNames() const {return fieldNames;}
-    void renameField(std::size_t fieldIndex,String const & newName)
-        {fieldNames[fieldIndex] = newName;}
     /**
      * Get the name of the field with the specified index;
      * @param fieldIndex The index of the desired field.
@@ -595,8 +593,6 @@ public:
      * @return The array of fieldNames.
      */
     StringArray const & getFieldNames() const {return fieldNames;}
-    void renameField(std::size_t fieldIndex,String const & newName)
-        {fieldNames[fieldIndex] = newName;}
     /**
      * Get the name of the field with the specified index;
      * @param fieldIndex The index of the desired field.
@@ -637,9 +633,6 @@ private:
    friend class Structure;
 };
 
-/**
- * This is a singlton class for creating introspection interfaces.
- */
 class FieldCreate;
 typedef std::tr1::shared_ptr<FieldCreate> FieldCreatePtr;
 
@@ -784,6 +777,9 @@ private:
    
 };
 
+/**
+ * This is a singleton class for creating introspection interfaces.
+ */
 class epicsShareClass FieldCreate {
 public:
     static FieldCreatePtr getFieldCreate();

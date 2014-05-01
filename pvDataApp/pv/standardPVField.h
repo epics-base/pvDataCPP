@@ -20,6 +20,10 @@
 #include <shareLib.h>
 
 namespace epics { namespace pvData { 
+
+class StandardPVField;
+typedef std::tr1::shared_ptr<StandardPVField> StandardPVFieldPtr;
+
 /**
  * StandardPVField is a class or creating standard data fields.
  * Like class StandardField it has two forms of the methods which create a fields:
@@ -31,18 +35,60 @@ namespace epics { namespace pvData {
     StandardPVField *standardPVField = getStandardPVField();
  * }
  */
-
-class StandardPVField;
-typedef std::tr1::shared_ptr<StandardPVField> StandardPVFieldPtr;
-
 class epicsShareClass StandardPVField : private NoDefaultMethods {
 public:
+    /**
+     * getStandardPVField returns the singleton.
+     * @return Shared pointer to StandardPVField.
+     */
     static StandardPVFieldPtr getStandardPVField();
     ~StandardPVField();
+    /**
+     * Create a structure that has a scalar value field.
+     * @param type The type.
+     * @param properties A comma separated list of properties.
+     * This is some combination of "alarm,timeStamp,display,control,valueAlarm".
+     * @return The const shared pointer to the structure.
+     */
     PVStructurePtr scalar(ScalarType type,String const & properties);
+    /**
+     * Create a structure that has a scalar array value field.
+     * @param type The type.
+     * @param properties A comma separated list of properties.
+     * This is some combination of "alarm,timeStamp,display,control,valueAlarm".
+     * @return The const shared pointer to the structure.
+     */
     PVStructurePtr scalarArray(ScalarType elementType, String const & properties);
+    /**
+     * Create a structure that has a structure array value field.
+     * @param type The type.
+     * @param properties A comma separated list of properties.
+     * This is some combination of "alarm,timeStamp,display,control,valueAlarm".
+     * @return The const shared pointer to the structure.
+     */
     PVStructurePtr structureArray(StructureConstPtr const &structure,String const & properties);
+    /**
+     * Create a structure that has a union array value field.
+     * @param type The type.
+     * @param properties A comma separated list of properties.
+     * This is some combination of "alarm,timeStamp,display,control,valueAlarm".
+     * @return The const shared pointer to the structure.
+     */
+    PVStructurePtr unionArray(UnionConstPtr const &punion,String const & properties);
+    /**
+     * Create a structure that has an enumerated structure value field.
+     * The id for the structure is "enum_t".
+     * @param choices This is a StringArray of choices.
+     * @return The const shared pointer to the structure.
+     */
     PVStructurePtr enumerated(StringArray const &choices);
+    /**
+     * Create a structure that has an enumerated structure value field.
+     * The id for the structure is "uri:ev4:nt/2012/pwd:NTEnum".
+     * @param choices This is a StringArray of choices.
+     * @param properties A comma separated list of properties.
+     * @return The const shared pointer to the structure.
+     */
     PVStructurePtr enumerated(StringArray const &choices, String const & properties);
 private:
     StandardPVField();

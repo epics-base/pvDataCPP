@@ -18,7 +18,7 @@ getFieldCreate()->createFieldBuilder()->
     createStructure();
 
 // create a structure (cntd.)
-PVStructure::const_shared_pointer enum_t = 
+StructureConstPtr enum_t = 
     getFieldCreate()->createFieldBuilder()->
         setId("enum_t")->
         add("index", pvInt)->
@@ -26,7 +26,7 @@ PVStructure::const_shared_pointer enum_t =
         createStructure();
 
 // create a structure (cntd.)
-PVStructure::const_shared_pointer ntEnum = 
+StructureConstPtr ntEnum = 
     getFieldCreate()->createFieldBuilder()->
         setId("uri:ev4:nt/2012/pwd/NTEnum")->
         add("value", enum_t)->

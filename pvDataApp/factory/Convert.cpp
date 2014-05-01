@@ -50,9 +50,10 @@ void Convert::getString(StringBuilder buf,PVField const *pvField,int /*indentLev
 {
     // TODO indextLevel ignored
     std::ostringstream strm;
-    PrinterPlain p;
-    p.setStream(strm);
-    p.print(*pvField);
+    strm << pvField->dumpValue(strm) << std::endl;
+//    PrinterPlain p;
+//    p.setStream(strm);
+//    p.print(*pvField);
     strm.str().swap(*buf);
 }
 

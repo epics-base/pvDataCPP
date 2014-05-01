@@ -734,72 +734,84 @@ public:
 
     /**
      * Get a boolean field with the specified name.
+     * No longer needed. Use templete version of getSubField
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
     PVBooleanPtr getBooleanField(String const &fieldName) ;
     /**
      * Get a byte field with the specified name.
+     * No longer needed. Use templete version of getSubField
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
     PVBytePtr getByteField(String const &fieldName) ;
     /**
      * Get a short field with the specified name.
+     * No longer needed. Use templete version of getSubField
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
     PVShortPtr getShortField(String const &fieldName) ;
     /**
      * Get a int field with the specified name.
+     * No longer needed. Use templete version of getSubField
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
     PVIntPtr getIntField(String const &fieldName) ;
     /**
      * Get a long field with the specified name.
+     * No longer needed. Use templete version of getSubField
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
     PVLongPtr getLongField(String const &fieldName) ;
     /**
      * Get an unsigned byte field with the specified name.
+     * No longer needed. Use templete version of getSubField
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
     PVUBytePtr getUByteField(String const &fieldName) ;
     /**
      * Get an unsigned short field with the specified name.
+     * No longer needed. Use templete version of getSubField
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
     PVUShortPtr getUShortField(String const &fieldName) ;
     /**
      * Get an unsigned int field with the specified name.
+     * No longer needed. Use templete version of getSubField
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
     PVUIntPtr getUIntField(String const &fieldName) ;
     /**
      * Get an unsigned long field with the specified name.
+     * No longer needed. Use templete version of getSubField
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
     PVULongPtr getULongField(String const &fieldName) ;
     /**
      * Get a float field with the specified name.
+     * No longer needed. Use templete version of getSubField
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
     PVFloatPtr getFloatField(String const &fieldName) ;
     /**
      * Get a double field with the specified name.
+     * No longer needed. Use templete version of getSubField
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
     PVDoublePtr getDoubleField(String const &fieldName) ;
     /**
      * Get a string field with the specified name.
+     * No longer needed. Use templete version of getSubField
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
@@ -807,18 +819,21 @@ public:
     
     /**
      * Get a structure field with the specified name.
+     * No longer needed. Use templete version of getSubField
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
     PVStructurePtr getStructureField(String const &fieldName) ;
     /**
      * Get a union field with the specified name.
+     * No longer needed. Use templete version of getSubField
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
     PVUnionPtr getUnionField(String const &fieldName) ;
     /**
      * Get a scalarArray field with the specified name.
+     * No longer needed. Use templete version of getSubField
      * @param fieldName The name of the field to get.
      * @param elementType The element type.
      * @return Pointer to the field of null if a field with that name and type does not exist.
@@ -827,12 +842,14 @@ public:
         String const &fieldName,ScalarType elementType) ;
     /**
      * Get a structureArray field with the specified name.
+     * No longer needed. Use templete version of getSubField
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
     PVStructureArrayPtr getStructureArrayField(String const &fieldName) ;
     /**
      * Get a unionArray field with the specified name.
+     * No longer needed. Use templete version of getSubField
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
@@ -908,6 +925,9 @@ private:
 };
 
 
+/**
+ * PVUnion has a single subfield which has a type specified by a union introspection interface.
+ */
 class epicsShareClass PVUnion : public PVField
 {
 public:
@@ -1396,7 +1416,12 @@ typedef std::tr1::shared_ptr<PVStringArray> PVStringArrayPtr;
  */
 class epicsShareClass PVDataCreate {
 public:
+    /**
+     * get the singleton
+     * @return The PVDataCreate implementation
+     */
     static PVDataCreatePtr getPVDataCreate();
+
     /**
      * Create a PVField using given Field introspection data.
      * @param field The introspection data to be used to create PVField.
@@ -1430,6 +1455,56 @@ public:
      */
     PVScalarPtr createPVScalar(PVScalarPtr const & scalarToClone);
     /**
+     * template version
+     * @param PVT must ve a valid pvType
+     * @return The PVScalar implementation.
+     */
+    template<typename PVT>
+    std::tr1::shared_ptr<PVT> createPVScalar()
+    {
+        return std::tr1::static_pointer_cast<PVT>(createPVScalar(PVT::typeCode));   
+    }
+
+    /**
+     * Create implementation for PVStructure.
+     * @param structure The introspection interface.
+     * @return The PVStructure implementation
+     */
+    PVStructurePtr createPVStructure(StructureConstPtr const & structure);
+    /**
+     * Create implementation for PVStructure.
+     * @param fieldNames The field names.
+     * @param pvFields Array of PVFields
+     * @return The PVStructure implementation
+     */
+    PVStructurePtr createPVStructure(
+        StringArray const & fieldNames,PVFieldPtrArray const & pvFields);
+     /**
+      * Create implementation for PVStructure.
+      * @param structToClone A structure. Each subfield and any auxInfo is cloned and added to the newly created structure.
+      * @return The PVStructure implementation.
+      */
+    PVStructurePtr createPVStructure(PVStructurePtr const & structToClone);
+
+    /**
+     * Create implementation for PVUnion.
+     * @param union The introspection interface.
+     * @return The PVUnion implementation
+     */
+    PVUnionPtr createPVUnion(UnionConstPtr const & punion);
+     /**
+      * Create implementation for PVUnion.
+      * @param unionToClone A union. Each subfield is cloned and added to the newly created union.
+      * @return The PVUnion implementation.
+      */
+   PVUnionPtr createPVUnion(PVUnionPtr const & unionToClone);
+    /**
+     * Create variant union implementation.
+     * @return The variant PVUnion implementation. 
+     */
+    PVUnionPtr createPVVariantUnion();
+
+    /**
      * Create an implementation of an array field reusing the Array introspection interface.
      * @param array The introspection interface.
      * @return The PVScalarArray implementation.
@@ -1450,6 +1525,17 @@ public:
      */
     PVScalarArrayPtr createPVScalarArray(PVScalarArrayPtr const  & scalarArrayToClone);
     /**
+     * template version
+     * @param PVT must ve a valid pvType
+     * @return The PVScalarArray implementation.
+     */
+    template<typename PVAT>
+    std::tr1::shared_ptr<PVAT> createPVScalarArray()
+    {
+        return std::tr1::static_pointer_cast<PVAT>(createPVScalarArray(PVAT::typeCode));   
+    }
+
+    /**
      * Create an implementation of an array with structure elements.
      * @param structureArray The introspection interface.
      * All elements share the same introspection interface.
@@ -1457,25 +1543,16 @@ public:
      */
     PVStructureArrayPtr createPVStructureArray(StructureArrayConstPtr const & structureArray);
     /**
-     * Create implementation for PVStructure.
-     * @param structure The introspection interface.
-     * @return The PVStructure implementation
+     * Create an implementation of an array with structure elements.
+     * @param structure The introspection interface that is used to create StructureArrayConstPtr.
+     * All elements share the same introspection interface.
+     * @return The PVStructureArray implementation.
      */
-    PVStructurePtr createPVStructure(StructureConstPtr const & structure);
-    /**
-     * Create implementation for PVStructure.
-     * @param fieldNames The field names.
-     * @param pvFields Array of PVFields
-     * @return The PVStructure implementation
-     */
-    PVStructurePtr createPVStructure(
-        StringArray const & fieldNames,PVFieldPtrArray const & pvFields);
-     /**
-      * Create implementation for PVStructure.
-      * @param structToClone A structure. Each subfield and any auxInfo is cloned and added to the newly created structure.
-      * @return The PVStructure implementation.
-      */
-   PVStructurePtr createPVStructure(PVStructurePtr const & structToClone);
+    PVStructureArrayPtr createPVStructureArray(StructureConstPtr const & structure)
+    {
+        return createPVStructureArray(fieldCreate->createStructureArray(structure));
+    }
+
     /**
      * Create an implementation of an array with union elements.
      * @param unionArray The introspection interface.
@@ -1484,51 +1561,21 @@ public:
      */
     PVUnionArrayPtr createPVUnionArray(UnionArrayConstPtr const & unionArray);
     /**
-     * Create implementation for PVUnion.
-     * @param union The introspection interface.
-     * @return The PVUnion implementation
+     * Create an implementation of an array with union elements.
+     * @param punion The introspection interface tht is used to create UnionArrayConstPtr.
+     * All elements share the same introspection interface.
+     * @return The PVUnionArray implementation.
      */
-    PVUnionPtr createPVUnion(UnionConstPtr const & punion);
-     /**
-      * Create implementation for PVUnion.
-      * @param unionToClone A union. Each subfield is cloned and added to the newly created union.
-      * @return The PVUnion implementation.
-      */
-   PVUnionPtr createPVUnion(PVUnionPtr const & unionToClone);
-    /**
-     * Create variant union implementation.
-     * @return The variant PVUnion implementation. 
-     */
-    PVUnionPtr createPVVariantUnion();
+    PVUnionArrayPtr createPVUnionArray(UnionConstPtr const & punion)
+    {
+        return createPVUnionArray(fieldCreate->createUnionArray(punion));
+    }
     /**
      * Create variant union array implementation.
      * @return The variant PVUnionArray implementation. 
      */
     PVUnionArrayPtr createPVVariantUnionArray();
     
-    
-    template<typename PVT>
-    std::tr1::shared_ptr<PVT> createPVScalar()
-    {
-        return std::tr1::static_pointer_cast<PVT>(createPVScalar(PVT::typeCode));   
-    }
-    
-    template<typename PVAT>
-    std::tr1::shared_ptr<PVAT> createPVScalarArray()
-    {
-        return std::tr1::static_pointer_cast<PVAT>(createPVScalarArray(PVAT::typeCode));   
-    }
-
-    PVStructureArrayPtr createPVStructureArray(StructureConstPtr const & structure)
-    {
-        return createPVStructureArray(fieldCreate->createStructureArray(structure));
-    }
-    
-    PVUnionArrayPtr createPVUnionArray(UnionConstPtr const & punion)
-    {
-        return createPVUnionArray(fieldCreate->createUnionArray(punion));
-    }
-   
 private:
    PVDataCreate();
    FieldCreatePtr fieldCreate;
