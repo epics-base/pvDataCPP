@@ -543,6 +543,11 @@ public:
      */
     virtual ~PVArray(){};
     /**
+     * Get the introspection interface
+     * @return The interface.
+     */
+    virtual ArrayConstPtr getArray() const = 0;
+    /**
      * Set the field to be immutable, i. e. it can no longer be modified.
      * This is permanent, i.e. once done the field can onot be made mutable.
      */
@@ -1155,6 +1160,11 @@ public:
      */
     virtual ~PVValueArray() {}
 
+    virtual ArrayConstPtr getArray() const
+    {
+        return std::tr1::static_pointer_cast<const Array>(this->getField());
+    }
+
     std::ostream& dumpValue(std::ostream& o) const
     {
         const_svector v(this->view());
@@ -1215,6 +1225,11 @@ public:
      * Destructor
      */
     virtual ~PVValueArray() {}
+
+    virtual ArrayConstPtr getArray() const
+    {
+        return std::tr1::static_pointer_cast<const Array>(structureArray);
+    }
 
     virtual size_t getLength() const {return value.size();}
     virtual size_t getCapacity() const {return value.capacity();}
@@ -1305,6 +1320,11 @@ public:
      * Destructor
      */
     virtual ~PVValueArray() {}
+
+    virtual ArrayConstPtr getArray() const
+    {
+        return std::tr1::static_pointer_cast<const Array>(unionArray);
+    }
 
     virtual size_t getLength() const {return value.size();}
     virtual size_t getCapacity() const {return value.capacity();}

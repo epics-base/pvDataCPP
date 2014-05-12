@@ -216,8 +216,15 @@ static UnionConstPtr deserializeUnionField(const FieldCreate* fieldCreate, ByteB
     	return fieldCreate->createUnion(id, fieldNames, fields);
 }
 
+Array::Array(Type type)
+    : Field(type)
+{
+}
+
+Array::~Array() {}
+
 ScalarArray::ScalarArray(ScalarType elementType)
-: Field(scalarArray),elementType(elementType)
+: Array(scalarArray),elementType(elementType)
 {
     if(elementType<0 || elementType>MAX_SCALAR_TYPE)
         throw std::invalid_argument("Can't construct ScalarArray from invalid ScalarType");
@@ -282,7 +289,7 @@ void ScalarArray::deserialize(ByteBuffer* /*buffer*/, DeserializableControl* /*c
 }
 
 StructureArray::StructureArray(StructureConstPtr const & structure)
-: Field(structureArray),pstructure(structure)
+: Array(structureArray),pstructure(structure)
 {
 }
 
@@ -312,7 +319,7 @@ void StructureArray::deserialize(ByteBuffer* /*buffer*/, DeserializableControl* 
 }
 
 UnionArray::UnionArray(UnionConstPtr const & _punion)
-: Field(unionArray),punion(_punion)
+: Array(unionArray),punion(_punion)
 {
 }
 
