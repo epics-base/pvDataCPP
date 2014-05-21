@@ -471,7 +471,7 @@ void Convert::copyUnion(PVUnionPtr const & from, PVUnionPtr const & to)
         if (fromValue.get() == 0)
             to->select(PVUnion::UNDEFINED_INDEX);
         else
-            copy(fromValue, to->select(from->getSelectedIndex()));
+            to->set(from->getSelectedFieldName(),from->get());
     }
 }
 

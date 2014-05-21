@@ -126,6 +126,7 @@ void PVUnion::set(int32 index, PVFieldPtr const & value)
 
     selector = index;
     this->value = value;
+    postPut();
 }
 
 void PVUnion::set(String const & fieldName, PVFieldPtr const & value)
