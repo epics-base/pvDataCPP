@@ -237,17 +237,10 @@ void PVCopy::updateCopySetBitSet(
         CopyMasterNodePtr masterNode = static_pointer_cast<CopyMasterNode>(headNode);
         PVFieldPtr pvMasterField= masterNode->masterPVField;
         PVFieldPtr copyPVField = copyPVStructure;
-        PVFieldPtrArray const & pvCopyFields = copyPVStructure->getPVFields();
-        if(pvCopyFields.size()==1) {
-            copyPVField = pvCopyFields[0];
-        }
         PVFieldPtr pvField = pvMasterField;
         if(pvField->getField()->getType()==epics::pvData::structure) {
             updateSubFieldSetBitSet(copyPVField,pvMasterField,bitSet);
             return;
-        }
-        if(pvCopyFields.size()!=1) {
-            throw std::logic_error("Logic error");
         }
         ConvertPtr convert = getConvert();
         bool isEqual = convert->equals(copyPVField,pvField);
@@ -268,18 +261,7 @@ void PVCopy::updateCopyFromBitSet(
         updateStructureNodeFromBitSet(copyPVStructure,node,bitSet,true,doAll);
     } else {
         CopyMasterNodePtr masterNode = static_pointer_cast<CopyMasterNode>(headNode);
-        PVFieldPtrArray const & pvCopyFields = copyPVStructure->getPVFields();
-        if(pvCopyFields.size()==1) {
-            updateSubFieldFromBitSet(
-                pvCopyFields[0],
-                masterNode->masterPVField,bitSet,
-                true,doAll);
-        } else {
-            updateSubFieldFromBitSet(
-                copyPVStructure,
-                masterNode->masterPVField,bitSet,
-                true,doAll);
-        }
+        updateSubFieldFromBitSet(copyPVStructure, masterNode->masterPVField,bitSet, true,doAll);
     }
 }
 
@@ -296,19 +278,7 @@ void PVCopy::updateMaster(
     } else {
         CopyMasterNodePtr masterNode =
             static_pointer_cast<CopyMasterNode>(headNode);
-        PVFieldPtrArray const & pvCopyFields =
-            copyPVStructure->getPVFields();
-        if(pvCopyFields.size()==1) {
-            updateSubFieldFromBitSet(
-                pvCopyFields[0],
-                masterNode->masterPVField,bitSet,
-                false,doAll);
-        } else {
-            updateSubFieldFromBitSet(
-                copyPVStructure,
-                masterNode->masterPVField,bitSet,
-                false,doAll);
-        }
+        updateSubFieldFromBitSet( copyPVStructure,masterNode->masterPVField,bitSet,false,doAll);
     }
 }
 
@@ -603,18 +573,9 @@ void PVCopy::updateSubFieldFromBitSet(
         PVStructurePtr pvCopyStructure =
             static_pointer_cast<PVStructure>(pvCopy);
         PVFieldPtrArray const & pvCopyFields = pvCopyStructure->getPVFields();
-        if(pvMasterField->getField()->getType()
-        !=epics::pvData::structure)
+        if(pvMasterField->getField()->getType() !=epics::pvData::structure)
         {
-            if(pvCopyFields.size()!=1) {
-                throw std::logic_error(String("Logic error"));
-            }
-            if(toCopy) {
-                convert->copy(pvMasterField, pvCopyFields[0]);
-            } else {
-                convert->copy(pvCopyFields[0], pvMasterField);
-            }
-            return;
+            throw std::logic_error(String("Logic error"));
         }
         PVStructurePtr pvMasterStructure = 
             static_pointer_cast<PVStructure>(pvMasterField);
