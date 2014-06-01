@@ -317,6 +317,8 @@ namespace epics { namespace pvData {
          static uint32 bitCount(uint64 i);
 
     };
+    
+    epicsShareExtern std::ostream& operator<<(std::ostream& o, const BitSet& b);
 
 }}
 #endif  /* BITSET_H */
