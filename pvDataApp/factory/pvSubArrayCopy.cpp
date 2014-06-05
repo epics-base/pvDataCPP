@@ -15,30 +15,32 @@
 #include <pv/pvSubArrayCopy.h>
 
 namespace epics { namespace pvData { 
+using std::cout;
+using std::endl;
 
 template<typename T>
 void copy(
     PVValueArray<T> & pvFrom,
     size_t fromOffset,
+    size_t fromStride,
     PVValueArray<T> & pvTo,
     size_t toOffset,
-    size_t len)
+    size_t toStride,
+    size_t count)
 {
-    if(pvTo.isImmutable()) {
-        throw std::logic_error("pvSubArrayCopy  to is immutable");
-    }
+    if(pvTo.isImmutable()) throw std::invalid_argument("pvSubArrayCopy: pvTo is immutable");
+    if(fromStride<1 || toStride<1) throw std::invalid_argument("stride must be >=1");
     size_t fromLength = pvFrom.getLength();
-    if(fromOffset+len>fromLength) {
-        throw std::length_error("pvSubArrayCopy from length error");
-    }
+    size_t num = fromOffset + count*fromStride;
+    if(num>fromLength) throw std::invalid_argument("pvSubArrayCopy pvFrom length error");
+    size_t newLength = toOffset + count*toStride;
     size_t capacity = pvTo.getCapacity();
-    if(toOffset+len>capacity) capacity = toOffset + len;
+    if(newLength>capacity) capacity = newLength;
     shared_vector<T> temp(capacity);
     typename PVValueArray<T>::const_svector vecFrom = pvFrom.view();
     typename PVValueArray<T>::const_svector vecTo = pvTo.view();
-    for(size_t i=0; i<toOffset; ++i) temp[i] = vecTo[i];
-    for(size_t i=0; i<len; ++i) temp[i + toOffset] = vecFrom[i + fromOffset];
-    for(size_t i=len + toOffset; i<capacity; ++i) temp[i] = vecTo[i];
+    for(size_t i=0; i<pvTo.getLength(); ++i) temp[i] = vecTo[i];
+    for(size_t i=0; i<count; ++i) temp[i*toStride + toOffset] = vecFrom[i*fromStride+fromOffset];
     shared_vector<const T> temp2(freeze(temp));
     pvTo.replace(temp2);
 }
@@ -46,9 +48,11 @@ void copy(
 void copy(
     PVScalarArray & from,
     size_t fromOffset,
+    size_t fromStride,
     PVScalarArray & to,
     size_t toOffset,
-    size_t len)
+    size_t toStride,
+    size_t count)
 {
     ScalarType scalarType = from.getScalarArray()->getElementType();
     ScalarType otherType = to.getScalarArray()->getElementType();
@@ -59,145 +63,167 @@ void copy(
     {
     case pvBoolean:
        {
-           copy(dynamic_cast<PVValueArray<boolean> &>(from),fromOffset,
+           copy(dynamic_cast<PVValueArray<boolean> &>(from),fromOffset,fromStride,
            dynamic_cast<PVValueArray<boolean>& >(to),
-           toOffset,len);
+           toOffset,toStride,count);
        }
        break;
     case pvByte:
        {
-           copy(dynamic_cast<PVValueArray<int8> &>(from),fromOffset,
+           copy(dynamic_cast<PVValueArray<int8> &>(from),fromOffset,fromStride,
            dynamic_cast<PVValueArray<int8>& >(to),
-           toOffset,len);
+           toOffset,toStride,count);
        }
        break;
     case pvShort:
        {
-           copy(dynamic_cast<PVValueArray<int16> &>(from),fromOffset,
+           copy(dynamic_cast<PVValueArray<int16> &>(from),fromOffset,fromStride,
            dynamic_cast<PVValueArray<int16>& >(to),
-           toOffset,len);
+           toOffset,toStride,count);
        }
        break;
     case pvInt:
        {
-           copy(dynamic_cast<PVValueArray<int32> &>(from),fromOffset,
+           copy(dynamic_cast<PVValueArray<int32> &>(from),fromOffset,fromStride,
            dynamic_cast<PVValueArray<int32>& >(to),
-           toOffset,len);
+           toOffset,toStride,count);
        }
        break;
     case pvLong:
        {
-           copy(dynamic_cast<PVValueArray<int64> &>(from),fromOffset,
+           copy(dynamic_cast<PVValueArray<int64> &>(from),fromOffset,fromStride,
            dynamic_cast<PVValueArray<int64>& >(to),
-           toOffset,len);
+           toOffset,toStride,count);
        }
        break;
     case pvUByte:
        {
-           copy(dynamic_cast<PVValueArray<uint8> &>(from),fromOffset,
+           copy(dynamic_cast<PVValueArray<uint8> &>(from),fromOffset,fromStride,
            dynamic_cast<PVValueArray<uint8>& >(to),
-           toOffset,len);
+           toOffset,toStride,count);
        }
        break;
     case pvUShort:
        {
-           copy(dynamic_cast<PVValueArray<uint16> &>(from),fromOffset,
+           copy(dynamic_cast<PVValueArray<uint16> &>(from),fromOffset,fromStride,
            dynamic_cast<PVValueArray<uint16>& >(to),
-           toOffset,len);
+           toOffset,toStride,count);
        }
        break;
     case pvUInt:
        {
-           copy(dynamic_cast<PVValueArray<uint32> &>(from),fromOffset,
+           copy(dynamic_cast<PVValueArray<uint32> &>(from),fromOffset,fromStride,
            dynamic_cast<PVValueArray<uint32>& >(to),
-           toOffset,len);
+           toOffset,toStride,count);
        }
        break;
     case pvULong:
        {
-           copy(dynamic_cast<PVValueArray<uint64> &>(from),fromOffset,
+           copy(dynamic_cast<PVValueArray<uint64> &>(from),fromOffset,fromStride,
            dynamic_cast<PVValueArray<uint64>& >(to),
-           toOffset,len);
+           toOffset,toStride,count);
        }
        break;
     case pvFloat:
        {
-           copy(dynamic_cast<PVValueArray<float> &>(from),fromOffset,
+           copy(dynamic_cast<PVValueArray<float> &>(from),fromOffset,fromStride,
            dynamic_cast<PVValueArray<float>& >(to),
-           toOffset,len);
+           toOffset,toStride,count);
        }
        break;
     case pvDouble:
        {
-           copy(dynamic_cast<PVValueArray<double> &>(from),fromOffset,
+           copy(dynamic_cast<PVValueArray<double> &>(from),fromOffset,fromStride,
            dynamic_cast<PVValueArray<double>& >(to),
-           toOffset,len);
+           toOffset,toStride,count);
        }
        break;
     case pvString:
        {
-           copy(dynamic_cast<PVValueArray<String> &>(from),fromOffset,
+           copy(dynamic_cast<PVValueArray<String> &>(from),fromOffset,fromStride,
            dynamic_cast<PVValueArray<String>& >(to),
-           toOffset,len);
+           toOffset,toStride,count);
        }
        break;
     }
 }
 
 void copy(
-    PVStructureArray & from,
-    size_t fromOffset,
-    PVStructureArray & to,
+    PVStructureArray & pvFrom,
+    size_t pvFromOffset,
+    size_t pvFromStride,
+    PVStructureArray & pvTo,
     size_t toOffset,
-    size_t len)
+    size_t toStride,
+    size_t count)
 {
-    if(to.isImmutable()) {
-        throw std::logic_error("pvSubArrayCopy  to is immutable");
+    if(pvTo.isImmutable()) {
+        throw std::logic_error("pvSubArrayCopy  pvTo is immutable");
     }
-    StructureArrayConstPtr fromStructure = from.getStructureArray();
-    StructureArrayConstPtr toStructure = to.getStructureArray();
-    if(fromStructure!=toStructure) {
+    if(pvFromStride<1 || toStride<1) throw std::invalid_argument("stride must be >=1");
+    StructureArrayConstPtr pvFromStructure = pvFrom.getStructureArray();
+    StructureArrayConstPtr toStructure = pvTo.getStructureArray();
+    if(pvFromStructure!=toStructure) {
         throw std::invalid_argument(
-            "pvSubArrayCopy structureArray to and from have different structures");
+            "pvSubArrayCopy structureArray pvTo and pvFrom have different structures");
     }
-    size_t fromLength = from.getLength();
-    if(fromOffset+len>fromLength) {
-        throw std::length_error("pvSubArrayCopy from length error");
-    }
-    size_t capacity = to.getCapacity();
-    if(toOffset+len>capacity) capacity = toOffset+len;
+    size_t pvFromLength = pvFrom.getLength();
+    size_t num = pvFromOffset + count*pvFromStride;
+    if(num>pvFromLength) throw std::invalid_argument("pvSubArrayCopy pvFrom length error");
+    size_t newLength = toOffset + count*toStride;
+    size_t capacity = pvTo.getCapacity();
+    if(newLength>capacity) capacity = newLength;
     shared_vector<PVStructurePtr> temp(capacity);
-    PVValueArray<PVStructurePtr>::const_svector vecFrom = from.view();
-    PVValueArray<PVStructurePtr>::const_svector vecTo = to.view();
-    for(size_t i=0; i<toOffset; ++i) temp[i] = vecTo[i];
-    for(size_t i=0; i<len; ++i) temp[i + toOffset] = vecFrom[i + fromOffset];
-    for(size_t i=len + toOffset; i<capacity; ++i) temp[i] = vecTo[i];
+    PVValueArray<PVStructurePtr>::const_svector vecFrom = pvFrom.view();
+    PVValueArray<PVStructurePtr>::const_svector vecTo = pvTo.view();
+    for(size_t i=0; i<pvTo.getLength(); ++i) temp[i] = vecTo[i];
+    for(size_t i=0; i<count; ++i) temp[i*toStride + toOffset] = vecFrom[i*pvFromStride+pvFromOffset];
     shared_vector<const PVStructurePtr> temp2(freeze(temp));
-    to.replace(temp2);
+    pvTo.replace(temp2);
 }
 
 void copy(
-    PVArray & from,
-    size_t fromOffset,
-    PVArray & to,
-    size_t toOffset,
-    size_t len)
+    PVArray & pvFrom,
+    size_t pvFromOffset,
+    size_t pvFromStride,
+    PVArray & pvTo,
+    size_t pvToOffset,
+    size_t pvToStride,
+    size_t count)
 {
-    Type type = from.getField()->getType();
-    Type otherType = to.getField()->getType();
-    if(type!=otherType) {
-        throw std::invalid_argument("pvSubArrayCopy types do not match");
+    Type pvFromType = pvFrom.getField()->getType();
+    Type pvToType = pvTo.getField()->getType();
+    if(pvFromType!=pvToType) throw std::invalid_argument("pvSubArrayCopy: pvFrom and pvTo different types");
+    if(pvFromType==scalarArray) {
+        ScalarType pvFromScalarType= static_cast<ScalarType>(pvFromType);
+        ScalarType pvToScalarType = static_cast<ScalarType>(pvToType);
+        if(pvFromScalarType!=pvToScalarType){
+              throw std::invalid_argument("pvSubArrayCopy: pvFrom and pvTo different types");
+        }
     }
-    if(type==scalarArray) {
-           copy(dynamic_cast<PVScalarArray &>(from) ,fromOffset,
-           dynamic_cast<PVScalarArray&>(to),
-           toOffset,len);
+    if(pvTo.isImmutable()) throw std::invalid_argument("pvSubArrayCopy: pvTo is immutable");
+    if(pvFromType==scalarArray) {
+           copy(dynamic_cast<PVScalarArray &>(pvFrom) ,pvFromOffset,pvFromStride,
+           dynamic_cast<PVScalarArray&>(pvTo),
+           pvToOffset,pvToStride,count);
     }
-    if(type==structureArray) {
-           copy(dynamic_cast<PVStructureArray &>(from) ,fromOffset,
-           dynamic_cast<PVStructureArray&>(to),
-           toOffset,len);
+    if(pvFromType==structureArray) {
+           copy(dynamic_cast<PVStructureArray &>(pvFrom) ,pvFromOffset,pvFromStride,
+           dynamic_cast<PVStructureArray&>(pvTo),
+           pvToOffset,pvToStride,count);
     }
+}
+
+void copy(
+    PVArray::shared_pointer const & pvFrom,
+    size_t pvFromOffset,
+    size_t pvFromStride,
+    PVArray::shared_pointer & pvTo,
+    size_t pvToOffset,
+    size_t pvToStride,
+    size_t count)
+{
+    copy(*pvFrom,pvFromOffset,pvFromStride,*pvTo,pvToOffset,pvToStride,count);
 }
 
 }}
