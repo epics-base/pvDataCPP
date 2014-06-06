@@ -40,6 +40,7 @@ void copy(
     typename PVValueArray<T>::const_svector vecFrom = pvFrom.view();
     typename PVValueArray<T>::const_svector vecTo = pvTo.view();
     for(size_t i=0; i<pvTo.getLength(); ++i) temp[i] = vecTo[i];
+    for(size_t i=pvTo.getLength(); i< capacity; ++i) temp[i] = T();
     for(size_t i=0; i<count; ++i) temp[i*toStride + toOffset] = vecFrom[i*fromStride+fromOffset];
     shared_vector<const T> temp2(freeze(temp));
     pvTo.replace(temp2);
@@ -177,6 +178,8 @@ void copy(
     PVValueArray<PVStructurePtr>::const_svector vecFrom = pvFrom.view();
     PVValueArray<PVStructurePtr>::const_svector vecTo = pvTo.view();
     for(size_t i=0; i<pvTo.getLength(); ++i) temp[i] = vecTo[i];
+    for(size_t i=pvTo.getLength(); i< capacity; ++i)
+        temp[i] = getPVDataCreate()->createPVStructure(toStructure->getStructure());
     for(size_t i=0; i<count; ++i) temp[i*toStride + toOffset] = vecFrom[i*pvFromStride+pvFromOffset];
     shared_vector<const PVStructurePtr> temp2(freeze(temp));
     pvTo.replace(temp2);
