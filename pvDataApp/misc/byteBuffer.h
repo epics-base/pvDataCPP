@@ -202,14 +202,32 @@ public:
      *
      * @param  size      The number of bytes.
      * @param  byteOrder The byte order.
-     * Must be one of EPICS_BYTE_ORDER,EPICS_ENDIAN_LITTLE,EPICS_ENDIAN_BIG,
+     * Must be one of EPICS_BYTE_ORDER,EPICS_ENDIAN_LITTLE,EPICS_ENDIAN_BIG.
      */
     ByteBuffer(std::size_t size, int byteOrder = EPICS_BYTE_ORDER) :
         _buffer(0), _size(size),
         _reverseEndianess(byteOrder != EPICS_BYTE_ORDER),
-        _reverseFloatEndianess(byteOrder != EPICS_FLOAT_WORD_ORDER)
+        _reverseFloatEndianess(byteOrder != EPICS_FLOAT_WORD_ORDER),
+        _wrapped(false)
     {
         _buffer = (char*)malloc(size);
+        clear();
+    }
+
+    /**
+     * Constructor for wrapping existing buffers.
+     * Given buffer will not be released by the ByteBuffer instance.
+     * @param  buffer    Existing buffer.
+     * @param  size      The number of bytes.
+     * @param  byteOrder The byte order.
+     * Must be one of EPICS_BYTE_ORDER,EPICS_ENDIAN_LITTLE,EPICS_ENDIAN_BIG.
+     */
+    ByteBuffer(char* buffer, std::size_t size, int byteOrder = EPICS_BYTE_ORDER) :
+        _buffer(buffer), _size(size),
+        _reverseEndianess(byteOrder != EPICS_BYTE_ORDER),
+        _reverseFloatEndianess(byteOrder != EPICS_FLOAT_WORD_ORDER),
+        _wrapped(true)
+    {
         clear();
     }
     /**
@@ -217,7 +235,7 @@ public:
      */
     ~ByteBuffer()
     {
-        if (_buffer) free(_buffer);
+        if (_buffer && !_wrapped) free(_buffer);
     }
     /**
      * Set the byte order.
@@ -618,7 +636,8 @@ private:
     char* _limit;
     std::size_t  _size;
     bool _reverseEndianess; 
-    bool _reverseFloatEndianess; 
+    bool _reverseFloatEndianess;
+    bool _wrapped;
 };
 
     template<>
