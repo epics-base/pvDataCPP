@@ -374,5 +374,20 @@ namespace epics { namespace pvData {
             words[i] |= (buffer->getByte() & 0xffL) << (8 * j);
     
     }
+    
+    epicsShareExtern std::ostream& operator<<(std::ostream& o, const BitSet& b)
+    {
+        o << '{';
+        int32 i = b.nextSetBit(0);
+        if (i != -1) {
+            o << i;
+            for (i = b.nextSetBit(i+1); i >= 0; i = b.nextSetBit(i+1)) {
+                int32 endOfRun = b.nextClearBit(i);
+                do { o << ", " << i; } while (++i < endOfRun);
+            }
+        }
+        o << '}';
+        return o;
+    }
 
 }};

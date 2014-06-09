@@ -1,0 +1,177 @@
+/* monitorPlugin.h */
+/**
+ * Copyright - See the COPYRIGHT that is included with this distribution.
+ * EPICS pvData is distributed subject to a Software License Agreement found
+ * in file LICENSE that is included with this distribution.
+ */
+/**
+ *  @author mrk
+ */
+#ifndef MONITORPLUGIN_H
+#define MONITORPLUGIN_H
+
+#include <list>
+#include <pv/pvData.h>
+#include <pv/sharedPtr.h>
+#include <pv/bitSet.h>
+#include <pv/monitor.h>
+
+#include <shareLib.h>
+
+namespace epics { namespace pvData { 
+
+/**
+ * typedef for a pointer to a MonitorPlugin
+ */
+class MonitorPlugin;
+typedef std::tr1::shared_ptr<MonitorPlugin> MonitorPluginPtr;
+
+
+/**
+ * typedef for a pointer to a MonitorPluginCreator
+ */
+class MonitorPluginCreator;
+typedef std::tr1::shared_ptr<MonitorPluginCreator> MonitorPluginCreatorPtr;
+
+
+/**
+ * typedef for a pointer to a MonitorPluginManager
+ */
+class MonitorPluginManager;
+typedef std::tr1::shared_ptr<MonitorPluginManager> MonitorPluginManagerPtr;
+        
+
+/** A plugin for raising monitors;
+ * This is for use by pvAccess servers that support monitors.
+ * Since the interface has only a dependence on pvData it
+ * can be used for other purposes.
+ * A monitor is assumed to be associated with a field of a top level
+ * structure.
+ */
+class MonitorPlugin
+{
+public:
+    virtual ~MonitorPlugin(){}
+    /**
+     * getName
+     * @returns The name of the plugin
+     */
+    virtual String const & getName() = 0;
+    /**
+     * Should a monitor be raised?
+     * @param pvField The field being monitored.
+     * @param pvTop The top level sructure in which the field resides.
+     * @param monitorElement The client data and bitSets.
+     * @returns true or false.
+     * True is returned if the change to this field should cause a monitor.
+     * False is returned in a change only to this field should not cause a
+     * monitor.
+     */
+    virtual bool causeMonitor(
+        PVFieldPtr const &pvField,
+        PVStructurePtr const &pvTop,
+        MonitorElementPtr const &monitorElement) = 0;
+    /**
+     * A monitor will be sent to the client.
+     * @param pvField The copy of the field being monitored.
+     * The plugin can modify the data.
+     * @param pvTop The top level sructure in which the field resides.
+     * @param monitorElement The data for the client.
+     * The plugin is allowed to change the data values.
+     */
+    virtual void monitorDone(
+        MonitorElementPtr const &monitorElement)
+        {}
+    /**
+     * Begin monitoring
+     */
+    virtual void startMonitoring(){}
+    /**
+     * Stop monitoring
+     */
+    virtual void stopMonitoring(){}
+    /**
+     * Begin a set of puts.
+     */
+    virtual void beginGroupPut() {};
+    /**
+     * End a set of puts.
+     */
+    virtual void endGroupPut() {};
+};
+
+/** A class that creates a plugin.
+ * Normlly a plugin is created for a single client.
+ */
+class MonitorPluginCreator
+{
+public:
+    virtual ~MonitorPluginCreator() {}
+    /**
+     * Create a monitor plugin.
+     * @param field The introspection interface for the field monitored.
+     * @param top The introspsction interface for the client structure.
+     * @param pvFieldOptions The options the client requested.
+     * The structure has a set of PVString subfields.
+     * The options are a set of name,value pairs.
+     * The subfield name is the name and the subfield value is the value.
+     * @returns shared pointer to a MonitorPluginCreator.
+     */
+    virtual MonitorPluginPtr create(
+        FieldConstPtr const &field,
+        StructureConstPtr const &top,
+        PVStructurePtr const &pvFieldOptions) = 0;
+    /**
+     * getName
+     * @returns The name of the plugin
+     */
+    virtual String const & getName() = 0;
+};
+    
+
+/**
+ * This manages a set of monitor plugins.
+ * @author mrk
+ */
+class epicsShareClass MonitorPluginManager
+{
+public:
+    POINTER_DEFINITIONS(MonitorPluginManager);
+    /**
+     * Factory to get the  manager.
+     * @return shared pointer to manager.
+     */
+    static MonitorPluginManagerPtr get();
+    /** destructor
+     */
+    ~MonitorPluginManager(){}
+    /* add plugin
+     * @param pluginName The name of the plugin.
+     * @param creator The creator.
+     * @returns true or false
+     * false is returned if a plugin with that name is already present
+     */
+     bool addPlugin(
+         String const &pluginName,
+         MonitorPluginCreatorPtr const &creator);
+    /* find plugin
+     * 
+     * @param plugin name
+     * @returns share pointer to plugin creator.
+     * If a plugin with that name is not found NULL is returned.
+     */
+     MonitorPluginCreatorPtr findPlugin(String const &pluginName);
+    /* showNames
+     * 
+     */
+    void showNames();
+private:
+     MonitorPluginManager(){}
+     std::list<MonitorPluginCreatorPtr> monitorPluginList;
+     epics::pvData::Mutex mutex;
+};
+
+
+
+}}
+#endif  /* MONITORPLUGIN_H */

@@ -60,7 +60,7 @@ PVStructure::PVStructure(StructureConstPtr const & structurePtr)
     pvFields.reserve(numberFields);
     PVDataCreatePtr pvDataCreate = getPVDataCreate();
     for(size_t i=0; i<numberFields; i++) {
-    	pvFields.push_back(pvDataCreate->createPVField(fields[i]));
+        pvFields.push_back(pvDataCreate->createPVField(fields[i]));
     }
     for(size_t i=0; i<numberFields; i++) {
     	pvFields[i]->setParentAndName(this,fieldNames[i]);
@@ -134,110 +134,6 @@ PVFieldPtr  PVStructure::getSubField(size_t fieldOffset) const
     throw std::logic_error("PVStructure.getSubField: Logic error");
 }
 
-void PVStructure::fixParentStructure()
-{
-    PVStructure *parent = getParent();
-    if(parent==NULL) return;
-    StructureConstPtr parentStructure = parent->structurePtr;
-    String fieldName = getFieldName();
-    size_t index = parentStructure->getFieldIndex(fieldName);
-    StringArray const &fieldNames = parentStructure->getFieldNames();
-    size_t num = fieldNames.size();
-    FieldConstPtrArray fields(num);
-    FieldConstPtrArray const & oldFields = parentStructure->getFields();
-    for(size_t i=0; i< num; i++) {
-        if(i==index) {
-            fields[i] = structurePtr;
-        } else {
-            fields[i] = oldFields[i];
-        }
-    }
-    FieldConstPtr field = getFieldCreate()->createStructure(
-        parentStructure->getID(),fieldNames,fields);
-    parent->replaceField(field);
-    parent->fixParentStructure();
-}
-
-void PVStructure::appendPVField(
-    String const &fieldName,
-    PVFieldPtr const & pvField)
-{
-    size_t origLength = pvFields.size();
-    size_t newLength = origLength+1;
-    PVFieldPtrArray * xxx = const_cast<PVFieldPtrArray *>(&pvFields);
-    xxx->push_back(pvField);
-    FieldConstPtr field = getFieldCreate()->appendField(
-        structurePtr,fieldName,pvField->getField());
-    replaceField(field);
-    structurePtr = static_pointer_cast<const Structure>(field);
-    StringArray fieldNames = structurePtr->getFieldNames();
-    for(size_t i=0; i<newLength; i++) {
-        pvFields[i]->setParentAndName(this,fieldNames[i]);
-    }
-    fixParentStructure();
-}
-
-void PVStructure::appendPVFields(
-    StringArray const & fieldNames,
-    PVFieldPtrArray const & pvFields)
-{
-    size_t origLength = this->pvFields.size();
-    size_t extra = fieldNames.size();
-    if(extra==0) return;
-    size_t newLength = origLength + extra;
-    PVFieldPtrArray * xxx = const_cast<PVFieldPtrArray *>(&this->pvFields);
-    xxx->reserve(newLength);
-    for(size_t i=0; i<extra; i++) {
-        xxx->push_back(pvFields[i]);
-    }
-    FieldConstPtrArray fields;
-    fields.reserve(extra);
-    for(size_t i=0; i<extra; i++) fields.push_back(pvFields[i]->getField());
-    FieldConstPtr field = getFieldCreate()->appendFields(
-        structurePtr,fieldNames,fields);
-    replaceField(field);
-    structurePtr = static_pointer_cast<const Structure>(field);
-    StringArray names = structurePtr->getFieldNames();
-    for(size_t i=0; i<newLength; i++) {
-        (*xxx)[i]->setParentAndName(this,names[i]);
-    }
-    fixParentStructure();
-}
-
-void PVStructure::removePVField(String const &fieldName)
-{
-    PVFieldPtr pvField = getSubField(fieldName);
-    if(pvField.get()==NULL) {
-        return;
-    }
-    size_t origLength = pvFields.size();
-    size_t newLength = origLength - 1;
-    PVFieldPtrArray const & origPVFields = pvFields;
-    FieldConstPtrArray origFields = structurePtr->getFields();
-    PVFieldPtrArray newPVFields;
-    newPVFields.reserve(newLength);
-    StringArray newFieldNames;
-    newFieldNames.reserve(newLength);
-    FieldConstPtrArray fields;
-    fields.reserve(newLength);
-    for(size_t i=0; i<origLength; i++) {
-        if(origPVFields[i]!=pvField) {
-            newFieldNames.push_back(origPVFields[i]->getFieldName());
-            newPVFields.push_back(origPVFields[i]);
-            fields.push_back(origFields[i]);
-        }
-    }
-    PVFieldPtrArray * xxx = const_cast<PVFieldPtrArray *>(&pvFields);
-    xxx->swap(newPVFields);
-    FieldConstPtr field = getFieldCreate()->createStructure(
-        structurePtr->getID(),newFieldNames,fields);
-    replaceField(field);
-    structurePtr = static_pointer_cast<const Structure>(field);
-    StringArray fieldNames = structurePtr->getFieldNames();
-    for(size_t i=0; i<newLength; i++) {
-        pvFields[i]->setParentAndName(this,fieldNames[i]);
-    }
-}
 
 PVBooleanPtr PVStructure::getBooleanField(String const &fieldName)
 {
@@ -341,18 +237,6 @@ PVUnionArrayPtr PVStructure::getUnionArrayField(
     return getSubField<PVUnionArray>(fieldName);
 }
 
-String PVStructure::getExtendsStructureName() const
-{
-    return extendsStructureName;
-}
-
-bool PVStructure::putExtendsStructureName(
-    String const &xxx)
-{
-    if(extendsStructureName.length()!=0) return false;
-    extendsStructureName = xxx;
-    return true;
-}
 
 void PVStructure::serialize(ByteBuffer *pbuffer,
         SerializableControl *pflusher) const {
@@ -477,10 +361,6 @@ static PVFieldPtr findSubField(
 std::ostream& PVStructure::dumpValue(std::ostream& o) const
 {
     o << format::indent() << getStructure()->getID() << ' ' << getFieldName();
-    String extendsName = getExtendsStructureName();
-    if(extendsName.length()>0) {
-        o << " extends " << extendsName;
-    }
     o << std::endl;
     {
     	format::indent_scope s(o);

@@ -1,0 +1,679 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
+  <title>EPICS pvDataCPP: copy and monitor</title>
+  <link rel="stylesheet" type="text/css"
+  href="http://epics-pvdata.sourceforge.net/base.css" />
+  <link rel="stylesheet" type="text/css"
+  href="http://epics-pvdata.sourceforge.net/epicsv4.css" />
+  <style type="text/css">
+  /*<![CDATA[*/
+     .about { margin-left: 3em; margin-right: 3em; font-size: .83em}
+     table { margin-left: auto; margin-right: auto }
+     .diagram { text-align: center; margin: 2.5em 0 }
+     span.opt { color: grey }
+     span.nterm { font-style:italic }
+     span.term { font-family:courier }
+     span.user { font-family:courier }
+     span.user:before { content:"<" }
+     span.user:after { content:">" }
+     .nonnorm { font-style:italic }
+     p.ed { color: #AA0000 }
+     span.ed { color: #AA0000 }
+     p.ed.priv { display: inline; }
+     span.ed.priv { display: inline; }
+  /*]]>*/</style>
+  <!-- Script that generates the Table of Contents -->
+  <script type="text/javascript"
+  src="http://epics-pvdata.sourceforge.net/script/tocgen.js">
+  </script>
+</head>
+<body>
+
+
+<div id="toc">
+<h2 class="nocount" style="page-break-before: always">Table of Contents</h2>
+</div>
+<div id="contents" class="contents">
+
+<h2>support for copy and monitor</h2>
+<p><b>copy</b> and <b>monitor</b> are not used in this project.
+They are intended for use by pvAccess and by pvAccess servers.
+They are provided with this project because the code depends only on
+pvData itself.
+</p>
+<p>This document describes C++ specific code.
+<a href="http://epics-pvdata.sourceforge.net/informative/pvRequest.html">
+pvRequest.html</a>
+provides a language independent overview of <b>copy</b> and <b>monitor</b>.
+</p>
+<p>
+<b>NOTE:pvRequest.html</b> must be updated since it is based on an earlier version of pvCopy that
+had knowlege of PVRecord. The C++ version was implemented in pvDatabaseCPP
+and the Java version on pvIOCJava.
+At present only the C++ version of the new API for pvCopy is implemented.
+</p>
+<p>Copy provides:
+<dl>
+   <dt>createRequest</dt>
+     <dd>
+      The Channel create methods in pvAccess all have an argument
+      <b>PVStructure pvRequest</b>.<br />
+      Given an ascii string createRequest creates a PVStructure that provides
+      a pvData representation of the information from the ascii string.
+      It is this structure that can be passed to the channel create methods.<br />
+      The information in a pvRequest selects an arbitrarary subset of the
+      fields in a top level structure that resides in the server.
+      In addition options can be specified. Both global and field specific
+      options can be specified.
+      </dd>
+   <dt>pvCopy</dt>
+     <dd>This is a faculity used by channel providers.
+     It provides client specific code that manages a copy of an arbitrary
+     subset of the fields in a top level structure that resides in the
+     provider. It also allows provider access to options specified
+     by the client.
+     </dd>
+</dl>
+Monitor provides:
+<dl>
+  <dt>monitor</dt>
+    <dd>This is support code for channel providers that implement channel
+    monitor. It, together with the queue facility, provides support for
+    monitor queues.
+    </dd>
+  <dt>monitorPlugin</dt>
+    <dd>This is support for implementing monitor plugins.
+     A monitor plugin can be developed that has no knowledge
+     of pvAccess but only pvData.
+    </dd>
+</dl>
+</p>
+
+<h2>support for copy</h2>
+<p><b>copy</b> provides the ability to create a structure that has 
+a copy of an arbitrary subset of the fields in an existing top level
+structure. In addition it allows global options and field specific options.
+It has two main components: <b>createRequest</b> and <b>pvCopy</b>.
+Given a string createRequest creates a pvRequest, which is a PVStructure
+that has the format expected by <b>pvCopy</b>.
+</p>
+
+<h3>createRequest</h3>
+<p>This is mainly used by pvAccess clients. Given a request string it creates
+a pvRequest structure that can be passed to the pvAccess create methods.
+In turn pvAccess passes the pvRequest to a local channel provider which 
+then passes it to pvCopy.
+</p>
+<p>The definition of the public members is:</p>
+<pre>
+class CreateRequest {
+...
+     static CreateRequestPtr create();
+     virtual PVStructurePtr createRequest(String const &amp;request);
+     String getMessage();
+};
+</pre>
+<p>An example of how it is used is:</p>
+<pre>
+CreateRequestPtr createRequest = CreateRequest::create();
+PVStructurePtr pvRequest = createRequest-&gt;createRequest(request);
+if(pvRequest==NULL) {
+    String error = createRequest-&gt;getMessage();
+    // take some action
+} else {
+    //success do something
+}
+</pre>
+<h3>pvCopy</h3>
+<p>The definition of the public members is:</p>
+<pre>
+class epicsShareClass PVCopyTraverseMasterCallback
+{
+...
+    virtual void nextMasterPVField(PVFieldPtr const &amp;pvField);
+};
+
+class class epicsShareClass PVCopy
+{
+...
+    static PVCopyPtr create(
+        PVStructurePtr const &amp;pvMaster,
+        PVStructurePtr const &amp;pvRequest,
+        String const &amp; structureName);
+    PVStructurePtr getPVMaster();
+    void traverseMaster(PVCopyTraverseMasterCallbackPtr const &amp; callback);
+    StructureConstPtr getStructure();
+    PVStructurePtr createPVStructure();
+    size_t getCopyOffset(PVFieldPtr const  &amp;masterPVField);
+    size_t getCopyOffset(
+        PVStructurePtr const  &amp;masterPVStructure,
+        PVFieldPtr const  &amp;masterPVField);
+     PVFieldPtr getMasterPVField(std::size_t structureOffset);
+     void initCopy(
+        PVStructurePtr const  &amp;copyPVStructure,
+        BitSetPtr const  &amp;bitSet);
+     void updateCopySetBitSet(
+        PVStructurePtr const  &amp;copyPVStructure,
+        BitSetPtr const  &amp;bitSet);
+    void updateCopyFromBitSet(
+        PVStructurePtr const  &amp;copyPVStructure,
+        BitSetPtr const  &amp;bitSet);
+    void updateMaster(
+        PVStructurePtr const  &amp;copyPVStructure,
+        BitSetPtr const  &amp;bitSet);
+    PVStructurePtr getOptions(std::size_t fieldOffset);
+...
+};
+</pre>
+where
+<dl>
+   <dt>PVCopyTraverseMasterCallback::nextMasterPVField</dt>
+     <dd>
+       <b>PVCopyTraverseMasterCallback</b> is a callback which must
+       be implemented by the code that uses pvCopy, normally
+       the channel provider. It has the single method <b>nextMasterPVField</b>
+       <br />
+       <b>nextMasterPVField</b> is called for each field in the master
+       as a result of a call to <b>traverseMaster</b>.
+     </dd>
+   <dt>create</dt>
+      <dd>
+        This is the method for creating a PVCopy instance.<br/>
+        <dl>
+           <dt>pvMaster</dt>
+             <dd>the top level sructure managed by the server.</dd>
+          <dt>pvRequest</dt>
+           <dd>selects the set of subfields desired
+         and options for each field.</dd>
+          <dt>structureName</dt>
+            <dd>the name for the top level of any PVStructure created.
+            </dd>
+        </dl>
+      </dd>
+   <dt>getPVMaster</dt>
+      <dd>
+       Gets the top level structure from pvMaster.
+      </dd>
+   <dt>traverseMaster</dt>
+      <dd>
+      Traverse all fields of the top level structure of pvMaster.
+      For each field the callback is called.
+      </dd>
+   <dt>getStructure</dt>
+      <dd>
+       Get the introspection interface for a PVStructure for e copy.
+      </dd>
+   <dt>createPVStructure</dt>
+      <dd>Create a copy instance.
+       Monitors keep a queue of monitor elements.
+     Since each element needs a PVStructure, multiple top level structures
+     will be created.
+      </dd>
+   <dt>getCopyOffset</dt>
+      <dd>Given a field in pvMaster.
+       return the offset in copy for the same field.
+      A value of String::npos means that the copy does not have this field.
+      Two overloaded methods are provided. The first is called if
+      the field of master is not a structure. The second is for
+      subfields of a structure.
+      </dd>
+   <dt>getMasterPVField</dt>
+      <dd>
+       Given a offset in the copy get the corresponding field in pvMaster.
+      </dd>
+   <dt>initCopy</dt>
+      <dd>
+       Initialize the fields in copyPVStructure
+       by giving each field the  value from the corresponding field in pvMaster.
+       bitSet will be set to show that all fields are changed.
+       This means that bit set will have the value <b>{0}</b>.
+      </dd>
+   <dt>updateCopySetBitSet</dt>
+      <dd>
+      Set all fields in copyPVStructure to the value of the corresponding field
+      in pvMaster. Each field that is changed has it's corresponding
+      bit set in bitSet.
+      </dd>
+   <dt>updateCopyFromBitSet</dt>
+      <dd>
+       For each set bit in bitSet set the field in copyPVStructure to the value
+      of the corrseponding field in pvMaster.
+      </dd>
+   <dt>updateMaster</dt>
+      <dd>
+       For each set bit in bitSet set the field in pvMaster to the value
+      of the corrseponding field in copyPVStructure.
+      
+      </dd>
+   <dt>getOptions</dt>
+      <dd>
+       Get the options for the field at the specified offset.
+      A NULL is returned if no options were specified for the field.
+      If options were specified,PVStructurePtr is 
+      a structure with a set of PVString subfields that specify name,value
+      pairs. name is the subField name and value is the subField value.
+      </dd>
+</dl>
+
+
+
+
+<h2>support for monitor</h2>
+<p>This consists of two components:
+<dl>
+   <dt>monitor</dt>
+     <dd>Used by code that implements pvAccess montors.</dd>
+   <dt>monitorPlugin</dt>
+      <dd>Code that provides special semantics for monitors.</dd>
+</dl>
+</p>
+<h3>monitor</h3>
+<pre>
+class MonitorElement {
+    MonitorElement(PVStructurePtr const &amp; pvStructurePtr);
+    PVStructurePtr pvStructurePtr;
+    BitSetPtr changedBitSet;
+    BitSetPtr overrunBitSet;
+};
+
+class Monitor {
+    virtual Status start() = 0;
+    virtual Status stop() = 0;
+    virtual MonitorElementPtr poll() = 0;
+    virtual void release(MonitorElementPtr const &amp; monitorElement) = 0;
+};
+
+class MonitorRequester : public virtual Requester {
+    virtual void monitorConnect(Status const &amp; status,
+        MonitorPtr const &amp; monitor, StructureConstPtr const &amp; structure) = 0;
+    virtual void monitorEvent(MonitorPtr const &amp; monitor) = 0;
+    virtual void unlisten(MonitorPtr const &amp; monitor) = 0;
+};
+</pre>
+<h4>monitorElement</h4>
+<p><b>MonitorElement</b> holds the data for one element of a monitor queue.
+It has the fields:
+<dl>
+  <dt>pvStructurePtr</dt>
+    <dd>A top level structure with data values at the time the monitors occurs.</dd>
+  <dt>changedBitSet</dt>
+     <dd>Shows which fields have changed since the previous monitor.</dd>
+  <dt>overrunBitSet</dt>
+     <dd>Shows which fields have changed more han once since the previous monitor.</dd>
+</dl>
+</p>
+<h4>monitorElement queue</h4>
+<p>
+A queue of monitor elements must be implemented by any channel provider that implements
+<b>Channel::createMonitor</b>.
+For an example implementation look at pvDatabaseCPP.
+It has the following:
+<pre>
+typedef Queue&lt;MonitorElement&gt; MonitorElementQueue;
+typedef std::tr1::shared_ptr&lt;MonitorElementQueue&gt; MonitorElementQueuePtr;
+
+class MultipleElementQueue :
+    public ElementQueue
+{
+public:
+    POINTER_DEFINITIONS(MultipleElementQueue);
+    virtual ~MultipleElementQueue(){}
+    MultipleElementQueue(
+        MonitorLocalPtr const &amp;monitorLocal,
+        MonitorElementQueuePtr const &amp;queue,
+        size_t nfields);
+    virtual void destroy(){}
+    virtual Status start();
+    virtual Status stop();
+    virtual bool dataChanged();
+    virtual MonitorElementPtr poll();
+    virtual void release(MonitorElementPtr const &amp;monitorElement);
+...
+};
+</pre>
+<h4>Monitor</h4>
+<p><b>Monitor</b> must be implemented by any channel provider that implements
+<b>Channel::createMonitor</b>.
+Remote PVAccess also implements Monitor on the client side.
+Note that each client has it's own queue that is not shared with other client.
+</p>
+<p>Monitor has the following methods:</p>
+<dl>
+   <dt>start</dt>
+     <dd>
+      Start monitoring.
+      This will result in a an inital monitor that has the current value
+      of all fields.
+     </dd>
+   <dt>stop</dt>
+     <dd>
+      Stop monitoring.
+     </dd>
+   <dt>poll</dt>
+     <dd>
+      Called to get a monitor element.
+      If no new elemants are available then a null pointer is returned.
+     </dd>
+   <dt>release</dt>
+     <dd>
+      Release the monotor element.
+      The caller owns the monitor element between the calls to poll and release.
+     </dd>
+<dl>
+</dl>
+<h4>MonitorRequester</h4>
+<p>This must be implemented by a pvAccess client.
+It has the methods:</p>
+<dl>
+  <dt>monitorConnect</dt>
+     <dd>
+      A monitor has either connected of disconnected.
+     </dd>
+  <dt>monitorEvent</dt>
+     <dd>
+      A new monitor element is available.
+     </dd>
+  <dt>unlisten</dt>
+     <dd>
+      The channel is going away. The client cam no longer access the monitor.
+     </dd>
+</dl>
+
+<h3>monitorPlugin</h3>
+<pre>
+class MonitorPlugin
+{
+    virtual String const &amp; getName() = 0;
+    virtual bool causeMonitor(
+        PVFieldPtr const &amp;pvField,
+        PVStructurePtr const &amp;pvTop,
+        MonitorElementPtr const &amp;monitorElement) = 0;
+    virtual void monitorDone(
+        MonitorElementPtr const &amp;monitorElement);
+    virtual void startMonitoring();
+    virtual void stopMonitoring();
+    virtual void beginGroupPut();
+    virtual void endGroupPut();
+};
+
+class MonitorPluginCreator
+{
+    virtual MonitorPluginPtr create(
+        FieldConstPtr const &amp;field,
+        StructureConstPtr const &amp;top,
+        PVStructurePtr const &amp;pvFieldOptions) = 0;
+     virtual String const &amp; getName() = 0;
+}
+
+class MonitorPluginManager
+{
+    static MonitorPluginManagerPtr get();
+    bool addPlugin(
+         String const &amp;pluginName,
+         MonitorPluginCreatorPtr const &amp;creator);
+    MonitorPluginCreatorPtr findPlugin(String const &amp;pluginName);
+    void showNames();
+};
+
+</pre>
+<h4>MonitorPlugin</h4>
+<p><b>MonitorPlugin</b> must be implemented by the plugin implementation.
+It has methods:</p>
+<dl>
+   <dt>getName</dt>
+     <dd>Get the name of the plugin.</dd>
+   <dt>causeMonitor</dt>
+     <dd>
+       Should the value of pvField cause a monitor to be raised.
+       pvField and pvTop are fields in the top level structure
+       being monitored. monitorElement has the top level structure
+       for the copy</b>.
+       The implementation should <b>not</b> modify the fields in the structure
+        being monitored.
+        Called with pvTop locked.
+     </dd>
+   <dt>monitorDone</dt>
+     <dd>
+       Called just before monitorElement will be given to client.
+       The plugin can change the data values and bitSets in monitorElement.
+        Called with pvTop unlocked.
+    </dd>
+   <dt>startMonitoring</dt>
+     <dd>
+      Monitoring is starting.
+     </dd>
+   <dt>stopMonitoring</dt>
+     <dd>
+      Monitoring is being stopped.
+     </dd>
+   <dt>beginGroupPut</dt>
+     <dd>
+      A set of puts is starting.
+        Called with pvTop locked.
+     </dd>
+   <dt>endGroupPut</dt>
+     <dd>
+      The set of puts is complete.
+        Called with pvTop locked.
+     </dd>
+</dl>
+<h4>MonitorPluginCreator</h4>
+<p><b>MonitorPluginCreator</b> must also be implemented by the plugin implementation.
+It is called for each field instance that has options of the from
+<b>[plugin=name...]</b> where <b>name</b> is the name of the plugin.
+Note that a plugin instance will belong to a single client.
+It has methods:</p>
+<dl>
+   <dt>getName</dt>
+     <dd>Get the name of the plugin.</dd>
+   <dt>create</dt>
+     <dd>
+     Create a new plugin instance.
+     If the arguments are not compatible with the plugin a NULL shared pointer is
+     returned.<br/>
+    pvFieldOptions is
+      a structure with a set of PVString subfields that specify <b>name,value</b>
+      pairs. name is the subField name and value is the subField value.<br/>
+     Note that a plugin will below to a single client.
+    </dd>
+<dl>
+<h4>MonitorPluginManager</h4>
+<p><b>MonitorPluginManager</b> has the methods:</p>
+<dl>
+   <dt>get</dt>
+     <dd>
+     MonitorPluginManager is a singleton.
+     The first call to get will create the single instance.
+     Further calls will rerurn the single instance.
+     </dd>
+   <dt>addPlugin</dt>
+     <dd>
+     Add a new plugin.
+     </dd>
+   <dt>findPlugin</dt>
+     <dd>
+      Find a plugin. A NULL shared pointer is reurned if it has not been added.
+     </dd>
+   <dt>showNames</dt>
+     <dd>
+      Show the names of all puugins that have been added.
+     </dd>
+</dl>
+<p><b>NOTE:</b>
+Should the method <b>causeMonitor</b> 
+have arguments <b>pvField</b> and <b>pvTop</b>
+be defined so that they can not be modfied.
+This would be posssible if the following was defined:
+<pre>
+typedef std::tr1::shared_ptr&lt;const PVField&gt; PVFieldConstPtr;
+typedef std::tr1::shared_ptr&lt;const PVStructure&gt; PVStructureConstPtr;
+</pre>
+then the definition for causeMonitor could be:
+<pre>
+virtual bool causeMonitor(
+        PVFieldConstPtr const &amp;pvField,
+        PVStructureConstPtr const &amp;pvTop,
+        MonitorElementPtr const &amp;monitorElement) = 0;
+</pre>
+But just adding these definitions is not sufficent.
+In addition all methods defined in pvDataCPP must be checked.
+In particular many of the methods in <b>Convert</b> must have
+their arguments modified.
+Big job.
+</p>
+<h2>monitorPlugin example</h2>
+<h3>Example Plugin Overview</h3>
+<p>This section describes an example plugin that:</p>
+<ul>
+   <li>Only raises monitors when a field changes value.<br />
+     If no plugin is provided
+     the default is to raise a monitor when a put is issued to a field.</li>
+   <li>Optionally a change will not raise a monitor.<br />
+     The change will, however,
+     appear if a put to another field raise a monitor.</li>
+</ul>
+<p>As an example assume that a channel provided by pvAccess has a top level structure
+that represents a power supply.</p>
+<pre>
+structure powerSupply
+    structure alarm
+    structure timeStamp
+    structure power
+       double value
+       structure alarm
+       struvture display
+    structure voltage
+       double value
+       structure alarm
+       struvture display
+    structure current
+       double value
+       structure alarm
+       struvture display
+</pre>
+<p>A pvAccess client wants to create a monitor on the powerSupply as follows:
+The client wants a top level structure that looks like:
+<pre>
+structure powerSupply
+    structure alarm
+    structure timeStamp
+    structure power
+       double value
+    structure voltage
+       double value
+    structure current
+       double value
+</pre>
+In addition the client wants monitors to occur only when one of the monitored
+fields changes value but not just because a put occured.
+Also if only the timeStamp changes value then that should not cause a monitor.
+</p>
+<p>The example monitor plugin implements the semantics the
+client wants. It can be attached to any field via the following options:
+<pre>
+[plugin=onChange,raiseMonitor=value]
+</pre>
+This plugin will trigger a monitor for the field only if the field changes
+value. In addition <b>value</b> equals <b>false</b> means do not raise a monotor
+for changes to this field.
+But if a change to another field does cause a monitor the change to this field
+will be passed to the client.
+</p>
+<p>
+Assume that the client has already connected to the channel.
+The client can then issue the commands:</p>
+<pre>
+String request("field(alarm[plugin=onChange]");
+request += ",timeStamp[plugin=onChange,raiseMonitor=false]";
+request += ",power.value[plugin=onChange";
+request += ",voltage.value[plugin=onChange";
+request += ",current.value[plugin=onChange";
+
+PVStructurePtr pvRequest = createRequest-&gt;createRequest(request);
+
+MonitorPtr monitor = channel-&gt;createMonitor(monitorRequester,pvRequest);
+</pre>
+<h3>Example Plugin Code</h3>
+<p>The header file to create the example has the definition:</p>
+<pre>
+class ExampleMonitorPlugin{
+public:
+    static void create();
+};
+</pre>
+<p>The implementation is:</p>
+<pre>
+class OnChangePlugin : public MonitorPlugin
+{
+public:
+    virtual ~OnChangePlugin(){}
+    OnChangePlugin() {}
+    bool init(
+        FieldConstPtr const &amp;field,
+        StructureConstPtr const &amp;top,
+        PVStructurePtr const &amp;pvFieldOptions)
+   {
+        pvField = getPVDataCreate()-&gt;createPVField(field);
+        raiseMonitor = true;
+        if(pvFieldOptions!=NULL) {
+            PVStringPtr pvString =
+                pvFieldOptions-&gt;getSubField&lt;PVString&gt;("raiseMonitor");
+                if(pvString!=NULL) {
+                    String value = pvString-&gt;get();
+                    if(value.compare("false")==0) raiseMonitor = false;
+                }
+        }
+        return true;
+   }
+   virtual String &amp;getName(){return pluginName;}
+   virtual bool causeMonitor(
+        PVFieldPtr const &amp;pvNew,
+        PVStructurePtr const &amp;pvTop,
+        MonitorElementPtr const &amp;monitorElement)
+   {
+       bool isSame = convert-&gt;equals(pvNew,pvField);
+       if(isSame) return false;
+       convert-&gt;copy(pvNew,pvField);
+       return raiseMonitor;
+   }
+private:
+   PVFieldPtr pvField;
+   bool raiseMonitor;
+};
+class OnChangePluginCreator : public MonitorPluginCreator
+{
+public:
+    virtual String &amp;getName(){return pluginName;}
+    virtual MonitorPluginPtr create(
+        FieldConstPtr const &amp;field,
+        StructureConstPtr const &amp;top,
+        PVStructurePtr const &amp;pvFieldOptions)
+   {
+       OnChangePluginPtr plugin(new OnChangePlugin());
+       bool result = plugin-&gt;init(field,top,pvFieldOptions);
+       if(!result) return MonitorPluginPtr();
+       return plugin;
+   }
+
+};
+
+void ExampleMonitorPlugin::create()
+{
+    static OnChangePluginCreatorPtr plugin;
+    static Mutex mutex;
+    Lock xx(mutex);
+    if(plugin==NULL) {
+        plugin = OnChangePluginCreatorPtr(new OnChangePluginCreator());
+        MonitorPluginManager::get()-&gt;addPlugin(pluginName,plugin);
+    }
+}
+</pre>
+
+
+</div>
+</body>
+</html>

@@ -25,37 +25,27 @@ String PVDisplay::notAttached("Not attached to an display structure");
 
 bool PVDisplay::attach(PVFieldPtr const & pvField)
 {
-    if(pvField->getField()->getType()!=structure) {
-            pvField->message(noDisplayFound,errorMessage);
-            return false;
-    }
+    if(pvField->getField()->getType()!=structure) return false;
     PVStructurePtr pvStructure = static_pointer_cast<PVStructure>(pvField);
     pvDescription = pvStructure->getStringField("description");
-    if(pvDescription.get()==NULL) {
-        pvField->message(noDisplayFound,errorMessage);
-        return false;
-    }
+    if(pvDescription.get()==NULL) return false;
     pvFormat = pvStructure->getStringField("format");
     if(pvFormat.get()==NULL) {
-        pvField->message(noDisplayFound,errorMessage);
         detach();
         return false;
     }
     pvUnits = pvStructure->getStringField("units");
     if(pvUnits.get()==NULL) {
-        pvField->message(noDisplayFound,errorMessage);
         detach();
         return false;
     }
     pvLow = pvStructure->getDoubleField(String("limitLow"));
     if(pvLow.get()==NULL) {
-        pvField->message(noDisplayFound,errorMessage);
         detach();
         return false;
     }
     pvHigh = pvStructure->getDoubleField(String("limitHigh"));
     if(pvHigh.get()==NULL) {
-        pvField->message(noDisplayFound,errorMessage);
         detach();
         return false;
     }

@@ -24,6 +24,8 @@
 
 using namespace epics::pvData;
 using std::tr1::static_pointer_cast;
+using std::cout;
+using std::endl;
 
 static bool debug = false;
 
@@ -36,24 +38,6 @@ static String builder("");
 static String alarmTimeStamp("alarm,timeStamp");
 static String alarmTimeStampValueAlarm("alarm,timeStamp,valueAlarm");
 static String allProperties("alarm,timeStamp,display,control,valueAlarm");
-
-static void testAppend()
-{
-    if(debug) printf("\ntestAppend\n");
-    PVFieldPtrArray pvFields;
-    StringArray fieldNames;
-    PVStructurePtr pvParent = pvDataCreate->createPVStructure(
-        fieldNames,pvFields);
-    PVStringPtr pvStringField = static_pointer_cast<PVString>(
-        pvDataCreate->createPVScalar(pvString));
-    pvStringField->put(String("value,timeStamp"));
-    PVFieldPtr pvField = pvStringField;
-    pvParent->appendPVField("request",pvField);
-    builder.clear();
-    pvParent->toString(&builder);
-    if(debug) printf("%s\n",builder.c_str());
-    printf("testAppend PASSED\n");
-}
 
 static void testCreatePVStructure()
 {
@@ -360,7 +344,7 @@ static void testScalarArrayCommon(String /*fieldName*/,ScalarType stype)
     pvStructure->toString(&builder);
     if(debug) printf("%s\n",builder.c_str());
     PVFieldPtr pvField = pvStructure->getSubField("alarm.status");
-    pvField->message("this is a test",infoMessage);
+    testOk1(pvField!=NULL);
 }
 
 static void testScalarArray()
@@ -377,18 +361,81 @@ static void testScalarArray()
     printf("testScalarArray PASSED\n");
 }
 
+static void testRequest()
+{
+    if(debug) printf("\ntestScalarArray\n");
+    StringArray nullNames;
+    FieldConstPtrArray nullFields;
+    StringArray optionNames(1);
+    FieldConstPtrArray optionFields(1);
+    optionNames[0] = "process";
+    optionFields[0] = fieldCreate->createScalar(pvString);
+    StringArray recordNames(1);
+    FieldConstPtrArray recordFields(1);
+    recordNames[0] = "_options";
+    recordFields[0] = fieldCreate->createStructure(optionNames,optionFields);
+    StringArray fieldNames(2);
+    FieldConstPtrArray fieldFields(2);
+    fieldNames[0] = "alarm";
+    fieldFields[0] = fieldCreate->createStructure(nullNames,nullFields);
+    fieldNames[1] = "timeStamp";
+    fieldFields[1] = fieldCreate->createStructure(nullNames,nullFields);
+    StringArray topNames(2);
+    FieldConstPtrArray topFields(2);
+    topNames[0] = "record";
+    topFields[0] = fieldCreate->createStructure(recordNames,recordFields);
+    topNames[1] = "field";
+    topFields[1] = fieldCreate->createStructure(fieldNames,fieldFields);
+    StructureConstPtr topStructure = fieldCreate->createStructure(
+        topNames,topFields);
+String buffer;
+topStructure->toString(&buffer);
+cout << buffer.c_str() << endl;
+    PVStructurePtr pvTop = pvDataCreate->createPVStructure(topStructure);
+buffer.clear();
+pvTop->toString(&buffer);
+cout << buffer.c_str() << endl;
+buffer.clear();
+pvTop->getStructure()->toString(&buffer);
+cout << buffer.c_str() << endl;
+PVStructurePtr xxx = pvTop->getSubField<PVStructure>("record");
+buffer.clear();
+xxx->toString(&buffer);
+cout << buffer.c_str() << endl;
+xxx = pvTop->getSubField<PVStructure>("field");
+buffer.clear();
+xxx->toString(&buffer);
+cout << buffer.c_str() << endl;
+PVStringPtr pvString = pvTop->getSubField<PVString>("record._options.process");
+pvString->put("true");
+buffer.clear();
+pvTop->toString(&buffer);
+cout << buffer.c_str() << endl;
+cout << pvTop->dumpValue(cout) << endl;
+
+String subName("record._options.process");
+PVFieldPtr pvField = pvTop->getSubField(subName);
+String fieldName = pvField->getFieldName();
+String fullName = pvField->getFullName();
+cout << "fieldName " << fieldName << " fullName " << fullName << endl;
+
+    testOk1(fieldName.compare("process")==0);
+    testOk1(fullName.compare(subName)==0);
+
+}
+
 MAIN(testPVData)
 {
-    testPlan(179);
+    testPlan(189);
     fieldCreate = getFieldCreate();
     pvDataCreate = getPVDataCreate();
     standardField = getStandardField();
     standardPVField = getStandardPVField();
     convert = getConvert();
-    testAppend();
     testCreatePVStructure();
     testPVScalar();
     testScalarArray();
+    testRequest();
     return testDone();
 }
 

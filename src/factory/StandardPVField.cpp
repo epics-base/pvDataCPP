@@ -53,6 +53,14 @@ PVStructurePtr StandardPVField::structureArray(
     return pvStructure;
 }
 
+PVStructurePtr StandardPVField::unionArray(
+    UnionConstPtr const & punion,String const & properties)
+{
+    StructureConstPtr field = standardField->unionArray(punion,properties);
+    PVStructurePtr pvStructure = pvDataCreate->createPVStructure(field);
+    return pvStructure;
+}
+
 PVStructurePtr StandardPVField::enumerated(StringArray const &choices)
 {
     StructureConstPtr field = standardField->enumerated();

@@ -25,10 +25,7 @@ String PVTimeStamp::notAttached("Not attached to a timeStamp structure");
 
 bool PVTimeStamp::attach(PVFieldPtr const & pvField)
 {
-    if(pvField->getField()->getType()!=structure) {
-            pvField->message(noTimeStamp,errorMessage);
-            return false;
-    }
+    if(pvField->getField()->getType()!=structure) return false;
     PVStructurePtr xxx = static_pointer_cast<PVStructure>(pvField);
     PVStructure* pvStructure = xxx.get();
     while(true) {

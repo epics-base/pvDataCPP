@@ -5,7 +5,6 @@ SRC_DIRS += $(PVDATA_SRC)/factory
 INC += factory.h
 LIBSRCS += TypeFunc.cpp
 LIBSRCS += FieldCreateFactory.cpp
-LIBSRCS += PVAuxInfoImpl.cpp
 LIBSRCS += PVField.cpp
 LIBSRCS += PVScalar.cpp
 LIBSRCS += PVArray.cpp

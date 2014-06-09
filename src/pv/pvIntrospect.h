@@ -24,6 +24,7 @@ namespace epics { namespace pvData {
 
 class Field;
 class Scalar;
+class Array;
 class ScalarArray;
 class Structure;
 class StructureArray;
@@ -42,6 +43,10 @@ typedef std::vector<FieldConstPtr> FieldConstPtrArray;
  * typedef for a shared pointer to an immutable Scalar.
  */
 typedef std::tr1::shared_ptr<const Scalar> ScalarConstPtr;
+/**
+ * typedef for a shared pointer to an immutable Array.
+ */
+typedef std::tr1::shared_ptr<const Array> ArrayConstPtr;
 /**
  * typedef for a shared pointer to an immutable ScalarArray.
  */
@@ -315,9 +320,38 @@ private:
 };
 
 /**
+ * This class implements introspection object for Array.
+ */
+class epicsShareClass Array : public Field{
+public:
+    POINTER_DEFINITIONS(Array);
+    /**
+     * Destructor.
+     */
+    virtual ~Array();
+    typedef Array& reference;
+    typedef const Array& const_reference;
+    
+/*	fixed-size array support
+    // 0 not valid value, means undefined
+    std::size_t getMaximumCapacity() const;
+
+    // 0 not valid value, means undefined
+    std::size_t getFixedLength() const;	
+*/
+protected:
+    /**
+     * Constructor
+     * @param  fieldName The field type.
+     */
+   Array(Type type);
+
+};
+
+/**
  * This class implements introspection object for field.
  */
-class epicsShareClass ScalarArray : public Field{
+class epicsShareClass ScalarArray : public Array{
 public:
     POINTER_DEFINITIONS(ScalarArray);
     typedef ScalarArray& reference;
@@ -332,7 +366,7 @@ public:
      * Get the scalarType for the elements.
      * @return the scalarType
      */
-    ScalarType  getElementType() const {return elementType;}
+    ScalarType getElementType() const {return elementType;}
     /**
      * Convert the scalarType to a string and add it to builder.
      * @param  builder The string builder.
@@ -365,7 +399,7 @@ private:
 /**
  * This class implements introspection object for a structureArray
  */
-class epicsShareClass StructureArray : public Field{
+class epicsShareClass StructureArray : public Array{
 public:
     POINTER_DEFINITIONS(StructureArray);
     typedef StructureArray& reference;
@@ -375,7 +409,7 @@ public:
      * Get the introspection interface for the array elements.
      * @return The introspection interface.
      */
-    StructureConstPtr  getStructure() const {return pstructure;}
+    StructureConstPtr getStructure() const {return pstructure;}
 
     /**
      * Convert the scalarType to a string and add it to builder.
@@ -407,7 +441,7 @@ private:
 /**
  * This class implements introspection object for a unionArray
  */
-class epicsShareClass UnionArray : public Field{
+class epicsShareClass UnionArray : public Array{
 public:
     POINTER_DEFINITIONS(UnionArray);
     typedef UnionArray& reference;
@@ -417,7 +451,7 @@ public:
      * Get the introspection interface for the array elements.
      * @return The introspection interface.
      */
-    UnionConstPtr  getUnion() const {return punion;}
+    UnionConstPtr getUnion() const {return punion;}
 
     /**
      * Convert the scalarType to a string and add it to builder.
@@ -500,8 +534,6 @@ public:
      * @return The array of fieldNames.
      */
     StringArray const & getFieldNames() const {return fieldNames;}
-    void renameField(std::size_t fieldIndex,String const & newName)
-        {fieldNames[fieldIndex] = newName;}
     /**
      * Get the name of the field with the specified index;
      * @param fieldIndex The index of the desired field.
@@ -595,8 +627,6 @@ public:
      * @return The array of fieldNames.
      */
     StringArray const & getFieldNames() const {return fieldNames;}
-    void renameField(std::size_t fieldIndex,String const & newName)
-        {fieldNames[fieldIndex] = newName;}
     /**
      * Get the name of the field with the specified index;
      * @param fieldIndex The index of the desired field.
@@ -637,9 +667,6 @@ private:
    friend class Structure;
 };
 
-/**
- * This is a singlton class for creating introspection interfaces.
- */
 class FieldCreate;
 typedef std::tr1::shared_ptr<FieldCreate> FieldCreatePtr;
 
@@ -784,6 +811,9 @@ private:
    
 };
 
+/**
+ * This is a singleton class for creating introspection interfaces.
+ */
 class epicsShareClass FieldCreate {
 public:
     static FieldCreatePtr getFieldCreate();
@@ -812,6 +842,11 @@ public:
       * @return An {@code Array} Interface for the newly created object.
       */
     StructureArrayConstPtr createStructureArray(StructureConstPtr const & structure) const;
+    /**
+     * Create a {@code Structure} field.
+     * @return a {@code Structure} interface for the newly created object.
+     */
+    StructureConstPtr createStructure () const;
     /**
      * Create a {@code Structure} field.
      * @param fieldNames The array of {@code fieldNames} for the structure.

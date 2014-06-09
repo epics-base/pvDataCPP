@@ -505,6 +505,20 @@ StructureConstPtr StandardField::scalar(
     return createProperties("uri:ev4:nt/2012/pwd:NTScalar",field,properties);
 }
 
+StructureConstPtr StandardField::regUnion(
+    UnionConstPtr const &field,
+        String const & properties)
+{
+   return createProperties("uri:ev4:nt/2012/pwd:NTUnion",field,properties);
+}
+
+StructureConstPtr StandardField::variantUnion(
+    String const & properties)
+{
+    UnionConstPtr field =  fieldCreate->createVariantUnion();
+    return createProperties("uri:ev4:nt/2012/pwd:NTUnion",field,properties);
+}
+
 StructureConstPtr StandardField::scalarArray(
     ScalarType elementType, String  const &properties)
 {
@@ -518,7 +532,15 @@ StructureConstPtr StandardField::structureArray(
 {
     StructureArrayConstPtr field = fieldCreate->createStructureArray(
         structure);
-    return createProperties("uri:ev4:nt/2012/pwd:NTAny",field,properties);
+    return createProperties("uri:ev4:nt/2012/pwd:NTStructureArray",field,properties);
+}
+
+StructureConstPtr StandardField::unionArray(
+    UnionConstPtr const & punion,String  const &properties)
+{
+    UnionArrayConstPtr field = fieldCreate->createUnionArray(
+        punion);
+    return createProperties("uri:ev4:nt/2012/pwd:NTUnionArray",field,properties);
 }
 
 StructureConstPtr StandardField::enumerated()

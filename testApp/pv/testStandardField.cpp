@@ -66,6 +66,17 @@ MAIN(testStandardField)
     builder.clear();
     structureArrayValue->toString(&builder);
     print("structureArrayValue");
+
+    StructureConstPtr punion = standardField->regUnion(
+        fieldCreate->createFieldBuilder()->
+        add("doubleValue", pvDouble)->
+        add("intValue", pvInt)->
+        add("timeStamp",standardField->timeStamp())->
+        createUnion(),
+        "alarm,timeStamp");
+    builder.clear();
+    punion->toString(&builder);
+    print("unionValue");
     testPass("testStandardField");
     return testDone();
 }

@@ -15,6 +15,7 @@
 #include <pv/pvData.h>
 #include <pv/sharedPtr.h>
 #include <pv/bitSet.h>
+#include <pv/requester.h>
 
 #include <shareLib.h>
 

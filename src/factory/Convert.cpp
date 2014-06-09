@@ -50,9 +50,10 @@ void Convert::getString(StringBuilder buf,PVField const *pvField,int /*indentLev
 {
     // TODO indextLevel ignored
     std::ostringstream strm;
-    PrinterPlain p;
-    p.setStream(strm);
-    p.print(*pvField);
+    strm << pvField->dumpValue(strm) << std::endl;
+//    PrinterPlain p;
+//    p.setStream(strm);
+//    p.print(*pvField);
     strm.str().swap(*buf);
 }
 
@@ -470,7 +471,7 @@ void Convert::copyUnion(PVUnionPtr const & from, PVUnionPtr const & to)
         if (fromValue.get() == 0)
             to->select(PVUnion::UNDEFINED_INDEX);
         else
-            copy(fromValue, to->select(from->getSelectedIndex()));
+            to->set(from->getSelectedFieldName(),from->get());
     }
 }
 

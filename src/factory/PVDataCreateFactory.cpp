@@ -548,16 +548,6 @@ PVScalarPtr PVDataCreate::createPVScalar(PVScalarPtr const & scalarToClone)
      ScalarType scalarType = scalarToClone->getScalar()->getScalarType();
      PVScalarPtr pvScalar = createPVScalar(scalarType);
      getConvert()->copyScalar(scalarToClone, pvScalar);
-     PVAuxInfoPtr from = scalarToClone->getPVAuxInfo();
-     PVAuxInfoPtr to = pvScalar->getPVAuxInfo();
-     PVAuxInfo::PVInfoMap & map = from->getInfoMap();
-     for(PVAuxInfo::PVInfoIter iter = map.begin(); iter!= map.end(); ++iter) {
-         String key = iter->first;
-         PVScalarPtr pvFrom = iter->second;
-         ScalarConstPtr scalar = pvFrom->getScalar();
-         PVScalarPtr pvTo = to->createInfo(key,scalar->getScalarType());
-         getConvert()->copyScalar(pvFrom,pvTo);
-     }
      return pvScalar;
 }
 
@@ -607,16 +597,6 @@ PVScalarArrayPtr PVDataCreate::createPVScalarArray(
      PVScalarArrayPtr pvArray = createPVScalarArray(
           arrayToClone->getScalarArray()->getElementType());
      pvArray->assign(*arrayToClone.get());
-     PVAuxInfoPtr from = arrayToClone->getPVAuxInfo();
-     PVAuxInfoPtr to = pvArray->getPVAuxInfo();
-     PVAuxInfo::PVInfoMap & map = from->getInfoMap();
-     for(PVAuxInfo::PVInfoIter iter = map.begin(); iter!= map.end(); ++iter) {
-         String key = iter->first;
-         PVScalarPtr pvFrom = iter->second;
-         ScalarConstPtr scalar = pvFrom->getScalar();
-         PVScalarPtr pvTo = to->createInfo(key,scalar->getScalarType());
-         getConvert()->copyScalar(pvFrom,pvTo);
-     }
     return pvArray;
 }
 
