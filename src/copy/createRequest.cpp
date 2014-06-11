@@ -7,10 +7,10 @@
 #include <string>
 #include <sstream>
 
+#define epicsExportSharedSymbols
+
 #include <pv/pvData.h>
 #include <pv/lock.h>
-
-#define epicsExportSharedSymbols
 #include <pv/createRequest.h>
 
 using namespace epics::pvData;

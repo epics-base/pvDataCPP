@@ -8,6 +8,8 @@
  *  @author mrk
  */
 
+#define epicsExportSharedSymbols
+
 #include <pv/monitorPlugin.h>
 
 namespace epics { namespace pvData { 

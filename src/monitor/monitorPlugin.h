@@ -48,7 +48,7 @@ typedef std::tr1::shared_ptr<MonitorPluginManager> MonitorPluginManagerPtr;
  * A monitor is assumed to be associated with a field of a top level
  * structure.
  */
-class MonitorPlugin
+class epicsShareClass MonitorPlugin
 {
 public:
     virtual ~MonitorPlugin(){}
@@ -103,7 +103,7 @@ public:
 /** A class that creates a plugin.
  * Normlly a plugin is created for a single client.
  */
-class MonitorPluginCreator
+class epicsShareClass MonitorPluginCreator
 {
 public:
     virtual ~MonitorPluginCreator() {}

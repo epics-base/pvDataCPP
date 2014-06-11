@@ -10,21 +10,10 @@
 #include <string>
 #include <sstream>
 
-#ifdef epicsExportSharedSymbols
-#   define pvDataEpicsExportSharedSymbols
-#   undef epicsExportSharedSymbols
-#endif
-
-
 #include <pv/pvData.h>
 #include <pv/lock.h>
 
-#ifdef pvDataEpicsExportSharedSymbols
-#   define epicsExportSharedSymbols
-#       undef pvDataEpicsExportSharedSymbols
-#endif
-
-
+#include <shareLib.h>
 
 namespace epics { namespace pvData {
 

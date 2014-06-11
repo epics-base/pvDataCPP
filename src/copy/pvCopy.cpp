@@ -13,6 +13,8 @@
 #include <memory>
 #include <sstream>
 
+#define epicsExportSharedSymbols
+
 #include <pv/thread.h>
 
 #include <pv/pvCopy.h>
