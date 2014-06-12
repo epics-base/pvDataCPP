@@ -164,7 +164,7 @@ void copy(
     if(pvFromStride<1 || toStride<1) throw std::invalid_argument("stride must be >=1");
     StructureArrayConstPtr pvFromStructure = pvFrom.getStructureArray();
     StructureArrayConstPtr toStructure = pvTo.getStructureArray();
-    if(pvFromStructure!=toStructure) {
+    if(pvFromStructure->getStructure()!=toStructure->getStructure()) {
         throw std::invalid_argument(
             "pvSubArrayCopy structureArray pvTo and pvFrom have different structures");
     }
@@ -182,6 +182,42 @@ void copy(
         temp[i] = getPVDataCreate()->createPVStructure(toStructure->getStructure());
     for(size_t i=0; i<count; ++i) temp[i*toStride + toOffset] = vecFrom[i*pvFromStride+pvFromOffset];
     shared_vector<const PVStructurePtr> temp2(freeze(temp));
+    pvTo.replace(temp2);
+}
+
+void copy(
+    PVUnionArray & pvFrom,
+    size_t pvFromOffset,
+    size_t pvFromStride,
+    PVUnionArray & pvTo,
+    size_t toOffset,
+    size_t toStride,
+    size_t count)
+{
+    if(pvTo.isImmutable()) {
+        throw std::logic_error("pvSubArrayCopy  pvTo is immutable");
+    }
+    if(pvFromStride<1 || toStride<1) throw std::invalid_argument("stride must be >=1");
+    UnionArrayConstPtr pvFromUnion = pvFrom.getUnionArray();
+    UnionArrayConstPtr toUnion = pvTo.getUnionArray();
+    if(pvFromUnion->getUnion()!=toUnion->getUnion()) {
+        throw std::invalid_argument(
+            "pvSubArrayCopy unionArray pvTo and pvFrom have different unions");
+    }
+    size_t pvFromLength = pvFrom.getLength();
+    size_t num = pvFromOffset + count*pvFromStride;
+    if(num>pvFromLength) throw std::invalid_argument("pvSubArrayCopy pvFrom length error");
+    size_t newLength = toOffset + count*toStride;
+    size_t capacity = pvTo.getCapacity();
+    if(newLength>capacity) capacity = newLength;
+    shared_vector<PVUnionPtr> temp(capacity);
+    PVValueArray<PVUnionPtr>::const_svector vecFrom = pvFrom.view();
+    PVValueArray<PVUnionPtr>::const_svector vecTo = pvTo.view();
+    for(size_t i=0; i<pvTo.getLength(); ++i) temp[i] = vecTo[i];
+    for(size_t i=pvTo.getLength(); i< capacity; ++i)
+        temp[i] = getPVDataCreate()->createPVUnion(toUnion->getUnion());
+    for(size_t i=0; i<count; ++i) temp[i*toStride + toOffset] = vecFrom[i*pvFromStride+pvFromOffset];
+    shared_vector<const PVUnionPtr> temp2(freeze(temp));
     pvTo.replace(temp2);
 }
 
@@ -213,6 +249,11 @@ void copy(
     if(pvFromType==structureArray) {
            copy(dynamic_cast<PVStructureArray &>(pvFrom) ,pvFromOffset,pvFromStride,
            dynamic_cast<PVStructureArray&>(pvTo),
+           pvToOffset,pvToStride,count);
+    }
+    if(pvFromType==unionArray) {
+           copy(dynamic_cast<PVUnionArray &>(pvFrom) ,pvFromOffset,pvFromStride,
+           dynamic_cast<PVUnionArray&>(pvTo),
            pvToOffset,pvToStride,count);
     }
 }
