@@ -31,8 +31,8 @@ void copy(
     if(pvTo.isImmutable()) throw std::invalid_argument("pvSubArrayCopy: pvTo is immutable");
     if(fromStride<1 || toStride<1) throw std::invalid_argument("stride must be >=1");
     size_t fromLength = pvFrom.getLength();
-    size_t num = fromOffset + count*fromStride;
-    if(num>fromLength) throw std::invalid_argument("pvSubArrayCopy pvFrom length error");
+    size_t maxcount = (fromLength -fromOffset + fromStride -1)/fromStride;
+    if(count>maxcount) throw std::invalid_argument("pvSubArrayCopy pvFrom length error");
     size_t newLength = toOffset + count*toStride;
     size_t capacity = pvTo.getCapacity();
     if(newLength>capacity) capacity = newLength;
@@ -169,8 +169,8 @@ void copy(
             "pvSubArrayCopy structureArray pvTo and pvFrom have different structures");
     }
     size_t pvFromLength = pvFrom.getLength();
-    size_t num = pvFromOffset + count*pvFromStride;
-    if(num>pvFromLength) throw std::invalid_argument("pvSubArrayCopy pvFrom length error");
+    size_t maxcount = (pvFromLength -pvFromOffset + pvFromStride -1)/pvFromStride;
+    if(count>maxcount) throw std::invalid_argument("pvSubArrayCopy pvFrom length error");
     size_t newLength = toOffset + count*toStride;
     size_t capacity = pvTo.getCapacity();
     if(newLength>capacity) capacity = newLength;
@@ -205,8 +205,8 @@ void copy(
             "pvSubArrayCopy unionArray pvTo and pvFrom have different unions");
     }
     size_t pvFromLength = pvFrom.getLength();
-    size_t num = pvFromOffset + count*pvFromStride;
-    if(num>pvFromLength) throw std::invalid_argument("pvSubArrayCopy pvFrom length error");
+    size_t maxcount = (pvFromLength -pvFromOffset + pvFromStride -1)/pvFromStride;
+    if(count>maxcount) throw std::invalid_argument("pvSubArrayCopy pvFrom length error");
     size_t newLength = toOffset + count*toStride;
     size_t capacity = pvTo.getCapacity();
     if(newLength>capacity) capacity = newLength;
