@@ -45,7 +45,6 @@ private:
     double period;
     bool onList;
     friend class Timer;
-    friend std::ostream& operator<<(std::ostream& o, Timer& timer);
 };
 
 class epicsShareClass Timer : public Runnable {
