@@ -113,14 +113,19 @@ void Status::deserialize(ByteBuffer *buffer, DeserializableControl *flusher)
 	}
 }
 
+void Status::dump(std::ostream& o) const
+{
+    o << "Status [type=" << Status::StatusTypeName[m_statusType];
+    if (!m_message.empty())
+        o << ", message=" << m_message;
+    if (!m_stackDump.empty())
+        o << ", stackDump=" << std::endl << m_stackDump;
+    o << ']';
+}    
+
 std::ostream& operator<<(std::ostream& o, const Status& status)
 {
-    o << "Status [type=" << Status::StatusTypeName[status.m_statusType];
-    if (!status.m_message.empty())
-        o << ", message=" << status.m_message;
-    if (!status.m_stackDump.empty())
-        o << ", stackDump=" << std::endl << status.m_stackDump;
-    o << ']';
+    status.dump(o);
     return o;
 }
 

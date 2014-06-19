@@ -98,6 +98,8 @@ namespace epics { namespace pvData {
             void serialize(ByteBuffer *buffer, SerializableControl *flusher) const;
             void deserialize(ByteBuffer *buffer, DeserializableControl *flusher);
     
+            void dump(std::ostream& o) const;
+
             private:
             
             static std::string m_emptyStringtring;
@@ -106,7 +108,6 @@ namespace epics { namespace pvData {
             std::string m_message;
             std::string m_stackDump;
 
-            friend std::ostream& operator<<(std::ostream& o, const Status& status);
         };
 
         epicsShareExtern std::ostream& operator<<(std::ostream& o, const Status& status);

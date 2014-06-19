@@ -196,23 +196,27 @@ void Timer::schedulePeriodic(
     if(isFirst) waitForWork.signal();
 }
 
-std::ostream& operator<<(std::ostream& o, Timer& timer)
+void Timer::dump(std::ostream& o)
 {
-    Lock xx(timer.mutex);
-    if(!timer.alive) return o;
+    Lock xx(mutex);
+    if(!alive) return;
     TimeStamp currentTime;
-    TimerCallbackPtr nodeToCall(timer.head);
+    TimerCallbackPtr nodeToCall(head);
     currentTime.getCurrent();
     while(true) {
-         if(nodeToCall.get()==NULL) return o;
+         if(nodeToCall.get()==NULL) return;
          TimeStamp timeToRun = nodeToCall->timeToRun;
          double period = nodeToCall->period;
          double diff = TimeStamp::diff(timeToRun,currentTime);
          o << "timeToRun " << diff << " period " << period << std::endl;
          nodeToCall = nodeToCall->next;
      }
-     return o;
 }
 
+std::ostream& operator<<(std::ostream& o, Timer& timer)
+{
+    timer.dump(o);
+    return o;
+}
 
 }}

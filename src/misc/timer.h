@@ -64,7 +64,7 @@ public:
     void cancel(TimerCallbackPtr const &timerCallback);
     bool isScheduled(TimerCallbackPtr const &timerCallback);
 
-    friend std::ostream& operator<<(std::ostream& o, Timer& timer);
+    void dump(std::ostream& o);
 
 private:
     void addElement(TimerCallbackPtr const &timerCallback);
