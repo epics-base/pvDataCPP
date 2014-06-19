@@ -20,9 +20,9 @@
 
 using std::tr1::const_pointer_cast;
 using std::size_t;
+using std::string;
 
 namespace epics { namespace pvData {
-
 
 PVField::PVField(FieldConstPtr field)
 : notImplemented("not implemented"),
@@ -79,7 +79,7 @@ void PVField::setPostHandler(PostHandlerPtr const &handler)
     postHandler = handler;
 }
 
-void PVField::setParentAndName(PVStructure * xxx,String const & name)
+void PVField::setParentAndName(PVStructure * xxx,string const & name)
 {
     parent = xxx;
     fieldName = name;
@@ -90,46 +90,14 @@ bool PVField::equals(PVField &pv)
     return pv==*this;
 }
 
-void PVField::toString(StringBuilder buf)
-{
-    toString(buf,0);
-}
-
-void PVField::toString(StringBuilder buf,int indentLevel) 
-{
-   Convert().getString(buf,this,indentLevel);
-}
-
 std::ostream& operator<<(std::ostream& o, const PVField& f)
 {
-	std::ostream& ro = f.dumpValue(o);
-	return ro;
+	return f.dumpValue(o);
 };
 
-namespace format
+string PVField::getFullName() const
 {
-	std::ostream& operator<<(std::ostream& os, indent_level const& indent)
-	{
-		indent_value(os) = indent.level;
-		return os;
-	}
-
-	std::ostream& operator<<(std::ostream& os, indent const&)
-	{
-		long il = indent_value(os);
-		std::size_t spaces = static_cast<std::size_t>(il) * 4;
-		return os << std::string(spaces, ' ');
-	}
-
-	array_at_internal operator<<(std::ostream& str, array_at const& manip)
-	{
-		return array_at_internal(manip.index, str);
-	}
-};
-
-String PVField::getFullName() const
-{
-    String ret(fieldName);
+    string ret(fieldName);
     for(PVField *fld=getParent(); fld; fld=fld->getParent())
     {
         if(fld->getFieldName().size()==0) break;

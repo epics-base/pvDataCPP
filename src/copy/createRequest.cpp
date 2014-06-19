@@ -17,6 +17,7 @@ using namespace epics::pvData;
 using std::tr1::static_pointer_cast;
 using std::cout;
 using std::endl;
+using std::string;
 
 namespace epics { namespace pvData {
 
@@ -26,23 +27,23 @@ static FieldCreatePtr fieldCreate = getFieldCreate();
 class CreateRequestImpl : public CreateRequest {
 private:
 
-    void removeBlanks(String& str)
+    void removeBlanks(string& str)
     {
         while(true) {
-            String::size_type pos = str.find_first_of(' ');
-            if(pos==String::npos) return;
+            string::size_type pos = str.find_first_of(' ');
+            if(pos==string::npos) return;
             str.erase(pos,1);
         }
     }
 
-    size_t findMatchingBrace(String& request, size_t index, int numOpen) {
+    size_t findMatchingBrace(string& request, size_t index, int numOpen) {
         size_t openBrace = request.find('{', index+1);
         size_t closeBrace = request.find('}', index+1);
-        if(openBrace == String::npos && closeBrace == std::string::npos){
+        if(openBrace == string::npos && closeBrace == string::npos){
              message = request + " missing }";
-             return std::string::npos;
+             return string::npos;
         }
-        if (openBrace != String::npos && openBrace!=0) {
+        if (openBrace != string::npos && openBrace!=0) {
             if(openBrace<closeBrace) return findMatchingBrace(request,openBrace,numOpen+1);
             if(numOpen==1) return closeBrace;
             return findMatchingBrace(request,closeBrace,numOpen-1);
@@ -51,34 +52,34 @@ private:
         return findMatchingBrace(request,closeBrace,numOpen-1);
     }
 
-    size_t findMatchingBracket(String& request, size_t index) {
+    size_t findMatchingBracket(string& request, size_t index) {
         for(size_t i=index+1; i< request.size(); ++i) {
             if(request[i] == ']') {
                 if(i==index+1) {
                      message = request + " illegal []";
-                     return String::npos;
+                     return string::npos;
                 }
                 return i;
             }
         }
          message = request + " missing ]";
-         return std::string::npos;
+         return string::npos;
     }
 
-    size_t findEndField(String& request) {
+    size_t findEndField(string& request) {
         size_t ind = 0;
         size_t maxind = request.size() -1;
         while(true) {
              if(request[ind]==',') return ind;
              if(request[ind]=='[') {
                  size_t closeBracket = findMatchingBracket(request,ind);
-                 if(closeBracket==String::npos) return closeBracket;
+                 if(closeBracket==string::npos) return closeBracket;
                  ind = closeBracket;
                  continue;
              }
              if(request[ind]=='{') {
                  size_t closeBrace = findMatchingBrace(request,ind,1);
-                 if(closeBrace==String::npos) return closeBrace;
+                 if(closeBrace==string::npos) return closeBrace;
                  if(ind>=request.size()) return request.size();
                  ind = closeBrace;
                  continue;
@@ -89,20 +90,20 @@ private:
         return request.size();
     }
 
-    std::vector<String> split(String const & commaSeparatedList) {
-        String::size_type numValues = 1;
-        String::size_type index=0;
+    std::vector<string> split(string const & commaSeparatedList) {
+        string::size_type numValues = 1;
+        string::size_type index=0;
         while(true) {
-            String::size_type pos = commaSeparatedList.find(',',index);
-            if(pos==String::npos) break;
+            string::size_type pos = commaSeparatedList.find(',',index);
+            if(pos==string::npos) break;
             numValues++;
             index = pos +1;
 	}
-        std::vector<String> valueList(numValues,"");
+        std::vector<string> valueList(numValues,"");
         index=0;
         for(size_t i=0; i<numValues; i++) {
             size_t pos = commaSeparatedList.find(',',index);
-            String value = commaSeparatedList.substr(index,pos-index);
+            string value = commaSeparatedList.substr(index,pos-index);
             valueList[i] = value;
             index = pos +1;
         }
@@ -110,17 +111,17 @@ private:
     }
 
     StructureConstPtr createRequestOptions(
-        String request)
+        string request)
     {
         if(request.length()<=1) return StructureConstPtr();
-        std::vector<String> items = split(request);
+        std::vector<string> items = split(request);
         size_t nitems = items.size();
         StringArray fieldNames(nitems);
         FieldConstPtrArray fields(nitems);
         for(size_t j=0; j<nitems; j++) {
-            String item = items[j];
+            string item = items[j];
             size_t equals = item.find('=');
-            if(equals==String::npos || equals==0) {
+            if(equals==string::npos || equals==0) {
                 message = item + " illegal option";
                 StructureConstPtr xxx;
                 return xxx;
@@ -133,16 +134,16 @@ private:
 
     void initRequestOptions(
         PVStructurePtr const & pvParent,
-        String request)
+        string request)
     {
         if(request.length()<=1) return;
-        std::vector<String> items = split(request);
+        std::vector<string> items = split(request);
         size_t nitems = items.size();
         for(size_t j=0; j<nitems; j++) {
-            String item = items[j];
+            string item = items[j];
             size_t equals = item.find('=');
-            String name = item.substr(0,equals);
-            String value = item.substr(equals+1);
+            string name = item.substr(0,equals);
+            string value = item.substr(equals+1);
             PVStringPtr pvValue = pvParent->getSubField<PVString>(name);
             pvValue->put(value);
         }
@@ -150,7 +151,7 @@ private:
 
     StructureConstPtr createSubFieldRequest(
         StructureConstPtr parent,
-        String request)
+        string request)
     {
         if(request.length()<=0) return parent;
         size_t period = request.find('.');
@@ -158,9 +159,9 @@ private:
         size_t openBrace = request.find('{');
 
         // name only
-        if(period==String::npos
-        && openBracket==String::npos
-        && openBrace==String::npos)
+        if(period==string::npos
+        && openBracket==string::npos
+        && openBrace==string::npos)
         {
             StructureConstPtr subField = fieldCreate->createStructure();
             parent = fieldCreate->appendField(parent,request,subField);
@@ -168,11 +169,11 @@ private:
         }
 
         // period is first
-        if(period!=String::npos
-        && (openBracket==String::npos || period<openBracket)
-        && (openBrace==String::npos || period<openBrace) )
+        if(period!=string::npos
+        && (openBracket==string::npos || period<openBracket)
+        && (openBrace==string::npos || period<openBrace) )
         {
-            String fieldName = request.substr(0,period);
+            string fieldName = request.substr(0,period);
             StructureConstPtr subField = fieldCreate->createStructure();
             subField = createSubFieldRequest(subField,request.substr(period+1));
             if(subField==NULL) return subField;
@@ -181,20 +182,20 @@ private:
         }
 
         // brace before [ or .
-        if(openBrace!=String::npos
-        && (openBracket==String::npos || openBrace<openBracket) )
+        if(openBrace!=string::npos
+        && (openBracket==string::npos || openBrace<openBracket) )
         {
-            String fieldName = request.substr(0,openBrace);
+            string fieldName = request.substr(0,openBrace);
             size_t closeBrace = findMatchingBrace(request,openBrace,1);
-            if(closeBrace==String::npos) return StructureConstPtr();
+            if(closeBrace==string::npos) return StructureConstPtr();
             size_t nextChar = closeBrace+1;
-            if(nextChar>= request.size()) nextChar = String::npos;
-            if(nextChar!=String::npos) {
+            if(nextChar>= request.size()) nextChar = string::npos;
+            if(nextChar!=string::npos) {
                 message = request + " syntax error " + request[nextChar] + " after } illegal";
                 return StructureConstPtr();
             }
             StructureConstPtr subField = fieldCreate->createStructure();
-            String subRequest = request.substr(openBrace+1,closeBrace-openBrace-1);
+            string subRequest = request.substr(openBrace+1,closeBrace-openBrace-1);
             subField = createFieldRequest(subField,subRequest);
             if(subField==NULL) return subField;
             parent = fieldCreate->appendField(parent,fieldName,subField);
@@ -202,15 +203,15 @@ private:
         }
 
         // [ is before brace or .
-        if(openBracket!=String::npos
-        && (openBrace==String::npos || openBracket<openBrace) )
+        if(openBracket!=string::npos
+        && (openBrace==string::npos || openBracket<openBrace) )
         {
-            String fieldName = request.substr(0,openBracket);
+            string fieldName = request.substr(0,openBracket);
             size_t closeBracket = findMatchingBracket(request,openBracket);
-            if(closeBracket==String::npos) return StructureConstPtr();
+            if(closeBracket==string::npos) return StructureConstPtr();
             size_t nextChar = closeBracket+1;
-            if(nextChar>= request.size()) nextChar = String::npos;
-            if(nextChar==String::npos) {
+            if(nextChar>= request.size()) nextChar = string::npos;
+            if(nextChar==string::npos) {
                 StringArray fieldNames(1);
                 FieldConstPtrArray fields(1);
                 fieldNames[0] = "_options";
@@ -241,9 +242,9 @@ private:
             }
             if(request[nextChar]=='{') {
                 size_t closeBrace = findMatchingBrace(request,openBrace,1);
-                if(closeBrace==String::npos) return StructureConstPtr();
+                if(closeBrace==string::npos) return StructureConstPtr();
                 StructureConstPtr subField = fieldCreate->createStructure();
-                String subRequest = request.substr(openBrace+1,closeBrace-openBrace-1);
+                string subRequest = request.substr(openBrace+1,closeBrace-openBrace-1);
                 subField = createFieldRequest(subField,subRequest);
                 if(subField==NULL) return subField;
                 size_t numSub = subField->getNumberFields();
@@ -270,12 +271,12 @@ private:
 
     StructureConstPtr createFieldRequest(
         StructureConstPtr parent,
-        String request)
+        string request)
     {
         size_t length = request.length();
         if(length<=0) return parent;
         size_t end = findEndField(request);
-        if(end==String::npos) return StructureConstPtr();
+        if(end==string::npos) return StructureConstPtr();
         StringArray fieldNames;
         FieldConstPtrArray fields;
         StructureConstPtr subField = fieldCreate->createStructure();
@@ -308,24 +309,24 @@ private:
 
     void initSubFieldOptions(
         PVStructurePtr const & pvParent,
-        String request)
+        string request)
     {
         if(request.length()<=0) return;
         size_t period = request.find('.');
         size_t openBracket = request.find('[');
         size_t openBrace = request.find('{');
         // name only
-        if(period==String::npos
-        && openBracket==String::npos
-        && openBrace==String::npos)
+        if(period==string::npos
+        && openBracket==string::npos
+        && openBrace==string::npos)
         {
              return;
         }
 
         // period is first
-        if(period!=String::npos
-        && (openBracket==String::npos || period<openBracket)
-        && (openBrace==String::npos || period<openBrace) )
+        if(period!=string::npos
+        && (openBracket==string::npos || period<openBracket)
+        && (openBrace==string::npos || period<openBrace) )
         {
             PVStructurePtr pvSubField = static_pointer_cast<PVStructure>(pvParent->getPVFields()[0]);
             initSubFieldOptions(pvSubField,request.substr(period+1));
@@ -333,12 +334,12 @@ private:
         }
 
         // brace before [ or .
-        if(openBrace!=String::npos
-        && (openBracket==String::npos || openBrace<openBracket) )
+        if(openBrace!=string::npos
+        && (openBracket==string::npos || openBrace<openBracket) )
         {
             PVStructurePtr pvSubField = static_pointer_cast<PVStructure>(pvParent->getPVFields()[0]);
             size_t closeBrace = findMatchingBrace(request,openBrace,1);
-            String subRequest = request.substr(openBrace+1,closeBrace-openBrace-1);
+            string subRequest = request.substr(openBrace+1,closeBrace-openBrace-1);
             initFieldOptions(pvSubField,subRequest);
             return;
         }
@@ -347,8 +348,8 @@ private:
         size_t closeBracket = findMatchingBracket(request,openBracket);
         initRequestOptions(pvOptions,request.substr(openBracket+1,closeBracket-openBracket-1));
         size_t nextChar = closeBracket+1;
-        if(nextChar>= request.size()) nextChar = String::npos;
-        if(nextChar==String::npos) return;
+        if(nextChar>= request.size()) nextChar = string::npos;
+        if(nextChar==string::npos) return;
         if(request[nextChar]=='.') {
             PVStructurePtr pvSubField = static_pointer_cast<PVStructure>(pvParent->getPVFields()[1]);
             initSubFieldOptions(pvSubField,request.substr(nextChar+1));
@@ -357,7 +358,7 @@ private:
         if(request[nextChar]!='{') throw std::logic_error("initSubFieldOptions request[nextChar]!='{'");
         size_t closeBrace = findMatchingBrace(request,openBrace,1);
         const PVFieldPtrArray &pvFields = pvParent->getPVFields();
-        String subRequest = request.substr(openBrace+1,closeBrace-openBrace-1);
+        string subRequest = request.substr(openBrace+1,closeBrace-openBrace-1);
         for(size_t i=1; i<pvFields.size(); ++i) {
              PVStructurePtr pvSubField = static_pointer_cast<PVStructure>(pvFields[i]);
              size_t comma = subRequest.find(',');
@@ -368,9 +369,9 @@ private:
 
     void initFieldOptions(
         PVStructurePtr const & pvParent,
-        String request)
+        string request)
     {
-        if(request.find('[')==String::npos) return;
+        if(request.find('[')==string::npos) return;
         size_t num = pvParent->getStructure()->getNumberFields();
         if(num==0) return;
         if(num==1) {
@@ -381,11 +382,11 @@ private:
         size_t start = 0;
         for(size_t i=0; i<num; ++i) {
             PVStructurePtr pvSub = static_pointer_cast<PVStructure>(pvParent->getPVFields()[i]);
-            String subRequest = request.substr(start, end - start);
+            string subRequest = request.substr(start, end - start);
             initSubFieldOptions(pvSub,subRequest);
             if(i==num-1) break;
             start = end +1;
-            String xxx = request.substr(start);
+            string xxx = request.substr(start);
             end += findEndField(xxx) + 1;
         }
     }
@@ -394,9 +395,9 @@ private:
 public:
 
     virtual PVStructure::shared_pointer createRequest(
-        String const & crequest)
+        string const & crequest)
     {
-    	String request = crequest;
+    	string request = crequest;
         StructureConstPtr topStructure = fieldCreate->createStructure();
 
         if (!request.empty()) removeBlanks(request);
@@ -410,18 +411,18 @@ public:
         size_t offsetField = request.find("field(");
         size_t offsetPutField = request.find("putField(");
         size_t offsetGetField = request.find("getField(");
-        if(offsetRecord==String::npos
-        && offsetField==String::npos
-        && offsetPutField==String::npos
-        && offsetGetField==String::npos)
+        if(offsetRecord==string::npos
+        && offsetField==string::npos
+        && offsetPutField==string::npos
+        && offsetGetField==string::npos)
         {
              request = "field(" + crequest + ")";
              offsetField = request.find("field(");
         }
-        if (offsetRecord != String::npos) {
+        if (offsetRecord != string::npos) {
             size_t openBracket = request.find('[', offsetRecord);
             size_t closeBracket = request.find(']', openBracket);
-            if(closeBracket == String::npos) {
+            if(closeBracket == string::npos) {
                 message = request.substr(offsetRecord)
                     + " record[ does not have matching ]";
                 return PVStructurePtr();
@@ -434,10 +435,10 @@ public:
             }
             topStructure = fieldCreate->appendField(topStructure,"record",structure);
         }
-        if (offsetField != String::npos) {
+        if (offsetField != string::npos) {
             size_t openBrace = request.find('(', offsetField);
             size_t closeBrace = request.find(')', openBrace);
-            if(closeBrace == String::npos) {
+            if(closeBrace == string::npos) {
                 message = request.substr(offsetField)
                     + " field( does not have matching )";
                 return PVStructurePtr();
@@ -450,10 +451,10 @@ public:
             }
             topStructure = fieldCreate->appendField(topStructure,"field",structure);
         }
-        if (offsetPutField != String::npos) {
+        if (offsetPutField != string::npos) {
             size_t openBrace = request.find('(', offsetPutField);
             size_t closeBrace = request.find(')', openBrace);
-            if(closeBrace == String::npos) {
+            if(closeBrace == string::npos) {
                 message =  request.substr(offsetField)
                     + " putField( does not have matching )";
                 return PVStructurePtr();
@@ -466,10 +467,10 @@ public:
             }
             topStructure = fieldCreate->appendField(topStructure,"putField",structure);
         }
-        if (offsetGetField != String::npos) {
+        if (offsetGetField != string::npos) {
             size_t openBrace = request.find('(', offsetGetField);
             size_t closeBrace = request.find(')', openBrace);
-            if(closeBrace == String::npos) {
+            if(closeBrace == string::npos) {
                 message = request.substr(offsetField)
                     + " getField( does not have matching )";
                 return PVStructurePtr();
@@ -483,14 +484,14 @@ public:
             topStructure = fieldCreate->appendField(topStructure,"getField",structure);
         }
         PVStructurePtr pvStructure = pvDataCreate->createPVStructure(topStructure);
-        if (offsetRecord != String::npos) {
+        if (offsetRecord != string::npos) {
             size_t openBracket = request.find('[', offsetRecord);
             size_t closeBracket = request.find(']', openBracket);
             initRequestOptions(
                 pvStructure->getSubField<PVStructure>("record"),
                 request.substr(openBracket+1,closeBracket-openBracket-1));
         }
-        if (offsetField != String::npos) {
+        if (offsetField != string::npos) {
             size_t openParam = request.find('(', offsetField);
             size_t closeParam = request.find(')', openParam);
             PVStructurePtr pvSub = pvStructure->getSubField<PVStructure>("field");
@@ -499,7 +500,7 @@ public:
             }
             if(pvSub!=NULL) initFieldOptions(pvSub,request.substr(openParam+1,closeParam-openParam-1));
         }
-        if (offsetPutField != String::npos) {
+        if (offsetPutField != string::npos) {
             size_t openParam = request.find('(', offsetPutField);
             size_t closeParam = request.find(')', openParam);
             PVStructurePtr pvSub = pvStructure->getSubField<PVStructure>("putField");
@@ -508,7 +509,7 @@ public:
             }
             if(pvSub!=NULL) initFieldOptions(pvSub,request.substr(openParam+1,closeParam-openParam-1));
         }
-        if (offsetGetField != String::npos) {
+        if (offsetGetField != string::npos) {
             size_t openParam = request.find('(', offsetGetField);
             size_t closeParam = request.find(')', openParam);
             PVStructurePtr pvSub = pvStructure->getSubField<PVStructure>("getField");

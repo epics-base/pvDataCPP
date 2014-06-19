@@ -11,6 +11,7 @@
 #include <cstddef>
 #include <string>
 #include <cstdio>
+#include <sstream>
 
 #include <epicsUnitTest.h>
 #include <testMain.h>
@@ -24,17 +25,19 @@
 
 using namespace epics::pvData;
 using std::tr1::static_pointer_cast;
+using std::string;
 
 static bool debug = false;
 
 static PVDataCreatePtr pvDataCreate = getPVDataCreate();
 static StandardFieldPtr standardField = getStandardField();
 static StandardPVFieldPtr standardPVField = getStandardPVField();
-static String builder("");
 
-static void print(String name)
+static void print(const string& name, PVFieldPtr const & f)
 {
-    if(debug) printf("\n%s\n%s\n",name.c_str(),builder.c_str());
+    if(debug) {
+        std::cout << std::endl << name << std::endl << *f << std::endl;
+    }
 }
 
 MAIN(testStandardPVField)
@@ -48,26 +51,18 @@ MAIN(testStandardPVField)
     pvSeverity->put(2);
     PVStringPtr pvMessage = pvStructure->getStringField("alarm.message");
     pvMessage->put("test message");
-    builder.clear();
-    pvStructure->toString(&builder);
-    print("scalarTest");
+    print("scalarTest", pvStructure);
     pvStructure = standardPVField->scalar(pvBoolean,"alarm,timeStamp,valueAlarm");
-    builder.clear();
-    pvStructure->toString(&builder);
-    print("booleanTest");
+    print("booleanTest", pvStructure);
     StringArray choices;
     choices.reserve(3);
     choices.push_back("one");
     choices.push_back("two");
     choices.push_back("three");
     pvStructure = standardPVField->enumerated(choices, "alarm,timeStamp,valueAlarm");
-    builder.clear();
-    pvStructure->toString(&builder);
-    print("enumeratedTest");
+    print("enumeratedTest", pvStructure);
     pvStructure = standardPVField->scalarArray(pvBoolean,"alarm,timeStamp");
-    builder.clear();
-    pvStructure->toString(&builder);
-    print("scalarArrayTest");
+    print("scalarArrayTest", pvStructure);
     StructureConstPtr structure = standardField->scalar(pvDouble, "alarm,timeStamp");
     pvStructure = standardPVField->structureArray(structure,"alarm,timeStamp");
     size_t num = 2;
@@ -78,9 +73,7 @@ MAIN(testStandardPVField)
     }
     PVStructureArrayPtr pvStructureArray = pvStructure->getStructureArrayField("value");
     pvStructureArray->replace(freeze(pvStructures));
-    builder.clear();
-    pvStructure->toString(&builder);
-    print("structureArrayTest");
+    print("structureArrayTest", pvStructure);
     testPass("testStandardPVField");
     return testDone();
 }

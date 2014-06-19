@@ -27,16 +27,11 @@
 
 using std::tr1::static_pointer_cast;
 using std::size_t;
+using std::string;
 
 namespace epics { namespace pvData {
 
 static DebugLevel debugLevel = lowDebug;
-
-static void newLine(StringBuilder buffer, int indentLevel)
-{
-    *buffer += "\n";
-    for(int i=0; i<indentLevel; i++) *buffer += "    ";
-}
 
 Field::Field(Type type)
     : m_fieldType(type)
@@ -47,31 +42,10 @@ Field::~Field() {
 }
 
 
-void Field::toString(StringBuilder /*buffer*/,int /*indentLevel*/) const{
-}
-
-
-// TODO move all these to a header file
-
-struct ScalarHashFunction {
-    size_t operator() (const Scalar& scalar) const { return scalar.getScalarType(); }
+std::ostream& operator<<(std::ostream& o, const Field& f)
+{
+	return f.dump(o);
 };
-
-struct ScalarArrayHashFunction {
-    size_t operator() (const ScalarArray& scalarArray) const { return 0x10 | scalarArray.getElementType(); }
-};
-
-struct StructureHashFunction {
-    size_t operator() (const Structure& /*structure*/) const { return 0; }
-    // TODO hash
-//        final int PRIME = 31;
-//        return PRIME * Arrays.hashCode(fieldNames) + Arrays.hashCode(fields);
-};
-
-struct StructureArrayHashFunction {
-    size_t operator() (const StructureArray& structureArray) const { StructureHashFunction shf; return (0x10 | shf(*(structureArray.getStructure()))); }
-};
-
 
 Scalar::Scalar(ScalarType scalarType)
        : Field(scalar),scalarType(scalarType)
@@ -82,14 +56,14 @@ Scalar::Scalar(ScalarType scalarType)
 
 Scalar::~Scalar(){}
 
-void Scalar::toString(StringBuilder buffer,int /*indentLevel*/) const{
-    *buffer += getID();
+std::ostream& Scalar::dump(std::ostream& o) const
+{
+    return o << format::indent() << getID();
 }
 
-
-String Scalar::getID() const
+string Scalar::getID() const
 {
-    static const String idScalarLUT[] = {
+    static const string idScalarLUT[] = {
 	"boolean", // pvBoolean
 	"byte",    // pvByte
 	"short",   // pvShort
@@ -136,15 +110,15 @@ void Scalar::deserialize(ByteBuffer* /*buffer*/, DeserializableControl* /*contro
     throw std::runtime_error("not valid operation, use FieldCreate::deserialize instead");
 }
 
-static String emptyString;
+static string emptyStringtring;
 
 static void serializeStructureField(const Structure* structure, ByteBuffer* buffer, SerializableControl* control)
 {
 	// to optimize default (non-empty) IDs optimization
 	// empty IDs are not allowed
-	String id = structure->getID();
+	string id = structure->getID();
 	if (id == Structure::DEFAULT_ID)	// TODO slow comparison
-		SerializeHelper::serializeString(emptyString, buffer, control);
+		SerializeHelper::serializeString(emptyStringtring, buffer, control);
 	else
 	    SerializeHelper::serializeString(id, buffer, control);
 
@@ -161,7 +135,7 @@ static void serializeStructureField(const Structure* structure, ByteBuffer* buff
 
 static StructureConstPtr deserializeStructureField(const FieldCreate* fieldCreate, ByteBuffer* buffer, DeserializableControl* control)
 {
-    String id = SerializeHelper::deserializeString(buffer, control);
+    string id = SerializeHelper::deserializeString(buffer, control);
     const std::size_t size = SerializeHelper::readSize(buffer, control);
     FieldConstPtrArray fields; fields.reserve(size);
     StringArray fieldNames; fieldNames.reserve(size);
@@ -181,9 +155,9 @@ static void serializeUnionField(const Union* punion, ByteBuffer* buffer, Seriali
 {
 	// to optimize default (non-empty) IDs optimization
 	// empty IDs are not allowed
-	String id = punion->getID();
+	string id = punion->getID();
 	if (id == Union::DEFAULT_ID)	// TODO slow comparison
-		SerializeHelper::serializeString(emptyString, buffer, control);
+		SerializeHelper::serializeString(emptyStringtring, buffer, control);
 	else
 	    SerializeHelper::serializeString(id, buffer, control);
 
@@ -200,7 +174,7 @@ static void serializeUnionField(const Union* punion, ByteBuffer* buffer, Seriali
 
 static UnionConstPtr deserializeUnionField(const FieldCreate* fieldCreate, ByteBuffer* buffer, DeserializableControl* control)
 {
-    String id = SerializeHelper::deserializeString(buffer, control);
+    string id = SerializeHelper::deserializeString(buffer, control);
     const std::size_t size = SerializeHelper::readSize(buffer, control);
     FieldConstPtrArray fields; fields.reserve(size);
     StringArray fieldNames; fieldNames.reserve(size);
@@ -251,9 +225,9 @@ int8 ScalarArray::getTypeCodeLUT() const
    return typeCodeLUT[elementType];
 }
 
-const String ScalarArray::getIDScalarArrayLUT() const
+const string ScalarArray::getIDScalarArrayLUT() const
 {
-    static const String idScalarArrayLUT[] = {
+    static const string idScalarArrayLUT[] = {
 	"boolean[]", // pvBoolean
 	"byte[]",    // pvByte
 	"short[]",   // pvShort
@@ -270,13 +244,14 @@ const String ScalarArray::getIDScalarArrayLUT() const
     return idScalarArrayLUT[elementType];
 }
 
-String ScalarArray::getID() const
+string ScalarArray::getID() const
 {
     return getIDScalarArrayLUT();
 }
 
-void ScalarArray::toString(StringBuilder buffer,int /*indentLevel*/) const{
-    *buffer += getID();
+std::ostream& ScalarArray::dump(std::ostream& o) const
+{
+    return o << format::indent() << getID();
 }
 
 void ScalarArray::serialize(ByteBuffer *buffer, SerializableControl *control) const {
@@ -297,15 +272,19 @@ StructureArray::~StructureArray() {
     if(debugLevel==highDebug) printf("~StructureArray\n");
 }
 
-String StructureArray::getID() const
+string StructureArray::getID() const
 {
 	return pstructure->getID() + "[]";
 }
 
-void StructureArray::toString(StringBuilder buffer,int indentLevel) const {
-    *buffer +=  getID();
-    newLine(buffer,indentLevel + 1);
-    pstructure->toString(buffer,indentLevel + 1);
+std::ostream& StructureArray::dump(std::ostream& o) const
+{
+    o << format::indent() << getID() << std::endl;
+    {
+        format::indent_scope s(o);
+        o << *pstructure;
+    }
+    return o;
 }
 
 void StructureArray::serialize(ByteBuffer *buffer, SerializableControl *control) const {
@@ -327,15 +306,19 @@ UnionArray::~UnionArray() {
     if(debugLevel==highDebug) printf("~UnionArray\n");
 }
 
-String UnionArray::getID() const
+string UnionArray::getID() const
 {
 	return punion->getID() + "[]";
 }
 
-void UnionArray::toString(StringBuilder buffer,int indentLevel) const {
-    *buffer +=  getID();
-    newLine(buffer,indentLevel + 1);
-    punion->toString(buffer,indentLevel + 1);
+std::ostream& UnionArray::dump(std::ostream& o) const
+{
+    o << format::indent() << getID() << std::endl;
+    {
+        format::indent_scope s(o);
+        o << *punion;
+    }
+    return o;
 }
 
 void UnionArray::serialize(ByteBuffer *buffer, SerializableControl *control) const {
@@ -356,12 +339,12 @@ void UnionArray::deserialize(ByteBuffer* /*buffer*/, DeserializableControl* /*co
     throw std::runtime_error("not valid operation, use FieldCreate::deserialize instead");
 }
 
-String Structure::DEFAULT_ID = "structure";
+string Structure::DEFAULT_ID = "structure";
 
 Structure::Structure (
     StringArray const & fieldNames,
     FieldConstPtrArray const & infields,
-    String const & inid)
+    string const & inid)
 : Field(structure),
       fieldNames(fieldNames),
       fields(infields),
@@ -375,7 +358,7 @@ Structure::Structure (
     }
     size_t number = fields.size();
     for(size_t i=0; i<number; i++) {
-        const String& name = fieldNames[i];
+        const string& name = fieldNames[i];
         if(name.empty()) {
             throw std::invalid_argument("fieldNames has a zero length string");
         }
@@ -383,10 +366,10 @@ Structure::Structure (
             throw std::invalid_argument("Can't construct Structure with NULL Field");
         // look for duplicates
         for(size_t j=i+1; j<number; j++) {
-            String otherName = fieldNames[j];
+            string otherName = fieldNames[j];
             int result = name.compare(otherName);
             if(result==0) {
-                String  message("duplicate fieldName ");
+                string  message("duplicate fieldName ");
                 message += name;
                 throw std::invalid_argument(message);
             }
@@ -397,12 +380,12 @@ Structure::Structure (
 Structure::~Structure() { }
 
 
-String Structure::getID() const
+string Structure::getID() const
 {
 	return id;
 }
 
-FieldConstPtr  Structure::getField(String const & fieldName) const {
+FieldConstPtr  Structure::getField(string const & fieldName) const {
     size_t numberFields = fields.size();
     for(size_t i=0; i<numberFields; i++) {
         FieldConstPtr pfield = fields[i];
@@ -412,7 +395,7 @@ FieldConstPtr  Structure::getField(String const & fieldName) const {
     return FieldConstPtr();
 }
 
-size_t Structure::getFieldIndex(String const &fieldName) const {
+size_t Structure::getFieldIndex(string const &fieldName) const {
     size_t numberFields = fields.size();
     for(size_t i=0; i<numberFields; i++) {
         FieldConstPtr pfield = fields[i];
@@ -422,17 +405,22 @@ size_t Structure::getFieldIndex(String const &fieldName) const {
     return -1;
 }
 
-void Structure::toString(StringBuilder buffer,int indentLevel) const{
-    *buffer += getID();
-    toStringCommon(buffer,indentLevel+1);
+std::ostream& Structure::dump(std::ostream& o) const
+{
+    o << format::indent() << getID() << std::endl;
+    {
+        format::indent_scope s(o);
+        dumpFields(o);
+    }
+    return o;
 }
-    
-void Structure::toStringCommon(StringBuilder buffer,int indentLevel) const{
-    newLine(buffer,indentLevel);
+
+void Structure::dumpFields(std::ostream& o) const
+{
     size_t numberFields = fields.size();
     for(size_t i=0; i<numberFields; i++) {
         FieldConstPtr pfield = fields[i];
-        *buffer += pfield->getID() + " " + fieldNames[i];
+        o << format::indent() << pfield->getID() << ' ' << fieldNames[i] << std::endl;
         switch(pfield->getType()) {
             case scalar:
             case scalarArray:
@@ -441,26 +429,31 @@ void Structure::toStringCommon(StringBuilder buffer,int indentLevel) const{
             {
                 Field const *xxx = pfield.get();
                 Structure const *pstruct = static_cast<Structure const*>(xxx);
-                pstruct->toStringCommon(buffer,indentLevel + 1);
+                format::indent_scope s(o);
+                pstruct->dumpFields(o);
                 break;
             }
             case structureArray:
-                newLine(buffer,indentLevel +1);
-                pfield->toString(buffer,indentLevel +1);
+            {
+                format::indent_scope s(o);
+                o << *pfield;
                 break;
+            }
             case union_:
             {
                 Field const *xxx = pfield.get();
-                Union const *pstruct = static_cast<Union const*>(xxx);
-                pstruct->toStringCommon(buffer,indentLevel + 1);
+                Union const *punion = static_cast<Union const*>(xxx);
+                format::indent_scope s(o);
+                punion->dumpFields(o);
                 break;
             }
             case unionArray:
-                newLine(buffer,indentLevel +1);
-                pfield->toString(buffer,indentLevel +1);
+            {
+                format::indent_scope s(o);
+                o << *pfield;
                 break;
+            }
         }
-        if(i<numberFields-1) newLine(buffer,indentLevel);
     }
 }
 
@@ -474,10 +467,10 @@ void Structure::deserialize(ByteBuffer* /*buffer*/, DeserializableControl* /*con
     throw std::runtime_error("not valid operation, use FieldCreate::deserialize instead");
 }
 
-String Union::DEFAULT_ID = "union";
+string Union::DEFAULT_ID = "union";
 
 #define UNION_ANY_ID "any"
-String Union::ANY_ID = UNION_ANY_ID;
+string Union::ANY_ID = UNION_ANY_ID;
 
 Union::Union ()
 : Field(union_),
@@ -492,7 +485,7 @@ Union::Union ()
 Union::Union (
     StringArray const & fieldNames,
     FieldConstPtrArray const & infields,
-    String const & inid)
+    string const & inid)
 : Field(union_),
       fieldNames(fieldNames),
       fields(infields),
@@ -510,7 +503,7 @@ Union::Union (
 
     size_t number = fields.size();
     for(size_t i=0; i<number; i++) {
-        const String& name = fieldNames[i];
+        const string& name = fieldNames[i];
         if(name.empty()) {
             throw std::invalid_argument("fieldNames has a zero length string");
         }
@@ -518,10 +511,10 @@ Union::Union (
             throw std::invalid_argument("Can't construct Union with NULL Field");
         // look for duplicates
         for(size_t j=i+1; j<number; j++) {
-            String otherName = fieldNames[j];
+            string otherName = fieldNames[j];
             int result = name.compare(otherName);
             if(result==0) {
-                String  message("duplicate fieldName ");
+                string  message("duplicate fieldName ");
                 message += name;
                 throw std::invalid_argument(message);
             }
@@ -532,12 +525,12 @@ Union::Union (
 Union::~Union() { }
 
 
-String Union::getID() const
+string Union::getID() const
 {
 	return id;
 }
 
-FieldConstPtr  Union::getField(String const & fieldName) const {
+FieldConstPtr  Union::getField(string const & fieldName) const {
     size_t numberFields = fields.size();
     for(size_t i=0; i<numberFields; i++) {
         FieldConstPtr pfield = fields[i];
@@ -547,7 +540,7 @@ FieldConstPtr  Union::getField(String const & fieldName) const {
     return FieldConstPtr();
 }
 
-size_t Union::getFieldIndex(String const &fieldName) const {
+size_t Union::getFieldIndex(string const &fieldName) const {
     size_t numberFields = fields.size();
     for(size_t i=0; i<numberFields; i++) {
         FieldConstPtr pfield = fields[i];
@@ -557,19 +550,22 @@ size_t Union::getFieldIndex(String const &fieldName) const {
     return -1;
 }
 
-void Union::toString(StringBuilder buffer,int indentLevel) const{
-    *buffer += getID();
-    toStringCommon(buffer,indentLevel+1);
+std::ostream& Union::dump(std::ostream& o) const
+{
+    o << getID() << std::endl;
+    {
+        format::indent_scope s(o);
+        dumpFields(o);
+    }
+    return o;
 }
-    
-void Union::toStringCommon(StringBuilder buffer,int indentLevel) const{
-    newLine(buffer,indentLevel);
+
+void Union::dumpFields(std::ostream& o) const
+{
     size_t numberFields = fields.size();
-    if (numberFields == 0)  // variant support
-        return;
     for(size_t i=0; i<numberFields; i++) {
         FieldConstPtr pfield = fields[i];
-        *buffer += pfield->getID() + " " + fieldNames[i];
+        o << format::indent() << pfield->getID() << ' ' << fieldNames[i] << std::endl;
         switch(pfield->getType()) {
             case scalar:
             case scalarArray:
@@ -578,26 +574,31 @@ void Union::toStringCommon(StringBuilder buffer,int indentLevel) const{
             {
                 Field const *xxx = pfield.get();
                 Structure const *pstruct = static_cast<Structure const*>(xxx);
-                pstruct->toStringCommon(buffer,indentLevel + 1);
+                format::indent_scope s(o);
+                pstruct->dumpFields(o);
                 break;
             }
             case structureArray:
-                newLine(buffer,indentLevel +1);
-                pfield->toString(buffer,indentLevel +1);
+            {
+                format::indent_scope s(o);
+                o << *pfield;
                 break;
+            }
             case union_:
             {
                 Field const *xxx = pfield.get();
-                Union const *pstruct = static_cast<Union const*>(xxx);
-                pstruct->toStringCommon(buffer,indentLevel + 1);
+                Union const *punion = static_cast<Union const*>(xxx);
+                format::indent_scope s(o);
+                punion->dumpFields(o);
                 break;
             }
             case unionArray:
-                newLine(buffer,indentLevel +1);
-                pfield->toString(buffer,indentLevel +1);
+            {
+                format::indent_scope s(o);
+                o << *pfield;
                 break;
+            }
         }
-        if(i<numberFields-1) newLine(buffer,indentLevel);
     }
 }
 
@@ -623,7 +624,7 @@ void Union::deserialize(ByteBuffer* /*buffer*/, DeserializableControl* /*control
 FieldBuilder::FieldBuilder() : fieldCreate(getFieldCreate()), idSet(false) {}
 
 FieldBuilder::FieldBuilder(FieldBuilderPtr const & _parentBuilder,
-			std::string const & _nestedName,
+			string const & _nestedName,
 			Type _nestedClassToBuild, bool _nestedArray) :
 		fieldCreate(getFieldCreate()),
 		idSet(false),
@@ -641,32 +642,32 @@ void FieldBuilder::reset()
 	fields.clear();
 }
 
-FieldBuilderPtr FieldBuilder::setId(std::string const & id)
+FieldBuilderPtr FieldBuilder::setId(string const & id)
 {
     this->id = id;
     idSet = true; 
     return shared_from_this();
 }
 
-FieldBuilderPtr FieldBuilder::add(std::string const & name, ScalarType scalarType)
+FieldBuilderPtr FieldBuilder::add(string const & name, ScalarType scalarType)
 {
     fields.push_back(fieldCreate->createScalar(scalarType)); fieldNames.push_back(name); 
 	return shared_from_this();
 }
 
-FieldBuilderPtr FieldBuilder::add(std::string const & name, FieldConstPtr const & field)
+FieldBuilderPtr FieldBuilder::add(string const & name, FieldConstPtr const & field)
 {
     fields.push_back(field); fieldNames.push_back(name);
 	return shared_from_this();
 }
 
-FieldBuilderPtr FieldBuilder::addArray(std::string const & name, ScalarType scalarType)
+FieldBuilderPtr FieldBuilder::addArray(string const & name, ScalarType scalarType)
 {
     fields.push_back(fieldCreate->createScalarArray(scalarType)); fieldNames.push_back(name);
 	return shared_from_this();
 }
 
-FieldBuilderPtr FieldBuilder::addArray(std::string const & name, FieldConstPtr const & element)
+FieldBuilderPtr FieldBuilder::addArray(string const & name, FieldConstPtr const & element)
 {
     switch (element->getType())
     {
@@ -730,24 +731,24 @@ UnionConstPtr FieldBuilder::createUnion()
     return field;
 }
 
-FieldBuilderPtr FieldBuilder::addNestedStructure(std::string const & name)
+FieldBuilderPtr FieldBuilder::addNestedStructure(string const & name)
 {
     return FieldBuilderPtr(new FieldBuilder(shared_from_this(), name, structure, false));
 }
 
 
-FieldBuilderPtr FieldBuilder::addNestedUnion(std::string const & name)
+FieldBuilderPtr FieldBuilder::addNestedUnion(string const & name)
 {
     return FieldBuilderPtr(new FieldBuilder(shared_from_this(), name, union_, false));
 }
 
 
-FieldBuilderPtr FieldBuilder::addNestedStructureArray(std::string const & name)
+FieldBuilderPtr FieldBuilder::addNestedStructureArray(string const & name)
 {
     return FieldBuilderPtr(new FieldBuilder(shared_from_this(), name, structure, true));
 }
 
-FieldBuilderPtr FieldBuilder::addNestedUnionArray(std::string const & name)
+FieldBuilderPtr FieldBuilder::addNestedUnionArray(string const & name)
 {
     return FieldBuilderPtr(new FieldBuilder(shared_from_this(), name, union_, true));
 }
@@ -804,7 +805,7 @@ StructureConstPtr FieldCreate::createStructure (
 }
 
 StructureConstPtr FieldCreate::createStructure (
-    String const & id,
+    string const & id,
     StringArray const & fieldNames,
     FieldConstPtrArray const & fields) const
 {
@@ -830,7 +831,7 @@ UnionConstPtr FieldCreate::createUnion (
 }
 
 UnionConstPtr FieldCreate::createUnion (
-    String const & id,
+    string const & id,
     StringArray const & fieldNames,
     FieldConstPtrArray const & fields) const
 {
@@ -859,7 +860,7 @@ UnionArrayConstPtr FieldCreate::createVariantUnionArray () const
 
 StructureConstPtr FieldCreate::appendField(
     StructureConstPtr const & structure,
-    String const & fieldName,
+    string const & fieldName,
     FieldConstPtr const & field) const
 {
     StringArray oldNames = structure->getFieldNames();

@@ -225,8 +225,6 @@ namespace epics { namespace pvData {
 
         bool operator!=(const BitSet &set) const;
 
-        void toString(StringBuilder buffer, int indentLevel = 0) const;
-
         virtual void serialize(ByteBuffer *buffer,
             SerializableControl *flusher) const;
         virtual void deserialize(ByteBuffer *buffer,

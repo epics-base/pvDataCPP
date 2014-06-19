@@ -38,9 +38,9 @@ typedef std::tr1::shared_ptr<StandardField> StandardFieldPtr;
  * For example the call:
  * {@code
    StructureConstPtr example = standardField->scalar(
-        String("value"),
+        std::string("value"),
         pvDouble,
-        String("value,alarm,timeStamp")); 
+        std::string("value,alarm,timeStamp")); 
  * }
  * Will result in a Field definition that has the form: {@code
   structure example
@@ -75,7 +75,7 @@ public:
      * This is some combination of "alarm,timeStamp,display,control,valueAlarm".
      * @return The const shared pointer to the structure.
      */
-    StructureConstPtr scalar(ScalarType type,String const & properties);
+    StructureConstPtr scalar(ScalarType type,std::string const & properties);
     /** Create a structure that has a union value field.
      * @param punion The interface for value field.
      * @param properties A comma separated list of properties.
@@ -84,20 +84,20 @@ public:
      */
     StructureConstPtr regUnion(
         UnionConstPtr const & punion,
-        String const & properties);
+        std::string const & properties);
     /** Create a structure that has a varient union value field.
      * @param properties A comma separated list of properties.
      * This is some combination of "alarm,timeStamp,display,control,valueAlarm".
      * @return The const shared pointer to the structure.
      */
-    StructureConstPtr variantUnion(String const & properties);
+    StructureConstPtr variantUnion(std::string const & properties);
     /** Create a structure that has a scalarArray value field.
      * @param type The type.
      * @param properties A comma separated list of properties.
      * This is some combination of "alarm,timeStamp,display,control,valueAlarm".
      * @return The const shared pointer to the structure.
      */
-    StructureConstPtr scalarArray(ScalarType elementType, String const & properties);
+    StructureConstPtr scalarArray(ScalarType elementType, std::string const & properties);
     /** Create a structure that has a structureArray value field.
      * @param type The type.
      * @param properties A comma separated list of properties.
@@ -106,7 +106,7 @@ public:
      */
     StructureConstPtr structureArray(
         StructureConstPtr const & structure,
-        String const & properties);
+        std::string const & properties);
     /** Create a structure that has a unionArray value field.
      * @param type The type.
      * @param properties A comma separated list of properties.
@@ -115,7 +115,7 @@ public:
      */
     StructureConstPtr unionArray(
         UnionConstPtr const & punion,
-        String const & properties);
+        std::string const & properties);
     /** Create a structure that has an enumerated structure value field.
      *  The id for the structure is "enum-t".
      * @return The const shared pointer to the structure.
@@ -127,7 +127,7 @@ public:
      * This is some combination of "alarm,timeStamp,display,control,valueAlarm".
      * @return The const shared pointer to the structure.
      */
-    StructureConstPtr enumerated(String const & properties);
+    StructureConstPtr enumerated(std::string const & properties);
     /**
      * create an alarm structure
      * @return The const shared pointer to the structure.
@@ -212,10 +212,10 @@ private:
     StandardField();
     void init();
     StructureConstPtr createProperties(
-        String id,FieldConstPtr field,String properties);
+        std::string id,FieldConstPtr field,std::string properties);
     FieldCreatePtr fieldCreate;
-    String notImplemented;
-    String valueFieldName;
+    std::string notImplemented;
+    std::string valueFieldName;
     StructureConstPtr alarmField;
     StructureConstPtr timeStampField;
     StructureConstPtr displayField;

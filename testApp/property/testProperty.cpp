@@ -33,6 +33,7 @@
 #include <pv/pvTimeStamp.h>
 
 using namespace epics::pvData;
+using std::string;
 
 static bool debug = false;
 
@@ -41,9 +42,8 @@ static PVDataCreatePtr pvDataCreate;
 static StandardFieldPtr standardField;
 static StandardPVFieldPtr standardPVField;
 static ConvertPtr convert;
-static String builder;
-static String alarmTimeStamp("alarm,timeStamp");
-static String allProperties("alarm,timeStamp,display,control");
+static string alarmTimeStamp("alarm,timeStamp");
+static string allProperties("alarm,timeStamp,display,control");
 
 static PVStructurePtr doubleRecord;
 static PVStructurePtr enumeratedRecord;
@@ -51,11 +51,8 @@ static PVStructurePtr enumeratedRecord;
 static void createRecords()
 {
     doubleRecord = standardPVField->scalar(pvDouble,allProperties);
-    if(debug) {
-        builder.clear();
-        doubleRecord->toString(&builder);
-        printf("doubleRecord\n%s\n",builder.c_str());
-    }
+    if(debug)
+        std::cout << "doubleRecord" << std::endl << *doubleRecord << std::endl;
     StringArray choices;
     choices.reserve(4);
     choices.push_back("1");
@@ -63,23 +60,14 @@ static void createRecords()
     choices.push_back("3");
     choices.push_back("4");
     enumeratedRecord = standardPVField->enumerated(choices,alarmTimeStamp);
-    if(debug) {
-        builder.clear();
-        enumeratedRecord->toString(&builder);
-        printf("enumeratedRecord\n%s\n",builder.c_str());
-    }
+    if(debug)
+        std::cout << "enumeratedRecord" << std::endl << *doubleRecord << std::endl;
 }
 
 static void printRecords()
 {
-    printf("doubleRecord\n");
-    builder.clear();
-    doubleRecord->toString(&builder);
-    printf("%s\n",builder.c_str());
-    printf("enumeratedRecord\n");
-    builder.clear();
-    enumeratedRecord->toString(&builder);
-    printf("%s\n",builder.c_str());
+    std::cout << "doubleRecord" << std::endl << *doubleRecord << std::endl;
+    std::cout << "enumeratedRecord" << std::endl << *doubleRecord << std::endl;
 }
 
 static void testAlarm()
@@ -88,7 +76,7 @@ static void testAlarm()
     Alarm alarm;
     PVAlarm pvAlarm; 
     bool result;
-    PVFieldPtr pvField = doubleRecord->getSubField(String("alarm"));
+    PVFieldPtr pvField = doubleRecord->getSubField(string("alarm"));
     if(pvField.get()==NULL) {
         printf("testAlarm ERROR did not find field alarm\n");
         return;
@@ -96,7 +84,7 @@ static void testAlarm()
     result = pvAlarm.attach(pvField);
     testOk1(result);
     Alarm al;
-    al.setMessage(String("testMessage"));
+    al.setMessage(string("testMessage"));
     al.setSeverity(majorAlarm);
     al.setStatus(clientStatus);
     result = pvAlarm.set(al);
@@ -105,9 +93,9 @@ static void testAlarm()
     testOk1(al.getMessage().compare(alarm.getMessage())==0);
     testOk1(al.getSeverity()==alarm.getSeverity());
     testOk1(al.getStatus()==alarm.getStatus());
-    String message = alarm.getMessage();
-    String severity = (*AlarmSeverityFunc::getSeverityNames())[alarm.getSeverity()];
-    String status = (*AlarmStatusFunc::getStatusNames())[alarm.getStatus()];
+    string message = alarm.getMessage();
+    string severity = (*AlarmSeverityFunc::getSeverityNames())[alarm.getSeverity()];
+    string status = (*AlarmStatusFunc::getStatusNames())[alarm.getStatus()];
     if(debug) {
         printf(" message %s severity %s status %s\n",
             message.c_str(),severity.c_str(),status.c_str());
@@ -121,7 +109,7 @@ static void testTimeStamp()
     TimeStamp timeStamp;
     PVTimeStamp pvTimeStamp; 
     bool result;
-    PVFieldPtr pvField = doubleRecord->getSubField(String("timeStamp"));
+    PVFieldPtr pvField = doubleRecord->getSubField(string("timeStamp"));
     if(pvField.get()==NULL) {
         printf("testTimeStamp ERROR did not find field timeStamp\n");
         return;
@@ -161,7 +149,7 @@ static void testControl()
     Control control;
     PVControl pvControl; 
     bool result;
-    PVFieldPtr pvField = doubleRecord->getSubField(String("control"));
+    PVFieldPtr pvField = doubleRecord->getSubField(string("control"));
     if(pvField.get()==NULL) {
         printf("testControl ERROR did not find field control\n");
         return;
@@ -188,7 +176,7 @@ static void testDisplay()
     Display display;
     PVDisplay pvDisplay; 
     bool result;
-    PVFieldPtr pvField = doubleRecord->getSubField(String("display"));
+    PVFieldPtr pvField = doubleRecord->getSubField(string("display"));
     if(pvField.get()==NULL) {
         printf("testDisplay ERROR did not find field display\n");
         return;
@@ -198,9 +186,9 @@ static void testDisplay()
     Display dy;
     dy.setLow(-10.0);
     dy.setHigh(-1.0);
-    dy.setDescription(String("testDescription"));
-    dy.setFormat(String("%f10.0"));
-    dy.setUnits(String("volts"));
+    dy.setDescription(string("testDescription"));
+    dy.setFormat(string("%f10.0"));
+    dy.setUnits(string("volts"));
     result = pvDisplay.set(dy);
     testOk1(result);
     pvDisplay.get(display);
@@ -220,7 +208,7 @@ static void testEnumerated()
     if(debug) printf("testEnumerated\n");
     PVEnumerated pvEnumerated; 
     bool result;
-    PVFieldPtr pvField = enumeratedRecord->getSubField(String("value"));
+    PVFieldPtr pvField = enumeratedRecord->getSubField(string("value"));
     if(pvField.get()==NULL) {
         printf("testEnumerated ERROR did not find field enumerated\n");
         return;
@@ -228,7 +216,7 @@ static void testEnumerated()
     result = pvEnumerated.attach(pvField);
     testOk1(result);
     int32 index = pvEnumerated.getIndex();
-    String choice = pvEnumerated.getChoice();
+    string choice = pvEnumerated.getChoice();
     PVStringArray::const_svector choices = pvEnumerated.getChoices();
     int32 numChoices = pvEnumerated.getNumberChoices();
     if(debug) {

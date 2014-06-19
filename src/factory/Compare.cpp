@@ -7,12 +7,14 @@
  * @author mes
  */
 
-#define epicsExportSharedSymbols
-#include <pv/convert.h>
-
 #include <algorithm>
 #include <iterator>
 #include <sstream>
+
+#define epicsExportSharedSymbols
+#include <pv/convert.h>
+
+using std::string;
 
 namespace epics { namespace pvData {
 
@@ -202,7 +204,7 @@ bool compareField(const PVScalarArray* left, const PVScalarArray* right)
     OP(pvLong, int64);
     OP(pvFloat, float);
     OP(pvDouble, double);
-    OP(pvString, String);
+    OP(pvString, string);
 #undef OP
     }
     throw std::logic_error("PVScalarArray with invalid element type!");

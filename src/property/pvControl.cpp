@@ -19,9 +19,10 @@
 namespace epics { namespace pvData { 
 
 using std::tr1::static_pointer_cast;
+using std::string;
 
-String PVControl::noControlFound("No control structure found");
-String PVControl::notAttached("Not attached to an control structure");
+string PVControl::noControlFound("No control structure found");
+string PVControl::notAttached("Not attached to an control structure");
 
 bool PVControl::attach(PVFieldPtr const & pvField)
 {
@@ -29,7 +30,7 @@ bool PVControl::attach(PVFieldPtr const & pvField)
     PVStructurePtr pvStructure = static_pointer_cast<PVStructure>(pvField);
     pvLow = pvStructure->getDoubleField("limitLow");
     if(pvLow.get()==NULL) return false;
-    pvHigh = pvStructure->getDoubleField(String("limitHigh"));
+    pvHigh = pvStructure->getDoubleField(string("limitHigh"));
     if(pvHigh.get()==NULL) {
         pvLow.reset();
         return false;

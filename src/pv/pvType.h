@@ -94,28 +94,23 @@ typedef uint64_t uint64;
 // float and double are types
 
 /**
- * A string
- */
-typedef std::string String;
-
-/**
  * A string array.
  */
-typedef std::vector<String> StringArray;
+typedef std::vector<std::string> StringArray;
 typedef std::tr1::shared_ptr<StringArray> StringArrayPtr;
-inline String * get(StringArray &value)
+inline std::string * get(StringArray &value)
 {
     return &value[0];
 }
-inline String const * get(StringArray const &value)
+inline std::string const * get(StringArray const &value)
 {
-    return static_cast<String const *>(&value[0]);
+    return static_cast<std::string const *>(&value[0]);
 }
-inline String * get(StringArrayPtr &value)
+inline std::string * get(StringArrayPtr &value)
 {
     return get(*value.get());
 }
-inline String const * get(StringArrayPtr const &value)
+inline std::string const * get(StringArrayPtr const &value)
 {
     return get(*value.get());
 }
@@ -127,13 +122,8 @@ inline StringArray const & getVector(StringArrayPtr const &value)
 {
      return *value.get();
 }
-typedef std::vector<String>::iterator StringArray_iterator;
-typedef std::vector<String>::const_iterator StringArray_const_iterator;
-
-/**
- * A convenience definition for toString methods
- */
-typedef String * StringBuilder;
+typedef std::vector<std::string>::iterator StringArray_iterator;
+typedef std::vector<std::string>::const_iterator StringArray_const_iterator;
 
 }}
 #endif  /* PVTYPE_H */

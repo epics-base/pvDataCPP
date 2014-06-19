@@ -16,12 +16,13 @@
 #include <pv/pvData.h>
 #include <pv/pvEnumerated.h>
 
+using std::tr1::static_pointer_cast;
+using std::string;
+
 namespace epics { namespace pvData { 
 
-using std::tr1::static_pointer_cast;
-
-String PVEnumerated::notFound("No enumerated structure found");
-String PVEnumerated::notAttached("Not attached to an enumerated structure");
+string PVEnumerated::notFound("No enumerated structure found");
+string PVEnumerated::notAttached("Not attached to an enumerated structure");
 
 bool PVEnumerated::attach(PVFieldPtr const & pvField)
 {
@@ -68,7 +69,7 @@ int32 PVEnumerated::getIndex()
     return pvIndex->get();
 }
 
-String PVEnumerated::getChoice()
+string PVEnumerated::getChoice()
 {
     if(pvIndex.get()==NULL ) {
          throw std::logic_error(notAttached);

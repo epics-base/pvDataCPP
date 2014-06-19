@@ -35,69 +35,6 @@ typedef class std::ios std::ios_base;
 
 namespace epics { namespace pvData { 
 
-
-namespace format {
-
-struct indent_level
-{
-    long level;
-
-    indent_level(long l) : level(l) {}
-};
-
-inline long& indent_value(std::ios_base& ios)
-{
-  static int indent_index = std::ios_base::xalloc();
-  return ios.iword(indent_index);
-}
-
-epicsShareExtern std::ostream& operator<<(std::ostream& os, indent_level const& indent);
-
-struct indent_scope
-{
-    long saved_level;
-    std::ios_base& stream;
-
-    indent_scope(std::ios_base& ios) :
-        stream(ios)
-    {
-        long& l = indent_value(ios);
-        saved_level = l;
-        l = saved_level + 1;
-    }
-
-    ~indent_scope()
-    {
-        indent_value(stream) = saved_level;
-    }
-};
-
-struct indent
-{
-};
-
-epicsShareExtern std::ostream& operator<<(std::ostream& os, indent const&);
-
-struct array_at
-{
-    std::size_t index;
-
-    array_at(std::size_t ix) : index(ix) {}
-};
-
-struct array_at_internal
-{
-    std::size_t index;
-    std::ostream& stream;
-
-    array_at_internal(std::size_t ix, std::ostream& str) : index(ix), stream(str) {}
-};
-
-epicsShareExtern array_at_internal operator<<(std::ostream& str, array_at const& manip);
-
-};
-
-
 class PostHandler;
 
 class PVField;
@@ -223,13 +160,13 @@ public:
      * Get the fieldName for this field.
      * @return The name or empty string if top level field.
      */
-    inline const String& getFieldName() const {return fieldName;}
+    inline const std::string& getFieldName() const {return fieldName;}
     /**
      * Fully expand the name of this field using the
      * names of its parent fields with a dot '.' seperating
      * each name.
      */
-    String getFullName() const;
+    std::string getFullName() const;
     /**
      * Get offset of the PVField field within top level structure.
      * Every field within the PVStructure has a unique offset.
@@ -288,25 +225,11 @@ public:
      */
     virtual bool equals(PVField &pv);
     /**
-     * Convert the PVField to a string.
-     *  @param buf buffer for the result
-     */
-    virtual void toString(StringBuilder buf) ;
-    /**
-     * Convert the PVField to a string.
-     * Each line is indented.
-     * @param buf buffer for the result
-     * @param indentLevel The indentation level.
-     */
-    virtual void toString(StringBuilder buf,int indentLevel) ;
-
-    /**
      * Puts the PVField raw value to the stream.
      * @param o output stream.
      * @return The output stream.
      */
     virtual std::ostream& dumpValue(std::ostream& o) const = 0;
-
 
 protected:
     PVField::shared_pointer getPtrSelf()
@@ -314,12 +237,12 @@ protected:
         return shared_from_this();
     }
     PVField(FieldConstPtr field);
-    void setParentAndName(PVStructure *parent, String const & fieldName);
+    void setParentAndName(PVStructure *parent, std::string const & fieldName);
 private:
     static void computeOffset(const PVField *pvField);
     static void computeOffset(const PVField *pvField,std::size_t offset);
-    String notImplemented;
-    String fieldName;
+    std::string notImplemented;
+    std::string fieldName;
     PVStructure *parent;
     FieldConstPtr field;
     size_t fieldOffset;
@@ -516,7 +439,7 @@ typedef std::tr1::shared_ptr<PVDouble> PVDoublePtr;
 /**
  * PVString is special case, since it implements SerializableArray
  */
-class epicsShareClass PVString : public PVScalarValue<String>, SerializableArray {
+class epicsShareClass PVString : public PVScalarValue<std::string>, SerializableArray {
 public:
     /**
      * Destructor
@@ -524,7 +447,7 @@ public:
     virtual ~PVString() {}
 protected:
     PVString(ScalarConstPtr const & scalar)
-    : PVScalarValue<String>(scalar) {}
+    : PVScalarValue<std::string>(scalar) {}
 };
 typedef std::tr1::shared_ptr<PVString> PVStringPtr;
 
@@ -709,10 +632,10 @@ public:
      * @param fieldName The name of the field.
      * @return Pointer to the field or null if field does not exist.
      */
-    PVFieldPtr getSubField(String const &fieldName) const;
+    PVFieldPtr getSubField(std::string const &fieldName) const;
 
     template<typename PVT>
-    std::tr1::shared_ptr<PVT> getSubField(String const &fieldName) const
+    std::tr1::shared_ptr<PVT> getSubField(std::string const &fieldName) const
     {
         PVFieldPtr pvField = getSubField(fieldName);
         if (pvField.get())
@@ -744,84 +667,84 @@ public:
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
-    PVBooleanPtr getBooleanField(String const &fieldName) ;
+    PVBooleanPtr getBooleanField(std::string const &fieldName) ;
     /**
      * Get a byte field with the specified name.
      * No longer needed. Use templete version of getSubField
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
-    PVBytePtr getByteField(String const &fieldName) ;
+    PVBytePtr getByteField(std::string const &fieldName) ;
     /**
      * Get a short field with the specified name.
      * No longer needed. Use templete version of getSubField
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
-    PVShortPtr getShortField(String const &fieldName) ;
+    PVShortPtr getShortField(std::string const &fieldName) ;
     /**
      * Get a int field with the specified name.
      * No longer needed. Use templete version of getSubField
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
-    PVIntPtr getIntField(String const &fieldName) ;
+    PVIntPtr getIntField(std::string const &fieldName) ;
     /**
      * Get a long field with the specified name.
      * No longer needed. Use templete version of getSubField
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
-    PVLongPtr getLongField(String const &fieldName) ;
+    PVLongPtr getLongField(std::string const &fieldName) ;
     /**
      * Get an unsigned byte field with the specified name.
      * No longer needed. Use templete version of getSubField
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
-    PVUBytePtr getUByteField(String const &fieldName) ;
+    PVUBytePtr getUByteField(std::string const &fieldName) ;
     /**
      * Get an unsigned short field with the specified name.
      * No longer needed. Use templete version of getSubField
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
-    PVUShortPtr getUShortField(String const &fieldName) ;
+    PVUShortPtr getUShortField(std::string const &fieldName) ;
     /**
      * Get an unsigned int field with the specified name.
      * No longer needed. Use templete version of getSubField
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
-    PVUIntPtr getUIntField(String const &fieldName) ;
+    PVUIntPtr getUIntField(std::string const &fieldName) ;
     /**
      * Get an unsigned long field with the specified name.
      * No longer needed. Use templete version of getSubField
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
-    PVULongPtr getULongField(String const &fieldName) ;
+    PVULongPtr getULongField(std::string const &fieldName) ;
     /**
      * Get a float field with the specified name.
      * No longer needed. Use templete version of getSubField
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
-    PVFloatPtr getFloatField(String const &fieldName) ;
+    PVFloatPtr getFloatField(std::string const &fieldName) ;
     /**
      * Get a double field with the specified name.
      * No longer needed. Use templete version of getSubField
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
-    PVDoublePtr getDoubleField(String const &fieldName) ;
+    PVDoublePtr getDoubleField(std::string const &fieldName) ;
     /**
      * Get a string field with the specified name.
      * No longer needed. Use templete version of getSubField
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
-    PVStringPtr getStringField(String const &fieldName) ;
+    PVStringPtr getStringField(std::string const &fieldName) ;
     
     /**
      * Get a structure field with the specified name.
@@ -829,14 +752,14 @@ public:
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
-    PVStructurePtr getStructureField(String const &fieldName) ;
+    PVStructurePtr getStructureField(std::string const &fieldName) ;
     /**
      * Get a union field with the specified name.
      * No longer needed. Use templete version of getSubField
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
-    PVUnionPtr getUnionField(String const &fieldName) ;
+    PVUnionPtr getUnionField(std::string const &fieldName) ;
     /**
      * Get a scalarArray field with the specified name.
      * No longer needed. Use templete version of getSubField
@@ -845,21 +768,21 @@ public:
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
     PVScalarArrayPtr getScalarArrayField(
-        String const &fieldName,ScalarType elementType) ;
+        std::string const &fieldName,ScalarType elementType) ;
     /**
      * Get a structureArray field with the specified name.
      * No longer needed. Use templete version of getSubField
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
-    PVStructureArrayPtr getStructureArrayField(String const &fieldName) ;
+    PVStructureArrayPtr getStructureArrayField(std::string const &fieldName) ;
     /**
      * Get a unionArray field with the specified name.
      * No longer needed. Use templete version of getSubField
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
-    PVUnionArrayPtr getUnionArrayField(String const &fieldName) ;
+    PVUnionArrayPtr getUnionArrayField(std::string const &fieldName) ;
     /**
      * Serialize.
      * @param pbuffer The byte buffer.
@@ -926,7 +849,7 @@ private:
 
     PVFieldPtrArray pvFields;
     StructureConstPtr structurePtr;
-    String extendsStructureName;
+    std::string extendsStructureName;
     friend class PVDataCreate;
 };
 
@@ -988,10 +911,10 @@ public:
      * @return corresponding PVField (of undetermined value).
      * @throws {@code std::invalid_argument} if field does not exist.
      */
-    PVFieldPtr select(String const & fieldName);
+    PVFieldPtr select(std::string const & fieldName);
 
     template<typename PVT>
-    std::tr1::shared_ptr<PVT> select(String const & fieldName) {
+    std::tr1::shared_ptr<PVT> select(std::string const & fieldName) {
         return std::tr1::dynamic_pointer_cast<PVT>(select(fieldName));
     }
 
@@ -1005,7 +928,7 @@ public:
      * Get selected field name.
      * @return selected field name, empty string if field does not exist.
      */
-    String getSelectedFieldName() const;
+    std::string getSelectedFieldName() const;
     
     /**
      * Set the {@code PVField} (by reference!) as selected field.
@@ -1025,12 +948,12 @@ public:
     /**
      * Set the {@code PVField} (by reference!) as field by given name.
      * If a value is not a valid union field an {@code std::invalid_argument} exception is thrown.
-     * Use {@code select(String)} to put by value.
+     * Use {@code select(std::string)} to put by value.
      * @param fieldName Name of the field to put.
      * @param value the field to set.
-     * @see #select(String)
+     * @see #select(std::string)
      */
-    void set(String const & fieldName, PVFieldPtr const & value);
+    void set(std::string const & fieldName, PVFieldPtr const & value);
 
     /**
      * Serialize.
@@ -1429,7 +1352,7 @@ typedef std::tr1::shared_ptr<PVFloatArray> PVFloatArrayPtr;
 typedef PVValueArray<double> PVDoubleArray;
 typedef std::tr1::shared_ptr<PVDoubleArray> PVDoubleArrayPtr;
 
-typedef PVValueArray<String> PVStringArray;
+typedef PVValueArray<std::string> PVStringArray;
 typedef std::tr1::shared_ptr<PVStringArray> PVStringArrayPtr;
 
 /**

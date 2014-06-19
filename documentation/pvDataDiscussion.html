@@ -88,7 +88,7 @@ The interfaces for C++ and Java should be similar so that
 someone who understands the interface in one of the languages
 and knows both languages will quickly understand the interface of the other language.</p>
 <p>There is another problem with the existing API. There are methods that allow the "structure"
-to change after an pvData object is created. An example is PVField::renameField(String newName).
+to change after an pvData object is created. An example is PVField::renameField(std::string newName).
 Such methods should not exist.</p>
 <p>There are methods regarding immutability: setImmutable, isImmutablei, setCapacityMutable, and isCapacityMutable.
 Should they exists? For now lets assume no.
@@ -114,18 +114,18 @@ The new methods also have a comment.
 <h3>Introspection Interfaces</h3>
 
 <pre>interface Field extends Serializable {
-    String getId();
+    std::string getId();
     Type getType();
     // following will be removed
     <font color = "red">void toString(StringBuilder buf);</font>
     <font color = "red">void toString(StringBuilder buf,int indentLevel);</font>
-    <font color = "red">String toString();</font>
+    <font color = "red">std::string toString();</font>
 }
 
 <font color = "blue">
 // new interface
-interface FieldToString {
-    String toString(Field field);
+interface FieldTostd::string {
+    std::string toString(Field field);
 }</font>
 
 interface Scalar extends Field {
@@ -137,12 +137,12 @@ interface ScalarArray extends Field {
 }
 
 interface Structure extends Field {
-    Field getField(String fieldName);
-    int getFieldIndex(String fieldName);
+    Field getField(std::string fieldName);
+    int getFieldIndex(std::string fieldName);
     Field[] getFields();
     Field getField(int fieldIndex);
-    String[] getFieldNames();
-    String getFieldName(int fieldIndex)
+    std::string[] getFieldNames();
+    std::string getFieldName(int fieldIndex)
 }
 
 interface StructureArray extends Field {
@@ -153,19 +153,19 @@ interface FieldCreate {
     Scalar createScalar(ScalarType scalarType);
     ScalarArray createScalarArray(ScalarType elementType);
     StructureArray createStructureArray(Structure elementStructure);
-    Structure createStructure(String[] fieldNames, Field[] field);
-    Structure createStructure(String id,String[] fieldNames, Field[] field);
+    Structure createStructure(std::string[] fieldNames, Field[] field);
+    Structure createStructure(std::string id,std::string[] fieldNames, Field[] field);
     Structure createStructure(Structure structToClone);
     Field deserialize(ByteBuffer buffer, DeserializableControl control);
     // following will be removed
-    <font color = "red">Structure appendField(Structure structure,String fieldName, Field field);</font>
-    <font color = "red">Structure appendFields(Structure structure,String[] fieldNames, Field[] fields);</font>
+    <font color = "red">Structure appendField(Structure structure,std::string fieldName, Field field);</font>
+    <font color = "red">Structure appendFields(Structure structure,std::string[] fieldNames, Field[] fields);</font>
 }
 </pre>
 <h3>Data Interfaces</h3>
 <pre>
 interface PVField extends Requester, Serializable {
-    String getFieldName();
+    std::string getFieldName();
     void setRequester(Requester requester);
     int getFieldOffset();
     int getNextFieldOffset();
@@ -178,16 +178,16 @@ interface PVField extends Requester, Serializable {
     <font color = "red">PVAuxInfo getPVAuxInfo();</font>
     <font color = "red">boolean isImmutable();</font>
     <font color = "red">void setImmutable();</font>
-    <font color = "red">void renameField(String newName);</font>
+    <font color = "red">void renameField(std::string newName);</font>
     <font color = "red">void toString(StringBuilder buf);</font>
     <font color = "red">void toString(StringBuilder buf,int indentLevel);</font>
-    <font color = "red">String toString();</font>
+    <font color = "red">std::string toString();</font>
 }
 
 <font color = "blue">
 // The following is a new interface
-interface PVFieldToString {
-    String toString(PVField pvField);
+interface PVFieldTostd::string {
+    std::string toString(PVField pvField);
     void setMaxInitialArrayElements(int num);
     void setMaxFinalArrayElements(int num);
     int getMaxInitialArrayElements();
@@ -241,28 +241,28 @@ interface PVDoubleArray extends PVArray {
 interface PVStructure extends PVField , BitSetSerializable{
     Structure getStructure();
     PVField[] getPVFields();
-    PVField getSubField(String fieldName);
+    PVField getSubField(std::string fieldName);
     PVField getSubField(int fieldOffset);
     // The following are convenience methods
-    PVBoolean getBooleanField(String fieldName);
-    PVByte getByteField(String fieldName);
-    PVShort getShortField(String fieldName);
-    PVInt getIntField(String fieldName);
-    PVLong getLongField(String fieldName);
-    PVFloat getFloatField(String fieldName);
-    PVDouble getDoubleField(String fieldName);
-    PVString getStringField(String fieldName);
-    PVScalarArray getScalarArrayField(String fieldName);
-    PVStructureArray getStructureArrayField(String fieldName);
-    PVStructure getStructureField(String fieldName);
-    PVArray getArrayField(String fieldName,ScalarType elementType);
+    PVBoolean getBooleanField(std::string fieldName);
+    PVByte getByteField(std::string fieldName);
+    PVShort getShortField(std::string fieldName);
+    PVInt getIntField(std::string fieldName);
+    PVLong getLongField(std::string fieldName);
+    PVFloat getFloatField(std::string fieldName);
+    PVDouble getDoubleField(std::string fieldName);
+    PVString getStringField(std::string fieldName);
+    PVScalarArray getScalarArrayField(std::string fieldName);
+    PVStructureArray getStructureArrayField(std::string fieldName);
+    PVStructure getStructureField(std::string fieldName);
+    PVArray getArrayField(std::string fieldName,ScalarType elementType);
     // following will be removed
-<font color = "red">    void appendPVField(String fieldName,PVField pvField);</font>
-<font color = "red">    void appendPVFields(String[] fieldNames,PVField[] pvFields);</font>
-<font color = "red">    void removePVField(String fieldName);</font>
+<font color = "red">    void appendPVField(std::string fieldName,PVField pvField);</font>
+<font color = "red">    void appendPVFields(std::string[] fieldNames,PVField[] pvFields);</font>
+<font color = "red">    void removePVField(std::string fieldName);</font>
 <font color = "red">    void replacePVField(PVField oldPVField,PVField newPVField);</font>
-<font color = "red">    String getExtendsStructureName();</font>
-<font color = "red">    boolean putExtendsStructureName(String extendsStructureName);</font>
+<font color = "red">    std::string getExtendsStructureName();</font>
+<font color = "red">    boolean putExtendsStructureName(std::string extendsStructureName);</font>
 <font color = "red">    public boolean checkValid();</font>
 }
  
@@ -297,13 +297,13 @@ public interface PVDataCreate {
     PVScalarArray createPVScalarArray(PVScalarArray arrayToClone;
     PVStructureArray createPVStructureArray(StructureArray structureArray);
     PVStructure createPVStructure(Structure structure);
-    PVStructure createPVStructure(String[] fieldNames,Field[] fields);
+    PVStructure createPVStructure(std::string[] fieldNames,Field[] fields);
     PVStructure createPVStructure(PVStructure structToClone);
     // following will be removed
     <font color = "red">PVField[] flattenPVStructure(PVStructure pvStructure);</font>
 }
 </pre>
-<h3>PVFieldToString</h3>
+<h3>PVFieldTostd::string</h3>
 <p>In addition to toString this has methods to limit the number of array element to display.
 The existing Java implementation of toString displayed all elements.
 For large arrays this is not desirable.
@@ -346,7 +346,7 @@ public:
     POINTER_DEFINITIONS(Field);
     virtual ~Field();
     Type getType() const{return m_type;}
-    virtual String getID() const = 0;
+    virtual std::string getID() const = 0;
     <font color = "red">
     // following will be removed
     virtual void toString(StringBuilder buf) const{toString(buf,0);}
@@ -373,7 +373,7 @@ public:
     // following will be removed
     virtual void toString(StringBuilder buf) const{toString(buf,0);}
     virtual void toString(StringBuilder buf,int indentLevel) const;
-    virtual String getID() const;
+    virtual std::string getID() const;
     </font>
  ...
 };
@@ -391,7 +391,7 @@ public:
     // following will be removed
     virtual void toString(StringBuilder buf) const{toString(buf,0);}
     virtual void toString(StringBuilder buf,int indentLevel) const;
-    virtual String getID() const;
+    virtual std::string getID() const;
     </font>
  ...
 };
@@ -403,19 +403,19 @@ public:
     typedef const Structure&amp; const_reference;
 
    std::size_t getNumberFields() const {return numberFields;}
-   FieldConstPtr getField(String const &amp; fieldName) const;
+   FieldConstPtr getField(std::string const &amp; fieldName) const;
    FieldConstPtr getField(std::size_t index) const;
-   std::size_t getFieldIndex(String const &amp;fieldName) const;
+   std::size_t getFieldIndex(std::string const &amp;fieldName) const;
    FieldConstPtrArray const &amp; getFields() const {return fields;}
    StringArray const &amp; getFieldNames() const;
-   String getFieldName(std::size_t fieldIndex);
+   std::string getFieldName(std::size_t fieldIndex);
    virtual void serialize(ByteBuffer *buffer, SerializableControl *control) const;
    virtual void deserialize(ByteBuffer *buffer, DeserializableControl *control);
     <font color = "red">
     // following will be removed
-   void renameField(std::size_t fieldIndex,String const &amp;newName);
+   void renameField(std::size_t fieldIndex,std::string const &amp;newName);
    virtual void toString(StringBuilder buf,int indentLevel) const;
-   virtual String getID() const;
+   virtual std::string getID() const;
    </font>
  ...
 };
@@ -432,7 +432,7 @@ public:
     <font color = "red">
     // following will be removed
     virtual void toString(StringBuilder buf,int indentLevel=0) const;
-    virtual String getID() const;
+    virtual std::string getID() const;
     </font>
  ...
 };
@@ -447,7 +447,7 @@ public:
         StringArray const &amp; fieldNames,
         FieldConstPtrArray const &amp; fields) const;
     StructureConstPtr createStructure (
-        String const &amp;id,
+        std::string const &amp;id,
         StringArray const &amp; fieldNames,
         FieldConstPtrArray const &amp; fields) const;
     FieldConstPtr deserialize(ByteBuffer* buffer, DeserializableControl* control) const;
@@ -455,7 +455,7 @@ public:
     // following will be removed
     StructureConstPtr appendField(
         StructureConstPtr const &amp; structure,
-        String const &amp;fieldName, FieldConstPtr const &amp; field) const;
+        std::string const &amp;fieldName, FieldConstPtr const &amp; field) const;
     StructureConstPtr appendFields(
         StructureConstPtr const &amp; structure,
         StringArray const &amp; fieldNames,
@@ -475,7 +475,7 @@ class PVField
 public:
    POINTER_DEFINITIONS(PVField);
    virtual ~PVField();
-   inline const String &amp;getFieldName() const ;
+   inline const std::string &amp;getFieldName() const ;
    virtual void setRequester(RequesterPtr const &amp;prequester);
    std::size_t getFieldOffset() const;
    std::size_t getNextFieldOffset() const;
@@ -486,15 +486,15 @@ public:
    void setPostHandler(PostHandlerPtr const &amp;postHandler);
     // following will be removed
     <font color = "red">
-   virtual void message(String message,MessageType messageType);
+   virtual void message(std::string message,MessageType messageType);
    void replacePVField(const PVFieldPtr&amp;  newPVField);
-   String getFullName() const;
+   std::string getFullName() const;
    virtual bool equals(PVField &amp;pv);
    PVAuxInfoPtr &amp; getPVAuxInfo()
    bool isImmutable() const;
    virtual void setImmutable();
    void replacePVField(const PVFieldPtr&amp;  newPVField);
-   void renameField(String const &amp;newName);
+   void renameField(std::string const &amp;newName);
    virtual void toString(StringBuilder buf) ;
    virtual void toString(StringBuilder buf,int indentLevel);
    std::ostream&amp; dumpValue(std::ostream&amp; o) const;
@@ -504,8 +504,8 @@ public:
 
 <font color = "blue">
 // The following is a new class
-class PVFieldToString {
-    String toString(const PVFieldPtr &amp;pvField);
+class PVFieldTostd::string {
+    std::string toString(const PVFieldPtr &amp;pvField);
     void setMaxInitialArrayElements(size_t num);
     void setMaxFinalArrayElements(size_t num);
     size_t getMaxInitialArrayElements();
@@ -546,7 +546,7 @@ public:
 }
 
 // PVString is special case, since it implements SerializableArray
-class PVString : public PVScalarValue&lt;String&gt;, SerializableArray {
+class PVString : public PVScalarValue&lt;std::string&gt;, SerializableArray {
 public:
     virtual ~PVString() {}
  ...
@@ -650,7 +650,7 @@ public:
 typedef PVValueArray&lt;uint8&gt; PVBooleanArray;
 typedef std::tr1::shared_ptr&lt;PVBooleanArray&gt; PVBooleanArrayPtr;
 ...
-typedef PVValueArray&lt;String&gt; PVStringArray;
+typedef PVValueArray&lt;std::string&gt; PVStringArray;
 typedef std::tr1::shared_ptr&lt;PVStringArray&gt; PVStringArrayPtr;
 
 class PVStructure : public PVField,public BitSetSerializable {
@@ -662,24 +662,24 @@ public:
 
     StructureConstPtr getStructure() const;
     const PVFieldPtrArray &amp; getPVFields() const;
-    PVFieldPtr getSubField(String const &amp;fieldName) const;
+    PVFieldPtr getSubField(std::string const &amp;fieldName) const;
     PVFieldPtr getSubField(std::size_t fieldOffset) const;
-    PVBooleanPtr getBooleanField(String const &amp;fieldName) ;
-    PVBytePtr getByteField(String const &amp;fieldName) ;
-    PVShortPtr getShortField(String const &amp;fieldName) ;
-    PVIntPtr getIntField(String const &amp;fieldName) ;
-    PVLongPtr getLongField(String const &amp;fieldName) ;
-    PVUBytePtr getUByteField(String const &amp;fieldName) ;
-    PVUShortPtr getUShortField(String const &amp;fieldName) ;
-    PVUIntPtr getUIntField(String const &amp;fieldName) ;
-    PVULongPtr getULongField(String const &amp;fieldName) ;
-    PVFloatPtr getFloatField(String const &amp;fieldName) ;
-    PVDoublePtr getDoubleField(String const &amp;fieldName) ;
-    PVStringPtr getStringField(String const &amp;fieldName) ;
-    PVStructurePtr getStructureField(String const &amp;fieldName) ;
+    PVBooleanPtr getBooleanField(std::string const &amp;fieldName) ;
+    PVBytePtr getByteField(std::string const &amp;fieldName) ;
+    PVShortPtr getShortField(std::string const &amp;fieldName) ;
+    PVIntPtr getIntField(std::string const &amp;fieldName) ;
+    PVLongPtr getLongField(std::string const &amp;fieldName) ;
+    PVUBytePtr getUByteField(std::string const &amp;fieldName) ;
+    PVUShortPtr getUShortField(std::string const &amp;fieldName) ;
+    PVUIntPtr getUIntField(std::string const &amp;fieldName) ;
+    PVULongPtr getULongField(std::string const &amp;fieldName) ;
+    PVFloatPtr getFloatField(std::string const &amp;fieldName) ;
+    PVDoublePtr getDoubleField(std::string const &amp;fieldName) ;
+    PVStringPtr getStringField(std::string const &amp;fieldName) ;
+    PVStructurePtr getStructureField(std::string const &amp;fieldName) ;
     PVScalarArrayPtr getScalarArrayField(
-        String const &amp;fieldName,ScalarType elementType) ;
-    PVStructureArrayPtr getStructureArrayField(String const &amp;fieldName) ;
+        std::string const &amp;fieldName,ScalarType elementType) ;
+    PVStructureArrayPtr getStructureArrayField(std::string const &amp;fieldName) ;
     virtual void serialize(
         ByteBuffer *pbuffer,SerializableControl *pflusher) const ;
     virtual void deserialize(
@@ -693,16 +693,16 @@ public:
     <font color = "red">
     // following are removed
     void appendPVField(
-        String const &amp;fieldName,
+        std::string const &amp;fieldName,
         PVFieldPtr const &amp; pvField);
     void appendPVFields(
         StringArray const &amp; fieldNames,
         PVFieldPtrArray const &amp; pvFields);
-    void removePVField(String const &amp;fieldName);
+    void removePVField(std::string const &amp;fieldName);
     virtual void setImmutable();
-    String getExtendsStructureName() const;
+    std::string getExtendsStructureName() const;
     bool putExtendsStructureName(
-        String const &amp;extendsStructureName);
+        std::string const &amp;extendsStructureName);
     </font>
 };
 

@@ -22,6 +22,7 @@
 
 using std::tr1::static_pointer_cast;
 using std::size_t;
+using std::string;
 
 namespace epics { namespace pvData {
 	
@@ -58,11 +59,11 @@ int32 PVUnion::getSelectedIndex() const
     return selector;
 }
 
-String PVUnion::getSelectedFieldName() const
+string PVUnion::getSelectedFieldName() const
 {
     // no name for undefined and for variant unions
     if (selector == UNDEFINED_INDEX)
-        return String();
+        return string();
     else
         return unionPtr->getFieldName(selector);
 }
@@ -91,7 +92,7 @@ PVFieldPtr PVUnion::select(int32 index)
     return value;
 }
 	
-PVFieldPtr PVUnion::select(String const & fieldName)
+PVFieldPtr PVUnion::select(string const & fieldName)
 {
     int32 index = variant ? -1 : static_cast<int32>(unionPtr->getFieldIndex(fieldName));
 	if (index == -1)
@@ -129,7 +130,7 @@ void PVUnion::set(int32 index, PVFieldPtr const & value)
     postPut();
 }
 
-void PVUnion::set(String const & fieldName, PVFieldPtr const & value)
+void PVUnion::set(string const & fieldName, PVFieldPtr const & value)
 {
     int32 index = variant ? -1 : static_cast<int32>(unionPtr->getFieldIndex(fieldName));
     if (index == -1)

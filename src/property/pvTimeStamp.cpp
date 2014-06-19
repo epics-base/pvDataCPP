@@ -16,12 +16,13 @@
 #include <pv/pvData.h>
 #include <pv/pvTimeStamp.h>
 
+using std::tr1::static_pointer_cast;
+using std::string;
+
 namespace epics { namespace pvData { 
 
-using std::tr1::static_pointer_cast;
-
-String PVTimeStamp::noTimeStamp("No timeStamp structure found");
-String PVTimeStamp::notAttached("Not attached to a timeStamp structure");
+string PVTimeStamp::noTimeStamp("No timeStamp structure found");
+string PVTimeStamp::notAttached("Not attached to a timeStamp structure");
 
 bool PVTimeStamp::attach(PVFieldPtr const & pvField)
 {

@@ -22,6 +22,7 @@
 
 using std::tr1::static_pointer_cast;
 using std::size_t;
+using std::string;
 
 namespace epics { namespace pvData {
 
@@ -45,7 +46,7 @@ PVUnionArrayPtr PVStructure::nullPVUnionArray;
 PVScalarArrayPtr PVStructure::nullPVScalarArray;
 
 static PVFieldPtr findSubField(
-    String const &fieldName,
+    string const &fieldName,
     const PVStructure *pvStructure);
 
 PVStructure::PVStructure(StructureConstPtr const & structurePtr)
@@ -109,7 +110,7 @@ const PVFieldPtrArray & PVStructure::getPVFields() const
     return pvFields;
 }
 
-PVFieldPtr  PVStructure::getSubField(String const &fieldName) const
+PVFieldPtr  PVStructure::getSubField(string const &fieldName) const
 {
     return findSubField(fieldName,this);
 }
@@ -135,78 +136,78 @@ PVFieldPtr  PVStructure::getSubField(size_t fieldOffset) const
 }
 
 
-PVBooleanPtr PVStructure::getBooleanField(String const &fieldName)
+PVBooleanPtr PVStructure::getBooleanField(string const &fieldName)
 {
     return getSubField<PVBoolean>(fieldName);
 }
 
-PVBytePtr PVStructure::getByteField(String const &fieldName)
+PVBytePtr PVStructure::getByteField(string const &fieldName)
 {
     return getSubField<PVByte>(fieldName);
 }
 
-PVShortPtr PVStructure::getShortField(String const &fieldName)
+PVShortPtr PVStructure::getShortField(string const &fieldName)
 {
     return getSubField<PVShort>(fieldName);
 }
 
-PVIntPtr PVStructure::getIntField(String const &fieldName)
+PVIntPtr PVStructure::getIntField(string const &fieldName)
 {
     return getSubField<PVInt>(fieldName);
 }
 
-PVLongPtr PVStructure::getLongField(String const &fieldName)
+PVLongPtr PVStructure::getLongField(string const &fieldName)
 {
     return getSubField<PVLong>(fieldName);
 }
 
-PVUBytePtr PVStructure::getUByteField(String const &fieldName)
+PVUBytePtr PVStructure::getUByteField(string const &fieldName)
 {
     return getSubField<PVUByte>(fieldName);
 }
 
-PVUShortPtr PVStructure::getUShortField(String const &fieldName)
+PVUShortPtr PVStructure::getUShortField(string const &fieldName)
 {
     return getSubField<PVUShort>(fieldName);
 }
 
-PVUIntPtr PVStructure::getUIntField(String const &fieldName)
+PVUIntPtr PVStructure::getUIntField(string const &fieldName)
 {
     return getSubField<PVUInt>(fieldName);
 }
 
-PVULongPtr PVStructure::getULongField(String const &fieldName)
+PVULongPtr PVStructure::getULongField(string const &fieldName)
 {
     return getSubField<PVULong>(fieldName);
 }
 
-PVFloatPtr PVStructure::getFloatField(String const &fieldName)
+PVFloatPtr PVStructure::getFloatField(string const &fieldName)
 {
     return getSubField<PVFloat>(fieldName);
 }
 
-PVDoublePtr PVStructure::getDoubleField(String const &fieldName)
+PVDoublePtr PVStructure::getDoubleField(string const &fieldName)
 {
     return getSubField<PVDouble>(fieldName);
 }
 
-PVStringPtr PVStructure::getStringField(String const &fieldName)
+PVStringPtr PVStructure::getStringField(string const &fieldName)
 {
     return getSubField<PVString>(fieldName);
 }
 
-PVStructurePtr PVStructure::getStructureField(String const &fieldName)
+PVStructurePtr PVStructure::getStructureField(string const &fieldName)
 {
     return getSubField<PVStructure>(fieldName);
 }
 
-PVUnionPtr PVStructure::getUnionField(String const &fieldName)
+PVUnionPtr PVStructure::getUnionField(string const &fieldName)
 {
     return getSubField<PVUnion>(fieldName);
 }
 
 PVScalarArrayPtr PVStructure::getScalarArrayField(
-    String const &fieldName,ScalarType elementType)
+    string const &fieldName,ScalarType elementType)
 {
     PVFieldPtr pvField  = findSubField(fieldName,this);
     if(pvField.get()==NULL) {
@@ -226,13 +227,13 @@ PVScalarArrayPtr PVStructure::getScalarArrayField(
 }
 
 PVStructureArrayPtr PVStructure::getStructureArrayField(
-    String const &fieldName)
+    string const &fieldName)
 {
     return getSubField<PVStructureArray>(fieldName);
 }
 
 PVUnionArrayPtr PVStructure::getUnionArrayField(
-    String const &fieldName)
+    string const &fieldName)
 {
     return getSubField<PVUnionArray>(fieldName);
 }
@@ -328,13 +329,13 @@ void PVStructure::deserialize(ByteBuffer *pbuffer,
 }
 
 static PVFieldPtr findSubField(
-    String const & fieldName,
+    string const & fieldName,
     PVStructure const *pvStructure)
 {
     if( fieldName.length()<1) return PVFieldPtr();
-    String::size_type index = fieldName.find('.');
-    String name = fieldName;
-    String restOfName = String();
+    string::size_type index = fieldName.find('.');
+    string name = fieldName;
+    string restOfName = string();
     if(index>0) {
         name = fieldName.substr(0, index);
         if(fieldName.length()>index) {

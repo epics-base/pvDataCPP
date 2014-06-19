@@ -14,6 +14,7 @@
 #include <pv/createRequest.h>
 
 using namespace epics::pvData;
+using std::string;
 using std::cout;
 using std::endl;
 
@@ -23,8 +24,8 @@ void testCreateRequest() {
     printf("testCreateRequest... \n");
     CreateRequest::shared_pointer  createRequest = CreateRequest::create();
 
-    String out;
-    String request = "";
+    string out;
+    string request = "";
     if(debug) { cout  << "request " << request <<endl;}
     PVStructurePtr pvRequest = createRequest->createRequest(request);
     if(debug) { cout<< createRequest->getMessage() << endl;}
@@ -43,7 +44,7 @@ void testCreateRequest() {
     testOk1(pvRequest!=NULL);
     if(debug) { cout << pvRequest->dumpValue(cout) << endl;}
     PVStringPtr pvString = pvRequest->getSubField<PVString>("record.a");
-    String sval = pvString->get();
+    string sval = pvString->get();
     testOk(sval.compare("b")==0,"record.a = b");
     pvString = pvRequest->getSubField<PVString>("record.x");
     sval = pvString->get();
@@ -131,7 +132,7 @@ void testCreateRequest() {
 
     request = "alarm,timeStamp,power.value";
     pvRequest = createRequest->createRequest(request);
-    if(debug) { cout << endl << String("request") <<endl << request <<endl;}
+    if(debug) { cout << endl << string("request") <<endl << request <<endl;}
     if(pvRequest==NULL) {
          cout << "reason " << createRequest->getMessage() << endl;
     }
@@ -144,7 +145,7 @@ void testCreateRequest() {
 
     request = "record[process=true]field(alarm,timeStamp,power.value)";
     pvRequest = createRequest->createRequest(request);
-    if(debug) { cout << endl << String("request") <<endl << request <<endl;}
+    if(debug) { cout << endl << string("request") <<endl << request <<endl;}
     if(pvRequest==NULL) {
         cout << "reason " << createRequest->getMessage() << endl;
     }
@@ -160,7 +161,7 @@ void testCreateRequest() {
 
     request = "record[process=true]field(alarm,timeStamp[algorithm=onChange,causeMonitor=false],power{value,alarm})";
     pvRequest = createRequest->createRequest(request);
-    if(debug) { cout << String("request") <<endl << request <<endl;}
+    if(debug) { cout << string("request") <<endl << request <<endl;}
     if(pvRequest==NULL) {
          cout << "reason " << createRequest->getMessage() << endl;
     }
@@ -183,7 +184,7 @@ void testCreateRequest() {
 
     request = "record[int=2,float=3.14159]field(alarm,timeStamp[shareData=true],power.value)";
     pvRequest = createRequest->createRequest(request);
-    if(debug) { cout << String("request") <<endl << request <<endl;}
+    if(debug) { cout << string("request") <<endl << request <<endl;}
     if(pvRequest==NULL) {
          cout << "reason " << createRequest->getMessage() << endl;
     }
@@ -202,12 +203,12 @@ void testCreateRequest() {
     if(debug) {cout << pvRequest->dumpValue(cout) << endl;}
     testPass("request %s",request.c_str());
 
-    request = String("record[process=true,xxx=yyy]")
+    request = string("record[process=true,xxx=yyy]")
         + "putField(power.value)"
     	+ "getField(alarm,timeStamp,power{value,alarm},"
     	+ "current{value,alarm},voltage{value,alarm})";
     pvRequest = createRequest->createRequest(request);
-    if(debug) { cout << String("request") <<endl << request <<endl;}
+    if(debug) { cout << string("request") <<endl << request <<endl;}
     if(pvRequest==NULL) {
         cout << "reason " << createRequest->getMessage() << endl;
     }
@@ -224,12 +225,12 @@ void testCreateRequest() {
     if(debug) {cout << pvRequest->dumpValue(cout) << endl;}
     testPass("request %s",request.c_str());
 
-    request = String("field(alarm,timeStamp,supply{")
+    request = string("field(alarm,timeStamp,supply{")
     	+ "0{voltage.value,current.value,power.value},"
         + "1{voltage.value,current.value,power.value}"
         + "})";
     pvRequest = createRequest->createRequest(request);
-    if(debug) { cout << String("request") <<endl << request <<endl;}
+    if(debug) { cout << string("request") <<endl << request <<endl;}
     if(pvRequest==NULL) {
          cout << "reason " << createRequest->getMessage() << endl;
     }
@@ -245,7 +246,7 @@ void testCreateRequest() {
     if(debug) {cout << pvRequest->dumpValue(cout) << endl;}
     testPass("request %s",request.c_str());
 
-    request = String("record[process=true,xxx=yyy]")
+    request = string("record[process=true,xxx=yyy]")
     	+ "putField(power.value)"
     	+ "getField(alarm,timeStamp,power{value,alarm},"
     	+ "current{value,alarm},voltage{value,alarm},"
@@ -253,7 +254,7 @@ void testCreateRequest() {
         + "ps1{alarm,timeStamp,power{value,alarm},current{value,alarm},voltage{value,alarm}}"
         + ")";
     pvRequest = createRequest->createRequest(request);
-    if(debug) { cout << String("request") <<endl << request <<endl;}
+    if(debug) { cout << string("request") <<endl << request <<endl;}
     if(pvRequest==NULL) {
         cout << "reason " << createRequest->getMessage() << endl;
     }
@@ -288,13 +289,13 @@ void testCreateRequest() {
 
     request = "a{b{c{d}}}";
     pvRequest = createRequest->createRequest(request);
-    if(debug) { cout << String("request") <<endl << request <<endl;}
+    if(debug) { cout << string("request") <<endl << request <<endl;}
     testOk1(pvRequest!=NULL);
     testOk1(pvRequest->getSubField("field.a.b.c.d")!=NULL);
     if(debug) {cout << pvRequest->dumpValue(cout) << endl;}
     testPass("request %s",request.c_str());
 
-    request = String("record[process=true,xxx=yyy]")
+    request = string("record[process=true,xxx=yyy]")
         + "putField(power.value)"
         + "getField(alarm,timeStamp,power{value,alarm},"
         + "current{value,alarm},voltage{value,alarm},"
@@ -302,14 +303,14 @@ void testCreateRequest() {
         + "ps1{alarm,timeStamp,power{value,alarm},current{value,alarm},voltage{value,alarm}"
         + ")";
     if(debug) { cout << endl << "Error Expected for next call!!" << endl;}
-    if(debug) { cout << String("request") <<endl << request <<endl;}
+    if(debug) { cout << string("request") <<endl << request <<endl;}
     pvRequest = createRequest->createRequest(request);
     assert(pvRequest.get()==NULL);
     if(debug) {cout << "reason " << createRequest->getMessage() << endl;}
     testPass("request %s",request.c_str());
 
     request = "record[process=true,power.value";
-    if(debug) { cout << String("request") <<endl << request <<endl;}
+    if(debug) { cout << string("request") <<endl << request <<endl;}
     if(debug) { cout << endl << "Error Expected for next call!!" << endl;}
     pvRequest = createRequest->createRequest(request);
     assert(pvRequest.get()==NULL);

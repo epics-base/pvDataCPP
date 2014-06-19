@@ -145,7 +145,7 @@ After it is unzipped just edit configure/RELEASE.local and then execute make.
 </p>
 <p>The examples assume that the following statements have been issued:</p>
 <pre>
-String builder;
+std::string builder;
 FieldCreatePtr fieldCreate = getFieldCreate();
 PVDataCreatePtr pvDataCreate = getPVDataCreate();
 StandardFieldPtr standardField = getStandardField();
@@ -876,21 +876,21 @@ typedef uint16_t  uint16;
 typedef uint32_t uint32;
 typedef uint64_t uint64;
 // float and double are types
-typedef std::string String;
+typedef std::string std::string;
 
-typedef std::vector<String> StringArray;
+typedef std::vector<std::string> StringArray;
 typedef std::tr1::shared_ptr<StringArray> StringArrayPtr;
-inline String * get(StringArray &amp;value);
-inline String const * get(StringArray const &amp;value);
-inline String * get(StringArrayPtr &amp;value);
-inline String const * get(StringArrayPtr const &amp;value);
+inline std::string * get(StringArray &amp;value);
+inline std::string const * get(StringArray const &amp;value);
+inline std::string * get(StringArrayPtr &amp;value);
+inline std::string const * get(StringArrayPtr const &amp;value);
 }
 inline StringArray &amp; getVector(StringArrayPtr &value);
 inline StringArray const &amp; getVector(StringArrayPtr const &value);
-typedef std::vector<String>::iterator StringArray_iterator;
-typedef std::vector<String>::const_iterator StringArray_const_iterator;
+typedef std::vector<std::string>::iterator StringArray_iterator;
+typedef std::vector<std::string>::const_iterator StringArray_const_iterator;
 
-typedef String * StringBuilder;
+typedef std::string * StringBuilder;
 </pre>
 
 <p>where</p>
@@ -905,7 +905,7 @@ typedef String * StringBuilder;
       have worked on all C++ implementations tested at present. If they break
       in a future implementation they should be changes via "#ifdef"
       preprocessor statements.</dd>
-  <dt>String</dt>
+  <dt>std::string</dt>
     <dd>pvData requires that a string be an immutable string that is transfered
       over the network as a UTF8 encoded string. Since std::string implements
       copy on write semantics, it can be used for support for immutable
@@ -914,8 +914,8 @@ typedef String * StringBuilder;
       is the same convention the Java implementation uses.
       Note that string is treated like a primitive type.</dd>
   <dt>StringArray definitions</dt>
-    <dd>typedefs are provided for an array of Strings,
-      which is a std::vector&lt;String&gt;.
+    <dd>typedefs are provided for an array of std::strings,
+      which is a std::vector&lt;std::string&gt;.
       This is used by introspection.
       </dd>
   <dt>StringBuilder</dt>
@@ -993,7 +993,7 @@ public:
     bool isUInteger(ScalarType type);
     bool isNumeric(ScalarType type);
     bool isPrimitive(ScalarType type);
-    ScalarType getScalarType(String const &amp;value);
+    ScalarType getScalarType(std::string const &amp;value);
     const char* name(ScalarType);
     void toString(StringBuilder buf,ScalarType scalarType);
     size_t elementSize(ScalarType id);
@@ -1072,7 +1072,7 @@ public:
   <dt>name</dt>
     <dd>Returns the name of the scalarType.</dd>
   <dt>getScalarType</dt>
-    <dd>Given a string of the form String("boolean"),...,String("string")
+    <dd>Given a string of the form std::string("boolean"),...,std::string("string")
       return the scalarType.</dd>
   <dt>toString</dt>
     <dd>Convert the scalar type to a string.</dd>
@@ -1158,7 +1158,7 @@ public:
     POINTER_DEFINITIONS(Field);
     virtual ~Field();
     Type getType() const{return m_type;}
-    virtual String getID() const = 0;
+    virtual std::string getID() const = 0;
     virtual void toString(StringBuilder buf) const{toString(buf,0);}
     virtual void toString(StringBuilder buf,int indentLevel) const;
  ...
@@ -1174,7 +1174,7 @@ public:
     ScalarType getScalarType() const {return scalarType;}
     virtual void toString(StringBuilder buf) const{toString(buf,0);}
     virtual void toString(StringBuilder buf,int indentLevel) const;
-    virtual String getID() const;
+    virtual std::string getID() const;
     virtual void serialize(ByteBuffer *buffer, SerializableControl *control) const;
     virtual void deserialize(ByteBuffer *buffer, DeserializableContol *control);
  ...
@@ -1190,7 +1190,7 @@ public:
     ScalarType  getElementType() const {return elementType;}
     virtual void toString(StringBuilder buf) const{toString(buf,0);}
     virtual void toString(StringBuilder buf,int indentLevel) const;
-    virtual String getID() const;
+    virtual std::string getID() const;
     virtual void serialize(ByteBuffer *buffer, SerializableControl *control) const;
     virtual void deserialize(ByteBuffer *buffer, DeserializableControl *control);
  ...
@@ -1204,7 +1204,7 @@ public:
 
     StructureConstPtr  getStructure() const {return pstructure;}
     virtual void toString(StringBuilder buf,int indentLevel=0) const;
-    virtual String getID() const;
+    virtual std::string getID() const;
     virtual void serialize(ByteBuffer *buffer, SerializableControl *control) const;
     virtual void deserialize(ByteBuffer *buffer, DeserializableControl *control);
  ...
@@ -1217,14 +1217,14 @@ public:
     typedef const Structure&amp; const_reference;
 
    std::size_t getNumberFields() const {return numberFields;}
-   FieldConstPtr getField(String const &amp; fieldName) const;
+   FieldConstPtr getField(std::string const &amp; fieldName) const;
    FieldConstPtr getField(std::size_t index) const;
-   std::size_t getFieldIndex(String const &amp;fieldName) const;
+   std::size_t getFieldIndex(std::string const &amp;fieldName) const;
    FieldConstPtrArray const &amp; getFields() const {return fields;}
    StringArray const &amp; getFieldNames() const;
-   String getFieldName(std::size_t fieldIndex) const;
+   std::string getFieldName(std::size_t fieldIndex) const;
    virtual void toString(StringBuilder buf,int indentLevel) const;
-   virtual String getID() const;
+   virtual std::string getID() const;
    virtual void serialize(ByteBuffer *buffer, SerializableControl *control) const;
    virtual void deserialize(ByteBuffer *buffer, DeserializableControl *control);
  ...
@@ -1233,23 +1233,23 @@ public:
 class epicsShareClass Union : public Field {
 public:
     POINTER_DEFINITIONS(Union);
-    static epics::pvData::String DEFAULT_ID;
-    static epics::pvData::String ANY_ID;
+    static std::string DEFAULT_ID;
+    static std::string ANY_ID;
     virtual ~Union();
     typedef Union&amp; reference;
     typedef const Union&amp; const_reference;
 
     std::size_t getNumberFields() const;
-    FieldConstPtr getField(String const &amp;fieldName) const;
+    FieldConstPtr getField(std::string const &amp;fieldName) const;
     FieldConstPtr getField(std::size_t index);
-    std::size_t getFieldIndex(String const &amp;fieldName) const;
+    std::size_t getFieldIndex(std::string const &amp;fieldName) const;
     FieldConstPtrArray const &amp; getFields() const;
     StringArray const &amp; getFieldNames() const;
-    String getFieldName(std::size_t fieldIndex) const;
+    std::string getFieldName(std::size_t fieldIndex) const;
     bool isVariant() const;
     virtual void toString(StringBuilder buf) const;
     virtual void toString(StringBuilder buf,int indentLevel) const;
-    virtual String getID() const;
+    virtual std::string getID() const;
     virtual void serialize(
         ByteBuffer *buffer, SerializableControl *control) const;
     virtual void deserialize(
@@ -1265,7 +1265,7 @@ public:
     UnionConstPtr  getUnion() const {return punion;}
     virtual void toString(StringBuilder buf,int indentLevel=0) const;
     
-    virtual String getID() const;
+    virtual std::string getID() const;
 
     virtual void serialize(ByteBuffer *buffer, SerializableControl *control) const;
     virtual void deserialize(ByteBuffer *buffer, DeserializableControl *control);
@@ -1395,14 +1395,14 @@ public:
         StringArray const &amp; fieldNames,
         FieldConstPtrArray const &amp; fields) const;
     StructureConstPtr createStructure (
-    	String const &amp; id,
+    	std::string const &amp; id,
         StringArray const &amp; fieldNames,
         FieldConstPtrArray const &amp; fields) const;
     UnionConstPtr createUnion (
         StringArray const &amp; fieldNames,
         FieldConstPtrArray const &amp; fields) const;
     UnionConstPtr createUnion (
-    	String const &amp; id,
+    	std::string const &amp; id,
         StringArray const &amp; fieldNames,
         FieldConstPtrArray const &amp; fields) const;
     UnionConstPtr createVariantUnion() const;
@@ -1410,7 +1410,7 @@ public:
     UnionArrayConstPtr createUnionArray(UnionConstPtr const &amp; punion) const;
     StructureConstPtr appendField(
         StructureConstPtr const &amp; structure,
-        String const &amp; fieldName, FieldConstPtr const &amp; field) const;
+        std::string const &amp; fieldName, FieldConstPtr const &amp; field) const;
     StructureConstPtr appendFields(
         StructureConstPtr const &amp; structure,
         StringArray const &amp; fieldNames,
@@ -1480,7 +1480,7 @@ StructureConstPtr structure =
       add("index", pvDouble)-&gt;
       addArray("choices", pvString)-&gt;
       createStructure();
-String builder;
+std::string builder;
 structure-&gt;toString(&amp;builder);
 cout &lt;&lt; builder &lt;&lt; endl;
 </pre>
@@ -1698,18 +1698,18 @@ class StandardField {
 public:
     static StandardFieldPtr getStandardField();
     ~StandardField();
-    StructureConstPtr scalar(ScalarType type,String const &amp;properties);
+    StructureConstPtr scalar(ScalarType type,std::string const &amp;properties);
     StructureConstPtr regUnion(
         UnionConstPtr const &amp; punion,
-        String const &amp; properties);
-    StructureConstPtr variantUnion(String const &amp; properties);
+        std::string const &amp; properties);
+    StructureConstPtr variantUnion(std::string const &amp; properties);
     StructureConstPtr scalarArray(
-        ScalarType elementType, String const &amp;properties);
+        ScalarType elementType, std::string const &amp;properties);
     StructureConstPtr structureArray(
-        StructureConstPtr const &amp; structure,String const &amp;properties);
-    StructureConstPtr unionArray(UnionConstPtr const &amp; punion,String const &amp; properties);
+        StructureConstPtr const &amp; structure,std::string const &amp;properties);
+    StructureConstPtr unionArray(UnionConstPtr const &amp; punion,std::string const &amp; properties);
     StructureConstPtr enumerated();
-    StructureConstPtr enumerated(String const &amp;properties);
+    StructureConstPtr enumerated(std::string const &amp;properties);
     StructureConstPtr alarm();
     StructureConstPtr timeStamp();
     StructureConstPtr display();
@@ -1879,7 +1879,7 @@ typedef PVValueArray&lt;uint32&gt; PVUIntArray;
 typedef PVValueArray&lt;uint64&gt; PVULongArray;
 typedef PVValueArray&lt;float&gt; PVFloatArray;
 typedef PVValueArray&lt;double&gt; PVDoubleArray;
-typedef PVValueArray&lt;String&gt; PVStringArray;
+typedef PVValueArray&lt;std::string&gt; PVStringArray;
 
 typedef std::tr1::shared_ptr&lt;PVBooleanArray&gt; PVBooleanArrayPtr;
 typedef std::tr1::shared_ptr&lt;PVByteArray&gt; PVByteArrayPtr;
@@ -1916,8 +1916,8 @@ class PVField
 public:
    POINTER_DEFINITIONS(PVField);
    virtual ~PVField();
-   String getFieldName() const ;
-   String getFullName() const;
+   std::string getFieldName() const ;
+   std::string getFullName() const;
    std::size_t getFieldOffset() const;
    std::size_t getNextFieldOffset() const;
    std::size_t getNumberFields() const;
@@ -2085,7 +2085,7 @@ typedef std::tr1::shared_ptr&lt;PVDouble&gt; PVDoublePtr;
 
 
 // PVString is special case, since it implements SerializableArray
-class PVString : public PVScalarValue&lt;String&gt;, SerializableArray {
+class PVString : public PVScalarValue&lt;std::string&gt;, SerializableArray {
 public:
     virtual ~PVString() {}
  ...
@@ -2177,18 +2177,18 @@ public:
         return std::tr1::dynamic_pointer_cast&lt;PVT&gt;(select(index));
     }
 
-    PVFieldPtr select(String const &amp; fieldName);
+    PVFieldPtr select(std::string const &amp; fieldName);
 
     template&lt;typename PVT&gt;
-    std::tr1::shared_ptr&lt;PVT&gt; select(String const &amp; fieldName) {
+    std::tr1::shared_ptr&lt;PVT&gt; select(std::string const &amp; fieldName) {
         return std::tr1::dynamic_pointer_cast&lt;PVT&gt;(select(fieldName));
     }
 
     int32 getSelectedIndex() const;
-    String getSelectedFieldName() const;
+    std::string getSelectedFieldName() const;
     void set(PVFieldPtr const &amp; value);
     void set(int32 index, PVFieldPtr const &amp; value);
-    void set(String const &amp; fieldName, PVFieldPtr const &amp; value);
+    void set(std::string const &amp; fieldName, PVFieldPtr const &amp; value);
     virtual void serialize(
         ByteBuffer *pbuffer,SerializableControl *pflusher) const ;
     PVUnion(UnionConstPtr const &amp; punion);
@@ -2328,10 +2328,10 @@ public:
     virtual void setImmutable();
     StructureConstPtr getStructure() const;
     const PVFieldPtrArray &amp; getPVFields() const;
-    PVFieldPtr getSubField(String const &amp;fieldName) const;
+    PVFieldPtr getSubField(std::string const &amp;fieldName) const;
 
     template&lt;typename PVT&gt;
-    std::tr1::shared_ptr&lt;PVT&gt; getSubField(String const &amp;fieldName) const
+    std::tr1::shared_ptr&lt;PVT&gt; getSubField(std::string const &amp;fieldName) const
 
     PVFieldPtr getSubField(std::size_t fieldOffset) const;
 
@@ -2358,7 +2358,7 @@ public:
   <dt>getPVFields</dt>
     <dd>Returns the array of subfields. The set of subfields must all have
       different field names.</dd>
-  <dt>getSubField(String fieldName)</dt>
+  <dt>getSubField(std::string fieldName)</dt>
     <dd>
       Get a subField of a field.d
       A non-null result is
@@ -2694,12 +2694,12 @@ class StandardPVField : private NoDefaultMethods {
 public:
     static StandardPVFieldPtr getStandardPVField();
     ~StandardPVField();
-    PVStructurePtr scalar(ScalarType type,String const &amp;properties);
-    PVStructurePtr scalarArray(ScalarType elementType, String const &amp;properties);
-    PVStructurePtr structureArray(StructureConstPtr const &amp;structure,String const &amp;properties);
-    PVStructurePtr unionArray(UnionConstPtr const &amp;punion,String const &amp;properties);
+    PVStructurePtr scalar(ScalarType type,std::string const &amp;properties);
+    PVStructurePtr scalarArray(ScalarType elementType, std::string const &amp;properties);
+    PVStructurePtr structureArray(StructureConstPtr const &amp;structure,std::string const &amp;properties);
+    PVStructurePtr unionArray(UnionConstPtr const &amp;punion,std::string const &amp;properties);
     PVStructurePtr enumerated(StringArray const &amp;choices);
-    PVStructurePtr enumerated(StringArray const &amp;choices, String const &amp;properties);
+    PVStructurePtr enumerated(StringArray const &amp;choices, std::string const &amp;properties);
  ...
 }
 
@@ -2786,8 +2786,8 @@ public:
         PVStructurePtr const &amp;pv,
         StringArray const &amp; from,
         std::size_t fromStartIndex = 0);
-    void fromString(PVScalarPtr const &amp; pv, String const &amp; from);
-    std::size_t fromString(PVScalarArrayPtr const &amp; pv, String const &amp;from);
+    void fromString(PVScalarPtr const &amp; pv, std::string const &amp; from);
+    std::size_t fromString(PVScalarArrayPtr const &amp; pv, std::string const &amp;from);
     std::size_t fromStringArray(
         PVScalarArrayPtr const &amp; pv,
         std::size_t offset, std::size_t length,
@@ -2832,7 +2832,7 @@ public:
     uint64 toULong(PVScalarPtr const &amp; pv);
     float toFloat(PVScalarPtr const &amp; pv);
     double toDouble(PVScalarPtr const &amp; pv);
-    String toString(PVScalarPtr const &amp; pv);
+    std::string toString(PVScalarPtr const &amp; pv);
     void fromByte(PVScalarPtr const &amp; pv,int8 from);
     void fromShort(PVScalarPtr const &amp; pv,int16 from);
     void fromInt(PVScalarPtr const &amp; pv, int32 from);
@@ -3068,7 +3068,7 @@ stack. For example the following is permitted:</p>
     result = pvAlarm.attach(pvField);
     assert(result);
     Alarm al;
-    al.setMessage(String("testMessage"));
+    al.setMessage(std::string("testMessage"));
     al.setSeverity(majorAlarm);
     result = pvAlarm.set(al);
     assert(result);
@@ -3306,8 +3306,8 @@ class Alarm {
 public:
     Alarm();
     //default constructors and destructor are OK
-    String getMessage();
-    void setMessage(String const &amp;value);
+    std::string getMessage();
+    void setMessage(std::string const &amp;value);
     AlarmSeverity getSeverity() const;
     void setSeverity(AlarmSeverity value);
     AlarmStatus getStatus() const;
@@ -3505,12 +3505,12 @@ public:
     double getHigh() const;
     void setLow(double value);
     void setHigh(double value);
-    String getDescription() const;
-    void setDescription(String const &amp;value);
-    String getFormat() const;
-    void setFormat(String const &amp;value);
-    String getUnits() const;
-    void setUnits(String const &amp;value);
+    std::string getDescription() const;
+    void setDescription(std::string const &amp;value);
+    std::string getFormat() const;
+    void setFormat(std::string const &amp;value);
+    std::string getUnits() const;
+    void setUnits(std::string const &amp;value);
 };</pre>
 
 <p>where</p>
@@ -3599,7 +3599,7 @@ public:
     // a set returns false if field is immutable
     bool setIndex(int32 index);
     int32 getIndex();
-    String getChoice();
+    std::string getChoice();
     bool choicesMutable();
     StringArrayPtr const &amp; getChoices();
     int32 getNumberChoices();
@@ -3624,7 +3624,7 @@ public:
   <dt>getIndex</dt>
     <dd>Get the index field in the pvData structure. </dd>
   <dt>getChoice</dt>
-    <dd>Get the String value corresponding to the current index field in the
+    <dd>Get the std::string value corresponding to the current index field in the
       pvData structure. An exception is thrown if not attached to a pvData
       structure. </dd>
   <dt>choicesMutable</dt>
@@ -3990,7 +3990,7 @@ private:
 class Executor :  public Runnable{
 public: 
     POINTER_DEFINITIONS(Executor);
-    Executor(String threadName,ThreadPriority priority);
+    Executor(std::string threadName,ThreadPriority priority);
     ~Executor();
     void execute(CommandPtr const &amp;node);
     virtual void run();
@@ -4123,7 +4123,7 @@ typedef std::tr1::shared_ptr&lt;MessageQueue&gt; MessageQueuePtr;
 
 class MessageNode {
 public:
-    String getMessage() const;
+    std::string getMessage() const;
     MessageType getMessageType() const;
     void setMessageNull();
 };
@@ -4138,7 +4138,7 @@ public:
     // must call release before next get
     void release();
     // return (false,true) if message (was not, was) put into queue
-    bool put(String message,MessageType messageType,bool replaceLast);
+    bool put(std::string message,MessageType messageType,bool replaceLast);
     bool isEmpty() ;
     bool isFull() ;
     int getClearOverrun();
@@ -4299,14 +4299,14 @@ enum MessageType {
    infoMessage,warningMessage,errorMessage,fatalErrorMessage
 };
 
-extern String getMessageTypeName(MessageType messageType);
+extern std::string getMessageTypeName(MessageType messageType);
 extern const size_t messageTypeCount;
 class Requester {
 public:
     POINTER_DEFINITIONS(Requester);
     virtual ~Requester(){}
-    virtual String getRequesterName() = 0;
-    virtual void message(String const &amp; message,MessageType messageType) = 0;
+    virtual std::string getRequesterName() = 0;
+    virtual void message(std::string const &amp; message,MessageType messageType) = 0;
 };</pre>
 
 <p>where</p>
@@ -4316,7 +4316,7 @@ public:
     <dd>Type of message.</dd>
   <dt>messageTypeName</dt>
     <dd>An array of strings of the message type names, i.e.
-      String("info"),String("warning"),String("error"),String("fatalError").</dd>
+      std::string("info"),std::string("warning"),std::string("error"),std::string("fatalError").</dd>
   <dt>getRequesterName</dt>
     <dd>Returns the requester name.</dd>
   <dt>message</dt>
@@ -4390,12 +4390,12 @@ public:
         SerializableControl* flusher);
     static int readSize(ByteBuffer* buffer,
         DeserializableControl* control);
-    static void serializeString(const String&amp; value,
+    static void serializeString(const std::string&amp; value,
         ByteBuffer* buffer,SerializableControl* flusher);
-    static void serializeSubstring(const String&amp; value, int offset,
+    static void serializeSubstring(const std::string&amp; value, int offset,
         int count, ByteBuffer* buffer,
         SerializableControl* flusher);
-    static String deserializeString(ByteBuffer* buffer,
+    static std::string deserializeString(ByteBuffer* buffer,
         DeserializableControl* control);
  ...
 };</pre>
@@ -4407,7 +4407,7 @@ public:
   <dt>readSize</dt>
     <dd>Deserialize the size.</dd>
   <dt>serializeString</dt>
-    <dd>Serialize a String.</dd>
+    <dd>Serialize a std::string.</dd>
   <dt>serializeSubstring</dt>
     <dd>Serialize a substring.</dd>
   <dt>deserializeString</dt>
@@ -4634,15 +4634,15 @@ Also he should check for correct descriptions.
     static const char* StatusTypeName[];
     static Status OK;
     Status();
-    Status(StatusType type, epics::pvData::String const &amp; message);
-    Status(StatusType type, epics::pvData::String const &amp; message, epics::pvData::String stackDump);
+    Status(StatusType type, std::string const &amp; message);
+    Status(StatusType type, std::string const &amp; message, std::string stackDump);
     ~Status()
     StatusType getType() const;
-    String getMessage() const;
-    String getStackDump() const;
+    std::string getMessage() const;
+    std::string getStackDump() const;
     bool isOK() const;
     bool isSuccess() const;
-    String toString() const;
+    std::string toString() const;
     void toString(StringBuilder buffer, int indentLevel = 0) const;
     void serialize(ByteBuffer *buffer, SerializableControl *flusher) const;
     void serialize(ByteBuffer *buffer, SerializableControl *flusher) const;
@@ -4703,7 +4703,7 @@ class Thread;
 class Thread : public epicsThread, private NoDefaultMethods {
 public:
     Thread(
-        String name,
+        std::string name,
         ThreadPriority priority,
         Runnable *runnableReady,
         epicsThreadStackSizeClass stkcls=epicsThreadStackSmall);
@@ -4802,7 +4802,7 @@ public:
 class Timer : private Runnable {
 public:
     POINTER_DEFINITIONS(Timer);
-    Timer(String threadName, ThreadPriority priority);
+    Timer(std::string threadName, ThreadPriority priority);
     virtual ~Timer();
     virtual void run();
     void scheduleAfterDelay(
@@ -4971,8 +4971,8 @@ then passes it to pvCopy.
 class CreateRequest {
 ...
      static CreateRequestPtr create();
-     virtual PVStructurePtr createRequest(String const &amp;request);
-     String getMessage();
+     virtual PVStructurePtr createRequest(std::string const &amp;request);
+     std::string getMessage();
 };
 </pre>
 <p>An example of how it is used is:</p>
@@ -4980,7 +4980,7 @@ class CreateRequest {
 CreateRequestPtr createRequest = CreateRequest::create();
 PVStructurePtr pvRequest = createRequest-&gt;createRequest(request);
 if(pvRequest==NULL) {
-    String error = createRequest-&gt;getMessage();
+    std::string error = createRequest-&gt;getMessage();
     // take some action
 } else {
     //success do something
@@ -5001,7 +5001,7 @@ class class epicsShareClass PVCopy
     static PVCopyPtr create(
         PVStructurePtr const &amp;pvMaster,
         PVStructurePtr const &amp;pvRequest,
-        String const &amp; structureName);
+        std::string const &amp; structureName);
     PVStructurePtr getPVMaster();
     void traverseMaster(PVCopyTraverseMasterCallbackPtr const &amp; callback);
     StructureConstPtr getStructure();
@@ -5074,7 +5074,7 @@ where
    <dt>getCopyOffset</dt>
       <dd>Given a field in pvMaster.
        return the offset in copy for the same field.
-      A value of String::npos means that the copy does not have this field.
+      A value of std::string::npos means that the copy does not have this field.
       Two overloaded methods are provided. The first is called if
       the field of master is not a structure. The second is for
       subfields of a structure.
@@ -5245,7 +5245,7 @@ It has the methods:</p>
 <pre>
 class MonitorPlugin
 {
-    virtual String const &amp; getName() = 0;
+    virtual std::string const &amp; getName() = 0;
     virtual bool causeMonitor(
         PVFieldPtr const &amp;pvField,
         PVStructurePtr const &amp;pvTop,
@@ -5264,16 +5264,16 @@ class MonitorPluginCreator
         FieldConstPtr const &amp;field,
         StructureConstPtr const &amp;top,
         PVStructurePtr const &amp;pvFieldOptions) = 0;
-     virtual String const &amp; getName() = 0;
+     virtual std::string const &amp; getName() = 0;
 }
 
 class MonitorPluginManager
 {
     static MonitorPluginManagerPtr get();
     bool addPlugin(
-         String const &amp;pluginName,
+         std::string const &amp;pluginName,
          MonitorPluginCreatorPtr const &amp;creator);
-    MonitorPluginCreatorPtr findPlugin(String const &amp;pluginName);
+    MonitorPluginCreatorPtr findPlugin(std::string const &amp;pluginName);
     void showNames();
 };
 
@@ -5445,7 +5445,7 @@ will be passed to the client.
 Assume that the client has already connected to the channel.
 The client can then issue the commands:</p>
 <pre>
-String request("field(alarm[plugin=onChange]");
+std::string request("field(alarm[plugin=onChange]");
 request += ",timeStamp[plugin=onChange,raiseMonitor=false]";
 request += ",power.value[plugin=onChange";
 request += ",voltage.value[plugin=onChange";
@@ -5481,13 +5481,13 @@ public:
             PVStringPtr pvString =
                 pvFieldOptions-&gt;getSubField&lt;PVString&gt;("raiseMonitor");
                 if(pvString!=NULL) {
-                    String value = pvString-&gt;get();
+                    std::string value = pvString-&gt;get();
                     if(value.compare("false")==0) raiseMonitor = false;
                 }
         }
         return true;
    }
-   virtual String &amp;getName(){return pluginName;}
+   virtual std::string &amp;getName(){return pluginName;}
    virtual bool causeMonitor(
         PVFieldPtr const &amp;pvNew,
         PVStructurePtr const &amp;pvTop,
@@ -5505,7 +5505,7 @@ private:
 class OnChangePluginCreator : public MonitorPluginCreator
 {
 public:
-    virtual String &amp;getName(){return pluginName;}
+    virtual std::string &amp;getName(){return pluginName;}
     virtual MonitorPluginPtr create(
         FieldConstPtr const &amp;field,
         StructureConstPtr const &amp;top,

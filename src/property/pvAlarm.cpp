@@ -16,12 +16,13 @@
 #include <pv/pvData.h>
 #include <pv/pvAlarm.h>
 
+using std::tr1::static_pointer_cast;
+using std::string;
+
 namespace epics { namespace pvData { 
 
-using std::tr1::static_pointer_cast;
-
-String PVAlarm::noAlarmFound("No alarm structure found");
-String PVAlarm::notAttached("Not attached to an alarm structure");
+string PVAlarm::noAlarmFound("No alarm structure found");
+string PVAlarm::notAttached("Not attached to an alarm structure");
 
 bool PVAlarm::attach(PVFieldPtr const & pvField)
 {

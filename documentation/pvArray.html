@@ -170,7 +170,7 @@ the  dumpValue method is replaced by the stream operator&lt;&lt;.
 </p>
 <h4>Java</h4>
 <pre>interface PVField extends Requester, Serializable {
-    String getFieldName();
+    std::string getFieldName();
     void setRequester(Requester requester);
     int getFieldOffset();
     int getNextFieldOffset();
@@ -180,12 +180,12 @@ the  dumpValue method is replaced by the stream operator&lt;&lt;.
     void setImmutable();
     Field getField();
     PVStructure getParent();
-    void renameField(String newName);
+    void renameField(std::string newName);
     void postPut(); // calls PVRecordField.postPut if this is a field of a record
     void setPostHandler(PostHandler postHandler);
     void toString(StringBuilder buf);
     void toString(StringBuilder buf,int indentLevel);
-    String toString();
+    std::string toString();
 }</pre>
 <h4>pvDataCPP</h4>
 <pre>class PVField
@@ -195,8 +195,8 @@ the  dumpValue method is replaced by the stream operator&lt;&lt;.
 public:
    POINTER_DEFINITIONS(PVField);
    virtual ~PVField();
-   virtual void message(String message,MessageType messageType);
-   String getFieldName() const ;
+   virtual void message(std::string message,MessageType messageType);
+   std::string getFieldName() const ;
    virtual void setRequester(RequesterPtr const &amp;prequester);
    std::size_t getFieldOffset() const;
    std::size_t getNextFieldOffset() const;
@@ -207,7 +207,7 @@ public:
    const FieldConstPtr &amp; getField() const ;
    PVStructure * getParent() const
    void replacePVField(const PVFieldPtr&amp;  newPVField);
-   void renameField(String const &amp;newName);
+   void renameField(std::string const &amp;newName);
    void postPut() ;
    void setPostHandler(PostHandlerPtr const &amp;postHandler);
    virtual bool equals(PVField &amp;pv);
@@ -227,8 +227,8 @@ std::ostream&amp; operator&lt;&lt;(std::ostream&amp; o, const PVFieldPtr &amp; f
 public:
    POINTER_DEFINITIONS(PVField);
    virtual ~PVField();
-   virtual void message(String message,MessageType messageType);
-   String getFieldName() const ;
+   virtual void message(std::string message,MessageType messageType);
+   std::string getFieldName() const ;
    virtual void setRequester(RequesterPtr const &amp;prequester);
    std::size_t getFieldOffset() const;
    std::size_t getNextFieldOffset() const;
@@ -239,7 +239,7 @@ public:
    const FieldConstPtr &amp; getField() const ;
    PVStructure * getParent() const
    void replacePVField(const PVFieldPtr&amp;  newPVField);
-   void renameField(String const &amp;newName);
+   void renameField(std::string const &amp;newName);
    void postPut() ;
    void setPostHandler(PostHandlerPtr const &amp;postHandler);
    virtual bool equals(PVField &amp;pv);
@@ -247,7 +247,7 @@ public:
    virtual void toString(StringBuilder buf,int indentLevel);
    std::ostream&amp; dumpValue(std::ostream&amp; o) const;
    // not in pvDataCPP
-   String getFullName() const;
+   std::string getFullName() const;
  ...
 }
 
@@ -262,8 +262,8 @@ class PVField
 public:
     POINTER_DEFINITIONS(PVField);
     virtual ~PVField();
-    virtual void message(String message,MessageType messageType);
-    const String&amp; getFieldName() const;
+    virtual void message(std::string message,MessageType messageType);
+    const std::string&amp; getFieldName() const;
     virtual void setRequester(RequesterPtr const &amp;prequester);
     std::size_t getFieldOffset() const;
     std::size_t getNextFieldOffset() const;
@@ -274,7 +274,7 @@ public:
     const FieldConstPtr &amp; getField() const;
     PVStructure * getParent() const;
     void replacePVField(const PVFieldPtr&amp;  newPVField);
-    void renameField(String const &amp; newName);
+    void renameField(std::string const &amp; newName);
     void postPut();
     void setPostHandler(PostHandlerPtr const &amp;postHandler);
     virtual bool equals(PVField &amp;pv);
@@ -328,8 +328,8 @@ interface PVDouble extends PVScalar {
     void put(double value);
 }
 interface PVString extends PVScalar, SerializableArray {
-    String get();
-    void put(String value);
+    std::string get();
+    void put(std::string value);
 }
 </pre>
 <h4>pvDataCPP</h4>
@@ -369,7 +369,7 @@ typedef std::tr1::shared_ptr<PVDouble> PVDoublePtr;
 
 
 // PVString is special case, since it implements SerializableArray
-class PVString : public PVScalarValue&lt;String&gt;, SerializableArray {
+class PVString : public PVScalarValue&lt;std::string&gt;, SerializableArray {
 public:
     virtual ~PVString() {}
  ...
@@ -427,7 +427,7 @@ typedef std::tr1::shared_ptr<PVDouble> PVDoublePtr;
 
 
 // PVString is special case, since it implements SerializableArray
-class PVString : public PVScalarValue&lt;String&gt;, SerializableArray {
+class PVString : public PVScalarValue&lt;std::string&gt;, SerializableArray {
 public:
     virtual ~PVString() {}
  ...
@@ -472,7 +472,7 @@ typedef std::tr1::shared_ptr&lt;PVByte&gt; PVBytePtr;
 typedef std::tr1::shared_ptr&lt;PVDouble&gt; PVDoublePtr;
 
 // PVString is special case, since it implements SerializableArray
-class PVString : public PVScalarValue&lt;String&gt;, SerializableArray {
+class PVString : public PVScalarValue&lt;std::string&gt;, SerializableArray {
 public:
     virtual ~PVString() {}
  ...
@@ -641,8 +641,8 @@ typedef PVArrayData&lt;uint8&gt; BooleanArrayData;
 typedef PVValueArray&lt;uint8&gt; PVBooleanArray;
 typedef std::tr1::shared_ptr&lt;PVBooleanArray&gt; PVBooleanArrayPtr;
 ...
-typedef PVArrayData&lt;String&gt; StringArrayData;
-typedef PVValueArray&lt;String&gt; PVStringArray;
+typedef PVArrayData&lt;std::string&gt; StringArrayData;
+typedef PVValueArray&lt;std::string&gt; PVStringArray;
 typedef std::tr1::shared_ptr&lt;PVStringArray&gt; PVStringArrayPtr;i
 </pre>
 
@@ -786,8 +786,8 @@ typedef PVArrayData&lt;uint8&gt; BooleanArrayData;
 typedef PVValueArray&lt;uint8&gt; PVBooleanArray;
 typedef std::tr1::shared_ptr&lt;PVBooleanArray&gt; PVBooleanArrayPtr;
 ...
-typedef PVArrayData&lt;String&gt; StringArrayData;
-typedef PVValueArray&lt;String&gt; PVStringArray;
+typedef PVArrayData&lt;std::string&gt; StringArrayData;
+typedef PVValueArray&lt;std::string&gt; PVStringArray;
 typedef std::tr1::shared_ptr&lt;PVStringArray&gt; PVStringArrayPtr;i
 </pre>
 <h4>proposed</h4>
@@ -843,7 +843,7 @@ public:
 typedef PVValueArray&lt;uint8&gt; PVBooleanArray;
 typedef std::tr1::shared_ptr&lt;PVBooleanArray&gt; PVBooleanArrayPtr;
 ...
-typedef PVValueArray&lt;String&gt; PVStringArray;
+typedef PVValueArray&lt;std::string&gt; PVStringArray;
 typedef std::tr1::shared_ptr&lt;PVStringArray&gt; PVStringArrayPtr;
 </pre>
 
@@ -865,8 +865,8 @@ class PVField
 public:
     POINTER_DEFINITIONS(PVField);
     virtual ~PVField();
-    virtual void message(String message,MessageType messageType);
-    const String&amp; getFieldName() const;
+    virtual void message(std::string message,MessageType messageType);
+    const std::string&amp; getFieldName() const;
     virtual void setRequester(RequesterPtr const &amp;prequester);
     std::size_t getFieldOffset() const;
     std::size_t getNextFieldOffset() const;
@@ -877,7 +877,7 @@ public:
     const FieldConstPtr &amp; getField() const;
     PVStructure * getParent() const;
     void replacePVField(const PVFieldPtr&amp;  newPVField);
-    void renameField(String const &amp; newName);
+    void renameField(std::string const &amp; newName);
     void postPut();
     void setPostHandler(PostHandlerPtr const &amp;postHandler);
     virtual bool equals(PVField &amp;pv);
@@ -1006,7 +1006,7 @@ typedef std::tr1::shared_ptr&lt;PVFloat&gt; PVFloatPtr;
 typedef std::tr1::shared_ptr&lt;PVDouble&gt; PVDoublePtr;
 
 // PVString is special case, since it implements SerializableArray
-class PVString : public PVScalarValue&lt;String&gt;, SerializableArray {
+class PVString : public PVScalarValue&lt;std::string&gt;, SerializableArray {
 public:
     virtual ~PVString() {}
  ...
@@ -1144,7 +1144,7 @@ typedef std::tr1::shared_ptr&lt;PVFloatArray&gt; PVFloatArrayPtr;
 typedef PVValueArray&lt;double&gt; PVDoubleArray;
 typedef std::tr1::shared_ptr&lt;PVDoubleArray&gt; PVDoubleArrayPtr;
 
-typedef PVValueArray&lt;String&gt; PVStringArray;
+typedef PVValueArray&lt;std::string&gt; PVStringArray;
 typedef std::tr1::shared_ptr&lt;PVStringArray&gt; PVStringArrayPtr;
 </pre>
 
@@ -1231,7 +1231,7 @@ For others the brief summary is followed by tutorial information.
 <pre>
 typedef shared_vector&lt;int32&gt; Int32Array;
 ...
-static void dumpArray(String const &amp;message,Int32Array const&amp; int32Array);
+static void dumpArray(std::string const &amp;message,Int32Array const&amp; int32Array);
 </pre>
 <p>The following:
 <pre>

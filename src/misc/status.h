@@ -10,6 +10,8 @@
 #ifndef STATUS_H
 #define STATUS_H
 
+#include <ostream>
+
 #include <pv/serialize.h>
 #include <pv/byteBuffer.h>
 #include <pv/sharedPtr.h>
@@ -51,12 +53,12 @@ namespace epics { namespace pvData {
         	/**
         	 * Create non-OK status.
         	 */
-            Status(StatusType type, epics::pvData::String const & message);
+            Status(StatusType type, std::string const & message);
         
             /**
              * Create non-OK status.
              */
-            Status(StatusType type, epics::pvData::String const & message, epics::pvData::String const & stackDump);
+            Status(StatusType type, std::string const & message, std::string const & stackDump);
         
             ~Status();
             
@@ -70,13 +72,13 @@ namespace epics { namespace pvData {
              * Get error message describing an error. Required if error status.
              * @return error message.
              */
-            epics::pvData::String getMessage() const;
+            std::string getMessage() const;
 
             /**
              * Get stack dump where error (exception) happened. Optional.
              * @return stack dump.
              */
-            epics::pvData::String getStackDump() const;
+            std::string getStackDump() const;
 
             /**
              * Convenient OK test. Same as <code>(getType() == StatusType.OK)</code>.
@@ -93,20 +95,22 @@ namespace epics { namespace pvData {
              */
             bool isSuccess() const;
 
-            String toString() const;
-            void toString(StringBuilder buffer, int indentLevel = 0) const;
-            
             void serialize(ByteBuffer *buffer, SerializableControl *flusher) const;
             void deserialize(ByteBuffer *buffer, DeserializableControl *flusher);
     
             private:
             
-            static epics::pvData::String m_emptyString;
+            static std::string m_emptyStringtring;
             
             StatusType m_statusType;
-            String m_message;
-            String m_stackDump;
+            std::string m_message;
+            std::string m_stackDump;
+
+            friend std::ostream& operator<<(std::ostream& o, const Status& status);
         };
+
+        epicsShareExtern std::ostream& operator<<(std::ostream& o, const Status& status);
+        epicsShareExtern std::ostream& operator<<(std::ostream& o, const Status::StatusType& statusType);
 
 }}
 #endif  /* STATUS_H */

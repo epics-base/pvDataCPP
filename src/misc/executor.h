@@ -40,7 +40,7 @@ private:
 class epicsShareClass Executor : public Runnable{
 public:
     POINTER_DEFINITIONS(Executor);
-    Executor(String threadName,ThreadPriority priority);
+    Executor(std::string const & threadName,ThreadPriority priority);
     ~Executor();
     void execute(CommandPtr const &node);
     virtual void run();

@@ -12,6 +12,7 @@
 
 #include <string>
 #include <stdexcept>
+#include <iostream>
 
 #include <pv/noDefaultMethods.h>
 #include <pv/pvType.h>
@@ -21,6 +22,67 @@
 #include <shareLib.h>
 
 namespace epics { namespace pvData { 
+
+namespace format {
+
+struct indent_level
+{
+    long level;
+
+    indent_level(long l) : level(l) {}
+};
+
+inline long& indent_value(std::ios_base& ios)
+{
+  static int indent_index = std::ios_base::xalloc();
+  return ios.iword(indent_index);
+}
+
+epicsShareExtern std::ostream& operator<<(std::ostream& os, indent_level const& indent);
+
+struct indent_scope
+{
+    long saved_level;
+    std::ios_base& stream;
+
+    indent_scope(std::ios_base& ios) :
+        stream(ios)
+    {
+        long& l = indent_value(ios);
+        saved_level = l;
+        l = saved_level + 1;
+    }
+
+    ~indent_scope()
+    {
+        indent_value(stream) = saved_level;
+    }
+};
+
+struct indent
+{
+};
+
+epicsShareExtern std::ostream& operator<<(std::ostream& os, indent const&);
+
+struct array_at
+{
+    std::size_t index;
+
+    array_at(std::size_t ix) : index(ix) {}
+};
+
+struct array_at_internal
+{
+    std::size_t index;
+    std::ostream& stream;
+
+    array_at_internal(std::size_t ix, std::ostream& str) : index(ix), stream(str) {}
+};
+
+epicsShareExtern array_at_internal operator<<(std::ostream& str, array_at const& manip);
+
+};
 
 class Field;
 class Scalar;
@@ -108,13 +170,10 @@ namespace TypeFunc {
      * @return The name for the type.
      */
     epicsShareExtern const char* name(Type type);
-    /**
-     * Convert the type to a string and add it to builder.
-     * @param  builder The string builder.
-     * @param  type    The type.
-     */
-    epicsShareExtern void toString(StringBuilder builder,const Type type);
 };
+
+epicsShareExtern std::ostream& operator<<(std::ostream& o, const Type& type);
+
 
 /**
  * Definition of support scalar types.
@@ -206,23 +265,20 @@ namespace ScalarTypeFunc {
      * @return The scalarType.
      * An exception is thrown if the name is not the name of a scalar type.
      */
-    epicsShareExtern ScalarType getScalarType(String const &value);
+    epicsShareExtern ScalarType getScalarType(std::string const &value);
     /**
      * Get a name for the scalarType.
      * @param  scalarType The type.
      * @return The name for the scalarType.
      */
     epicsShareExtern const char* name(ScalarType scalarType);
-    /**
-     * Convert the scalarType to a string and add it to builder.
-     * @param  builder The string builder.
-     * @param  scalarType    The type.
-     */
-    epicsShareExtern void toString(StringBuilder builder,ScalarType scalarType);
 
     //! gives sizeof(T) where T depends on the scalar type id.
     epicsShareExtern size_t elementSize(ScalarType id);
 };
+
+epicsShareExtern std::ostream& operator<<(std::ostream& o, const ScalarType& scalarType);
+
 
 /**
  * This class implements introspection object for field.
@@ -245,18 +301,15 @@ public:
     * Get the identification string.
     * @return The identification string, can be empty.
     */
-   virtual String getID() const = 0;
+   virtual std::string getID() const = 0;
+   
     /**
-     * Convert the scalarType to a string and add it to builder.
-     * @param  builder The string builder.
+     * Puts the string representation to the stream.
+     * @param o output stream.
+     * @return The output stream.
      */
-   virtual void toString(StringBuilder builder) const{toString(builder,0);}
-    /**
-     * Convert the scalarType to a string and add it to builder.
-     * @param  builder The string builder.
-     * @param  indentLevel The number of blanks at the beginning of new lines.
-     */
-   virtual void toString(StringBuilder builder,int indentLevel) const;
+    virtual std::ostream& dump(std::ostream& o) const = 0;
+
 protected:
     /**
      * Constructor
@@ -276,6 +329,8 @@ private:
    struct Deleter{void operator()(Field *p){delete p;}};
 };
 
+epicsShareExtern std::ostream& operator<<(std::ostream& o, const Field& field);
+
 
 /**
  * This class implements introspection object for Scalar.
@@ -294,19 +349,10 @@ public:
      * @return the scalarType
      */
     ScalarType getScalarType() const {return scalarType;}
-    /**
-     * Convert the scalar to a string and add it to builder.
-     * @param  builder The string builder.
-     */
-    virtual void toString(StringBuilder buf) const{toString(buf,0);}
-    /**
-     * Convert the scalar to a string and add it to builder.
-     * @param  builder The string builder.
-     * @param  indentLevel The number of blanks at the beginning of new lines.
-     */
-    virtual void toString(StringBuilder buf,int indentLevel) const;
+    
+    virtual std::string getID() const;
 
-    virtual String getID() const;
+    virtual std::ostream& dump(std::ostream& o) const;
 
     virtual void serialize(ByteBuffer *buffer, SerializableControl *control) const;
     virtual void deserialize(ByteBuffer *buffer, DeserializableControl *control);
@@ -367,19 +413,10 @@ public:
      * @return the scalarType
      */
     ScalarType getElementType() const {return elementType;}
-    /**
-     * Convert the scalarType to a string and add it to builder.
-     * @param  builder The string builder.
-     */
-    virtual void toString(StringBuilder buf) const{toString(buf,0);}
-    /**
-     * Convert the scalarType to a string and add it to builder.
-     * @param  builder The string builder.
-     * @param  indentLevel The number of blanks at the beginning of new lines.
-     */
-    virtual void toString(StringBuilder buf,int indentLevel) const;
     
-    virtual String getID() const;
+    virtual std::string getID() const;
+
+    virtual std::ostream& dump(std::ostream& o) const;
 
     virtual void serialize(ByteBuffer *buffer, SerializableControl *control) const;
     virtual void deserialize(ByteBuffer *buffer, DeserializableControl *control);
@@ -391,7 +428,7 @@ protected:
     virtual ~ScalarArray();
 private:
     int8 getTypeCodeLUT() const;
-    const String getIDScalarArrayLUT() const;
+    const std::string getIDScalarArrayLUT() const;
     ScalarType elementType;
     friend class FieldCreate;
 };
@@ -411,14 +448,9 @@ public:
      */
     StructureConstPtr getStructure() const {return pstructure;}
 
-    /**
-     * Convert the scalarType to a string and add it to builder.
-     * @param  builder The string builder.
-     * @param  indentLevel The number of blanks at the beginning of new lines.
-     */
-    virtual void toString(StringBuilder buf,int indentLevel=0) const;
-    
-    virtual String getID() const;
+    virtual std::string getID() const;
+
+    virtual std::ostream& dump(std::ostream& o) const;
 
     virtual void serialize(ByteBuffer *buffer, SerializableControl *control) const;
     virtual void deserialize(ByteBuffer *buffer, DeserializableControl *control);
@@ -453,14 +485,9 @@ public:
      */
     UnionConstPtr getUnion() const {return punion;}
 
-    /**
-     * Convert the scalarType to a string and add it to builder.
-     * @param  builder The string builder.
-     * @param  indentLevel The number of blanks at the beginning of new lines.
-     */
-    virtual void toString(StringBuilder buf,int indentLevel=0) const;
-    
-    virtual String getID() const;
+    virtual std::string getID() const;
+
+    virtual std::ostream& dump(std::ostream& o) const;
 
     virtual void serialize(ByteBuffer *buffer, SerializableControl *control) const;
     virtual void deserialize(ByteBuffer *buffer, DeserializableControl *control);
@@ -490,7 +517,7 @@ public:
     /**
      * Default structure ID.
      */
-    static epics::pvData::String DEFAULT_ID;
+    static std::string DEFAULT_ID;
 
     /**
      * Destructor.
@@ -510,7 +537,7 @@ public:
      * @return The introspection interface.
      * This will hold a null pointer if the field is not in the structure.
      */
-    FieldConstPtr getField(String const &fieldName) const;
+    FieldConstPtr getField(std::string const &fieldName) const;
     /**
      * Get the field for the specified fieldName.
      * @param fieldName The index of the field to get;
@@ -523,7 +550,7 @@ public:
      * @return The introspection interface.
      * This will be -1 if the field is not in the structure.
      */
-    std::size_t getFieldIndex(String const &fieldName) const;
+    std::size_t getFieldIndex(std::string const &fieldName) const;
     /**
      * Get the fields in the structure.
      * @return The array of fields.
@@ -539,33 +566,26 @@ public:
      * @param fieldIndex The index of the desired field.
      * @return The fieldName.
      */
-    String getFieldName(std::size_t fieldIndex) const {return fieldNames[fieldIndex];}
-    /**
-     * Convert the structure to a string and add it to builder.
-     * @param  builder The string builder.
-     */
-    virtual void toString(StringBuilder buf) const{toString(buf,0);}
-    /**
-     * Convert the structure to a string and add it to builder.
-     * @param  builder The string builder.
-     * @param  indentLevel The number of blanks at the beginning of new lines.
-     */
-    virtual void toString(StringBuilder buf,int indentLevel) const;
-    
-    virtual String getID() const;
+    std::string getFieldName(std::size_t fieldIndex) const {return fieldNames[fieldIndex];}
+
+    virtual std::string getID() const;
+
+    virtual std::ostream& dump(std::ostream& o) const;
 
     virtual void serialize(ByteBuffer *buffer, SerializableControl *control) const;
     virtual void deserialize(ByteBuffer *buffer, DeserializableControl *control);
     
 protected:
-   Structure(StringArray const & fieldNames, FieldConstPtrArray const & fields, String const & id = DEFAULT_ID);
+    Structure(StringArray const & fieldNames, FieldConstPtrArray const & fields, std::string const & id = DEFAULT_ID);
 private:
-    void toStringCommon(StringBuilder buf,int indentLevel) const;
     StringArray fieldNames;
     FieldConstPtrArray fields;
-    String id;
-   friend class FieldCreate;
-   friend class Union;
+    std::string id;
+
+    virtual void dumpFields(std::ostream& o) const;
+    
+    friend class FieldCreate;
+    friend class Union;
 };
 
 /**
@@ -578,12 +598,12 @@ public:
     /**
      * Default union ID.
      */
-    static epics::pvData::String DEFAULT_ID;
+    static std::string DEFAULT_ID;
 
     /**
      * Default variant union ID.
      */
-    static epics::pvData::String ANY_ID;
+    static std::string ANY_ID;
 
     /**
      * Destructor.
@@ -603,7 +623,7 @@ public:
      * @return The introspection interface.
      * This will hold a null pointer if the field is not in the union.
      */
-    FieldConstPtr getField(String const &fieldName) const;
+    FieldConstPtr getField(std::string const &fieldName) const;
     /**
      * Get the field for the specified fieldName.
      * @param fieldName The index of the field to get;
@@ -616,7 +636,7 @@ public:
      * @return The introspection interface.
      * This will be -1 if the field is not in the union.
      */
-    std::size_t getFieldIndex(String const &fieldName) const;
+    std::size_t getFieldIndex(std::string const &fieldName) const;
     /**
      * Get the fields in the union.
      * @return The array of fields.
@@ -632,37 +652,30 @@ public:
      * @param fieldIndex The index of the desired field.
      * @return The fieldName.
      */
-    String getFieldName(std::size_t fieldIndex) const {return fieldNames[fieldIndex];}
+    std::string getFieldName(std::size_t fieldIndex) const {return fieldNames[fieldIndex];}
     /**
      * Check if this union is variant union (aka any type).
      * @return <code>true</code> if this union is variant union, otherwise <code>false</code>.
      */
     bool isVariant() const {return (fieldNames.size() == 0);}
-    /**
-     * Convert the union to a string and add it to builder.
-     * @param  builder The string builder.
-     */
-    virtual void toString(StringBuilder buf) const{toString(buf,0);}
-    /**
-     * Convert the union to a string and add it to builder.
-     * @param  builder The string builder.
-     * @param  indentLevel The number of blanks at the beginning of new lines.
-     */
-    virtual void toString(StringBuilder buf,int indentLevel) const;
-    
-    virtual String getID() const;
+
+    virtual std::string getID() const;
+
+    virtual std::ostream& dump(std::ostream& o) const;
 
     virtual void serialize(ByteBuffer *buffer, SerializableControl *control) const;
     virtual void deserialize(ByteBuffer *buffer, DeserializableControl *control);
     
 protected:
    Union();
-   Union(StringArray const & fieldNames, FieldConstPtrArray const & fields, String const & id = DEFAULT_ID);
+   Union(StringArray const & fieldNames, FieldConstPtrArray const & fields, std::string const & id = DEFAULT_ID);
 private:
-    void toStringCommon(StringBuilder buf,int indentLevel) const;
-    StringArray fieldNames;
-    FieldConstPtrArray fields;
-    String id;
+   StringArray fieldNames;
+   FieldConstPtrArray fields;
+   std::string id;
+   
+   virtual void dumpFields(std::ostream& o) const;
+
    friend class FieldCreate;
    friend class Structure;
 };
@@ -778,8 +791,8 @@ public:
 
     /**
      * Complete the creation of a nested object.
-     * @see #addNestedStructure(String)
-     * @see #addNestedUnion(String)
+     * @see #addNestedStructure(std::string)
+     * @see #addNestedUnion(std::string)
      * @return a previous (parent) {@code FieldBuilder}.
      */
     FieldBuilderPtr endNested();
@@ -864,7 +877,7 @@ public:
      * @return a {@code Structure} interface for the newly created object.
      */
     StructureConstPtr createStructure (
-    	String const & id,
+    	std::string const & id,
         StringArray const & fieldNames,
         FieldConstPtrArray const & fields) const;
      /**
@@ -901,7 +914,7 @@ public:
      * @return a {@code Union} interface for the newly created object.
      */
     UnionConstPtr createUnion (
-    	String const & id,
+    	std::string const & id,
         StringArray const & fieldNames,
         FieldConstPtrArray const & fields) const;
     /**
@@ -913,7 +926,7 @@ public:
      */
     StructureConstPtr appendField(
         StructureConstPtr const & structure,
-        String const & fieldName, FieldConstPtr const & field) const;
+        std::string const & fieldName, FieldConstPtr const & field) const;
     /**
      * Append fields to a structure.
      * @param structure The structure to which the fields appended.
@@ -986,8 +999,27 @@ OP(pvUInt, uint32)
 OP(pvULong, uint64)
 OP(pvFloat, float)
 OP(pvDouble, double)
-OP(pvString, String)
+OP(pvString, std::string)
 #undef OP
+
+struct ScalarHashFunction {
+    size_t operator() (const Scalar& scalar) const { return scalar.getScalarType(); }
+};
+
+struct ScalarArrayHashFunction {
+    size_t operator() (const ScalarArray& scalarArray) const { return 0x10 | scalarArray.getElementType(); }
+};
+
+struct StructureHashFunction {
+    size_t operator() (const Structure& /*structure*/) const { return 0; }
+    // TODO hash
+//        final int PRIME = 31;
+//        return PRIME * Arrays.hashCode(fieldNames) + Arrays.hashCode(fields);
+};
+
+struct StructureArrayHashFunction {
+    size_t operator() (const StructureArray& structureArray) const { StructureHashFunction shf; return (0x10 | shf(*(structureArray.getStructure()))); }
+};
 
 }}
 #endif  /* PVINTROSPECT_H */

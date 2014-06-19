@@ -2,6 +2,7 @@
 #define PRINTER_H
 
 #include <ostream>
+#include <shareLib.h>
 
 #include "pvData.h"
 

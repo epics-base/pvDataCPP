@@ -15,6 +15,7 @@
 #include <cstddef>
 #include <string>
 #include <cstdio>
+#include <iostream>
 
 #include <epicsUnitTest.h>
 #include <testMain.h>
@@ -25,6 +26,7 @@
 #include <pv/thread.h>
 
 using namespace epics::pvData;
+using std::string;
 
 static TimeStamp currentTimeStamp;
 static double oneDelay = 4.0;
@@ -39,7 +41,7 @@ typedef std::tr1::shared_ptr<MyCallback> MyCallbackPtr;
 class MyCallback : public TimerCallback {
 public:
     POINTER_DEFINITIONS(MyCallback);
-    MyCallback(String name,EventPtr const & wait)
+    MyCallback(string name,EventPtr const & wait)
     : name(name),
       wait(wait)
     {
@@ -58,7 +60,7 @@ public:
     }
     TimeStamp &getTimeStamp() { return timeStamp;}
 private:
-    String name;
+    string name;
     EventPtr wait;
     TimeStamp timeStamp;
 };
@@ -69,13 +71,13 @@ static void testBasic()
         printf("\n\ntestBasic oneDelay %lf twoDelay %lf threeDaley %lf\n",
             oneDelay,twoDelay,threeDelay);
     }
-    String one("one");
-    String two("two");
-    String three("three");
+    string one("one");
+    string two("two");
+    string three("three");
     EventPtr eventOne(new Event());
     EventPtr eventTwo(new Event());
     EventPtr eventThree(new Event());
-    TimerPtr timer(new Timer(String("timer"),middlePriority));
+    TimerPtr timer(new Timer(string("timer"),middlePriority));
     MyCallbackPtr callbackOne(new MyCallback(one,eventOne));
     MyCallbackPtr callbackTwo(new MyCallback(two,eventTwo));
     MyCallbackPtr callbackThree(new MyCallback(three,eventThree));
@@ -91,9 +93,8 @@ static void testBasic()
         if(twoDelay>.1) testOk1(timer->isScheduled(callbackTwo));
         if(threeDelay>.1) testOk1(timer->isScheduled(callbackThree));
         if(debug) {
-            String builder;
-            timer->toString(&builder);
-            printf("timerQueue\n%s",builder.c_str());
+            std::cout << "timerQueue" << std::endl;
+            std::cout << *timer;
         }
         eventOne->wait();
         eventTwo->wait();
@@ -137,13 +138,13 @@ static void testCancel()
         printf("\n\ntestCancel oneDelay %lf twoDelay %lf threeDaley %lf\n",
             oneDelay,twoDelay,threeDelay);
     }
-    String one("one");
-    String two("two");
-    String three("three");
+    string one("one");
+    string two("two");
+    string three("three");
     EventPtr eventOne(new Event());
     EventPtr eventTwo(new Event());
     EventPtr eventThree(new Event());
-    TimerPtr timer(new Timer(String("timer"),middlePriority));
+    TimerPtr timer(new Timer(string("timer"),middlePriority));
     MyCallbackPtr callbackOne(new MyCallback(one,eventOne));
     MyCallbackPtr callbackTwo(new MyCallback(two,eventTwo));
     MyCallbackPtr callbackThree(new MyCallback(three,eventThree));
@@ -160,9 +161,8 @@ static void testCancel()
         testOk1(!timer->isScheduled(callbackTwo));
         if(threeDelay>.1) testOk1(timer->isScheduled(callbackThree));
         if(debug) {
-            String builder;
-            timer->toString(&builder);
-            printf("timerQueue\n%s",builder.c_str());
+            std::cout << "timerQueue" << std::endl;
+            std::cout << *timer;
         }
         eventOne->wait();
         eventThree->wait();

@@ -71,7 +71,7 @@ public:
     static PVCopyPtr create(
         PVStructurePtr const &pvMaster,
         PVStructurePtr const &pvRequest,
-        String const & structureName);
+        std::string const & structureName);
     virtual ~PVCopy(){}
     virtual void destroy();
     /**
@@ -99,13 +99,13 @@ public:
     PVStructurePtr createPVStructure();
     /**
      * Given a field in pvMaster. return the offset in copy for the same field.
-     * A value of String::npos means that the copy does not have this field.
+     * A value of std::string::npos means that the copy does not have this field.
      * @param masterPVField The field in master.
      */
     std::size_t getCopyOffset(PVFieldPtr const  &masterPVField);
     /**
      * Given a field in pvMaster. return the offset in copy for the same field.
-     * A value of String::npos means that the copy does not have this field.
+     * A value of std::string::npos means that the copy does not have this field.
      * @param masterPVStructure A structure in master that has masterPVField.
      * @param masterPVField The field in master.
      */
@@ -166,10 +166,10 @@ public:
     /**
      * For debugging.
      */
-    String dump();
+    std::string dump();
 private:
     void dump(
-        String *builder,
+        std::string *builder,
         CopyNodePtr const &node,
         int indentLevel);
     PVCopyPtr getPtrSelf()
@@ -185,8 +185,8 @@ private:
     PVCopy(PVStructurePtr const &pvMaster);
     friend class PVCopyMonitor;
     bool init(PVStructurePtr const &pvRequest);
-    String dump(
-        String const &value,
+    std::string dump(
+        std::string const &value,
         CopyNodePtr const &node,
         int indentLevel);
     StructureConstPtr createStructure(

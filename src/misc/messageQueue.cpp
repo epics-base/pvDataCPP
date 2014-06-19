@@ -12,13 +12,15 @@
 #define epicsExportSharedSymbols
 #include <pv/messageQueue.h>
 
+using std::string;
+
 namespace epics { namespace pvData { 
 
 MessageNode::MessageNode()
 : messageType(infoMessage)
 {}
 
-String MessageNode::getMessage() const
+string MessageNode::getMessage() const
 {
     return message;
 }
@@ -59,7 +61,7 @@ void MessageQueue::release() {
     releaseUsed(lastGet);
     lastGet.reset();
 }
-bool MessageQueue::put(String message,MessageType messageType,bool replaceLast)
+bool MessageQueue::put(string message,MessageType messageType,bool replaceLast)
 {
     MessageNodePtr node = getFree();
     if(node.get()!= NULL) {

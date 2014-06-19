@@ -27,8 +27,9 @@
 #include <pv/timeFunction.h>
 
 using namespace epics::pvData;
+using std::string;
 
-static String actionName("action");
+static string actionName("action");
 
 class Action;
 typedef std::tr1::shared_ptr<Action> ActionPtr;
@@ -101,7 +102,7 @@ private:
 typedef std::tr1::shared_ptr<Basic> BasicPtr;
 
 static void testBasic() {
-    ExecutorPtr executor(new Executor(String("basic"),middlePriority));
+    ExecutorPtr executor(new Executor(string("basic"),middlePriority));
     BasicPtr basic( new Basic(executor));
     basic->run();
     printf("testBasic PASSED\n");
@@ -130,7 +131,7 @@ typedef std::tr1::shared_ptr<MyFunc> MyFuncPtr;
 #ifdef TESTTHREADCONTEXT
 
 static void testThreadContext() {
-    ExecutorPtr executor(new Executor(String("basic"),middlePriority));
+    ExecutorPtr executor(new Executor(string("basic"),middlePriority));
     BasicPtr basic(new Basic(executor));
     MyFuncPtr myFunc(new MyFunc(basic));
     TimeFunctionPtr timeFunction(new TimeFunction(myFunc));

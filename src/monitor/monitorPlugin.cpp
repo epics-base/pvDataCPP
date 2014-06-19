@@ -12,9 +12,11 @@
 
 #include <pv/monitorPlugin.h>
 
-namespace epics { namespace pvData { 
+using std::string;
 using std::cout;
 using std::endl;
+
+namespace epics { namespace pvData { 
 
 MonitorPluginManagerPtr MonitorPluginManager::get()
 {
@@ -28,7 +30,7 @@ MonitorPluginManagerPtr MonitorPluginManager::get()
 }
 
 bool MonitorPluginManager::addPlugin(
-    String const &pluginName,
+    string const &pluginName,
     MonitorPluginCreatorPtr const &creator)
 {
     mutex.lock();
@@ -53,7 +55,7 @@ bool MonitorPluginManager::addPlugin(
 
 
 MonitorPluginCreatorPtr MonitorPluginManager::findPlugin(
-    String const &pluginName)
+    string const &pluginName)
 {
     mutex.lock();
     std::list<MonitorPluginCreatorPtr>::iterator iter;

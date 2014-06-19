@@ -36,8 +36,8 @@ public:
     void get(TimeStamp &) const;
     bool set(TimeStamp const & timeStamp);
 private:
-    static String noTimeStamp;
-    static String notAttached;
+    static std::string noTimeStamp;
+    static std::string notAttached;
     PVLongPtr pvSecs;
     PVIntPtr pvUserTag;
     PVIntPtr pvNano;

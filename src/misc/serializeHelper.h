@@ -46,30 +46,30 @@ namespace epics {
                     DeserializableControl* control);
 
             /**
-             * String serialization helper method.
+             * std::string serialization helper method.
              *
-             * @param[in] value String to serialize
+             * @param[in] value std::string to serialize
              * @param[in] buffer serialization buffer
              * @param[in] flusher flusher
              */
-            static void serializeString(const String& value, ByteBuffer* buffer,
+            static void serializeString(const std::string& value, ByteBuffer* buffer,
                     SerializableControl* flusher);
 
             /**
-             * String serialization helper method.
+             * std::string serialization helper method.
              *
-             * @param[in] value String to serialize
+             * @param[in] value std::string to serialize
              * @param[in] offset start of the substring in {@code value}
              * @param[in] count the number of characters to write
              * @param[in] buffer serialization buffer
              * @param[in] flusher flusher
              */
-            static void serializeSubstring(const String& value, std::size_t offset,
+            static void serializeSubstring(const std::string& value, std::size_t offset,
                     std::size_t count, ByteBuffer* buffer,
                     SerializableControl* flusher);
 
             /**
-             * String deserialization helper method.
+             * std::string deserialization helper method.
              * TODO This method cannot return "null", but Java implementation
              * could have serialized "null" value as well. We need to decide
              * how to deserialize "null".
@@ -82,7 +82,7 @@ namespace epics {
              * could have serialized "null" value as well. We need to decide
              * how to deserialize "null".
              */
-            static String deserializeString(ByteBuffer* buffer,
+            static std::string deserializeString(ByteBuffer* buffer,
                     DeserializableControl* control);
 
         private:

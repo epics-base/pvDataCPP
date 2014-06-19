@@ -27,6 +27,7 @@
 
 using std::tr1::static_pointer_cast;
 using std::size_t;
+using std::string;
 using std::min;
 
 namespace epics { namespace pvData {
@@ -43,7 +44,7 @@ template<> const ScalarType PVUInt::typeCode = pvUInt;
 template<> const ScalarType PVULong::typeCode = pvULong;
 template<> const ScalarType PVFloat::typeCode = pvFloat;
 template<> const ScalarType PVDouble::typeCode = pvDouble;
-template<> const ScalarType PVScalarValue<String>::typeCode = pvString;
+template<> const ScalarType PVScalarValue<string>::typeCode = pvString;
 
 template<> const ScalarType PVBooleanArray::typeCode = pvBoolean;
 template<> const ScalarType PVByteArray::typeCode = pvByte;
@@ -83,7 +84,7 @@ template<typename T>
 BasePVScalar<T>::BasePVScalar(ScalarConstPtr const & scalar)
     : PVScalarValue<T>(scalar),value(0)
 {}
-//Note: '0' is a suitable default for all POD types (not String)
+//Note: '0' is a suitable default for all POD types (not string)
 
 template<typename T>
 BasePVScalar<T>::~BasePVScalar() {}
@@ -128,14 +129,14 @@ typedef BasePVScalar<double> BasePVDouble;
 // BasePVString is special case, since it implements SerializableArray
 class BasePVString : public PVString {
 public:
-    typedef String value_type;
-    typedef String* pointer;
-    typedef const String* const_pointer;
+    typedef string value_type;
+    typedef string* pointer;
+    typedef const string* const_pointer;
 
     BasePVString(ScalarConstPtr const & scalar);
     virtual ~BasePVString();
-    virtual String get() const ;
-    virtual void put(String val);
+    virtual string get() const ;
+    virtual void put(string val);
     virtual void serialize(ByteBuffer *pbuffer,
         SerializableControl *pflusher) const;
     virtual void deserialize(ByteBuffer *pbuffer,
@@ -143,7 +144,7 @@ public:
     virtual void serialize(ByteBuffer *pbuffer,
         SerializableControl *pflusher, size_t offset, size_t count) const;
 private:
-    String value;
+    string value;
 };
 
 BasePVString::BasePVString(ScalarConstPtr const & scalar)
@@ -152,9 +153,9 @@ BasePVString::BasePVString(ScalarConstPtr const & scalar)
 
 BasePVString::~BasePVString() {}
 
-String BasePVString::get() const  { return value;}
+string BasePVString::get() const  { return value;}
 
-void BasePVString::put(String val)
+void BasePVString::put(string val)
 {
     value = val;
     postPut();
@@ -362,10 +363,10 @@ void DefaultPVArray<T>::serialize(ByteBuffer *pbuffer,
     }
 }
 
-// specializations for String
+// specializations for string
 
 template<>
-void DefaultPVArray<String>::deserialize(ByteBuffer *pbuffer,
+void DefaultPVArray<string>::deserialize(ByteBuffer *pbuffer,
         DeserializableControl *pcontrol) {
     size_t size = SerializeHelper::readSize(pbuffer, pcontrol);
 
@@ -378,7 +379,7 @@ void DefaultPVArray<String>::deserialize(ByteBuffer *pbuffer,
         nextvalue.slice(0, size);
 
 
-    String * pvalue = nextvalue.data();
+    string * pvalue = nextvalue.data();
     for(size_t i = 0; i<size; i++) {
         pvalue[i] = SerializeHelper::deserializeString(pbuffer,
                                                        pcontrol);
@@ -389,7 +390,7 @@ void DefaultPVArray<String>::deserialize(ByteBuffer *pbuffer,
 }
 
 template<>
-void DefaultPVArray<String>::serialize(ByteBuffer *pbuffer,
+void DefaultPVArray<string>::serialize(ByteBuffer *pbuffer,
         SerializableControl *pflusher, size_t offset, size_t count) const {
 
     const_svector temp(value);
@@ -397,7 +398,7 @@ void DefaultPVArray<String>::serialize(ByteBuffer *pbuffer,
 
     SerializeHelper::writeSize(temp.size(), pbuffer, pflusher);
 
-    const String * pvalue = temp.data();
+    const string * pvalue = temp.data();
     for(size_t i = 0; i<temp.size(); i++) {
         SerializeHelper::serializeString(pvalue[i], pbuffer, pflusher);
     }
@@ -414,7 +415,7 @@ typedef DefaultPVArray<uint32> BasePVUIntArray;
 typedef DefaultPVArray<uint64> BasePVULongArray;
 typedef DefaultPVArray<float> BasePVFloatArray;
 typedef DefaultPVArray<double> BasePVDoubleArray;
-typedef DefaultPVArray<String> BasePVStringArray;
+typedef DefaultPVArray<string> BasePVStringArray;
 
 // Factory
 

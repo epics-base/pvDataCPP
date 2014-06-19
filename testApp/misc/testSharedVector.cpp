@@ -18,6 +18,8 @@
 
 #include "pv/sharedVector.h"
 
+using std::string;
+
 static void testEmpty()
 {
     testDiag("Test empty vector");
@@ -376,7 +378,7 @@ static void testNonPOD()
 {
     testDiag("Test vector of non-POD types");
 
-    epics::pvData::shared_vector<std::string> strings(6);
+    epics::pvData::shared_vector<string> strings(6);
     epics::pvData::shared_vector<std::tr1::shared_ptr<dummyStruct> > structs(5);
 
     testOk1(strings[0].empty());
@@ -406,7 +408,7 @@ static void testVectorConvert()
 
     epics::pvData::shared_vector<int> ints(6, 42), moreints;
     epics::pvData::shared_vector<float> floats;
-    epics::pvData::shared_vector<std::string> strings;
+    epics::pvData::shared_vector<string> strings;
     epics::pvData::shared_vector<void> voids;
 
     testOk1(ints.unique());
@@ -435,7 +437,7 @@ static void testVectorConvert()
     // convert from void uses shared_vector<void>::original_type()
     // to find that the actual type is 'int'.
     // returns a new vector
-    strings = epics::pvData::shared_vector_convert<std::string>(voids);
+    strings = epics::pvData::shared_vector_convert<string>(voids);
 
     voids.clear();
 

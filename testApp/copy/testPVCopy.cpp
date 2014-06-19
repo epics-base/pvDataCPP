@@ -35,8 +35,8 @@ using namespace epics::pvData;
 static bool debug = true;
 
 static void testPVScalar(
-    String const & valueNameMaster,
-    String const & valueNameCopy,
+    string const & valueNameMaster,
+    string const & valueNameCopy,
     PVStructurePtr const & pvMaster,
     PVCopyPtr const & pvCopy)
 {
@@ -45,7 +45,6 @@ static void testPVScalar(
     PVScalarPtr pvValueMaster;
     PVScalarPtr pvValueCopy;
     BitSetPtr bitSet;
-    String builder;
     size_t offset;
     ConvertPtr convert = getConvert();
 
@@ -53,8 +52,7 @@ static void testPVScalar(
     pvValueMaster = static_pointer_cast<PVScalar>(pvField);
     convert->fromDouble(pvValueMaster,.04);
     StructureConstPtr structure = pvCopy->getStructure();
-    builder.clear(); structure->toString(&builder);
-    if(debug) { cout << "structure from copy" << endl << builder << endl; }
+    if(debug) { cout << "structure from copy" << endl << *structure << endl; }
     pvStructureCopy = pvCopy->createPVStructure();
     pvField = pvStructureCopy->getSubField(valueNameCopy);
     pvValueCopy = static_pointer_cast<PVScalar>(pvField);
@@ -68,24 +66,20 @@ static void testPVScalar(
     testOk1(convert->toDouble(pvValueCopy)==.06);
     testOk1(bitSet->get(pvValueCopy->getFieldOffset()));
     if(debug) { cout << "after put(.06) pvValueCopy " << convert->toDouble(pvValueCopy); }
-    builder.clear();
-    bitSet->toString(&builder);
-    if(debug) { cout << " bitSet " << builder; }
+    if(debug) { cout << " bitSet " << *bitSet; }
     if(debug) { cout << endl; }
     offset = pvCopy->getCopyOffset(pvValueMaster);
     if(debug) { cout << "getCopyOffset() " << offset; }
     if(debug) { cout << " pvValueCopy->getOffset() " << pvValueCopy->getFieldOffset(); }
     if(debug) { cout << " pvValueMaster->getOffset() " << pvValueMaster->getFieldOffset(); }
-    if(debug) { cout << " bitSet " << builder; }
+    if(debug) { cout << " bitSet " << *bitSet; }
     if(debug) { cout << endl; }
     bitSet->clear();
     convert->fromDouble(pvValueMaster,1.0);
-    builder.clear();
-    bitSet->toString(&builder);
     if(debug) { cout << "before updateCopyFromBitSet"; }
     if(debug) { cout << " masterValue " << convert->toDouble(pvValueMaster); }
     if(debug) { cout << " copyValue " << convert->toDouble(pvValueCopy); }
-    if(debug) { cout << " bitSet " << builder; }
+    if(debug) { cout << " bitSet " << *bitSet; }
     if(debug) { cout << endl; }
     bitSet->set(0);
     testOk1(convert->toDouble(pvValueCopy)==0.06);
@@ -94,14 +88,14 @@ static void testPVScalar(
     if(debug) { cout << "after updateCopyFromBitSet"; }
     if(debug) { cout << " masterValue " << convert->toDouble(pvValueMaster); }
     if(debug) { cout << " copyValue " << convert->toDouble(pvValueCopy); }
-    if(debug) { cout << " bitSet " << builder; }
+    if(debug) { cout << " bitSet " << *bitSet; }
     if(debug) { cout << endl; }
     convert->fromDouble(pvValueCopy,2.0);
     bitSet->set(0);
     if(debug) { cout << "before updateMaster"; }
     if(debug) { cout << " masterValue " << convert->toDouble(pvValueMaster); }
     if(debug) { cout << " copyValue " << convert->toDouble(pvValueCopy); }
-    if(debug) { cout << " bitSet " << builder; }
+    if(debug) { cout << " bitSet " << *bitSet; }
     if(debug) { cout << endl; }
     testOk1(convert->toDouble(pvValueMaster)==1.0);
     pvCopy->updateMaster(pvStructureCopy,bitSet);
@@ -109,14 +103,14 @@ static void testPVScalar(
     if(debug) { cout << "after updateMaster"; }
     if(debug) { cout << " masterValue " << convert->toDouble(pvValueMaster); }
     if(debug) { cout << " copyValue " << convert->toDouble(pvValueCopy); }
-    if(debug) { cout << " bitSet " << builder; }
+    if(debug) { cout << " bitSet " << *bitSet; }
     if(debug) { cout << endl; }
 }
 
 static void testPVScalarArray(
     ScalarType scalarType,
-    String const & valueNameMaster,
-    String const & valueNameCopy,
+    string const & valueNameMaster,
+    string const & valueNameCopy,
     PVStructurePtr const & pvMaster,
     PVCopyPtr const & pvCopy)
 {
@@ -124,7 +118,6 @@ static void testPVScalarArray(
     PVScalarArrayPtr pvValueMaster;
     PVScalarArrayPtr pvValueCopy;
     BitSetPtr bitSet;
-    String builder;
     size_t offset;
     size_t n = 5;
     shared_vector<double> values(n);
@@ -135,14 +128,12 @@ static void testPVScalarArray(
     const shared_vector<const double> xxx(freeze(values));
     pvValueMaster->putFrom(xxx);
     StructureConstPtr structure = pvCopy->getStructure();
-    builder.clear(); structure->toString(&builder);
-    if(debug) { cout << "structure from copy" << endl << builder << endl;}
+    if(debug) { cout << "structure from copy" << endl << *structure << endl;}
     pvStructureCopy = pvCopy->createPVStructure();
     pvValueCopy = pvStructureCopy->getScalarArrayField(valueNameCopy,scalarType);
     bitSet = BitSetPtr(new BitSet(pvStructureCopy->getNumberFields()));
     pvCopy->initCopy(pvStructureCopy, bitSet);
-    builder.clear(); pvValueCopy->toString(&builder);
-    if(debug) { cout << "after initCopy pvValueCopy " << builder << endl; }
+    if(debug) { cout << "after initCopy pvValueCopy " << *pvValueCopy << endl; }
     if(debug) { cout << endl; }
     values.resize(n);
     for(size_t i=0; i<n; i++) values[i] = i + .06;
@@ -153,35 +144,24 @@ static void testPVScalarArray(
     pvCopy->updateCopySetBitSet(pvStructureCopy,bitSet);
     pvValueCopy->getAs(cvalues);
     testOk1(cvalues[0]==0.06);
-    builder.clear(); pvValueCopy->toString(&builder);
-    if(debug) { cout << "after put(i+ .06) pvValueCopy " << builder << endl; }
-    builder.clear();
-    bitSet->toString(&builder);
-    if(debug) { cout << " bitSet " << builder; }
+    if(debug) { cout << "after put(i+ .06) pvValueCopy " << *pvValueCopy << endl; }
+    if(debug) { cout << " bitSet " << *bitSet; }
     if(debug) { cout << endl; }
     offset = pvCopy->getCopyOffset(pvValueMaster);
     if(debug) { cout << "getCopyOffset() " << offset; }
     if(debug) { cout << " pvValueCopy->getOffset() " << pvValueCopy->getFieldOffset(); }
     if(debug) { cout << " pvValueMaster->getOffset() " << pvValueMaster->getFieldOffset(); }
-    builder.clear();
-    bitSet->toString(&builder);
-    if(debug) { cout << " bitSet " << builder; }
+    if(debug) { cout << " bitSet " << *bitSet; }
     if(debug) { cout << endl; }
     bitSet->clear();
     values.resize(n);
     for(size_t i=0; i<n; i++) values[i] = i + 1.0;
     const shared_vector<const double> zzz(freeze(values));
     pvValueMaster->putFrom(zzz);
-    builder.clear();
-    bitSet->toString(&builder);
     if(debug) { cout << "before updateCopyFromBitSet"; }
-    builder.clear(); pvValueMaster->toString(&builder);
-    if(debug) { cout << " masterValue " << builder << endl; }
-    builder.clear(); pvValueCopy->toString(&builder);
-    if(debug) { cout << " copyValue " << builder << endl; }
-    if(debug) { cout << " bitSet " << builder; }
-    builder.clear();
-    bitSet->toString(&builder);
+    if(debug) { cout << " masterValue " << *pvValueMaster << endl; }
+    if(debug) { cout << " copyValue " << *pvValueCopy << endl; }
+    if(debug) { cout << " bitSet " << *bitSet; }
     if(debug) { cout << endl; }
     bitSet->set(0);
     pvValueCopy->getAs(cvalues);
@@ -190,13 +170,9 @@ static void testPVScalarArray(
     pvValueCopy->getAs(cvalues);
     testOk1(cvalues[0]==1.0);
     if(debug) { cout << "after updateCopyFromBitSet"; }
-    builder.clear(); pvValueMaster->toString(&builder);
-    if(debug) { cout << " masterValue " << builder << endl; }
-    builder.clear(); pvValueCopy->toString(&builder);
-    if(debug) { cout << " copyValue " << builder << endl; }
-    builder.clear();
-    bitSet->toString(&builder);
-    if(debug) { cout << " bitSet " << builder; }
+    if(debug) { cout << " masterValue " << *pvValueMaster << endl; }
+    if(debug) { cout << " copyValue " << *pvValueCopy << endl; }
+    if(debug) { cout << " bitSet " << *bitSet; }
     if(debug) { cout << endl; }
     values.resize(n);
     for(size_t i=0; i<n; i++) values[i] = i + 2.0;
@@ -204,27 +180,19 @@ static void testPVScalarArray(
     pvValueMaster->putFrom(ttt);
     bitSet->set(0);
     if(debug) { cout << "before updateMaster"; }
-    builder.clear(); pvValueMaster->toString(&builder);
-    if(debug) { cout << " masterValue " << builder << endl; }
-    builder.clear(); pvValueCopy->toString(&builder);
-    if(debug) { cout << " copyValue " << builder << endl; }
-    builder.clear();
-    bitSet->toString(&builder);
-    if(debug) { cout << " bitSet " << builder; }
+    if(debug) { cout << " masterValue " << *pvValueMaster << endl; }
+    if(debug) { cout << " copyValue " << *pvValueCopy << endl; }
+    if(debug) { cout << " bitSet " << *bitSet; }
     if(debug) { cout << endl; }
     pvValueMaster->getAs(cvalues);
     testOk1(cvalues[0]==2.0);
     pvCopy->updateMaster(pvStructureCopy,bitSet);
     pvValueMaster->getAs(cvalues);
     testOk1(cvalues[0]==1.0);
-    if(debug) { cout << "after updateMaster"; }
-    builder.clear(); pvValueMaster->toString(&builder);
-    if(debug) { cout << " masterValue " << builder << endl; }
-    builder.clear(); pvValueCopy->toString(&builder);
-    if(debug) { cout << " copyValue " << builder << endl; }
-    builder.clear();
-    bitSet->toString(&builder);
-    if(debug) { cout << " bitSet " << builder; }
+    if(debug) { cout << "before updateMaster"; }
+    if(debug) { cout << " masterValue " << *pvValueMaster << endl; }
+    if(debug) { cout << " copyValue " << *pvValueCopy << endl; }
+    if(debug) { cout << " bitSet " << *bitSet; }
     if(debug) { cout << endl; }
 }
     
@@ -232,12 +200,12 @@ static void scalarTest()
 {
     if(debug) { cout << endl << endl << "****scalarTest****" << endl; }
     PVStructurePtr pvMaster;
-    String request;
+    string request;
     PVStructurePtr pvRequest;
     PVFieldPtr pvMasterField;
     PVCopyPtr pvCopy;
-    String valueNameMaster;
-    String valueNameCopy;
+    string valueNameMaster;
+    string valueNameCopy;
 
     StandardPVFieldPtr standardPVField = getStandardPVField();
     pvMaster = standardPVField->scalar(pvDouble,"alarm,timeStamp,display");
@@ -272,12 +240,12 @@ static void arrayTest()
 {
     if(debug) { cout << endl << endl << "****arrayTest****" << endl; }
     PVStructurePtr pvMaster;
-    String request;
+    string request;
     PVStructurePtr pvRequest;
     PVFieldPtr pvMasterField;
     PVCopyPtr pvCopy;
-    String valueNameMaster;
-    String valueNameCopy;
+    string valueNameMaster;
+    string valueNameCopy;
 
     CreateRequest::shared_pointer createRequest = CreateRequest::create();
     StandardPVFieldPtr standardPVField = getStandardPVField();
@@ -322,7 +290,7 @@ static PVStructurePtr createPowerSupply()
     powerSupply.push_back(standardField->alarm());
     names.push_back("timeStamp");
     powerSupply.push_back(standardField->timeStamp());
-    String properties("alarm,display");
+    string properties("alarm,display");
     names.push_back("voltage");
     powerSupply.push_back(standardField->scalar(pvDouble,properties));
     names.push_back("power");
@@ -339,13 +307,13 @@ static void powerSupplyTest()
 {
     if(debug) { cout << endl << endl << "****powerSupplyTest****" << endl; }
     PVStructurePtr pvMaster;
-    String request;
+    string request;
     PVStructurePtr pvRequest;
     PVFieldPtr pvMasterField;
     PVCopyPtr pvCopy;
-    String builder;
-    String valueNameMaster;
-    String valueNameCopy;
+    string builder;
+    string valueNameMaster;
+    string valueNameCopy;
 
     CreateRequest::shared_pointer createRequest = CreateRequest::create();
     pvMaster = createPowerSupply();

@@ -309,21 +309,6 @@ namespace epics { namespace pvData {
         return !(*this == set);
     }
 
-    void BitSet::toString(StringBuilder buffer, int /*indentLevel*/) const
-    {
-        *buffer += '{';
-        int32 i = nextSetBit(0);
-        char tmp[30];
-        if (i != -1) {
-            sprintf(tmp,"%d",(int)i); *buffer += tmp;
-            for (i = nextSetBit(i+1); i >= 0; i = nextSetBit(i+1)) {
-                int32 endOfRun = nextClearBit(i);
-                do { *buffer += ", "; sprintf(tmp,"%d",(int)i); *buffer += tmp; } while (++i < endOfRun);
-            }
-        }
-        *buffer += '}';
-    }
-
     void BitSet::serialize(ByteBuffer* buffer, SerializableControl* flusher) const {
     
         uint32 n = wordsInUse;

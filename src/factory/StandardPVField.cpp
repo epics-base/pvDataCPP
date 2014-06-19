@@ -18,6 +18,8 @@
 #include <pv/standardField.h>
 #include <pv/standardPVField.h>
 
+using std::string;
+
 namespace epics { namespace pvData { 
 
 StandardPVField::StandardPVField()
@@ -30,7 +32,7 @@ StandardPVField::StandardPVField()
 StandardPVField::~StandardPVField(){}
 
 PVStructurePtr StandardPVField::scalar(
-    ScalarType type,String const & properties)
+    ScalarType type,string const & properties)
 {
     StructureConstPtr field = standardField->scalar(type,properties);
     PVStructurePtr pvStructure = pvDataCreate->createPVStructure(field);
@@ -38,7 +40,7 @@ PVStructurePtr StandardPVField::scalar(
 }
 
 PVStructurePtr StandardPVField::scalarArray(
-    ScalarType elementType, String const & properties)
+    ScalarType elementType, string const & properties)
 {
     StructureConstPtr field = standardField->scalarArray(elementType,properties);
     PVStructurePtr pvStructure = pvDataCreate->createPVStructure(field);
@@ -46,7 +48,7 @@ PVStructurePtr StandardPVField::scalarArray(
 }
 
 PVStructurePtr StandardPVField::structureArray(
-    StructureConstPtr const & structure,String const & properties)
+    StructureConstPtr const & structure,string const & properties)
 {
     StructureConstPtr field = standardField->structureArray(structure,properties);
     PVStructurePtr pvStructure = pvDataCreate->createPVStructure(field);
@@ -54,7 +56,7 @@ PVStructurePtr StandardPVField::structureArray(
 }
 
 PVStructurePtr StandardPVField::unionArray(
-    UnionConstPtr const & punion,String const & properties)
+    UnionConstPtr const & punion,string const & properties)
 {
     StructureConstPtr field = standardField->unionArray(punion,properties);
     PVStructurePtr pvStructure = pvDataCreate->createPVStructure(field);
@@ -74,7 +76,7 @@ PVStructurePtr StandardPVField::enumerated(StringArray const &choices)
 }
 
 PVStructurePtr StandardPVField::enumerated(
-    StringArray const &choices,String const & properties)
+    StringArray const &choices,string const & properties)
 {
     StructureConstPtr field = standardField->enumerated(properties);
     PVStructurePtr pvStructure =  pvDataCreate->createPVStructure(field);

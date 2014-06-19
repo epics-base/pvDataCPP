@@ -14,11 +14,13 @@
 #include <pv/lock.h>
 #include <pv/requester.h>
 
+using std::string;
+
 namespace epics { namespace pvData { 
 
 static StringArray messageTypeName(MESSAGE_TYPE_COUNT);
 
-String getMessageTypeName(MessageType messageType)
+string getMessageTypeName(MessageType messageType)
 {
     // TODO not thread-safe
     static Mutex mutex;

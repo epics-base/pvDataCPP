@@ -19,6 +19,8 @@
 
 #include "dbDefs.h" // for NELEMENTS
 
+using std::string;
+
 namespace epics { namespace pvData {
 
 namespace TypeFunc {
@@ -30,10 +32,12 @@ namespace TypeFunc {
             THROW_EXCEPTION2(std::invalid_argument, "logic error unknown Type");
         return names[t];
     }
-    void toString(StringBuilder buf,const Type type) {
-        *buf += name(type);
-    }
 } // namespace TypeFunc
+
+std::ostream& operator<<(std::ostream& o, const Type& type)
+{
+    return o << TypeFunc::name(type);
+}
 
 
 namespace ScalarTypeFunc {
@@ -63,7 +67,7 @@ namespace ScalarTypeFunc {
         "ubyte", "ushort", "uint", "ulong",
         "float", "double", "string",
     };
-    ScalarType getScalarType(const String& pvalue) {
+    ScalarType getScalarType(const string& pvalue) {
         for(size_t i=0; i<NELEMENTS(names); i++)
             if(pvalue==names[i])
                 return ScalarType(i);
@@ -74,10 +78,6 @@ namespace ScalarTypeFunc {
         if (t<pvBoolean || t>pvString)
             THROW_EXCEPTION2(std::invalid_argument, "error unknown ScalarType");
         return names[t];
-    }
-
-    void toString(StringBuilder buf,const ScalarType scalarType) {
-        *buf += name(scalarType);
     }
 
     size_t elementSize(ScalarType id)
@@ -95,7 +95,7 @@ namespace ScalarTypeFunc {
             OP(pvLong, int64);
             OP(pvFloat, float);
             OP(pvDouble, double);
-            OP(pvString, String);
+            OP(pvString, string);
 #undef OP
         default:
             THROW_EXCEPTION2(std::invalid_argument, "error unknown ScalarType");
@@ -117,7 +117,7 @@ namespace ScalarTypeFunc {
         OP(pvLong, int64);
         OP(pvFloat, float);
         OP(pvDouble, double);
-        OP(pvString, String);
+        OP(pvString, string);
 #undef OP
         default:
             throw std::bad_alloc();
@@ -125,5 +125,10 @@ namespace ScalarTypeFunc {
     }
 
 } // namespace ScalarTypeFunc
+
+std::ostream& operator<<(std::ostream& o, const ScalarType& scalarType)
+{
+    return o << ScalarTypeFunc::name(scalarType);
+}
 
 }}

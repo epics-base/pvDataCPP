@@ -56,7 +56,7 @@ public:
      * getName
      * @returns The name of the plugin
      */
-    virtual String const & getName() = 0;
+    virtual std::string const & getName() = 0;
     /**
      * Should a monitor be raised?
      * @param pvField The field being monitored.
@@ -125,7 +125,7 @@ public:
      * getName
      * @returns The name of the plugin
      */
-    virtual String const & getName() = 0;
+    virtual std::string const & getName() = 0;
 };
     
 
@@ -152,7 +152,7 @@ public:
      * false is returned if a plugin with that name is already present
      */
      bool addPlugin(
-         String const &pluginName,
+         std::string const &pluginName,
          MonitorPluginCreatorPtr const &creator);
     /* find plugin
      * 
@@ -160,7 +160,7 @@ public:
      * @returns share pointer to plugin creator.
      * If a plugin with that name is not found NULL is returned.
      */
-     MonitorPluginCreatorPtr findPlugin(String const &pluginName);
+     MonitorPluginCreatorPtr findPlugin(std::string const &pluginName);
     /* showNames
      * 
      */

@@ -13,10 +13,13 @@
 #endif
 
 #include <stdexcept>
+#include <string>
 
 #define epicsExportSharedSymbols
 #include <pv/convert.h>
 #include <pv/timer.h>
+
+using std::string;
 
 namespace epics { namespace pvData { 
 
@@ -26,7 +29,7 @@ TimerCallback::TimerCallback()
 {
 }
 
-Timer::Timer(String threadName,ThreadPriority priority)
+Timer::Timer(string threadName,ThreadPriority priority)
 : waitForWork(false),
   waitForDone(false),
   alive(true),
@@ -84,7 +87,7 @@ void Timer::cancel(TimerCallbackPtr const &timerCallback)
         prevNode = nextNode;
         nextNode = nextNode->next;
     }
-    throw std::logic_error(String(""));
+    throw std::logic_error(string(""));
 }
 
 bool Timer::isScheduled(TimerCallbackPtr const &timerCallback)
@@ -169,7 +172,7 @@ void Timer::schedulePeriodic(
     double period)
 {
     if(isScheduled(timerCallback)) {
-        throw std::logic_error(String("already queued"));
+        throw std::logic_error(string("already queued"));
     }
     {
         Lock xx(mutex);
@@ -193,23 +196,23 @@ void Timer::schedulePeriodic(
     if(isFirst) waitForWork.signal();
 }
 
-void Timer::toString(StringBuilder builder)
+std::ostream& operator<<(std::ostream& o, Timer& timer)
 {
-    Lock xx(mutex);
-    if(!alive) return;
+    Lock xx(timer.mutex);
+    if(!timer.alive) return o;
     TimeStamp currentTime;
-    TimerCallbackPtr nodeToCall(head);
+    TimerCallbackPtr nodeToCall(timer.head);
     currentTime.getCurrent();
     while(true) {
-         if(nodeToCall.get()==NULL) return;
+         if(nodeToCall.get()==NULL) return o;
          TimeStamp timeToRun = nodeToCall->timeToRun;
          double period = nodeToCall->period;
          double diff = TimeStamp::diff(timeToRun,currentTime);
-         char buffer[50];
-         sprintf(buffer,"timeToRun %f period %f\n",diff,period);
-         *builder += buffer;
+         o << "timeToRun " << diff << " period " << period << std::endl;
          nodeToCall = nodeToCall->next;
      }
+     return o;
 }
+
 
 }}

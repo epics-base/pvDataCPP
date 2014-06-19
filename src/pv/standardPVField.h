@@ -50,7 +50,7 @@ public:
      * This is some combination of "alarm,timeStamp,display,control,valueAlarm".
      * @return The const shared pointer to the structure.
      */
-    PVStructurePtr scalar(ScalarType type,String const & properties);
+    PVStructurePtr scalar(ScalarType type,std::string const & properties);
     /**
      * Create a structure that has a scalar array value field.
      * @param type The type.
@@ -58,7 +58,7 @@ public:
      * This is some combination of "alarm,timeStamp,display,control,valueAlarm".
      * @return The const shared pointer to the structure.
      */
-    PVStructurePtr scalarArray(ScalarType elementType, String const & properties);
+    PVStructurePtr scalarArray(ScalarType elementType, std::string const & properties);
     /**
      * Create a structure that has a structure array value field.
      * @param type The type.
@@ -66,7 +66,7 @@ public:
      * This is some combination of "alarm,timeStamp,display,control,valueAlarm".
      * @return The const shared pointer to the structure.
      */
-    PVStructurePtr structureArray(StructureConstPtr const &structure,String const & properties);
+    PVStructurePtr structureArray(StructureConstPtr const &structure,std::string const & properties);
     /**
      * Create a structure that has a union array value field.
      * @param type The type.
@@ -74,7 +74,7 @@ public:
      * This is some combination of "alarm,timeStamp,display,control,valueAlarm".
      * @return The const shared pointer to the structure.
      */
-    PVStructurePtr unionArray(UnionConstPtr const &punion,String const & properties);
+    PVStructurePtr unionArray(UnionConstPtr const &punion,std::string const & properties);
     /**
      * Create a structure that has an enumerated structure value field.
      * The id for the structure is "enum_t".
@@ -89,13 +89,13 @@ public:
      * @param properties A comma separated list of properties.
      * @return The const shared pointer to the structure.
      */
-    PVStructurePtr enumerated(StringArray const &choices, String const & properties);
+    PVStructurePtr enumerated(StringArray const &choices, std::string const & properties);
 private:
     StandardPVField();
     StandardFieldPtr standardField;
     FieldCreatePtr fieldCreate;
     PVDataCreatePtr pvDataCreate;
-    String notImplemented;
+    std::string notImplemented;
 };
 
 epicsShareExtern StandardPVFieldPtr getStandardPVField();

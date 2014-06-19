@@ -10,6 +10,8 @@
 #define epicsExportSharedSymbols
 #include <pv/printer.h>
 
+using std::string;
+
 namespace {
 
 void indentN(std::ostream& strm, size_t N)
@@ -21,6 +23,27 @@ void indentN(std::ostream& strm, size_t N)
 }
 
 namespace epics { namespace pvData {
+
+namespace format
+{
+	std::ostream& operator<<(std::ostream& os, indent_level const& indent)
+	{
+		indent_value(os) = indent.level;
+		return os;
+	}
+
+	std::ostream& operator<<(std::ostream& os, indent const&)
+	{
+		long il = indent_value(os);
+		std::size_t spaces = static_cast<std::size_t>(il) * 4;
+		return os << string(spaces, ' ');
+	}
+
+	array_at_internal operator<<(std::ostream& str, array_at const& manip)
+	{
+		return array_at_internal(manip.index, str);
+	}
+};
 
 PrinterBase::PrinterBase()
     :strm(NULL)
@@ -239,14 +262,14 @@ void PrinterPlain::encodeScalar(const PVScalar& pv)
     indentN(S(), ilvl);
     S() << pv.getScalar()->getID() << " "
         << pv.getFieldName() << " "
-        << pv.getAs<String>() << std::endl;
+        << pv.getAs<string>() << std::endl;
 }
 
 void PrinterPlain::encodeArray(const PVScalarArray& pv)
 {
     indentN(S(), ilvl);
-    shared_vector<const String> temp;
-    pv.getAs<String>(temp);
+    shared_vector<const string> temp;
+    pv.getAs<string>(temp);
 
     S() << pv.getScalarArray()->getID() << " "
         << pv.getFieldName() << " [";

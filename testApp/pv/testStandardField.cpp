@@ -11,6 +11,7 @@
 #include <cstddef>
 #include <string>
 #include <cstdio>
+#include <sstream>
 
 #include <epicsUnitTest.h>
 #include <testMain.h>
@@ -23,16 +24,18 @@
 
 using namespace epics::pvData;
 using std::tr1::static_pointer_cast;
+using std::string;
 
 static bool debug = false;
 
 static FieldCreatePtr fieldCreate = getFieldCreate();
 static StandardFieldPtr standardField = getStandardField();
-static String builder("");
 
-static void print(String name)
+static void print(const string& name, FieldConstPtr const & f)
 {
-    if(debug) printf("\n%s\n%s\n",name.c_str(),builder.c_str());
+    if(debug) {
+        std::cout << std::endl << name << std::endl << *f << std::endl;
+    }
 }
 
 MAIN(testStandardField)
@@ -40,19 +43,13 @@ MAIN(testStandardField)
     testPlan(1);
     StructureConstPtr doubleValue = standardField->scalar(pvDouble,
         "alarm,timeStamp,display,control,valueAlarm");
-    builder.clear();
-    doubleValue->toString(&builder);
-    print("doubleValue");
+    print("doubleValue", doubleValue);
     StructureConstPtr stringArrayValue = standardField->scalarArray(pvString,
         "alarm,timeStamp");
-    builder.clear();
-    stringArrayValue->toString(&builder);
-    print("stringArrayValue");
+    print("stringArrayValue", stringArrayValue);
     StructureConstPtr enumeratedValue = standardField->enumerated(
         "alarm,timeStamp,valueAlarm");
-    builder.clear();
-    enumeratedValue->toString(&builder);
-    print("enumeratedValue");
+    print("enumeratedValue", enumeratedValue);
     FieldConstPtrArray fields;
     fields.reserve(2);
     fields.push_back(fieldCreate->createScalar(pvDouble));
@@ -63,9 +60,7 @@ MAIN(testStandardField)
     fieldNames.push_back("arrayValue");
     StructureConstPtr structure = fieldCreate->createStructure(fieldNames, fields);
     StructureConstPtr structureArrayValue = standardField->structureArray(structure, "alarm,timeStamp");
-    builder.clear();
-    structureArrayValue->toString(&builder);
-    print("structureArrayValue");
+    print("structureArrayValue", structureArrayValue);
 
     StructureConstPtr punion = standardField->regUnion(
         fieldCreate->createFieldBuilder()->
@@ -74,9 +69,7 @@ MAIN(testStandardField)
         add("timeStamp",standardField->timeStamp())->
         createUnion(),
         "alarm,timeStamp");
-    builder.clear();
-    punion->toString(&builder);
-    print("unionValue");
+    print("unionValue", punion);
     testPass("testStandardField");
     return testDone();
 }

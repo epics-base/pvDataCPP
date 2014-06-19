@@ -21,6 +21,7 @@
 #include <pv/pvIntrospect.h>
 
 using namespace epics::pvData;
+using std::string;
 using std::cout;
 
 void testBasicOperations() {
@@ -197,7 +198,7 @@ void testBasicOperations() {
     testOk1(buff->getPosition()==6);
     testOk1(strncmp(&src[2],&dst[2],6)==0);
 
-    cout<<"    First 10 characters of destination: >>"<<String(dst, 10)<<"<<\n";
+    cout<<"    First 10 characters of destination: >>"<<string(dst, 10)<<"<<\n";
 
     delete buff;
 

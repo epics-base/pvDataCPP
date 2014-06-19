@@ -20,15 +20,14 @@
 #include <pv/pvCopy.h>
 #include <pv/convert.h>
 
-
-namespace epics { namespace pvData { 
-
-using namespace epics::pvData;
 using std::tr1::static_pointer_cast;
 using std::tr1::dynamic_pointer_cast;
+using std::string;
 using std::size_t;
 using std::cout;
 using std::endl;
+
+namespace epics { namespace pvData { 
 
 static PVCopyPtr NULLPVCopy;
 static FieldConstPtr NULLField;
@@ -63,7 +62,7 @@ struct CopyStructureNode : public  CopyNode {
 PVCopyPtr PVCopy::create(
     PVStructurePtr const &pvMaster, 
     PVStructurePtr const &pvRequest, 
-    String const & structureName)
+    string const & structureName)
 {
     PVStructurePtr pvStructure(pvRequest);
     if(structureName.size()>0) {
@@ -171,12 +170,12 @@ size_t PVCopy::getCopyOffset(PVFieldPtr const &masterPVField)
         size_t off = masterPVField->getFieldOffset();
         size_t offdiff = off -offsetParent;
         if(offdiff<masterNode->nfields) return headNode->structureOffset + offdiff;
-        return String::npos;
+        return string::npos;
     }
     CopyStructureNodePtr node = static_pointer_cast<CopyStructureNode>(headNode);
     CopyMasterNodePtr masterNode = getCopyOffset(node,masterPVField);
     if(masterNode.get()!=NULL) return masterNode->structureOffset;
-    return String::npos;
+    return string::npos;
 }
 
 size_t PVCopy::getCopyOffset(
@@ -186,12 +185,12 @@ size_t PVCopy::getCopyOffset(
     CopyMasterNodePtr masterNode;
     if(!headNode->isStructure) {
         masterNode = static_pointer_cast<CopyMasterNode>(headNode);
-        if(masterNode->masterPVField.get()!=masterPVStructure.get()) return String::npos;
+        if(masterNode->masterPVField.get()!=masterPVStructure.get()) return string::npos;
     } else {
         CopyStructureNodePtr node = static_pointer_cast<CopyStructureNode>(headNode);
         masterNode = getCopyOffset(node,masterPVField);
     }
-    if(masterNode.get()==NULL) return String::npos;
+    if(masterNode.get()==NULL) return string::npos;
     size_t diff = masterPVField->getFieldOffset()
         - masterPVStructure->getFieldOffset();
     return masterNode->structureOffset + diff;
@@ -284,14 +283,14 @@ void PVCopy::updateMaster(
     }
 }
 
-epics::pvData::String PVCopy::dump()
+string PVCopy::dump()
 {
-    String builder;
+    string builder;
     dump(&builder,headNode,0);
     return builder;
 }
 
-void PVCopy::dump(String *builder,CopyNodePtr const &node,int indentLevel)
+void PVCopy::dump(string *builder,CopyNodePtr const &node,int indentLevel)
 {
     getConvert()->newLine(builder,indentLevel);
     std::stringstream ss;
@@ -302,12 +301,17 @@ void PVCopy::dump(String *builder,CopyNodePtr const &node,int indentLevel)
     PVStructurePtr options = node->options;
     if(options.get()!=NULL) {
         getConvert()->newLine(builder,indentLevel +1);
-        options->toString(builder);
+        
+        // TODO !!! ugly
+        std::ostringstream oss;
+        oss << *options;
+        *builder += oss.str();
+        
         getConvert()->newLine(builder,indentLevel);
     }
     if(!node->isStructure) {
         CopyMasterNodePtr masterNode = static_pointer_cast<CopyMasterNode>(node);
-        String name = masterNode->masterPVField->getFullName();
+        string name = masterNode->masterPVField->getFullName();
         *builder += " masterField " + name;
         return;
     }
@@ -331,7 +335,7 @@ bool PVCopy::init(epics::pvData::PVStructurePtr const &pvRequest)
     PVStructurePtr pvMasterStructure = pvMaster;
     size_t len = pvRequest->getPVFields().size();
     bool entireMaster = false;
-    if(len==String::npos) entireMaster = true;
+    if(len==string::npos) entireMaster = true;
     if(len==0) entireMaster = true;
     PVStructurePtr pvOptions;
     if(len==1 && pvRequest->getSubField("_options")!=NULL) {
@@ -358,12 +362,12 @@ bool PVCopy::init(epics::pvData::PVStructurePtr const &pvRequest)
     return true;
 }
 
-epics::pvData::String PVCopy::dump(
-    String const &value,
+string PVCopy::dump(
+    string const &value,
     CopyNodePtr const &node,
     int indentLevel)
 {
-    throw std::logic_error(String("Not Implemented"));
+    throw std::logic_error(string("Not Implemented"));
 }
 
 
@@ -381,7 +385,7 @@ StructureConstPtr PVCopy::createStructure(
     FieldConstPtrArray fields; fields.reserve(length);
     StringArray fieldNames; fields.reserve(length);
     for(size_t i=0; i<length; ++i) {
-        String const &fieldName = fromRequestFieldNames[i];
+        string const &fieldName = fromRequestFieldNames[i];
         PVFieldPtr pvMasterField = pvMaster->getSubField(fieldName);
         if(pvMasterField==NULL) continue;
         FieldConstPtr field = pvMasterField->getField();
@@ -425,7 +429,7 @@ CopyNodePtr PVCopy::createStructureNodes(
     nodes->reserve(number);
     for(size_t i=0; i<number; i++) {
         PVFieldPtr copyPVField = copyPVFields[i];
-        String fieldName = copyPVField->getFieldName();
+        string fieldName = copyPVField->getFieldName();
         
         PVStructurePtr requestPVStructure = static_pointer_cast<PVStructure>(
               pvFromRequest->getSubField(fieldName));
@@ -531,7 +535,7 @@ void PVCopy::updateStructureNodeFromBitSet(
     size_t offset = structureNode->structureOffset;
     if(!doAll) {
         size_t nextSet = bitSet->nextSetBit(offset);
-        if(nextSet==String::npos) return;
+        if(nextSet==string::npos) return;
     }
     if(offset>=pvCopy->getNextFieldOffset()) return;
     if(!doAll) doAll = bitSet->get(offset);
@@ -567,7 +571,7 @@ void PVCopy::updateSubFieldFromBitSet(
     if(!doAll) {
         size_t offset = pvCopy->getFieldOffset();
         size_t nextSet = bitSet->nextSetBit(offset);
-        if(nextSet==String::npos) return;
+        if(nextSet==string::npos) return;
         if(nextSet>=pvCopy->getNextFieldOffset()) return;
     }
     ConvertPtr convert = getConvert();
@@ -577,7 +581,7 @@ void PVCopy::updateSubFieldFromBitSet(
         PVFieldPtrArray const & pvCopyFields = pvCopyStructure->getPVFields();
         if(pvMasterField->getField()->getType() !=epics::pvData::structure)
         {
-            throw std::logic_error(String("Logic error"));
+            throw std::logic_error(string("Logic error"));
         }
         PVStructurePtr pvMasterStructure = 
             static_pointer_cast<PVStructure>(pvMasterField);

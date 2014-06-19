@@ -21,6 +21,7 @@
 #include <epicsAssert.h>
 
 using namespace epics::pvData;
+using std::string;
 using std::cout;
 using std::endl;
 
@@ -28,8 +29,8 @@ static StandardPVFieldPtr standardPVField = getStandardPVField();
 
 void test()
 {
-     String buffer;
-     String properties("alarm,timeStamp,display");
+     string buffer;
+     string properties("alarm,timeStamp,display");
      PVStructurePtr pvStructure = standardPVField->scalar(pvDouble,properties);
      PVDoublePtr pvValue = pvStructure->getDoubleField("value");
      uint32 valueOffset = (uint32) pvValue->getFieldOffset();

@@ -11,11 +11,13 @@
 #include <pv/pvData.h>
 #include <pv/standardField.h>
 #include <pv/standardPVField.h>
+#include <pv/status.h>
 
 #include <epicsUnitTest.h>
 #include <testMain.h>
 
 using namespace epics::pvData;
+using std::string;
 
 static PVDataCreatePtr pvDataCreate = getPVDataCreate();
 static StandardFieldPtr standardField = getStandardField();
@@ -37,12 +39,12 @@ MAIN(testOperators)
     testOk1(testDV == dv);
 
 
-    const std::string testSV = "test message";
+    const string testSV = "test message";
 
     PVStringPtr pvMessage = pvStructure->getStringField("alarm.message");
     *pvMessage <<= testSV;
 
-    std::string sv;
+    string sv;
     *pvMessage >>= sv;
     testOk1(testSV == sv);
 
@@ -54,6 +56,10 @@ MAIN(testOperators)
     std::cout << *pvMessage << std::endl;
     std::cout << *pvStructure << std::endl;
 
+    std::cout << *pvStructure->getStructure() << std::endl;
+
+    std::cout << Status::Ok << std::endl;
+    std::cout << Status::STATUSTYPE_OK << std::endl;
 
     StringArray choices;
     choices.reserve(3);

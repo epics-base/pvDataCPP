@@ -26,14 +26,14 @@ enum MessageType {
 };
 #define MESSAGE_TYPE_COUNT 4
 
-epicsShareExtern String getMessageTypeName(MessageType messageType);
+epicsShareExtern std::string getMessageTypeName(MessageType messageType);
 
 class epicsShareClass Requester {
 public:
     POINTER_DEFINITIONS(Requester);
     virtual ~Requester(){}
-    virtual String getRequesterName() = 0;
-    virtual void message(String const & message,MessageType messageType) = 0;
+    virtual std::string getRequesterName() = 0;
+    virtual void message(std::string const & message,MessageType messageType) = 0;
 };
 
 }}

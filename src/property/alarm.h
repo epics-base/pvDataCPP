@@ -42,10 +42,10 @@ public:
 
 class epicsShareClass Alarm {
 public:
-    Alarm() : severity(0),status(0), message(String("")) {}
+    Alarm() : severity(0),status(0), message(std::string("")) {}
     //default constructors and destructor are OK
-    String getMessage() const {return message;}
-    void setMessage(String const &value) {message = value;}
+    std::string getMessage() const {return message;}
+    void setMessage(std::string const &value) {message = value;}
     AlarmSeverity getSeverity() const;
     void setSeverity(AlarmSeverity value) {severity = value;}
     AlarmStatus getStatus() const;
@@ -53,7 +53,7 @@ public:
 private:
     int32 severity;
     int32 status;
-    String message;
+    std::string message;
 };
     
 }}

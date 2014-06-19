@@ -17,6 +17,7 @@
 #include <pv/standardField.h>
 
 using std::tr1::static_pointer_cast;
+using std::string;
 
 namespace epics { namespace pvData { 
 
@@ -49,7 +50,7 @@ void StandardField::init()
 
 StandardField::~StandardField(){}
 
-StructureConstPtr StandardField::createProperties(String id,FieldConstPtr field,String properties)
+StructureConstPtr StandardField::createProperties(string id,FieldConstPtr field,string properties)
 {
     bool gotAlarm = false;
     bool gotTimeStamp = false;
@@ -57,11 +58,11 @@ StructureConstPtr StandardField::createProperties(String id,FieldConstPtr field,
     bool gotControl = false;
     bool gotValueAlarm = false;
     int numProp = 0;
-    if(properties.find("alarm")!=String::npos) { gotAlarm = true; numProp++; }
-    if(properties.find("timeStamp")!=String::npos) { gotTimeStamp = true; numProp++; }
-    if(properties.find("display")!=String::npos) { gotDisplay = true; numProp++; }
-    if(properties.find("control")!=String::npos) { gotControl = true; numProp++; }
-    if(properties.find("valueAlarm")!=String::npos) { gotValueAlarm = true; numProp++; }
+    if(properties.find("alarm")!=string::npos) { gotAlarm = true; numProp++; }
+    if(properties.find("timeStamp")!=string::npos) { gotTimeStamp = true; numProp++; }
+    if(properties.find("display")!=string::npos) { gotDisplay = true; numProp++; }
+    if(properties.find("control")!=string::npos) { gotControl = true; numProp++; }
+    if(properties.find("valueAlarm")!=string::npos) { gotValueAlarm = true; numProp++; }
     StructureConstPtr valueAlarm;
     Type type= field->getType();
     while(gotValueAlarm) {
@@ -82,7 +83,7 @@ StructureConstPtr StandardField::createProperties(String id,FieldConstPtr field,
                case pvFloat: valueAlarm = floatAlarmField; break;
                case pvDouble: valueAlarm = doubleAlarmField; break;
                case pvString:
-                throw std::logic_error(String("valueAlarm property not supported for pvString"));
+                throw std::logic_error(string("valueAlarm property not supported for pvString"));
            }
            break;
         }
@@ -93,8 +94,8 @@ StructureConstPtr StandardField::createProperties(String id,FieldConstPtr field,
                 FieldConstPtrArray fields = structurePtr->getFields();
                 FieldConstPtr first = fields[0];
                 FieldConstPtr second = fields[1];
-                String nameFirst = names[0];
-                String nameSecond = names[1];
+                string nameFirst = names[0];
+                string nameSecond = names[1];
                 int compareFirst = nameFirst.compare("index");
                 int compareSecond = nameSecond.compare("choices");
                 if(compareFirst==0 && compareSecond==0) {
@@ -112,7 +113,7 @@ StructureConstPtr StandardField::createProperties(String id,FieldConstPtr field,
                 }
             }
         }
-        throw std::logic_error(String("valueAlarm property for illegal type"));
+        throw std::logic_error(string("valueAlarm property for illegal type"));
     }
     size_t numFields = numProp+1;
     FieldConstPtrArray fields(numFields);
@@ -499,7 +500,7 @@ void StandardField::createEnumeratedAlarm() {
 
 
 StructureConstPtr StandardField::scalar(
-    ScalarType type,String  const &properties)
+    ScalarType type,string  const &properties)
 {
     ScalarConstPtr field = fieldCreate->createScalar(type); // scalar_t
     return createProperties("uri:ev4:nt/2012/pwd:NTScalar",field,properties);
@@ -507,20 +508,20 @@ StructureConstPtr StandardField::scalar(
 
 StructureConstPtr StandardField::regUnion(
     UnionConstPtr const &field,
-        String const & properties)
+        string const & properties)
 {
    return createProperties("uri:ev4:nt/2012/pwd:NTUnion",field,properties);
 }
 
 StructureConstPtr StandardField::variantUnion(
-    String const & properties)
+    string const & properties)
 {
     UnionConstPtr field =  fieldCreate->createVariantUnion();
     return createProperties("uri:ev4:nt/2012/pwd:NTUnion",field,properties);
 }
 
 StructureConstPtr StandardField::scalarArray(
-    ScalarType elementType, String  const &properties)
+    ScalarType elementType, string  const &properties)
 {
     ScalarArrayConstPtr field = fieldCreate->createScalarArray(elementType); // scalar_t[]
     return createProperties("uri:ev4:nt/2012/pwd:NTScalarArray",field,properties);
@@ -528,7 +529,7 @@ StructureConstPtr StandardField::scalarArray(
 
 
 StructureConstPtr StandardField::structureArray(
-    StructureConstPtr const & structure,String  const &properties)
+    StructureConstPtr const & structure,string  const &properties)
 {
     StructureArrayConstPtr field = fieldCreate->createStructureArray(
         structure);
@@ -536,7 +537,7 @@ StructureConstPtr StandardField::structureArray(
 }
 
 StructureConstPtr StandardField::unionArray(
-    UnionConstPtr const & punion,String  const &properties)
+    UnionConstPtr const & punion,string  const &properties)
 {
     UnionArrayConstPtr field = fieldCreate->createUnionArray(
         punion);
@@ -556,7 +557,7 @@ StructureConstPtr StandardField::enumerated()
     // NOTE: if this method is used to get NTEnum wihtout properties the ID will be wrong!
 }
 
-StructureConstPtr StandardField::enumerated(String  const &properties)
+StructureConstPtr StandardField::enumerated(string  const &properties)
 {
     StructureConstPtr field = enumerated(); // enum_t
     return createProperties("uri:ev4:nt/2012/pwd:NTEnum",field,properties);

@@ -57,7 +57,7 @@ namespace epics {
                 return (std::size_t)(b<0 ? b+256 : b);
         }
 
-        void SerializeHelper::serializeString(const String& value,
+        void SerializeHelper::serializeString(const string& value,
                 ByteBuffer* buffer, SerializableControl* flusher) {
             std::size_t len = value.length();
             SerializeHelper::writeSize(len, buffer, flusher);
@@ -74,7 +74,7 @@ namespace epics {
             }
         }
 
-        void SerializeHelper::serializeSubstring(const String& value,
+        void SerializeHelper::serializeSubstring(const string& value,
                 std::size_t offset, std::size_t count, ByteBuffer* buffer,
                 SerializableControl* flusher) {
             /*if(offset<0)
@@ -97,9 +97,9 @@ namespace epics {
             }
         }
         
-        static String emptyString;
+        static string emptyStringtring;
 
-        String SerializeHelper::deserializeString(ByteBuffer* buffer,
+        string SerializeHelper::deserializeString(ByteBuffer* buffer,
                 DeserializableControl* control) {
 
             std::size_t size = SerializeHelper::readSize(buffer, control);
@@ -109,13 +109,13 @@ namespace epics {
                 {
                     // entire string is in buffer, simply create a string out of it (copy)
                     std::size_t pos = buffer->getPosition();
-                    String str(buffer->getArray()+pos, size);
+                    string str(buffer->getArray()+pos, size);
                     buffer->setPosition(pos+size);
                     return str;
                 }
                 else
                 {
-                    String str;
+                    string str;
                     str.reserve(size);
                     try {
                         std::size_t i = 0;
@@ -137,7 +137,7 @@ namespace epics {
                 }
             }
             else
-                return emptyString;
+                return emptyStringtring;
         }
 
     }

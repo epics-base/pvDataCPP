@@ -31,10 +31,10 @@ typedef std::tr1::shared_ptr<MessageQueue> MessageQueuePtr;
 class epicsShareClass MessageNode {
 public:
     MessageNode();
-    String getMessage() const;
+    std::string getMessage() const;
     MessageType getMessageType() const;
 private:
-    String message;
+    std::string message;
     MessageType messageType;
     friend class MessageQueue;
 };
@@ -49,7 +49,7 @@ public:
     // must call release before next get
     void release();
     // return (false,true) if message (was not, was) put into queue
-    bool put(String message,MessageType messageType,bool replaceLast);
+    bool put(std::string message,MessageType messageType,bool replaceLast);
     bool isEmpty() ;
     bool isFull() ;
     int getClearOverrun();

@@ -30,8 +30,6 @@
 
 namespace epics { namespace pvData {
 
-typedef std::string String;
-
 namespace detail {
     // parseToPOD wraps the epicsParse*() functions in one name
     // and throws exceptions
@@ -48,12 +46,12 @@ namespace detail {
     epicsShareExtern void parseToPOD(const std::string&, double *out);
 
     /* want to pass POD types by value,
-     * and String by const reference
+     * and std::string by const reference
      */
     template<typename ARG>
     struct cast_arg { typedef ARG arg; };
     template<>
-    struct cast_arg<String> { typedef const String& arg; };
+    struct cast_arg<std::string> { typedef const std::string& arg; };
 
     // Handle mangling of type/value when printing
     template<typename T>
@@ -98,10 +96,10 @@ namespace detail {
     };
 
     // print POD to string
-    // when String!=FROM
+    // when std::string!=FROM
     template<typename FROM>
-    struct cast_helper<String, FROM, typename meta::not_same_type<String,FROM>::type> {
-        static String op(FROM from) {
+    struct cast_helper<std::string, FROM, typename meta::not_same_type<std::string,FROM>::type> {
+        static std::string op(FROM from) {
             std::ostringstream strm;
             strm << print_convolute<FROM>::op(from);
             if(strm.fail())
@@ -111,10 +109,10 @@ namespace detail {
     };
 
     // parse POD from string
-    // TO!=String
+    // TO!=std::string
     template<typename TO>
-    struct cast_helper<TO, String, typename meta::not_same_type<TO,String>::type> {
-        static FORCE_INLINE TO op(const String& from) {
+    struct cast_helper<TO, std::string, typename meta::not_same_type<TO,std::string>::type> {
+        static FORCE_INLINE TO op(const std::string& from) {
             TO ret;
             parseToPOD(from, &ret);
             return ret;
@@ -127,7 +125,7 @@ namespace detail {
  *
  * Supported types: uint8_t, int8_t, uint16_t, int16_t,
  *                  uint32_t, int32_t, uint64_t, int64_t,
- *                  float, double, String
+ *                  float, double, std::string
  *
  * As defined in pvType.h
  *
@@ -153,9 +151,9 @@ namespace detail {
  * Conversions where invalid or out of range inputs result
  * in an exception.
  *
- * - non-String -> String
- * - String -> non-String
- * - String -> String (throws only std::bad_alloc)
+ * - non-std::string -> std::string
+ * - std::string -> non-std::string
+ * - std::string -> std::string (throws only std::bad_alloc)
  *
  * Conversions where out of range inputs produce undefined
  * results.
@@ -169,7 +167,7 @@ namespace detail {
  *    too large to be represented by the integer type
  *    is not defined.
  *
- @section stringf String formats
+ @section stringf std::string formats
  *
  * - Numbers beginning with 1-9 are parsed as base-10.
  * - Numbers beginning with '0x' are parsed as base-16

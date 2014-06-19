@@ -16,12 +16,13 @@
 #include <pv/pvData.h>
 #include <pv/pvDisplay.h>
 
+using std::tr1::static_pointer_cast;
+using std::string;
+
 namespace epics { namespace pvData { 
 
-using std::tr1::static_pointer_cast;
-
-String PVDisplay::noDisplayFound("No display structure found");
-String PVDisplay::notAttached("Not attached to an display structure");
+string PVDisplay::noDisplayFound("No display structure found");
+string PVDisplay::notAttached("Not attached to an display structure");
 
 bool PVDisplay::attach(PVFieldPtr const & pvField)
 {
@@ -39,12 +40,12 @@ bool PVDisplay::attach(PVFieldPtr const & pvField)
         detach();
         return false;
     }
-    pvLow = pvStructure->getDoubleField(String("limitLow"));
+    pvLow = pvStructure->getDoubleField(string("limitLow"));
     if(pvLow.get()==NULL) {
         detach();
         return false;
     }
-    pvHigh = pvStructure->getDoubleField(String("limitHigh"));
+    pvHigh = pvStructure->getDoubleField(string("limitHigh"));
     if(pvHigh.get()==NULL) {
         detach();
         return false;

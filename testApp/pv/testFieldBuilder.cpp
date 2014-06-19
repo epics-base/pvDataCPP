@@ -31,7 +31,7 @@ void test_structure()
     FieldBuilderPtr fb = fieldCreate->createFieldBuilder();
     
     // test with simple (non-nested) structure
-    std::string ID = "testStructureID";
+    string ID = "testStructureID";
     StructureConstPtr s = fb->setId(ID)->
                          add("double", pvDouble)->
                          addArray("intArray", pvInt)->
@@ -116,7 +116,7 @@ void test_nestedStructure()
 
     FieldCreatePtr fieldCreate = getFieldCreate();
     
-    std::string NESTED_ID = "nestedID";
+    string NESTED_ID = "nestedID";
     StructureConstPtr s = fieldCreate->createFieldBuilder()->
                             add("double", pvDouble)->
                             addNestedStructure("nested")->
@@ -172,7 +172,7 @@ void test_nestedStructureArray()
 
     FieldCreatePtr fieldCreate = getFieldCreate();
     
-    std::string NESTED_ID = "nestedID";
+    string NESTED_ID = "nestedID";
     StructureConstPtr s = fieldCreate->createFieldBuilder()->
                             add("double", pvDouble)->
                             addNestedStructureArray("nested")->

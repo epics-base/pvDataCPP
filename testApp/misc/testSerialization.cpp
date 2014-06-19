@@ -51,6 +51,7 @@
 #define DOUBLE_MIN_VALUE std::numeric_limits<double>::min()
 
 using namespace epics::pvData;
+using std::string;
 
 namespace {
 
@@ -135,12 +136,10 @@ void serializationTest(PVFieldPtr const & field) {
         testPass("Serialization round trip OK");
     else {
         testFail("Serialization round trip did not match!");
-        std::string buf;
-        field->toString(&buf);
-        testDiag("Expected: %s", buf.c_str());
-        buf.clear();
-        deserializedField->toString(&buf);
-        testDiag("Found: %s", buf.c_str());
+        std::ostringstream oss;
+        oss << "Expected: " << *field << std::endl;
+        oss << "Found   : " << *deserializedField << std::endl;
+        testDiag("Found: %s", oss.str().c_str());
     }
 }
 
@@ -300,7 +299,7 @@ void testScalar() {
     serializationTest(pvString);
 
     // huge string test
-    pvString->put(String(10000, 'a'));
+    pvString->put(string(10000, 'a'));
     serializationTest(pvString);
 }
 
@@ -347,7 +346,7 @@ static const float fdata[] = { (float)0.0, (float)1.1, (float)2.3, (float)-1.4,
                                FLOAT_MAX_VALUE, FLOAT_MAX_VALUE-(float)123456.789,
                                FLOAT_MIN_VALUE+(float)1.1, FLOAT_MIN_VALUE };
 
-static const String sdata[] = {
+static const string sdata[] = {
     "",
     "a",
     "a b",
@@ -355,7 +354,7 @@ static const String sdata[] = {
     "test",
     "smile",
     "this is a little longer string... maybe a little but longer... this makes test better",
-    String(10000, 'b')
+    string(10000, 'b')
 };
 
 void testArray() {
@@ -701,10 +700,10 @@ void testIntrospectionSerialization()
 }
 
 void testStringCopy() {
-    String s1 = "abc";
-    String s2 = s1;
+    string s1 = "abc";
+    string s2 = s1;
     if (s1.c_str() != s2.c_str())
-        testDiag("implementation of epics::pvData::String assignment operator does not share content");
+        testDiag("implementation of string assignment operator does not share content");
 }
 
 } // end namespace

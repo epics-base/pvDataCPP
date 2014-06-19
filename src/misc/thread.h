@@ -50,7 +50,7 @@ typedef epicsThreadRunable Runnable;
 class epicsShareClass Thread : public epicsThread, private NoDefaultMethods {
 public:
 
-    Thread(String name,
+    Thread(std::string name,
            ThreadPriority priority,
            Runnable *runnable,
            epicsThreadStackSizeClass stkcls=epicsThreadStackSmall)
@@ -63,7 +63,7 @@ public:
     }
 
     Thread(Runnable &runnable,
-           String name,
+           std::string name,
            unsigned int stksize,
            unsigned int priority=lowestPriority)
         :epicsThread(runnable,

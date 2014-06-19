@@ -45,12 +45,13 @@ private:
     double period;
     bool onList;
     friend class Timer;
+    friend std::ostream& operator<<(std::ostream& o, Timer& timer);
 };
 
 class epicsShareClass Timer : public Runnable {
 public:
     POINTER_DEFINITIONS(Timer);
-    Timer(String threadName, ThreadPriority priority);
+    Timer(std::string threadName, ThreadPriority priority);
     virtual ~Timer();
     virtual void run();
     void scheduleAfterDelay(
@@ -62,7 +63,9 @@ public:
         double period);
     void cancel(TimerCallbackPtr const &timerCallback);
     bool isScheduled(TimerCallbackPtr const &timerCallback);
-    void toString(StringBuilder builder);
+
+    friend std::ostream& operator<<(std::ostream& o, Timer& timer);
+
 private:
     void addElement(TimerCallbackPtr const &timerCallback);
     TimerCallbackPtr head;
@@ -72,6 +75,8 @@ private:
     bool alive;
     Thread thread;
 };
+
+epicsShareExtern std::ostream& operator<<(std::ostream& o, Timer& timer);
 
 }}
 #endif  /* TIMER_H */

@@ -22,23 +22,23 @@ namespace epics { namespace pvData {
 class epicsShareClass Display {
 public:
     Display()
-    : description(String("")),format(String("")),units(String("")),
+    : description(std::string("")),format(std::string("")),units(std::string("")),
         low(0.0),high(0.0) {}
     //default constructors and destructor are OK
     double getLow() const {return low;}
     double getHigh() const{ return high;}
     void setLow(double value){low = value;}
     void setHigh(double value){high = value;}
-    String getDescription() const {return description;}
-    void setDescription(String const & value) {description = value;}
-    String getFormat() const {return format;}
-    void setFormat(String const & value) {format = value;}
-    String getUnits() const {return units;}
-    void setUnits(String const & value) {units = value;}
+    std::string getDescription() const {return description;}
+    void setDescription(std::string const & value) {description = value;}
+    std::string getFormat() const {return format;}
+    void setFormat(std::string const & value) {format = value;}
+    std::string getUnits() const {return units;}
+    void setUnits(std::string const & value) {units = value;}
 private:
-    String description;
-    String format;
-    String units;
+    std::string description;
+    std::string format;
+    std::string units;
     double low;
     double high;
 };

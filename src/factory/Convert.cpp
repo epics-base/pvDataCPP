@@ -22,31 +22,32 @@
 
 using std::tr1::static_pointer_cast;
 using std::size_t;
+using std::string;
 
 namespace epics { namespace pvData { 
 
 
-static std::vector<String> split(String commaSeparatedList) {
-    String::size_type numValues = 1;
-    String::size_type index=0;
+static std::vector<string> split(string commaSeparatedList) {
+    string::size_type numValues = 1;
+    string::size_type index=0;
     while(true) {
-        String::size_type pos = commaSeparatedList.find(',',index);
-        if(pos==String::npos) break;
+        string::size_type pos = commaSeparatedList.find(',',index);
+        if(pos==string::npos) break;
         numValues++;
         index = pos +1;
     }
-    std::vector<String> valueList(numValues,"");
+    std::vector<string> valueList(numValues,"");
     index=0;
     for(size_t i=0; i<numValues; i++) {
         size_t pos = commaSeparatedList.find(',',index);
-        String value = commaSeparatedList.substr(index,pos);
+        string value = commaSeparatedList.substr(index,pos);
         valueList[i] = value;
         index = pos +1;
     }
     return valueList;
 }
 
-void Convert::getString(StringBuilder buf,PVField const *pvField,int /*indentLevel*/)
+void Convert::getString(string *buf,PVField const *pvField,int /*indentLevel*/)
 {
     // TODO indextLevel ignored
     std::ostringstream strm;
@@ -88,9 +89,9 @@ size_t Convert::fromString(PVStructurePtr const &pvStructure, StringArray const 
             }
             else {
                 // union, structureArray, unionArray not supported
-                String message("Convert::fromString unsupported fieldType ");
-                TypeFunc::toString(&message,type);
-                throw std::logic_error(message);
+                std::ostringstream oss;
+                oss << "Convert::fromString unsupported fieldType " << type;
+                throw std::logic_error(oss.str());
             }
         }
     }
@@ -98,13 +99,13 @@ size_t Convert::fromString(PVStructurePtr const &pvStructure, StringArray const 
     return processed;
 }
 
-size_t Convert::fromString(PVScalarArrayPtr const &pv, String from)
+size_t Convert::fromString(PVScalarArrayPtr const &pv, string from)
 {
    if(from[0]=='[' && from[from.length()]==']') {
         size_t offset = from.rfind(']');
         from = from.substr(1, offset);
     }
-    std::vector<String> valueList(split(from));
+    std::vector<string> valueList(split(from));
     size_t length = valueList.size();
     size_t num = fromStringArray(pv,0,length,valueList,0);
     if(num<length) length = num;
@@ -129,7 +130,7 @@ size_t Convert::fromStringArray(PVScalarArrayPtr const &pv,
                   data.begin());
 
         PVStringArray::const_svector temp(freeze(data));
-        pv->putFrom<String>(temp);
+        pv->putFrom<string>(temp);
         return length;
 
     } else {
@@ -143,7 +144,7 @@ size_t Convert::toStringArray(PVScalarArrayPtr const & pv,
                               StringArray  &to, size_t toOffset)
 {
     PVStringArray::const_svector data;
-    pv->getAs<String>(data);
+    pv->getAs<string>(data);
     data.slice(offset, length);
     if(toOffset+data.size() > to.size())
         to.resize(toOffset+data.size());
@@ -192,7 +193,7 @@ bool Convert::isCopyCompatible(FieldConstPtr const &from, FieldConstPtr const &t
              return isCopyUnionArrayCompatible(xxx,yyy);
         }
     }
-    String message("Convert::isCopyCompatible should never get here");
+    string message("Convert::isCopyCompatible should never get here");
     throw std::logic_error(message);
 }
 
@@ -259,7 +260,7 @@ void Convert::copyScalar(PVScalarPtr const & from, PVScalarPtr const & to)
 {
     if(to->isImmutable()) {
         if(from==to) return;
-        String message("Convert.copyScalar destination is immutable");
+        string message("Convert.copyScalar destination is immutable");
         throw std::invalid_argument(message);
     }
     to->assign(*from.get());
@@ -349,13 +350,13 @@ void Convert::copyStructure(PVStructurePtr const & from, PVStructurePtr const & 
     PVFieldPtrArray const & toDatas = to->getPVFields();
     if(from->getStructure()->getNumberFields() 
     != to->getStructure()->getNumberFields()) {
-        String message("Convert.copyStructure Illegal copyStructure");
+        string message("Convert.copyStructure Illegal copyStructure");
         throw std::invalid_argument(message);
     }
     size_t numberFields = from->getStructure()->getNumberFields();
     if(numberFields>=2) {
-        String name0 = fromDatas[0]->getFieldName();
-        String name1 = fromDatas[1]->getFieldName();
+        string name0 = fromDatas[0]->getFieldName();
+        string name1 = fromDatas[1]->getFieldName();
         // look for enumerated structure and copy choices first
         if(name0.compare("index")==0 && name1.compare("choices")==0) {
             FieldConstPtr fieldIndex = fromDatas[0]->getField();
@@ -383,7 +384,7 @@ void Convert::copyStructure(PVStructurePtr const & from, PVStructurePtr const & 
         Type fromType = fromData->getField()->getType();
         Type toType = toData->getField()->getType();
         if(fromType!=toType) {
-            String message("Convert.copyStructure Illegal copyStructure");
+            string message("Convert.copyStructure Illegal copyStructure");
             throw std::invalid_argument(message);
         }
         if(toData->isImmutable()) {
@@ -513,10 +514,10 @@ void Convert::copyUnionArray(
     to->replace(from->view());
 }
 
-void Convert::newLine(StringBuilder buffer, int indentLevel)
+void Convert::newLine(string *buffer, int indentLevel)
 {
     *buffer += "\n";
-    *buffer += String(indentLevel*4, ' ');
+    *buffer += string(indentLevel*4, ' ');
 }
 
 ConvertPtr Convert::getConvert()

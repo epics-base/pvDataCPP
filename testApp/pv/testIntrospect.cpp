@@ -11,6 +11,7 @@
 #include <cstddef>
 #include <string>
 #include <cstdio>
+#include <sstream>
 
 #include <epicsUnitTest.h>
 #include <testMain.h>
@@ -21,6 +22,7 @@
 #include <pv/standardField.h>
 
 using namespace epics::pvData;
+using std::string;
 
 static FieldCreatePtr fieldCreate;
 static PVDataCreatePtr pvDataCreate;
@@ -29,13 +31,14 @@ static StandardFieldPtr standardField;
 static void testScalarCommon(ScalarType stype,
     bool isInteger,bool isNumeric,bool isPrimitive)
 {
-    String builder;
     ScalarConstPtr pscalar = fieldCreate->createScalar(stype);
     Type type = pscalar->getType();
     testOk1(type==scalar);
-    builder.clear();
-    TypeFunc::toString(&builder,type);
-    testOk1(builder.compare("scalar")==0);
+    
+    std::ostringstream oss;
+    oss << type;
+    testOk1(oss.str().compare("scalar")==0);
+
     ScalarType scalarType = pscalar->getScalarType();
     testOk1(scalarType==stype);
     testOk1(ScalarTypeFunc::isInteger(scalarType)==isInteger);
@@ -58,13 +61,14 @@ static void testScalar() {
 static void testScalarArrayCommon(ScalarType stype,
     bool isInteger,bool isNumeric,bool isPrimitive)
 {
-    String builder;
     ScalarArrayConstPtr pscalar = fieldCreate->createScalarArray(stype);
     Type type = pscalar->getType();
     testOk1(type==scalarArray);
-    builder.clear();
-    TypeFunc::toString(&builder,type);
-    testOk1(builder.compare("scalarArray")==0);
+
+    std::ostringstream oss;
+    oss << type;
+    testOk1(oss.str().compare("scalarArray")==0);
+
     ScalarType scalarType = pscalar->getElementType();
     testOk1(scalarType==stype);
     testOk1(ScalarTypeFunc::isInteger(scalarType)==isInteger);
@@ -246,7 +250,7 @@ static void testMapping()
     OP(uint64, pvULong)
     OP(float, pvFloat)
     OP(double, pvDouble)
-    OP(String, pvString)
+    OP(string, pvString)
 #undef OP
 
     testOk1((ScalarType)ScalarTypeID<PVField>::value==(ScalarType)-1);

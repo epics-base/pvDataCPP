@@ -11,9 +11,9 @@
 #include "typeCast.h"
 
 using epics::pvData::castUnsafe;
-using epics::pvData::String;
 using epics::pvData::ScalarType;
 using epics::pvData::pvString;
+using std::string;
 
 namespace {
 
@@ -77,7 +77,7 @@ static convertfn converters[pvString+1][pvString+1] =
       &noconvert,
       &noconvert,
       &noconvert,
-      &castVTyped<epics::pvData::boolean, String>,
+      &castVTyped<epics::pvData::boolean, string>,
     },
     // to pvByte
     {&noconvert,
@@ -91,7 +91,7 @@ static convertfn converters[pvString+1][pvString+1] =
      &castVTyped<int8_t, uint64_t>,
      &castVTyped<int8_t, float>,
      &castVTyped<int8_t, double>,
-     &castVTyped<int8_t, String>,
+     &castVTyped<int8_t, string>,
     },
     // to pvShort
     {&noconvert,
@@ -105,7 +105,7 @@ static convertfn converters[pvString+1][pvString+1] =
      &castVTyped<int16_t, uint64_t>,
      &castVTyped<int16_t, float>,
      &castVTyped<int16_t, double>,
-     &castVTyped<int16_t, String>,
+     &castVTyped<int16_t, string>,
     },
     // to pvInt
     {&noconvert,
@@ -119,7 +119,7 @@ static convertfn converters[pvString+1][pvString+1] =
      &castVTyped<int32_t, uint64_t>,
      &castVTyped<int32_t, float>,
      &castVTyped<int32_t, double>,
-     &castVTyped<int32_t, String>,
+     &castVTyped<int32_t, string>,
     },
     // to pvLong
     {&noconvert,
@@ -133,7 +133,7 @@ static convertfn converters[pvString+1][pvString+1] =
      &castVTyped<int64_t, uint64_t>,
      &castVTyped<int64_t, float>,
      &castVTyped<int64_t, double>,
-     &castVTyped<int64_t, String>,
+     &castVTyped<int64_t, string>,
     },
     // to pvUByte
     {&noconvert,
@@ -147,7 +147,7 @@ static convertfn converters[pvString+1][pvString+1] =
      &castVTyped<uint8_t, uint64_t>,
      &castVTyped<uint8_t, float>,
      &castVTyped<uint8_t, double>,
-     &castVTyped<uint8_t, String>,
+     &castVTyped<uint8_t, string>,
     },
     // to pvUShort
     {&noconvert,
@@ -161,7 +161,7 @@ static convertfn converters[pvString+1][pvString+1] =
      &castVTyped<uint16_t, uint64_t>,
      &castVTyped<uint16_t, float>,
      &castVTyped<uint16_t, double>,
-     &castVTyped<uint16_t, String>,
+     &castVTyped<uint16_t, string>,
     },
     // to pvUInt
     {&noconvert,
@@ -175,7 +175,7 @@ static convertfn converters[pvString+1][pvString+1] =
      &castVTyped<uint32_t, uint64_t>,
      &castVTyped<uint32_t, float>,
      &castVTyped<uint32_t, double>,
-     &castVTyped<uint32_t, String>,
+     &castVTyped<uint32_t, string>,
     },
     // to pvULong
     {&noconvert,
@@ -189,7 +189,7 @@ static convertfn converters[pvString+1][pvString+1] =
      &copyV<uint64_t>,
      &castVTyped<uint64_t, float>,
      &castVTyped<uint64_t, double>,
-     &castVTyped<uint64_t, String>,
+     &castVTyped<uint64_t, string>,
     },
     // to pvFloat
     {&noconvert,
@@ -203,7 +203,7 @@ static convertfn converters[pvString+1][pvString+1] =
      &castVTyped<float, uint64_t>,
      &copyV<float>,
      &castVTyped<float, double>,
-     &castVTyped<float, String>,
+     &castVTyped<float, string>,
     },
     // to pvDouble
     {&noconvert,
@@ -217,21 +217,21 @@ static convertfn converters[pvString+1][pvString+1] =
      &castVTyped<double, uint64_t>,
      &castVTyped<double, float>,
      &copyV<double>,
-     &castVTyped<double, String>,
+     &castVTyped<double, string>,
     },
     // to pvString
-    {&castVTyped<String, epics::pvData::boolean>,
-     &castVTyped<String, int8_t>,
-     &castVTyped<String, int16_t>,
-     &castVTyped<String, int32_t>,
-     &castVTyped<String, uint64_t>,
-     &castVTyped<String, uint8_t>,
-     &castVTyped<String, uint16_t>,
-     &castVTyped<String, uint32_t>,
-     &castVTyped<String, uint64_t>,
-     &castVTyped<String, float>,
-     &castVTyped<String, double>,
-     &copyV<String>,
+    {&castVTyped<string, epics::pvData::boolean>,
+     &castVTyped<string, int8_t>,
+     &castVTyped<string, int16_t>,
+     &castVTyped<string, int32_t>,
+     &castVTyped<string, uint64_t>,
+     &castVTyped<string, uint8_t>,
+     &castVTyped<string, uint16_t>,
+     &castVTyped<string, uint32_t>,
+     &castVTyped<string, uint64_t>,
+     &castVTyped<string, float>,
+     &castVTyped<string, double>,
+     &copyV<string>,
     },
 };
 

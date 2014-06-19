@@ -38,15 +38,15 @@ class epicsShareClass CreateRequest {
     * If a NULL PVStructure is returned then getMessage will return
     * the reason.
     */
-    virtual PVStructure::shared_pointer createRequest(String const & request) = 0;
+    virtual PVStructure::shared_pointer createRequest(std::string const & request) = 0;
     /**
      * Get the error message of createRequest returns NULL
      * return the error message
      */
-    String getMessage() {return message;}
+    std::string getMessage() {return message;}
 protected:
     CreateRequest() {}
-    String message;
+    std::string message;
 };
 
 

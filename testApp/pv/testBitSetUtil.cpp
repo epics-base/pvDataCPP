@@ -11,6 +11,7 @@
 #include <cstddef>
 #include <string>
 #include <cstdio>
+#include <sstream>
 
 #include <epicsUnitTest.h>
 #include <testMain.h>
@@ -22,6 +23,7 @@
 #include <pv/standardPVField.h>
 
 using namespace epics::pvData;
+using std::string;
 using std::tr1::static_pointer_cast;
 
 static bool debug = false;
@@ -31,10 +33,11 @@ static PVDataCreatePtr pvDataCreate;
 static StandardFieldPtr standardField;
 static StandardPVFieldPtr standardPVField;
 static ConvertPtr convert;
-static String builder("");
 
 static void test()
 {
+    std::ostringstream oss;
+    
     if(debug) printf("\ntestBitSetUtil\n");
     StringArray fieldNames;
     PVFieldPtrArray pvFields;
@@ -60,19 +63,28 @@ static void test()
             standardField->scalar(pvDouble,"alarm")));
     PVStructurePtr pvs =  pvDataCreate->createPVStructure(
          fieldNames,pvFields);
-    builder.clear();
-    pvs->toString(&builder);
-    if(debug) printf("pvs\n%s\n",builder.c_str());
+    if(debug) {
+        oss.clear();
+        oss << "pvs" << std::endl;
+        oss << *pvs << std::endl;
+        std::cout << oss.str();
+    }     
     int32 nfields = (int32)pvs->getNumberFields();
     BitSetPtr bitSet = BitSet::create(nfields);
     for(int32 i=0; i<nfields; i++) bitSet->set(i);
-    builder.clear();
-    bitSet->toString(&builder);
-    if(debug) printf("bitSet\n%s\n",builder.c_str());
+    if(debug) {
+        oss.clear();
+        oss << "bitSet" << std::endl;
+        oss << *bitSet << std::endl;
+        std::cout << oss.str();
+    }     
     BitSetUtil::compress(bitSet,pvs);
-    builder.clear();
-    bitSet->toString(&builder);
-    if(debug) printf("bitSet\n%s\n",builder.c_str());
+    if(debug) {
+        oss.clear();
+        oss << "bitSet" << std::endl;
+        oss << *bitSet << std::endl;
+        std::cout << oss.str();
+    }     
     bitSet->clear();
     PVFieldPtr pvField = pvs->getSubField("timeStamp");
     int32 offsetTimeStamp = (int32)pvField->getFieldOffset();
@@ -87,15 +99,21 @@ static void test()
     testOk1(bitSet->get(offsetSeconds)==true);
     bitSet->set(offsetNano);
     bitSet->set(offsetUserTag);
-    builder.clear();
-    bitSet->toString(&builder);
-    if(debug) printf("bitSet\n%s\n",builder.c_str());
+    if(debug) {
+        oss.clear();
+        oss << "bitSet" << std::endl;
+        oss << *bitSet << std::endl;
+        std::cout << oss.str();
+    }     
     BitSetUtil::compress(bitSet,pvs);
     testOk1(bitSet->get(offsetSeconds)==false);
     testOk1(bitSet->get(offsetTimeStamp)==true);
-    builder.clear();
-    bitSet->toString(&builder);
-    if(debug) printf("bitSet\n%s\n",builder.c_str());
+    if(debug) {
+        oss.clear();
+        oss << "bitSet" << std::endl;
+        oss << *bitSet << std::endl;
+        std::cout << oss.str();
+    }     
     bitSet->clear();
 
     pvField = pvs->getSubField("current");
@@ -114,25 +132,37 @@ static void test()
     bitSet->set(offsetSeverity);
     bitSet->set(offsetStatus);
     bitSet->set(offsetMessage);
-    builder.clear();
-    bitSet->toString(&builder);
-    if(debug) printf("bitSet\n%s\n",builder.c_str());
+    if(debug) {
+        oss.clear();
+        oss << "bitSet" << std::endl;
+        oss << *bitSet << std::endl;
+        std::cout << oss.str();
+    }     
     BitSetUtil::compress(bitSet,pvs);
-    builder.clear();
-    bitSet->toString(&builder);
-    if(debug) printf("bitSet\n%s\n",builder.c_str());
+    if(debug) {
+        oss.clear();
+        oss << "bitSet" << std::endl;
+        oss << *bitSet << std::endl;
+        std::cout << oss.str();
+    }     
     testOk1(bitSet->get(offsetCurrent)==true);
     bitSet->clear();
     bitSet->set(offsetSeverity);
     bitSet->set(offsetStatus);
     bitSet->set(offsetMessage);
-    builder.clear();
-    bitSet->toString(&builder);
-    if(debug) printf("bitSet\n%s\n",builder.c_str());
+    if(debug) {
+        oss.clear();
+        oss << "bitSet" << std::endl;
+        oss << *bitSet << std::endl;
+        std::cout << oss.str();
+    }     
     BitSetUtil::compress(bitSet,pvs);
-    builder.clear();
-    bitSet->toString(&builder);
-    if(debug) printf("bitSet\n%s\n",builder.c_str());
+    if(debug) {
+        oss.clear();
+        oss << "bitSet" << std::endl;
+        oss << *bitSet << std::endl;
+        std::cout << oss.str();
+    }     
     testOk1(bitSet->get(offsetAlarm)==true);
     bitSet->clear();
     printf("testBitSetUtil PASSED\n");

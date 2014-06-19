@@ -63,12 +63,12 @@ static inline bool operator!=(const UnionArray& a, const UnionArray& b)
  * pvUByte, pvUShort, pvUInt, pvULong,
  * pvFloat, or pvDouble.</p>
  * 
- * <p>getString converts any supported type to a String.
+ * <p>getString converts any supported type to a std::string.
  * Code that implements a PVField interface should implement
  * method toString by calling this method.</p>
  *
- * <p>fromString converts a String to a scalar.
- * fromStringArray converts an array of Strings
+ * <p>fromString converts a std::string to a scalar.
+ * fromStringArray converts an array of std::strings
  * to a pvArray, which must have a scaler element type.
  * A scalar field is a numeric field or pvBoolean or pvString.</p>
  * <p>All from methods put data into a PVField, e.g. from means where the PVField gets it's data.</p>
@@ -85,7 +85,7 @@ public:
      * @param builder The builder that will have the result.
      * @param pvField The pvField.
      */
-    void getFullName(StringBuilder buf,PVFieldPtr const & pvField)
+    void getFullName(std::string *buf,PVFieldPtr const & pvField)
     {
         *buf = pvField->getFullName();
     }
@@ -121,7 +121,7 @@ public:
      * If a PVField is a structure or array be prepared for a very long string.
      * @param indentLevel indentation level
      */
-    inline void getString(StringBuilder buf,PVFieldPtr const & pvField,int indentLevel)
+    inline void getString(std::string *buf,PVFieldPtr const & pvField,int indentLevel)
     {getString(buf, pvField.get(), indentLevel);}
     /**
      * Convert a PVField to a string.
@@ -129,7 +129,7 @@ public:
      * @param pv The PVField to convert to a string.
      * If the PVField is a structure or array be prepared for a very long string.
      */
-    inline void getString(StringBuilder buf,PVFieldPtr const & pvField)
+    inline void getString(std::string * buf,PVFieldPtr const & pvField)
     {getString(buf, pvField.get(), 0);}
     /**
      * Convert a PVField to a string.
@@ -138,49 +138,49 @@ public:
      * If a PVField is a structure or array be prepared for a very long string.
      * @param indentLevel indentation level
      */
-    void getString(StringBuilder buf,PVField const * pvField,int indentLevel);
+    void getString(std::string * buf,PVField const * pvField,int indentLevel);
     /**
      * Convert a PVField to a string.
      * param buf buffer for the result
      * @param pv The PVField to convert to a string.
      * If the PVField is a structure or array be prepared for a very long string.
      */
-    inline void getString(StringBuilder buf,PVField const * pvField)
+    inline void getString(std::string * buf,PVField const * pvField)
     {getString(buf, pvField, 0);}
      /**
-      * Convert from an array of String to a PVScalar
+      * Convert from an array of std::string to a PVScalar
       * @param pv The PV.
-      * @param from The array of String value to convert and put into a PV.
+      * @param from The array of std::string value to convert and put into a PV.
       * @param fromStartIndex The first element if the array of strings.
-      * @throws std::logic_error if the array of String does not have a valid values.
+      * @throws std::logic_error if the array of std::string does not have a valid values.
       */
     std::size_t fromString(
         PVStructurePtr const &pv,
         StringArray const & from,
         std::size_t fromStartIndex = 0);
      /**
-     * Convert from a String to a PVScalar
+     * Convert from a std::string to a PVScalar
      * @param pv The PV.
-     * @param from The String value to convert and put into a PV.
-     * @throws std::logic_error if the String does not have a valid value.
+     * @param from The std::string value to convert and put into a PV.
+     * @throws std::logic_error if the std::string does not have a valid value.
      */
-    void fromString(PVScalarPtr const & pv, String const & from)
+    void fromString(PVScalarPtr const & pv, std::string const & from)
     {
-        pv->putFrom<String>(from);
+        pv->putFrom<std::string>(from);
     }
 
     /**
-     * Convert  from a String to a PVScalarArray.
-     * The String must be a comma separated set of values optionally enclosed in []
+     * Convert  from a std::string to a PVScalarArray.
+     * The std::string must be a comma separated set of values optionally enclosed in []
      * @param pv The PV.
-     * @param from The String value to convert and put into a PV.
+     * @param from The std::string value to convert and put into a PV.
      * @return The number of elements converted.
      * @throws std::invalid_argument if the element Type is not a scalar.
-     * @throws std::logic_error if the String does not have a valid array values.
+     * @throws std::logic_error if the std::string does not have a valid array values.
      */
-    std::size_t fromString(PVScalarArrayPtr const & pv, String from);
+    std::size_t fromString(PVScalarArrayPtr const & pv, std::string from);
     /**
-     * Convert a PVScalarArray from a String array.
+     * Convert a PVScalarArray from a std::string array.
      * The array element type must be a scalar.
      * @param pv The PV.
      * @param offset Starting element in a PV.
@@ -189,7 +189,7 @@ public:
      * @param fromOffset Starting element in the source array.
      * @return The number of elements converted.
      * @throws std::invalid_argument if the element Type is not a scalar.
-     * @throws std::logic_error if the String does not have a valid value.
+     * @throws std::logic_error if the std::string does not have a valid value.
      */
     std::size_t fromStringArray(
         PVScalarArrayPtr const & pv,
@@ -197,11 +197,11 @@ public:
         StringArray const & from,
         std::size_t fromOffset);
     /**
-     * Convert a PVScalarArray to a String array.
+     * Convert a PVScalarArray to a std::string array.
      * @param pv The PV.
      * @param offset Starting element in the PV array.
      * @param length Number of elements to convert to the string array.
-     * @param to String array to receive the converted PV data.
+     * @param to std::string array to receive the converted PV data.
      * @param toOffset Starting element in the string array.
      * @return Number of elements converted.
      */
@@ -401,11 +401,11 @@ public:
      */
     inline double toDouble(PVScalarPtr const & pv) { return pv->getAs<double>();}
     /**
-     * Convert a PV to a String
+     * Convert a PV to a std::string
      * @param pv a PV
      * @return converted value
      */
-    inline String toString(PVScalarPtr const & pv) { return pv->getAs<String>();}
+    inline std::string toString(PVScalarPtr const & pv) { return pv->getAs<std::string>();}
     /**
      * Convert a PV from a byte
      * @param pv a PV
@@ -480,10 +480,10 @@ public:
     /**
      * Convenience method for implementing toString.
      * It generates a newline and inserts blanks at the beginning of the newline.
-     * @param builder The StringBuilder being constructed.
+     * @param builder The std::string * being constructed.
      * @param indentLevel Indent level, Each level is four spaces.
      */
-    void newLine(StringBuilder buf, int indentLevel);
+    void newLine(std::string * buf, int indentLevel);
 };
 
 static inline ConvertPtr getConvert() { return Convert::getConvert(); }

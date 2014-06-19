@@ -14,9 +14,11 @@
 #define epicsExportSharedSymbols
 #include <pv/pvSubArrayCopy.h>
 
-namespace epics { namespace pvData { 
 using std::cout;
 using std::endl;
+using std::string;
+
+namespace epics { namespace pvData { 
 
 template<typename T>
 void copy(
@@ -141,8 +143,8 @@ void copy(
        break;
     case pvString:
        {
-           copy(dynamic_cast<PVValueArray<String> &>(from),fromOffset,fromStride,
-           dynamic_cast<PVValueArray<String>& >(to),
+           copy(dynamic_cast<PVValueArray<string> &>(from),fromOffset,fromStride,
+           dynamic_cast<PVValueArray<string>& >(to),
            toOffset,toStride,count);
        }
        break;
