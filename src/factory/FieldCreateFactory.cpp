@@ -552,7 +552,7 @@ size_t Union::getFieldIndex(string const &fieldName) const {
 
 std::ostream& Union::dump(std::ostream& o) const
 {
-    o << getID() << std::endl;
+    o << format::indent() << getID() << std::endl;
     {
         format::indent_scope s(o);
         dumpFields(o);
