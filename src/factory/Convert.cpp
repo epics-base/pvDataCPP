@@ -18,7 +18,6 @@
 #include <pv/pvIntrospect.h>
 #include <pv/pvData.h>
 #include <pv/convert.h>
-#include <pv/printer.h>
 
 using std::tr1::static_pointer_cast;
 using std::size_t;

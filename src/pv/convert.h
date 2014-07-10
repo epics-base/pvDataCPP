@@ -63,9 +63,7 @@ static inline bool operator!=(const UnionArray& a, const UnionArray& b)
  * pvUByte, pvUShort, pvUInt, pvULong,
  * pvFloat, or pvDouble.</p>
  * 
- * <p>getString converts any supported type to a std::string.
- * Code that implements a PVField interface should implement
- * method toString by calling this method.</p>
+ * <p>getString converts any supported type to a std::string.</p>
  *
  * <p>fromString converts a std::string to a scalar.
  * fromStringArray converts an array of std::strings
@@ -478,7 +476,7 @@ public:
     inline void fromDouble(PVScalarPtr const & pv, double from) { pv->putFrom<double>(from); }
 
     /**
-     * Convenience method for implementing toString.
+     * Convenience method for implementing dump.
      * It generates a newline and inserts blanks at the beginning of the newline.
      * @param builder The std::string * being constructed.
      * @param indentLevel Indent level, Each level is four spaces.
