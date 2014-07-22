@@ -1,0 +1,12 @@
+<h1>TODO</h1>
+<h2>printer</h2>
+<p>pv/printer.h is not used.</p>
+<h2>doxygen</h2>
+<p>There is a lot of public code that does not have doxygen tags.</p>
+<h2>postMonitor: PVUnion, PVUnionArray, and PVStructureArray</h2>
+<p>PVUnion, PVUnionArray, and PVStructureArray all have elements
+that are treated like a top level field.
+The implementation should be changed so that it implements PostHandler.
+Thus when an element is modified it will call postPut for itself.</p>
+<h2>monitorPlugin</h2>
+<p>A debate is on-going about what semantics should be.</p>

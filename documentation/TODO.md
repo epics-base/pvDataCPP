@@ -26,10 +26,3 @@ monitorPlugin
 
 A debate is on-going about what semantics should be.
 
-PVFieldConstPtr etc
--------------------
-
-In addition to PVFieldPtr should PVFieldConstPtr exist.
-But this means that all methods defined in pvDataCPP must be checked.
-This is a BIG job.
-
