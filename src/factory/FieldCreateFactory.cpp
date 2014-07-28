@@ -88,10 +88,10 @@ int8 Scalar::getTypeCodeLUT() const
         0x21, // pvShort
         0x22, // pvInt
         0x23, // pvLong
-        0x28, // pvUByte
-        0x29, // pvUShort
-        0x2A, // pvUInt
-        0x2B, // pvULong
+        0x24, // pvUByte
+        0x25, // pvUShort
+        0x26, // pvUInt
+        0x27, // pvULong
         0x42, // pvFloat
         0x43, // pvDouble
         0x60  // pvString
@@ -206,6 +206,7 @@ ScalarArray::ScalarArray(ScalarType elementType)
 
 ScalarArray::~ScalarArray() {}
 
+// TODO remove duplication, see Scalar::getTypeCodeLUT()
 int8 ScalarArray::getTypeCodeLUT() const
 {
     static const int8 typeCodeLUT[] = {
@@ -214,10 +215,10 @@ int8 ScalarArray::getTypeCodeLUT() const
         0x21, // pvShort
         0x22, // pvInt
         0x23, // pvLong
-        0x28, // pvUByte
-        0x29, // pvUShort
-        0x2A, // pvUInt
-        0x2B, // pvULong
+        0x24, // pvUByte
+        0x25, // pvUShort
+        0x26, // pvUInt
+        0x27, // pvULong
         0x42, // pvFloat
         0x43, // pvDouble
         0x60  // pvString
@@ -256,7 +257,7 @@ std::ostream& ScalarArray::dump(std::ostream& o) const
 
 void ScalarArray::serialize(ByteBuffer *buffer, SerializableControl *control) const {
     control->ensureBuffer(1);
-    buffer->putByte((int8)0x10 | getTypeCodeLUT());
+    buffer->putByte((int8)0x08 | getTypeCodeLUT());
 }
 
 void ScalarArray::deserialize(ByteBuffer* /*buffer*/, DeserializableControl* /*control*/) {
@@ -289,7 +290,7 @@ std::ostream& StructureArray::dump(std::ostream& o) const
 
 void StructureArray::serialize(ByteBuffer *buffer, SerializableControl *control) const {
     control->ensureBuffer(1);
-    buffer->putByte((int8)0x90);
+    buffer->putByte((int8)0x88);
     control->cachedSerialize(pstructure, buffer);
 }
 
@@ -326,11 +327,11 @@ void UnionArray::serialize(ByteBuffer *buffer, SerializableControl *control) con
     if (punion->isVariant())
     {
         // unrestricted/variant union
-        buffer->putByte((int8)0x92);
+        buffer->putByte((int8)0x8A);
     }
     else
     {
-        buffer->putByte((int8)0x91);
+        buffer->putByte((int8)0x89);
         control->cachedSerialize(punion, buffer);
     }
 }
@@ -904,22 +905,14 @@ static int decodeScalar(int8 code)
 {
     static const int integerLUT[] =
     {
-        pvByte,  // 8-bits
-        pvShort, // 16-bits
-        pvInt,   // 32-bits
-        pvLong,  // 64-bits
-        -1,
-        -1,
-        -1,
-        -1,
+        pvByte,   // 8-bits
+        pvShort,  // 16-bits
+        pvInt,    // 32-bits
+        pvLong,   // 64-bits
         pvUByte,  // unsigned 8-bits
         pvUShort, // unsigned 16-bits
         pvUInt,   // unsigned 32-bits
-        pvULong,  // unsigned 64-bits
-        -1,
-        -1,
-        -1,
-        -1
+        pvULong   // unsigned 64-bits
     };
     
     static const int floatLUT[] =
@@ -931,22 +924,14 @@ static int decodeScalar(int8 code)
         -1,
         -1,
         -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
         -1
     };
     // bits 7-5
     switch (code >> 5)
     {
     case 0: return pvBoolean;
-    case 1: return integerLUT[code & 0x0F];
-    case 2: return floatLUT[code & 0x0F];
+    case 1: return integerLUT[code & 0x07];
+    case 2: return floatLUT[code & 0x07];
     case 3: return pvString;
     default: return -1;
     }
@@ -959,8 +944,9 @@ FieldConstPtr FieldCreate::deserialize(ByteBuffer* buffer, DeserializableControl
     if (code == -1)
         return FieldConstPtr();
 
-    int typeCode = code & 0xEF;
-    bool notArray = ((code & 0x10) == 0);
+    int typeCode = code & 0xE7;
+    int scalarOrArray = code & 0x18;
+    bool notArray = (scalarOrArray == 0);
     if (notArray)
     {
         if (typeCode < 0x80)
@@ -991,28 +977,56 @@ FieldConstPtr FieldCreate::deserialize(ByteBuffer* buffer, DeserializableControl
     }
     else // array
     {
+        bool isVariable = (scalarOrArray == 0x08);
+        // bounded == 0x10;
+        bool isFixed = (scalarOrArray == 0x18);
+
+        size_t size = (isVariable ? 0 : SerializeHelper::readSize(buffer, control));
+
         if (typeCode < 0x80)
         {
             // Type type = Type.scalarArray;
             int scalarType = decodeScalar(code);
             if (scalarType == -1)
                 throw std::invalid_argument("invalid scalarArray type encoding");
-            return scalarArrays[scalarType];
+            if (isVariable)
+                return scalarArrays[scalarType];
+            /*
+            else if (isFixed)
+                return FieldConstPtr(new ScalarFixedArray(scalarType, size), Field::Deleter());
+            else
+                return FieldConstPtr(new ScalarBoundedArray(scalarType, size), Field::Deleter());
+            */
+            // TODO
+            else
+                throw std::invalid_argument("only variant array supported for now");
         }
         else if (typeCode == 0x80)
         {
+            // TODO fixed and bounded array support
+            if (!isVariable)
+                throw std::invalid_argument("fixed and bounded structure array not supported");
+
             // Type type = Type.structureArray;
             StructureConstPtr elementStructure = std::tr1::static_pointer_cast<const Structure>(control->cachedDeserialize(buffer));
             return FieldConstPtr(new StructureArray(elementStructure), Field::Deleter());
         }
         else if (typeCode == 0x81)
         {
+            // TODO fixed and bounded array support
+            if (!isVariable)
+                throw std::invalid_argument("fixed and bounded structure array not supported");
+
             // Type type = Type.unionArray;
             UnionConstPtr elementUnion = std::tr1::static_pointer_cast<const Union>(control->cachedDeserialize(buffer));
             return FieldConstPtr(new UnionArray(elementUnion), Field::Deleter());
         }
         else if (typeCode == 0x82)
         {
+            // TODO fixed and bounded array support
+            if (!isVariable)
+                throw std::invalid_argument("fixed and bounded structure array not supported");
+
             // Type type = Type.unionArray; variant union (aka any type)
             return variantUnionArray;
         }
