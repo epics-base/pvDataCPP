@@ -169,7 +169,9 @@ void PVUnion::deserialize(ByteBuffer *pbuffer, DeserializableControl *pcontrol)
         FieldConstPtr field = pcontrol->cachedDeserialize(pbuffer);
         if (field.get())
         {
-            value = getPVDataCreate()->createPVField(field);
+            // try to reuse existing field instance
+            if (!value.get() || *value->getField() != *field)
+                value = getPVDataCreate()->createPVField(field);
             value->deserialize(pbuffer, pcontrol);
         }
         else
@@ -177,11 +179,17 @@ void PVUnion::deserialize(ByteBuffer *pbuffer, DeserializableControl *pcontrol)
     }
     else
     {
+        int32 previousSelector = selector;
         selector = static_cast<int32>(SerializeHelper::readSize(pbuffer, pcontrol));
         if (selector != UNDEFINED_INDEX)
         {
-            FieldConstPtr field = unionPtr->getField(selector);
-            value = getPVDataCreate()->createPVField(field);
+            if (selector != previousSelector)
+            {
+                FieldConstPtr field = unionPtr->getField(selector);
+                // try to reuse existing field instance
+                if (!value.get() || *value->getField() != *field)
+                    value = getPVDataCreate()->createPVField(field);
+            }
             value->deserialize(pbuffer, pcontrol);
         }
         else
