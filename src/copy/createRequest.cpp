@@ -129,7 +129,11 @@ private:
             fieldNames[j] = item.substr(0,equals);
             fields[j] = fieldCreate->createScalar(pvString);
         }
-        return fieldCreate->createStructure(fieldNames,fields);
+        StringArray names(1);
+        FieldConstPtrArray field(1);
+        names[0] = "_options";
+        field[0] = fieldCreate->createStructure(fieldNames,fields);
+        return fieldCreate->createStructure(names,field);
     }
 
     void initRequestOptions(
@@ -142,7 +146,7 @@ private:
         for(size_t j=0; j<nitems; j++) {
             string item = items[j];
             size_t equals = item.find('=');
-            string name = item.substr(0,equals);
+            string name = "_options." + item.substr(0,equals);
             string value = item.substr(equals+1);
             PVStringPtr pvValue = pvParent->getSubField<PVString>(name);
             pvValue->put(value);

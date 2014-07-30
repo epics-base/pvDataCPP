@@ -37,7 +37,7 @@
 <h1>EPICS pvDataCPP</h1>
 <!-- Maturity: Working Draft or Request for Comments, or Recommendation, and date.  -->
 
-<h2 class="nocount">EPICS v4 Working Group, Working Draft, 08-July-2014</h2>
+<h2 class="nocount">EPICS v4 Working Group, Working Draft, 23-July-2014</h2>
 
   <dl>
     <dt>Latest version:</dt>
@@ -78,12 +78,15 @@ V4 control system programming environment:<br />
 
 <h2 class="nocount">Status of this Document</h2>
 
-<p>This is the 08-July-2014 version of the C++ implementation of pvData.
+<p>For now this is a working copy so it is not the same as "This version" shown above.</p>
+
+<p>This is the 23-July-2014 version of the C++ implementation of pvData.
 </p>
 
 <p>RELEASE_NOTES.md provides changes since the last release.
 TODO.md describes things to do before the next release.
 </p>
+
 
 
 <div id="toc">
@@ -1685,7 +1688,10 @@ class PVScalar;
 class PVScalarArray;
 class PVStructure;
 class PVStructureArray;
+class PVUnion;
+class PVUnionArray;
 
+typedef std::tr1::shared_ptr&lt;PostHandler&gt; PostHandlerPtr;
 
 typedef std::tr1::shared_ptr&lt;PVField&gt; PVFieldPtr;
 typedef std::vector&lt;PVFieldPtr&gt; PVFieldPtrArray;
@@ -1857,7 +1863,15 @@ std::ostream&amp; operator&lt;&lt;(std::ostream&amp; o, const PVField&amp; f);
       PVStructure.</dd>
   <dt>postPut</dt>
     <dd>If a postHandler is registered it is called otherwise no action is
-      taken.</dd>
+      taken.<br />
+     <b>NOTE: </b>The implementation  of the various data interfaces automatically
+      call postPut when a field is changed. However this is not true
+      for a subField of a PVUnion, PVUnionArray, or PVStructureArray.
+     If a subField of any of these is changed then the code that is making
+     the modification must call postPut for the PVUnion, PVUnionArray, or PVStructureArray
+     field. Note also that it is not a good idea to modify a subfield of a PVUnionArray
+     or a PVStructureArray since it violates the idea of Copy On Write for arrays.
+    </dd>
   <dt>setPostHandler</dt>
     <dd>Set the postHandler for the record. Only a single handler can be
       registered.

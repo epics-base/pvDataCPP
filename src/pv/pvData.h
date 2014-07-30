@@ -979,7 +979,6 @@ public:
 
 private:
     friend class PVDataCreate;
-    
     UnionConstPtr unionPtr;
 
 	int32 selector;

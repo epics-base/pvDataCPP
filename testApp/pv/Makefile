@@ -32,6 +32,11 @@ testPVData_SRCS += testPVData.cpp
 testPVData_LIBS += pvData Com
 TESTS += testPVData
 
+PROD_HOST += testPVUnion
+testPVUnion_SRCS += testPVUnion.cpp
+testPVUnion_LIBS += pvData Com
+TESTS += testPVUnion
+
 PROD_HOST += testConvert
 testConvert_SRCS += testConvert.cpp
 testConvert_LIBS += pvData Com
