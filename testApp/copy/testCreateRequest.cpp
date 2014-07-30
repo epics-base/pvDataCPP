@@ -30,7 +30,7 @@ void testCreateRequest() {
     PVStructurePtr pvRequest = createRequest->createRequest(request);
     if(debug) { cout<< createRequest->getMessage() << endl;}
     testOk1(pvRequest!=NULL);
-    if(debug) { cout << pvRequest->dumpValue(cout) << endl;}
+    if(debug) { cout << *pvRequest << endl;}
     testOk1(pvRequest->getStructure()->getNumberFields()==0);
     testPass("request %s",request.c_str());
 
@@ -42,11 +42,11 @@ void testCreateRequest() {
     }
     if(debug) { cout  << "request " << request <<endl;}
     testOk1(pvRequest!=NULL);
-    if(debug) { cout << pvRequest->dumpValue(cout) << endl;}
-    PVStringPtr pvString = pvRequest->getSubField<PVString>("record.a");
+    if(debug) { cout << *pvRequest << endl;}
+    PVStringPtr pvString = pvRequest->getSubField<PVString>("record._options.a");
     string sval = pvString->get();
     testOk(sval.compare("b")==0,"record.a = b");
-    pvString = pvRequest->getSubField<PVString>("record.x");
+    pvString = pvRequest->getSubField<PVString>("record._options.x");
     sval = pvString->get();
     testOk(sval.compare("y")==0,"record.x = y");
     testOk1(pvRequest->getSubField("field.a")!=NULL);
@@ -61,7 +61,7 @@ void testCreateRequest() {
     }
     if(debug) { cout  << "request " << request <<endl;}
     testOk1(pvRequest!=NULL);
-    if(debug) { cout << pvRequest->dumpValue(cout) << endl;}
+    if(debug) { cout << *pvRequest << endl;}
     pvString = pvRequest->getSubField<PVString>("field.a.b._options.x");
     sval = pvString->get();
     testOk(sval.compare("y")==0,"field.a.b._options.x = y");
@@ -75,7 +75,7 @@ void testCreateRequest() {
     }
     testOk1(pvRequest!=NULL);
     testOk1(pvRequest->getSubField("field.a.b.c.d")!=NULL);
-    if(debug) { cout << pvRequest->dumpValue(cout) << endl;}
+    if(debug) { cout << *pvRequest << endl;}
     testPass("request %s",request.c_str());
 
     request = "field(a.b[x=y]{c.d})";
@@ -89,7 +89,7 @@ void testCreateRequest() {
     sval = pvString->get();
     testOk(sval.compare("y")==0,"field.a.b._options.x = y");
     testOk1(pvRequest->getSubField("field.a.b.c.d")!=NULL);
-    if(debug) { cout << pvRequest->dumpValue(cout) << endl;}
+    if(debug) { cout << *pvRequest << endl;}
     testPass("request %s",request.c_str());
 
     request = "field(a.b[x=y]{c.d[x=y]})";
@@ -105,7 +105,7 @@ void testCreateRequest() {
     pvString = pvRequest->getSubField<PVString>("field.a.b.c.d._options.x");
     sval = pvString->get();
     testOk(sval.compare("y")==0,"field.a.b.c.d._options.x = y");
-    if(debug) { cout << pvRequest->dumpValue(cout) << endl;}
+    if(debug) { cout << *pvRequest << endl;}
     testPass("request %s",request.c_str());
 
     request = "record[a=b,c=d] field(a.a[a=b]{a.a[a=b]},b.a[a=b]{a,b})";
@@ -126,7 +126,7 @@ void testCreateRequest() {
     testOk(sval.compare("b")==0,"field.b.a._options.a = b");
     testOk1(pvRequest->getSubField("field.b.a.a")!=NULL);
     testOk1(pvRequest->getSubField("field.b.a.b")!=NULL);
-    if(debug) { cout << pvRequest->dumpValue(cout) << endl;}
+    if(debug) { cout << *pvRequest << endl;}
     testPass("request %s",request.c_str());
 
 
@@ -140,7 +140,7 @@ void testCreateRequest() {
     testOk1(pvRequest->getSubField("field.alarm")!=NULL);
     testOk1(pvRequest->getSubField("field.timeStamp")!=NULL);
     testOk1(pvRequest->getSubField("field.power.value")!=NULL);
-    if(debug) { cout << pvRequest->dumpValue(cout) << endl;}
+    if(debug) { cout << *pvRequest << endl;}
     testPass("request %s",request.c_str());
 
     request = "record[process=true]field(alarm,timeStamp,power.value)";
@@ -156,7 +156,7 @@ void testCreateRequest() {
     testOk1(pvRequest->getSubField("field.alarm")!=NULL);
     testOk1(pvRequest->getSubField("field.timeStamp")!=NULL);
     testOk1(pvRequest->getSubField("field.power.value")!=NULL);
-    if(debug) {cout << pvRequest->dumpValue(cout) << endl;}
+    if(debug) {cout << *pvRequest << endl;}
     testPass("request %s",request.c_str());
 
     request = "record[process=true]field(alarm,timeStamp[algorithm=onChange,causeMonitor=false],power{value,alarm})";
@@ -179,7 +179,7 @@ void testCreateRequest() {
     testOk(sval.compare("false")==0,"field.timeStamp._options.causeMonitor = false");
     testOk1(pvRequest->getSubField("field.power.value")!=NULL);
     testOk1(pvRequest->getSubField("field.power.alarm")!=NULL);
-    if(debug) {cout << pvRequest->dumpValue(cout) << endl;}
+    if(debug) {cout << *pvRequest << endl;}
     testPass("request %s",request.c_str());
 
     request = "record[int=2,float=3.14159]field(alarm,timeStamp[shareData=true],power.value)";
@@ -200,7 +200,7 @@ void testCreateRequest() {
     sval = pvString->get();
     testOk(sval.compare("true")==0,"field.timeStamp._options.shareData = true");
     testOk1(pvRequest->getSubField("field.power.value")!=NULL);
-    if(debug) {cout << pvRequest->dumpValue(cout) << endl;}
+    if(debug) {cout << *pvRequest << endl;}
     testPass("request %s",request.c_str());
 
     request = string("record[process=true,xxx=yyy]")
@@ -222,7 +222,7 @@ void testCreateRequest() {
     testOk1(pvRequest->getSubField("getField.current.alarm")!=NULL);
     testOk1(pvRequest->getSubField("getField.voltage.value")!=NULL);
     testOk1(pvRequest->getSubField("getField.voltage.alarm")!=NULL);
-    if(debug) {cout << pvRequest->dumpValue(cout) << endl;}
+    if(debug) {cout << *pvRequest << endl;}
     testPass("request %s",request.c_str());
 
     request = string("field(alarm,timeStamp,supply{")
@@ -243,7 +243,7 @@ void testCreateRequest() {
     testOk1(pvRequest->getSubField("field.supply.1.voltage.value")!=NULL);
     testOk1(pvRequest->getSubField("field.supply.1.current.value")!=NULL);
     testOk1(pvRequest->getSubField("field.supply.1.power.value")!=NULL);
-    if(debug) {cout << pvRequest->dumpValue(cout) << endl;}
+    if(debug) {cout << *pvRequest << endl;}
     testPass("request %s",request.c_str());
 
     request = string("record[process=true,xxx=yyy]")
@@ -284,7 +284,7 @@ void testCreateRequest() {
     testOk1(pvRequest->getSubField("getField.ps1.current.alarm")!=NULL);
     testOk1(pvRequest->getSubField("getField.ps1.voltage.value")!=NULL);
     testOk1(pvRequest->getSubField("getField.ps1.voltage.alarm")!=NULL);
-    if(debug) {cout << pvRequest->dumpValue(cout) << endl;}
+    if(debug) {cout << *pvRequest << endl;}
     testPass("request %s",request.c_str());
 
     request = "a{b{c{d}}}";
@@ -292,7 +292,7 @@ void testCreateRequest() {
     if(debug) { cout << string("request") <<endl << request <<endl;}
     testOk1(pvRequest!=NULL);
     testOk1(pvRequest->getSubField("field.a.b.c.d")!=NULL);
-    if(debug) {cout << pvRequest->dumpValue(cout) << endl;}
+    if(debug) {cout << *pvRequest << endl;}
     testPass("request %s",request.c_str());
 
     request = string("record[process=true,xxx=yyy]")
