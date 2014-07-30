@@ -360,9 +360,12 @@ public:
 protected:
     Scalar(ScalarType scalarType);
 private:
-    int8 getTypeCodeLUT() const;
+    static int8 getTypeCodeLUT(ScalarType scalarType);
     ScalarType scalarType;
     friend class FieldCreate;
+    friend class ScalarArray;
+    friend class BoundedScalarArray;
+    friend class FixedScalarArray;
 };
 
 /**
@@ -377,14 +380,21 @@ public:
     virtual ~Array();
     typedef Array& reference;
     typedef const Array& const_reference;
-    
-/*	fixed-size array support
-    // 0 not valid value, means undefined
+
+    enum ArraySizeType { variable, fixed, bounded };
+
+    /**
+     * Get array size type (i.e. variable/fixed/bounded size array).
+     * @return array size type enum.
+     */
+    ArraySizeType getArraySizeType() const;
+
+    /**
+     * Get maximum capacity of the array.
+     * @return maximum capacity of the array, 0 indicates variable size array.
+     */
     std::size_t getMaximumCapacity() const;
 
-    // 0 not valid value, means undefined
-    std::size_t getFixedLength() const;	
-*/
 protected:
     /**
      * Constructor
@@ -394,8 +404,14 @@ protected:
 
 };
 
+
+
+
+
+
+
 /**
- * This class implements introspection object for field.
+ * This class implements introspection object for scalar array.
  */
 class epicsShareClass ScalarArray : public Array{
 public:
@@ -414,6 +430,10 @@ public:
      */
     ScalarType getElementType() const {return elementType;}
     
+    virtual ArraySizeType getArraySizeType() const {return Array::variable;}
+
+    virtual std::size_t getMaximumCapacity() const {return 0;}
+
     virtual std::string getID() const;
 
     virtual std::ostream& dump(std::ostream& o) const;
@@ -427,11 +447,84 @@ protected:
      */
     virtual ~ScalarArray();
 private:
-    int8 getTypeCodeLUT() const;
     const std::string getIDScalarArrayLUT() const;
     ScalarType elementType;
     friend class FieldCreate;
 };
+
+
+
+/**
+ * This class implements introspection object for bounded scalar array.
+ */
+class epicsShareClass BoundedScalarArray : public ScalarArray{
+public:
+    POINTER_DEFINITIONS(BoundedScalarArray);
+    typedef BoundedScalarArray& reference;
+    typedef const BoundedScalarArray& const_reference;
+
+    /**
+     * Constructor
+     * @param scalarType The scalarType for the field.
+     * @param size maximum (bound) capacity.
+     */
+    BoundedScalarArray(ScalarType scalarType, std::size_t size);
+
+    virtual ArraySizeType getArraySizeType() const {return Array::bounded;}
+
+    virtual std::size_t getMaximumCapacity() const {return size;}
+
+    virtual std::string getID() const;
+
+    virtual void serialize(ByteBuffer *buffer, SerializableControl *control) const;
+
+protected:
+    /**
+     * Destructor.
+     */
+    virtual ~BoundedScalarArray();
+private:
+    std::size_t size;
+    friend class FieldCreate;
+};
+
+/**
+ * This class implements introspection object for bounded scalar array.
+ */
+class epicsShareClass FixedScalarArray : public ScalarArray{
+public:
+    POINTER_DEFINITIONS(FixedScalarArray);
+    typedef FixedScalarArray& reference;
+    typedef const FixedScalarArray& const_reference;
+
+    /**
+     * Constructor
+     * @param scalarType The scalarType for the field.
+     * @param size maximum (bound) capacity.
+     */
+    FixedScalarArray(ScalarType scalarType, std::size_t size);
+
+    virtual ArraySizeType getArraySizeType() const {return Array::fixed;}
+
+    virtual std::size_t getMaximumCapacity() const {return size;}
+
+    virtual std::string getID() const;
+
+    virtual void serialize(ByteBuffer *buffer, SerializableControl *control) const;
+
+protected:
+    /**
+     * Destructor.
+     */
+    virtual ~FixedScalarArray();
+private:
+    std::size_t size;
+    friend class FieldCreate;
+};
+
+
+
+
 
 /**
  * This class implements introspection object for a structureArray
@@ -720,13 +813,31 @@ public:
     FieldBuilderPtr add(std::string const & name, FieldConstPtr const & field);
 
     /**
-     * Add array of {@code Scalar} elements.
+     * Add variable size array of {@code Scalar} elements.
      * @param name name of the array.
      * @param scalarType type of a scalar element.
      * @return this instance of a {@code FieldBuilder}.
      */
     FieldBuilderPtr addArray(std::string const & name, ScalarType scalarType);
     
+    /**
+     * Add fixed-size array of {@code Scalar} elements.
+     * @param name name of the array.
+     * @param scalarType type of a scalar element.
+     * @param size Array fixed size.
+     * @return this instance of a {@code FieldBuilder}.
+     */
+    FieldBuilderPtr addFixedArray(std::string const & name, ScalarType scalarType, std::size_t size);
+
+    /**
+     * Add bounded-size array of {@code Scalar} elements.
+     * @param name name of the array.
+     * @param scalarType type of a scalar element.
+     * @param bound Array maximum capacity (size).
+     * @return this instance of a {@code FieldBuilder}.
+     */
+    FieldBuilderPtr addBoundedArray(std::string const & name, ScalarType scalarType, std::size_t bound);
+
     /**
      * Add array of {@code Field} elements.
      * @param name name of the array.
@@ -843,11 +954,25 @@ public:
      */
     ScalarConstPtr createScalar(ScalarType scalarType) const;
     /**
-     * Create an {@code Array} field.
+     * Create an {@code Array} field, variable size array.
      * @param elementType The {@code scalarType} for array elements
      * @return An {@code Array} Interface for the newly created object.
      */
     ScalarArrayConstPtr createScalarArray(ScalarType elementType) const;
+    /*
+     * Create an {@code Array} field, fixed size array.
+     * @param elementType The {@code scalarType} for array elements
+     * @param size Fixed array size.
+     * @return An {@code Array} Interface for the newly created object.
+     */
+    ScalarArrayConstPtr createFixedScalarArray(ScalarType elementType, std::size_t size) const;
+    /**
+     * Create an {@code Array} field, bounded size array.
+     * @param elementType The {@code scalarType} for array elements
+     * @param size Array maximum capacity (bound).
+     * @return An {@code Array} Interface for the newly created object.
+     */
+     ScalarArrayConstPtr createBoundedScalarArray(ScalarType elementType, std::size_t bound) const;
      /**
       * Create an {@code Array} field that is has element type <i>Structure</i>
       * @param fieldName The field name

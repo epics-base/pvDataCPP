@@ -110,6 +110,23 @@ void test_invalid()
 }
 
 
+void test_arraySizeTypes()
+{
+    testDiag("Test test_arraySizeTypes()");
+
+    FieldCreatePtr fieldCreate = getFieldCreate();
+
+    StructureConstPtr s = fieldCreate->createFieldBuilder()->
+                            addArray("variableArray", pvDouble)->
+                            addFixedArray("fixedArray", pvDouble, 10)->
+                            addBoundedArray("boundedArray", pvDouble, 1024)->
+                            createStructure();
+    testOk1(s.get() != 0);
+    testOk1(Structure::DEFAULT_ID == s->getID());
+    testOk1(3 == s->getFields().size());
+}
+
+
 void test_nestedStructure()
 {
     testDiag("Test test_nestedStructure()");
@@ -224,11 +241,12 @@ void test_nestedStructureArray()
 
 MAIN(testFieldBuilder)
 {
-    testPlan(65);
+    testPlan(68);
     testDiag("Tests for FieldBuilder");
 
     test_factory();
     test_structure();
+    test_arraySizeTypes();
     test_nestedStructure();
     test_nestedStructureArray();
     

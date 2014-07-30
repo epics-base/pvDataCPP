@@ -80,7 +80,7 @@ string Scalar::getID() const
     return idScalarLUT[scalarType];
 }
 
-int8 Scalar::getTypeCodeLUT() const
+int8 Scalar::getTypeCodeLUT(ScalarType scalarType)
 {
     static const int8 typeCodeLUT[] = {
         0x00, // pvBoolean
@@ -102,7 +102,7 @@ int8 Scalar::getTypeCodeLUT() const
 
 void Scalar::serialize(ByteBuffer *buffer, SerializableControl *control) const {
     control->ensureBuffer(1);
-    buffer->putByte(getTypeCodeLUT());
+    buffer->putByte(getTypeCodeLUT(scalarType));
 }
 
 void Scalar::deserialize(ByteBuffer* /*buffer*/, DeserializableControl* /*control*/) {
@@ -198,7 +198,8 @@ Array::Array(Type type)
 Array::~Array() {}
 
 ScalarArray::ScalarArray(ScalarType elementType)
-: Array(scalarArray),elementType(elementType)
+    : Array(scalarArray),
+      elementType(elementType)
 {
     if(elementType<0 || elementType>MAX_SCALAR_TYPE)
         throw std::invalid_argument("Can't construct ScalarArray from invalid ScalarType");
@@ -206,32 +207,12 @@ ScalarArray::ScalarArray(ScalarType elementType)
 
 ScalarArray::~ScalarArray() {}
 
-// TODO remove duplication, see Scalar::getTypeCodeLUT()
-int8 ScalarArray::getTypeCodeLUT() const
-{
-    static const int8 typeCodeLUT[] = {
-        0x00, // pvBoolean
-        0x20, // pvByte
-        0x21, // pvShort
-        0x22, // pvInt
-        0x23, // pvLong
-        0x24, // pvUByte
-        0x25, // pvUShort
-        0x26, // pvUInt
-        0x27, // pvULong
-        0x42, // pvFloat
-        0x43, // pvDouble
-        0x60  // pvString
-    };
-   return typeCodeLUT[elementType];
-}
-
 const string ScalarArray::getIDScalarArrayLUT() const
 {
     static const string idScalarArrayLUT[] = {
-	"boolean[]", // pvBoolean
-	"byte[]",    // pvByte
-	"short[]",   // pvShort
+    "boolean[]", // pvBoolean
+    "byte[]",    // pvByte
+    "short[]",   // pvShort
 	"int[]",     // pvInt
 	"long[]",    // pvLong
 	"ubyte[]",   // pvUByte
@@ -257,12 +238,58 @@ std::ostream& ScalarArray::dump(std::ostream& o) const
 
 void ScalarArray::serialize(ByteBuffer *buffer, SerializableControl *control) const {
     control->ensureBuffer(1);
-    buffer->putByte((int8)0x08 | getTypeCodeLUT());
+    buffer->putByte((int8)0x08 | Scalar::getTypeCodeLUT(elementType));
 }
 
 void ScalarArray::deserialize(ByteBuffer* /*buffer*/, DeserializableControl* /*control*/) {
     throw std::runtime_error("not valid operation, use FieldCreate::deserialize instead");
 }
+
+
+BoundedScalarArray::~BoundedScalarArray() {}
+
+BoundedScalarArray::BoundedScalarArray(ScalarType elementType, size_t size)
+    : ScalarArray(elementType),
+      size(size)
+{
+}
+
+string BoundedScalarArray::getID() const
+{
+    char buffer[32];
+    sprintf(buffer, "%s<%zu>", ScalarTypeFunc::name(getElementType()), size);
+    return string(buffer);
+}
+
+void BoundedScalarArray::serialize(ByteBuffer *buffer, SerializableControl *control) const {
+    control->ensureBuffer(1);
+    buffer->putByte((int8)0x10 | Scalar::getTypeCodeLUT(getElementType()));
+    SerializeHelper::writeSize(size, buffer, control);
+}
+
+
+FixedScalarArray::~FixedScalarArray() {}
+
+FixedScalarArray::FixedScalarArray(ScalarType elementType, size_t size)
+    : ScalarArray(elementType),
+      size(size)
+{
+}
+
+string FixedScalarArray::getID() const
+{
+    char buffer[32];
+    sprintf(buffer, "%s[%zu]", ScalarTypeFunc::name(getElementType()), size);
+    return string(buffer);
+}
+
+void FixedScalarArray::serialize(ByteBuffer *buffer, SerializableControl *control) const {
+    control->ensureBuffer(1);
+    buffer->putByte((int8)0x18 | Scalar::getTypeCodeLUT(getElementType()));
+    SerializeHelper::writeSize(size, buffer, control);
+}
+
+
 
 StructureArray::StructureArray(StructureConstPtr const & structure)
 : Array(structureArray),pstructure(structure)
@@ -668,6 +695,18 @@ FieldBuilderPtr FieldBuilder::addArray(string const & name, ScalarType scalarTyp
 	return shared_from_this();
 }
 
+FieldBuilderPtr FieldBuilder::addFixedArray(string const & name, ScalarType scalarType, size_t size)
+{
+    fields.push_back(fieldCreate->createFixedScalarArray(scalarType, size)); fieldNames.push_back(name);
+    return shared_from_this();
+}
+
+FieldBuilderPtr FieldBuilder::addBoundedArray(string const & name, ScalarType scalarType, size_t size)
+{
+    fields.push_back(fieldCreate->createBoundedScalarArray(scalarType, size)); fieldNames.push_back(name);
+    return shared_from_this();
+}
+
 FieldBuilderPtr FieldBuilder::addArray(string const & name, FieldConstPtr const & element)
 {
     switch (element->getType())
@@ -788,6 +827,22 @@ ScalarArrayConstPtr FieldCreate::createScalarArray(ScalarType elementType) const
         throw std::invalid_argument("Can't construct ScalarArray from invalid ScalarType");
         
     return scalarArrays[elementType];
+}
+
+ScalarArrayConstPtr FieldCreate::createFixedScalarArray(ScalarType elementType, size_t size) const
+{
+    if(elementType<0 || elementType>MAX_SCALAR_TYPE)
+        throw std::invalid_argument("Can't construct ScalarArray from invalid ScalarType");
+
+    return ScalarArrayConstPtr(new FixedScalarArray(elementType, size), Field::Deleter());
+}
+
+ScalarArrayConstPtr FieldCreate::createBoundedScalarArray(ScalarType elementType, size_t size) const
+{
+    if(elementType<0 || elementType>MAX_SCALAR_TYPE)
+        throw std::invalid_argument("Can't construct ScalarArray from invalid ScalarType");
+
+    return ScalarArrayConstPtr(new BoundedScalarArray(elementType, size), Field::Deleter());
 }
 
 StructureConstPtr FieldCreate::createStructure () const
@@ -991,15 +1046,14 @@ FieldConstPtr FieldCreate::deserialize(ByteBuffer* buffer, DeserializableControl
                 throw std::invalid_argument("invalid scalarArray type encoding");
             if (isVariable)
                 return scalarArrays[scalarType];
-            /*
             else if (isFixed)
-                return FieldConstPtr(new ScalarFixedArray(scalarType, size), Field::Deleter());
+                return FieldConstPtr(
+                            new FixedScalarArray(static_cast<epics::pvData::ScalarType>(scalarType), size),
+                            Field::Deleter());
             else
-                return FieldConstPtr(new ScalarBoundedArray(scalarType, size), Field::Deleter());
-            */
-            // TODO
-            else
-                throw std::invalid_argument("only variant array supported for now");
+                return FieldConstPtr(
+                            new BoundedScalarArray(static_cast<epics::pvData::ScalarType>(scalarType), size),
+                            Field::Deleter());
         }
         else if (typeCode == 0x80)
         {

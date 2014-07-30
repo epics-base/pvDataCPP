@@ -625,13 +625,13 @@ void testStructureId() {
     testOk1(structureWithNoId!=structure1);
     testOk1(structure1!=structure2);
 
-    //serializationTest(structure1);
+    //serializationFieldTest(structure1);
 
     PVStructurePtr pvStructure = getPVDataCreate()->createPVStructure(structure1);
     serializationTest(pvStructure);
 }
 
-void serializatioTest(FieldConstPtr const & field)
+void serializationFieldTest(FieldConstPtr const & field)
 {
 	buffer->clear();
 
@@ -660,27 +660,27 @@ void testIntrospectionSerialization()
 		 ScalarType scalarType = static_cast<ScalarType>(i);
 
 		 ScalarConstPtr scalar = factory->createScalar(scalarType);
-		 serializatioTest(scalar);
+         serializationFieldTest(scalar);
 
 		 ScalarArrayConstPtr array = factory->createScalarArray(scalarType);
-		 serializatioTest(array);
+         serializationFieldTest(array);
 	 }
 
      // and a structure
      StructureConstPtr structure = getStandardField()->timeStamp();
-     serializatioTest(structure);
+     serializationFieldTest(structure);
 
      // and a structure array
      StructureArrayConstPtr structureArray = factory->createStructureArray(structure);
-     serializatioTest(structureArray);
+     serializationFieldTest(structureArray);
 
      // variant union
      UnionConstPtr variant = factory->createVariantUnion();
-     serializatioTest(variant);
+     serializationFieldTest(variant);
      
      // variant array union
      UnionArrayConstPtr variantArray = factory->createVariantUnionArray();
-     serializatioTest(variantArray);
+     serializationFieldTest(variantArray);
      
      // union
      UnionConstPtr punion = factory->createFieldBuilder()->
@@ -692,11 +692,29 @@ void testIntrospectionSerialization()
                                 endNested()->
                             addArray("intArray", pvInt)->
                             createUnion();
-     serializatioTest(punion);
+     serializationFieldTest(punion);
      
      // union array
      UnionArrayConstPtr punionArray = factory->createUnionArray(punion);
-     serializatioTest(punionArray);
+     serializationFieldTest(punionArray);
+}
+
+void testArraySizeType() {
+    testDiag("Testing array size types...");
+
+    FieldCreatePtr fieldCreate = getFieldCreate();
+
+    StructureConstPtr s = fieldCreate->createFieldBuilder()->
+                            addArray("variableArray", pvDouble)->
+                            addFixedArray("fixedArray", pvDouble, 10)->
+                            addBoundedArray("boundedArray", pvDouble, 1024)->
+                            createStructure();
+    testOk1(s.get() != 0);
+    testOk1(Structure::DEFAULT_ID == s->getID());
+    testOk1(3 == s->getFields().size());
+
+    serializationFieldTest(s);
+    serializationTest(getPVDataCreate()->createPVStructure(s));
 }
 
 void testStringCopy() {
@@ -710,7 +728,7 @@ void testStringCopy() {
 
 MAIN(testSerialization) {
 
-    testPlan(213);
+    testPlan(216);
 
     flusher = new SerializableControlImpl();
     control = new DeserializableControlImpl();
@@ -724,9 +742,12 @@ MAIN(testSerialization) {
     testScalar();
     testArray();
     testStructure();
+    testStructureId();
     testStructureArray();
     
     testUnion();
+
+    testArraySizeType();
 
 
     delete buffer;

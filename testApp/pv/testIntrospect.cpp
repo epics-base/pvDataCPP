@@ -59,15 +59,35 @@ static void testScalar() {
 }
 
 static void testScalarArrayCommon(ScalarType stype,
-    bool isInteger,bool isNumeric,bool isPrimitive)
+    bool isInteger,bool isNumeric,bool isPrimitive,
+    Array::ArraySizeType sizeType = Array::variable, size_t size = 0)
 {
-    ScalarArrayConstPtr pscalar = fieldCreate->createScalarArray(stype);
+    ScalarArrayConstPtr pscalar;
+    switch (sizeType)
+    {
+        case Array::variable:
+            pscalar = fieldCreate->createScalarArray(stype);
+            size = 0;
+            break;
+        case Array::bounded:
+            pscalar = fieldCreate->createBoundedScalarArray(stype, size);
+            break;
+        case Array::fixed:
+            pscalar = fieldCreate->createFixedScalarArray(stype, size);
+            break;
+        default:
+            throw std::invalid_argument("unsupported array size type");
+    }
+
     Type type = pscalar->getType();
     testOk1(type==scalarArray);
 
     std::ostringstream oss;
     oss << type;
     testOk1(oss.str().compare("scalarArray")==0);
+
+    testOk1(pscalar->getArraySizeType()==sizeType);
+    testOk1(pscalar->getMaximumCapacity()==size);
 
     ScalarType scalarType = pscalar->getElementType();
     testOk1(scalarType==stype);
@@ -86,6 +106,24 @@ static void testScalarArray() {
     testScalarArrayCommon(pvFloat,false,true,true);
     testScalarArrayCommon(pvDouble,false,true,true);
     testScalarArrayCommon(pvString,false,false,false);
+
+    testScalarArrayCommon(pvBoolean,false,false,true,Array::bounded,10);
+    testScalarArrayCommon(pvByte,true,true,true,Array::bounded,10);
+    testScalarArrayCommon(pvShort,true,true,true,Array::bounded,10);
+    testScalarArrayCommon(pvInt,true,true,true,Array::bounded,10);
+    testScalarArrayCommon(pvLong,true,true,true,Array::bounded,10);
+    testScalarArrayCommon(pvFloat,false,true,true,Array::bounded,10);
+    testScalarArrayCommon(pvDouble,false,true,true,Array::bounded,10);
+    testScalarArrayCommon(pvString,false,false,false,Array::bounded,10);
+
+    testScalarArrayCommon(pvBoolean,false,false,true,Array::fixed,16);
+    testScalarArrayCommon(pvByte,true,true,true,Array::fixed,16);
+    testScalarArrayCommon(pvShort,true,true,true,Array::fixed,16);
+    testScalarArrayCommon(pvInt,true,true,true,Array::fixed,16);
+    testScalarArrayCommon(pvLong,true,true,true,Array::fixed,16);
+    testScalarArrayCommon(pvFloat,false,true,true,Array::fixed,16);
+    testScalarArrayCommon(pvDouble,false,true,true,Array::fixed,16);
+    testScalarArrayCommon(pvString,false,false,false,Array::fixed,16);
 }
 
 static void testStructure()
@@ -258,7 +296,7 @@ static void testMapping()
 
 MAIN(testIntrospect)
 {
-    testPlan(180);
+    testPlan(324);
     fieldCreate = getFieldCreate();
     pvDataCreate = getPVDataCreate();
     standardField = getStandardField();
