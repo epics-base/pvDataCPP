@@ -33,12 +33,18 @@ namespace epics { namespace pvData {
     template<>
     std::ostream& PVScalarValue<int8>::dumpValue(std::ostream& o) const
     {
-    	return o << static_cast<int>(get());
+        return o << static_cast<int>(get());
     }
 
     template<>
     std::ostream& PVScalarValue<uint8>::dumpValue(std::ostream& o) const
     {
     	return o << static_cast<unsigned int>(get());
+    }
+
+    template<>
+    std::ostream& PVScalarValue<boolean>::dumpValue(std::ostream& o) const
+    {
+        return o << std::boolalpha << static_cast<bool>(get());
     }
 }}
