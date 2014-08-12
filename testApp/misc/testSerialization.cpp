@@ -715,9 +715,9 @@ void testArraySizeType() {
 
     serializationFieldTest(s);
 
-//    PVStructurePtr pvs = getPVDataCreate()->createPVStructure(s);
-//    pvs->
-//    serializationTest(pvs);
+    PVStructurePtr pvs = getPVDataCreate()->createPVStructure(s);
+    pvs->getSubField<PVArray>("fixedArray")->setLength(10);
+    serializationTest(pvs);
 }
 
 void testStringCopy() {
@@ -731,7 +731,7 @@ void testStringCopy() {
 
 MAIN(testSerialization) {
 
-    testPlan(216);
+    testPlan(221);
 
     flusher = new SerializableControlImpl();
     control = new DeserializableControlImpl();
