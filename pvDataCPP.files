@@ -233,3 +233,4 @@ testApp/pv/testPVStructureArray.cpp
 testApp/pv/testPVType.cpp
 testApp/pv/testStandardField.cpp
 testApp/pv/testStandardPVField.cpp
+src/factory/printer.cpp

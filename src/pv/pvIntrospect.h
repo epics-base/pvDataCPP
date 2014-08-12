@@ -387,13 +387,13 @@ public:
      * Get array size type (i.e. variable/fixed/bounded size array).
      * @return array size type enum.
      */
-    ArraySizeType getArraySizeType() const;
+    virtual ArraySizeType getArraySizeType() const = 0;
 
     /**
      * Get maximum capacity of the array.
      * @return maximum capacity of the array, 0 indicates variable size array.
      */
-    std::size_t getMaximumCapacity() const;
+    virtual std::size_t getMaximumCapacity() const = 0;
 
 protected:
     /**
@@ -541,6 +541,10 @@ public:
      */
     StructureConstPtr getStructure() const {return pstructure;}
 
+    virtual ArraySizeType getArraySizeType() const {return Array::variable;}
+
+    virtual std::size_t getMaximumCapacity() const {return 0;}
+
     virtual std::string getID() const;
 
     virtual std::ostream& dump(std::ostream& o) const;
@@ -577,6 +581,10 @@ public:
      * @return The introspection interface.
      */
     UnionConstPtr getUnion() const {return punion;}
+
+    virtual ArraySizeType getArraySizeType() const {return Array::variable;}
+
+    virtual std::size_t getMaximumCapacity() const {return 0;}
 
     virtual std::string getID() const;
 

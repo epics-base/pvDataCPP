@@ -190,6 +190,19 @@ void BasePVString::serialize(ByteBuffer *pbuffer,
 	SerializeHelper::serializeSubstring(value, offset, count, pbuffer, pflusher);
 }
 
+void PVArray::checkLength(size_t len)
+{
+    Array::ArraySizeType type = getArray()->getArraySizeType();
+    if (type != Array::variable)
+    {
+        size_t size = getArray()->getMaximumCapacity();
+        if (type == Array::fixed && len != size)
+            throw std::invalid_argument("invalid length for a fixed size array");
+        else if (type == Array::bounded && len > size)
+            throw std::invalid_argument("new array capacity too large for a bounded size array");
+    }
+}
+
 /** Default storage for arrays
  */
 template<typename T>
@@ -231,7 +244,14 @@ DefaultPVArray<T>::DefaultPVArray(ScalarArrayConstPtr const & scalarArray)
 : PVValueArray<T>(scalarArray),
     value()
   
-{ }
+{
+    ArrayConstPtr array = this->getArray();
+    if (array->getArraySizeType() == Array::fixed)
+    {
+        // this->setLength(array->getMaximumCapacity());
+        this->setCapacityMutable(false);
+    }
+}
 
 template<typename T>
 DefaultPVArray<T>::~DefaultPVArray()
@@ -240,18 +260,25 @@ template<typename T>
 void DefaultPVArray<T>::setCapacity(size_t capacity)
 {
     if(this->isCapacityMutable()) {
+        this->checkLength(capacity);
         value.reserve(capacity);
     }
+    else
+        THROW_EXCEPTION2(std::logic_error, "capacity immutable");
 }
 
 template<typename T>
 void DefaultPVArray<T>::setLength(size_t length)
 {
     if(this->isImmutable())
-        THROW_EXCEPTION2(std::logic_error,"Immutable");
-    if(length == value.size())
+        THROW_EXCEPTION2(std::logic_error, "immutable");
+
+    if (length == value.size())
         return;
-    else if(length < value.size())
+
+    this->checkLength(length);
+
+    if (length < value.size())
         value.slice(0, length);
     else
         value.resize(length);
@@ -260,6 +287,8 @@ void DefaultPVArray<T>::setLength(size_t length)
 template<typename T>
 void DefaultPVArray<T>::replace(const const_svector& next)
 {
+    this->checkLength(next.size());
+
     value = next;
     this->postPut();
 }
@@ -267,8 +296,10 @@ void DefaultPVArray<T>::replace(const const_svector& next)
 template<typename T>
 void DefaultPVArray<T>::swap(const_svector &other)
 {
-    if(this->isImmutable())
-        THROW_EXCEPTION2(std::logic_error,"Immutable");
+    if (this->isImmutable())
+        THROW_EXCEPTION2(std::logic_error, "immutable");
+
+    // no checkLength call here
 
     value.swap(other);
 }
@@ -283,7 +314,10 @@ void DefaultPVArray<T>::serialize(ByteBuffer *pbuffer,
 template<typename T>
 void DefaultPVArray<T>::deserialize(ByteBuffer *pbuffer,
         DeserializableControl *pcontrol) {
-    size_t size = SerializeHelper::readSize(pbuffer, pcontrol);
+
+    size_t size = this->getArray()->getArraySizeType() == Array::fixed ?
+                this->getArray()->getMaximumCapacity() :
+                SerializeHelper::readSize(pbuffer, pcontrol);
 
     svector nextvalue(thaw(value));
     nextvalue.resize(size); // TODO: avoid copy of stuff we will then overwrite
@@ -321,6 +355,7 @@ void DefaultPVArray<T>::deserialize(ByteBuffer *pbuffer,
         remaining -= n2read;
     }
     value = freeze(nextvalue);
+    // TODO !!!
     // inform about the change?
     PVField::postPut();
 }
@@ -334,7 +369,11 @@ void DefaultPVArray<T>::serialize(ByteBuffer *pbuffer,
     temp.slice(offset, count);
     count = temp.size();
 
-    SerializeHelper::writeSize(temp.size(), pbuffer, pflusher);
+    ArrayConstPtr array = this->getArray();
+    if (array->getArraySizeType() != Array::fixed)
+        SerializeHelper::writeSize(count, pbuffer, pflusher);
+    else if (count != array->getMaximumCapacity())
+        throw std::length_error("fixed array cannot be partially serialized");
 
     const T* cur = temp.data();
 
@@ -368,7 +407,10 @@ void DefaultPVArray<T>::serialize(ByteBuffer *pbuffer,
 template<>
 void DefaultPVArray<string>::deserialize(ByteBuffer *pbuffer,
         DeserializableControl *pcontrol) {
-    size_t size = SerializeHelper::readSize(pbuffer, pcontrol);
+
+    size_t size = this->getArray()->getArraySizeType() == Array::fixed ?
+                this->getArray()->getMaximumCapacity() :
+                SerializeHelper::readSize(pbuffer, pcontrol);
 
     svector nextvalue(thaw(value));
 
@@ -396,7 +438,9 @@ void DefaultPVArray<string>::serialize(ByteBuffer *pbuffer,
     const_svector temp(value);
     temp.slice(offset, count);
 
-    SerializeHelper::writeSize(temp.size(), pbuffer, pflusher);
+    // TODO if fixed count == getArray()->getMaximumCapacity()
+    if (this->getArray()->getArraySizeType() != Array::fixed)
+        SerializeHelper::writeSize(temp.size(), pbuffer, pflusher);
 
     const string * pvalue = temp.data();
     for(size_t i = 0; i<temp.size(); i++) {

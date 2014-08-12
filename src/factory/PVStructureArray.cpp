@@ -25,6 +25,8 @@ namespace epics { namespace pvData {
 
 size_t PVStructureArray::append(size_t number)
 {
+    checkLength(value.size()+number);
+
     svector data(reuse());
     data.resize(data.size()+number);
 
@@ -44,9 +46,11 @@ size_t PVStructureArray::append(size_t number)
 
 bool PVStructureArray::remove(size_t offset,size_t number)
 {
-    if(number==0)
+    if (number==0)
         return true;
-    else if(offset+number>getLength())
+    else if (offset+number>getLength())
+        return false;
+    else if (getArray()->getArraySizeType() == Array::fixed)
         return false;
 
     svector vec(reuse());
@@ -65,6 +69,9 @@ bool PVStructureArray::remove(size_t offset,size_t number)
 }
 
 void PVStructureArray::compress() {
+    if (getArray()->getArraySizeType() == Array::fixed)
+            return;
+
     svector vec(reuse()); // TODO: check for first NULL before realloc
 
     size_t length = vec.size();
@@ -99,7 +106,8 @@ void PVStructureArray::compress() {
 
 void PVStructureArray::setCapacity(size_t capacity)
 {
-    if(this->isCapacityMutable()) {
+    if (this->isCapacityMutable()) {
+        checkLength(capacity);
         const_svector value;
         swap(value);
         if(value.capacity()<capacity) {
@@ -109,17 +117,23 @@ void PVStructureArray::setCapacity(size_t capacity)
         }
         swap(value);
     }
+    else
+        THROW_EXCEPTION2(std::logic_error, "capacity immutable");
 }
 
 void PVStructureArray::setLength(size_t length)
 {
     if(this->isImmutable())
-        THROW_EXCEPTION2(std::logic_error,"Immutable");
+        THROW_EXCEPTION2(std::logic_error, "immutable");
     const_svector value;
     swap(value);
-    if(length == value.size()) {
-        // nothing
-    } else if(length < value.size()) {
+
+    if (length == value.size())
+        return;
+
+    checkLength(length);
+
+    if (length < value.size()) {
         value.slice(0, length);
     } else {
         svector mvalue(thaw(value));
@@ -131,8 +145,10 @@ void PVStructureArray::setLength(size_t length)
 
 void PVStructureArray::swap(const_svector &other)
 {
-    if(this->isImmutable())
-        THROW_EXCEPTION2(std::logic_error,"Immutable");
+    if (this->isImmutable())
+        THROW_EXCEPTION2(std::logic_error, "immutable");
+
+    // no checkLength call here
 
     value.swap(other);
 }
@@ -146,7 +162,10 @@ void PVStructureArray::deserialize(ByteBuffer *pbuffer,
         DeserializableControl *pcontrol) {
     svector data(reuse());
 
-    size_t size = SerializeHelper::readSize(pbuffer, pcontrol);
+    size_t size = this->getArray()->getArraySizeType() == Array::fixed ?
+                this->getArray()->getMaximumCapacity() :
+                SerializeHelper::readSize(pbuffer, pcontrol);
+
     data.resize(size);
 
     StructureConstPtr structure = structureArray->getStructure();
@@ -175,7 +194,11 @@ void PVStructureArray::serialize(ByteBuffer *pbuffer,
     const_svector temp(view());
     temp.slice(offset, count);
 
-    SerializeHelper::writeSize(temp.size(), pbuffer, pflusher);
+    ArrayConstPtr array = this->getArray();
+    if (array->getArraySizeType() != Array::fixed)
+        SerializeHelper::writeSize(temp.size(), pbuffer, pflusher);
+    else if (count != array->getMaximumCapacity())
+        throw std::length_error("fixed array cannot be partially serialized");
 
     for(size_t i = 0; i<count; i++) {
         if(pbuffer->getRemaining()<1)

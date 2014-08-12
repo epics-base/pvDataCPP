@@ -714,7 +714,10 @@ void testArraySizeType() {
     testOk1(3 == s->getFields().size());
 
     serializationFieldTest(s);
-    serializationTest(getPVDataCreate()->createPVStructure(s));
+
+//    PVStructurePtr pvs = getPVDataCreate()->createPVStructure(s);
+//    pvs->
+//    serializationTest(pvs);
 }
 
 void testStringCopy() {

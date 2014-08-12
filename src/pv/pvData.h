@@ -511,6 +511,7 @@ public:
 
 protected:
     PVArray(FieldConstPtr const & field);
+    void checkLength(size_t length);
 private:
     bool capacityMutable;
     friend class PVDataCreate;
@@ -1194,6 +1195,7 @@ public:
     virtual const_svector view() const { return value; }
     virtual void swap(const_svector &other);
     virtual void replace(const const_svector &other) {
+        checkLength(other.size());
         value = other;
         PVField::postPut();
     }
@@ -1289,6 +1291,7 @@ public:
     virtual const_svector view() const { return value; }
     virtual void swap(const_svector &other);
     virtual void replace(const const_svector &other) {
+        checkLength(other.size());
         value = other;
         PVField::postPut();
     }
