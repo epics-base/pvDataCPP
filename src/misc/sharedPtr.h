@@ -48,6 +48,8 @@
 #  undef SHARED_FROM_BOOST
 #  undef SHARED_FROM_TR1
 
+#include <memory>
+
 // import std classes into std::tr1
 namespace std { 
     namespace tr1 {
