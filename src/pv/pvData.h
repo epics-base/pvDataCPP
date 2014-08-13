@@ -507,6 +507,7 @@ public:
      */
     virtual void setCapacity(std::size_t capacity) = 0;
 
+    using PVField::dumpValue;
     virtual std::ostream& dumpValue(std::ostream& o, std::size_t index) const = 0;
 
 protected:

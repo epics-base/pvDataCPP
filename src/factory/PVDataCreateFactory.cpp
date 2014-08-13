@@ -693,7 +693,7 @@ PVStructurePtr PVDataCreate::createPVStructure(
 PVStructurePtr PVDataCreate::createPVStructure(PVStructurePtr const & structToClone)
 {
     FieldConstPtrArray field;
-    if(structToClone==0) {
+    if(!structToClone) {
         // is this correct?!
         FieldConstPtrArray fields(0);
         StringArray fieldNames(0);

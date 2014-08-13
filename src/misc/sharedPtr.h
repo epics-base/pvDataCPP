@@ -44,6 +44,23 @@
 #  undef SHARED_FROM_TR1
 #endif
 
+#if defined(__clang__)
+#  undef SHARED_FROM_BOOST
+#  undef SHARED_FROM_TR1
+
+// import std classes into std::tr1
+namespace std { 
+    namespace tr1 {
+        using std::shared_ptr;
+        using std::weak_ptr;
+        using std::static_pointer_cast;
+        using std::dynamic_pointer_cast;
+        using std::const_pointer_cast;
+        using std::enable_shared_from_this;
+    }
+}
+#endif
+
 // go and get it
 
 #if defined(SHARED_FROM_TR1)

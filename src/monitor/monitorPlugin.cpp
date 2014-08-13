@@ -23,7 +23,7 @@ MonitorPluginManagerPtr MonitorPluginManager::get()
     static MonitorPluginManagerPtr pluginManager;
     static Mutex mutex;
     Lock xx(mutex);
-    if(pluginManager==NULL) {
+    if(!pluginManager) {
         pluginManager = MonitorPluginManagerPtr(new MonitorPluginManager());
     }
     return pluginManager;

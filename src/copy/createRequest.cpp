@@ -180,7 +180,7 @@ private:
             string fieldName = request.substr(0,period);
             StructureConstPtr subField = fieldCreate->createStructure();
             subField = createSubFieldRequest(subField,request.substr(period+1));
-            if(subField==NULL) return subField;
+            if(!subField) return subField;
             parent = fieldCreate->appendField(parent,fieldName,subField);
             return parent;
         }
@@ -201,7 +201,7 @@ private:
             StructureConstPtr subField = fieldCreate->createStructure();
             string subRequest = request.substr(openBrace+1,closeBrace-openBrace-1);
             subField = createFieldRequest(subField,subRequest);
-            if(subField==NULL) return subField;
+            if(!subField) return subField;
             parent = fieldCreate->appendField(parent,fieldName,subField);
             return parent;
         }
@@ -228,7 +228,7 @@ private:
             if(request[nextChar]=='.') {
                 StructureConstPtr subField = fieldCreate->createStructure();
                 subField = createSubFieldRequest(subField,request.substr(nextChar+1));
-                if(subField==NULL) return StructureConstPtr();
+                if(!subField) return StructureConstPtr();
                 if(subField->getNumberFields()!=1) {
                     message = request + " logic error createSubFieldRequest openBracket subField";
                     return StructureConstPtr();
@@ -250,7 +250,7 @@ private:
                 StructureConstPtr subField = fieldCreate->createStructure();
                 string subRequest = request.substr(openBrace+1,closeBrace-openBrace-1);
                 subField = createFieldRequest(subField,subRequest);
-                if(subField==NULL) return subField;
+                if(!subField) return subField;
                 size_t numSub = subField->getNumberFields();
                 StringArray fieldNames(numSub + 1);
                 FieldConstPtrArray fields(numSub+1);
@@ -285,7 +285,7 @@ private:
         FieldConstPtrArray fields;
         StructureConstPtr subField = fieldCreate->createStructure();
         subField = createSubFieldRequest(subField,request.substr(0,end));
-        if(subField==NULL) return subField;
+        if(!subField) return subField;
         fieldNames.push_back(subField->getFieldNames()[0]);
         fields.push_back(subField->getFields()[0]);
         if(end!=length) {
@@ -298,7 +298,7 @@ private:
             }
             StructureConstPtr nextSubField = fieldCreate->createStructure();
             nextSubField = createFieldRequest(nextSubField,request.substr(end+1));
-            if(nextSubField==NULL) return nextSubField;
+            if(!nextSubField) return nextSubField;
             size_t numFields = nextSubField->getNumberFields();
             StringArray subNames = nextSubField->getFieldNames();
             FieldConstPtrArray subFields = nextSubField->getFields();
@@ -348,7 +348,7 @@ private:
             return;
         }
         PVStructurePtr pvOptions = pvParent->getSubField<PVStructure>("_options");
-        if(pvOptions==NULL) throw std::logic_error("initSubFieldOptions pvOptions NULL");
+        if(!pvOptions) throw std::logic_error("initSubFieldOptions pvOptions NULL");
         size_t closeBracket = findMatchingBracket(request,openBracket);
         initRequestOptions(pvOptions,request.substr(openBracket+1,closeBracket-openBracket-1));
         size_t nextChar = closeBracket+1;
@@ -433,7 +433,7 @@ public:
             }
             StructureConstPtr structure = createRequestOptions(
                 request.substr(openBracket+1,closeBracket-openBracket-1));
-            if(structure==NULL)
+            if(!structure)
             {
                  return PVStructurePtr();
             }
@@ -449,7 +449,7 @@ public:
             }
             StructureConstPtr structure = fieldCreate->createStructure();
             structure = createFieldRequest(structure,request.substr(openBrace+1,closeBrace-openBrace-1));
-            if(structure==NULL)
+            if(!structure)
             {
                 return PVStructurePtr();
             }
@@ -465,7 +465,7 @@ public:
             }
             StructureConstPtr structure = fieldCreate->createStructure();
             structure = createFieldRequest(structure,request.substr(openBrace+1,closeBrace-openBrace-1));
-            if(structure==NULL)
+            if(!structure)
             {
                 return PVStructurePtr();
             }
@@ -481,7 +481,7 @@ public:
             }
             StructureConstPtr structure = fieldCreate->createStructure();
             structure = createFieldRequest(structure,request.substr(openBrace+1,closeBrace-openBrace-1));
-            if(structure==NULL)
+            if(!structure)
             {
                 return PVStructurePtr();
             }
@@ -502,7 +502,7 @@ public:
             if(pvSub->getStructure()->getNumberFields()==1) {
                 pvSub = static_pointer_cast<PVStructure>(pvSub->getPVFields()[0]);
             }
-            if(pvSub!=NULL) initFieldOptions(pvSub,request.substr(openParam+1,closeParam-openParam-1));
+            if(pvSub) initFieldOptions(pvSub,request.substr(openParam+1,closeParam-openParam-1));
         }
         if (offsetPutField != string::npos) {
             size_t openParam = request.find('(', offsetPutField);
@@ -511,7 +511,7 @@ public:
             if(pvSub->getStructure()->getNumberFields()==1) {
                 pvSub = static_pointer_cast<PVStructure>(pvSub->getPVFields()[0]);
             }
-            if(pvSub!=NULL) initFieldOptions(pvSub,request.substr(openParam+1,closeParam-openParam-1));
+            if(pvSub) initFieldOptions(pvSub,request.substr(openParam+1,closeParam-openParam-1));
         }
         if (offsetGetField != string::npos) {
             size_t openParam = request.find('(', offsetGetField);
@@ -520,7 +520,7 @@ public:
             if(pvSub->getStructure()->getNumberFields()==1) {
                 pvSub = static_pointer_cast<PVStructure>(pvSub->getPVFields()[0]);
             }
-            if(pvSub!=NULL) initFieldOptions(pvSub,request.substr(openParam+1,closeParam-openParam-1));
+            if(pvSub) initFieldOptions(pvSub,request.substr(openParam+1,closeParam-openParam-1));
         }
         return pvStructure;
     }

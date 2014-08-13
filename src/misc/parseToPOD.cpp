@@ -17,7 +17,7 @@
 using std::string;
 
 // need to use "long long" when sizeof(int)==sizeof(long)
-#if (ULONG_MAX == 0xfffffffful) || defined(_WIN32) || defined(__rtems__)
+#if (ULONG_MAX == 0xfffffffful) || defined(_WIN32) || defined(__rtems__) || defined(__APPLE__)
 #define NEED_LONGLONG
 #endif
 

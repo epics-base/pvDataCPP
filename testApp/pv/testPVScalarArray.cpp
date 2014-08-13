@@ -108,7 +108,7 @@ static void testBasic()
 
     {
         typename PVT::const_svector avoid;
-        arr1->PVScalarArray::getAs<typename PVT::value_type>(avoid);
+        arr1->PVScalarArray::template getAs<typename PVT::value_type>(avoid);
         testOk1(avoid.data()==cdata.data());
         testOk1(avoid.data()==arr1->view().data());
     }
@@ -133,7 +133,7 @@ static void testBasic()
     testOk1(cdata.size()==arr1->getLength());
 
     PVIntArray::const_svector idata;
-    arr1->PVScalarArray::getAs<int32>(idata);
+    arr1->PVScalarArray::template getAs<int32>(idata);
 
     testOk1(idata.at(1)==10);
 
@@ -143,7 +143,7 @@ static void testBasic()
 
     idata = freeze(wdata);
 
-    arr1->PVScalarArray::putFrom<int32>(idata);
+    arr1->PVScalarArray::template putFrom<int32>(idata);
 
     testOk1(castUnsafe<PVIntArray::value_type>(arr1->view()[1])==42);
 }

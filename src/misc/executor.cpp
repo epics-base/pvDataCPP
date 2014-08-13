@@ -54,14 +54,14 @@ void Executor::run()
 {
     Lock xx(mutex);
     while(true) {
-        while(head.get()==NULL) {
+        while(!head.get()) {
             xx.unlock();
             moreWork.wait();
             xx.lock();
         }
         CommandPtr command = head;
         head = command->next;
-        if(command.get()==NULL) continue;
+        if(!command.get()) continue;
         if(command.get()==shutdown.get()) break;
         xx.unlock();
         try {
@@ -82,13 +82,13 @@ void Executor::execute(CommandPtr const & command)
 {
     Lock xx(mutex);
     command->next.reset();
-    if(head.get()==NULL) {
+    if(!head.get()) {
         head = command;
         moreWork.signal();
         return;
     }
     CommandPtr tail = head;
-    while(tail->next!=NULL) tail = tail->next;
+    while(tail->next) tail = tail->next;
     tail->next = command;   
 }
 

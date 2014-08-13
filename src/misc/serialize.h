@@ -65,9 +65,10 @@ namespace epics { namespace pvData {
     };
 
 
-    class epicsShareClass SerializableArray : virtual public Serializable {
+    class epicsShareClass SerializableArray : public virtual Serializable {
     public:
         virtual ~SerializableArray(){}
+        using Serializable::serialize;
         virtual void serialize(ByteBuffer *buffer,
             SerializableControl *flusher, std::size_t offset, std::size_t count) const = 0;
     };

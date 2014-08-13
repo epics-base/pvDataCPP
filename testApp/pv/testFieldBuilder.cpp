@@ -60,7 +60,7 @@ void test_structure()
     StructureConstPtr s2 = fb->add("s", s)->
                             addArray("sArray", s)->
                             createStructure();
-    testOk1(s2 != 0);
+    testOk1(s2.get()!=0);
     testOk1(Structure::DEFAULT_ID == s2->getID());
     testOk1(2 == s2->getFields().size());
 

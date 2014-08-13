@@ -197,45 +197,45 @@ static void testPVScalarWithProperties(
     }
     PVLongPtr seconds = pvStructure->getLongField(
         string("timeStamp.secondsPastEpoch"));
-    testOk1(seconds!=0);
+    testOk1(seconds.get()!=0);
     seconds->put(123456789);
     PVIntPtr nano = pvStructure->getIntField(string("timeStamp.nanoSeconds"));
-    testOk1(nano!=0);
+    testOk1(nano.get()!=0);
     nano->put(1000000);
     PVIntPtr severity = pvStructure->getIntField(string("alarm.severity"));
-    testOk1(severity!=0);
+    testOk1(severity.get()!=0);
     severity->put(2);
     PVStringPtr message = pvStructure->getStringField(string("alarm.message"));
-    testOk1(message!=0);
+    testOk1(message.get()!=0);
     message->put(string("messageForAlarm"));
     if(hasDisplayControl) {
         PVStringPtr desc = pvStructure->getStringField(
             string("display.description"));
-        testOk1(desc!=0);
+        testOk1(desc.get()!=0);
         desc->put(string("this is a description"));
         PVStringPtr format = pvStructure->getStringField(
             string("display.format"));
-        testOk1(format!=0);
+        testOk1(format.get()!=0);
         format->put(string("f10.2"));
         PVStringPtr units = pvStructure->getStringField(
             string("display.units"));
-        testOk1(units!=0);
+        testOk1(units.get()!=0);
         units->put(string("SomeUnits"));
         PVDoublePtr limit = pvStructure->getDoubleField(
             string("display.limitLow"));
-        testOk1(limit!=0);
+        testOk1(limit.get()!=0);
         limit->put(0.0);
         limit = pvStructure->getDoubleField(
             string("display.limitHigh"));
-        testOk1(limit!=0);
+        testOk1(limit.get()!=0);
         limit->put(10.0);
         limit = pvStructure->getDoubleField(
             string("control.limitLow"));
-        testOk1(limit!=0);
+        testOk1(limit.get()!=0);
         limit->put(1.0);
         limit = pvStructure->getDoubleField(
             string("control.limitHigh"));
-        testOk1(limit!=0);
+        testOk1(limit.get()!=0);
         limit->put(9.0);
     }
     if(hasValueAlarm) {
@@ -255,15 +255,15 @@ static void testPVScalarWithProperties(
         convert->fromDouble(pvtemp,9.0);
         severity = pvStructure->getIntField(
             string("valueAlarm.lowAlarmSeverity"));
-        testOk1(severity!=0);
+        testOk1(severity.get()!=0);
         severity->put(2);
         severity = pvStructure->getIntField(
             string("valueAlarm.highAlarmSeverity"));
-        testOk1(severity!=0);
+        testOk1(severity.get()!=0);
         severity->put(2);
         PVBooleanPtr active = pvStructure->getBooleanField(
             string("valueAlarm.active"));
-        testOk1(active!=0);
+        testOk1(active.get()!=0);
         active->put(true);
     }
     if(hasBooleanAlarm) {
@@ -273,15 +273,15 @@ static void testPVScalarWithProperties(
         pvBoolean->put(true);
         severity = pvStructure->getIntField(
             string("valueAlarm.falseSeverity"));
-        testOk1(severity!=0);
+        testOk1(severity.get()!=0);
         severity->put(0);
         severity = pvStructure->getIntField(
             string("valueAlarm.trueSeverity"));
-        testOk1(severity!=0);
+        testOk1(severity.get()!=0);
         severity->put(2);
         severity = pvStructure->getIntField(
             string("valueAlarm.changeStateSeverity"));
-        testOk1(severity!=0);
+        testOk1(severity.get()!=0);
         severity->put(1);
     }
     if(debug)
@@ -345,7 +345,7 @@ static void testScalarArrayCommon(string /*fieldName*/,ScalarType stype)
     if(debug)
         std::cout << *pvStructure << std::endl;
     PVFieldPtr pvField = pvStructure->getSubField("alarm.status");
-    testOk1(pvField!=NULL);
+    testOk1(pvField.get()!=0);
 }
 
 static void testScalarArray()

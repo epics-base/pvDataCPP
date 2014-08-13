@@ -17,6 +17,7 @@
 #include <string>
 #include <cstdio>
 #include <stdexcept>
+#include <sstream>
 
 #define epicsExportSharedSymbols
 #include <pv/lock.h>
@@ -720,8 +721,11 @@ FieldBuilderPtr FieldBuilder::addArray(string const & name, FieldConstPtr const 
         case scalar:
             fields.push_back(fieldCreate->createScalarArray(static_pointer_cast<const Scalar>(element)->getScalarType()));
             break;
+        // scalarArray?
         default:
-            throw std::invalid_argument("unsupported array element type:" + element->getType());
+            std::ostringstream msg("unsupported array element type: ");
+            msg << element->getType();
+            throw std::invalid_argument(msg.str());
     }
     
     fieldNames.push_back(name);
@@ -747,7 +751,11 @@ FieldConstPtr FieldBuilder::createFieldInternal(Type type)
             fieldCreate->createUnion(fieldNames, fields);
     }
     else
-        throw std::invalid_argument("unsupported type: " + type);    
+    {
+        std::ostringstream msg("unsupported type: ");
+        msg << type;
+        throw std::invalid_argument(msg.str());
+    }
 }
 
 
@@ -834,7 +842,10 @@ ScalarArrayConstPtr FieldCreate::createFixedScalarArray(ScalarType elementType, 
     if(elementType<0 || elementType>MAX_SCALAR_TYPE)
         throw std::invalid_argument("Can't construct ScalarArray from invalid ScalarType");
 
-    return ScalarArrayConstPtr(new FixedScalarArray(elementType, size), Field::Deleter());
+    // TODO use std::make_shared
+    std::tr1::shared_ptr<ScalarArray> s(new FixedScalarArray(elementType, size), Field::Deleter());
+    ScalarArrayConstPtr sa = s;
+    return sa;
 }
 
 ScalarArrayConstPtr FieldCreate::createBoundedScalarArray(ScalarType elementType, size_t size) const
@@ -842,7 +853,10 @@ ScalarArrayConstPtr FieldCreate::createBoundedScalarArray(ScalarType elementType
     if(elementType<0 || elementType>MAX_SCALAR_TYPE)
         throw std::invalid_argument("Can't construct ScalarArray from invalid ScalarType");
 
-    return ScalarArrayConstPtr(new BoundedScalarArray(elementType, size), Field::Deleter());
+    // TODO use std::make_shared
+    std::tr1::shared_ptr<ScalarArray> s(new BoundedScalarArray(elementType, size), Field::Deleter());
+    ScalarArrayConstPtr sa = s;
+    return sa;
 }
 
 StructureConstPtr FieldCreate::createStructure () const
@@ -855,8 +869,9 @@ StructureConstPtr FieldCreate::createStructure () const
 StructureConstPtr FieldCreate::createStructure (
     StringArray const & fieldNames,FieldConstPtrArray const & fields) const
 {
-      StructureConstPtr structure(
-         new Structure(fieldNames,fields), Field::Deleter());
+      // TODO use std::make_shared
+      std::tr1::shared_ptr<Structure> sp(new Structure(fieldNames,fields), Field::Deleter());
+      StructureConstPtr structure = sp;
       return structure;
 }
 
@@ -865,24 +880,27 @@ StructureConstPtr FieldCreate::createStructure (
     StringArray const & fieldNames,
     FieldConstPtrArray const & fields) const
 {
-      StructureConstPtr structure(
-         new Structure(fieldNames,fields,id), Field::Deleter());
+      // TODO use std::make_shared
+      std::tr1::shared_ptr<Structure> sp(new Structure(fieldNames,fields,id), Field::Deleter());
+      StructureConstPtr structure = sp;
       return structure;
 }
 
 StructureArrayConstPtr FieldCreate::createStructureArray(
     StructureConstPtr const & structure) const
 {
-     StructureArrayConstPtr structureArray(
-        new StructureArray(structure), Field::Deleter());
+     // TODO use std::make_shared
+     std::tr1::shared_ptr<StructureArray> sp(new StructureArray(structure), Field::Deleter());
+     StructureArrayConstPtr structureArray = sp;
      return structureArray;
 }
 
 UnionConstPtr FieldCreate::createUnion (
     StringArray const & fieldNames,FieldConstPtrArray const & fields) const
 {
-      UnionConstPtr punion(
-         new Union(fieldNames,fields), Field::Deleter());
+      // TODO use std::make_shared
+      std::tr1::shared_ptr<Union> sp(new Union(fieldNames,fields), Field::Deleter());
+      UnionConstPtr punion = sp;
       return punion;
 }
 
@@ -891,8 +909,9 @@ UnionConstPtr FieldCreate::createUnion (
     StringArray const & fieldNames,
     FieldConstPtrArray const & fields) const
 {
-      UnionConstPtr punion(
-         new Union(fieldNames,fields,id), Field::Deleter());
+      // TODO use std::make_shared
+      std::tr1::shared_ptr<Union> sp(new Union(fieldNames,fields,id), Field::Deleter());
+      UnionConstPtr punion = sp;
       return punion;
 }
 
@@ -904,8 +923,9 @@ UnionConstPtr FieldCreate::createVariantUnion () const
 UnionArrayConstPtr FieldCreate::createUnionArray(
     UnionConstPtr const & punion) const
 {
-     UnionArrayConstPtr unionArray(
-        new UnionArray(punion), Field::Deleter());
+     // TODO use std::make_shared 
+     std::tr1::shared_ptr<UnionArray> sp(new UnionArray(punion), Field::Deleter());
+     UnionArrayConstPtr unionArray = sp;
      return unionArray;
 }
 
@@ -1047,13 +1067,23 @@ FieldConstPtr FieldCreate::deserialize(ByteBuffer* buffer, DeserializableControl
             if (isVariable)
                 return scalarArrays[scalarType];
             else if (isFixed)
-                return FieldConstPtr(
+            {
+                // TODO use std::make_shared
+                std::tr1::shared_ptr<Field> sp(
                             new FixedScalarArray(static_cast<epics::pvData::ScalarType>(scalarType), size),
                             Field::Deleter());
+                FieldConstPtr p = sp;
+                return p;
+            }
             else
-                return FieldConstPtr(
+            {
+                // TODO use std::make_shared
+                std::tr1::shared_ptr<Field> sp(
                             new BoundedScalarArray(static_cast<epics::pvData::ScalarType>(scalarType), size),
                             Field::Deleter());
+                FieldConstPtr p = sp;
+                return p;
+            }
         }
         else if (typeCode == 0x80)
         {
@@ -1063,7 +1093,10 @@ FieldConstPtr FieldCreate::deserialize(ByteBuffer* buffer, DeserializableControl
 
             // Type type = Type.structureArray;
             StructureConstPtr elementStructure = std::tr1::static_pointer_cast<const Structure>(control->cachedDeserialize(buffer));
-            return FieldConstPtr(new StructureArray(elementStructure), Field::Deleter());
+            // TODO use std::make_shared
+            std::tr1::shared_ptr<Field> sp(new StructureArray(elementStructure), Field::Deleter());
+            FieldConstPtr p = sp;
+            return p;
         }
         else if (typeCode == 0x81)
         {
@@ -1073,7 +1106,10 @@ FieldConstPtr FieldCreate::deserialize(ByteBuffer* buffer, DeserializableControl
 
             // Type type = Type.unionArray;
             UnionConstPtr elementUnion = std::tr1::static_pointer_cast<const Union>(control->cachedDeserialize(buffer));
-            return FieldConstPtr(new UnionArray(elementUnion), Field::Deleter());
+            // TODO use std::make_shared
+            std::tr1::shared_ptr<Field> sp(new UnionArray(elementUnion), Field::Deleter());
+            FieldConstPtr p = sp;
+            return p;
         }
         else if (typeCode == 0x82)
         {
@@ -1105,11 +1141,24 @@ FieldCreate::FieldCreate()
 {
     for (int i = 0; i <= MAX_SCALAR_TYPE; i++)
     {
-        scalars.push_back(ScalarConstPtr(new Scalar(static_cast<ScalarType>(i)), Field::Deleter()));
-        scalarArrays.push_back(ScalarArrayConstPtr(new ScalarArray(static_cast<ScalarType>(i)), Field::Deleter()));
+        // TODO use std::make_shared
+        std::tr1::shared_ptr<Scalar> sp(new Scalar(static_cast<ScalarType>(i)), Field::Deleter());
+        ScalarConstPtr p = sp;
+        scalars.push_back(p);
+
+        // TODO use std::make_shared
+        std::tr1::shared_ptr<ScalarArray> spa(new ScalarArray(static_cast<ScalarType>(i)), Field::Deleter());
+        ScalarArrayConstPtr pa = spa;
+        scalarArrays.push_back(spa);
     }
-    variantUnion = UnionConstPtr(new Union(), Field::Deleter());
-    variantUnionArray = UnionArrayConstPtr(new UnionArray(variantUnion), Field::Deleter());
+
+    // TODO use std::make_shared
+    std::tr1::shared_ptr<Union> su(new Union(), Field::Deleter());
+    variantUnion = su;
+
+    // TODO use std::make_shared
+    std::tr1::shared_ptr<UnionArray> sua(new UnionArray(variantUnion), Field::Deleter());
+    variantUnionArray = sua;
 }
 
 FieldCreatePtr getFieldCreate() {
