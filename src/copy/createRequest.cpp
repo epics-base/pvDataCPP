@@ -374,49 +374,57 @@ public:
                         "record[ does not have matching ]";
                     return PVStructurePtr();
                 }
-                Node node("record");
-                Node optNode = createRequestOptions(
-                        request.substr(openBracket+1,closeBracket-openBracket-1));
-                node.nodes.push_back(optNode);
-                top.push_back(node);
+                if(closeBracket-openBracket > 3) {
+                    Node node("record");
+                    Node optNode = createRequestOptions(
+                            request.substr(openBracket+1,closeBracket-openBracket-1));
+                    node.nodes.push_back(optNode);
+                    top.push_back(node);
+                }
             }
             if(offsetField!=string::npos) {
                 fullFieldName = "field";
                 Node node("field");
-                size_t openBrace = request.find('(', offsetField);
-                size_t closeBrace = request.find(')', openBrace);
-                if(closeBrace==string::npos) {
+                size_t openParan = request.find('(', offsetField);
+                size_t closeParan = request.find(')', openParan);
+                if(closeParan==string::npos) {
                     message = request.substr(offsetField)
                             + " field( does not have matching )";
                     return PVStructurePtr();
                 }
-                createSubNode(node,request.substr(openBrace+1,closeBrace-openBrace-1));
+                if(closeParan>openParan+1) {
+                    createSubNode(node,request.substr(openParan+1,closeParan-openParan-1));
+                }
                 top.push_back(node);
             }
             if(offsetGetField!=string::npos) {
                 fullFieldName = "getField";
                 Node node("getField");
-                size_t openBrace = request.find('(', offsetGetField);
-                size_t closeBrace = request.find(')', openBrace);
-                if(closeBrace==string::npos) {
+                size_t openParan = request.find('(', offsetGetField);
+                size_t closeParan = request.find(')', openParan);
+                if(closeParan==string::npos) {
                     message = request.substr(offsetField)
                             + " getField( does not have matching )";
                     return PVStructurePtr();
                 }
-                createSubNode(node,request.substr(openBrace+1,closeBrace-openBrace-1));
+                if(closeParan>openParan+1) {
+                    createSubNode(node,request.substr(openParan+1,closeParan-openParan-1));
+                }
                 top.push_back(node);
             }
             if(offsetPutField!=string::npos) {
                 fullFieldName = "putField";
                 Node node("putField");
-                size_t openBrace = request.find('(', offsetPutField);
-                size_t closeBrace = request.find(')', openBrace);
-                if(closeBrace==string::npos) {
+                size_t openParan = request.find('(', offsetPutField);
+                size_t closeParan = request.find(')', openParan);
+                if(closeParan==string::npos) {
                     message = request.substr(offsetField)
                             + " putField( does not have matching )";
                     return PVStructurePtr();
                 }
-                createSubNode(node,request.substr(openBrace+1,closeBrace-openBrace-1));
+                if(closeParan>openParan+1) {
+                    createSubNode(node,request.substr(openParan+1,closeParan-openParan-1));
+                }
                 top.push_back(node);
             }
         } catch (std::exception &e) {
