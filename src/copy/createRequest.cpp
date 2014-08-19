@@ -352,15 +352,21 @@ public:
             if(chr==']') numBracket--;
         }
         if(numParan!=0) {
-            message = "mismatched () " + numParan;
+            std::ostringstream msg("mismatched () ");
+            msg << numParan;
+            message = msg.str();
             return PVStructurePtr();
         }
         if(numBrace!=0) {
-            message = "mismatched {} " + numBrace;
+            std::ostringstream msg("mismatched {} ");
+            msg << numBrace;
+            message = msg.str();
             return PVStructurePtr();
         }
         if(numBracket!=0) {
-            message = "mismatched [] " + numBracket;
+            std::ostringstream msg("mismatched [] ");
+            msg << numBracket;
+            message = msg.str();
             return PVStructurePtr();
         }
         vector<Node> top;
