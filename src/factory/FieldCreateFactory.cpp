@@ -111,6 +111,38 @@ void Scalar::deserialize(ByteBuffer* /*buffer*/, DeserializableControl* /*contro
     throw std::runtime_error("not valid operation, use FieldCreate::deserialize instead");
 }
 
+
+
+
+std::string BoundedString::getID() const
+{
+    std::ostringstream id;
+    id << Scalar::getID() << '(' << maxLength << ')';
+    return id.str();
+}
+
+void BoundedString::serialize(ByteBuffer *buffer, SerializableControl *control) const
+{
+    control->ensureBuffer(1);
+    buffer->putByte(0x83);
+    SerializeHelper::writeSize(maxLength, buffer, control);
+}
+
+std::size_t BoundedString::getMaximumLength() const
+{
+    return maxLength;
+}
+
+BoundedString::BoundedString(std::size_t maxStringLength) :
+    Scalar(pvString), maxLength(maxStringLength)
+{
+    if (maxLength == 0)
+        throw std::invalid_argument("maxLength == 0");
+}
+
+BoundedString::~BoundedString() {}
+
+
 static string emptyStringtring;
 
 static void serializeStructureField(const Structure* structure, ByteBuffer* buffer, SerializableControl* control)
@@ -684,6 +716,12 @@ FieldBuilderPtr FieldBuilder::add(string const & name, ScalarType scalarType)
 	return shared_from_this();
 }
 
+FieldBuilderPtr FieldBuilder::addBoundedString(std::string const & name, std::size_t maxLength)
+{
+    fields.push_back(fieldCreate->createBoundedString(maxLength)); fieldNames.push_back(name);
+    return shared_from_this();
+}
+
 FieldBuilderPtr FieldBuilder::add(string const & name, FieldConstPtr const & field)
 {
     fields.push_back(field); fieldNames.push_back(name);
@@ -719,6 +757,10 @@ FieldBuilderPtr FieldBuilder::addArray(string const & name, FieldConstPtr const 
             fields.push_back(fieldCreate->createUnionArray(static_pointer_cast<const Union>(element)));
             break;
         case scalar:
+
+            if (std::tr1::dynamic_pointer_cast<const BoundedString>(element).get())
+                throw std::invalid_argument("bounded string arrays are not supported");
+
             fields.push_back(fieldCreate->createScalarArray(static_pointer_cast<const Scalar>(element)->getScalarType()));
             break;
         // scalarArray?
@@ -828,7 +870,15 @@ ScalarConstPtr FieldCreate::createScalar(ScalarType scalarType) const
 
     return scalars[scalarType];
 }
- 
+
+BoundedStringConstPtr FieldCreate::createBoundedString(std::size_t maxLength) const
+{
+    // TODO use std::make_shared
+    std::tr1::shared_ptr<BoundedString> s(new BoundedString(maxLength), Field::Deleter());
+    BoundedStringConstPtr sa = s;
+    return sa;
+}
+
 ScalarArrayConstPtr FieldCreate::createScalarArray(ScalarType elementType) const
 {
     if(elementType<0 || elementType>MAX_SCALAR_TYPE)
@@ -1046,6 +1096,20 @@ FieldConstPtr FieldCreate::deserialize(ByteBuffer* buffer, DeserializableControl
         {
             // Type type = Type.union; variant union (aka any type)
             return variantUnion;
+        }
+        else if (typeCode == 0x83)
+        {
+            // TODO cache?
+            // bounded string
+
+            size_t size = SerializeHelper::readSize(buffer, control);
+
+            // TODO use std::make_shared
+            std::tr1::shared_ptr<Field> sp(
+                        new BoundedString(size),
+                        Field::Deleter());
+            FieldConstPtr p = sp;
+            return p;
         }
         else
             throw std::invalid_argument("invalid type encoding");

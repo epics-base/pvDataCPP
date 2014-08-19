@@ -93,6 +93,8 @@ class StructureArray;
 class Union;
 class UnionArray;
 
+class BoundedString;
+
 /**
  * typedef for a shared pointer to an immutable Field.
  */
@@ -129,6 +131,10 @@ typedef std::tr1::shared_ptr<const Union> UnionConstPtr;
  * typedef for a shared pointer to an immutable UnionArray.
  */
 typedef std::tr1::shared_ptr<const UnionArray> UnionArrayConstPtr;
+/**
+ * typedef for a shared pointer to an immutable BoundedString.
+ */
+typedef std::tr1::shared_ptr<const BoundedString> BoundedStringConstPtr;
 
 /**
  * Definition of support field types.
@@ -366,6 +372,33 @@ private:
     friend class ScalarArray;
     friend class BoundedScalarArray;
     friend class FixedScalarArray;
+    friend class BoundedString;
+};
+
+/**
+ * This class implements introspection object for BoundedString.
+ */
+class epicsShareClass BoundedString : public Scalar{
+public:
+    POINTER_DEFINITIONS(BoundedString);
+    /**
+     * Destructor.
+     */
+    virtual ~BoundedString();
+    typedef BoundedString& reference;
+    typedef const BoundedString& const_reference;
+
+    virtual std::string getID() const;
+
+    virtual void serialize(ByteBuffer *buffer, SerializableControl *control) const;
+
+    std::size_t getMaximumLength() const;
+
+protected:
+    BoundedString(std::size_t maxStringLength);
+private:
+    std::size_t maxLength;
+    friend class FieldCreate;
 };
 
 /**
@@ -813,6 +846,14 @@ public:
     FieldBuilderPtr add(std::string const & name, ScalarType scalarType);
 
     /**
+     * Add a {@code BoundedString}.
+     * @param name name of the array.
+     * @param maxLength a string maximum length.
+     * @return this instance of a {@code FieldBuilder}.
+     */
+    FieldBuilderPtr addBoundedString(std::string const & name, std::size_t maxLength);
+
+    /**
      * Add a {@code Field} (e.g. {@code Structure}, {@code Union}).
      * @param name name of the array.
      * @param field a field to add.
@@ -961,6 +1002,13 @@ public:
      * @throws An {@code IllegalArgumentException} if an illegal type is specified.
      */
     ScalarConstPtr createScalar(ScalarType scalarType) const;
+    /**
+     * Create a {@code BoundedString}.
+     * @param maxLength a string maximum length.
+     * @return a {@code BoundedString} interface for the newly created object.
+     * @throws An {@code IllegalArgumentException} if maxLength == 0.
+     */
+    BoundedStringConstPtr createBoundedString(std::size_t maxLength) const;
     /**
      * Create an {@code Array} field, variable size array.
      * @param elementType The {@code scalarType} for array elements

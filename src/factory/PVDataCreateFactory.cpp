@@ -145,11 +145,18 @@ public:
         SerializableControl *pflusher, size_t offset, size_t count) const;
 private:
     string value;
+    std::size_t maxLength;
 };
 
 BasePVString::BasePVString(ScalarConstPtr const & scalar)
     : PVString(scalar),value()
-{}
+{
+    BoundedStringConstPtr boundedString = std::tr1::dynamic_pointer_cast<const BoundedString>(scalar);
+    if (boundedString.get())
+        maxLength = boundedString->getMaximumLength();
+    else
+        maxLength = 0;
+}
 
 BasePVString::~BasePVString() {}
 
@@ -157,6 +164,9 @@ string BasePVString::get() const  { return value;}
 
 void BasePVString::put(string val)
 {
+    if (maxLength > 0 && val.length() > maxLength)
+        throw std::overflow_error("string too long");
+
     value = val;
     postPut();
 }

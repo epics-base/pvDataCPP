@@ -225,6 +225,21 @@ static void testUnion()
     
 }
 
+static void testBoundedString()
+{
+    testDiag("testBoundedString");
+
+    BoundedStringConstPtr bs = fieldCreate->createBoundedString(8);
+
+    Type type = bs->getType();
+    testOk1(type==scalar);
+
+    ScalarType scalarType = bs->getScalarType();
+    testOk1(scalarType==pvString);
+
+    testOk1(bs->getMaximumLength()==8);
+}
+
 
 #define testExcept(EXCEPT, CMD) try{ CMD; testFail( "No exception from: " #CMD); } \
 catch(EXCEPT& e) {testPass("Got expected exception from: " #CMD);} \
@@ -296,7 +311,7 @@ static void testMapping()
 
 MAIN(testIntrospect)
 {
-    testPlan(324);
+    testPlan(327);
     fieldCreate = getFieldCreate();
     pvDataCreate = getPVDataCreate();
     standardField = getStandardField();
@@ -304,6 +319,7 @@ MAIN(testIntrospect)
     testScalarArray();
     testStructure();
     testUnion();
+    testBoundedString();
     testError();
     testMapping();
     return testDone();

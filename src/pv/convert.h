@@ -35,6 +35,7 @@ bool epicsShareExtern operator==(const Structure&, const Structure&);
 bool epicsShareExtern operator==(const StructureArray&, const StructureArray&);
 bool epicsShareExtern operator==(const Union&, const Union&);
 bool epicsShareExtern operator==(const UnionArray&, const UnionArray&);
+bool epicsShareExtern operator==(const BoundedString&, const BoundedString&);
 
 static inline bool operator!=(const Field& a, const Field& b)
 {return !(a==b);}
@@ -49,6 +50,8 @@ static inline bool operator!=(const StructureArray& a, const StructureArray& b)
 static inline bool operator!=(const Union& a, const Union& b)
 {return !(a==b);}
 static inline bool operator!=(const UnionArray& a, const UnionArray& b)
+{return !(a==b);}
+static inline bool operator!=(const BoundedString& a, const BoundedString& b)
 {return !(a==b);}
 
 

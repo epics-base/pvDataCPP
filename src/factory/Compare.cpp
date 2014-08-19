@@ -134,6 +134,13 @@ bool operator==(const UnionArray& a, const UnionArray& b)
     return *(a.getUnion().get())==*(b.getUnion().get());
 }
 
+bool operator==(const BoundedString& a, const BoundedString& b)
+{
+    if(&a==&b)
+        return true;
+    return a.getMaximumLength()==b.getMaximumLength();
+}
+
 // PVXXX object comparison
 
 namespace {

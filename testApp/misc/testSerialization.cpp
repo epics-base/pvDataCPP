@@ -720,6 +720,38 @@ void testArraySizeType() {
     serializationTest(pvs);
 }
 
+void testBoundedString() {
+    testDiag("Testing bounded string...");
+
+    FieldCreatePtr fieldCreate = getFieldCreate();
+
+    StructureConstPtr s = fieldCreate->createFieldBuilder()->
+                            add("str", pvString)->
+                            addBoundedString("boundedStr", 8)->
+                            add("scalar", pvDouble)->
+                            createStructure();
+    testOk1(s.get() != 0);
+    testOk1(Structure::DEFAULT_ID == s->getID());
+    testOk1(3 == s->getFields().size());
+
+    serializationFieldTest(s);
+    PVStructurePtr pvs = getPVDataCreate()->createPVStructure(s);
+    serializationTest(pvs);
+
+    PVStringPtr pvStr = pvs->getSubField<PVString>("boundedStr");
+    pvStr->put("");
+    pvStr->put("small");
+    pvStr->put("exact123");
+
+    try {
+        pvStr->put("tooLargeString");
+        testFail("too large string accepted");
+    } catch (std::overflow_error oe) {
+        // OK
+    }
+
+}
+
 void testStringCopy() {
     string s1 = "abc";
     string s2 = s1;
@@ -731,7 +763,7 @@ void testStringCopy() {
 
 MAIN(testSerialization) {
 
-    testPlan(221);
+    testPlan(226);
 
     flusher = new SerializableControlImpl();
     control = new DeserializableControlImpl();
@@ -751,6 +783,7 @@ MAIN(testSerialization) {
     testUnion();
 
     testArraySizeType();
+    testBoundedString();
 
 
     delete buffer;
