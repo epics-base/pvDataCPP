@@ -162,7 +162,7 @@ void StandardField::createTimeStamp() {
     FieldConstPtrArray fields(num);
     StringArray names(num);
     names[0] = "secondsPastEpoch";
-    names[1] = "nanoSeconds";
+    names[1] = "nanoseconds";
     names[2] = "userTag";
     fields[0] = fieldCreate->createScalar(pvLong);
     fields[1] = fieldCreate->createScalar(pvInt);
@@ -228,7 +228,7 @@ void StandardField::createByteAlarm() {
     names[6] = "lowWarningSeverity";
     names[7] = "highWarningSeverity";
     names[8] = "highAlarmSeverity";
-    names[9] =  "hystersis";
+    names[9] =  "hysteresis";
     fields[0] = fieldCreate->createScalar(pvBoolean);
     fields[1] = fieldCreate->createScalar(pvByte);
     fields[2] = fieldCreate->createScalar(pvByte);
@@ -255,7 +255,7 @@ void StandardField::createShortAlarm() {
     names[6] = "lowWarningSeverity";
     names[7] = "highWarningSeverity";
     names[8] = "highAlarmSeverity";
-    names[9] =  "hystersis";
+    names[9] =  "hysteresis";
     fields[0] = fieldCreate->createScalar(pvBoolean);
     fields[1] = fieldCreate->createScalar(pvShort);
     fields[2] = fieldCreate->createScalar(pvShort);
@@ -282,7 +282,7 @@ void StandardField::createIntAlarm() {
     names[6] = "lowWarningSeverity";
     names[7] = "highWarningSeverity";
     names[8] = "highAlarmSeverity";
-    names[9] =  "hystersis";
+    names[9] =  "hysteresis";
     fields[0] = fieldCreate->createScalar(pvBoolean);
     fields[1] = fieldCreate->createScalar(pvInt);
     fields[2] = fieldCreate->createScalar(pvInt);
@@ -309,7 +309,7 @@ void StandardField::createLongAlarm() {
     names[6] = "lowWarningSeverity";
     names[7] = "highWarningSeverity";
     names[8] = "highAlarmSeverity";
-    names[9] =  "hystersis";
+    names[9] =  "hysteresis";
     fields[0] = fieldCreate->createScalar(pvBoolean);
     fields[1] = fieldCreate->createScalar(pvLong);
     fields[2] = fieldCreate->createScalar(pvLong);
@@ -336,7 +336,7 @@ void StandardField::createUByteAlarm() {
     names[6] = "lowWarningSeverity";
     names[7] = "highWarningSeverity";
     names[8] = "highAlarmSeverity";
-    names[9] =  "hystersis";
+    names[9] =  "hysteresis";
     fields[0] = fieldCreate->createScalar(pvBoolean);
     fields[1] = fieldCreate->createScalar(pvUByte);
     fields[2] = fieldCreate->createScalar(pvUByte);
@@ -363,7 +363,7 @@ void StandardField::createUShortAlarm() {
     names[6] = "lowWarningSeverity";
     names[7] = "highWarningSeverity";
     names[8] = "highAlarmSeverity";
-    names[9] =  "hystersis";
+    names[9] =  "hysteresis";
     fields[0] = fieldCreate->createScalar(pvBoolean);
     fields[1] = fieldCreate->createScalar(pvUShort);
     fields[2] = fieldCreate->createScalar(pvUShort);
@@ -390,7 +390,7 @@ void StandardField::createUIntAlarm() {
     names[6] = "lowWarningSeverity";
     names[7] = "highWarningSeverity";
     names[8] = "highAlarmSeverity";
-    names[9] =  "hystersis";
+    names[9] =  "hysteresis";
     fields[0] = fieldCreate->createScalar(pvBoolean);
     fields[1] = fieldCreate->createScalar(pvUInt);
     fields[2] = fieldCreate->createScalar(pvUInt);
@@ -417,7 +417,7 @@ void StandardField::createULongAlarm() {
     names[6] = "lowWarningSeverity";
     names[7] = "highWarningSeverity";
     names[8] = "highAlarmSeverity";
-    names[9] =  "hystersis";
+    names[9] =  "hysteresis";
     fields[0] = fieldCreate->createScalar(pvBoolean);
     fields[1] = fieldCreate->createScalar(pvULong);
     fields[2] = fieldCreate->createScalar(pvULong);
@@ -444,7 +444,7 @@ void StandardField::createFloatAlarm() {
     names[6] = "lowWarningSeverity";
     names[7] = "highWarningSeverity";
     names[8] = "highAlarmSeverity";
-    names[9] =  "hystersis";
+    names[9] =  "hysteresis";
     fields[0] = fieldCreate->createScalar(pvBoolean);
     fields[1] = fieldCreate->createScalar(pvFloat);
     fields[2] = fieldCreate->createScalar(pvFloat);
@@ -471,7 +471,7 @@ void StandardField::createDoubleAlarm() {
     names[6] = "lowWarningSeverity";
     names[7] = "highWarningSeverity";
     names[8] = "highAlarmSeverity";
-    names[9] =  "hystersis";
+    names[9] =  "hysteresis";
     fields[0] = fieldCreate->createScalar(pvBoolean);
     fields[1] = fieldCreate->createScalar(pvDouble);
     fields[2] = fieldCreate->createScalar(pvDouble);

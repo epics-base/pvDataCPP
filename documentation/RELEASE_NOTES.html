@@ -3,6 +3,7 @@
 <ul>
 <li>array semantics now enforce Copy On Write.</li>
 <li>String no longer defined.</li>
+<li>timeStamp and valueAlarm name changes</li>
 <li>toString replaced by stream I/O </li>
 <li>union is new type.</li>
 <li>copy is new.</li>
@@ -15,6 +16,9 @@ This allows multiple instances of array data to use the shared raw data.
 COW is implemented via shared_vectors of const data, i. e. data that can not be modified.</p>
 <h2>String no longer defined</h2>
 <p>This is replaced by std::string.</p>
+<h2>timeStamp and valueAlarm name changes</h2>
+<p>In timeStamp nanoSeconds is changed to nanoseconds.</p>
+<p>In valueAlarm hystersis is changed to hysteresis</p>
 <h2>toString replaced by stream I/O</h2>
 <p>pvData.h and pvIntrospect no longer defines toString
 Instead they have stream support.

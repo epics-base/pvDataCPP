@@ -51,7 +51,7 @@ typedef std::tr1::shared_ptr<StandardField> StandardFieldPtr;
         string message
    structure timeStamp
         long secondsPastEpoch
-        int  nanoSeconds
+        int  nanoseconds
         int userTag
  * }
  * In addition there are methods that create each of the property structures,

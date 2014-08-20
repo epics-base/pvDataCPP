@@ -5,6 +5,7 @@ The main changes since release 3.0.2 are:
 
 * array semantics now enforce Copy On Write.
 * String no longer defined.
+* timeStamp and valueAlarm name changes
 * toString replaced by stream I/O 
 * union is new type.
 * copy is new.
@@ -23,6 +24,14 @@ String no longer defined
 ---------
 
 This is replaced by std::string.
+
+
+timeStamp and valueAlarm name changes
+--------------
+
+In timeStamp nanoSeconds is changed to nanoseconds.
+
+In valueAlarm hystersis is changed to hysteresis
 
 
 toString replaced by stream I/O

@@ -35,7 +35,7 @@ void testTimeStamp()
     current.getCurrent();
     printf("current %lli %i milliSec %lli\n",
         (long long)current.getSecondsPastEpoch(),
-        current.getNanoSeconds(),
+        current.getNanoseconds(),
         (long long)current.getMilliseconds());
     time_t tt;
     current.toTime_t(tt);
@@ -45,13 +45,13 @@ void testTimeStamp()
         "%4.4d.%2.2d.%2.2d %2.2d:%2.2d:%2.2d %d isDst %s\n",
         ctm.tm_year+1900,ctm.tm_mon + 1,ctm.tm_mday,
         ctm.tm_hour,ctm.tm_min,ctm.tm_sec,
-        current.getNanoSeconds(),
+        current.getNanoseconds(),
         (ctm.tm_isdst==0) ? "false" : "true");
     tt = time(&tt);
     current.fromTime_t(tt);
     printf("fromTime_t\ncurrent %lli %i milliSec %lli\n",
         (long long)current.getSecondsPastEpoch(),
-        current.getNanoSeconds(),
+        current.getNanoseconds(),
         (long long)current.getMilliseconds());
     current.toTime_t(tt);
     memcpy(&ctm,localtime(&tt),sizeof(struct tm));
@@ -59,12 +59,12 @@ void testTimeStamp()
         "%4.4d.%2.2d.%2.2d %2.2d:%2.2d:%2.2d %d isDst %s\n",
         ctm.tm_year+1900,ctm.tm_mon + 1,ctm.tm_mday,
         ctm.tm_hour,ctm.tm_min,ctm.tm_sec,
-        current.getNanoSeconds(),
+        current.getNanoseconds(),
         (ctm.tm_isdst==0) ? "false" : "true");
     TimeStamp right;
     TimeStamp left;
-    right.put(current.getSecondsPastEpoch(),current.getNanoSeconds());
-    left.put(current.getSecondsPastEpoch(),current.getNanoSeconds());
+    right.put(current.getSecondsPastEpoch(),current.getNanoseconds());
+    left.put(current.getSecondsPastEpoch(),current.getNanoseconds());
     double diff;
     diff = TimeStamp::diff(left,right);
     if(debug) printf("diff %e\n",diff);
@@ -75,7 +75,7 @@ void testTimeStamp()
     testOk1(!(left<right));
     testOk1((left>=right));
     testOk1(!(left>right));
-    left.put(current.getSecondsPastEpoch()+1,current.getNanoSeconds());
+    left.put(current.getSecondsPastEpoch()+1,current.getNanoseconds());
     diff = TimeStamp::diff(left,right);
     if(debug) printf("diff %e\n",diff);
     testOk1(diff==1.0);
@@ -85,7 +85,7 @@ void testTimeStamp()
     testOk1(!(left<right));
     testOk1((left>=right));
     testOk1((left>right));
-    left.put(current.getSecondsPastEpoch()-1,current.getNanoSeconds());
+    left.put(current.getSecondsPastEpoch()-1,current.getNanoseconds());
     diff = TimeStamp::diff(left,right);
     if(debug) printf("diff %e\n",diff);
     testOk1(diff==-1.0);
@@ -95,7 +95,7 @@ void testTimeStamp()
     testOk1((left<right));
     testOk1(!(left>=right));
     testOk1(!(left>right));
-    left.put(current.getSecondsPastEpoch(),current.getNanoSeconds()-nanoSecPerSec);
+    left.put(current.getSecondsPastEpoch(),current.getNanoseconds()-nanoSecPerSec);
     diff = TimeStamp::diff(left,right);
     if(debug) printf("diff %e\n",diff);
     testOk1(diff==-1.0);
@@ -105,7 +105,7 @@ void testTimeStamp()
     testOk1((left<right));
     testOk1(!(left>=right));
     testOk1(!(left>right));
-    left.put(current.getSecondsPastEpoch(),current.getNanoSeconds()-1);
+    left.put(current.getSecondsPastEpoch(),current.getNanoseconds()-1);
     diff = TimeStamp::diff(left,right);
     if(debug) printf("diff %e\n",diff);
     testOk1(diff<0.0);
@@ -115,11 +115,11 @@ void testTimeStamp()
     testOk1((left<right));
     testOk1(!(left>=right));
     testOk1(!(left>right));
-    left.put(current.getSecondsPastEpoch(),current.getNanoSeconds());
+    left.put(current.getSecondsPastEpoch(),current.getNanoseconds());
     left += .1;
     diff = TimeStamp::diff(left,right);
     if(debug) printf("diff %e\n",diff);
-    left.put(current.getSecondsPastEpoch(),current.getNanoSeconds());
+    left.put(current.getSecondsPastEpoch(),current.getNanoseconds());
     int64 inc = -1;
     left += inc;
     diff = TimeStamp::diff(left,right);

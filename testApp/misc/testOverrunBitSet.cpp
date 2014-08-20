@@ -41,11 +41,11 @@ void test()
      uint32 messageOffset = (uint32) pvMessage->getFieldOffset();
      PVStructurePtr pvTimeStamp = pvStructure->getStructureField("timeStamp");
      PVLongPtr pvSeconds = pvTimeStamp->getLongField("secondsPastEpoch");
-     PVIntPtr pvNanoSeconds = pvTimeStamp->getIntField("nanoSeconds");
+     PVIntPtr pvNanoseconds = pvTimeStamp->getIntField("nanoseconds");
      PVIntPtr pvUserTag = pvTimeStamp->getIntField("userTag");
      uint32 timeStampOffset = (uint32) pvTimeStamp->getFieldOffset();
      uint32 secondsOffset = (uint32) pvSeconds->getFieldOffset();
-     uint32 nanoSecondsOffset = (uint32) pvNanoSeconds->getFieldOffset();
+     uint32 nanosecondsOffset = (uint32) pvNanoseconds->getFieldOffset();
      uint32 userTagOffset = (uint32) pvUserTag->getFieldOffset();
      uint32 nfields = (uint32) pvStructure->getNumberFields();
      BitSetPtr changeBitSet = BitSet::create(nfields);
@@ -55,7 +55,7 @@ void test()
      pvSeverity->put(2); changeBitSet->set(severityOffset);
      pvMessage->put("error"); changeBitSet->set(messageOffset);
      pvSeconds->put(1); changeBitSet->set(secondsOffset);
-     pvNanoSeconds->put(1000000); changeBitSet->set(nanoSecondsOffset);
+     pvNanoseconds->put(1000000); changeBitSet->set(nanosecondsOffset);
      pvUserTag->put(1); changeBitSet->set(userTagOffset);
      userOverrunBitSet->or_and(*changeBitSet.get(),*userChangeBitSet.get());
      (*userChangeBitSet)|=(*changeBitSet.get());
@@ -64,7 +64,7 @@ void test()
      pvSeverity->put(0); changeBitSet->set(severityOffset);
      pvMessage->put(""); changeBitSet->set(messageOffset);
      pvSeconds->put(2); changeBitSet->set(secondsOffset);
-     pvNanoSeconds->put(0); changeBitSet->set(nanoSecondsOffset);
+     pvNanoseconds->put(0); changeBitSet->set(nanosecondsOffset);
      pvUserTag->put(0); changeBitSet->set(userTagOffset);
      userOverrunBitSet->or_and(*changeBitSet.get(),*userChangeBitSet.get());
      (*userChangeBitSet)|=(*changeBitSet.get());
@@ -73,14 +73,14 @@ void test()
      testOk1(userChangeBitSet->get(severityOffset));
      testOk1(userChangeBitSet->get(messageOffset));
      testOk1(userChangeBitSet->get(secondsOffset));
-     testOk1(userChangeBitSet->get(nanoSecondsOffset));
+     testOk1(userChangeBitSet->get(nanosecondsOffset));
      testOk1(userChangeBitSet->get(userTagOffset));
      testOk1(userOverrunBitSet->cardinality()==6);
      testOk1(userOverrunBitSet->get(valueOffset));
      testOk1(userOverrunBitSet->get(severityOffset));
      testOk1(userOverrunBitSet->get(messageOffset));
      testOk1(userOverrunBitSet->get(secondsOffset));
-     testOk1(userOverrunBitSet->get(nanoSecondsOffset));
+     testOk1(userOverrunBitSet->get(nanosecondsOffset));
      testOk1(userOverrunBitSet->get(userTagOffset));
      
      BitSetUtil::compress(userChangeBitSet,pvStructure);
@@ -101,13 +101,13 @@ void test()
      userOverrunBitSet->clear();
      pvValue->put(1.0); changeBitSet->set(valueOffset);
      pvSeconds->put(3); changeBitSet->set(secondsOffset);
-     pvNanoSeconds->put(0); changeBitSet->set(nanoSecondsOffset);
+     pvNanoseconds->put(0); changeBitSet->set(nanosecondsOffset);
      userOverrunBitSet->or_and(*changeBitSet.get(),*userChangeBitSet.get());
      (*userChangeBitSet)|=(*changeBitSet.get());
      testOk1(userChangeBitSet->cardinality()==3);
      testOk1(userChangeBitSet->get(valueOffset));
      testOk1(userChangeBitSet->get(secondsOffset));
-     testOk1(userChangeBitSet->get(nanoSecondsOffset));
+     testOk1(userChangeBitSet->get(nanosecondsOffset));
      testOk1(userOverrunBitSet->cardinality()==0);
 
      changeBitSet->clear();
@@ -117,7 +117,7 @@ void test()
      testOk1(userChangeBitSet->cardinality()==3);
      testOk1(userChangeBitSet->get(valueOffset));
      testOk1(userChangeBitSet->get(secondsOffset));
-     testOk1(userChangeBitSet->get(nanoSecondsOffset));
+     testOk1(userChangeBitSet->get(nanosecondsOffset));
      testOk1(userOverrunBitSet->cardinality()==1);
      testOk1(userOverrunBitSet->get(valueOffset));
 
@@ -126,7 +126,7 @@ void test()
      testOk1(userChangeBitSet->cardinality()==3);
      testOk1(userChangeBitSet->get(valueOffset));
      testOk1(userChangeBitSet->get(secondsOffset));
-     testOk1(userChangeBitSet->get(nanoSecondsOffset));
+     testOk1(userChangeBitSet->get(nanosecondsOffset));
      testOk1(userOverrunBitSet->cardinality()==1);
      testOk1(userOverrunBitSet->get(valueOffset));
 }

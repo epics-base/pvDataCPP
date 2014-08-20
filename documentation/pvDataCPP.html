@@ -199,7 +199,7 @@ It uses only createField.
     fields.reserve(n);
     names.push_back("secondsPastEpoch");
     fields.push_back(fieldCreate-&gt;createScalar(pvLong));
-    names.push_back("nanoSeconds");
+    names.push_back("nanoseconds");
     fields.push_back(fieldCreate-&gt;createScalar(pvInt));
     names.push_back("userTag");
     fields.push_back(fieldCreate-&gt;createScalar(pvInt));
@@ -225,7 +225,7 @@ It uses only createField.
         addNestedStructure("timeStamp")-&gt;
             setId("time_t")-&gt;
             add("secondsPastEpoch", pvLong)-&gt;
-            add("nanoSeconds", pvInt)-&gt;
+            add("nanoseconds", pvInt)-&gt;
             add("userTag", pvInt)-&gt;
             endNested()-&gt;
         createStructure();
@@ -264,7 +264,7 @@ uri:ev4:nt/2012/pwd:NTScalarArray
         string message
     time_t timeStamp
         long secondsPastEpoch
-        int nanoSeconds
+        int nanoseconds
         int userTag
 </pre>
 <p>An easy way to create a structure with a string array value field and an alarm and time stamp is
@@ -284,7 +284,7 @@ uri:ev4:nt/2012/pwd:NTScalarArray
         string message
     time_t timeStamp
         long secondsPastEpoch
-        int nanoSeconds
+        int nanoseconds
         int userTag
 0x607188
 </pre>
@@ -309,7 +309,7 @@ A hard way to create an structure with an enumerated value field and a time stam
         addNestedStructure("timeStamp")-&gt;
             setId("time_t")-&gt;
             add("secondsPastEpoch", pvLong)-&gt;
-            add("nanoSeconds", pvInt)-&gt;
+            add("nanoseconds", pvInt)-&gt;
             add("userTag", pvInt)-&gt;
             endNested()-&gt;
         createStructure();
@@ -323,7 +323,7 @@ uri:ev4:nt/2012/pwd/NTEnum
         string[] choices
     time_t timeStamp
         long secondsPastEpoch
-        int nanoSeconds
+        int nanoseconds
         int userTag
 </pre>
 <p>The following is an easy way. Note that it has two additional
@@ -344,7 +344,7 @@ uri:ev4:nt/2012/pwd:NTEnum
         string message
     time_t timeStamp
         long secondsPastEpoch
-        int nanoSeconds
+        int nanoseconds
         int userTag
 </pre>
 
@@ -370,7 +370,7 @@ union
     int intValue
     time_t timeStamp
         long secondsPastEpoch
-        int nanoSeconds
+        int nanoseconds
         int userTag
 
 structure with value field being a union
@@ -380,7 +380,7 @@ uri:ev4:nt/2012/pwd:NTUnion
         int intValue
         time_t timeStamp
             long secondsPastEpoch
-            int nanoSeconds
+            int nanoseconds
             int userTag
     alarm_t alarm
         int severity
@@ -388,7 +388,7 @@ uri:ev4:nt/2012/pwd:NTUnion
         string message
     time_t timeStamp
         long secondsPastEpoch
-        int nanoSeconds
+        int nanoseconds
         int userTag
 </pre>
 
@@ -436,7 +436,7 @@ structure
         string message
     time_t timestamp
         long secondsPastEpoch
-        int nanoSeconds
+        int nanoseconds
         int userTag
     structure power
         double value
@@ -480,7 +480,7 @@ uri:ev4:nt/2012/pwd:NTScalar
         string message 
     time_t timeStamp
         long secondsPastEpoch 0
-        int nanoSeconds 0
+        int nanoseconds 0
         int userTag 0
 0x607268
 from get 100000
@@ -513,7 +513,7 @@ uri:ev4:nt/2012/pwd:NTScalarArray
         string message 
     time_t timeStamp
         long secondsPastEpoch 0
-        int nanoSeconds 0
+        int nanoseconds 0
         int userTag 0
 0x607268
 via getData 0 1 2 3 4 5 6 7 8 9
@@ -536,7 +536,7 @@ uri:ev4:nt/2012/pwd:NTEnum
         string message 
     time_t timeStamp
         long secondsPastEpoch 0
-        int nanoSeconds 0
+        int nanoseconds 0
         int userTag 0
 0x607268
 </pre>
@@ -571,7 +571,7 @@ structure
         string message 
     time_t timestamp_t
         long secondsPastEpoch 0
-        int nanoSeconds 0
+        int nanoseconds 0
         int userTag 0
     structure power
         double value 0
@@ -616,7 +616,7 @@ uri:ev4:nt/2012/pwd:NTUnion
     union value
         time_t
             long secondsPastEpoch 1000
-            int nanoSeconds 0
+            int nanoseconds 0
             int userTag 0
     alarm_t alarm
         int severity 0
@@ -624,7 +624,7 @@ uri:ev4:nt/2012/pwd:NTUnion
         string message
     time_t timeStamp
         long secondsPastEpoch 0
-        int nanoSeconds 0
+        int nanoseconds 0
         int userTag 0
 0x60a2c8
 uri:ev4:nt/2012/pwd:NTUnion
@@ -636,7 +636,7 @@ uri:ev4:nt/2012/pwd:NTUnion
         string message
     time_t timeStamp
         long secondsPastEpoch 0
-        int nanoSeconds 0
+        int nanoseconds 0
         int userTag 0
 0x60a2c8
 </pre>
@@ -663,7 +663,7 @@ uri:ev4:nt/2012/pwd:NTUnion
     any value
         time_t
             long secondsPastEpoch 1000
-            int nanoSeconds 0
+            int nanoseconds 0
             int userTag 0
     alarm_t alarm
         int severity 0
@@ -671,7 +671,7 @@ uri:ev4:nt/2012/pwd:NTUnion
         string message
     time_t timeStamp
         long secondsPastEpoch 0
-        int nanoSeconds 0
+        int nanoseconds 0
         int userTag 0
 0x60a2c8
 uri:ev4:nt/2012/pwd:NTUnion
@@ -683,7 +683,7 @@ uri:ev4:nt/2012/pwd:NTUnion
         string message
     time_t timeStamp
         long secondsPastEpoch 0
-        int nanoSeconds 0
+        int nanoseconds 0
         int userTag 0
 0x60a2c8
 </pre>
@@ -766,7 +766,7 @@ uri:ev4:nt/2012/pwd:NTUnion
         string message
     time_t timeStamp
         long secondsPastEpoch
-        int nanoSeconds
+        int nanoseconds
         int userTag
 0x60a2c8
 data
@@ -779,7 +779,7 @@ uri:ev4:nt/2012/pwd:NTUnion
         string message
     time_t timeStamp
         long secondsPastEpoch 0
-        int nanoSeconds 0
+        int nanoseconds 0
         int userTag 0
 0x60a2c8
 select valueDouble
@@ -792,7 +792,7 @@ uri:ev4:nt/2012/pwd:NTUnion
         string message
     time_t timeStamp
         long secondsPastEpoch 0
-        int nanoSeconds 0
+        int nanoseconds 0
         int userTag 0
 0x60a2c8
 value = 1.55
@@ -808,7 +808,7 @@ uri:ev4:nt/2012/pwd:NTUnion
         string message
     time_t timeStamp
         long secondsPastEpoch 0
-        int nanoSeconds 0
+        int nanoseconds 0
         int userTag 0
 0x60a2c8
 value = 1.65
@@ -1569,7 +1569,7 @@ StructureConstPtr example = standardField-&gt;scalar(
         string message
     timeStamp_t timeStamp
         long secondsPastEpoch
-        int  nanoSeconds
+        int  nanoseconds
         int userTag</pre>
 
 <p>In addition there are methods that create each of the property structures,
@@ -2797,7 +2797,7 @@ value field has properties alarm, timeStamp, and display.</p>
         string message
     timeStamp_t
         long secondsPastEpoch
-        int nanoSeconds
+        int nanoseconds
         int userTag
     display_t
         double limitLow 0.0
@@ -2823,7 +2823,7 @@ structure powerSupplySimple
         string message
     timeStamp_t
         long secondsPastEpoch
-        int nanoSeconds
+        int nanoseconds
         int userTag
     powerSupplyValue_t voltage
         double value
@@ -2943,17 +2943,17 @@ stack. For example the following is permitted:</p>
 <p>A timeStamp is represented by the following structure</p>
 <pre>structure timeStamp
     long secondsPastEpoch
-    int nanoSeconds
+    int nanoseconds
     int userTag</pre>
 
 <p>The Epoch is the posix epoch, i.e. Jan 1, 1970 00:00:00 UTC. Both the
-seconds and nanoSeconds are signed integers and thus can be negative. Since the
+seconds and nanoseconds are signed integers and thus can be negative. Since the
 seconds is kept as a 64 bit integer, it allows for a time much greater than the
-present age of the universe. Since the nanoSeconds portion is kept as a 32 bit
+present age of the universe. Since the nanoseconds portion is kept as a 32 bit
 integer it is subject to overflow if a value that corresponds to a value that
 is greater than a little more than 2 seconds of less that about -2 seconds. The
 support code always adjust seconds so that the nanoSecconds part is normlized,
-i. e. it has is 0&lt;=nanoSeconds&lt;nanoSecPerSec..</p>
+i. e. it has is 0&lt;=nanoseconds&lt;nanoSecPerSec..</p>
 
 <p>Two header files are provided for manipulating time stamps:</p>
 <dl>
@@ -2977,8 +2977,8 @@ extern int64 posixEpochAtEpicsEpoch;
 class TimeStamp {
 public:
     TimeStamp()
-    :secondsPastEpoch(0), nanoSeconds(0), userTag(0) {}
-    TimeStamp(int64 secondsPastEpoch,int32 nanoSeconds = 0,int32 userTag = 0);
+    :secondsPastEpoch(0), nanoseconds(0), userTag(0) {}
+    TimeStamp(int64 secondsPastEpoch,int32 nanoseconds = 0,int32 userTag = 0);
     //default constructors and destructor are OK
     //This class should not be extended
     void normalize();
@@ -2988,12 +2988,12 @@ public:
     int64 getEpicsSecondsPastEpoch() const {
         return secondsPastEpoch - posixEpochAtEpicsEpoch;
     }
-    int32 getNanoSeconds() const  {return nanoSeconds;}
+    int32 getNanoseconds() const  {return nanoseconds;}
     int32 getUserTag() const {return userTag;}
     void setUserTag(int userTag) {this-&gt;userTag = userTag;}
-    void put(int64 secondsPastEpoch,int32 nanoSeconds = 0) {
+    void put(int64 secondsPastEpoch,int32 nanoseconds = 0) {
         this-&gt;secondsPastEpoch = secondsPastEpoch;
-        this-&gt;nanoSeconds = nanoSeconds;
+        this-&gt;nanoseconds = nanoseconds;
         normalize();
     }
     void put(int64 milliseconds);
@@ -3017,12 +3017,12 @@ public:
 <p>where</p>
 <dl>
   <dt>TimeStamp()</dt>
-    <dd>The defauly constuctor. Both seconds and nanoSeconds are set to 0.</dd>
-  <dt>TimeStamp(int64 secondsPastEpoch,int32 nanoSeconds = 0)</dt>
+    <dd>The defauly constuctor. Both seconds and nanoseconds are set to 0.</dd>
+  <dt>TimeStamp(int64 secondsPastEpoch,int32 nanoseconds = 0)</dt>
     <dd>A constructor that gives initial values to seconds and nanoseconds.</dd>
   <dt>normalize</dt>
-    <dd>Adjust seconds and nanoSeconds so that
-      0&lt;=nanoSeconds&lt;nanoSecPerSec.</dd>
+    <dd>Adjust seconds and nanoseconds so that
+      0&lt;=nanoseconds&lt;nanoSecPerSec.</dd>
   <dt>fromTime_t</dt>
     <dd>Set time from standard C time.</dd>
   <dt>toTime_t</dt>
@@ -3032,13 +3032,13 @@ public:
   <dt>getEpicsSecondsPastEpoch</dt>
     <dd>Get the number of EPICS seconds since the epoch. EPICS uses Jan 1, 1990
       00:00:00 UTC as the epoch.</dd>
-  <dt>getNanoSeconds</dt>
-    <dd>Get the number of nanoSeconds. This is always normalized.</dd>
+  <dt>getNanoseconds</dt>
+    <dd>Get the number of nanoseconds. This is always normalized.</dd>
   <dt>getUserTag</dt>
     <dd>Get the userTag.</dd>
   <dt>setUserTag</dt>
     <dd>Set the userTag.</dd>
-  <dt>put(int64 secondsPastEpoch,int32 nanoSeconds = 0)</dt>
+  <dt>put(int64 secondsPastEpoch,int32 nanoseconds = 0)</dt>
     <dd>Set the timeStamp value. If necessary it will be normalized.</dd>
   <dt>put(int64 milliseconds)</dt>
     <dd>Set the timeStamp with a value the is the number of milliSeconds since

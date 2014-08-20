@@ -123,7 +123,7 @@ static void testTimeStamp()
     testOk1(result);
     pvTimeStamp.get(timeStamp);
     testOk1(ts.getSecondsPastEpoch()==timeStamp.getSecondsPastEpoch());
-    testOk1(ts.getNanoSeconds()==timeStamp.getNanoSeconds());
+    testOk1(ts.getNanoseconds()==timeStamp.getNanoseconds());
     testOk1(ts.getUserTag()==timeStamp.getUserTag());
     time_t tt;
     timeStamp.toTime_t(tt);
@@ -131,10 +131,10 @@ static void testTimeStamp()
     memcpy(&ctm,localtime(&tt),sizeof(struct tm));
     if(debug) {
         printf(
-            "%4.4d.%2.2d.%2.2d %2.2d:%2.2d:%2.2d %d nanoSeconds isDst %s userTag %d\n",
+            "%4.4d.%2.2d.%2.2d %2.2d:%2.2d:%2.2d %d nanoseconds isDst %s userTag %d\n",
             ctm.tm_year+1900,ctm.tm_mon + 1,ctm.tm_mday,
             ctm.tm_hour,ctm.tm_min,ctm.tm_sec,
-            timeStamp.getNanoSeconds(),
+            timeStamp.getNanoseconds(),
             (ctm.tm_isdst==0) ? "false" : "true",
             timeStamp.getUserTag());
     }

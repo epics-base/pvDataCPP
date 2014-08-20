@@ -27,21 +27,21 @@ int32 microSecPerSec = milliSecPerSec*milliSecPerSec;
 int32 nanoSecPerSec = milliSecPerSec*microSecPerSec;
 int64 posixEpochAtEpicsEpoch = POSIX_TIME_AT_EPICS_EPOCH;
 
-TimeStamp::TimeStamp(int64 secondsPastEpoch,int32 nanoSeconds,int32 userTag)
-: secondsPastEpoch(secondsPastEpoch),nanoSeconds(nanoSeconds),userTag(userTag)
+TimeStamp::TimeStamp(int64 secondsPastEpoch,int32 nanoseconds,int32 userTag)
+: secondsPastEpoch(secondsPastEpoch),nanoseconds(nanoseconds),userTag(userTag)
 {
     normalize();
 }
 
 void TimeStamp::normalize()
 {
-    if(nanoSeconds>=0 && nanoSeconds<nanoSecPerSec) return;
-    while(nanoSeconds>=nanoSecPerSec) {
-        nanoSeconds -= nanoSecPerSec;
+    if(nanoseconds>=0 && nanoseconds<nanoSecPerSec) return;
+    while(nanoseconds>=nanoSecPerSec) {
+        nanoseconds -= nanoSecPerSec;
         secondsPastEpoch++;
     }
-    while(nanoSeconds<0) {
-        nanoSeconds += nanoSecPerSec;
+    while(nanoseconds<0) {
+        nanoseconds += nanoSecPerSec;
         secondsPastEpoch--;
     }
 }
@@ -51,21 +51,21 @@ void TimeStamp::fromTime_t(const time_t & tt)
     epicsTimeStamp epicsTime;
     epicsTimeFromTime_t(&epicsTime,tt);
     secondsPastEpoch = epicsTime.secPastEpoch + posixEpochAtEpicsEpoch;
-    nanoSeconds = epicsTime.nsec;
+    nanoseconds = epicsTime.nsec;
 }
 
 void TimeStamp::toTime_t(time_t  &tt) const
 {
     epicsTimeStamp epicsTime;
     epicsTime.secPastEpoch = static_cast<epicsUInt32>(secondsPastEpoch-posixEpochAtEpicsEpoch);
-    epicsTime.nsec = nanoSeconds;
+    epicsTime.nsec = nanoseconds;
     epicsTimeToTime_t(&tt,&epicsTime);
 }
 
 void TimeStamp::put(int64 milliseconds)
 {
     secondsPastEpoch = milliseconds/1000;
-    nanoSeconds = (milliseconds%1000)*1000000;
+    nanoseconds = (milliseconds%1000)*1000000;
 }
 
 void TimeStamp::getCurrent()
@@ -74,13 +74,13 @@ void TimeStamp::getCurrent()
     epicsTimeGetCurrent(&epicsTime);
     secondsPastEpoch = epicsTime.secPastEpoch;
     secondsPastEpoch += posixEpochAtEpicsEpoch;
-    nanoSeconds = epicsTime.nsec;
+    nanoseconds = epicsTime.nsec;
 }
 
 double TimeStamp::toSeconds() const
 {
     double value = static_cast<double>(secondsPastEpoch);
-    double nano = nanoSeconds;
+    double nano = nanoseconds;
     value += nano/1e9;
     return value;
 }
@@ -88,9 +88,9 @@ double TimeStamp::toSeconds() const
 int64 TimeStamp::diffInt(TimeStamp const & left,TimeStamp  const&right )
 {
     int64 sl = left.secondsPastEpoch;
-    int32 nl = left.nanoSeconds;
+    int32 nl = left.nanoseconds;
     int64 sr = right.secondsPastEpoch;
-    int32 nr = right.nanoSeconds;
+    int32 nr = right.nanoseconds;
     int64 sdiff = sl - sr;
     sdiff *= nanoSecPerSec;
     sdiff += nl - nr;
@@ -142,7 +142,7 @@ bool TimeStamp::operator>(TimeStamp const &right) const
 double TimeStamp::diff(TimeStamp const & a,TimeStamp const & b)
 {
     double result = static_cast<double>(a.secondsPastEpoch - b.secondsPastEpoch);
-    result += (a.nanoSeconds - b.nanoSeconds)/1e9;
+    result += (a.nanoseconds - b.nanoseconds)/1e9;
     return result;
 }
 
@@ -163,12 +163,12 @@ TimeStamp & TimeStamp::operator+=(double seconds)
 {
     int64 secs = static_cast<int64>(seconds);
     int64 nano = static_cast<int64>((seconds - secs)*1e9);
-    nanoSeconds += static_cast<int32>(nano);
-    if(nanoSeconds>nanoSecPerSec) {
-        nanoSeconds -= nanoSecPerSec;
+    nanoseconds += static_cast<int32>(nano);
+    if(nanoseconds>nanoSecPerSec) {
+        nanoseconds -= nanoSecPerSec;
         secondsPastEpoch += 1;
-    } else if(nanoSeconds<-nanoSecPerSec) {
-        nanoSeconds += -nanoSecPerSec;
+    } else if(nanoseconds<-nanoSecPerSec) {
+        nanoseconds += -nanoSecPerSec;
         secondsPastEpoch -= 1;
     }
     secondsPastEpoch += secs;
@@ -182,7 +182,7 @@ TimeStamp & TimeStamp::operator-=(double seconds)
 
 int64 TimeStamp::getMilliseconds()
 {
-    return secondsPastEpoch*1000 + nanoSeconds/1000000;
+    return secondsPastEpoch*1000 + nanoseconds/1000000;
 }
 
 }}

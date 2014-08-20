@@ -386,7 +386,7 @@ void testStructure() {
     testDiag("\tSimple structure serialization");
 	PVStructurePtr pvStructure = factory->createPVStructure(getStandardField()->timeStamp());
     pvStructure->getLongField("secondsPastEpoch")->put(123);
-    pvStructure->getIntField("nanoSeconds")->put(456);
+    pvStructure->getIntField("nanoseconds")->put(456);
     pvStructure->getIntField("userTag")->put(789);
 
     serializationTest(pvStructure);

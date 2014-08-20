@@ -90,7 +90,7 @@ static void test()
     int32 offsetTimeStamp = (int32)pvField->getFieldOffset();
     pvField = pvs->getSubField("timeStamp.secondsPastEpoch");
     int32 offsetSeconds = (int32)pvField->getFieldOffset();
-    pvField = pvs->getSubField("timeStamp.nanoSeconds");
+    pvField = pvs->getSubField("timeStamp.nanoseconds");
     int32 offsetNano = (int32)pvField->getFieldOffset();
     pvField = pvs->getSubField("timeStamp.userTag");
     int32 offsetUserTag = (int32)pvField->getFieldOffset();

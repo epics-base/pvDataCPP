@@ -33,7 +33,7 @@ bool PVTimeStamp::attach(PVFieldPtr const & pvField)
         PVLongPtr pvLong = pvStructure->getLongField("secondsPastEpoch");
         if(pvLong.get()!=NULL) {
             pvSecs = pvLong;
-            pvNano = pvStructure->getIntField("nanoSeconds");
+            pvNano = pvStructure->getIntField("nanoseconds");
             pvUserTag = pvStructure->getIntField("userTag");
         }
         if(pvSecs.get()!=NULL
@@ -76,7 +76,7 @@ bool PVTimeStamp::set(TimeStamp const & timeStamp)
     if(pvSecs->isImmutable() || pvNano->isImmutable()) return false;
     pvSecs->put(timeStamp.getSecondsPastEpoch());
     pvUserTag->put(timeStamp.getUserTag());
-    pvNano->put(timeStamp.getNanoSeconds());
+    pvNano->put(timeStamp.getNanoseconds());
     return true;
 }
     

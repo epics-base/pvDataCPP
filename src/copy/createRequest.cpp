@@ -14,6 +14,7 @@
 #include <pv/createRequest.h>
 
 using namespace epics::pvData;
+using std::ostringstream;
 using std::tr1::static_pointer_cast;
 using std::cout;
 using std::endl;
@@ -161,7 +162,9 @@ private:
             string item = items[j];
             size_t equals = item.find('=');
             if(equals==string::npos || equals==0) {
-                message = item + " illegal option " + request;
+                ostringstream oss;
+                oss << item + " illegal option " + request;
+                message = oss.str();
                 throw std::logic_error("message");
             }
             top.push_back(Node(item.substr(0,equals)));
@@ -352,21 +355,21 @@ public:
             if(chr==']') numBracket--;
         }
         if(numParan!=0) {
-            std::ostringstream msg("mismatched () ");
-            msg << numParan;
-            message = msg.str();
+            ostringstream oss;
+            oss << "mismatched () " << numParan;
+            message = oss.str();
             return PVStructurePtr();
         }
         if(numBrace!=0) {
-            std::ostringstream msg("mismatched {} ");
-            msg << numBrace;
-            message = msg.str();
+            ostringstream oss;
+            oss << "mismatched {} " << numBrace;
+            message = oss.str();
             return PVStructurePtr();
         }
         if(numBracket!=0) {
-            std::ostringstream msg("mismatched [] ");
-            msg << numBracket;
-            message = msg.str();
+            ostringstream oss;
+            oss << "mismatched [] " << numBracket;
+            message = oss.str();
             return PVStructurePtr();
         }
         vector<Node> top;

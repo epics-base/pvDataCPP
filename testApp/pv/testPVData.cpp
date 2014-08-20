@@ -199,7 +199,7 @@ static void testPVScalarWithProperties(
         string("timeStamp.secondsPastEpoch"));
     testOk1(seconds.get()!=0);
     seconds->put(123456789);
-    PVIntPtr nano = pvStructure->getIntField(string("timeStamp.nanoSeconds"));
+    PVIntPtr nano = pvStructure->getIntField(string("timeStamp.nanoseconds"));
     testOk1(nano.get()!=0);
     nano->put(1000000);
     PVIntPtr severity = pvStructure->getIntField(string("alarm.severity"));
