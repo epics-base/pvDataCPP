@@ -30,7 +30,7 @@ void testCreateRequest() {
     string request = "";
     if(debug) { cout  << "request " << request <<endl;}
     PVStructurePtr pvRequest = createRequest->createRequest(request);
-    if(pvRequest==NULL) { cout<< createRequest->getMessage() << endl;}
+    if(pvRequest.get()==NULL) { cout<< createRequest->getMessage() << endl;}
     if(debug) { cout << *pvRequest << endl;}
     testOk1(pvRequest.get()!=NULL);
     testOk1(pvRequest->getStructure()->getNumberFields()==0);
@@ -39,7 +39,7 @@ void testCreateRequest() {
     request = "record[]field()getField()putField()";
     if(debug) { cout  << "request " << request <<endl;}
     pvRequest = createRequest->createRequest(request);
-    if(pvRequest==NULL) { cout<< createRequest->getMessage() << endl;}
+    if(pvRequest.get()==NULL) { cout<< createRequest->getMessage() << endl;}
     if(debug) { cout << *pvRequest << endl;}
     testOk1(pvRequest.get()!=NULL);
     testOk1(pvRequest->getSubField("field").get()!=NULL);
@@ -50,7 +50,7 @@ void testCreateRequest() {
     request = "record[a=b,x=y]field(a) putField(a),getField(a)";
     if(debug) { cout  << "request " << request <<endl;}
     pvRequest = createRequest->createRequest(request);
-    if(pvRequest==NULL) { cout<< createRequest->getMessage() << endl;}
+    if(pvRequest.get()==NULL) { cout<< createRequest->getMessage() << endl;}
     if(debug) { cout << *pvRequest << endl;}
     testOk1(pvRequest.get()!=NULL);
     pvString = pvRequest->getSubField<PVString>("record._options.a");
@@ -67,7 +67,7 @@ void testCreateRequest() {
     request = "field(a.b[x=y])";
     if(debug) { cout  << "request " << request <<endl;}
     pvRequest = createRequest->createRequest(request);
-    if(pvRequest==NULL) { cout<< createRequest->getMessage() << endl;}
+    if(pvRequest.get()==NULL) { cout<< createRequest->getMessage() << endl;}
     if(debug) { cout << *pvRequest << endl;}
     testOk1(pvRequest.get()!=NULL);
     pvString = pvRequest->getSubField<PVString>("field.a.b._options.x");
@@ -78,7 +78,7 @@ void testCreateRequest() {
     request = "field(a.b{c.d})";
     if(debug) { cout  << "request " << request <<endl;}
     pvRequest = createRequest->createRequest(request);
-    if(pvRequest==NULL) { cout<< createRequest->getMessage() << endl;}
+    if(pvRequest.get()==NULL) { cout<< createRequest->getMessage() << endl;}
     if(debug) { cout << *pvRequest << endl;}
     testOk1(pvRequest.get()!=NULL);
     testOk1(pvRequest->getSubField("field.a.b.c.d").get()!=NULL);
@@ -87,7 +87,7 @@ void testCreateRequest() {
     request = "field(a.b[x=y]{c.d})";
     if(debug) { cout  << "request " << request <<endl;}
     pvRequest = createRequest->createRequest(request);
-    if(pvRequest==NULL) { cout<< createRequest->getMessage() << endl;}
+    if(pvRequest.get()==NULL) { cout<< createRequest->getMessage() << endl;}
     if(debug) { cout << *pvRequest << endl;}
     testOk1(pvRequest.get()!=NULL);
     pvString = pvRequest->getSubField<PVString>("field.a.b._options.x");
@@ -99,7 +99,7 @@ void testCreateRequest() {
     request = "field(a.b[x=y]{c.d[x=y]})";
     if(debug) { cout  << "request " << request <<endl;}
     pvRequest = createRequest->createRequest(request);
-    if(pvRequest==NULL) { cout<< createRequest->getMessage() << endl;}
+    if(pvRequest.get()==NULL) { cout<< createRequest->getMessage() << endl;}
     if(debug) { cout << *pvRequest << endl;}
     testOk1(pvRequest.get()!=NULL);
     pvString = pvRequest->getSubField<PVString>("field.a.b._options.x");
@@ -113,7 +113,7 @@ void testCreateRequest() {
     request = "record[a=b,c=d] field(a.a[a=b]{a.a[a=b]},b.a[a=b]{a,b})";
     if(debug) { cout  << "request " << request <<endl;}
     pvRequest = createRequest->createRequest(request);
-    if(pvRequest==NULL) { cout<< createRequest->getMessage() << endl;}
+    if(pvRequest.get()==NULL) { cout<< createRequest->getMessage() << endl;}
     if(debug) { cout << *pvRequest << endl;}
     testOk1(pvRequest.get()!=NULL);
     pvString = pvRequest->getSubField<PVString>("field.a.a._options.a");
@@ -133,7 +133,7 @@ void testCreateRequest() {
     request = "alarm,timeStamp,power.value";
     if(debug) { cout  << "request " << request <<endl;}
     pvRequest = createRequest->createRequest(request);
-    if(pvRequest==NULL) { cout<< createRequest->getMessage() << endl;}
+    if(pvRequest.get()==NULL) { cout<< createRequest->getMessage() << endl;}
     if(debug) { cout << *pvRequest << endl;}
     testOk1(pvRequest.get()!=NULL);
     testOk1(pvRequest->getSubField("field.alarm").get()!=NULL);
@@ -144,7 +144,7 @@ void testCreateRequest() {
     request = "record[process=true]field(alarm,timeStamp,power.value)";
     if(debug) { cout  << "request " << request <<endl;}
     pvRequest = createRequest->createRequest(request);
-    if(pvRequest==NULL) { cout<< createRequest->getMessage() << endl;}
+    if(pvRequest.get()==NULL) { cout<< createRequest->getMessage() << endl;}
     if(debug) { cout << *pvRequest << endl;}
     testOk1(pvRequest.get()!=NULL);
     pvString = pvRequest->getSubField<PVString>("record._options.process");
@@ -158,7 +158,7 @@ void testCreateRequest() {
     request = "record[process=true]field(alarm,timeStamp[algorithm=onChange,causeMonitor=false],power{value,alarm})";
     if(debug) { cout  << "request " << request <<endl;}
     pvRequest = createRequest->createRequest(request);
-    if(pvRequest==NULL) { cout<< createRequest->getMessage() << endl;}
+    if(pvRequest.get()==NULL) { cout<< createRequest->getMessage() << endl;}
     if(debug) { cout << *pvRequest << endl;}
     testOk1(pvRequest.get()!=NULL);
     pvString = pvRequest->getSubField<PVString>("record._options.process");
@@ -179,7 +179,7 @@ void testCreateRequest() {
     request = "record[int=2,float=3.14159]field(alarm,timeStamp[shareData=true],power.value)";
     if(debug) { cout  << "request " << request <<endl;}
     pvRequest = createRequest->createRequest(request);
-    if(pvRequest==NULL) { cout<< createRequest->getMessage() << endl;}
+    if(pvRequest.get()==NULL) { cout<< createRequest->getMessage() << endl;}
     if(debug) { cout << *pvRequest << endl;}
     testOk1(pvRequest.get()!=NULL);
     pvString = pvRequest->getSubField<PVString>("record._options.int");
@@ -201,7 +201,7 @@ void testCreateRequest() {
     	+ "current{value,alarm},voltage{value,alarm})";
     if(debug) { cout  << "request " << request <<endl;}
     pvRequest = createRequest->createRequest(request);
-    if(pvRequest==NULL) { cout<< createRequest->getMessage() << endl;}
+    if(pvRequest.get()==NULL) { cout<< createRequest->getMessage() << endl;}
     if(debug) { cout << *pvRequest << endl;}
     testOk1(pvRequest.get()!=NULL);
     testOk1(pvRequest->getSubField("putField.power.value").get()!=NULL);
@@ -221,7 +221,7 @@ void testCreateRequest() {
         + "})";
     if(debug) { cout  << "request " << request <<endl;}
     pvRequest = createRequest->createRequest(request);
-    if(pvRequest==NULL) { cout<< createRequest->getMessage() << endl;}
+    if(pvRequest.get()==NULL) { cout<< createRequest->getMessage() << endl;}
     if(debug) { cout << *pvRequest << endl;}
     testOk1(pvRequest.get()!=NULL);
     testOk1(pvRequest->getSubField("field.alarm").get()!=NULL);
@@ -243,7 +243,7 @@ void testCreateRequest() {
         + ")";
     if(debug) { cout  << "request " << request <<endl;}
     pvRequest = createRequest->createRequest(request);
-    if(pvRequest==NULL) { cout<< createRequest->getMessage() << endl;}
+    if(pvRequest.get()==NULL) { cout<< createRequest->getMessage() << endl;}
     if(debug) { cout << *pvRequest << endl;}
     testOk1(pvRequest.get()!=NULL);
     testOk1(pvRequest->getSubField("putField.power.value").get()!=NULL);
@@ -276,7 +276,7 @@ void testCreateRequest() {
     request = "a{b{c{d}}}";
     if(debug) { cout  << "request " << request <<endl;}
     pvRequest = createRequest->createRequest(request);
-    if(pvRequest==NULL) { cout<< createRequest->getMessage() << endl;}
+    if(pvRequest.get()==NULL) { cout<< createRequest->getMessage() << endl;}
     if(debug) { cout << *pvRequest << endl;}
     testOk1(pvRequest.get()!=NULL);
     testOk1(pvRequest->getSubField("field.a.b.c.d").get()!=NULL);

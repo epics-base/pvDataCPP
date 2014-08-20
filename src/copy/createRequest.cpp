@@ -162,9 +162,7 @@ private:
             string item = items[j];
             size_t equals = item.find('=');
             if(equals==string::npos || equals==0) {
-                ostringstream oss;
-                oss << item + " illegal option " + request;
-                message = oss.str();
+                message = item + " illegal option " + request;
                 throw std::logic_error("message");
             }
             top.push_back(Node(item.substr(0,equals)));
