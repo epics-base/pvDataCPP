@@ -33,6 +33,7 @@ public:
 private:
     PVDoublePtr pvLow;
     PVDoublePtr pvHigh;
+    PVDoublePtr pvMinStep;
     static std::string noControlFound;
     static std::string notAttached;
 };

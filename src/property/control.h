@@ -16,7 +16,7 @@ namespace epics { namespace pvData {
 
 class epicsShareClass Control {
 public:
-    Control() : low(0.0), high(0.0) {}
+    Control() : low(0.0), high(0.0), minStep(0.0) {}
     //default constructors and destructor are OK
     double getLow() const {return low;}
     double getHigh() const {return high;}
