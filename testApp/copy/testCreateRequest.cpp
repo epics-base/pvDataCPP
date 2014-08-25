@@ -20,7 +20,7 @@ using std::endl;
 
 static bool debug = false;
 
-void testCreateRequest() {
+static void testCreateRequest() {
     printf("testCreateRequest... \n");
     CreateRequest::shared_pointer  createRequest = CreateRequest::create();
     PVStringPtr pvString;
