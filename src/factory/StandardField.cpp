@@ -503,28 +503,28 @@ StructureConstPtr StandardField::scalar(
     ScalarType type,string  const &properties)
 {
     ScalarConstPtr field = fieldCreate->createScalar(type); // scalar_t
-    return createProperties("uri:ev4:nt/2012/pwd:NTScalar",field,properties);
+    return createProperties("uri:ev4:nt/2014/pwd:NTScalar",field,properties);
 }
 
 StructureConstPtr StandardField::regUnion(
     UnionConstPtr const &field,
         string const & properties)
 {
-   return createProperties("uri:ev4:nt/2012/pwd:NTUnion",field,properties);
+   return createProperties("uri:ev4:nt/2014/pwd:NTUnion",field,properties);
 }
 
 StructureConstPtr StandardField::variantUnion(
     string const & properties)
 {
     UnionConstPtr field =  fieldCreate->createVariantUnion();
-    return createProperties("uri:ev4:nt/2012/pwd:NTUnion",field,properties);
+    return createProperties("uri:ev4:nt/2014/pwd:NTUnion",field,properties);
 }
 
 StructureConstPtr StandardField::scalarArray(
     ScalarType elementType, string  const &properties)
 {
     ScalarArrayConstPtr field = fieldCreate->createScalarArray(elementType); // scalar_t[]
-    return createProperties("uri:ev4:nt/2012/pwd:NTScalarArray",field,properties);
+    return createProperties("uri:ev4:nt/2014/pwd:NTScalarArray",field,properties);
 }
 
 
@@ -533,7 +533,7 @@ StructureConstPtr StandardField::structureArray(
 {
     StructureArrayConstPtr field = fieldCreate->createStructureArray(
         structure);
-    return createProperties("uri:ev4:nt/2012/pwd:NTStructureArray",field,properties);
+    return createProperties("uri:ev4:nt/2014/pwd:NTStructureArray",field,properties);
 }
 
 StructureConstPtr StandardField::unionArray(
@@ -541,7 +541,7 @@ StructureConstPtr StandardField::unionArray(
 {
     UnionArrayConstPtr field = fieldCreate->createUnionArray(
         punion);
-    return createProperties("uri:ev4:nt/2012/pwd:NTUnionArray",field,properties);
+    return createProperties("uri:ev4:nt/2014/pwd:NTUnionArray",field,properties);
 }
 
 StructureConstPtr StandardField::enumerated()
@@ -560,7 +560,7 @@ StructureConstPtr StandardField::enumerated()
 StructureConstPtr StandardField::enumerated(string  const &properties)
 {
     StructureConstPtr field = enumerated(); // enum_t
-    return createProperties("uri:ev4:nt/2012/pwd:NTEnum",field,properties);
+    return createProperties("uri:ev4:nt/2014/pwd:NTEnum",field,properties);
 }
 
 StructureConstPtr StandardField::alarm()

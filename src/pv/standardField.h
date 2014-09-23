@@ -122,7 +122,7 @@ public:
      */
     StructureConstPtr enumerated();
     /** Create a structure that has an enumerated structure value field
-     * The id for the structure is "uri:ev4:nt/2012/pwd:NTEnum".
+     * The id for the structure is "uri:ev4:nt/2014/pwd:NTEnum".
      * @param properties A comma separated list of properties.
      * This is some combination of "alarm,timeStamp,display,control,valueAlarm".
      * @return The const shared pointer to the structure.

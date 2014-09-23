@@ -48,11 +48,15 @@ static string allProperties("alarm,timeStamp,display,control");
 static PVStructurePtr doubleRecord;
 static PVStructurePtr enumeratedRecord;
 
+static void printRecords()
+{
+    std::cout << "doubleRecord" << std::endl << *doubleRecord << std::endl;
+    std::cout << "enumeratedRecord" << std::endl << *enumeratedRecord << std::endl;
+}
+
 static void createRecords()
 {
     doubleRecord = standardPVField->scalar(pvDouble,allProperties);
-    if(debug)
-        std::cout << "doubleRecord" << std::endl << *doubleRecord << std::endl;
     StringArray choices;
     choices.reserve(4);
     choices.push_back("1");
@@ -60,14 +64,7 @@ static void createRecords()
     choices.push_back("3");
     choices.push_back("4");
     enumeratedRecord = standardPVField->enumerated(choices,alarmTimeStamp);
-    if(debug)
-        std::cout << "enumeratedRecord" << std::endl << *doubleRecord << std::endl;
-}
-
-static void printRecords()
-{
-    std::cout << "doubleRecord" << std::endl << *doubleRecord << std::endl;
-    std::cout << "enumeratedRecord" << std::endl << *doubleRecord << std::endl;
+    if(debug) printRecords();
 }
 
 static void testAlarm()
