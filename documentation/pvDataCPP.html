@@ -254,7 +254,7 @@ structure
         int userTag
 
 easy way
-uri:ev4:nt/2014/pwd:NTScalarArray
+ev4:nt/NTScalarArray:1.0
     string[] value
     alarm_t alarm
         int severity
@@ -274,7 +274,7 @@ via standardField:</p>
 </pre>
 It produces :
 <pre>
-uri:ev4:nt/2014/pwd:NTScalarArray
+ev4:nt/NTScalarArray:1.0
     string[] value
     alarm_t alarm
         int severity
@@ -302,7 +302,7 @@ A hard way to create an structure with an enumerated value field and a time stam
 
     StructureConstPtr ntEnumHard =
     fieldCreate-&gt;createFieldBuilder()-&gt;
-        setId("uri:ev4:nt/2014/pwd/NTEnum")-&gt;
+        setId("ev4:nt/NTEnum:1.0")-&gt;
         add("value", enum_t)-&gt;
         addNestedStructure("timeStamp")-&gt;
             setId("time_t")-&gt;
@@ -315,7 +315,7 @@ A hard way to create an structure with an enumerated value field and a time stam
 </pre>
 It produces:
 <pre>
-uri:ev4:nt/2014/pwd/NTEnum
+ev4:nt/NTEnum:1.0
     enum_t value
         int index
         string[] choices
@@ -332,7 +332,7 @@ fields: alarm and timeStamp:</p>
 </pre>
 It produces:
 <pre>
-uri:ev4:nt/2014/pwd:NTEnum
+ev4:nt/NTEnum
     enum_t value
         int index
         string[] choices
@@ -372,7 +372,7 @@ union
         int userTag
 
 structure with value field being a union
-uri:ev4:nt/2014/pwd:NTUnion
+ev4:nt/NTUnion:1.0
     union value
         double doubleValue
         int intValue
@@ -470,7 +470,7 @@ structure
 </pre>
 This produces:
 <pre>
-uri:ev4:nt/2014/pwd:NTScalar 
+ev4:nt/NTScalar:1.0
     double value 100000
     alarm_t alarm
         int severity 0
@@ -503,7 +503,7 @@ from get 100000
 </pre>
 This produces:
 <pre>
-uri:ev4:nt/2014/pwd:NTScalarArray 
+ev4:nt/NTScalarArray:1.0
     double[] value [0,1,2,3,4,5,6,7,8,9]
     alarm_t alarm
         int severity 0
@@ -524,7 +524,7 @@ via getData 0 1 2 3 4 5 6 7 8 9
 </pre>
 This produces:
 <pre>
-uri:ev4:nt/2014/pwd:NTEnum 
+ev4:nt/NTEnum:1.0
     enum_t value
         int index 0
         string[] choices []
@@ -610,7 +610,7 @@ structure
 </pre>
 This produces:
 <pre>
-uri:ev4:nt/2014/pwd:NTUnion
+ev4:nt/NTUnio:1.0
     union value
         time_t
             long secondsPastEpoch 1000
@@ -625,7 +625,7 @@ uri:ev4:nt/2014/pwd:NTUnion
         int nanoseconds 0
         int userTag 0
 0x60a2c8
-uri:ev4:nt/2014/pwd:NTUnion
+ev4:nt/NTUnio:1.0
     union value
         double  100000
     alarm_t alarm
@@ -657,7 +657,7 @@ uri:ev4:nt/2014/pwd:NTUnion
 </pre>
 This produces:
 <pre>
-uri:ev4:nt/2014/pwd:NTUnion
+ev4:nt/NTUnio:1.0
     any value
         time_t
             long secondsPastEpoch 1000
@@ -672,7 +672,7 @@ uri:ev4:nt/2014/pwd:NTUnion
         int nanoseconds 0
         int userTag 0
 0x60a2c8
-uri:ev4:nt/2014/pwd:NTUnion
+ev4:nt/NTUnio:1.0
     any value
         double  100000
     alarm_t alarm
@@ -732,7 +732,7 @@ uri:ev4:nt/2014/pwd:NTUnion
 This produces:
 <pre>
 introspection
-uri:ev4:nt/2014/pwd:NTUnion
+ev4:nt/NTUnio:1.0
     union value
         double doubleValue
         double[] doubleArrayValue
@@ -768,7 +768,7 @@ uri:ev4:nt/2014/pwd:NTUnion
         int userTag
 0x60a2c8
 data
-uri:ev4:nt/2014/pwd:NTUnion
+ev4:nt/NTUnion:1.0
     union value
         (none)
     alarm_t alarm
@@ -781,7 +781,7 @@ uri:ev4:nt/2014/pwd:NTUnion
         int userTag 0
 0x60a2c8
 select valueDouble
-uri:ev4:nt/2014/pwd:NTUnion
+ev4:nt/NTUnion:1.0
     union value
         double  1.55
     alarm_t alarm
@@ -795,7 +795,7 @@ uri:ev4:nt/2014/pwd:NTUnion
 0x60a2c8
 value = 1.55
 select structValue
-uri:ev4:nt/2014/pwd:NTUnion
+ev4:nt/NTUnion:1.0
     union value
         structure
             double doubleValue 1.65
