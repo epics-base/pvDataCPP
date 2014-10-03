@@ -2365,10 +2365,10 @@ public:
 <h3>PVUnionArray</h3>
 <p>The interface for an array of unions is:</p>
 <pre>
-template&amp;ly;&amp;gt;
-class epicsShareClass PVValueArray&amp;ly;PVUnionPtr&amp;gt; : public detail::PVVectorStorage&amp;ly;PVUnionPtr,PVArray&amp;gt;
+template&lt;&gt;
+class epicsShareClass PVValueArray&lt;PVUnionPtr&gt; : public detail::PVVectorStorage&lt;PVUnionPtr,PVArray&gt;
 {
-    typedef detail::PVVectorStorage&amp;ly;PVUnionPtr,PVArray&amp;gt; base_t;
+    typedef detail::PVVectorStorage&lt;PVUnionPtr,PVArray&gt; base_t;
 public:
     POINTER_DEFINITIONS(PVUnionArray);
     typedef PVUnionPtr  value_type;
@@ -2378,8 +2378,8 @@ public:
     typedef const PVUnionArray&amp; const_reference;
 
     //TODO: full namespace can be removed along with local typedef 'shared_vector'
-    typedef ::epics::pvData::shared_vector&amp;ly;PVUnionPtr&amp;gt; svector;
-    typedef ::epics::pvData::shared_vector&amp;ly;const PVUnionPtr&amp;gt; const_svector;
+    typedef ::epics::pvData::shared_vector&lt;PVUnionPtr&gt; svector;
+    typedef ::epics::pvData::shared_vector&lt;const PVUnionPtr&gt; const_svector;
     
     virtual ~PVValueArray() {}
     virtual ArrayConstPtr getArray() const;
