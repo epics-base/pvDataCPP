@@ -68,7 +68,7 @@ license.</a></p>
 
 <p>EPICS Version 4 provides efficient
 storage, access, and communication, of memory resident structured data.
-pvData is the storage compoment.
+pvData is the storage component.
 pvDataCPP is the C++ implementation of pvData.
 It is one part of the set of related products in the EPICS
 V4 control system programming environment:<br />
@@ -97,7 +97,7 @@ TODO.md describes things to do before the next release.
 <p>pvData is one of a set of related projects. It describes and implements
 data that the other projects support. Thus it is not useful by itself but
 understanding pvData is required in order to understand the other projects. The
-reader should also become familar with project pvAccess, which is
+reader should also become familiar with project pvAccess, which is
 located via the same sourceforge site as this project.</p>
 
 <p>The Java and C++ implementation of pvData implement the same data model but
@@ -107,7 +107,7 @@ differ in implementation because of the differences between Java and C++.</p>
 first two chapters:</p>
 <dl>
   <dt>Introduction</dt>
-    <dd>A brief descripton of pvData.</dd>
+    <dd>A brief description of pvData.</dd>
   <dt>PVData Meta Language</dt>
     <dd>A language used to describe data.</dd>
 </dl>
@@ -172,11 +172,11 @@ StandardPVFieldPtr standardPVField = getStandardPVField();
     <dd>This creates instances of data objects.
      </dd>
   <dt>standardField</dt>
-     <dd>This provides support for introspection obects for standard fields,
+     <dd>This provides support for introspection objects for standard fields,
      Standard fields are alarm, timeStamp, display, enumerated structure, and value alarm.
      </dd>
   <dt>standardPVField</dt>
-     <dd>This provides support for data obects for standard fields,
+     <dd>This provides support for data objects for standard fields,
      </dd>
 </dl>
 
@@ -245,7 +245,7 @@ structure
         int nanoseconds
         int userTag
 
-hardway
+hard way
 structure
     double value
     time_t timeStamp
@@ -639,7 +639,7 @@ ev4:nt/NTUnio:1.0
 0x60a2c8
 </pre>
 
-<h4>varient union example</h4>
+<h4>variant union example</h4>
 <pre>
     PVStructurePtr pvStructure = pvDataCreate-&gt;createPVStructure(
         standardField-&gt;variantUnion("alarm,timeStamp"));
@@ -821,10 +821,10 @@ value = 1.65
      // ...
 }}</pre>
 
-<h3>Memory Managemment</h3>
+<h3>Memory Management</h3>
 
 <p>Many pvDataCPP introspection and data objects are designed to be shared. They are
-made availiable via <b>std::tr1::shared_ptr</b>.
+made available via <b>std::tr1::shared_ptr</b>.
 The following naming convention is used
 in typedefs:</p>
 <dl>
@@ -847,14 +847,14 @@ Test programs appears in <b>testApp/pv</b>.</p>
 <p><b>NOTES</b>:</p>
 <dl>
   <dt>interface</dt>
-    <dd>The documention uses the word <b>interface</b>.
+    <dd>The documentation uses the word <b>interface</b>.
      This is an analogy with how Java defines interface.
       C++ does not have interfaces but directory pv defines classes
       with public members that are similar to the Java interfaces. Most of the
       implementation is in factory.</dd>
-  <dt>Naming Convertions</dt>
-    <dd>The naming convertions for variables, methods, and classes follow the
-      Java convertions, i. e. class name begin with an upper case letter,
+  <dt>Naming Conventions</dt>
+    <dd>The naming conventions for variables, methods, and classes follow the
+      Java conventions, i. e. class name begin with an upper case letter,
       variables and methods begin with a lower case letter.</dd>
 </dl>
 
@@ -885,14 +885,14 @@ copying data between fields.</p>
     <dd>Provides access to introspection interfaces for standard structures
       like timeStamp, alarm, etc.</dd>
   <dt>standardPVField.h</dt>
-    <dd>Cteates data interfaces for standard data structures like timeStamp,
+    <dd>Creates data interfaces for standard data structures like timeStamp,
       alarm, etc.</dd>
 </dl>
 
 <h2>pvType.h</h2>
 
 <p>This provides C/C++ definitions for the pvData primitive types: boolean,
-byte, short, int, long, ubyte,ushort, uint,u long,float, double, and string.
+byte, short, int, long, ubyte, ushort, uint, ulong, float, double, and string.
 Because pvData is network data, the C++ implementation must implement the
 proper semantics for the primitive types.</p>
 
@@ -938,7 +938,7 @@ typedef std::vector&lt;std::string&gt;::const_iterator StringArray_const_iterato
       in a future implementation they should be changes via "#ifdef"
       preprocessor statements.</dd>
   <dt>std::string</dt>
-    <dd>pvData requires that a string be an immutable string that is transfered
+    <dd>pvData requires that a string be an immutable string that is transferred
       over the network as a UTF8 encoded string. Since std::string implements
       copy on write semantics, it can be used for support for immutable
       strings. It can also be serialized/deserialized as a UTF8 encoded string.
@@ -971,10 +971,10 @@ than showing the entire file, it will be described in parts. </p>
 <p>The primary purpose for pvData is to support network access to structured data.
 pvAccess transports top level pvStructures. In addition a pvAccess server holds
 a set of pvnames, where each name is a unique name in the local network.
-This is also refered to as the channel name.
+This is also referred to as the channel name.
 </p>
 
-<p>Given a pvname , it is possible to introspect the types of the associated data
+<p>Given a pvname, it is possible to introspect the types of the associated data
 access to data. The reflection and data interfaces are separate because the
 data may not be available. For example when a pvAccess client connects to a pvname,
 the client library can obtain the reflection information without obtaining any
@@ -1035,8 +1035,8 @@ std::ostream&amp; operator&lt;&lt;(std::ostream&amp; o, const ScalarType&amp; sc
       structure introspection interface.</dd>
   <dt>union_t</dt>
     <dd>This is like a structure that has a single subfield.
-    The type for the subfield can either be any type, which is called a varient union,
-    of can be one od a specified set of types.
+    The type for the subfield can either be any type, which is called a variant union,
+    of can be one of a specified set of types.
     In the data interfaces the type can be changed dynamically.
 '   </dd>
   <dt>unionArray</dt>
@@ -1120,15 +1120,15 @@ following: </p>
     <dd>Has fields that can be any of the supported types.</dd>
   <dt>StructureArray</dt>
     <dd>The field holds an array of structures. Each element has the same
-      Structure interspection interface. A pvAccess client can only get/put
+      Structure introspection interface. A pvAccess client can only get/put
       entire PVStructure elements NOT subfields of array elements.</dd>
    <dt>Union</dt>
       <dd>
-       This has two flavors: a varient union or a union of a fixed set
+       This has two flavors: a variant union or a union of a fixed set
        of types. A PVUnion will have a single subfield.
-       If the union introspection interface is a varient union then
+       If the union introspection interface is a variant union then
         the single field can be of any type and has the name <b>any</b>.
-       If the union is not a varient type then the type can be one of
+       If the union is not a variant type then the type can be one of
       a fixed set of types and a name associated with the type.
        The union introspection interface has a field array and a string
        array that has the fixed set of types and associated names.
@@ -1136,7 +1136,7 @@ following: </p>
    <dt>UnionArray</dt>
        <dd>
         This is an array of unions. A PVUnionArray is an array
-        of PVUnions. Each element has the same interspection interface
+        of PVUnions. Each element has the same introspection interface
          but the subfield of each element can have a different type.
        </dd>
   <dt>FieldBuilder</dt>
@@ -1369,10 +1369,10 @@ public:
    <dt>getNumberFields</dt>
     <dd>Get the number of possible field types.
      Both getFields and getFieldNames will return an array with getNumberFields elements.
-     A value of 0 is returned for invarient arrays.
+     A value of 0 is returned for invariant arrays.
      </dd>
    <dt>getField</dt>
-     <dd>Given a name ot an index the type is returned.
+     <dd>Given a name or an index the type is returned.
       NULL is returned if not found.
      </dd>
    <dt>getFieldIndex</dt>
@@ -1384,7 +1384,7 @@ public:
    <dt>getFieldName</dt>
        <dd>Get the name for the specified index.</dd>
    <dt>isVariant</dt>
-      <dd>returns <b>true</b> if this is varient array and <b>false</b> otherwise.
+      <dd>returns <b>true</b> if this is variant array and <b>false</b> otherwise.
 </dl>
 <h3>fieldBuilder and createField</h3>
 <pre>
@@ -1519,13 +1519,13 @@ description of the methods.
       </dd>
   <dt>createVariantUnion</dt>
       <dd>
-      Create a varient union. The id will be <b>any</b>.
+      Create a variant union. The id will be <b>any</b>.
       </dd>
   <dt>createUnionArray</dt>
      <dd>Create a union array. <b>punion</b> is the introspection interface
       for each element.</dd>
   <dt>createVariantUnionArray</dt>
-     <dd>Create a  union array where each element is a varient union.</dd>
+     <dd>Create a  union array where each element is a variant union.</dd>
   <dt>createStructureArray</dt>
     <dd>Create a structure array introspection instance. </dd>
   <dt>appendField</dt>
@@ -1622,8 +1622,8 @@ public:
       will be created with the first element being a union with the specified
       scalar type and name value. The other fields in the structure will be the
       corresponding property structures.</dd>
-  <dt>varient`Union</dt>
-    <dd>Create a varient union. A structure
+  <dt>variant`Union</dt>
+    <dd>Create a variant union. A structure
       will be created with the first element being a union with the specified
       scalar type and name value. The other fields in the structure will be the
       corresponding property structures.</dd>
@@ -1679,7 +1679,7 @@ showing the entire file, it will be described in parts. </p>
 <h3>typedefs</h3>
 
 <p>These are typedefs for Array and Ptr for the various pvData class
-definitions, i.e. typdefs for "std::vector" and "std::tr1::shared_ptr".</p>
+definitions, i.e. typedefs for "std::vector" and "std::tr1::shared_ptr".</p>
 <pre>
 class PVField;
 class PVScalar;
@@ -1830,7 +1830,7 @@ std::ostream&amp; operator&lt;&lt;(std::ostream&amp; o, const PVField&amp; f);
       name will be an empty string.</dd>
   <dt>getFullName</dt>
      <dd>Fully expand the name of this field using the
-     names of its parent fields with a dot '.' seperating
+     names of its parent fields with a dot '.' separating
      each name.
      </dd>
   <dt>getFieldOffset</dt>
@@ -2026,9 +2026,9 @@ pv-&gt;putFrom&lt;pvInt&gt;(val);
 <p>A PVUnion has a single subfield.
 The Union  introspection interface determines the possible
 field types for the subfield.
-If it is a varient union then any type is allowed and the
+If it is a variant union then any type is allowed and the
 subfield name is normally <b>any</b>.
-If it is not a varient union that the Union interface determines
+If it is not a variant union that the Union interface determines
 the possible field types and names.</p>
 <pre>
 class PVUnion : public PVField
@@ -2069,7 +2069,7 @@ public:
    <dt>getUnion</dt>
      <dd>Get the introspection interface.</dd>
    <dt>get</dt>
-     <dd>Get the curent field. A template version does the conversion.
+     <dd>Get the current field. A template version does the conversion.
      <b>NULL</b> is returned if no field is selected or if the caller
 '     asks for the wrong type.
      </dd>
@@ -2133,7 +2133,7 @@ public:
   <dt>setCapacityMutable</dt>
     <dd>Specify if the capacity can be changed.</dd>
   <dt>setCapacity</dt>
-    <dd>Set the capaciity.</dd>
+    <dd>Set the capacity.</dd>
   <dt>dumpValue</dt>
     <dd>ostream method</dd>
 </dl>
@@ -2143,7 +2143,7 @@ public:
 <h3>PVScalarArray</h3>
 
 <p>PVScalarArray is the base class for scalar array data. PVValueArray is a
-templete for the various scalar array data classes. There is a class for each
+template for the various scalar array data classes. There is a class for each
 possible scalar type, i. e. PVBooleanArray, ..., PVStringArray.</p>
 <pre>
 class PVScalarArray : public PVArray {
@@ -2179,13 +2179,13 @@ public:
      <dd>Assign the given value after conversion.
       A copy and element-wise conversion is performed unless the element type
       of the PVScalarArray matches the type of the provided data.
-     If the types do match then a new refernce to the provided data is kept.
+     If the types do match then a new reference to the provided data is kept.
      </dd>
   <dt>assign</dt>
     <dd>Assign the given PVScalarArray's value.
      A copy and element-wise conversion is performed unless the element type
      of the PVScalarArray matches the type of the provided data.
-     If the types do match then a new refernce to the provided data is kept.
+     If the types do match then a new reference to the provided data is kept.
     </dd>
 </dl>
 
@@ -2238,7 +2238,7 @@ public:
       A non-null result is
       returned if fieldName is a field of the PVStructure. The fieldName can be
       of the form name.name...
-      If the field does not exist the a Ptr to a NULL value is returned
+      If the field does not exist then a Ptr to a NULL value is returned
       without any error message being generated.
       <br />
       Note that the template version replaces getBooleanField, etc.<br/>
@@ -2493,7 +2493,7 @@ PVDoublePtr pvDouble = getPVDataCreate()-&gt;createPVScalar&lt;PVDouble&gt;();
     The second clones an existing PVUnion.
     </dd>
   <dt>createPVVariantUnion<dt>
-    <dd>Creates an instance of a varient PVUnion.
+    <dd>Creates an instance of a variant PVUnion.
       This is a union which has a single field which can be any pvData supported type,
      </dd>
   <dt>createPVScalarArray</dt>
@@ -2768,7 +2768,7 @@ other copy functions. The arguments are:</p>
    <dt>immutable</dt>
       <dd>The destination array is immutable.</dt>
    <dt>capacity immutable</dt>
-      <dd>The destination array needs to have it's capacity extentended
+      <dd>The destination array needs to have it's capacity extended
         but the capacity is immutable.</dd>
 </dl>
 
@@ -2783,7 +2783,7 @@ considered properties of the value field. The fieldname is also the property
 name. The value field can have any type, i.e. scalar, scalarArray, or
 structure. Typical property fields are timeStamp, alarm, display, control, and
 history. The timeStamp is a special case. If it appears anywhere in the
-structure hieraracy above a value field it is a property of the value field.</p>
+structure hierarchy above a value field it is a property of the value field.</p>
 
 <p>For example the following top level structure has a single value field. The
 value field has properties alarm, timeStamp, and display.</p>
@@ -2882,7 +2882,7 @@ general purpose clients.</p>
       characteristics for the value field.</dd>
   <dt>history</dt>
     <dd>Provides a history buffer for the value field. Note that currently
-      PVData does not define history suppoprt.</dd>
+      PVData does not define history support.</dd>
   <dt>other</dt>
     <dd>Other standard properties can be defined.</dd>
 </dl>
@@ -2950,7 +2950,7 @@ seconds is kept as a 64 bit integer, it allows for a time much greater than the
 present age of the universe. Since the nanoseconds portion is kept as a 32 bit
 integer it is subject to overflow if a value that corresponds to a value that
 is greater than a little more than 2 seconds of less that about -2 seconds. The
-support code always adjust seconds so that the nanoSecconds part is normlized,
+support code always adjust seconds so that the nanoseconds part is normalized,
 i. e. it has is 0&lt;=nanoseconds&lt;nanoSecPerSec..</p>
 
 <p>Two header files are provided for manipulating time stamps:</p>
@@ -3015,7 +3015,7 @@ public:
 <p>where</p>
 <dl>
   <dt>TimeStamp()</dt>
-    <dd>The defauly constuctor. Both seconds and nanoseconds are set to 0.</dd>
+    <dd>The default constructor. Both seconds and nanoseconds are set to 0.</dd>
   <dt>TimeStamp(int64 secondsPastEpoch,int32 nanoseconds = 0)</dt>
     <dd>A constructor that gives initial values to seconds and nanoseconds.</dd>
   <dt>normalize</dt>
@@ -3282,7 +3282,7 @@ public:
 <p>where</p>
 <dl>
   <dt>Control</dt>
-    <dd>The default constructure.</dd>
+    <dd>The default constructor.</dd>
   <dt>getLow</dt>
     <dd>Get the low limit.</dd>
   <dt>getHigh</dt>
@@ -3376,7 +3376,7 @@ public:
 <p>where</p>
 <dl>
   <dt>Control</dt>
-    <dd>The default constructure.</dd>
+    <dd>The default constructor.</dd>
   <dt>getLow</dt>
     <dd>Get the low limit.</dd>
   <dt>getHigh</dt>
@@ -3477,7 +3477,7 @@ public:
   <dt>detach</dt>
     <dd>Just detaches from the pvData structure.</dd>
   <dt>isAttached</dt>
-    <dd>Is there an attachment to an enemerated structure?</dd>
+    <dd>Is there an attachment to an enumerated structure?</dd>
   <dt>setIndex</dt>
     <dd>Set the index field in the pvData structure. An exception is thrown if
       not attached to a pvData structure. </dd>
@@ -3566,7 +3566,7 @@ implements getConvert.</p>
   <dt>status.h</dt>
     <dd>A way to pass status information to a client.</dd>
   <dt>templateMeta.h</dt>
-    <dd><b>TBD</b> Michael can You provide an explaination?</dd>
+    <dd><b>TBD</b> Michael can You provide an explanation?</dd>
   <dt>thread.h</dt>
     <dd>Provides thread support.</dd>
   <dt>timeFunction.h</dt>
@@ -3575,7 +3575,7 @@ implements getConvert.</p>
     <dd>An implementation of Timer that does not require an object to be
       created for each timer request.</dd>
   <dt>typeCast.h</dt>
-    <dd><b>TBD</b> Michael can You provide an explaination?</dd>
+    <dd><b>TBD</b> Michael can You provide an explanation?</dd>
 </dl>
 
 <p>Note that directory testApp/misc has test code for all the classes in misc.
@@ -3815,7 +3815,7 @@ public:
   <dt>wait</dt>
     <dd>Wait until event is full or until timeout. The return value is
       (false,true) if the wait completed because event (was not, was) full. A
-      false value normally means that that a timeout occured. It is also
+      false value normally means that that a timeout occurred. It is also
       returned if an error occurs or because the event is being deleted.</dd>
   <dt>tryWait</dt>
     <dd>returns (false,true) if the event is (empty,full)</dd>
@@ -3927,7 +3927,7 @@ once. This can be implemented as follows:</p>
 <pre>
 bool locked;
 </pre>
-and improves efficency by checking the local variable before calling the
+and improves efficiency by checking the local variable before calling the
 mutex methods. This is <b>not</b> thread safe if any methods are called by a thread other than
 the thread that created the Lock.
 </p>
@@ -4038,8 +4038,8 @@ public:
 <h3>noDefaultMethods.h</h3>
 
 <p>If a class privately extends this class then the compiler can not create any
-of the following: default constructor, default copy constructror, or default
-assignment contructor.</p>
+of the following: default constructor, default copy constructor, or default
+assignment constructor.</p>
 <pre>/* This is based on Item 6 of
  * Effective C++, Third Edition, Scott Meyers
  */
@@ -4049,7 +4049,7 @@ assignment contructor.</p>
     NoDefaultMethods(){};
     ~NoDefaultMethods(){}
     private:
-    // do not implment
+    // do not implement
     NoDefaultMethods(const NoDefaultMethods&amp;);
     NoDefaultMethods &amp; operator=(const NoDefaultMethods &amp;);
     };</pre>
@@ -4058,7 +4058,7 @@ assignment contructor.</p>
 
 <p>This provides a bounded queue. When the queue is
 full the user code is expected to keep using the current element until a new
-free element becomes avalable.</p>
+free element becomes available.</p>
 <pre>
 template &lt;typename T&gt;
 class Queue
@@ -4089,7 +4089,7 @@ public:
   <dt>getNumberFree</dt>
     <dd>Get the number of free elements in the queue.</dd>
   <dt>capacity</dt>
-    <dd>Get the capacity, i.e. the maximun number of elements the queue can
+    <dd>Get the capacity, i.e. the maximum number of elements the queue can
       hold.</dd>
   <dt>getNumberFree</dt>
     <dd>Get the number of free elements.</dd>
@@ -4237,7 +4237,7 @@ public:
 <h3>serializeHelper.h</h3>
 
 <p>This is a helper class for serialization, which is required for sending and
-receiving pvData over the nerwork.</p>
+receiving pvData over the network.</p>
 <pre>class SerializeHelper : public NoDefaultMethods {
 public:
     static void writeSize(int s, ByteBuffer* buffer,
@@ -4278,7 +4278,7 @@ public:
 
 <h3>sharedVector.h</h3>
 <p>
-shared_vector is a holder for a contigious piece of memory.
+shared_vector is a holder for a contiguous piece of memory.
 Data is shared, but offset and length are not.
 This allows one vector to have access to only a subset of a piece of memory.
 </p>
@@ -4318,7 +4318,7 @@ shared_vector differs from std::vector as follows:</p>
      shared_vector has additional constructors from raw pointers and shared_ptr s.
      The copy constructor and assignment operator allow implicit castings
       from type 'shared_vector&lt;T&gt;' to 'shared_vector&lt;const T>&gt;'.
-      To faciliate safe modification the methods unique() and make_unique() are provided
+      To facilitate safe modification the methods unique() and make_unique() are provided
      The slice() method selects a sub-set of the shared_vector.
      The low level accessors dataPtr(), dataOffset(), dataCount(), and dataTotal().
      </dd>
@@ -4400,7 +4400,7 @@ public:
 where
 <dl>
    <dt>shared_vector</dt>
-      <dd>Several flavors of constructor are provided. The most commingly used is:
+      <dd>Several flavors of constructor are provided. The most commonly used is:
        <pre>
 shared_vector(size_t c);
        </pre>
@@ -4425,7 +4425,7 @@ shared_vector(size_t c);
          is the sole owner of the data array.
       </dd>
    <dt>begin,...,rend</dt>
-       <dd>Standard interators.</dd>
+       <dd>Standard iterators.</dd>
    <dt>front</dt>
        <dd>Return a reference to the first element.</dd>
    <dt>back</dt>
@@ -4456,7 +4456,7 @@ shared_vector(size_t c);
    <dt>slice</dt>
       <dd>Reduce the view of this shared_vector.</dd>
    <dt>dataPtr</dt>
-      <dd>A readonly shared_ptr to the array.</dd>
+      <dd>A read-only shared_ptr to the array.</dd>
    <dt>dataOffset</dt>
       <dd>Offset in the data array of first visible element.</dd>
    <dt>dataCount</dt>
@@ -4566,7 +4566,7 @@ public:
 
 <p>Runnable must be implement by code that wants to be run via a thread. It has
 one virtual method: run. Run is the code that is run as a thread. When run
-compeletes it can not be restarted. If code wants to delete a thread then it
+completes it can not be restarted. If code wants to delete a thread then it
 MUST arrange that the run returns before the thread can be deleted. An
 exception is thrown if run remains active when delete is called. </p>
 
@@ -4588,7 +4588,7 @@ exception is thrown if run remains active when delete is called. </p>
 <p>TimeFunction is a facility that measures the average number of seconds a
 function call requires. When timeCall is called, it calls function in a loop.
 It starts with a loop of one iteration. If the total elapsed time is less then
-.1 seconds it increases the number of iterrations by a factor of 10. It keeps
+.1 seconds it increases the number of iterations by a factor of 10. It keeps
 repeating until the elapsed time is greater than .1 seconds. It returns the
 average number of seconds per call.</p>
 <pre>class TimeFunctionRequester;
@@ -4676,9 +4676,9 @@ public:
 <dl>
   <dt>callback</dt>
     <dd>This is called when a timer expires. This is called with no locks held.
-      When called a delay timer is no longer on the queue but a periodioc timer
+      When called a delay timer is no longer on the queue but a periodic timer
       is on a queue. Thus the callback for a delay timer can issue a new
-      schedule request but a periodic timer must not. Note the explaination of
+      schedule request but a periodic timer must not. Note the explanation of
       TimerNode.cancel below.</dd>
   <dt>timerStopped</dt>
     <dd>Timer.stop was called when a timer request was queued. or if the timer
@@ -4707,7 +4707,7 @@ be used to schedule multiple callbacks. It has the methods:</p>
 <p>Timer has the methods:</p>
 <dl>
   <dt>Timer</dt>
-    <dd>The consttructor.</dd>
+    <dd>The constructor.</dd>
   <dt>~Timer</dt>
     <dd>The destructor. The queue is emptied and TimerCallback.timerStopped is
       called for each element of the queue.</dd>
@@ -4763,7 +4763,7 @@ provides a language independent overview of <b>copy</b> and <b>monitor</b>.
 </p>
 <p>
 <b>NOTE:pvRequest.html</b> must be updated since it is based on an earlier version of pvCopy that
-had knowlege of PVRecord. The C++ version was implemented in pvDatabaseCPP
+had knowledge of PVRecord. The C++ version was implemented in pvDatabaseCPP
 and the Java version on pvIOCJava.
 At present only the C++ version of the new API for pvCopy is implemented.
 </p>
@@ -4776,13 +4776,13 @@ At present only the C++ version of the new API for pvCopy is implemented.
       Given an ascii string createRequest creates a PVStructure that provides
       a pvData representation of the information from the ascii string.
       It is this structure that can be passed to the channel create methods.<br />
-      The information in a pvRequest selects an arbitrarary subset of the
+      The information in a pvRequest selects an arbitrary subset of the
       fields in a top level structure that resides in the server.
       In addition options can be specified. Both global and field specific
       options can be specified.
       </dd>
    <dt>pvCopy</dt>
-     <dd>This is a faculity used by channel providers.
+     <dd>This is a facility used by channel providers.
      It provides client specific code that manages a copy of an arbitrary
      subset of the fields in a top level structure that resides in the
      provider. It also allows provider access to options specified
@@ -4898,7 +4898,7 @@ where
         This is the method for creating a PVCopy instance.<br/>
         <dl>
            <dt>pvMaster</dt>
-             <dd>the top level sructure managed by the server.</dd>
+             <dd>the top level structure managed by the server.</dd>
           <dt>pvRequest</dt>
            <dd>selects the set of subfields desired
          and options for each field.</dd>
@@ -4954,12 +4954,12 @@ where
    <dt>updateCopyFromBitSet</dt>
       <dd>
        For each set bit in bitSet set the field in copyPVStructure to the value
-      of the corrseponding field in pvMaster.
+      of the corresponding field in pvMaster.
       </dd>
    <dt>updateMaster</dt>
       <dd>
        For each set bit in bitSet set the field in pvMaster to the value
-      of the corrseponding field in copyPVStructure.
+      of the corresponding field in copyPVStructure.
       
       </dd>
    <dt>getOptions</dt>
@@ -4979,7 +4979,7 @@ where
 <p>This consists of two components:
 <dl>
    <dt>monitor</dt>
-     <dd>Used by code that implements pvAccess montors.</dd>
+     <dd>Used by code that implements pvAccess monitors.</dd>
    <dt>monitorPlugin</dt>
       <dd>Code that provides special semantics for monitors.</dd>
 </dl>
@@ -5016,7 +5016,7 @@ It has the fields:
   <dt>changedBitSet</dt>
      <dd>Shows which fields have changed since the previous monitor.</dd>
   <dt>overrunBitSet</dt>
-     <dd>Shows which fields have changed more han once since the previous monitor.</dd>
+     <dd>Shows which fields have changed more than once since the previous monitor.</dd>
 </dl>
 </p>
 <h4>monitorElement queue</h4>
@@ -5059,7 +5059,7 @@ Note that each client has it's own queue that is not shared with other client.
    <dt>start</dt>
      <dd>
       Start monitoring.
-      This will result in a an inital monitor that has the current value
+      This will result in a an initial monitor that has the current value
       of all fields.
      </dd>
    <dt>stop</dt>
@@ -5069,11 +5069,11 @@ Note that each client has it's own queue that is not shared with other client.
    <dt>poll</dt>
      <dd>
       Called to get a monitor element.
-      If no new elemants are available then a null pointer is returned.
+      If no new elements are available then a null pointer is returned.
      </dd>
    <dt>release</dt>
      <dd>
-      Release the monotor element.
+      Release the monitor element.
       The caller owns the monitor element between the calls to poll and release.
      </dd>
 <dl>
@@ -5201,7 +5201,7 @@ It has methods:</p>
      <dd>
      MonitorPluginManager is a singleton.
      The first call to get will create the single instance.
-     Further calls will rerurn the single instance.
+     Further calls will return the single instance.
      </dd>
    <dt>addPlugin</dt>
      <dd>
@@ -5209,18 +5209,18 @@ It has methods:</p>
      </dd>
    <dt>findPlugin</dt>
      <dd>
-      Find a plugin. A NULL shared pointer is reurned if it has not been added.
+      Find a plugin. A NULL shared pointer is returned if it has not been added.
      </dd>
    <dt>showNames</dt>
      <dd>
-      Show the names of all puugins that have been added.
+      Show the names of all plugins that have been added.
      </dd>
 </dl>
 <p><b>NOTE:</b>
 Should the method <b>causeMonitor</b> 
 have arguments <b>pvField</b> and <b>pvTop</b>
-be defined so that they can not be modfied.
-This would be posssible if the following was defined:
+be defined so that they can not be modified.
+This would be possible if the following was defined:
 <pre>
 typedef std::tr1::shared_ptr&lt;const PVField&gt; PVFieldConstPtr;
 typedef std::tr1::shared_ptr&lt;const PVStructure&gt; PVStructureConstPtr;
@@ -5232,7 +5232,7 @@ virtual bool causeMonitor(
         PVStructureConstPtr const &amp;pvTop,
         MonitorElementPtr const &amp;monitorElement) = 0;
 </pre>
-But just adding these definitions is not sufficent.
+But just adding these definitions is not sufficient.
 In addition all methods defined in pvDataCPP must be checked.
 In particular many of the methods in <b>Convert</b> must have
 their arguments modified.
@@ -5258,15 +5258,15 @@ structure powerSupply
     structure power
        double value
        structure alarm
-       struvture display
+       structure display
     structure voltage
        double value
        structure alarm
-       struvture display
+       structure display
     structure current
        double value
        structure alarm
-       struvture display
+       structure display
 </pre>
 <p>A pvAccess client wants to create a monitor on the powerSupply as follows:
 The client wants a top level structure that looks like:
@@ -5282,7 +5282,7 @@ structure powerSupply
        double value
 </pre>
 In addition the client wants monitors to occur only when one of the monitored
-fields changes value but not just because a put occured.
+fields changes value but not just because a put occurred.
 Also if only the timeStamp changes value then that should not cause a monitor.
 </p>
 <p>The example monitor plugin implements the semantics the
@@ -5291,7 +5291,7 @@ client wants. It can be attached to any field via the following options:
 [plugin=onChange,raiseMonitor=value]
 </pre>
 This plugin will trigger a monitor for the field only if the field changes
-value. In addition <b>value</b> equals <b>false</b> means do not raise a monotor
+value. In addition <b>value</b> equals <b>false</b> means do not raise a monitor
 for changes to this field.
 But if a change to another field does cause a monitor the change to this field
 will be passed to the client.
