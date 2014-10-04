@@ -68,7 +68,7 @@ license.</a></p>
 
 <h2>Changes</h2>
 <p>Since the last version of this document the following changes have 
-been made to the proposed interface definitionsi for PVValueArray:</p>
+been made to the proposed interface definitions for PVValueArray:</p>
 <dl>
    <dt>put(const svector &amp;from)</dt>
      <dd>This has been removed. shareData can be used instead.</dd>
@@ -93,7 +93,7 @@ purpose for pvData:
 <blockquote>pvData (Process Variable Data) defines and implements an efficent
 way to store, access, and communicate memory resident data structures.</blockquote>
 This statement appears as the first sentence of pvDataJava.html.
-A few sentances later the document makes clear that communication
+A few sentences later the document makes clear that communication
 includes network communication.
 Thus pvData provides an interface for network accessible structured data.
 If the interfaces for C++ and Java are similar then
@@ -160,7 +160,7 @@ PVScalar and extensions, PVArray and extensions.
 PVStructureArray is not discussed.
 </p>
 <h3>PVField</h3>
-<p>This is the base for all the PVXXX iterfaces.
+<p>This is the base for all the PVXXX interfaces.
 It provides basic methods for allowing network transfer and for 
 traversing structured data.
 The pvDataJava and pvDataCPP definitions are similar.
@@ -306,7 +306,7 @@ methods:
 </dl>
 </p>
 <p>The proposed version is like the pvDataCPP version except for dumpValue
-and the stream interators.</p>
+and the stream iterators.</p>
 <h4>pvDataJava</h4>
 <pre>
 interface PVScalar extends PVField {
@@ -1161,7 +1161,7 @@ typedef std::tr1::shared_ptr&lt;PVStringArray&gt; PVStringArrayPtr;
    <dt>put</dt>
      <dd>This is the recommended method for modifying the array elements.
        It may change the capacity if len asks for more elements
-       than the cureent capacity allows.
+       than the current capacity allows.
        It does not change the current length.
       </dd>
    <dt>shareData</dt>
@@ -1169,7 +1169,7 @@ typedef std::tr1::shared_ptr&lt;PVStringArray&gt; PVStringArrayPtr;
         Note that if capacity is ever changed then data will no
         longer be shared.
         This method can also be called to force the PVValueArray to have a new
-        raw array. This is usefull for implementing Copy On Write.
+        raw array. This is useful for implementing Copy On Write.
       </dd>
 </dl>
 
@@ -1218,12 +1218,12 @@ and start with a brief summary modeled after Section 31.3(STL Containers) in:<br
 "The C++ Programming Language, C++11, Fourth Edition", Bjarne Stroustrup,2013<br/>
 The subsection names are the same names that Stroustrup uses.
 Each subsection starts with a brief summary that is similar to
-the summary Stroustrup has at the beginnining of each subsection.</p>
+the summary Stroustrup has at the beginning of each subsection.</p>
 <p>The comparison is always with std::vector.
 In addition it shows what is defined by by std::vector but not by
 shared_vector.</p>
 <p>Someone who already understand the C++ STL can understand shared_vector
-by just looking at the brief summarys.
+by just looking at the brief summaries.
 For others the brief summary is followed by tutorial information.
 </p>
 <h3>shared_vector example</h3>
@@ -1322,7 +1322,7 @@ These are not used by any of the client methods.</p>
 <p>Brief Summary
 <pre>
 C c();         Default constructor; c is empty.
-C c(n);        c is initialized with n elementis with the value value_type{};
+C c(n);        c is initialized with n elements with the value value_type{};
                offset is 0; size is n;
 C c(n,e);      Initialize c with n copies of e.
                offset is 0; size is n;
@@ -1373,7 +1373,7 @@ shared_vector(size_t n, value_type e);
 <p>The first three constructors all create a new shared_vector
 by also creating a new raw array,
 The difference is the size of the array, i.e. how many elements it contains,
-and how the elements are initalized.
+and how the elements are initialized.
 </p>
 <dl>
 <dt>shared_vector()</dt>
@@ -1405,7 +1405,7 @@ emptyArray 1
 zeroArray {16}[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ...]
 oneArray {8}[1, 1, 1, 1, 1, 1, 1, 1]
 </pre>
-<p><b>NOTE EXISTING: </b> Why did emptyArray disply the above.
+<p><b>NOTE EXISTING: </b> Why did emptyArray display the above.
 Should it be "emptyArray {0} []"?
 </p>
 <h4>Construct by sharing raw array from a shared_vector</h4>
@@ -1593,7 +1593,7 @@ crend()      Constant last element of reverse sequence
 <p>
 shared_vector supports both iterators and reverse iterators as defined by the STL.
 For both constant iterators are also defined.
-A constant iterator does not allow an array elemnent to be modified.</p>
+A constant iterator does not allow an array element to be modified.</p>
 <p>The following is an example of a constant iterator.</p>
 <pre>
 int32 sum = 0;
@@ -1705,7 +1705,7 @@ produces:
 <pre>
 void make_unique()         Make caller the only user of std::tr1::shared_ptr
 bool unique()              Is the caller the only user of std::tr1::shared_ptr
-void slice(offset,length)  Change window offset andsize
+void slice(offset,length)  Change window offset and size
 
 // following should only be used for debugging
 const std::tr1::shared_ptr&lt;E&gt;&amp;

@@ -70,11 +70,11 @@ license.</a></p>
 more and more member functions.
 These member functions have nothing to do with the primary primary
 purpose for pvData:
-<blockquote>pvData (Process Variable Data) defines and implements an efficent
+<blockquote>pvData (Process Variable Data) defines and implements an efficient
 way to store, access, and communicate memory resident data structures.</blockquote>
 This statement appears as the first sentence of pvDataJava.html.
-A few sentances later the document makes it clear that communication
-includes efficent network communication.
+A few sentences later the document makes it clear that communication
+includes efficient network communication.
 Thus pvData provides an interface for network accessible structured data.
 The problem of adding member functions that have nothing to do with the primary purpose
 started with the Java API.
@@ -82,7 +82,7 @@ It already had extra methods that solved problems that should have had a differe
 This document removes the extra methods so that when new problems arise in the future
 the solution will not involve adding new member functions to the introspection and data API.
 </p>
-<p>The introspection and data API for pvData should only encapuslate methods that support the primary purpose
+<p>The introspection and data API for pvData should only encapsulate methods that support the primary purpose
 stated above.
 The interfaces for C++ and Java should be similar so that
 someone who understands the interface in one of the languages
@@ -308,7 +308,7 @@ public interface PVDataCreate {
 The existing Java implementation of toString displayed all elements.
 For large arrays this is not desirable.
 The new methods provide a way for the client to limit the number of elements.
-The default might be set to something like display up to 10 elements with 5 fron the beginning and 5 from the end.</p>
+The default might be set to something like display up to 10 elements with 5 from the beginning and 5 from the end.</p>
 <p>For C++ this can be a replacement for dumpValue.</p>
 <h3>PVBooleanArray, ..., PVStructureArray</h3>
 <p>The old get and put are replaced by two new and simpler methods:
