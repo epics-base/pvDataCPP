@@ -37,7 +37,7 @@
 <h1>EPICS pvDataCPP</h1>
 <!-- Maturity: Working Draft or Request for Comments, or Recommendation, and date.  -->
 
-<h2 class="nocount">EPICS v4 Working Group, Working Draft, 23-July-2014</h2>
+<h2 class="nocount">EPICS v4 Working Group, Working Draft, 08-Oct-2014</h2>
 
   <dl>
     <dt>Latest version:</dt>
@@ -56,6 +56,7 @@
     <dd>Marty Kraimer, BNL</dd>
     <dd>Michael Davidsaver, BNL</dd>
     <dd>Matej Sekoranja, CosyLab</dd>
+    <dd>David Hickin, Diamond Light Source</dd>
   </dl>
 
   <p class="copyright">This product is made available subject to acceptance of the <a
@@ -78,7 +79,7 @@ V4 control system programming environment:<br />
 
 <h2 class="nocount">Status of this Document</h2>
 
-<p>This is the 23-July-2014 version of the C++ implementation of pvData.
+<p>This is the 08-Oct-2014 version of the C++ implementation of pvData.
 </p>
 
 <p>RELEASE_NOTES.md provides changes since the last release.
@@ -120,17 +121,17 @@ href="./html/index.html">doxygenDoc</a></p>
 </p>
 <p>This document discusses the following:</p>
 <dl>
-  <dt>pvDataAPP/pv</dt>
+  <dt>src/pv</dt>
     <dd>This subdirectory contains all the public interfaces that describe pvData.
      The section from <b>Namespace and Memory Management</b>
      through <b>Conversion</b> discuss these interfaces.
      </dd>
-  <dt>pvDataApp/property</dt>
+  <dt>src/property</dt>
     <dd>This section has support for managing "standard" fields.
     </dd>
-  <dt>pvDataApp/misc</dt>
+  <dt>src/misc</dt>
     <dd>This section has support for facilities required by implementation code.</dd>
-  <dt>copy and monitor</dt>
+  <dt>src/copy and src/monitor</dt>
     <dd>These sections provide pvData support for implementing pvAccess providers.</dd>
 </dl>
 
@@ -140,7 +141,7 @@ data interfaces. The first time reader may not understand them but hopefully wil
 idea of how pvData works. After reading the rest of this document the examples will
 be much easier to understand.
 </p>
-</p>The documentation directory for this project has a file <b>examples.zip</b>.
+<p>The documentation directory for this project has a file <b>examples.zip</b>.
 It has the code for the examples.
 After it is unzipped:</p>
 <pre>
@@ -149,10 +150,12 @@ cp ExampleRELEASE.local RELEASE.local
 #edit RELEASE.local
 cd ..
 make
+</pre>
+Now you are ready to run the examples:
+<pre>
 bin/linux-x86_64/introspectMain 
 bin/linux-x86_64/dataMain
 </pre>
-</p>
 <p>The examples assume that the following statements have been issued:</p>
 <pre>
 using std::cout;
@@ -166,7 +169,7 @@ StandardPVFieldPtr standardPVField = getStandardPVField();
 <dl>
   <dt>fieldCreate</dt>
     <dd>This creates instances of introspection objects.
-     It also provides fieldBuilder, which provides an easier way to create introspection objects.
+     It also provides <b>fieldBuilder</b>, which provides an easier way to create introspection objects.
     </dd>
   <dt>pvDataCreate</dt>
     <dd>This creates instances of data objects.
@@ -213,7 +216,7 @@ It uses only createField.
     topfields.push_back(timeStamp);
     StructureConstPtr doubleScalar =
         fieldCreate-&gt;createStructure(topnames,topfields);
-    cout &lt;&lt; doubleScalar-&gt;dump(cout) &lt;&lt; endl;
+    cout &lt;&lt; *doubleScalar &lt;&lt; endl;
 </pre>
 <p>Using FieldBuilder the same can be done via:</p>
 <pre>
@@ -227,13 +230,13 @@ It uses only createField.
             add("userTag", pvInt)-&gt;
             endNested()-&gt;
         createStructure();
-    cout &lt;&lt; doubleScalarHard-&gt;dump(cout) &lt;&lt; endl;
+    cout &lt;&lt; *doubleScalarHard &lt;&lt; endl;
 </pre>
 <p>The easiest way to produce the structure is:</p>
 <pre>
     StructureConstPtr stringArrayEasy =
          getStandardField()-&gt;scalarArray(pvString,"alarm,timeStamp");
-    cout &lt;&lt; stringArrayEasy-&gt;dump(cout) &lt;&lt; "\n\n";
+    cout &lt;&lt; *stringArrayEasy &lt;&lt; "\n\n";
 </pre>
 These three ways produce:
 <pre>
@@ -270,7 +273,7 @@ via standardField:</p>
 <pre>
     StructureConstPtr stringArrayEasy =
         standardField-&gt;scalarArray(pvString,"alarm,timeStamp");
-    cout &lt;&lt;stringArrayEasy-&gt;dump(cout) &lt;&lt; endl;
+    cout &lt;&lt; *stringArrayEasy &lt;&lt; endl;
 </pre>
 It produces :
 <pre>
@@ -311,7 +314,7 @@ A hard way to create an structure with an enumerated value field and a time stam
             add("userTag", pvInt)-&gt;
             endNested()-&gt;
         createStructure();
-    cout &lt;&lt;ntEnumHard-&gt;dump(cout) &lt;&lt; endl;
+    cout &lt;&lt; *ntEnumHard &lt;&lt; endl;
 </pre>
 It produces:
 <pre>
@@ -328,7 +331,7 @@ ev4:nt/NTEnum:1.0
 fields: alarm and timeStamp:</p>
 <pre>
     StructureConstPtr ntEnumEasy = getStandardField()-&gt;enumerated("alarm,timeStamp");
-    cout &lt;&lt;ntEnumEsay-&gt;dump(cout) &lt;&lt; endl;
+    cout &lt;&lt; *ntEnumEasy &lt;&lt; endl;
 </pre>
 It produces:
 <pre>
@@ -356,10 +359,10 @@ ev4:nt/NTEnum
         add("intValue", pvInt)-&gt;
         add("timeStamp",standardField-&gt;timeStamp())-&gt;
         createUnion();
-    cout &lt;&lt;ntunion-&gt;dump(cout) &lt;&lt; endl;
+    cout &lt;&lt; *ntunion &lt;&lt; endl;
 
     StructureConstPtr unionValue = standardField-&gt;regUnion(punion,"alarm,timeStamp");
-    cout &lt;&lt;unionValue-&gt;dump(cout) &lt;&lt; endl;
+    cout &lt;&lt; *unionValue &lt;&lt; endl;
 </pre>
 It produces:
 <pre>
@@ -395,7 +398,7 @@ ev4:nt/NTUnion:1.0
 <pre>
     UnionArrayConstPtr unionArray = fieldCreate-&gt;createUnionArray(
         fieldCreate-&gt;createVariantUnion());
-    cout &lt;&lt; unionArray-&gt;dump(cout) &lt;&lt; "\n\n";
+    cout &lt;&lt; *unionArray &lt;&lt; "\n\n";
 </pre>
 <p>Produces</p>
 <pre>
@@ -423,7 +426,7 @@ any
            add("alarm",standardField-&gt;alarm()) -&gt;
            endNested()-&gt;
         createStructure();
-    std::cout &lt;&lt; powerSupply-&gt;dumpValue(cout) &lt;&lt;std::endl;
+    std::cout &lt;&lt; *powerSupply &lt;&lt;std::endl;
 </pre>
 It produces:
 <pre>
@@ -464,7 +467,7 @@ structure
     PVDoublePtr pvdouble =
         doubleValue-&gt;getSubField&lt;PVDouble&gt;("value");
     pvdouble-&gt;put(1e5);
-    cout &lt;&lt; doubleValue-&gt;dumpValue(cout) &lt;&lt; endl;
+    cout &lt;&lt; *doubleValue &lt;&lt; endl;
     double value = doubleValue-&gt;getSubField&lt;PVDouble&gt;("value")-&gt;get();
     cout &lt;&lt; "from get " &lt;&lt; value &lt;&lt; "\n\n";
 </pre>
@@ -494,7 +497,7 @@ from get 100000
     for(size_t i=0; i&lt; len; ++i) xxx[i] = i;
     shared_vector&lt;const double&gt; data(freeze(xxx));
     pvDoubleArray-&gt;replace(data);
-    cout &lt;&lt; doubleArrayValue-&gt;dumpValue(cout) &lt;&lt; endl;
+    cout &lt;&lt; *doubleArrayValue &lt;&lt; endl;
     
     shared_vector&lt;const double&gt;  getData = pvDoubleArray-&gt;view();
     cout &lt;&lt; "via getData";
@@ -520,7 +523,7 @@ via getData 0 1 2 3 4 5 6 7 8 9
 <pre>
     PVStructurePtr pvntenum = pvDataCreate-&gt;createPVStructure(
          standardField-&gt;enumerated("alarm,timeStamp"));
-    cout &lt;&lt; pvntenum-&gt;dumpValue(cout) &lt;&lt; "\n\n";
+    cout &lt;&lt; *pvntenum &lt;&lt; "\n\n";
 </pre>
 This produces:
 <pre>
@@ -558,7 +561,7 @@ ev4:nt/NTEnum:1.0
            endNested()-&gt;
         createStructure();
     PVStructurePtr pvpowerSupply = pvDataCreate-&gt;createPVStructure(powerSupply);
-    cout &lt;&lt; pvpowerSupply-&gt;dumpValue(cout) &lt;&lt; endl;
+    cout &lt;&lt; *pvpowerSupply &lt;&lt; endl;
 </pre>
 This produces:
 <pre>
@@ -604,9 +607,9 @@ structure
     PVStructurePtr pvTimeStamp =
         pvStructure-&gt;getSubField&lt;PVUnion&gt;("value")-&gt;select&lt;PVStructure&gt;(2);
     pvTimeStamp-&gt;getSubField&lt;PVLong&gt;("secondsPastEpoch")-&gt;put(1000);
-    cout &lt;&lt; pvStructure-&gt;dumpValue(cout) &lt;&lt; "\n";
+    cout &lt;&lt; *pvStructure) &lt;&lt; "\n";
     pvStructure-&gt;getSubField&lt;PVUnion&gt;("value")-&gt;select&lt;PVDouble&gt;(0)-&gt;put(1e5);
-    cout &lt;&lt; pvStructure-&gt;dumpValue(cout) &lt;&lt; "\n\n";
+    cout &lt;&lt; *pvStructure &lt;&lt; "\n\n";
 </pre>
 This produces:
 <pre>
@@ -647,13 +650,13 @@ ev4:nt/NTUnion:1.0
         pvDataCreate-&gt;createPVStructure(standardField-&gt;timeStamp());
     pvStructure-&gt;getSubField&lt;PVUnion&gt;("value")-&gt;set(pvTimeStamp);
     pvTimeStamp-&gt;getSubField&lt;PVLong&gt;("secondsPastEpoch")-&gt;put(1000);
-    cout &lt;&lt; pvStructure-&gt;dumpValue(cout) &lt;&lt; "\n";
+    cout &lt;&lt; *pvStructure &lt;&lt; "\n";
     pvStructure-&gt;getSubField&lt;PVUnion&gt;("value")-&gt;set(
         pvDataCreate-&gt;createPVScalar(pvDouble));
     PVDoublePtr pvValue = static_pointer_cast&lt;PVDouble&gt;(
         pvStructure-&gt;getSubField&lt;PVUnion&gt;("value")-&gt;get());
     pvValue-&gt;put(1e5);
-    cout &lt;&lt; pvStructure-&gt;dumpValue(cout) &lt;&lt; "\n\n";
+    cout &lt;&lt; *pvStructure &lt;&lt; "\n\n";
 </pre>
 This produces:
 <pre>
@@ -712,21 +715,21 @@ ev4:nt/NTUnion:1.0
                 createUnion(),
             "alarm,timeStamp"));
     cout &lt;&lt; "introspection\n";
-    cout &lt;&lt;pvStructure-&gt;getStructure()-&gt;dump(cout) &lt;&lt; endl;
+    cout &lt;&lt; *pvStructure-&gt;getStructure() &lt;&lt; endl;
     cout &lt;&lt; "data\n";
-    cout &lt;&lt; pvStructure-&gt;dumpValue(cout) &lt;&lt; "\n";
+    cout &lt;&lt; *pvStructure &lt;&lt; "\n";
     PVUnionPtr pvUnion = pvStructure-&gt;getSubField&lt;PVUnion&gt;("value");;
     pvUnion-&gt;select("doubleValue");
     PVDoublePtr pvDouble = pvUnion-&gt;get&lt;PVDouble&gt;();
     pvDouble-&gt;put(1.55);
     cout &lt;&lt; "select valueDouble\n";
-    cout &lt;&lt; pvStructure-&gt;dumpValue(cout) &lt;&lt; "\n";
+    cout &lt;&lt; *pvStructure &lt;&lt; "\n";
     cout &lt;&lt; "value = " &lt;&lt; pvDouble-&gt;get() &lt;&lt; "\n";
     pvUnion-&gt;select("structValue");
     pvDouble = pvUnion-&gt;get&lt;PVStructure&gt;()-&gt;getSubField&lt;PVDouble&gt;("doubleValue");
     pvDouble-&gt;put(1.65);
     cout &lt;&lt; "select structValue\n";
-    cout &lt;&lt; pvStructure-&gt;dumpValue(cout) &lt;&lt; "\n";
+    cout &lt;&lt; *pvStructure &lt;&lt; "\n";
     cout &lt;&lt; "value = " &lt;&lt; pvDouble-&gt;get() &lt;&lt; "\n";
 </pre>
 This produces:
@@ -838,10 +841,10 @@ typedef PVScalarValue&lt;boolean&gt; PVBoolean;
 typedef std::tr1::shared_ptr&lt;PVBoolean&gt; PVBooleanPtr;
 </pre>
 
-<h2>pvDataApp/pv</h2>
+<h2>src/pv</h2>
 
-<p>Directory <b>pvDataApp/pv</b> has header files that completely describe pvData.
-The implementation is provided in directory <b>pvDataApp/factory</b>.
+<p>Directory <b>src/pv</b> has header files that completely describe pvData.
+The implementation is provided in directory <b>src/factory</b>.
 Test programs appears in <b>testApp/pv</b>.</p>
 
 <p><b>NOTES</b>:</p>
@@ -868,7 +871,7 @@ introspection and data interfaces for pvData. </p>
 data objects. Class Convert provides a rich set of methods for converting and
 copying data between fields.</p>
 
-<p>Directory pvDataApp/pv has the following header files:</p>
+<p>Directory src/pv has the following header files:</p>
 <dl>
   <dt>pvType.h</dt>
     <dd>C++ definitions for primitive types.</dd>
@@ -919,8 +922,8 @@ inline std::string const * get(StringArray const &amp;value);
 inline std::string * get(StringArrayPtr &amp;value);
 inline std::string const * get(StringArrayPtr const &amp;value);
 }
-inline StringArray &amp; getVector(StringArrayPtr &value);
-inline StringArray const &amp; getVector(StringArrayPtr const &value);
+inline StringArray &amp; getVector(StringArrayPtr &amp;value);
+inline StringArray const &amp; getVector(StringArrayPtr const &amp;value);
 typedef std::vector&lt;std::string&gt;::iterator StringArray_iterator;
 typedef std::vector&lt;std::string&gt;::const_iterator StringArray_const_iterator;
 </pre>
@@ -942,26 +945,24 @@ typedef std::vector&lt;std::string&gt;::const_iterator StringArray_const_iterato
       over the network as a UTF8 encoded string. Since std::string implements
       copy on write semantics, it can be used for support for immutable
       strings. It can also be serialized/deserialized as a UTF8 encoded string.
-      Because it is not a C++ primitive the first letter is capitalized. This
-      is the same convention the Java implementation uses.
-      Note that string is treated like a primitive type.</dd>
+      Note that std::string is treated like a primitive type.</dd>
   <dt>StringArray definitions</dt>
     <dd>typedefs are provided for an array of std::strings,
       which is a std::vector&lt;std::string&gt;.
       This is used by introspection.
       </dd>
 </dl>
-<p><b>TBD</b> 
+<p><b>TBD</b> </p>
 <dl>
    <dt>boolean</dt>
      <dd>Question for Michael. Why isn't the definition of <b>boolean</b> just
     <pre>
 typedef uint8_t boolean;
     </pre>
+     </dd>
    <dt>printer.h</dt>
      <dd>Not documented. Is this needed? Nothing currently uses it.</dd>
 </dl>
-</p>
 
 <h2>pvIntrospect.h</h2>
 
@@ -1197,12 +1198,29 @@ public:
  ...
 };
 
+class BoundedString : public Scalar{
+public:
+    POINTER_DEFINITIONS(BoundedString);
+    virtual ~BoundedString();
+    typedef BoundedString&amp; reference;
+    typedef const BoundedString&amp; const_reference;
+
+    std::size_t getMaximumLength() const;
+    virtual std::string getID() const;
+    virtual void serialize(ByteBuffer *buffer, SerializableControl *control) const;
+...
+};
+
 class epicsShareClass Array : public Field{
 public:
     POINTER_DEFINITIONS(Array);
     virtual ~Array();
     typedef Array&amp; reference;
     typedef const Array&amp; const_reference;
+    enum ArraySizeType { variable, fixed, bounded };
+
+    virtual ArraySizeType getArraySizeType() const = 0;
+    virtual std::size_t getMaximumCapacity() const = 0;
  ...
 };
 
@@ -1215,12 +1233,44 @@ public:
 
     ScalarArray(ScalarType scalarType);
     ScalarType  getElementType() const {return elementType;}
+    virtual ArraySizeType getArraySizeType() const;
+    virtual std::size_t getMaximumCapacity() const;
     virtual std::string getID() const;
     virtual std::ostream&amp; dump(std::ostream&amp; o) const;
     virtual void serialize(ByteBuffer *buffer, SerializableControl *control) const;
     virtual void deserialize(ByteBuffer *buffer, DeserializableControl *control);
  ...
 };
+
+class epicsShareClass BoundedScalarArray : public ScalarArray{
+public:
+    POINTER_DEFINITIONS(BoundedScalarArray);
+    typedef BoundedScalarArray&amp; reference;
+    typedef const BoundedScalarArray&amp; const_reference;
+
+    BoundedScalarArray(ScalarType scalarType, std::size_t size);
+    virtual ArraySizeType getArraySizeType() const;
+    virtual std::size_t getMaximumCapacity() const;
+    virtual std::string getID() const;
+    virtual void serialize(ByteBuffer *buffer, SerializableControl *control) const;
+...
+}
+
+class epicsShareClass FixedScalarArray : public ScalarArray{
+public:
+    POINTER_DEFINITIONS(FixedScalarArray);
+    typedef FixedScalarArray&amp; reference;
+    typedef const FixedScalarArray&amp; const_reference;
+
+    FixedScalarArray(ScalarType scalarType, std::size_t size);
+    virtual ArraySizeType getArraySizeType() const {return Array::fixed;}
+    virtual std::size_t getMaximumCapacity() const {return size;}
+    virtual std::string getID() const;
+    virtual void serialize(ByteBuffer *buffer, SerializableControl *control) const;
+...
+};
+
+
 
 class StructureArray : public Field{
 public:
@@ -1229,6 +1279,8 @@ public:
     typedef const StructureArray&amp; const_reference;
 
     StructureConstPtr  getStructure() const {return pstructure;}
+    virtual ArraySizeType getArraySizeType() const;
+    virtual std::size_t getMaximumCapacity() const;
     virtual std::string getID() const;
     virtual std::ostream&amp; dump(std::ostream&amp; o) const;
     virtual void serialize(ByteBuffer *buffer, SerializableControl *control) const;
@@ -1242,6 +1294,8 @@ public:
     typedef UnionArray&amp; reference;
     typedef const UnionArray&amp; const_reference;
     UnionConstPtr  getUnion() const {return punion;}
+    virtual ArraySizeType getArraySizeType() const;
+    virtual std::size_t getMaximumCapacity() const;
     virtual std::string getID() const;
     virtual std::ostream&amp; dump(std::ostream&amp; o) const;
     virtual void serialize(ByteBuffer *buffer, SerializableControl *control) const;
@@ -1376,7 +1430,7 @@ public:
       NULL is returned if not found.
      </dd>
    <dt>getFieldIndex</dt>
-      <dd>Get the index for name. -1 is returned if not found.
+      <dd>Get the index for name. -1 is returned if not found.</dd>
    <dt>getFields</dt>
        <dd>Get the array of types.</dd>
    <dt>getFieldNames</dt>
@@ -1384,7 +1438,7 @@ public:
    <dt>getFieldName</dt>
        <dd>Get the name for the specified index.</dd>
    <dt>isVariant</dt>
-      <dd>returns <b>true</b> if this is variant array and <b>false</b> otherwise.
+      <dd>returns <b>true</b> if this is variant array and <b>false</b> otherwise.</dd>
 </dl>
 <h3>fieldBuilder and createField</h3>
 <pre>
@@ -1394,8 +1448,16 @@ class epicsShareClass FieldBuilder :
 public:
     FieldBuilderPtr setId(std::string const &amp; id);
     FieldBuilderPtr add(std::string const &amp; name, ScalarType scalarType);
+    FieldBuilderPtr addBoundedString(std::string const &amp; name, std::size_t maxLength);
     FieldBuilderPtr add(std::string const &amp; name, FieldConstPtr const &amp; field);
     FieldBuilderPtr addArray(std::string const &amp; name, ScalarType scalarType);
+    FieldBuilderPtr addFixedArray(
+         std::string const &amp; name,
+         ScalarType scalarType,
+         std::size_t size);
+    FieldBuilderPtr addBoundedArray(std::string const &amp;
+         name,ScalarType scalarType,
+         std::size_t bound);
     FieldBuilderPtr addArray(std::string const &amp; name, FieldConstPtr const &amp; element);
     StructureConstPtr createStructure();
     UnionConstPtr createUnion();
@@ -1411,8 +1473,14 @@ public:
     static FieldCreatePtr getFieldCreate();
     FieldBuilderPtr createFieldBuilder() const;
     ScalarConstPtr createScalar(ScalarType scalarType) const;
+    BoundedStringConstPtr createBoundedString(std::size_t maxLength) const;
     ScalarArrayConstPtr createScalarArray(ScalarType elementType) const;
-    StructureArrayConstPtr createStructureArray(StructureConstPtr const &amp; structure) const;
+    ScalarArrayConstPtr createFixedScalarArray(
+        ScalarType elementType, std::size_t size) const
+    ScalarArrayConstPtr createBoundedScalarArray(
+        ScalarType elementType, std::size_t bound) const;
+    StructureArrayConstPtr createStructureArray(
+        StructureConstPtr const &amp; structure) const;
     StructureConstPtr createStructure () const;
     StructureConstPtr createStructure (
         StringArray const &amp; fieldNames,
@@ -1458,9 +1526,22 @@ description of the methods.
       <dd>
        Add a scalar field.
       </dd>
+   <dt>addBoundedString</dt>
+      <dd>
+       Add a scalar field that is a string that has a maximum size.
+      </dd>
    <dt>addArray</dt>
       <dd>
-      Add a scalarArray field.
+      Add an array field. There are two methods: one to create a scalaArray
+      and one to create scalarArray, unionArray, or structureArray.
+      </dd>
+   <dt>addFixedArray</dt>
+      <dd>
+      Add a fixed size scalarArray field.
+      </dd>
+   <dt>addBoundedArray</dt>
+      <dd>
+      Add a bounded scalarArray field.
       </dd>
    <dt>createStructure</dt>
       <dd>
@@ -1504,7 +1585,13 @@ description of the methods.
     <dd>Create an instance of a FieldBuilder.</dd>
   <dt>createScalar</dt>
     <dd>Create a scalar introspection instance.</dd>
+  <dt>createBoundedString</dt>
+     <dd>create a scalar introspection instance for a bounded string.</dd>
   <dt>createScalarArray</dt>
+    <dd>Create a scalar array introspection instance.</dd>
+  <dt>createFixedScalarArray</dt>
+    <dd>Create a scalar array introspection instance.</dd>
+  <dt>createBoundedScalarArray</dt>
     <dd>Create a scalar array introspection instance.</dd>
   <dt>createStructure</dt>
     <dd>Create a structure introspection instance. Three methods are provided.
@@ -1512,6 +1599,10 @@ description of the methods.
       The other two are similar.
       The only difference is that one provides an ID and the other does
       not. The one without will result in ID <b>structure</b>.</dd>
+   <dt>createStructureArray</dt>
+     <dd>Ceate a structure array introspection instance.
+       All elements will have the same introspection interface.
+     </dd>
   <dt>createUnion</dt>
       <dd>Create a union. There are two methods.
        Each has arguments for an array of types and an array of names.
@@ -1687,7 +1778,13 @@ class PVScalarArray;
 class PVStructure;
 class PVStructureArray;
 class PVUnion;
-class PVUnionArray;
+
+template&lt;typename T&gt; class PVScalarValue;
+template&lt;typename T&gt; class PVValueArray;
+
+typedef PVValueArray&lt;PVUnionPtr&gt; PVUnionArray;
+typedef std::tr1::shared_ptr&lt;PVUnionArray&gt; PVUnionArrayPtr;
+
 
 typedef std::tr1::shared_ptr&lt;PostHandler&gt; PostHandlerPtr;
 
@@ -1909,7 +2006,7 @@ public:
      which must be one of the ScalarType enums.
      For example:
 <pre>
-uint32 val = pv-&gt;getAs<pvInt>();
+uint32 val = pv-&gt;getAs&lt;pvInt&gt;();
 </pre>
      </dd>
 
@@ -2063,6 +2160,7 @@ public:
     virtual void serialize(
         ByteBuffer *pbuffer,SerializableControl *pflusher) const ;
     PVUnion(UnionConstPtr const &amp; punion);
+    virtual std::ostream&amp; dumpValue(std::ostream&amp; o) const;
 };
 </pre>
 <dl>
@@ -2137,7 +2235,6 @@ public:
   <dt>dumpValue</dt>
     <dd>ostream method</dd>
 </dl>
-</p>
 
 
 <h3>PVScalarArray</h3>
@@ -2241,12 +2338,14 @@ public:
       If the field does not exist then a Ptr to a NULL value is returned
       without any error message being generated.
       <br />
-      Note that the template version replaces getBooleanField, etc.<br/>
+      <b>Note</b> The template version replaces getBooleanField, etc.<br/>
       </dd>
   <dt>getSubField(int fieldOffset)</dt>
     <dd>Get the field located a fieldOffset, where fieldOffset is relative to
       the top level structure. This returns null if the specified field is not
       located within this PVStructure.
+      <br />
+      <b>Note</b> The template version replaces getBooleanField, etc.<br/>
     </dd>
   <dt>dumpValue</dt>
      <dd>Method for streams I/O.</dd>
@@ -2270,12 +2369,13 @@ public:
     static const ScalarType typeCode;
 
     virtual ~PVValueArray() {}
+    virtual ArrayConstPtr getArray() const
     std::ostream&amp; dumpValue(std::ostream&amp; o) const;
     std::ostream&amp; dumpValue(std::ostream&amp; o, size_t index) const;
     // inherited from PVVectorStorage
     const_svector view();
-    void swap(const_svector& other);
-    void replace(const const_svector& next);
+    void swap(const_svector&amp; other);
+    void replace(const const_svector&amp; next);
     svector reuse();
     ...
 };
@@ -2283,6 +2383,8 @@ public:
 
 <p>where</p>
 <dl>
+  <dt>getArray</dt>
+    <dd>Get the introspection interface.</dd>
   <dt>dumpValue</dt>
      <dd>Method for streams I/O.</dd>
   <dt>view</dt>
@@ -2297,13 +2399,12 @@ public:
   <dt>reuse</dt>
      <dd>Remove and return the current array data or an unique copy if shared.</dd>
 </dl>
-<p><b>TBD</b>
+<p><b>TBD</b></p>
 <dl>
    <dt>Check for completeness</dt>
      <dd>Michael should check that PVScalarArray and PVValueArray
       have the correct set of methods and that the descriptions are correct.</dd>
 </dl>
-</p>
 
 <h3>PVStructureArray</h3>
 
@@ -2343,11 +2444,6 @@ public:
         DeserializableControl *pflusher);
     virtual std::ostream&amp; dumpValue(std::ostream&amp; o) const;
     virtual std::ostream&amp; dumpValue(std::ostream&amp; o, std::size_t index) const;
-    // inherited from PVVectorStorage
-    const_svector view();
-    void swap(const_svector&amp; other);
-    void replace(const const_svector&amp; next);
-    svector reuse();
  ...
 }</pre>
 <p>where</p>
@@ -2449,7 +2545,7 @@ public:
     std::tr1::shared_ptr&lt;PVAT&gt; createPVScalarArray();
 
     PVStructureArrayPtr createPVStructureArray(StructureArrayConstPtr const &amp; structureArray);
-    PVStructureArrayPtr createPVStructureArray(StructureConstPtr const &mp; structure);
+    PVStructureArrayPtr createPVStructureArray(StructureConstPtr const &amp; structure);
 
     PVUnionArrayPtr createPVUnionArray(UnionArrayConstPtr const &amp; unionArray);
     PVUnionArrayPtr createPVUnionArray(UnionConstPtr const &amp; punion);
@@ -2487,12 +2583,12 @@ PVDoublePtr pvDouble = getPVDataCreate()-&gt;createPVScalar&lt;PVDouble&gt;();
       If structToClone is null then the new structure is initialized to have 0 subfields.
       The third method uses a previously created structure introspection interface.
       </dd>
-  <dt>createPVUnion<dt>
+  <dt>createPVUnion</dt>
     <dd>Create an instance of a PVUnion. Two methods are provided.
     The first uses a previously created union introspection interface.
     The second clones an existing PVUnion.
     </dd>
-  <dt>createPVVariantUnion<dt>
+  <dt>createPVVariantUnion</dt>
     <dd>Creates an instance of a variant PVUnion.
       This is a union which has a single field which can be any pvData supported type,
      </dd>
@@ -2740,7 +2836,7 @@ void copy(
     size_t count);
 </pre>
 <p>The last copy is the only one most client need to call.
-It either throws an error of the element types do not match or calls the 
+It either throws an error if the element types do not match or calls the 
 other copy functions. The arguments are:</p>
 <dl>
    <dt>from</dt>
@@ -2763,20 +2859,21 @@ other copy functions. The arguments are:</p>
 </dl>
 <p>An exception is thrown if:</p>
 <dl>
-   <dt>type  mismatch</dt>
+   <dt>type mismatch</dt>
      <dd>The element types for the source and destination differ.</dd>
    <dt>immutable</dt>
-      <dd>The destination array is immutable.</dt>
+      <dd>The destination array is immutable.</dd>
    <dt>capacity immutable</dt>
       <dd>The destination array needs to have it's capacity extended
         but the capacity is immutable.</dd>
 </dl>
 
-<h2>pvDataApp/property</h2>
+<h2>src/property</h2>
 
 <h3>Definition of Property</h3>
 
-<p>Only fields named "value" have properties. A record can have multiple value
+<p>
+Often a field named "value" has properties. A record can have multiple value
 fields, which can appear in the top level structure of a record or in a
 substructure. All other fields in the structure containing a value field are
 considered properties of the value field. The fieldname is also the property
@@ -3463,7 +3560,7 @@ public:
     bool choicesMutable();
     StringArrayPtr const &amp; getChoices();
     int32 getNumberChoices();
-    bool setChoices(StringArray &amp;choices,int32 numberChoices);
+    bool setChoices(StringArray &amp;choices);
 };</pre>
 
 <p>where</p>
@@ -3502,7 +3599,7 @@ public:
 </dl>
 
 
-<h2>pvDataApp/factory</h2>
+<h2>src/factory</h2>
 
 <p>Directory factory has code that implements everything described by the files
 in directory pv</p>
@@ -3522,7 +3619,7 @@ implements getConvert.</p>
 
 <p>Other files implement PVData base classes</p>
 
-<h2>pvDataAPP/misc</h2>
+<h2>src/misc</h2>
 
 <h3>Overview</h3>
 
@@ -3560,7 +3657,7 @@ implements getConvert.</p>
     <dd>More support for serializing objects.</dd>
   <dt>sharedPtr.h</dt>
     <dd>Defines POINTER_DEFINITIONS.</dd>
-  <dt>sharedVector.h</dd>
+  <dt>sharedVector.h</dt>
      <dd>Like std::vector except that std::shared_ptr is used for
       the data array.</dd>
   <dt>status.h</dt>
@@ -3608,7 +3705,6 @@ public:
     BitSet&amp; operator&amp;=(const BitSet&amp; set);
     BitSet&amp; operator|=(const BitSet&amp; set);
     BitSet&amp; operator^=(const BitSet&amp; set);
-    BitSet&amp; operator-=(const BitSet&amp; set);
     BitSet&amp; operator=(const BitSet &amp;set);
     void or_and(const BitSet&amp; set1, const BitSet&amp; set2);
     bool operator==(const BitSet &amp;set) const;
@@ -3667,10 +3763,6 @@ std::ostream&amp; operator&lt;&lt;(std::ostream&amp; o, const BitSet&amp; b);
   <dt>operator^=(const BitSet&amp; set)</dt>
     <dd>Performs a logical exclusive or of this target bit set with the
       argument bit set.</dd>
-  <dt>operator-=(const BitSet&amp; set)</dt>
-    <dd><p>Clears all of the bits in this bitSet whose corresponding bit is set
-      in the specified bitSet.</p>
-    </dd>
   <dt>operator=(const BitSet &amp;set)</dt>
     <dd>Assignment operator.</dd>
   <dt>or_and(const BitSet&amp; set1, const BitSet&amp; set2)</dt>
@@ -3687,7 +3779,6 @@ std::ostream&amp; operator&lt;&lt;(std::ostream&amp; o, const BitSet&amp; b);
   *flusher);</dt>
     <dd>Deserialize the bitSet.</dd>
 </dl>
-</p>
 
 <h3>byteBuffer.h</h3>
 
@@ -3922,15 +4013,13 @@ once. This can be implemented as follows:</p>
         if(alreadyInitialized) return;
         // initialization
     }</pre>
-<p>
-<p>Lock has a private variable:
+<p>Lock has a private variable:</p>
 <pre>
 bool locked;
 </pre>
 and improves efficiency by checking the local variable before calling the
 mutex methods. This is <b>not</b> thread safe if any methods are called by a thread other than
 the thread that created the Lock.
-</p>
 <p>It is thread safe if used as follows:</p>
 <pre>
 {
@@ -4720,7 +4809,7 @@ be used to schedule multiple callbacks. It has the methods:</p>
 <h3>typeCast.h</h3>
 <p><b>TBD</b> Michael will explain.</p>
 
-<h2>pvDataApp/pvMisc</h2>
+<h2>src/pvMisc</h2>
 
 <h3>bitSetUtil.h</h3>
 
@@ -4750,7 +4839,7 @@ currently has only one method:</p>
       entire structures if the structure offset bit is set. </dd>
 </dl>
 
-<h2>support for copy and monitor</h2>
+<h2>src/copy and src/monitor</h2>
 <p><b>copy</b> and <b>monitor</b> are not used in this project.
 They are intended for use by pvAccess and by pvAccess servers.
 They are provided with this project because the code depends only on
@@ -4767,7 +4856,7 @@ had knowledge of PVRecord. The C++ version was implemented in pvDatabaseCPP
 and the Java version on pvIOCJava.
 At present only the C++ version of the new API for pvCopy is implemented.
 </p>
-<p>Copy provides:
+<p>Copy provides:</p>
 <dl>
    <dt>createRequest</dt>
      <dd>
@@ -4802,9 +4891,7 @@ Monitor provides:
      of pvAccess but only pvData.
     </dd>
 </dl>
-</p>
-
-<h2>support for copy</h2>
+<h2>src/copy</h2>
 <p><b>copy</b> provides the ability to create a structure that has 
 a copy of an arbitrary subset of the fields in an existing top level
 structure. In addition it allows global options and field specific options.
@@ -4975,15 +5062,14 @@ where
 
 
 
-<h2>support for monitor</h2>
-<p>This consists of two components:
+<h2>src/monitor</h2>
+<p>This consists of two components:</p>
 <dl>
    <dt>monitor</dt>
      <dd>Used by code that implements pvAccess monitors.</dd>
    <dt>monitorPlugin</dt>
       <dd>Code that provides special semantics for monitors.</dd>
 </dl>
-</p>
 <h3>monitor</h3>
 <pre>
 class MonitorElement {
@@ -5010,6 +5096,7 @@ class MonitorRequester : public virtual Requester {
 <h4>monitorElement</h4>
 <p><b>MonitorElement</b> holds the data for one element of a monitor queue.
 It has the fields:
+</p>
 <dl>
   <dt>pvStructurePtr</dt>
     <dd>A top level structure with data values at the time the monitors occurs.</dd>
@@ -5018,13 +5105,13 @@ It has the fields:
   <dt>overrunBitSet</dt>
      <dd>Shows which fields have changed more than once since the previous monitor.</dd>
 </dl>
-</p>
 <h4>monitorElement queue</h4>
 <p>
 A queue of monitor elements must be implemented by any channel provider that implements
 <b>Channel::createMonitor</b>.
 For an example implementation look at pvDatabaseCPP.
 It has the following:
+</p>
 <pre>
 typedef Queue&lt;MonitorElement&gt; MonitorElementQueue;
 typedef std::tr1::shared_ptr&lt;MonitorElementQueue&gt; MonitorElementQueuePtr;
@@ -5076,7 +5163,6 @@ Note that each client has it's own queue that is not shared with other client.
       Release the monitor element.
       The caller owns the monitor element between the calls to poll and release.
      </dd>
-<dl>
 </dl>
 <h4>MonitorRequester</h4>
 <p>This must be implemented by a pvAccess client.
@@ -5144,7 +5230,7 @@ It has methods:</p>
        Should the value of pvField cause a monitor to be raised.
        pvField and pvTop are fields in the top level structure
        being monitored. monitorElement has the top level structure
-       for the copy</b>.
+       for the copy<br/>.
        The implementation should <b>not</b> modify the fields in the structure
         being monitored.
         Called with pvTop locked.
@@ -5193,7 +5279,7 @@ It has methods:</p>
       pairs. name is the subField name and value is the subField value.<br/>
      Note that a plugin will below to a single client.
     </dd>
-<dl>
+</dl>
 <h4>MonitorPluginManager</h4>
 <p><b>MonitorPluginManager</b> has the methods:</p>
 <dl>
@@ -5221,6 +5307,7 @@ Should the method <b>causeMonitor</b>
 have arguments <b>pvField</b> and <b>pvTop</b>
 be defined so that they can not be modified.
 This would be possible if the following was defined:
+</p>
 <pre>
 typedef std::tr1::shared_ptr&lt;const PVField&gt; PVFieldConstPtr;
 typedef std::tr1::shared_ptr&lt;const PVStructure&gt; PVStructureConstPtr;
@@ -5237,7 +5324,6 @@ In addition all methods defined in pvDataCPP must be checked.
 In particular many of the methods in <b>Convert</b> must have
 their arguments modified.
 Big job.
-</p>
 <h2>monitorPlugin example</h2>
 <h3>Example Plugin Overview</h3>
 <p>This section describes an example plugin that:</p>
@@ -5270,6 +5356,7 @@ structure powerSupply
 </pre>
 <p>A pvAccess client wants to create a monitor on the powerSupply as follows:
 The client wants a top level structure that looks like:
+</p>
 <pre>
 structure powerSupply
     structure alarm
@@ -5284,9 +5371,9 @@ structure powerSupply
 In addition the client wants monitors to occur only when one of the monitored
 fields changes value but not just because a put occurred.
 Also if only the timeStamp changes value then that should not cause a monitor.
-</p>
 <p>The example monitor plugin implements the semantics the
 client wants. It can be attached to any field via the following options:
+</p>
 <pre>
 [plugin=onChange,raiseMonitor=value]
 </pre>
@@ -5295,7 +5382,6 @@ value. In addition <b>value</b> equals <b>false</b> means do not raise a monitor
 for changes to this field.
 But if a change to another field does cause a monitor the change to this field
 will be passed to the client.
-</p>
 <p>
 Assume that the client has already connected to the channel.
 The client can then issue the commands:</p>
