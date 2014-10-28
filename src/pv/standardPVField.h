@@ -84,7 +84,7 @@ public:
     PVStructurePtr enumerated(StringArray const &choices);
     /**
      * Create a structure that has an enumerated structure value field.
-     * The id for the structure is "ev4:nt/NTEnum:1.0".
+     * The id for the structure is "epics:nt/NTEnum:1.0".
      * @param choices This is a StringArray of choices.
      * @param properties A comma separated list of properties.
      * @return The const shared pointer to the structure.

@@ -28,11 +28,11 @@ StructureConstPtr enum_t =
 // create a structure (cntd.)
 StructureConstPtr ntEnum = 
     getFieldCreate()->createFieldBuilder()->
-        setId("uri:ev4:nt/2012/pwd/NTEnum")->
+        setId("epics:nt/NTEnum:1.0")->
         add("value", enum_t)->
         addNestedStructure("timeStamp")->
             setId("time_t")->
-            add("secsPastEpoch", pvLong)->
+            add("secondsPastEpoch", pvLong)->
             add("nanoseconds", pvInt)->
             add("userTag", pvInt)->
             endNested()->

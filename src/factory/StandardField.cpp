@@ -503,28 +503,28 @@ StructureConstPtr StandardField::scalar(
     ScalarType type,string  const &properties)
 {
     ScalarConstPtr field = fieldCreate->createScalar(type); // scalar_t
-    return createProperties("ev4:nt/NTScalar:1.0",field,properties);
+    return createProperties("epics:nt/NTScalar:1.0",field,properties);
 }
 
 StructureConstPtr StandardField::regUnion(
     UnionConstPtr const &field,
         string const & properties)
 {
-   return createProperties("ev4:nt/NTUnion:1.0",field,properties);
+   return createProperties("epics:nt/NTUnion:1.0",field,properties);
 }
 
 StructureConstPtr StandardField::variantUnion(
     string const & properties)
 {
     UnionConstPtr field =  fieldCreate->createVariantUnion();
-    return createProperties("ev4:nt/NTUnion:1.0",field,properties);
+    return createProperties("epics:nt/NTUnion:1.0",field,properties);
 }
 
 StructureConstPtr StandardField::scalarArray(
     ScalarType elementType, string  const &properties)
 {
     ScalarArrayConstPtr field = fieldCreate->createScalarArray(elementType); // scalar_t[]
-    return createProperties("ev4:nt/NTScalarArray:1.0",field,properties);
+    return createProperties("epics:nt/NTScalarArray:1.0",field,properties);
 }
 
 
@@ -533,7 +533,7 @@ StructureConstPtr StandardField::structureArray(
 {
     StructureArrayConstPtr field = fieldCreate->createStructureArray(
         structure);
-    return createProperties("ev4:nt/NTStructureArray:1.0",field,properties);
+    return createProperties("epics:nt/NTStructureArray:1.0",field,properties);
 }
 
 StructureConstPtr StandardField::unionArray(
@@ -541,7 +541,7 @@ StructureConstPtr StandardField::unionArray(
 {
     UnionArrayConstPtr field = fieldCreate->createUnionArray(
         punion);
-    return createProperties("ev4:nt/NTUnionArray:1.0",field,properties);
+    return createProperties("epics:nt/NTUnionArray:1.0",field,properties);
 }
 
 StructureConstPtr StandardField::enumerated()
@@ -560,7 +560,7 @@ StructureConstPtr StandardField::enumerated()
 StructureConstPtr StandardField::enumerated(string  const &properties)
 {
     StructureConstPtr field = enumerated(); // enum_t
-    return createProperties("ev4:nt/NTEnum:1.0",field,properties);
+    return createProperties("epics:nt/NTEnum:1.0",field,properties);
 }
 
 StructureConstPtr StandardField::alarm()
