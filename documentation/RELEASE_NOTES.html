@@ -34,8 +34,8 @@ For example:</p>
 </code></pre>
 <p>is replaced by</p>
 <pre><code>  PVDoublePtr pvValue;
-  cout &lt;&lt; pvValue=&gt;dumpValue(cout) &lt;&lt; endl
-  cout &lt;&lt; pvValue-&gt;getField()-&gt;dump(cout) &lt;&lt; endl;
+  cout &lt;&lt; *pvValue &lt;&lt; endl
+  cout &lt;&lt; *pvValue-&gt;getField() &lt;&lt; endl;
 </code></pre>
 <h2>union is a new basic type.</h2>
 <p>There are two new basic types: union_t and unionArray.</p>
