@@ -52,7 +52,7 @@ provides a language independent overview of <b>copy</b> and <b>monitor</b>.
 </p>
 <p>
 <b>NOTE:pvRequest.html</b> must be updated since it is based on an earlier version of pvCopy that
-had knowlege of PVRecord. The C++ version was implemented in pvDatabaseCPP
+had knowledge of PVRecord. The C++ version was implemented in pvDatabaseCPP
 and the Java version on pvIOCJava.
 At present only the C++ version of the new API for pvCopy is implemented.
 </p>
@@ -65,13 +65,13 @@ At present only the C++ version of the new API for pvCopy is implemented.
       Given an ascii string createRequest creates a PVStructure that provides
       a pvData representation of the information from the ascii string.
       It is this structure that can be passed to the channel create methods.<br />
-      The information in a pvRequest selects an arbitrarary subset of the
+      The information in a pvRequest selects an arbitrary subset of the
       fields in a top level structure that resides in the server.
       In addition options can be specified. Both global and field specific
       options can be specified.
       </dd>
    <dt>pvCopy</dt>
-     <dd>This is a faculity used by channel providers.
+     <dd>This is a facility used by channel providers.
      It provides client specific code that manages a copy of an arbitrary
      subset of the fields in a top level structure that resides in the
      provider. It also allows provider access to options specified
@@ -185,7 +185,7 @@ where
         This is the method for creating a PVCopy instance.<br/>
         <dl>
            <dt>pvMaster</dt>
-             <dd>the top level sructure managed by the server.</dd>
+             <dd>the top level structure managed by the server.</dd>
           <dt>pvRequest</dt>
            <dd>selects the set of subfields desired
          and options for each field.</dd>
@@ -241,12 +241,12 @@ where
    <dt>updateCopyFromBitSet</dt>
       <dd>
        For each set bit in bitSet set the field in copyPVStructure to the value
-      of the corrseponding field in pvMaster.
+      of the corresponding field in pvMaster.
       </dd>
    <dt>updateMaster</dt>
       <dd>
        For each set bit in bitSet set the field in pvMaster to the value
-      of the corrseponding field in copyPVStructure.
+      of the corresponding field in copyPVStructure.
       
       </dd>
    <dt>getOptions</dt>
@@ -266,7 +266,7 @@ where
 <p>This consists of two components:
 <dl>
    <dt>monitor</dt>
-     <dd>Used by code that implements pvAccess montors.</dd>
+     <dd>Used by code that implements pvAccess monitors.</dd>
    <dt>monitorPlugin</dt>
       <dd>Code that provides special semantics for monitors.</dd>
 </dl>
@@ -346,7 +346,7 @@ Note that each client has it's own queue that is not shared with other client.
    <dt>start</dt>
      <dd>
       Start monitoring.
-      This will result in a an inital monitor that has the current value
+      This will result in a an initial monitor that has the current value
       of all fields.
      </dd>
    <dt>stop</dt>
@@ -356,11 +356,11 @@ Note that each client has it's own queue that is not shared with other client.
    <dt>poll</dt>
      <dd>
       Called to get a monitor element.
-      If no new elemants are available then a null pointer is returned.
+      If no new elements are available then a null pointer is returned.
      </dd>
    <dt>release</dt>
      <dd>
-      Release the monotor element.
+      Release the monitor element.
       The caller owns the monitor element between the calls to poll and release.
      </dd>
 <dl>
@@ -488,7 +488,7 @@ It has methods:</p>
      <dd>
      MonitorPluginManager is a singleton.
      The first call to get will create the single instance.
-     Further calls will rerurn the single instance.
+     Further calls will return the single instance.
      </dd>
    <dt>addPlugin</dt>
      <dd>
@@ -496,18 +496,18 @@ It has methods:</p>
      </dd>
    <dt>findPlugin</dt>
      <dd>
-      Find a plugin. A NULL shared pointer is reurned if it has not been added.
+      Find a plugin. A NULL shared pointer is returned if it has not been added.
      </dd>
    <dt>showNames</dt>
      <dd>
-      Show the names of all puugins that have been added.
+      Show the names of all plugins that have been added.
      </dd>
 </dl>
 <p><b>NOTE:</b>
 Should the method <b>causeMonitor</b> 
 have arguments <b>pvField</b> and <b>pvTop</b>
-be defined so that they can not be modfied.
-This would be posssible if the following was defined:
+be defined so that they can not be modified.
+This would be possible if the following was defined:
 <pre>
 typedef std::tr1::shared_ptr&lt;const PVField&gt; PVFieldConstPtr;
 typedef std::tr1::shared_ptr&lt;const PVStructure&gt; PVStructureConstPtr;
@@ -519,7 +519,7 @@ virtual bool causeMonitor(
         PVStructureConstPtr const &amp;pvTop,
         MonitorElementPtr const &amp;monitorElement) = 0;
 </pre>
-But just adding these definitions is not sufficent.
+But just adding these definitions is not sufficient.
 In addition all methods defined in pvDataCPP must be checked.
 In particular many of the methods in <b>Convert</b> must have
 their arguments modified.
@@ -545,15 +545,15 @@ structure powerSupply
     structure power
        double value
        structure alarm
-       struvture display
+       structure display
     structure voltage
        double value
        structure alarm
-       struvture display
+       structure display
     structure current
        double value
        structure alarm
-       struvture display
+       structure display
 </pre>
 <p>A pvAccess client wants to create a monitor on the powerSupply as follows:
 The client wants a top level structure that looks like:
@@ -578,7 +578,7 @@ client wants. It can be attached to any field via the following options:
 [plugin=onChange,raiseMonitor=value]
 </pre>
 This plugin will trigger a monitor for the field only if the field changes
-value. In addition <b>value</b> equals <b>false</b> means do not raise a monotor
+value. In addition <b>value</b> equals <b>false</b> means do not raise a monitor
 for changes to this field.
 But if a change to another field does cause a monitor the change to this field
 will be passed to the client.

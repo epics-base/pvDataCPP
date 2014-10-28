@@ -53,8 +53,8 @@ For example:
 is replaced by
 
       PVDoublePtr pvValue;
-      cout << pvValue=>dumpValue(cout) << endl
-      cout << pvValue->getField()->dump(cout) << endl;
+      cout << *pvValue << endl
+      cout << *pvValue->getField() << endl;
 
 
 union is a new basic type.

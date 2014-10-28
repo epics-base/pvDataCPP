@@ -27,7 +27,7 @@ using std::string;
 #endif
 
 #if EPICS_VERSION_INT < VERSION_INT(3,15,0,1)
-/* integer conversion primatives added to epicsStdlib.c in 3.15.0.1 */
+/* integer conversion primitives added to epicsStdlib.c in 3.15.0.1 */
 
 #define S_stdlib_noConversion 1 /* No digits to convert */
 #define S_stdlib_extraneous   2 /* Extraneous characters */
@@ -249,7 +249,18 @@ epicsParseFloat(const char *str, float *to, char **units)
 }
 #endif
 
-#if defined(NEED_LONGLONG) && (defined(__vxworks) || defined (_WIN32))
+// MS Visual Studio 2013 defines strtoll, etc.
+#if defined(_WIN32)
+#  if (_MSC_VER >= 1800)
+#    define WIN_NEEDS_OLL_FUNC 0
+#  else
+#    define WIN_NEEDS_OLL_FUNC 1
+#  endif
+#else
+#  define WIN_NEEDS_OLL_FUNC 0
+#endif
+
+#if defined(NEED_LONGLONG) && (defined(__vxworks) || WIN_NEEDS_OLL_FUNC)
 static
 long long strtoll(const char *ptr, char ** endp, int base)
 {

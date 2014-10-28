@@ -214,7 +214,7 @@ static void scalarTest()
     CreateRequest::shared_pointer createRequest = CreateRequest::create();
     pvRequest = createRequest->createRequest(request);
     if(debug) { cout << "request " << request << endl; }
-    if(debug) { cout << "pvRequest\n" << pvRequest->dumpValue(cout) << endl; }
+    if(debug) { cout << "pvRequest\n" << *pvRequest << endl; }
     pvCopy = PVCopy::create(pvMaster,pvRequest,"");
     valueNameCopy = "value";
     testPVScalar(valueNameMaster,valueNameCopy,pvMaster,pvCopy);
@@ -222,7 +222,7 @@ static void scalarTest()
     valueNameMaster = "value";
     pvRequest = createRequest->createRequest(request);
     if(debug) { cout << "request " << request << endl; }
-    if(debug) { cout << "pvRequest\n" << pvRequest->dumpValue(cout) << endl; }
+    if(debug) { cout << "pvRequest\n" << *pvRequest << endl; }
     pvCopy = PVCopy::create(pvMaster,pvRequest,"");
     valueNameCopy = "value";
     testPVScalar(valueNameMaster,valueNameCopy,pvMaster,pvCopy);
@@ -230,7 +230,7 @@ static void scalarTest()
     valueNameMaster = "value";
     pvRequest = createRequest->createRequest(request);
     if(debug) { cout << "request " << request << endl; }
-    if(debug) { cout << "pvRequest\n" << pvRequest->dumpValue(cout) << endl; }
+    if(debug) { cout << "pvRequest\n" << *pvRequest << endl; }
     pvCopy = PVCopy::create(pvMaster,pvRequest,"");
     valueNameCopy = "value";
     testPVScalar(valueNameMaster,valueNameCopy,pvMaster,pvCopy);
@@ -253,7 +253,7 @@ static void arrayTest()
     valueNameMaster = request = "value";
     pvRequest = createRequest->createRequest(request);
     if(debug) { cout << "request " << request << endl; }
-    if(debug) { cout << "pvRequest\n" << pvRequest->dumpValue(cout) << endl; }
+    if(debug) { cout << "pvRequest\n" << *pvRequest << endl; }
     pvCopy = PVCopy::create(pvMaster,pvRequest,"");
     valueNameCopy = "value";
     testPVScalarArray(pvDouble,valueNameMaster,valueNameCopy,pvMaster,pvCopy);
@@ -261,7 +261,7 @@ static void arrayTest()
     valueNameMaster = "value";
     pvRequest = createRequest->createRequest(request);
     if(debug) { cout << "request " << request << endl; }
-    if(debug) { cout << "pvRequest\n" << pvRequest->dumpValue(cout) << endl; }
+    if(debug) { cout << "pvRequest\n" << *pvRequest << endl; }
     pvCopy = PVCopy::create(pvMaster,pvRequest,"");
     valueNameCopy = "value";
     testPVScalarArray(pvDouble,valueNameMaster,valueNameCopy,pvMaster,pvCopy);
@@ -269,7 +269,7 @@ static void arrayTest()
     valueNameMaster = "value";
     pvRequest = createRequest->createRequest(request);
     if(debug) { cout << "request " << request << endl; }
-    if(debug) { cout << "pvRequest\n" << pvRequest->dumpValue(cout) << endl; }
+    if(debug) { cout << "pvRequest\n" << *pvRequest << endl; }
     pvCopy = PVCopy::create(pvMaster,pvRequest,"");
     valueNameCopy = "value";
     testPVScalarArray(pvDouble,valueNameMaster,valueNameCopy,pvMaster,pvCopy);
@@ -320,7 +320,7 @@ static void powerSupplyTest()
     valueNameMaster = request = "power.value";
     pvRequest = createRequest->createRequest(request);
     if(debug) { cout << "request " << request << endl; }
-    if(debug) { cout << "pvRequest\n" << pvRequest->dumpValue(cout) << endl; }
+    if(debug) { cout << "pvRequest\n" << *pvRequest << endl; }
     pvCopy = PVCopy::create(pvMaster,pvRequest,"");
     valueNameCopy = "power.value";
     testPVScalar(valueNameMaster,valueNameCopy,pvMaster,pvCopy);
@@ -328,7 +328,7 @@ static void powerSupplyTest()
     valueNameMaster = "power.value";
     pvRequest = createRequest->createRequest(request);
     if(debug) { cout << "request " << request << endl; }
-    if(debug) { cout << "pvRequest\n" << pvRequest->dumpValue(cout) << endl; }
+    if(debug) { cout << "pvRequest\n" << *pvRequest << endl; }
     pvCopy = PVCopy::create(pvMaster,pvRequest,"");
     valueNameCopy = "power.value";
     testPVScalar(valueNameMaster,valueNameCopy,pvMaster,pvCopy);
@@ -336,7 +336,7 @@ static void powerSupplyTest()
     valueNameMaster = "power.value";
     pvRequest = createRequest->createRequest(request);
     if(debug) { cout << "request " << request << endl; }
-    if(debug) { cout << "pvRequest\n" << pvRequest->dumpValue(cout) << endl; }
+    if(debug) { cout << "pvRequest\n" << *pvRequest << endl; }
     pvCopy = PVCopy::create(pvMaster,pvRequest,"");
     valueNameCopy = "power.value";
     testPVScalar(valueNameMaster,valueNameCopy,pvMaster,pvCopy);
@@ -344,7 +344,7 @@ static void powerSupplyTest()
     valueNameMaster = "power.value";
     pvRequest = createRequest->createRequest(request);
     if(debug) { cout << "request " << request << endl; }
-    if(debug) { cout << "pvRequest\n" << pvRequest->dumpValue(cout) << endl; }
+    if(debug) { cout << "pvRequest\n" << *pvRequest << endl; }
     pvCopy = PVCopy::create(pvMaster,pvRequest,"");
     valueNameCopy = "power.value";
     testPVScalar(valueNameMaster,valueNameCopy,pvMaster,pvCopy);
