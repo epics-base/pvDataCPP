@@ -28,7 +28,7 @@ using namespace epics::pvData;
 
 static bool debug = false;
 
-void testTimeStamp()
+void testTimeStampInternal()
 {
     testOk1(nanoSecPerSec==1000000000);
     TimeStamp current;
@@ -131,6 +131,6 @@ MAIN(testTimeStamp)
 {
     testPlan(37);
     testDiag("Tests timeStamp");
-    testTimeStamp();
+    testTimeStampInternal();
     return testDone();
 }

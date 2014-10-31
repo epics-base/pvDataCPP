@@ -9,18 +9,18 @@
 #include <epicsThread.h>
 #include <epicsUnitTest.h>
 
-int testBitSetUtil(int);
-int testConvert(int);
-int testFieldBuilder(int);
-int testIntrospect(int);
-int testOperators(int);
-int testPVData(int);
-int testPVScalarArray(int);
-int testPVStructureArray(int);
-int testPVType(int);
-int testPVUnion(int);
-int testStandardField(int);
-int testStandardPVField(int);
+int testBitSetUtil(void);
+int testConvert(void);
+int testFieldBuilder(void);
+int testIntrospect(void);
+int testOperators(void);
+int testPVData(void);
+int testPVScalarArray(void);
+int testPVStructureArray(void);
+int testPVType(void);
+int testPVUnion(void);
+int testStandardField(void);
+int testStandardPVField(void);
 
 void epicsRunPVDataTests(void)
 {
