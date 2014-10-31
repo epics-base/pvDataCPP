@@ -2,12 +2,12 @@ TOP=../..
 
 include $(TOP)/configure/CONFIG
 
-PROD_HOST += testCreateRequest
+TESTPROD_HOST += testCreateRequest
 testCreateRequest_SRCS = testCreateRequest.cpp
 testCreateRequest_LIBS = pvData Com
 TESTS += testCreateRequest
 
-PROD_HOST += testPVCopy
+TESTPROD_HOST += testPVCopy
 testPVCopy_SRCS += testPVCopy.cpp
 testPVCopy_LIBS += pvData Com
 TESTS += testPVCopy

@@ -37,7 +37,7 @@ static StandardFieldPtr standardField = getStandardField();
 static StandardPVFieldPtr standardPVField = getStandardPVField();
 static ConvertPtr convert = getConvert();
 
-static void testPVUnion()
+static void testPVUnionType()
 {
     if(debug) 
         std::cout << std::endl << "testPVUnion" << std::endl;
@@ -115,10 +115,10 @@ static void testPVUnionArray()
 }
 
 
-MAIN(testPVData)
+MAIN(testPVUnion)
 {
     testPlan(6);
-    testPVUnion();
+    testPVUnionType();
     testPVUnionArray();
     return testDone();
 }

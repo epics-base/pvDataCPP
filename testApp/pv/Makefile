@@ -2,65 +2,79 @@ TOP=../..
 
 include $(TOP)/configure/CONFIG
 
-PROD_HOST += testBitSetUtil
+PROD_LIBS += pvData Com
+
+TESTPROD_HOST += testBitSetUtil
 testBitSetUtil_SRCS += testBitSetUtil.cpp
-testBitSetUtil_LIBS += pvData Com
+testHarness_SRCS += testBitSetUtil.cpp
 TESTS += testBitSetUtil
 
-PROD_HOST += testIntrospect
+TESTPROD_HOST += testIntrospect
 testIntrospect_SRCS += testIntrospect.cpp
-testIntrospect_LIBS += pvData Com
+testHarness_SRCS += testIntrospect.cpp
 TESTS += testIntrospect
 
-PROD_HOST += testPVType
+TESTPROD_HOST += testPVType
 testPVType_SRCS += testPVType.cpp
-testPVType_LIBS += pvData Com
+testHarness_SRCS += testPVType.cpp
 TESTS += testPVType
 
-PROD_HOST += testStandardField
+TESTPROD_HOST += testStandardField
 testStandardField_SRCS += testStandardField.cpp
-testStandardField_LIBS += pvData Com
+testHarness_SRCS += testStandardField.cpp
 TESTS += testStandardField
 
-PROD_HOST += testStandardPVField
+TESTPROD_HOST += testStandardPVField
 testStandardPVField_SRCS += testStandardPVField.cpp
-testStandardPVField_LIBS += pvData Com
+testHarness_SRCS += testStandardPVField.cpp
 TESTS += testStandardPVField
 
-PROD_HOST += testPVData
+TESTPROD_HOST += testPVData
 testPVData_SRCS += testPVData.cpp
-testPVData_LIBS += pvData Com
+testHarness_SRCS += testPVData.cpp
 TESTS += testPVData
 
-PROD_HOST += testPVUnion
+TESTPROD_HOST += testPVUnion
 testPVUnion_SRCS += testPVUnion.cpp
-testPVUnion_LIBS += pvData Com
+testHarness_SRCS += testPVUnion.cpp
 TESTS += testPVUnion
 
-PROD_HOST += testConvert
+TESTPROD_HOST += testConvert
 testConvert_SRCS += testConvert.cpp
-testConvert_LIBS += pvData Com
+testHarness_SRCS += testConvert.cpp
 TESTS += testConvert
 
-PROD_HOST += testPVScalarArray
+TESTPROD_HOST += testPVScalarArray
 testPVScalarArray_SRCS += testPVScalarArray.cpp
-testPVScalarArray_LIBS += pvData Com
+testHarness_SRCS += testPVScalarArray.cpp
 TESTS += testPVScalarArray
 
-PROD_HOST += testPVStructureArray
+TESTPROD_HOST += testPVStructureArray
 testPVStructureArray_SRCS += testPVStructureArray.cpp
-testPVStructureArray_LIBS += pvData Com
+testHarness_SRCS += testPVStructureArray.cpp
 TESTS += testPVStructureArray
 
-PROD_HOST += testOperators
+TESTPROD_HOST += testOperators
 testOperators_SRCS += testOperators.cpp
-testOperators_LIBS += pvData Com
+testHarness_SRCS += testOperators.cpp
 TESTS += testOperators
 
-PROD_HOST += testFieldBuilder
+TESTPROD_HOST += testFieldBuilder
 testFieldBuilder_SRCS += testFieldBuilder.cpp
-testFieldBuilder_LIBS += pvData Com
+testHarness_SRCS += testFieldBuilder.cpp
 TESTS += testFieldBuilder
+
+# The testHarness runs all the test programs in a known working order.
+testHarness_SRCS += epicsRunPVDataTests.c
+
+PROD_vxWorks = vxTestHarness
+vxTestHarness_SRCS += $(testHarness_SRCS)
+TESTSPEC_vxWorks = vxTestHarness.$(MUNCH_SUFFIX); epicsRunPVDataTests
+
+#PROD_RTEMS += rtemsTestHarness
+#rtemsTestHarness_SRCS += rtemsTestHarness.c
+#rtemsTestHarness_SRCS += $(testHarness_SRCS)
+#TESTSPEC_RTEMS = rtemsTestHarness.boot; epicsRunPVDataTests
 
 TESTSCRIPTS_HOST += $(TESTS:%=%.t)
 
