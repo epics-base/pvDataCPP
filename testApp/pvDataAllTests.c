@@ -44,7 +44,7 @@ int testPVUnion(void);
 int testStandardField(void);
 int testStandardPVField(void);
 
-void epicsRunPVDataTests(void)
+void pvDataAllTests(void)
 {
     testHarness();
 
