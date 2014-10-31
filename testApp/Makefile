@@ -1,16 +1,24 @@
+# Makefile for the pvData tests
+
 TOP = ..
 include $(TOP)/configure/CONFIG
-DIRS += misc
-DIRS += pv
-DIRS += property
-DIRS += copy
 
-# TODO combined test vxTestHarness
-#PROD_vxWorks = vxTestHarness
-#vxTestHarness_SRCS += pvDataAllTests
-#vxTestHarness_OBJS += misc/
-#TESTSPEC_vxWorks = vxTestHarness.$(MUNCH_SUFFIX); pvDataAllTests
+PVDATA_TEST = $(TOP)/testApp
 
-include $(TOP)/configure/RULES_DIRS
+PROD_LIBS += pvData Com
+
+include $(PVDATA_TEST)/misc/Makefile
+include $(PVDATA_TEST)/pv/Makefile
+include $(PVDATA_TEST)/property/Makefile
+include $(PVDATA_TEST)/copy/Makefile
+
+PROD_vxWorks = vxTestHarness
+vxTestHarness_SRCS += pvDataAllTests
+vxTestHarness_OBJS += misc/
+TESTSPEC_vxWorks = vxTestHarness.$(MUNCH_SUFFIX); pvDataAllTests
+
+TESTSCRIPTS_HOST += $(TESTS:%=%.t)
+
+include $(TOP)/configure/RULES
 
 
