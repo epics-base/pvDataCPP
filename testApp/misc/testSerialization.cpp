@@ -790,7 +790,6 @@ MAIN(testSerialization) {
     delete control;
     delete flusher;
 
-    epicsExitCallAtExits();
     return testDone();
 }
 
