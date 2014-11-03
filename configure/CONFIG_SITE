@@ -28,5 +28,3 @@ USR_CPPFLAGS += --coverage
 USR_LDFLAGS += --coverage
 endif
 
-CROSS_COMPILER_TARGET_ARCHS=RTEMS-pc386
-
