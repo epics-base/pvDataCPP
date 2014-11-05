@@ -19,11 +19,12 @@
 #include "pv/sharedVector.h"
 
 using std::string;
+using namespace epics::pvData;
 
 static void testEmpty()
 {
     testDiag("Test empty vector");
-    epics::pvData::shared_vector<int> empty, empty2;
+    epics::pvData::shared_vector<int32> empty, empty2;
 
     testOk1(empty.size()==0);
     testOk1(empty.empty());
@@ -42,7 +43,7 @@ static void testInternalAlloc()
 {
     testDiag("Test vector alloc w/ new[]");
 
-    epics::pvData::shared_vector<int> internal(5);
+    epics::pvData::shared_vector<int32> internal(5);
 
     testOk1(internal.size()==5);
     testOk1(!internal.empty());
@@ -57,7 +58,7 @@ static void testInternalAlloc()
     internal[2] = 42;
     testOk1(internal[2]==42);
 
-    epics::pvData::shared_vector<int> internal2(15, 500);
+    epics::pvData::shared_vector<int32> internal2(15, 500);
 
     testOk1(internal2.size()==15);
     testOk1(internal2[1]==500);
@@ -79,7 +80,7 @@ namespace {
     //Note: STL shared_ptr requires that deletors be copy constructable
     template<typename E>
     struct callCounter {
-        std::tr1::shared_ptr<int> count;
+        std::tr1::shared_ptr<int32> count;
         callCounter():count(new int){*count=0;}
         callCounter(const callCounter& o):count(o.count) {};
         callCounter& operator=(const callCounter& o){count=o.count;}
@@ -93,7 +94,7 @@ static void testExternalAlloc()
 
     // Simulate a failed malloc() or similar
     int *oops=0;
-    epics::pvData::shared_vector<int> nullPtr(oops, 42, 100);
+    epics::pvData::shared_vector<int32> nullPtr(oops, 42, 100);
 
     testOk1(nullPtr.size()==0);
     testOk1(nullPtr.empty());
@@ -103,7 +104,7 @@ static void testExternalAlloc()
     testOk1(nullPtr.data()==NULL);
 
     int *raw=new int[5];
-    epics::pvData::shared_vector<int> newData(raw, 1, 4);
+    epics::pvData::shared_vector<int32> newData(raw, 1, 4);
 
     testOk1(newData.size()==4);
     testOk1(!newData.empty());
@@ -117,7 +118,7 @@ static void testExternalAlloc()
     callCounter<int*> tracker;
     testOk1(*tracker.count==0);
 
-    epics::pvData::shared_vector<int> locvar(localVar,
+    epics::pvData::shared_vector<int32> locvar(localVar,
                                              tracker,
                                              0, 4);
 
@@ -137,8 +138,8 @@ static void testShare()
 {
     testDiag("Test vector Sharing");
 
-    epics::pvData::shared_vector<int> one, two(15);
-    epics::pvData::shared_vector<int> three(two);
+    epics::pvData::shared_vector<int32> one, two(15);
+    epics::pvData::shared_vector<int32> three(two);
 
     testOk1(one.unique());
     testOk1(!two.unique());
@@ -199,10 +200,10 @@ static void testConst()
 {
     testDiag("Test constant vector");
 
-    epics::pvData::shared_vector<int> writable(15, 100);
+    epics::pvData::shared_vector<int32> writable(15, 100);
 
-    epics::pvData::shared_vector<int>::reference wr = writable[0];
-    epics::pvData::shared_vector<int>::const_reference ror = writable[0];
+    epics::pvData::shared_vector<int32>::reference wr = writable[0];
+    epics::pvData::shared_vector<int32>::const_reference ror = writable[0];
 
     testOk1(wr==ror);
 
@@ -240,9 +241,9 @@ static void testSlice()
 {
     testDiag("Test vector slicing");
 
-    epics::pvData::shared_vector<int> original(10, 100);
+    epics::pvData::shared_vector<int32> original(10, 100);
 
-    epics::pvData::shared_vector<int> half1(original), half2(original), half2a(original);
+    epics::pvData::shared_vector<int32> half1(original), half2(original), half2a(original);
 
     half1.slice(0, 5);
     half2.slice(5, 5);
@@ -290,7 +291,7 @@ static void testCapacity()
 {
     testDiag("Test vector capacity");
 
-    epics::pvData::shared_vector<int> vect(10, 100);
+    epics::pvData::shared_vector<int32> vect(10, 100);
 
     int *peek = vect.dataPtr().get();
 
@@ -330,7 +331,7 @@ static void testCapacity()
 
 static void testPush()
 {
-    epics::pvData::shared_vector<int> vect;
+    epics::pvData::shared_vector<int32> vect;
 
     testDiag("Test push_back optimizations");
 
@@ -357,7 +358,7 @@ static void testVoid()
 {
     testDiag("Test vecter cast to/from void");
 
-    epics::pvData::shared_vector<int> typed(4);
+    epics::pvData::shared_vector<int32> typed(4);
 
     epics::pvData::shared_vector<void> untyped2(epics::pvData::static_shared_vector_cast<void>(typed));
 
@@ -366,7 +367,7 @@ static void testVoid()
 
     untyped2.slice(sizeof(int), 2*sizeof(int));
 
-    typed = epics::pvData::static_shared_vector_cast<int>(untyped2);
+    typed = epics::pvData::static_shared_vector_cast<int32>(untyped2);
 
     testOk1(typed.dataOffset()==1);
     testOk1(typed.size()==2);
@@ -406,7 +407,7 @@ static void testVectorConvert()
 {
     testDiag("Test shared_vector_convert");
 
-    epics::pvData::shared_vector<int> ints(6, 42), moreints;
+    epics::pvData::shared_vector<int32> ints(6, 42), moreints;
     epics::pvData::shared_vector<float> floats;
     epics::pvData::shared_vector<string> strings;
     epics::pvData::shared_vector<void> voids;
@@ -414,7 +415,7 @@ static void testVectorConvert()
     testOk1(ints.unique());
 
     // no-op convert.  Just returns another reference
-    moreints = epics::pvData::shared_vector_convert<int>(ints);
+    moreints = epics::pvData::shared_vector_convert<int32>(ints);
 
     testOk1(!ints.unique());
     moreints.clear();
@@ -432,11 +433,12 @@ static void testVectorConvert()
     voids = epics::pvData::shared_vector_convert<void>(ints);
 
     testOk1(!ints.unique());
-    testOk1(voids.size()==ints.size()*sizeof(int));
+    testOk1(voids.size()==ints.size()*sizeof(int32));
 
     // convert from void uses shared_vector<void>::original_type()
-    // to find that the actual type is 'int'.
+    // to find that the actual type is 'int32'.
     // returns a new vector
+    testOk1(voids.original_type()==epics::pvData::pvInt);
     strings = epics::pvData::shared_vector_convert<string>(voids);
 
     voids.clear();
@@ -450,11 +452,11 @@ static void testWeak()
 {
     testDiag("Test weak_ptr counting");
 
-    epics::pvData::shared_vector<int> data(6);
+    epics::pvData::shared_vector<int32> data(6);
 
     testOk1(data.unique());
 
-    std::tr1::shared_ptr<int> pdata(data.dataPtr());
+    std::tr1::shared_ptr<int32> pdata(data.dataPtr());
 
     testOk1(!data.unique());
 
@@ -462,7 +464,7 @@ static void testWeak()
 
     testOk1(data.unique());
 
-    std::tr1::weak_ptr<int> wdata(data.dataPtr());
+    std::tr1::weak_ptr<int32> wdata(data.dataPtr());
 
     testOk1(data.unique()); // True, but I wish it wasn't!!!
 
@@ -475,7 +477,7 @@ static void testICE()
 {
     testDiag("Test freeze and thaw");
 
-    epics::pvData::shared_vector<int> A(6, 42), C;
+    epics::pvData::shared_vector<int32> A(6, 42), C;
     epics::pvData::shared_vector<const int> B, D;
 
     int *check = A.data();
@@ -537,11 +539,11 @@ static void testICE()
 
 MAIN(testSharedVector)
 {
-    testPlan(162);
+    testPlan(163);
     testDiag("Tests for shared_vector");
 
-    testDiag("sizeof(shared_vector<int>)=%lu",
-             (unsigned long)sizeof(epics::pvData::shared_vector<int>));
+    testDiag("sizeof(shared_vector<int32>)=%lu",
+             (unsigned long)sizeof(epics::pvData::shared_vector<int32>));
 
     testEmpty();
     testInternalAlloc();

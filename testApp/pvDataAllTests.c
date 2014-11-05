@@ -48,9 +48,19 @@ void pvDataAllTests(void)
 {
     testHarness();
 
-    /* copy */
-    runTest(testCreateRequest);
-    runTest(testPVCopy);
+    /* pv */
+    runTest(testBitSetUtil);
+    runTest(testConvert);
+    runTest(testFieldBuilder);
+    runTest(testIntrospect);
+    runTest(testOperators);
+    runTest(testPVData);
+    runTest(testPVScalarArray);
+    runTest(testPVStructureArray);
+    runTest(testPVType);
+    runTest(testPVUnion);
+    runTest(testStandardField);
+    runTest(testStandardPVField);
 
     /* misc */
     runTest(testBaseException);
@@ -66,22 +76,11 @@ void pvDataAllTests(void)
     runTest(testTimer);
     runTest(testTypeCast);
 
+    /* copy */
+    runTest(testCreateRequest);
+    runTest(testPVCopy);
+
     /* property */
     runTest(testCreateRequest);
-
-    /* pv */
-    runTest(testBitSetUtil);
-    runTest(testConvert);
-    runTest(testFieldBuilder);
-    runTest(testIntrospect);
-    runTest(testOperators);
-    runTest(testPVData);
-    runTest(testPVScalarArray);
-    runTest(testPVStructureArray);
-    runTest(testPVType);
-    runTest(testPVUnion);
-    runTest(testStandardField);
-    runTest(testStandardPVField);
-
 }
 

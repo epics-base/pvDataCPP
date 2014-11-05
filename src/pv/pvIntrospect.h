@@ -1153,7 +1153,7 @@ epicsShareExtern FieldCreatePtr getFieldCreate();
  * value (eg -1).
  */
 template<typename T>
-struct ScalarTypeID { enum {value=-1}; };
+struct ScalarTypeID {};
 
 /**
  * Static mapping from ScalarType enum to value type.
