@@ -81,7 +81,7 @@ namespace {
     template<typename E>
     struct callCounter {
         std::tr1::shared_ptr<int32> count;
-        callCounter():count(new int){*count=0;}
+        callCounter():count(new int32){*count=0;}
         callCounter(const callCounter& o):count(o.count) {};
         callCounter& operator=(const callCounter& o){count=o.count;}
         void operator()(E){*count=1;}
@@ -93,7 +93,7 @@ static void testExternalAlloc()
     testDiag("Test vector external alloc");
 
     // Simulate a failed malloc() or similar
-    int *oops=0;
+    int32 *oops=0;
     epics::pvData::shared_vector<int32> nullPtr(oops, 42, 100);
 
     testOk1(nullPtr.size()==0);
@@ -103,7 +103,7 @@ static void testExternalAlloc()
 
     testOk1(nullPtr.data()==NULL);
 
-    int *raw=new int[5];
+    int32 *raw=new int32[5];
     epics::pvData::shared_vector<int32> newData(raw, 1, 4);
 
     testOk1(newData.size()==4);
@@ -114,8 +114,8 @@ static void testExternalAlloc()
     testOk1(newData[0]==14);
 
     // Check use of custom deleter
-    int localVar[4] = {1,2,3,4};
-    callCounter<int*> tracker;
+    int32 localVar[4] = {1,2,3,4};
+    callCounter<int32*> tracker;
     testOk1(*tracker.count==0);
 
     epics::pvData::shared_vector<int32> locvar(localVar,
@@ -207,15 +207,15 @@ static void testConst()
 
     testOk1(wr==ror);
 
-    int *compare = writable.data();
+    int32 *compare = writable.data();
 
     testOk1(writable.unique());
 
     // can re-target container, but data is R/O
-    epics::pvData::shared_vector<const int> rodata(freeze(writable));
+    epics::pvData::shared_vector<const int32> rodata(freeze(writable));
 
-    epics::pvData::shared_vector<const int>::reference wcr = rodata[0];
-    epics::pvData::shared_vector<const int>::const_reference rocr = rodata[0];
+    epics::pvData::shared_vector<const int32>::reference wcr = rodata[0];
+    epics::pvData::shared_vector<const int32>::const_reference rocr = rodata[0];
 
     testOk1(wcr==rocr);
 
@@ -228,7 +228,7 @@ static void testConst()
 
     testOk1(rodata.data()==compare);
 
-    epics::pvData::shared_vector<const int> rodata2(rodata);
+    epics::pvData::shared_vector<const int32> rodata2(rodata);
 
     testOk1(rodata.data()==rodata2.data());
 
@@ -293,7 +293,7 @@ static void testCapacity()
 
     epics::pvData::shared_vector<int32> vect(10, 100);
 
-    int *peek = vect.dataPtr().get();
+    int32 *peek = vect.dataPtr().get();
 
     vect.slice(0, 5);
 
@@ -478,9 +478,9 @@ static void testICE()
     testDiag("Test freeze and thaw");
 
     epics::pvData::shared_vector<int32> A(6, 42), C;
-    epics::pvData::shared_vector<const int> B, D;
+    epics::pvData::shared_vector<const int32> B, D;
 
-    int *check = A.data();
+    int32 *check = A.data();
 
     // check freeze w/ unique reference
 
