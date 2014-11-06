@@ -232,8 +232,13 @@ std::ostream& PVStructureArray::dumpValue(std::ostream& o) const
 std::ostream& PVStructureArray::dumpValue(std::ostream& o, std::size_t index) const
 {
     const_svector temp(view());
-    if(index<temp.size())
-        o << *temp[index];
+    if (index<temp.size())
+    {
+        if (temp[index])
+            o << *temp[index];
+        else
+            o << "(none)" << std::endl;
+    }
     return o;
 }
 

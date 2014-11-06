@@ -251,7 +251,13 @@ bool compareField(const PVStructureArray* left, const PVStructureArray* right)
         lit!=lend;
         ++lit, ++rit)
     {
-        if(**lit != **rit)
+        // element can be null
+        if (!(*lit) || !(*rit))
+        {
+            if (*lit || *rit)
+                return false;
+        }
+        else if (**lit != **rit)
             return false;
     }
     return true;
@@ -304,7 +310,13 @@ bool compareField(const PVUnionArray* left, const PVUnionArray* right)
         lit!=lend;
         ++lit, ++rit)
     {
-        if(**lit != **rit)
+        // element can be null
+        if (!(*lit) || !(*rit))
+        {
+            if (*lit || *rit)
+                return false;
+        }
+        else if (**lit != **rit)
             return false;
     }
     return true;
