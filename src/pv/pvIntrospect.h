@@ -32,11 +32,7 @@ struct indent_level
     indent_level(long l) : level(l) {}
 };
 
-inline long& indent_value(std::ios_base& ios)
-{
-  static int indent_index = std::ios_base::xalloc();
-  return ios.iword(indent_index);
-}
+epicsShareExtern long& indent_value(std::ios_base& ios);
 
 epicsShareExtern std::ostream& operator<<(std::ostream& os, indent_level const& indent);
 

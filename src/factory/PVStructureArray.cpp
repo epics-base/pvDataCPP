@@ -237,7 +237,7 @@ std::ostream& PVStructureArray::dumpValue(std::ostream& o, std::size_t index) co
         if (temp[index])
             o << *temp[index];
         else
-            o << "(none)" << std::endl;
+            o << format::indent() << "(none)" << std::endl;
     }
     return o;
 }
