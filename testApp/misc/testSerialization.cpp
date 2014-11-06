@@ -716,7 +716,9 @@ void testArraySizeType() {
     serializationFieldTest(s);
 
     PVStructurePtr pvs = getPVDataCreate()->createPVStructure(s);
-    pvs->getSubField<PVArray>("fixedArray")->setLength(10);
+    PVDoubleArray::shared_pointer pvDA = pvs->getSubField<PVDoubleArray>("fixedArray");
+    PVDoubleArray::svector vec(10, 42);
+    pvDA->replace(freeze(vec));
     serializationTest(pvs);
 }
 
