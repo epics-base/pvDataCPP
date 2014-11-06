@@ -29,7 +29,7 @@ typedef int intptr_t;
 typedef unsigned int uintptr_t;
 #ifndef INT64_MAX
 #define INT64_MAX (0x7fffffffffffffffLL)
-#define UINT64_MAX (0xffffffffffffffffLL)
+#define UINT64_MAX (0xffffffffffffffffULL)
 #endif
 #else
 #include <stdint.h>

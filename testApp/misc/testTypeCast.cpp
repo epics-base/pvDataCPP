@@ -37,11 +37,11 @@ namespace {
     };
     template<>
     struct testequal<double> {
-        static bool op(double A, double B) {return fabs(A-B)<1e-300; }
+        static bool op(double A, double B) {return fabs(A-B)<1e-15; }
     };
     template<>
     struct testequal<float> {
-        static bool op(float A, float B) {return fabs(A-B)<1e-30; }
+        static bool op(float A, float B) {return fabs(A-B)<1e-7; }
     };
 
     template<typename TO, typename FROM>
@@ -117,7 +117,7 @@ namespace {
 
 MAIN(testTypeCast)
 {
-    testPlan(122);
+    testPlan(123);
 
 try {
 
@@ -387,7 +387,8 @@ try {
     FAIL(int8_t, string, "1000");
     FAIL(int8_t, string, "-1000");
 
-    FAIL(double, string, "1e+10000000");
+    FAIL(double, string, "1e+1000");
+    FAIL(double, string, "-1e+1000");
 
     FAIL(epics::pvData::boolean, string, "hello");
     FAIL(epics::pvData::boolean, string, "1");
