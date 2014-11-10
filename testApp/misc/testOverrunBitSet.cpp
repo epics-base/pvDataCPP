@@ -132,7 +132,7 @@ void test()
 }
 
 
-MAIN(testOverrunBitSet`)
+MAIN(testOverrunBitSet)
 {
     testPlan(41);
     testDiag("Tests for changeBitSet and overrunBitSet");

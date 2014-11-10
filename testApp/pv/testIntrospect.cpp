@@ -289,6 +289,9 @@ static void testError()
 static void testMapping()
 {
 #define OP(TYPE, ENUM) \
+    printf(#TYPE ": sizeof %u typeid '%s' ScalarTypeID %d\n",\
+        (unsigned)sizeof(TYPE), typeid(TYPE).name(),\
+        epics::pvData::ScalarTypeID<TYPE>::value);\
     testOk1(typeid(ScalarTypeTraits<ENUM>::type)==typeid(TYPE)); \
             testOk1(ENUM==(ScalarType)ScalarTypeID<TYPE>::value); \
             testOk1(ENUM==(ScalarType)ScalarTypeID<const TYPE>::value);
@@ -306,12 +309,11 @@ static void testMapping()
     OP(string, pvString)
 #undef OP
 
-    testOk1((ScalarType)ScalarTypeID<PVField>::value==(ScalarType)-1);
 }
 
 MAIN(testIntrospect)
 {
-    testPlan(327);
+    testPlan(326);
     fieldCreate = getFieldCreate();
     pvDataCreate = getPVDataCreate();
     standardField = getStandardField();

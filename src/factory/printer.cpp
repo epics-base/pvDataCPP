@@ -26,7 +26,14 @@ namespace epics { namespace pvData {
 
 namespace format
 {
-	std::ostream& operator<<(std::ostream& os, indent_level const& indent)
+    static int indent_index = std::ios_base::xalloc();
+
+    long& indent_value(std::ios_base& ios)
+    {
+      return ios.iword(indent_index);
+    }
+
+    std::ostream& operator<<(std::ostream& os, indent_level const& indent)
 	{
 		indent_value(os) = indent.level;
 		return os;

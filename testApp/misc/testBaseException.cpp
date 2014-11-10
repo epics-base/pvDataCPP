@@ -42,7 +42,7 @@ void internalTestBaseException(int /*unused*/ = 0)
     }
 }
 
-void testBaseException() {
+void testBaseExceptionTest() {
     printf("testBaseException... ");
 
     try {
@@ -86,7 +86,7 @@ MAIN(testBaseException)
     testPlan(2);
     testDiag("Tests base exception");
     testLogicException();
-    testBaseException();
+    testBaseExceptionTest();
     return testDone();
 }
 

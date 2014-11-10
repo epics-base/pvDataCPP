@@ -308,6 +308,71 @@ noconvert:
     return 0;
 }
 
+#if defined(__vxworks)
+/* vxworks version of std::istringstream >>uint64_t is buggy, we use out own implementation */
+static
+unsigned long long strtoull(const char *nptr, char **endptr, int base)
+{
+  const char *s = nptr;
+  unsigned long long acc;
+  int c;
+  unsigned long long cutoff;
+  int neg = 0, any, cutlim;
+
+  do
+    c = *s++;
+  while (isspace(c));
+  if (c == '-')
+    {
+      neg = 1;
+      c = *s++;
+    }
+  else if (c == '+')
+    c = *s++;
+  if ((base == 0 || base == 16) &&
+      c == '0' && (*s == 'x' || *s == 'X'))
+    {
+      c = s[1];
+      s += 2;
+      base = 16;
+    }
+  if (base == 0)
+    base = c == '0' ? 8 : 10;
+
+  cutoff = (unsigned long long) UINT64_MAX / (unsigned long long) base;
+  cutlim = (unsigned long long) UINT64_MAX % (unsigned long long) base;
+
+  for (acc = 0, any = 0;; c = *s++)
+    {
+      if (isdigit(c))
+        c -= '0';
+      else if (isalpha(c))
+        c -= isupper(c) ? 'A' - 10 : 'a' - 10;
+      else
+        break;
+      if (c >= base)
+        break;
+      if (any < 0 || acc > cutoff || (acc == cutoff && c > cutlim))
+        any = -1;
+      else
+        {
+          any = 1;
+          acc *= base;
+          acc += c;
+        }
+    }
+  if (any < 0)
+    {
+      acc = UINT64_MAX;
+      errno = ERANGE;
+    }
+  else if (neg)
+    acc = -acc;
+  if (endptr != 0)
+    *endptr = any ? (char *) s - 1 : (char *) nptr;
+  return (acc);
+}
+#else
 static
 unsigned long long strtoull(const char *ptr, char ** endp, int base)
 {
@@ -350,7 +415,7 @@ noconvert:
     *endp = (char*)ptr;
     return 0;
 }
-
+#endif
 #endif
 
 /* do we need long long? */
@@ -486,6 +551,26 @@ void parseToPOD(const string& in, float *out) {
 void parseToPOD(const string& in, double *out) {
     int err = epicsParseDouble(in.c_str(), out, NULL);
     if(err)   handleParseError(err);
+#if defined(__vxworks)
+    /* vxWorks strtod returns [-]epicsINF when it should return ERANGE error
+     * if [-]epicsINF is returned and first char is a digit then translate this into ERANGE error
+     */
+    else if (*out == epicsINF || *out == -epicsINF) {
+        const char* s = in.c_str();
+        int c;
+
+        /* skip spaces and the sign */
+        do {
+            c = *s++;
+        } while (isspace(c));
+
+        if (c == '-' || c == '+')
+            c = *s++;
+
+        if (isdigit(c))
+            handleParseError(S_stdlib_overflow);
+    }
+#endif
 }
 
 }}}

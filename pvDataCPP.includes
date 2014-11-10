@@ -4,3 +4,8 @@
 /home/msekoranja/epicsV4/pvDataCPP/pvDataApp/property
 /home/msekoranja/epicsV4/pvDataCPP/pvDataApp/pv
 /home/msekoranja/epicsV4/pvDataCPP/pvDataApp/pvMisc
+testApp/pv
+testApp/copy
+testApp/misc
+testApp
+testApp/property

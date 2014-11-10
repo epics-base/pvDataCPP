@@ -1,16 +1,8 @@
-TOP=../..
+# This is a Makefile fragment, see ../Makefile
 
-include $(TOP)/configure/CONFIG
+SRC_DIRS += $(PVDATA_TEST)/property
 
 TESTPROD_HOST += testProperty
 testProperty_SRCS += testProperty.cpp
+testHarness_SRCS += testProperty.cpp
 TESTS += testProperty
-
-testProperty_LIBS += pvData  Com
-
-TESTSCRIPTS_HOST += $(TESTS:%=%.t)
-
-include $(TOP)/configure/RULES
-#----------------------------------------
-#  ADD RULES AFTER THIS LINE
-

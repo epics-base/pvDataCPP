@@ -462,17 +462,14 @@ void Convert::copyUnion(PVUnionPtr const & from, PVUnionPtr const & to)
     PVFieldPtr fromValue = from->get();
     if (from->getUnion()->isVariant())
     {
-        if (fromValue.get() == 0)
-            to->set(PVFieldPtr());
-        else
-            to->set(getPVDataCreate()->createPVField(fromValue));	// clone value // TODO cache getPVDataCreate()
+            to->set(from->get());
     }
     else
     {
         if (fromValue.get() == 0)
             to->select(PVUnion::UNDEFINED_INDEX);
         else
-            to->set(from->getSelectedFieldName(),from->get());
+            to->set(from->getSelectedIndex(),from->get());
     }
 }
 

@@ -1,22 +1,13 @@
-TOP=../..
+# This is a Makefile fragment, see ../Makefile
 
-include $(TOP)/configure/CONFIG
+SRC_DIRS += $(PVDATA_TEST)/copy
 
-PROD_HOST += testCreateRequest
+TESTPROD_HOST += testCreateRequest
 testCreateRequest_SRCS = testCreateRequest.cpp
-testCreateRequest_LIBS = pvData Com
+testHarness_SRCS += testCreateRequest.cpp
 TESTS += testCreateRequest
 
-PROD_HOST += testPVCopy
+TESTPROD_HOST += testPVCopy
 testPVCopy_SRCS += testPVCopy.cpp
-testPVCopy_LIBS += pvData Com
+testHarness_SRCS += testPVCopy.cpp
 TESTS += testPVCopy
-
-TESTSCRIPTS_HOST += $(TESTS:%=%.t)
-
-
-
-include $(TOP)/configure/RULES
-#----------------------------------------
-#  ADD RULES AFTER THIS LINE
-

@@ -20,7 +20,7 @@ using std::endl;
 
 static bool debug = false;
 
-static void testCreateRequest() {
+static void testCreateRequestInternal() {
     printf("testCreateRequest... \n");
     CreateRequest::shared_pointer  createRequest = CreateRequest::create();
     PVStringPtr pvString;
@@ -307,7 +307,7 @@ static void testCreateRequest() {
 MAIN(testCreateRequest)
 {
     testPlan(117);
-    testCreateRequest();
+    testCreateRequestInternal();
     return testDone();
 }
 
