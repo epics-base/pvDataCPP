@@ -674,7 +674,7 @@ public:
      * @return The introspection interface.
      * This will hold a null pointer if the field is not in the structure.
      */
-    FieldConstPtr getField(std::size_t index) const {return fields[index];}
+    FieldConstPtr getField(std::size_t index) const {return fields.at(index);}
     /**
      * Get the field index for the specified fieldName.
      * @return The introspection interface.
@@ -696,7 +696,7 @@ public:
      * @param fieldIndex The index of the desired field.
      * @return The fieldName.
      */
-    std::string getFieldName(std::size_t fieldIndex) const {return fieldNames[fieldIndex];}
+    std::string getFieldName(std::size_t fieldIndex) const {return fieldNames.at(fieldIndex);}
 
     virtual std::string getID() const;
 
@@ -760,7 +760,7 @@ public:
      * @return The introspection interface.
      * This will hold a null pointer if the field is not in the union.
      */
-    FieldConstPtr getField(std::size_t index) const {return fields[index];}
+    FieldConstPtr getField(std::size_t index) const {return fields.at(index);}
     /**
      * Get the field index for the specified fieldName.
      * @return The introspection interface.
@@ -782,7 +782,7 @@ public:
      * @param fieldIndex The index of the desired field.
      * @return The fieldName.
      */
-    std::string getFieldName(std::size_t fieldIndex) const {return fieldNames[fieldIndex];}
+    std::string getFieldName(std::size_t fieldIndex) const {return fieldNames.at(fieldIndex);}
     /**
      * Check if this union is variant union (aka any type).
      * @return <code>true</code> if this union is variant union, otherwise <code>false</code>.
