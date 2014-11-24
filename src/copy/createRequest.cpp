@@ -322,148 +322,154 @@ public:
     virtual PVStructurePtr createRequest(
         string const & crequest)
     {
-    	string request = crequest;
-        if (!request.empty()) removeBlanks(request);
-        if (request.empty())
-        {
-            return pvDataCreate->createPVStructure(fieldCreate->createStructure());
-        }
-        size_t offsetRecord = request.find("record[");
-        size_t offsetField = request.find("field(");
-        size_t offsetPutField = request.find("putField(");
-        size_t offsetGetField = request.find("getField(");
-        if(offsetRecord==string::npos
-        && offsetField==string::npos
-        && offsetPutField==string::npos
-        && offsetGetField==string::npos)
-        {
-             request = "field(" + request + ")";
-             offsetField = request.find("field(");
-        }
-        int numParan = 0;
-        int numBrace = 0;
-        int numBracket = 0;
-        for(size_t i=0; i< request.length() ; ++i) {
-            char chr = request[i];
-            if(chr=='(') numParan++;
-            if(chr==')') numParan--;
-            if(chr=='{') numBrace++;
-            if(chr=='}') numBrace--;
-            if(chr=='[') numBracket++;
-            if(chr==']') numBracket--;
-        }
-        if(numParan!=0) {
-            ostringstream oss;
-            oss << "mismatched () " << numParan;
-            message = oss.str();
-            return PVStructurePtr();
-        }
-        if(numBrace!=0) {
-            ostringstream oss;
-            oss << "mismatched {} " << numBrace;
-            message = oss.str();
-            return PVStructurePtr();
-        }
-        if(numBracket!=0) {
-            ostringstream oss;
-            oss << "mismatched [] " << numBracket;
-            message = oss.str();
-            return PVStructurePtr();
-        }
-        vector<Node> top;
         try {
-            if(offsetRecord!=string::npos) {
-                fullFieldName = "record";
-                size_t openBracket = request.find('[', offsetRecord);
-                size_t closeBracket = request.find(']', openBracket);
-                if(closeBracket==string::npos) {
-                    message = request.substr(offsetRecord) +
-                        "record[ does not have matching ]";
-                    return PVStructurePtr();
+            string request = crequest;
+            if (!request.empty()) removeBlanks(request);
+            if (request.empty())
+            {
+                return pvDataCreate->createPVStructure(fieldCreate->createStructure());
+            }
+            size_t offsetRecord = request.find("record[");
+            size_t offsetField = request.find("field(");
+            size_t offsetPutField = request.find("putField(");
+            size_t offsetGetField = request.find("getField(");
+            if(offsetRecord==string::npos
+            && offsetField==string::npos
+            && offsetPutField==string::npos
+            && offsetGetField==string::npos)
+            {
+                 request = "field(" + request + ")";
+                 offsetField = request.find("field(");
+            }
+            int numParan = 0;
+            int numBrace = 0;
+            int numBracket = 0;
+            for(size_t i=0; i< request.length() ; ++i) {
+                char chr = request[i];
+                if(chr=='(') numParan++;
+                if(chr==')') numParan--;
+                if(chr=='{') numBrace++;
+                if(chr=='}') numBrace--;
+                if(chr=='[') numBracket++;
+                if(chr==']') numBracket--;
+            }
+            if(numParan!=0) {
+                ostringstream oss;
+                oss << "mismatched () " << numParan;
+                message = oss.str();
+                return PVStructurePtr();
+            }
+            if(numBrace!=0) {
+                ostringstream oss;
+                oss << "mismatched {} " << numBrace;
+                message = oss.str();
+                return PVStructurePtr();
+            }
+            if(numBracket!=0) {
+                ostringstream oss;
+                oss << "mismatched [] " << numBracket;
+                message = oss.str();
+                return PVStructurePtr();
+            }
+            vector<Node> top;
+            try {
+                if(offsetRecord!=string::npos) {
+                    fullFieldName = "record";
+                    size_t openBracket = request.find('[', offsetRecord);
+                    size_t closeBracket = request.find(']', openBracket);
+                    if(closeBracket==string::npos) {
+                        message = request.substr(offsetRecord) +
+                            "record[ does not have matching ]";
+                        return PVStructurePtr();
+                    }
+                    if(closeBracket-openBracket > 3) {
+                        Node node("record");
+                        Node optNode = createRequestOptions(
+                                request.substr(openBracket+1,closeBracket-openBracket-1));
+                        node.nodes.push_back(optNode);
+                        top.push_back(node);
+                    }
                 }
-                if(closeBracket-openBracket > 3) {
-                    Node node("record");
-                    Node optNode = createRequestOptions(
-                            request.substr(openBracket+1,closeBracket-openBracket-1));
-                    node.nodes.push_back(optNode);
+                if(offsetField!=string::npos) {
+                    fullFieldName = "field";
+                    Node node("field");
+                    size_t openParan = request.find('(', offsetField);
+                    size_t closeParan = request.find(')', openParan);
+                    if(closeParan==string::npos) {
+                        message = request.substr(offsetField)
+                                + " field( does not have matching )";
+                        return PVStructurePtr();
+                    }
+                    if(closeParan>openParan+1) {
+                        createSubNode(node,request.substr(openParan+1,closeParan-openParan-1));
+                    }
                     top.push_back(node);
                 }
+                if(offsetGetField!=string::npos) {
+                    fullFieldName = "getField";
+                    Node node("getField");
+                    size_t openParan = request.find('(', offsetGetField);
+                    size_t closeParan = request.find(')', openParan);
+                    if(closeParan==string::npos) {
+                        message = request.substr(offsetField)
+                                + " getField( does not have matching )";
+                        return PVStructurePtr();
+                    }
+                    if(closeParan>openParan+1) {
+                        createSubNode(node,request.substr(openParan+1,closeParan-openParan-1));
+                    }
+                    top.push_back(node);
+                }
+                if(offsetPutField!=string::npos) {
+                    fullFieldName = "putField";
+                    Node node("putField");
+                    size_t openParan = request.find('(', offsetPutField);
+                    size_t closeParan = request.find(')', openParan);
+                    if(closeParan==string::npos) {
+                        message = request.substr(offsetField)
+                                + " putField( does not have matching )";
+                        return PVStructurePtr();
+                    }
+                    if(closeParan>openParan+1) {
+                        createSubNode(node,request.substr(openParan+1,closeParan-openParan-1));
+                    }
+                    top.push_back(node);
+                }
+            } catch (std::exception &e) {
+                string xxx = e.what();
+                message = "while creating Structure exception " + xxx;
+                return PVStructurePtr();
             }
-            if(offsetField!=string::npos) {
-                fullFieldName = "field";
-                Node node("field");
-                size_t openParan = request.find('(', offsetField);
-                size_t closeParan = request.find(')', openParan);
-                if(closeParan==string::npos) {
-                    message = request.substr(offsetField)
-                            + " field( does not have matching )";
-                    return PVStructurePtr();
+            size_t num = top.size();
+            StringArray names(num);
+            FieldConstPtrArray fields(num);
+            for(size_t i=0; i<num; ++i) {
+                Node node = top[i];
+                names[i] = node.name;
+                vector<Node> subNode = node.nodes;
+                if(subNode.empty()) {
+                    fields[i] = fieldCreate->createStructure();
+                } else {
+                    fields[i] = createSubStructure(subNode);
                 }
-                if(closeParan>openParan+1) {
-                    createSubNode(node,request.substr(openParan+1,closeParan-openParan-1));
-                }
-                top.push_back(node);
             }
-            if(offsetGetField!=string::npos) {
-                fullFieldName = "getField";
-                Node node("getField");
-                size_t openParan = request.find('(', offsetGetField);
-                size_t closeParan = request.find(')', openParan);
-                if(closeParan==string::npos) {
-                    message = request.substr(offsetField)
-                            + " getField( does not have matching )";
-                    return PVStructurePtr();
-                }
-                if(closeParan>openParan+1) {
-                    createSubNode(node,request.substr(openParan+1,closeParan-openParan-1));
-                }
-                top.push_back(node);
+            StructureConstPtr structure = fieldCreate->createStructure(names, fields);
+            PVStructurePtr pvStructure = pvDataCreate->createPVStructure(structure);
+            for(size_t i=0; i<optionList.size(); ++i) {
+                OptionPair pair = optionList[i];
+                string name = pair.name;
+                string value = pair.value;
+                PVStringPtr pvField = pvStructure->getSubField<PVString>(name);
+                pvField->put(value);
             }
-            if(offsetPutField!=string::npos) {
-                fullFieldName = "putField";
-                Node node("putField");
-                size_t openParan = request.find('(', offsetPutField);
-                size_t closeParan = request.find(')', openParan);
-                if(closeParan==string::npos) {
-                    message = request.substr(offsetField)
-                            + " putField( does not have matching )";
-                    return PVStructurePtr();
-                }
-                if(closeParan>openParan+1) {
-                    createSubNode(node,request.substr(openParan+1,closeParan-openParan-1));
-                }
-                top.push_back(node);
-            }
+            optionList.clear();
+            return pvStructure;
         } catch (std::exception &e) {
-            string xxx = e.what();
-            message = "while creating Structure exception " + xxx;
-            return PVStructurePtr();
+             message = e.what();
+             return PVStructurePtr();
         }
-        size_t num = top.size();
-        StringArray names(num);
-        FieldConstPtrArray fields(num);
-        for(size_t i=0; i<num; ++i) {
-            Node node = top[i];
-            names[i] = node.name;
-            vector<Node> subNode = node.nodes;
-            if(subNode.empty()) {
-                fields[i] = fieldCreate->createStructure();
-            } else {
-                fields[i] = createSubStructure(subNode);
-            }
-        }
-        StructureConstPtr structure = fieldCreate->createStructure(names, fields);
-        PVStructurePtr pvStructure = pvDataCreate->createPVStructure(structure);
-        for(size_t i=0; i<optionList.size(); ++i) {
-            OptionPair pair = optionList[i];
-            string name = pair.name;
-            string value = pair.value;
-            PVStringPtr pvField = pvStructure->getSubField<PVString>(name);
-            pvField->put(value);
-        }
-        optionList.clear();
-        return pvStructure;
     }
+
 
 };
 
