@@ -7,6 +7,11 @@ testThread_SRCS += testThread.cpp
 testHarness_SRCS += testThread.cpp
 TESTS += testThread
 
+TESTPROD_HOST += testEvent
+testEvent_SRCS += testEvent.cpp
+testHarness_SRCS += testEvent.cpp
+TESTS += testEvent
+
 TESTPROD_HOST += testTimer
 testTimer_SRCS += testTimer.cpp
 testHarness_SRCS += testTimer.cpp

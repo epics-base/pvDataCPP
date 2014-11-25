@@ -46,7 +46,6 @@ public:
     bool tryWait (); /* false if empty */
 private:
     epicsEventId id;
-    std::string alreadyOn;
 };
 
 }}

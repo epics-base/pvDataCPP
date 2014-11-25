@@ -234,7 +234,6 @@ testApp/pv/testPVType.cpp
 testApp/pv/testStandardField.cpp
 testApp/pv/testStandardPVField.cpp
 src/factory/printer.cpp
-configure/O.darwin-x86/Makefile
 configure/Makefile
 include/pv/alarm.h
 include/pv/bitSet.h
@@ -349,7 +348,6 @@ src/monitor/monitor.cpp
 src/monitor/monitor.h
 src/monitor/monitorPlugin.cpp
 src/monitor/monitorPlugin.h
-src/O.darwin-x86/Makefile
 src/property/alarm.cpp
 src/property/alarm.h
 src/property/control.h
@@ -437,7 +435,6 @@ testApp/misc/testThread.cpp
 testApp/misc/testTimer.cpp
 testApp/misc/testTimeStamp.cpp
 testApp/misc/testTypeCast.cpp
-testApp/O.darwin-x86/Makefile
 testApp/property/epicsRunPVDataTests.c
 testApp/property/Makefile
 testApp/property/testProperty.cpp
@@ -489,3 +486,18 @@ testApp/pvDataAllTests.c
 testApp/rtemsConfig.c
 testApp/rtemsNetworking.h
 testApp/rtemsTestHarness.c
+testApp/misc/Makefile
+testApp/misc/testBaseException.cpp
+testApp/misc/testBitSet.cpp
+testApp/misc/testByteBuffer.cpp
+testApp/misc/testByteOrder.cpp
+testApp/misc/testEvent.cpp
+testApp/misc/testMessageQueue.cpp
+testApp/misc/testOverrunBitSet.cpp
+testApp/misc/testQueue.cpp
+testApp/misc/testSerialization.cpp
+testApp/misc/testSharedVector.cpp
+testApp/misc/testThread.cpp
+testApp/misc/testTimer.cpp
+testApp/misc/testTimeStamp.cpp
+testApp/misc/testTypeCast.cpp

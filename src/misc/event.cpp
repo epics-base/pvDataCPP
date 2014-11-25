@@ -38,8 +38,7 @@ Event::~Event() {
 
 
 Event::Event(bool full)
-: id(epicsEventCreate(full?epicsEventFull : epicsEventEmpty)),
-  alreadyOn("already on list")
+: id(epicsEventCreate(full?epicsEventFull : epicsEventEmpty))
 {
 }
 

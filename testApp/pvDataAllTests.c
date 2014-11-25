@@ -23,6 +23,7 @@ int testQueue(void);
 int testSerialization(void);
 int testSharedVector(void);
 int testThread(void);
+int testEvent(void);
 int testTimeStamp(void);
 int testTimer(void);
 int testTypeCast(void);
@@ -72,6 +73,7 @@ void pvDataAllTests(void)
     runTest(testSerialization);
     runTest(testSharedVector);
     runTest(testThread);
+    runTest(testEvent);
     runTest(testTimeStamp);
     runTest(testTimer);
     runTest(testTypeCast);
