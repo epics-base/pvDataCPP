@@ -35,7 +35,7 @@ void testTimeStampInternal()
     current.getCurrent();
     printf("current %lli %i milliSec %lli\n",
         (long long)current.getSecondsPastEpoch(),
-        current.getNanoseconds(),
+        (int)current.getNanoseconds(),
         (long long)current.getMilliseconds());
     time_t tt;
     current.toTime_t(tt);
@@ -45,13 +45,13 @@ void testTimeStampInternal()
         "%4.4d.%2.2d.%2.2d %2.2d:%2.2d:%2.2d %d isDst %s\n",
         ctm.tm_year+1900,ctm.tm_mon + 1,ctm.tm_mday,
         ctm.tm_hour,ctm.tm_min,ctm.tm_sec,
-        current.getNanoseconds(),
+        (int)current.getNanoseconds(),
         (ctm.tm_isdst==0) ? "false" : "true");
     tt = time(&tt);
     current.fromTime_t(tt);
     printf("fromTime_t\ncurrent %lli %i milliSec %lli\n",
         (long long)current.getSecondsPastEpoch(),
-        current.getNanoseconds(),
+        (int)current.getNanoseconds(),
         (long long)current.getMilliseconds());
     current.toTime_t(tt);
     memcpy(&ctm,localtime(&tt),sizeof(struct tm));
@@ -59,7 +59,7 @@ void testTimeStampInternal()
         "%4.4d.%2.2d.%2.2d %2.2d:%2.2d:%2.2d %d isDst %s\n",
         ctm.tm_year+1900,ctm.tm_mon + 1,ctm.tm_mday,
         ctm.tm_hour,ctm.tm_min,ctm.tm_sec,
-        current.getNanoseconds(),
+        (int)current.getNanoseconds(),
         (ctm.tm_isdst==0) ? "false" : "true");
     TimeStamp right;
     TimeStamp left;

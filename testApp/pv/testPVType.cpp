@@ -50,10 +50,10 @@ MAIN(testPVType)
     int32 intInt;
     intValue = 0x7fffffff;
     intInt = intValue;
-    printf("int8 max %d",intInt);
+    printf("int8 max %d",(int)intInt);
     intValue = 0x80000000;
     intInt = intValue;
-    printf(" min %d\n",intInt);
+    printf(" min %d\n",(int)intInt);
 
     int64 longInt = 0x7fffffff;
     longInt <<= 32;
