@@ -2662,6 +2662,12 @@ objects:</p>
 </dl>
 <h3>convert.h</h3>
 
+<p>NOTE about copying immutable array fields. If an entire immutable array
+field is copied to another array that has the same elementType, both offsets
+are 0, and the length is the length of the source array, then the shareData
+method of the target array is called and the target array is set immutable.
+Thus the source and target share the same primitive array.</p>
+
 <p>This section describes the supported conversions between data types.</p>
 <ul>
   <li>All supported types can be converted to a string. If you ask for a 100
@@ -2673,6 +2679,12 @@ objects:</p>
       <li>Numeric type to another numeric type</li>
       <li>Both have the same type.</li>
       <li>Either is a string</li>
+    </ul>
+  </li>
+  <li>Copy between PVArrays that satisfy one of the following. 
+    <ul>
+      <li>Both have the same type.</li>
+      <li>Either is a string.</li>
     </ul>
   </li>
   <li>Conversions between numeric scalar types.</li>
