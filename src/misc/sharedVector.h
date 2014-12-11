@@ -527,9 +527,12 @@ public:
 
 };
 
-//! Specialization for storing untyped pointers
-//! Does not allow access or iteration of contents
-//! other than as void* or const void*
+/**
+ * @brief Specialization for storing untyped pointers.
+ *
+ * Does not allow access or iteration of contents
+ * other than as void* or const void*
+ */
 template<typename E>
 class shared_vector<E, typename meta::is_void<E>::type >
     : public detail::shared_vector_base<E>

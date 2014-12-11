@@ -163,7 +163,8 @@ enum Type {
 };
 
 /**
- * Convenience functions for Type.
+ * @brief Convenience functions for Type.
+ *
  */
 namespace TypeFunc {
     /**
@@ -234,7 +235,8 @@ enum ScalarType {
 #define MAX_SCALAR_TYPE pvString
 
 /**
- * Convenience functions for ScalarType.
+ * @brief Convenience functions for ScalarType.
+ *
  */
 namespace ScalarTypeFunc {
     /**
@@ -283,7 +285,8 @@ epicsShareExtern std::ostream& operator<<(std::ostream& o, const ScalarType& sca
 
 
 /**
- * This class implements introspection object for field.
+ * @brief This class implements introspection object for field.
+ *
  */
 class epicsShareClass Field : 
     virtual public Serializable,
@@ -335,7 +338,8 @@ epicsShareExtern std::ostream& operator<<(std::ostream& o, const Field& field);
 
 
 /**
- * This class implements introspection object for Scalar.
+ * @brief This class implements introspection object for Scalar.
+ *
  */
 class epicsShareClass Scalar : public Field{
 public:
@@ -372,7 +376,8 @@ private:
 };
 
 /**
- * This class implements introspection object for BoundedString.
+ * @brief This class implements introspection object for BoundedString.
+ *
  */
 class epicsShareClass BoundedString : public Scalar{
 public:
@@ -398,7 +403,8 @@ private:
 };
 
 /**
- * This class implements introspection object for Array.
+ * @brief This class implements introspection object for Array.
+ *
  */
 class epicsShareClass Array : public Field{
 public:
@@ -433,14 +439,9 @@ protected:
 
 };
 
-
-
-
-
-
-
 /**
- * This class implements introspection object for scalar array.
+ * @brief This class implements introspection object for scalar array.
+ *
  */
 class epicsShareClass ScalarArray : public Array{
 public:
@@ -484,7 +485,8 @@ private:
 
 
 /**
- * This class implements introspection object for bounded scalar array.
+ * @brief This class implements introspection object for bounded scalar array.
+ *
  */
 class epicsShareClass BoundedScalarArray : public ScalarArray{
 public:
@@ -518,7 +520,8 @@ private:
 };
 
 /**
- * This class implements introspection object for bounded scalar array.
+ * @brief This class implements introspection object for bounded scalar array.
+ *
  */
 class epicsShareClass FixedScalarArray : public ScalarArray{
 public:
@@ -551,12 +554,9 @@ private:
     friend class FieldCreate;
 };
 
-
-
-
-
 /**
- * This class implements introspection object for a structureArray
+ * @brief This class implements introspection object for a structureArray
+ *
  */
 class epicsShareClass StructureArray : public Array{
 public:
@@ -597,7 +597,8 @@ private:
 };
 
 /**
- * This class implements introspection object for a unionArray
+ * @brief This class implements introspection object for a unionArray
+ *
  */
 class epicsShareClass UnionArray : public Array{
 public:
@@ -638,7 +639,8 @@ private:
 };
 
 /**
- * This class implements introspection object for a structure.
+ * @brief This class implements introspection object for a structure.
+ *
  */
 class epicsShareClass Structure : public Field {
 public:
@@ -719,7 +721,8 @@ private:
 };
 
 /**
- * This class implements introspection object for a union.
+ * @brief This class implements introspection object for a union.
+ *
  */
 class epicsShareClass Union : public Field {
 public:
@@ -817,7 +820,8 @@ class FieldBuilder;
 typedef std::tr1::shared_ptr<FieldBuilder> FieldBuilderPtr;
 
 /**
- * Interface for in-line creating of introspection interfaces.
+ * @brief Interface for in-line creating of introspection interfaces.
+ *
  * One instance can be used to create multiple {@code Field} instances.
  * An instance of this object must not be used concurrently (an object has a state).
  * @author mse
@@ -981,7 +985,8 @@ private:
 };
 
 /**
- * This is a singleton class for creating introspection interfaces.
+ * @brief This is a singleton class for creating introspection interfaces.
+ *
  */
 class epicsShareClass FieldCreate {
 public:
@@ -1179,14 +1184,26 @@ OP(pvDouble, double)
 OP(pvString, std::string)
 #undef OP
 
+/**
+ * @brief Hash a Scalar
+ *
+ */
 struct ScalarHashFunction {
     size_t operator() (const Scalar& scalar) const { return scalar.getScalarType(); }
 };
 
+/**
+ * @brief Hash a ScalarArray
+ *
+ */
 struct ScalarArrayHashFunction {
     size_t operator() (const ScalarArray& scalarArray) const { return 0x10 | scalarArray.getElementType(); }
 };
 
+/**
+ * @brief Hash a Structure
+ *
+ */
 struct StructureHashFunction {
     size_t operator() (const Structure& /*structure*/) const { return 0; }
     // TODO hash
@@ -1194,6 +1211,10 @@ struct StructureHashFunction {
 //        return PRIME * Arrays.hashCode(fieldNames) + Arrays.hashCode(fields);
 };
 
+/**
+ * @brief Hash a StructureArray
+ *
+ */
 struct StructureArrayHashFunction {
     size_t operator() (const StructureArray& structureArray) const { StructureHashFunction shf; return (0x10 | shf(*(structureArray.getStructure()))); }
 };

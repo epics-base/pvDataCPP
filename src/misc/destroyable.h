@@ -18,7 +18,8 @@ namespace epics { namespace pvData {
 
 
         /**
-         * Instance declaring destroy method.
+         * @brief Instance declaring destroy method.
+         * 
          * @author mse
          */
         class epicsShareClass Destroyable {

@@ -25,7 +25,8 @@ class StandardField;
 typedef std::tr1::shared_ptr<StandardField> StandardFieldPtr;
 
 /**
- * Standard Fields is a class or creating or sharing Field objects for standard fields.
+ * @brief Standard Fields is a class or creating or sharing Field objects for standard fields.
+ *
  * For each type of standard object two methods are defined:s
  *      one with no properties and with properties
  * The property field is a comma separated string of property names of the following:

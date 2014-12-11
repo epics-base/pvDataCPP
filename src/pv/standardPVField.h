@@ -25,7 +25,8 @@ class StandardPVField;
 typedef std::tr1::shared_ptr<StandardPVField> StandardPVFieldPtr;
 
 /**
- * StandardPVField is a class or creating standard data fields.
+ * @brief StandardPVField is a class or creating standard data fields.
+ *
  * Like class StandardField it has two forms of the methods which create a fields:
  *      one without properties and one with properties.
  * The properties are some combination of alarm, timeStamp, control, display, and valueAlarm.

@@ -24,6 +24,8 @@ namespace epics { namespace pvData {
     typedef std::tr1::shared_ptr<BitSet> BitSetPtr;
 
     /**
+     * @brief A vector of bits.
+     *
      * This class implements a vector of bits that grows as needed. Each
      * component of the bit set has a {@code bool} value. The
      * bits of a {@code BitSet} are indexed by nonnegative integers.

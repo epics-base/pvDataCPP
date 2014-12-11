@@ -20,28 +20,21 @@
 
 namespace epics { namespace pvData { 
 
-/**
- * typedef for a pointer to a MonitorPlugin
- */
 class MonitorPlugin;
 typedef std::tr1::shared_ptr<MonitorPlugin> MonitorPluginPtr;
 
 
-/**
- * typedef for a pointer to a MonitorPluginCreator
- */
 class MonitorPluginCreator;
 typedef std::tr1::shared_ptr<MonitorPluginCreator> MonitorPluginCreatorPtr;
 
 
-/**
- * typedef for a pointer to a MonitorPluginManager
- */
 class MonitorPluginManager;
 typedef std::tr1::shared_ptr<MonitorPluginManager> MonitorPluginManagerPtr;
         
 
-/** A plugin for raising monitors;
+/**
+ * @brief A plugin for raising monitors;
+ *
  * This is for use by pvAccess servers that support monitors.
  * Since the interface has only a dependence on pvData it
  * can be used for other purposes.
@@ -100,7 +93,9 @@ public:
     virtual void endGroupPut() {};
 };
 
-/** A class that creates a plugin.
+/**
+ * @brief  A class that creates a plugin.
+ *
  * Normlly a plugin is created for a single client.
  */
 class epicsShareClass MonitorPluginCreator
@@ -130,6 +125,8 @@ public:
     
 
 /**
+ * @brief Manager for plugins.
+ *
  * This manages a set of monitor plugins.
  * @author mrk
  */

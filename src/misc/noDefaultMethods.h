@@ -17,17 +17,26 @@ namespace epics { namespace pvData {
  * Effective C++, Third Edition, Scott Meyers
  */
 
-
-    class epicsShareClass NoDefaultMethods {
-    protected:
-    // allow by derived objects
+/**
+ * @brief Base class for not allowing default methods.
+ *
+ * Note that copy constructor a copy methods are declared private.
+ */
+class epicsShareClass NoDefaultMethods {
+protected:
+    /**
+     * Constructor
+     */
     NoDefaultMethods(){};
+    /**
+     * Destructor
+     */
     ~NoDefaultMethods(){}
     private:
     // do not implment
     NoDefaultMethods(const NoDefaultMethods&);
     NoDefaultMethods & operator=(const NoDefaultMethods &);
-    };
+};
 
 }}
 #endif  /* NO_DEFAULT_METHODS_H */

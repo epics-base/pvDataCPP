@@ -18,6 +18,12 @@
 
 namespace epics { namespace pvData { 
 
+/**
+ * @brief Template class for a bounded queue.
+ *
+ * An instance can make a queueElement be any class desired
+ * but must create a std::vector of shared_ptr to queueElements.
+ */
 template <typename T>
 class Queue
 {
@@ -25,15 +31,58 @@ public:
     POINTER_DEFINITIONS(Queue);
     typedef std::tr1::shared_ptr<T> queueElementPtr;
     typedef std::vector<queueElementPtr> queueElementPtrArray;
-    Queue(queueElementPtrArray &);
+    /**
+     * Constructor
+     * @param elementArray The vector of shared_ptr to queue elements.
+     */
+    Queue(queueElementPtrArray & elementArray);
+    /**
+     * Destructor
+     */
     virtual ~Queue();
+    /**
+     * Clear the queue.
+     */
     void clear();
+    /** 
+     * get the capacity of the queue, i. e. number of queue elements,
+     * @return The capacity.
+     */
     int capacity();
+    /**
+     * Get the number of free elements in the queue.
+     * @return The number.
+     */
     int getNumberFree();
+    /**
+     * Get the number of used elements in the queue.
+     * This is the number that have been setUsed but not released.
+     * @return The number.
+     */
     int getNumberUsed();
+    /**
+     * Get the next free element.
+     * @return a shared_ptr to the queue element.
+     * This is null if queue was full.
+     */
     queueElementPtr & getFree();
+    /**
+     * Set the element returned by getFree as used.
+     * Until this is called getUsed will not return it.
+     * @param element The element. It must be the element returned
+     * by the most recent call to getUsed.
+     */
     void setUsed(queueElementPtr const &element);
+    /**
+     * Get the oldest used element;
+     * @return a shared_ptr to the queue element.
+     * This is null if no used element is available.`
+     */
     queueElementPtr & getUsed();
+    /**
+     * Release the element obtained by the most recent call to getUsed.
+     * @param element The element.
+     */
     void releaseUsed(queueElementPtr const &element);
 private:
     queueElementPtr nullElement;
