@@ -21,5 +21,5 @@
 #   PVCOMMON = /home/install/epicsV4/pvCommonCPP
 #   EPICS_BASE = /home/install/epics/base
 
--include $(TOP)/configure/RELEASE.local
 -include $(TOP)/../RELEASE.local
+-include $(TOP)/configure/RELEASE.local

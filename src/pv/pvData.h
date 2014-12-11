@@ -122,7 +122,8 @@ class PVDataCreate;
 typedef std::tr1::shared_ptr<PVDataCreate> PVDataCreatePtr;
 
 /**
- * This class is implemented by code that calls setPostHander
+ * @brief This class is implemented by code that calls setPostHander
+ *
  */
 class epicsShareClass PostHandler 
 {
@@ -139,7 +140,8 @@ public:
 };
 
 /**
- * PVField is the base class for each PVData field.
+ * @brief PVField is the base class for each PVData field.
+ *
  * Each PVData field has an interface that extends PVField.
  */
 class epicsShareClass PVField
@@ -256,7 +258,8 @@ private:
 epicsShareExtern std::ostream& operator<<(std::ostream& o, const PVField& f);
 
 /**
- * PVScalar is the base class for each scalar field.
+ * @brief PVScalar is the base class for each scalar field.
+ *
  */
 class epicsShareClass PVScalar : public PVField {
     // friend our child class(s) so that it
@@ -322,7 +325,8 @@ protected:
 };
 
 /**
- * Class that holds the data for each posssible scalar type.
+ * @brief Class that holds the data for each posssible scalar type.
+ *
  */
 template<typename T>
 class epicsShareClass PVScalarValue : public PVScalar {
@@ -437,7 +441,8 @@ typedef std::tr1::shared_ptr<PVFloat> PVFloatPtr;
 typedef std::tr1::shared_ptr<PVDouble> PVDoublePtr;
 
 /**
- * PVString is special case, since it implements SerializableArray
+ * @brief PVString is special case, since it implements SerializableArray
+ *
  */
 class epicsShareClass PVString : public PVScalarValue<std::string>, SerializableArray {
 public:
@@ -453,7 +458,11 @@ typedef std::tr1::shared_ptr<PVString> PVStringPtr;
 
 
 /**
- * PVArray is the base class for all array types, i.e. the scalarArray types and structureArray.
+ * @brief PVArray is the base class for all array types.
+ *
+ * The array types are unionArray, strucrtureArray and scalarArray.
+ * There is a scalarArray type for each scalarType.
+ *
  */
 class epicsShareClass PVArray : public PVField, public SerializableArray {
 public:
@@ -520,9 +529,9 @@ private:
 
 epicsShareExtern std::ostream& operator<<(format::array_at_internal const& manip, const PVArray& array);
 
-
 /**
- * Base class for a scalarArray.
+ * @brief Base class for a scalarArray.
+ *
  */
 class epicsShareClass PVScalarArray : public PVArray {
 public:
@@ -604,6 +613,10 @@ private:
 };
 
 
+/**
+ * @brief Data interface for a structure,
+ *
+ */
 class epicsShareClass PVStructure : public PVField, public BitSetSerializable
 {
 public:
@@ -665,84 +678,84 @@ public:
 
     /**
      * Get a boolean field with the specified name.
-     * No longer needed. Use templete version of getSubField
+     * @deprecated No longer needed. Use templete version of getSubField
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
     PVBooleanPtr getBooleanField(std::string const &fieldName) ;
     /**
      * Get a byte field with the specified name.
-     * No longer needed. Use templete version of getSubField
+     * @deprecated No longer needed. Use templete version of getSubField
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
     PVBytePtr getByteField(std::string const &fieldName) ;
     /**
      * Get a short field with the specified name.
-     * No longer needed. Use templete version of getSubField
+     * @deprecated No longer needed. Use templete version of getSubField
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
     PVShortPtr getShortField(std::string const &fieldName) ;
     /**
      * Get a int field with the specified name.
-     * No longer needed. Use templete version of getSubField
+     * @deprecated No longer needed. Use templete version of getSubField
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
     PVIntPtr getIntField(std::string const &fieldName) ;
     /**
      * Get a long field with the specified name.
-     * No longer needed. Use templete version of getSubField
+     * @deprecated No longer needed. Use templete version of getSubField
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
     PVLongPtr getLongField(std::string const &fieldName) ;
     /**
      * Get an unsigned byte field with the specified name.
-     * No longer needed. Use templete version of getSubField
+     * @deprecated No longer needed. Use templete version of getSubField
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
     PVUBytePtr getUByteField(std::string const &fieldName) ;
     /**
      * Get an unsigned short field with the specified name.
-     * No longer needed. Use templete version of getSubField
+     * @deprecated No longer needed. Use templete version of getSubField
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
     PVUShortPtr getUShortField(std::string const &fieldName) ;
     /**
      * Get an unsigned int field with the specified name.
-     * No longer needed. Use templete version of getSubField
+     * @deprecated No longer needed. Use templete version of getSubField
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
     PVUIntPtr getUIntField(std::string const &fieldName) ;
     /**
      * Get an unsigned long field with the specified name.
-     * No longer needed. Use templete version of getSubField
+     * @deprecated No longer needed. Use templete version of getSubField
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
     PVULongPtr getULongField(std::string const &fieldName) ;
     /**
      * Get a float field with the specified name.
-     * No longer needed. Use templete version of getSubField
+     * @deprecated No longer needed. Use templete version of getSubField
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
     PVFloatPtr getFloatField(std::string const &fieldName) ;
     /**
      * Get a double field with the specified name.
-     * No longer needed. Use templete version of getSubField
+     * @deprecated No longer needed. Use templete version of getSubField
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
     PVDoublePtr getDoubleField(std::string const &fieldName) ;
     /**
      * Get a string field with the specified name.
-     * No longer needed. Use templete version of getSubField
+     * @deprecated No longer needed. Use templete version of getSubField
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
@@ -750,21 +763,21 @@ public:
     
     /**
      * Get a structure field with the specified name.
-     * No longer needed. Use templete version of getSubField
+     * @deprecated No longer needed. Use templete version of getSubField
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
     PVStructurePtr getStructureField(std::string const &fieldName) ;
     /**
      * Get a union field with the specified name.
-     * No longer needed. Use templete version of getSubField
+     * @deprecated No longer needed. Use templete version of getSubField
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
     PVUnionPtr getUnionField(std::string const &fieldName) ;
     /**
      * Get a scalarArray field with the specified name.
-     * No longer needed. Use templete version of getSubField
+     * @deprecated No longer needed. Use templete version of getSubField
      * @param fieldName The name of the field to get.
      * @param elementType The element type.
      * @return Pointer to the field of null if a field with that name and type does not exist.
@@ -773,14 +786,14 @@ public:
         std::string const &fieldName,ScalarType elementType) ;
     /**
      * Get a structureArray field with the specified name.
-     * No longer needed. Use templete version of getSubField
+     * @deprecated No longer needed. Use templete version of getSubField
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
     PVStructureArrayPtr getStructureArrayField(std::string const &fieldName) ;
     /**
      * Get a unionArray field with the specified name.
-     * No longer needed. Use templete version of getSubField
+     * @deprecated No longer needed. Use templete version of getSubField
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
@@ -857,7 +870,10 @@ private:
 
 
 /**
- * PVUnion has a single subfield which has a type specified by a union introspection interface.
+ * @brief PVUnion has a single subfield.
+ *
+ * The type for the subfield is specified by a union introspection interface.
+ *
  */
 class epicsShareClass PVUnion : public PVField
 {
@@ -1064,6 +1080,13 @@ namespace detail {
     };
 } // namespace detail
 
+/**
+ * @brief template class for all extensions of PVArray.
+ *
+ * The direct extensions are pvBooleanArray, pvByteArray, ..., pvStringArray.
+ * There are specializations for PVStringArray, PVStructureArray, and PVUnionArray.
+ *
+ */
 template<typename T>
 class epicsShareClass PVValueArray : public detail::PVVectorStorage<T,PVScalarArray> {
     typedef detail::PVVectorStorage<T,PVScalarArray> base_t;
@@ -1085,6 +1108,9 @@ public:
      */
     virtual ~PVValueArray() {}
 
+    /**
+     * Get introspection interface.
+     */
     virtual ArrayConstPtr getArray() const
     {
         return std::tr1::static_pointer_cast<const Array>(this->getField());
@@ -1129,7 +1155,8 @@ protected:
 
 
 /**
- * Data class for a structureArray
+ * @brief Data class for a structureArray
+ *
  */
 template<>
 class epicsShareClass PVValueArray<PVStructurePtr> : public detail::PVVectorStorage<PVStructurePtr,PVArray>
@@ -1225,7 +1252,8 @@ private:
 
 
 /**
- * Data class for a unionArray
+ * @brief Data class for a unionArray
+ *
  */
 template<>
 class epicsShareClass PVValueArray<PVUnionPtr> : public detail::PVVectorStorage<PVUnionPtr,PVArray>
@@ -1359,7 +1387,8 @@ typedef PVValueArray<std::string> PVStringArray;
 typedef std::tr1::shared_ptr<PVStringArray> PVStringArrayPtr;
 
 /**
- * This is a singlton class for creating data instances.
+ * @brief This is a singlton class for creating data instances.
+ *
  */
 class epicsShareClass PVDataCreate {
 public:
@@ -1537,3 +1566,9 @@ epicsShareExtern PVDataCreatePtr getPVDataCreate();
 
 }}
 #endif  /* PVDATA_H */
+
+/** @page Overview Documentation
+ *
+ * <a href = "pvDataCPP.html">pvData.html</a>
+ *
+ */

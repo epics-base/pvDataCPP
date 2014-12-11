@@ -74,8 +74,12 @@ string PVEnumerated::getChoice()
     if(pvIndex.get()==NULL ) {
          throw std::logic_error(notAttached);
     }
-    int index = pvIndex->get();
+    size_t index = pvIndex->get();
     const PVStringArray::const_svector& data(pvChoices->view());
+    if(index<0 || index>=data.size()) {
+        string nullString;
+        return nullString;
+    }
     return data[index];
 }
 

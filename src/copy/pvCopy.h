@@ -25,7 +25,8 @@ class PVCopyTraverseMasterCallback;
 typedef std::tr1::shared_ptr<PVCopyTraverseMasterCallback> PVCopyTraverseMasterCallbackPtr;
 
 /**
- * Callback for traversing master structure
+ * @brief Callback for traversing master structure
+ *
  * Must be implemented by code that creates pvCopy.
  */
 class epicsShareClass PVCopyTraverseMasterCallback
@@ -53,6 +54,8 @@ typedef std::tr1::shared_ptr<CopyStructureNode> CopyStructureNodePtr;
 
 
 /**
+ * @brief Support for subset of fields in a pvStructure.
+ *
  * Class that manages one or more PVStructures that holds an arbitrary subset of the fields
  * in another PVStructure called master.
  */

@@ -202,13 +202,26 @@ do { \
 #define THROW_EXCEPTION2(E,A) do{throw (E)(A);}while(0)
 
 #endif // THROW_EXCEPTION_COMPAT
-
+/**
+ * @brief Base for pvData exceptions.
+ *
+ */
 class epicsShareClass BaseException : public std::logic_error {
 public:
+    /**
+     * Constructor.
+     */
     explicit BaseException(const std::string msg) : std::logic_error(msg) {}
 
+    /**
+     * Destructor.
+     */
     virtual ~BaseException() throw(){};
 
+    /**
+     * 
+     * Reason for excepton.
+     */
     virtual const char* what() const throw();
 
 private:

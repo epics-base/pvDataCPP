@@ -188,7 +188,8 @@ inline double swap(double val)
 #endif
 
 /**
- * This class implements {@code Bytebuffer} that is like the {@code java.nio.ByteBuffer}.
+ * @brief This class implements a Bytebuffer that is like the java.nio.ByteBuffer.
+ * 
  * <p>A {@code BitSet} is not safe for multithreaded use without
  * external synchronization.
  *

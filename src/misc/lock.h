@@ -38,12 +38,30 @@ namespace epics { namespace pvData {
 
 typedef epicsMutex Mutex;
 
+/**
+ * @brief A lock for multithreading
+ *
+ * This is based on item 14 of 
+ *  * Effective C++, Third Edition, Scott Meyers
+ */
 class epicsShareClass Lock : private NoDefaultMethods {
 public:
+    /**
+     * Constructor
+     * @param m The mutex for the facility being locked.
+     */
     explicit Lock(Mutex &m)
     : mutexPtr(m), locked(true)
     { mutexPtr.lock();}
+    /**
+     * Destructor
+     * Note that destructor does an automatic unlock.
+     */
     ~Lock(){unlock();}
+    /**
+     * Take the lock
+     * Recursive locks are supported but each lock must be matched with an unlock.
+     */
     void lock()
     {
         if(!locked) 
@@ -52,6 +70,9 @@ public:
             locked = true;
         }
     }
+    /** 
+     * release the lock.
+     */
     void unlock()
     {
         if(locked)
@@ -60,6 +81,10 @@ public:
             locked=false;
         }
     }
+    /** 
+     * If lock is not held take the lock.
+     * @return (false,true) if caller (does not have, has) the lock.
+     */
     bool tryLock()
     {
          if(locked) return true;
@@ -69,6 +94,10 @@ public:
          }
          return false;
     }
+    /** 
+     * See if caller has the lock,
+     * @return (false,true) if caller (does not have, has) the lock.
+     */
     bool ownsLock() const{return locked;}
 private:
     Mutex &mutexPtr;

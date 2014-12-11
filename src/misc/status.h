@@ -21,7 +21,9 @@
 namespace epics { namespace pvData { 
 
         /**
-         * Status.
+         * @brief Status.
+         *
+         * This is a class for returning status to clients.
          * @author mse
          */
         class epicsShareClass Status : public epics::pvData::Serializable {

@@ -18,8 +18,20 @@
 
 namespace epics { namespace pvData {
 
+/**
+ * @brief Compress a bitSet.
+ *
+ */
 class epicsShareClass BitSetUtil : private NoDefaultMethods {
 public:
+    /**
+     *  compress the bitSet for a pvStructure.
+     *  In all subfields of a structure have been modified then
+     *  the bit for the structure is set and all the subfield bits
+     *  are cleared.
+     *  @param bitSet this must be a valid bitSet for pvStructure.
+     *  @param pvStructure the structure.
+     */
     static bool compress(BitSetPtr const &bitSet,PVStructurePtr const &pvStructure);
 };
 

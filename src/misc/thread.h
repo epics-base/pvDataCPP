@@ -47,9 +47,28 @@ typedef std::tr1::shared_ptr<epicsThread> EpicsThreadPtr;
 
 typedef epicsThreadRunable Runnable;
 
+/**
+ * @brief C++ wrapper for epicsThread from EPICS base.
+ *
+ */
 class epicsShareClass Thread : public epicsThread, private NoDefaultMethods {
 public:
 
+    /**
+     * 
+     * Constructor
+     * @param name thread name.
+     * @param priority priority is one of:
+     @code
+     enum ThreadPriority {
+        lowestPriority, lowerPriority, lowPriority,
+        middlePriority,
+        highPriority, higherPriority, highestPriority
+     };
+     @endcode
+     * @param runnable this is a c function
+     * @param stkcls stack size as specified by epicsThreadStackSizeClass
+     */
     Thread(std::string name,
            ThreadPriority priority,
            Runnable *runnable,
@@ -62,6 +81,21 @@ public:
         this->start();
     }
 
+    /**
+     * 
+     * Constructor
+     * @param runnable this is a c function
+     * @name thread name.
+     * @param stkcls stack size as specified by epicsThreadStackSizeClass
+     * @param priority priority is one of:
+     @code
+     enum ThreadPriority {
+        lowestPriority, lowerPriority, lowPriority,
+        middlePriority,
+        highPriority, higherPriority, highestPriority
+     };
+     @endcode
+     */
     Thread(Runnable &runnable,
            std::string name,
            unsigned int stksize,
@@ -74,6 +108,9 @@ public:
         this->start();
     }
 
+    /**
+     * Destructor
+     */
     ~Thread()
     {
         this->exitWait();

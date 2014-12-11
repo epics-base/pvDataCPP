@@ -23,6 +23,10 @@
 namespace epics {
     namespace pvData {
 
+        /**
+         * @brief Serialization helper.
+         *
+         */
         class epicsShareClass SerializeHelper : public NoDefaultMethods {
         public:
 

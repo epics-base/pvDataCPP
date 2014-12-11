@@ -55,7 +55,13 @@ static inline bool operator!=(const BoundedString& a, const BoundedString& b)
 {return !(a==b);}
 
 
+
+class Convert;
+typedef std::tr1::shared_ptr<Convert> ConvertPtr;
+
 /**
+ * @brief Conversion and Copy facility for pvData.
+ *
  * Convert between numeric types,  convert any field to a string,
  *  or convert from a string to a scalar field.
  * <p>Numeric conversions are between scalar numeric types or between arrays of
@@ -74,16 +80,12 @@ static inline bool operator!=(const BoundedString& a, const BoundedString& b)
  * A scalar field is a numeric field or pvBoolean or pvString.</p>
  * <p>All from methods put data into a PVField, e.g. from means where the PVField gets it's data.</p>
  */
-
-class Convert;
-typedef std::tr1::shared_ptr<Convert> ConvertPtr;
-
 class epicsShareClass Convert {
 public:
     static ConvertPtr getConvert();
     /**
      * Get the full fieldName for the pvField.
-     * @param builder The builder that will have the result.
+     * @param buf The string that will have the result.
      * @param pvField The pvField.
      */
     void getFullName(std::string *buf,PVFieldPtr const & pvField)
@@ -94,8 +96,8 @@ public:
     /**
      * Do fields have the same definition.
      *
-     * @param  First field
-     * @param  Second field
+     * @param a First field
+     * @param b Second field
      * @return (false, true) if the fields (are not, are) the same.
      */
     inline bool equals(PVFieldPtr const &a,PVFieldPtr const &b)
@@ -106,8 +108,8 @@ public:
     /**
      * Do fields have the same definition.
      *
-     * @param  First field
-     * @param  Second field
+     * @param a First field
+     * @param b Second field
      * @return (false, true) if the fields (are not, are) the same.
      */
     inline bool equals(PVField &a,PVField &b)
@@ -117,42 +119,26 @@ public:
 
     /**
      * Convert a PVField to a string.
-     * @param buf buffer for the result
-     * @param pv a PVField to convert to a string.
      * If a PVField is a structure or array be prepared for a very long string.
-     * @param indentLevel indentation level
-     */
-    inline void getString(std::string *buf,PVFieldPtr const & pvField,int indentLevel)
-    {getString(buf, pvField.get(), indentLevel);}
-    /**
-     * Convert a PVField to a string.
-     * param buf buffer for the result
-     * @param pv The PVField to convert to a string.
-     * If the PVField is a structure or array be prepared for a very long string.
+     * @param buf string that will hold pvField converted to a string,
+     * @param pvField The PVField to convert to a string.
      */
     inline void getString(std::string * buf,PVFieldPtr const & pvField)
     {getString(buf, pvField.get(), 0);}
     /**
      * Convert a PVField to a string.
-     * @param buf buffer for the result
-     * @param pv a PVField to convert to a string.
      * If a PVField is a structure or array be prepared for a very long string.
+     * @param buf string that will hold pvField converted to a string,
+     * @param pvField The PVField to convert to a string.
      * @param indentLevel indentation level
      */
     void getString(std::string * buf,PVField const * pvField,int indentLevel);
-    /**
-     * Convert a PVField to a string.
-     * param buf buffer for the result
-     * @param pv The PVField to convert to a string.
-     * If the PVField is a structure or array be prepared for a very long string.
-     */
-    inline void getString(std::string * buf,PVField const * pvField)
-    {getString(buf, pvField, 0);}
      /**
-      * Convert from an array of std::string to a PVScalar
+      * Convert from an array of std::string to a PVStructure
       * @param pv The PV.
       * @param from The array of std::string value to convert and put into a PV.
       * @param fromStartIndex The first element if the array of strings.
+      * @return The total number of fields that have been changed.
       * @throws std::logic_error if the array of std::string does not have a valid values.
       */
     std::size_t fromString(
