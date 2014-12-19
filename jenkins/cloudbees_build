@@ -15,7 +15,9 @@
 DEFAULT_BASE=3.14.12.4
 
 BASE=${1:-${DEFAULT_BASE}}
-[ "${1}" = ${DEFAULT_BASE} -o -z "${1}" ] && BUILD_DOCS=YES
+if [ "${1}" = "${DEFAULT_BASE}" -o -z "${1}" ]; then
+    BUILD_DOCS=YES
+fi
 
 ###########################################
 # Fetch and unpack dependencies
@@ -46,7 +48,9 @@ EPICS_BASE=${EPICS_BASE}
 EOF
 
 make distclean all
-[ "${BUILD_DOCS}" ] && doxygen
+if [ "${BUILD_DOCS}" ]; then
+    doxygen
+fi
 
 ###########################################
 # Test
@@ -62,4 +66,6 @@ tar czf pvData.CB-dist.tar.gz lib include COPYRIGHT LICENSE
 ###########################################
 # Publish documentation
 
-[ "${BUILD_DOCS}" ] && rsync -aqP --delete -e ssh documentation epics-jenkins@web.sourceforge.net:/home/project-web/epics-pvdata/htdocs/docbuild/pvDataCPP/tip
+if [ "${BUILD_DOCS}" ]; then
+    rsync -aqP --delete -e ssh documentation epics-jenkins@web.sourceforge.net:/home/project-web/epics-pvdata/htdocs/docbuild/pvDataCPP/tip
+fi
