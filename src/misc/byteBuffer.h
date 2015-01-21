@@ -144,6 +144,23 @@ inline int64 swap(int64 val)
     return swap64(val);
 }
 
+inline uint16 swap(uint16 val)
+{
+    return swap16(val);
+}
+
+template<>
+inline uint32 swap(uint32 val)
+{
+    return swap32(val);
+}
+
+template<>
+inline uint64 swap(uint64 val)
+{
+    return swap64(val);
+}
+
 template<>
 inline float swap(float val)
 {
