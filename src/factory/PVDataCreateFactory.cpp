@@ -527,7 +527,7 @@ PVFieldPtr PVDataCreate::createPVField(PVFieldPtr const & fieldToClone)
              PVStructurePtr pvStructure
                    = static_pointer_cast<PVStructure>(fieldToClone);
              StringArray const & fieldNames = pvStructure->getStructure()->getFieldNames();
-             PVFieldPtrArray pvFieldPtrArray = pvStructure->getPVFields();
+             PVFieldPtrArray const & pvFieldPtrArray = pvStructure->getPVFields();
              return createPVStructure(fieldNames,pvFieldPtrArray);
          }
      case structureArray:

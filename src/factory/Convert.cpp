@@ -282,8 +282,8 @@ bool Convert::isCopyScalarArrayCompatible(ScalarArrayConstPtr const &fromArray,
 bool Convert::isCopyStructureCompatible(
     StructureConstPtr const &fromStruct, StructureConstPtr const &toStruct)
 {
-    FieldConstPtrArray fromFields = fromStruct->getFields();
-    FieldConstPtrArray toFields = toStruct->getFields();
+    FieldConstPtrArray const & fromFields = fromStruct->getFields();
+    FieldConstPtrArray const & toFields = toStruct->getFields();
     size_t length = fromStruct->getNumberFields();
     if(length!=toStruct->getNumberFields()) return false;
     for(size_t i=0; i<length; i++) {

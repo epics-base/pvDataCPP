@@ -76,7 +76,7 @@ string PVEnumerated::getChoice()
     }
     size_t index = pvIndex->get();
     const PVStringArray::const_svector& data(pvChoices->view());
-    if(index<0 || index>=data.size()) {
+    if(/*index<0 ||*/ index>=data.size()) {
         string nullString;
         return nullString;
     }

@@ -989,8 +989,8 @@ StructureConstPtr FieldCreate::appendField(
     string const & fieldName,
     FieldConstPtr const & field) const
 {
-    StringArray oldNames = structure->getFieldNames();
-    FieldConstPtrArray oldFields = structure->getFields();
+    StringArray const & oldNames = structure->getFieldNames();
+    FieldConstPtrArray const & oldFields = structure->getFields();
     size_t oldLen = oldNames.size();
     StringArray newNames(oldLen+1);
     FieldConstPtrArray newFields(oldLen+1);
@@ -1008,8 +1008,8 @@ StructureConstPtr FieldCreate::appendFields(
     StringArray const & fieldNames,
     FieldConstPtrArray const & fields) const
 {
-    StringArray oldNames = structure->getFieldNames();
-    FieldConstPtrArray oldFields = structure->getFields();
+    StringArray const & oldNames = structure->getFieldNames();
+    FieldConstPtrArray const & oldFields = structure->getFields();
     size_t oldLen = oldNames.size();
     size_t extra = fieldNames.size();
     StringArray newNames(oldLen+extra);

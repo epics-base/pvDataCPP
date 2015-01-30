@@ -55,8 +55,8 @@ PVStructure::PVStructure(StructureConstPtr const & structurePtr)
   extendsStructureName("")
 {
     size_t numberFields = structurePtr->getNumberFields();
-    FieldConstPtrArray fields = structurePtr->getFields();
-    StringArray fieldNames = structurePtr->getFieldNames();
+    FieldConstPtrArray const & fields = structurePtr->getFields();
+    StringArray const & fieldNames = structurePtr->getFieldNames();
 //    PVFieldPtrArray * xxx = const_cast<PVFieldPtrArray *>(&pvFields);
     pvFields.reserve(numberFields);
     PVDataCreatePtr pvDataCreate = getPVDataCreate();
@@ -76,7 +76,7 @@ PVStructure::PVStructure(StructureConstPtr const & structurePtr,
   extendsStructureName("")
 {
     size_t numberFields = structurePtr->getNumberFields();
-    StringArray fieldNames = structurePtr->getFieldNames();
+    StringArray const & fieldNames = structurePtr->getFieldNames();
     pvFields.reserve(numberFields);
     for(size_t i=0; i<numberFields; i++) {
         pvFields.push_back(pvs[i]);
@@ -342,7 +342,7 @@ static PVFieldPtr findSubField(
             restOfName = fieldName.substr(index+1);
         }
     }
-    PVFieldPtrArray  pvFields = pvStructure->getPVFields();
+    PVFieldPtrArray const & pvFields = pvStructure->getPVFields();
     PVFieldPtr pvField;
     size_t numFields = pvStructure->getStructure()->getNumberFields();
     for(size_t i=0; i<numFields; i++) {

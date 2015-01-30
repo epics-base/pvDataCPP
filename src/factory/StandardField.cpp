@@ -89,9 +89,9 @@ StructureConstPtr StandardField::createProperties(string id,FieldConstPtr field,
         }
         if(type==structure) {
             StructureConstPtr structurePtr = static_pointer_cast<const Structure>(field);
-            StringArray names = structurePtr->getFieldNames();
+            StringArray const & names = structurePtr->getFieldNames();
             if(names.size()==2) {
-                FieldConstPtrArray fields = structurePtr->getFields();
+                FieldConstPtrArray const & fields = structurePtr->getFields();
                 FieldConstPtr first = fields[0];
                 FieldConstPtr second = fields[1];
                 string nameFirst = names[0];
