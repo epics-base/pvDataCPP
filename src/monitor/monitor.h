@@ -77,6 +77,7 @@ class epicsShareClass Monitor : public Destroyable{
     virtual MonitorElementPtr poll() = 0;
     /**
      * Release a MonitorElement that was returned by poll.
+     * A poll() must be called after the release() to check the presence of any modified data.
      * @param monitorElement
      */
     virtual void release(MonitorElementPtr const & monitorElement) = 0;
