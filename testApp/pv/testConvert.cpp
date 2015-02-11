@@ -60,7 +60,7 @@ static void testFromString()
 
 MAIN(testConvert)
 {
-    testPlan(0);
+    testPlan(6);
     testFromString();
     return testDone();
 }

@@ -159,7 +159,7 @@ static void testFromRaw()
 
 MAIN(testPVStructureArray)
 {
-    testPlan(0);
+    testPlan(23);
     testDiag("Testing structure array handling");
     fieldCreate = getFieldCreate();
     pvDataCreate = getPVDataCreate();
