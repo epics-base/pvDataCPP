@@ -1570,7 +1570,7 @@ epicsShareExtern PVDataCreatePtr getPVDataCreate();
  * stream support for pvField
  */
 namespace std{
-    std::ostream& operator<<(std::ostream& o, const epics::pvData::PVField *ptr);
+    epicsShareExtern std::ostream& operator<<(std::ostream& o, const epics::pvData::PVField *ptr);
 }
 
 #endif  /* PVDATA_H */
