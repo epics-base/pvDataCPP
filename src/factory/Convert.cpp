@@ -475,6 +475,7 @@ void Convert::copyUnion(PVUnionPtr const & from, PVUnionPtr const & to)
                 to->set(toValue);
             }
             copy(fromValue, toValue);
+            to->postPut();
         }
     }
     else
@@ -485,6 +486,7 @@ void Convert::copyUnion(PVUnionPtr const & from, PVUnionPtr const & to)
         {
             copy(fromValue, to->select(from->getSelectedIndex()));
         }
+        to->postPut();
     }
 }
 
