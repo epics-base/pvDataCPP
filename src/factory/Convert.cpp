@@ -472,10 +472,14 @@ void Convert::copyUnion(PVUnionPtr const & from, PVUnionPtr const & to)
             if (toValue.get() == 0 || *toValue->getField() != *fromValue->getField())
             {
                 toValue = pvDataCreate->createPVField(fromValue->getField());
+                copy(fromValue, toValue);
                 to->set(toValue);
             }
-            copy(fromValue, toValue);
-            to->postPut();
+            else
+            {
+                copy(fromValue, toValue);
+                to->postPut();
+            }
         }
     }
     else
