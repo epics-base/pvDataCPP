@@ -179,7 +179,7 @@ void PVStructureArray::deserialize(ByteBuffer *pbuffer,
             data[i].reset();
         }
         else {
-            if(data[i].get()==NULL) {
+            if(data[i].get()==NULL || !data[i].unique()) {
                 data[i] = pvDataCreate->createPVStructure(structure);
             }
             data[i]->deserialize(pbuffer, pcontrol);

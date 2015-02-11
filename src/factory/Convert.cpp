@@ -448,6 +448,8 @@ bool Convert::isCopyUnionCompatible(
     return *(from.get()) == *(to.get());
 }
 
+static PVDataCreatePtr pvDataCreate = getPVDataCreate();
+
 void Convert::copyUnion(PVUnionPtr const & from, PVUnionPtr const & to)
 {
     if(to->isImmutable()) {
@@ -462,14 +464,27 @@ void Convert::copyUnion(PVUnionPtr const & from, PVUnionPtr const & to)
     PVFieldPtr fromValue = from->get();
     if (from->getUnion()->isVariant())
     {
-            to->set(from->get());
+        if (fromValue.get() == 0)
+            to->set(PVField::shared_pointer());
+        else
+        {
+            PVFieldPtr toValue = to->get();
+            if (toValue.get() == 0 || *toValue->getField() != *fromValue->getField())
+            {
+                toValue = pvDataCreate->createPVField(fromValue->getField());
+                to->set(toValue);
+            }
+            copy(fromValue, toValue);
+        }
     }
     else
     {
         if (fromValue.get() == 0)
             to->select(PVUnion::UNDEFINED_INDEX);
         else
-            to->set(from->getSelectedIndex(),from->get());
+        {
+            copy(fromValue, to->select(from->getSelectedIndex()));
+        }
     }
 }
 
