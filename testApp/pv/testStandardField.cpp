@@ -34,7 +34,7 @@ static StandardFieldPtr standardField = getStandardField();
 static void print(const string& name, FieldConstPtr const & f)
 {
     if(debug) {
-        std::cout << std::endl << name << std::endl << *f << std::endl;
+        std::cout << std::endl << name << std::endl << f << std::endl;
     }
 }
 

@@ -454,12 +454,14 @@ public:
                 }
             }
             StructureConstPtr structure = fieldCreate->createStructure(names, fields);
+            if(!structure) throw std::invalid_argument("bad request " + crequest);
             PVStructurePtr pvStructure = pvDataCreate->createPVStructure(structure);
             for(size_t i=0; i<optionList.size(); ++i) {
                 OptionPair pair = optionList[i];
                 string name = pair.name;
                 string value = pair.value;
                 PVStringPtr pvField = pvStructure->getSubField<PVString>(name);
+                if(!pvField) throw std::invalid_argument("bad request " + crequest);
                 pvField->put(value);
             }
             optionList.clear();

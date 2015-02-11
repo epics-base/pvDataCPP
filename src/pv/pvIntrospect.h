@@ -1220,4 +1220,12 @@ struct StructureArrayHashFunction {
 };
 
 }}
+
+/**
+ * stream support for Field
+ */
+namespace std{
+    std::ostream& operator<<(std::ostream& o, const epics::pvData::Field *ptr);
+}
+
 #endif  /* PVINTROSPECT_H */

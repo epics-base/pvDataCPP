@@ -1,4 +1,45 @@
-<h1>Release 4.0 IN DEVELOPMENT</h1>
+<h1>Release 4.1 IN DEVELOPMENT</h1>
+<p>The main changes since release 4.0 are:</p>
+<ul>
+<li>Convert::copyUnion now always copies between subfields.</li>
+<li>CreateRequest prevents a possible SEGFAULT.</li>
+<li>New stream operators for Field and PVField are provided.</li>
+</ul>
+<h2>Convert::copyUnion</h2>
+<p>Before this method, depending on types for to and from,
+sometimes did a shallow cppy, i. e. just made to shared_ptr for to 
+share the same data as from.
+Now it always copies between the subfield of to and from.</p>
+<h2>CreateRequest change</h2>
+<p>createRequest could cause a SEGFAULT if passed a bad argument.
+This has been changed so the it returns a null pvStructure
+and provies an error.</p>
+<h2>New stream operators</h2>
+<p>New steam operators are available for Field and PVField.
+Before to print a Field (or any extension) or a PVField (or any extension)
+it was necessary to have code like:</p>
+<pre><code> void print(StructureConstPtr struct, PVStructurePtr pv)
+ {
+     if(struct) {
+         cout &lt;&lt; *struct &lt;&lt; endl;
+     } else {
+         cout &lt;&lt; "nullptr\n"
+     }
+     if(pv) {
+         cout &lt;&lt; *.struct &lt;&lt; endl;
+     } else {
+         cout &lt;&lt; "nullptr\n"
+     }
+ }
+</code></pre>
+<p>Now it can be done as follows:</p>
+<pre><code> void print(StructureConstPtr struct, PVStructurePtr pv)
+ {
+     cout &lt;&lt; struct &lt;&lt; endl;
+     cout &lt;&lt; pv &lt;&lt; endl;
+ }
+</code></pre>
+<h1>Release 4.0</h1>
 <p>The main changes since release 3.0.2 are:</p>
 <ul>
 <li>array semantics now enforce Copy On Write.</li>

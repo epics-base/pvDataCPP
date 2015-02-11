@@ -36,7 +36,7 @@ static StandardPVFieldPtr standardPVField = getStandardPVField();
 static void print(const string& name, PVFieldPtr const & f)
 {
     if(debug) {
-        std::cout << std::endl << name << std::endl << *f << std::endl;
+        std::cout << std::endl << name << std::endl << f << std::endl;
     }
 }
 

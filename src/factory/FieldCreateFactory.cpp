@@ -1230,3 +1230,12 @@ FieldCreatePtr getFieldCreate() {
 }
 
 }}
+
+namespace std{
+    std::ostream& operator<<(std::ostream& o, const epics::pvData::Field *ptr)
+    {
+        if(ptr) return o << *ptr;
+        return o << "nullptr";
+    }
+}
+

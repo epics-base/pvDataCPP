@@ -1,4 +1,58 @@
-Release 4.0 IN DEVELOPMENT
+Release 4.1 IN DEVELOPMENT
+===========
+
+The main changes since release 4.0 are:
+
+* Convert::copyUnion now always copies between subfields.
+* CreateRequest prevents a possible SEGFAULT.
+* New stream operators for Field and PVField are provided.
+
+Convert::copyUnion
+-----------------
+
+Before this method, depending on types for to and from,
+sometimes did a shallow cppy, i. e. just made to shared_ptr for to 
+share the same data as from.
+Now it always copies between the subfield of to and from.
+
+CreateRequest change
+--------------------
+
+createRequest could cause a SEGFAULT if passed a bad argument.
+This has been changed so the it returns a null pvStructure
+and provies an error.
+
+New stream operators
+--------------------
+
+New steam operators are available for Field and PVField.
+Before to print a Field (or any extension) or a PVField (or any extension)
+it was necessary to have code like:
+
+     void print(StructureConstPtr struct, PVStructurePtr pv)
+     {
+         if(struct) {
+             cout << *struct << endl;
+         } else {
+             cout << "nullptr\n"
+         }
+         if(pv) {
+             cout << *.struct << endl;
+         } else {
+             cout << "nullptr\n"
+         }
+     }
+
+Now it can be done as follows:
+
+     void print(StructureConstPtr struct, PVStructurePtr pv)
+     {
+         cout << struct << endl;
+         cout << pv << endl;
+     }
+
+
+Release 4.0
 ===========
 
 The main changes since release 3.0.2 are:

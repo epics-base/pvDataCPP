@@ -741,3 +741,12 @@ PVDataCreatePtr getPVDataCreate() {
 }
 
 }}
+
+namespace std{
+    std::ostream& operator<<(std::ostream& o, const epics::pvData::PVField *ptr)
+    {
+        if(ptr) return o << *ptr;
+        return o << "nullptr";
+    }
+}
+

@@ -31,7 +31,7 @@ static void testCreateRequestInternal() {
     if(debug) { cout  << "request " << request <<endl;}
     PVStructurePtr pvRequest = createRequest->createRequest(request);
     if(!pvRequest) { cout<< createRequest->getMessage() << endl;}
-    if(debug) { cout << *pvRequest << endl;}
+    if(debug) { cout << pvRequest << endl;}
     testOk1(pvRequest.get()!=NULL);
     testOk1(pvRequest->getStructure()->getNumberFields()==0);
     testPass("request %s",request.c_str());
@@ -40,7 +40,7 @@ static void testCreateRequestInternal() {
     if(debug) { cout  << "request " << request <<endl;}
     pvRequest = createRequest->createRequest(request);
     if(!pvRequest) { cout<< createRequest->getMessage() << endl;}
-    if(debug) { cout << *pvRequest << endl;}
+    if(debug) { cout << pvRequest << endl;}
     testOk1(pvRequest.get()!=NULL);
     testOk1(pvRequest->getSubField("field").get()!=NULL);
     testOk1(pvRequest->getSubField("putField").get()!=NULL);
@@ -51,7 +51,7 @@ static void testCreateRequestInternal() {
     if(debug) { cout  << "request " << request <<endl;}
     pvRequest = createRequest->createRequest(request);
     if(!pvRequest) { cout<< createRequest->getMessage() << endl;}
-    if(debug) { cout << *pvRequest << endl;}
+    if(debug) { cout << pvRequest << endl;}
     testOk1(pvRequest.get()!=NULL);
     pvString = pvRequest->getSubField<PVString>("record._options.a");
     sval = pvString->get();
@@ -68,7 +68,7 @@ static void testCreateRequestInternal() {
     if(debug) { cout  << "request " << request <<endl;}
     pvRequest = createRequest->createRequest(request);
     if(!pvRequest) { cout<< createRequest->getMessage() << endl;}
-    if(debug) { cout << *pvRequest << endl;}
+    if(debug) { cout << pvRequest << endl;}
     testOk1(pvRequest.get()!=NULL);
     pvString = pvRequest->getSubField<PVString>("field.a.b._options.x");
     sval = pvString->get();
@@ -79,7 +79,7 @@ static void testCreateRequestInternal() {
     if(debug) { cout  << "request " << request <<endl;}
     pvRequest = createRequest->createRequest(request);
     if(!pvRequest) { cout<< createRequest->getMessage() << endl;}
-    if(debug) { cout << *pvRequest << endl;}
+    if(debug) { cout << pvRequest << endl;}
     testOk1(pvRequest.get()!=NULL);
     testOk1(pvRequest->getSubField("field.a.b.c.d").get()!=NULL);
     testPass("request %s",request.c_str());
@@ -88,7 +88,7 @@ static void testCreateRequestInternal() {
     if(debug) { cout  << "request " << request <<endl;}
     pvRequest = createRequest->createRequest(request);
     if(!pvRequest) { cout<< createRequest->getMessage() << endl;}
-    if(debug) { cout << *pvRequest << endl;}
+    if(debug) { cout << pvRequest << endl;}
     testOk1(pvRequest.get()!=NULL);
     pvString = pvRequest->getSubField<PVString>("field.a.b._options.x");
     sval = pvString->get();
@@ -100,7 +100,7 @@ static void testCreateRequestInternal() {
     if(debug) { cout  << "request " << request <<endl;}
     pvRequest = createRequest->createRequest(request);
     if(!pvRequest) { cout<< createRequest->getMessage() << endl;}
-    if(debug) { cout << *pvRequest << endl;}
+    if(debug) { cout << pvRequest << endl;}
     testOk1(pvRequest.get()!=NULL);
     pvString = pvRequest->getSubField<PVString>("field.a.b._options.x");
     sval = pvString->get();
@@ -114,7 +114,7 @@ static void testCreateRequestInternal() {
     if(debug) { cout  << "request " << request <<endl;}
     pvRequest = createRequest->createRequest(request);
     if(!pvRequest) { cout<< createRequest->getMessage() << endl;}
-    if(debug) { cout << *pvRequest << endl;}
+    if(debug) { cout << pvRequest << endl;}
     testOk1(pvRequest.get()!=NULL);
     pvString = pvRequest->getSubField<PVString>("field.a.a._options.a");
     sval = pvString->get();
@@ -134,7 +134,7 @@ static void testCreateRequestInternal() {
     if(debug) { cout  << "request " << request <<endl;}
     pvRequest = createRequest->createRequest(request);
     if(!pvRequest) { cout<< createRequest->getMessage() << endl;}
-    if(debug) { cout << *pvRequest << endl;}
+    if(debug) { cout << pvRequest << endl;}
     testOk1(pvRequest.get()!=NULL);
     testOk1(pvRequest->getSubField("field.alarm").get()!=NULL);
     testOk1(pvRequest->getSubField("field.timeStamp").get()!=NULL);
@@ -145,7 +145,7 @@ static void testCreateRequestInternal() {
     if(debug) { cout  << "request " << request <<endl;}
     pvRequest = createRequest->createRequest(request);
     if(!pvRequest) { cout<< createRequest->getMessage() << endl;}
-    if(debug) { cout << *pvRequest << endl;}
+    if(debug) { cout << pvRequest << endl;}
     testOk1(pvRequest.get()!=NULL);
     pvString = pvRequest->getSubField<PVString>("record._options.process");
     sval = pvString->get();
@@ -159,7 +159,7 @@ static void testCreateRequestInternal() {
     if(debug) { cout  << "request " << request <<endl;}
     pvRequest = createRequest->createRequest(request);
     if(!pvRequest) { cout<< createRequest->getMessage() << endl;}
-    if(debug) { cout << *pvRequest << endl;}
+    if(debug) { cout << pvRequest << endl;}
     testOk1(pvRequest.get()!=NULL);
     pvString = pvRequest->getSubField<PVString>("record._options.process");
     sval = pvString->get();
@@ -180,7 +180,7 @@ static void testCreateRequestInternal() {
     if(debug) { cout  << "request " << request <<endl;}
     pvRequest = createRequest->createRequest(request);
     if(!pvRequest) { cout<< createRequest->getMessage() << endl;}
-    if(debug) { cout << *pvRequest << endl;}
+    if(debug) { cout << pvRequest << endl;}
     testOk1(pvRequest.get()!=NULL);
     pvString = pvRequest->getSubField<PVString>("record._options.int");
     sval = pvString->get();
@@ -202,7 +202,7 @@ static void testCreateRequestInternal() {
     if(debug) { cout  << "request " << request <<endl;}
     pvRequest = createRequest->createRequest(request);
     if(!pvRequest) { cout<< createRequest->getMessage() << endl;}
-    if(debug) { cout << *pvRequest << endl;}
+    if(debug) { cout << pvRequest << endl;}
     testOk1(pvRequest.get()!=NULL);
     testOk1(pvRequest->getSubField("putField.power.value").get()!=NULL);
     testOk1(pvRequest->getSubField("getField.alarm").get()!=NULL);
@@ -222,7 +222,7 @@ static void testCreateRequestInternal() {
     if(debug) { cout  << "request " << request <<endl;}
     pvRequest = createRequest->createRequest(request);
     if(!pvRequest) { cout<< createRequest->getMessage() << endl;}
-    if(debug) { cout << *pvRequest << endl;}
+    if(debug) { cout << pvRequest << endl;}
     testOk1(pvRequest.get()!=NULL);
     testOk1(pvRequest->getSubField("field.alarm").get()!=NULL);
     testOk1(pvRequest->getSubField("field.timeStamp").get()!=NULL);
@@ -244,7 +244,7 @@ static void testCreateRequestInternal() {
     if(debug) { cout  << "request " << request <<endl;}
     pvRequest = createRequest->createRequest(request);
     if(!pvRequest) { cout<< createRequest->getMessage() << endl;}
-    if(debug) { cout << *pvRequest << endl;}
+    if(debug) { cout << pvRequest << endl;}
     testOk1(pvRequest.get()!=NULL);
     testOk1(pvRequest->getSubField("putField.power.value").get()!=NULL);
     testOk1(pvRequest->getSubField("getField.alarm").get()!=NULL);
@@ -277,7 +277,7 @@ static void testCreateRequestInternal() {
     if(debug) { cout  << "request " << request <<endl;}
     pvRequest = createRequest->createRequest(request);
     if(!pvRequest) { cout<< createRequest->getMessage() << endl;}
-    if(debug) { cout << *pvRequest << endl;}
+    if(debug) { cout << pvRequest << endl;}
     testOk1(pvRequest.get()!=NULL);
     testOk1(pvRequest->getSubField("field.a.b.c.d").get()!=NULL);
     testPass("request %s",request.c_str());
@@ -310,11 +310,19 @@ static void testCreateRequestInternal() {
     cout << "reason " << createRequest->getMessage() << endl;
     testOk1(pvRequest.get()==NULL);
     testPass("request %s",request.c_str());
+
+    request = ":field(record[process=false]power.value)";
+    if(debug) { cout  << "request " << request <<endl;}
+    cout << endl << "Error Expected for next call!!" << endl;
+    pvRequest = createRequest->createRequest(request);
+    cout << "reason " << createRequest->getMessage() << endl;
+    testOk1(pvRequest.get()==NULL);
+    testPass("request %s",request.c_str());
 }
 
 MAIN(testCreateRequest)
 {
-    testPlan(119);
+    testPlan(121);
     testCreateRequestInternal();
     return testDone();
 }
