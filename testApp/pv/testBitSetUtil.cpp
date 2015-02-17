@@ -18,7 +18,6 @@
 
 #include <pv/requester.h>
 #include <pv/bitSetUtil.h>
-#include <pv/convert.h>
 #include <pv/standardField.h>
 #include <pv/standardPVField.h>
 
@@ -32,7 +31,6 @@ static FieldCreatePtr fieldCreate;
 static PVDataCreatePtr pvDataCreate;
 static StandardFieldPtr standardField;
 static StandardPVFieldPtr standardPVField;
-static ConvertPtr convert;
 
 static void test()
 {
@@ -175,7 +173,6 @@ MAIN(testBitSetUtil)
     pvDataCreate = getPVDataCreate();
     standardField = getStandardField();
     standardPVField = getStandardPVField();
-    convert = getConvert();
     test();
     return testDone();
 }

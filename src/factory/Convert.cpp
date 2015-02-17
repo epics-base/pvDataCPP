@@ -152,12 +152,6 @@ size_t Convert::toStringArray(PVScalarArrayPtr const & pv,
     return data.size();
 }
 
-void Convert::newLine(string *buffer, int indentLevel)
-{
-    *buffer += "\n";
-    *buffer += string(indentLevel*4, ' ');
-}
-
 ConvertPtr Convert::getConvert()
 {
     static ConvertPtr convert;

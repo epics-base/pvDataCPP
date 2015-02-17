@@ -49,39 +49,6 @@ typedef std::tr1::shared_ptr<Convert> ConvertPtr;
 class epicsShareClass Convert {
 public:
     static ConvertPtr getConvert();
-    /**
-     * Get the full fieldName for the pvField.
-     * @param buf The string that will have the result.
-     * @param pvField The pvField.
-     */
-    void getFullName(std::string *buf,PVFieldPtr const & pvField)
-    {
-        *buf = pvField->getFullName();
-    }
-
-    /**
-     * Do fields have the same definition.
-     *
-     * @param a First field
-     * @param b Second field
-     * @return (false, true) if the fields (are not, are) the same.
-     */
-    inline bool equals(PVFieldPtr const &a,PVFieldPtr const &b)
-    {
-        return *a==*b;
-    }
-
-    /**
-     * Do fields have the same definition.
-     *
-     * @param a First field
-     * @param b Second field
-     * @return (false, true) if the fields (are not, are) the same.
-     */
-    inline bool equals(PVField &a,PVField &b)
-    {
-        return a==b;
-    }
 
     /**
      * Convert a PVField to a string.
@@ -308,13 +275,6 @@ public:
      */
     inline void fromDouble(PVScalarPtr const & pv, double from) { pv->putFrom<double>(from); }
 
-    /**
-     * Convenience method for implementing dump.
-     * It generates a newline and inserts blanks at the beginning of the newline.
-     * @param builder The std::string * being constructed.
-     * @param indentLevel Indent level, Each level is four spaces.
-     */
-    void newLine(std::string * buf, int indentLevel);
 };
 
 static inline ConvertPtr getConvert() { return Convert::getConvert(); }

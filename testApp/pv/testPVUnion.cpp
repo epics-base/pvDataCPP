@@ -17,7 +17,6 @@
 
 #include <pv/pvIntrospect.h>
 #include <pv/pvData.h>
-#include <pv/convert.h>
 #include <pv/standardField.h>
 #include <pv/standardPVField.h>
 #include <pv/timeStamp.h>
@@ -35,7 +34,6 @@ static FieldCreatePtr fieldCreate = getFieldCreate();
 static PVDataCreatePtr pvDataCreate = getPVDataCreate();
 static StandardFieldPtr standardField = getStandardField();
 static StandardPVFieldPtr standardPVField = getStandardPVField();
-static ConvertPtr convert = getConvert();
 
 static void testPVUnionType()
 {

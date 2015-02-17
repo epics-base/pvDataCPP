@@ -19,7 +19,6 @@
 #include <pv/requester.h>
 #include <pv/pvIntrospect.h>
 #include <pv/pvData.h>
-#include <pv/convert.h>
 #include <pv/standardField.h>
 #include <pv/standardPVField.h>
 #include <pv/alarm.h>
@@ -41,7 +40,6 @@ static FieldCreatePtr fieldCreate;
 static PVDataCreatePtr pvDataCreate;
 static StandardFieldPtr standardField;
 static StandardPVFieldPtr standardPVField;
-static ConvertPtr convert;
 static string alarmTimeStamp("alarm,timeStamp");
 static string allProperties("alarm,timeStamp,display,control");
 
@@ -236,7 +234,6 @@ MAIN(testProperty)
     pvDataCreate = getPVDataCreate();
     standardField = getStandardField();
     standardPVField = getStandardPVField();
-    convert = getConvert();
     createRecords();
     testAlarm();
     testTimeStamp();
