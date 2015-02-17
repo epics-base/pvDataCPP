@@ -391,20 +391,6 @@ public:
         put(castUnsafe<T,T1>(val));
     }
 
-protected:
-    PVScalarValue(ScalarConstPtr const & scalar)
-    : PVScalar(scalar) {}
-    virtual void getAs(void * result, ScalarType rtype) const
-    {
-        const T src = get();
-        castUnsafeV(1, rtype, result, typeCode, (const void*)&src);
-    }
-    virtual void putFrom(const void *src, ScalarType stype)
-    {
-        T result;
-        castUnsafeV(1, typeCode, (void*)&result, stype, src);
-        put(result);
-    }
     virtual void assign(const PVScalar& scalar)
     {
         if(isImmutable())
@@ -421,6 +407,21 @@ protected:
             return;
         T result;
         from.getAs((void*)&result, typeCode);
+        put(result);
+    }
+
+protected:
+    PVScalarValue(ScalarConstPtr const & scalar)
+    : PVScalar(scalar) {}
+    virtual void getAs(void * result, ScalarType rtype) const
+    {
+        const T src = get();
+        castUnsafeV(1, rtype, result, typeCode, (const void*)&src);
+    }
+    virtual void putFrom(const void *src, ScalarType stype)
+    {
+        T result;
+        castUnsafeV(1, typeCode, (void*)&result, stype, src);
         put(result);
     }
 
