@@ -241,4 +241,25 @@ std::ostream& PVUnionArray::dumpValue(std::ostream& o, std::size_t index) const
     return o;
 }
 
+void PVUnionArray::copy(const PVUnionArray& from)
+{
+    if(isImmutable())
+        throw std::invalid_argument("destination is immutable");
+
+    // TODO relaxed compare?
+    if(*getUnionArray().get() != *from.getUnionArray().get())
+        throw std::invalid_argument("unionArray definitions do not match");
+
+    copyUnchecked(from);
+}
+
+void PVUnionArray::copyUnchecked(const PVUnionArray& from)
+{
+    if (this == &from)
+        return;
+
+    replace(from.view());
+}
+
+
 }}

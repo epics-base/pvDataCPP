@@ -233,6 +233,9 @@ public:
      */
     virtual std::ostream& dumpValue(std::ostream& o) const = 0;
 
+    void copy(const PVField& from);
+    void copyUnchecked(const PVField& from);
+
 protected:
     PVField::shared_pointer getPtrSelf()
     {
@@ -320,6 +323,9 @@ public:
 
     virtual void assign(const PVScalar&) = 0;
 
+    virtual void copy(const PVScalar& from) = 0;
+    virtual void copyUnchecked(const PVScalar& from) = 0;
+
 protected:
     PVScalar(ScalarConstPtr const & scalar);
 };
@@ -401,12 +407,20 @@ protected:
     }
     virtual void assign(const PVScalar& scalar)
     {
-        if(this==&scalar)
-            return;
         if(isImmutable())
-            throw std::invalid_argument("Destination is immutable");
+            throw std::invalid_argument("destination is immutable");
+        copyUnchecked(scalar);
+    }
+    virtual void copy(const PVScalar& from)
+    {
+        assign(from);
+    }
+    virtual void copyUnchecked(const PVScalar& from)
+    {
+        if(this==&from)
+            return;
         T result;
-        scalar.getAs((void*)&result, typeCode);
+        from.getAs((void*)&result, typeCode);
         put(result);
     }
 
@@ -600,9 +614,21 @@ public:
      * If the types do match then a new refernce to the provided
      * data is kept.
      */
-    void assign(PVScalarArray& pv) {
+    void assign(const PVScalarArray& pv) {
+        if (isImmutable())
+            throw std::invalid_argument("destination is immutable");
+        copyUnchecked(pv);
+    }
+
+    void copy(const PVScalarArray& from) {
+        assign(from);
+    }
+
+    void copyUnchecked(const PVScalarArray& from) {
+        if (this==&from)
+            return;
         shared_vector<const void> temp;
-        pv._getAsVoid(temp);
+        from._getAsVoid(temp);
         _putFromVoid(temp);
     }
 
@@ -842,6 +868,11 @@ public:
 
     virtual std::ostream& dumpValue(std::ostream& o) const;
 
+    void copy(const PVStructure& from);
+
+    void copyUnchecked(const PVStructure& from);
+    void copyUnchecked(const PVStructure& from, const BitSet& maskBitSet, bool inverse = false);
+
 private:
     static PVFieldPtr nullPVField;
     static PVBooleanPtr nullPVBoolean;
@@ -995,7 +1026,12 @@ public:
 
     virtual std::ostream& dumpValue(std::ostream& o) const;
 
+    void copy(const PVUnion& from);
+    void copyUnchecked(const PVUnion& from);
+
 private:
+    static PVDataCreatePtr pvDataCreate;
+
     friend class PVDataCreate;
     UnionConstPtr unionPtr;
 
@@ -1238,6 +1274,9 @@ public:
     virtual std::ostream& dumpValue(std::ostream& o) const;
     virtual std::ostream& dumpValue(std::ostream& o, std::size_t index) const;
 
+    void copy(const PVStructureArray& from);
+    void copyUnchecked(const PVStructureArray& from);
+
 protected:
     PVValueArray(StructureArrayConstPtr const & structureArray)
         :base_t(structureArray)
@@ -1334,6 +1373,9 @@ public:
 
     virtual std::ostream& dumpValue(std::ostream& o) const;
     virtual std::ostream& dumpValue(std::ostream& o, std::size_t index) const;
+
+    void copy(const PVUnionArray& from);
+    void copyUnchecked(const PVUnionArray& from);
 
 protected:
     PVValueArray(UnionArrayConstPtr const & unionArray)
@@ -1563,6 +1605,11 @@ private:
  */
 
 epicsShareExtern PVDataCreatePtr getPVDataCreate();
+
+bool epicsShareExtern operator==(const PVField&, const PVField&);
+
+static inline bool operator!=(const PVField& a, const PVField& b)
+{return !(a==b);}
 
 }}
 

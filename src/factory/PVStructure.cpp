@@ -382,4 +382,80 @@ std::ostream& PVStructure::dumpValue(std::ostream& o) const
  	return o;
 }
 
+
+void PVStructure::copy(const PVStructure& from)
+{
+    if(isImmutable())
+        throw std::invalid_argument("destination is immutable");
+
+    // TODO relaxed compare?
+    if(*getStructure().get() != *from.getStructure().get())
+        throw std::invalid_argument("structure definitions do not match");
+
+    copyUnchecked(from);
+}
+
+void PVStructure::copyUnchecked(const PVStructure& from)
+{
+    if (this == &from)
+        return;
+
+    PVFieldPtrArray const & fromPVFields = from.getPVFields();
+    PVFieldPtrArray const & toPVFields = getPVFields();
+
+    size_t fieldsSize = fromPVFields.size();
+    for(size_t i = 0; i<fieldsSize; i++) {
+        toPVFields[i]->copyUnchecked(*fromPVFields[i].get());
+    }
+}
+
+void PVStructure::copyUnchecked(const PVStructure& from, const BitSet& maskBitSet, bool inverse)
+{
+    if (this == &from)
+        return;
+
+    size_t numberFields = from.getNumberFields();
+    size_t offset = from.getFieldOffset();
+    int32 next = inverse ?
+                maskBitSet.nextClearBit(static_cast<uint32>(offset)) :
+                maskBitSet.nextSetBit(static_cast<uint32>(offset));
+
+    // no more changes or no changes in this structure
+    if(next<0||next>=static_cast<int32>(offset+numberFields)) return;
+
+    // entire structure
+    if(static_cast<int32>(offset)==next) {
+        copyUnchecked(from);
+        return;
+    }
+
+    PVFieldPtrArray const & fromPVFields = from.getPVFields();
+    PVFieldPtrArray const & toPVFields = getPVFields();
+
+    size_t fieldsSize = fromPVFields.size();
+    for(size_t i = 0; i<fieldsSize; i++) {
+        PVFieldPtr pvField = fromPVFields[i];
+        offset = pvField->getFieldOffset();
+        int32 inumberFields = static_cast<int32>(pvField->getNumberFields());
+        next = inverse ?
+                    maskBitSet.nextClearBit(static_cast<uint32>(offset)) :
+                    maskBitSet.nextSetBit(static_cast<uint32>(offset));
+
+        // no more changes
+        if(next<0) return;
+        //  no change in this pvField
+        if(next>=static_cast<int32>(offset+inumberFields)) continue;
+
+        // serialize field or fields
+        if(inumberFields==1) {
+            toPVFields[i]->copyUnchecked(*pvField.get());
+        } else {
+            PVStructure::shared_pointer fromPVStructure = std::tr1::static_pointer_cast<PVStructure>(pvField);
+            PVStructure::shared_pointer toPVStructure = std::tr1::static_pointer_cast<PVStructure>(toPVFields[i]);
+            toPVStructure->copyUnchecked(*fromPVStructure.get(), maskBitSet, inverse);
+       }
+    }
+}
+
+
 }}

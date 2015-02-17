@@ -22,40 +22,6 @@
 
 namespace epics { namespace pvData { 
 
-bool epicsShareExtern operator==(const PVField&, const PVField&);
-
-static inline bool operator!=(const PVField& a, const PVField& b)
-{return !(a==b);}
-
-
-bool epicsShareExtern operator==(const Field&, const Field&);
-bool epicsShareExtern operator==(const Scalar&, const Scalar&);
-bool epicsShareExtern operator==(const ScalarArray&, const ScalarArray&);
-bool epicsShareExtern operator==(const Structure&, const Structure&);
-bool epicsShareExtern operator==(const StructureArray&, const StructureArray&);
-bool epicsShareExtern operator==(const Union&, const Union&);
-bool epicsShareExtern operator==(const UnionArray&, const UnionArray&);
-bool epicsShareExtern operator==(const BoundedString&, const BoundedString&);
-
-static inline bool operator!=(const Field& a, const Field& b)
-{return !(a==b);}
-static inline bool operator!=(const Scalar& a, const Scalar& b)
-{return !(a==b);}
-static inline bool operator!=(const ScalarArray& a, const ScalarArray& b)
-{return !(a==b);}
-static inline bool operator!=(const Structure& a, const Structure& b)
-{return !(a==b);}
-static inline bool operator!=(const StructureArray& a, const StructureArray& b)
-{return !(a==b);}
-static inline bool operator!=(const Union& a, const Union& b)
-{return !(a==b);}
-static inline bool operator!=(const UnionArray& a, const UnionArray& b)
-{return !(a==b);}
-static inline bool operator!=(const BoundedString& a, const BoundedString& b)
-{return !(a==b);}
-
-
-
 class Convert;
 typedef std::tr1::shared_ptr<Convert> ConvertPtr;
 

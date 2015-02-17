@@ -242,4 +242,24 @@ std::ostream& PVStructureArray::dumpValue(std::ostream& o, std::size_t index) co
     return o;
 }
 
+void PVStructureArray::copy(const PVStructureArray& from)
+{
+    if(isImmutable())
+        throw std::invalid_argument("destination is immutable");
+
+    // TODO relaxed structure compare?
+    if(*getStructureArray().get() != *from.getStructureArray().get())
+        throw std::invalid_argument("structureArray definitions do not match");
+
+    copyUnchecked(from);
+}
+
+void PVStructureArray::copyUnchecked(const PVStructureArray& from)
+{
+    if (this == &from)
+        return;
+
+    replace(from.view());
+}
+
 }}
