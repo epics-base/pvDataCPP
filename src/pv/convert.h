@@ -51,6 +51,19 @@ public:
     static ConvertPtr getConvert();
 
     /**
+     * Copy from a PVField to another PVField.
+     * This calls one on copyScalar, copyArray, copyStructure.
+     * The two arguments must be compatible.
+     * @param from The source.
+     * @param to The destination
+     * @throws std::invalid_argument if the arguments are not compatible.
+     * @DEPRECATED use "to->copy[Unchecked](*from)" instead
+     */
+    void copy(PVFieldPtr const & from, PVFieldPtr const & to) {
+        to->copy(*from);
+    }
+
+    /**
      * Convert a PVField to a string.
      * If a PVField is a structure or array be prepared for a very long string.
      * @param buf string that will hold pvField converted to a string,
