@@ -14,7 +14,6 @@
 
 #define epicsExportSharedSymbols
 #include <pv/pvData.h>
-#include <pv/convert.h>
 #include <pv/factory.h>
 #include <pv/serializeHelper.h>
 
@@ -247,8 +246,7 @@ void PVStructureArray::copy(const PVStructureArray& from)
     if(isImmutable())
         throw std::invalid_argument("destination is immutable");
 
-    // TODO relaxed structure compare?
-    if(*getStructureArray().get() != *from.getStructureArray().get())
+    if(*getStructureArray() != *from.getStructureArray())
         throw std::invalid_argument("structureArray definitions do not match");
 
     copyUnchecked(from);

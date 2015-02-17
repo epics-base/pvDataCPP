@@ -16,7 +16,6 @@
 #include <pv/lock.h>
 #include <pv/pvData.h>
 #include <pv/factory.h>
-#include <pv/convert.h>
 
 using std::tr1::const_pointer_cast;
 using std::size_t;

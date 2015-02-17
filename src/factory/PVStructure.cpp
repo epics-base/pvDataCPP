@@ -16,7 +16,6 @@
 #define epicsExportSharedSymbols
 #include <pv/pvData.h>
 #include <pv/pvIntrospect.h>
-#include <pv/convert.h>
 #include <pv/factory.h>
 #include <pv/bitSet.h>
 
@@ -388,8 +387,7 @@ void PVStructure::copy(const PVStructure& from)
     if(isImmutable())
         throw std::invalid_argument("destination is immutable");
 
-    // TODO relaxed compare?
-    if(*getStructure().get() != *from.getStructure().get())
+    if(*getStructure() != *from.getStructure())
         throw std::invalid_argument("structure definitions do not match");
 
     copyUnchecked(from);
@@ -405,7 +403,7 @@ void PVStructure::copyUnchecked(const PVStructure& from)
 
     size_t fieldsSize = fromPVFields.size();
     for(size_t i = 0; i<fieldsSize; i++) {
-        toPVFields[i]->copyUnchecked(*fromPVFields[i].get());
+        toPVFields[i]->copyUnchecked(*fromPVFields[i]);
     }
 }
 
@@ -448,11 +446,11 @@ void PVStructure::copyUnchecked(const PVStructure& from, const BitSet& maskBitSe
 
         // serialize field or fields
         if(inumberFields==1) {
-            toPVFields[i]->copyUnchecked(*pvField.get());
+            toPVFields[i]->copyUnchecked(*pvField);
         } else {
             PVStructure::shared_pointer fromPVStructure = std::tr1::static_pointer_cast<PVStructure>(pvField);
             PVStructure::shared_pointer toPVStructure = std::tr1::static_pointer_cast<PVStructure>(toPVFields[i]);
-            toPVStructure->copyUnchecked(*fromPVStructure.get(), maskBitSet, inverse);
+            toPVStructure->copyUnchecked(*fromPVStructure, maskBitSet, inverse);
        }
     }
 }

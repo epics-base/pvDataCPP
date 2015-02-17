@@ -14,7 +14,6 @@
 
 #define epicsExportSharedSymbols
 #include <pv/pvData.h>
-#include <pv/convert.h>
 #include <pv/factory.h>
 #include <pv/serializeHelper.h>
 
@@ -246,8 +245,7 @@ void PVUnionArray::copy(const PVUnionArray& from)
     if(isImmutable())
         throw std::invalid_argument("destination is immutable");
 
-    // TODO relaxed compare?
-    if(*getUnionArray().get() != *from.getUnionArray().get())
+    if(*getUnionArray() != *from.getUnionArray())
         throw std::invalid_argument("unionArray definitions do not match");
 
     copyUnchecked(from);

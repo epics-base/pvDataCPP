@@ -16,7 +16,6 @@
 #define epicsExportSharedSymbols
 #include <pv/pvData.h>
 #include <pv/pvIntrospect.h>
-#include <pv/convert.h>
 #include <pv/factory.h>
 #include <pv/serializeHelper.h>
 
@@ -224,7 +223,7 @@ void PVUnion::copy(const PVUnion& from)
     if(isImmutable())
         throw std::invalid_argument("destination is immutable");
 
-    if(*getUnion().get() != *from.getUnion().get())
+    if(*getUnion() != *from.getUnion())
         throw std::invalid_argument("union definitions do not match");
 
     copyUnchecked(from);
@@ -246,12 +245,12 @@ void PVUnion::copyUnchecked(const PVUnion& from)
             if (toValue.get() == 0 || *toValue->getField() != *fromValue->getField())
             {
                 toValue = pvDataCreate->createPVField(fromValue->getField());
-                toValue->copyUnchecked(*fromValue.get());
+                toValue->copyUnchecked(*fromValue);
                 set(toValue);
             }
             else
             {
-                toValue->copyUnchecked(*fromValue.get());
+                toValue->copyUnchecked(*fromValue);
                 postPut();
             }
         }
@@ -264,7 +263,7 @@ void PVUnion::copyUnchecked(const PVUnion& from)
         }
         else
         {
-            select(from.getSelectedIndex())->copyUnchecked(*fromValue.get());
+            select(from.getSelectedIndex())->copyUnchecked(*fromValue);
         }
         postPut();
     }
