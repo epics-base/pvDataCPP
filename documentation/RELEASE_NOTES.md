@@ -3,9 +3,30 @@ Release 4.1 IN DEVELOPMENT
 
 The main changes since release 4.0 are:
 
+* Convert copy methods and equals operators (re)moved
 * Convert::copyUnion now always copies between subfields.
 * CreateRequest prevents a possible SEGFAULT.
 * New stream operators for Field and PVField are provided.
+
+Convert copy methods and equals operators
+-----------------------------------------
+
+Convert copy methods where moved and replaced with methods
+on PVField classes, i.e.
+
+    PVField::copy(const PVField& from)
+
+Methods
+
+    PVField::copyUnchecked(const PVField& from)
+
+where added to allow unchecked copies, to gain performance
+where checked are not needed (anymore).
+
+In addition:
+- isCompatibleXXX methods were removed in favour of Field::operator==.
+- equals methods were remove in favour of PVField::operator==.
+- operator== methods where moved to pvIntrospect.h and pvData.h
 
 Convert::copyUnion
 -----------------
