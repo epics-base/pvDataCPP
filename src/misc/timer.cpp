@@ -14,9 +14,9 @@
 
 #include <stdexcept>
 #include <string>
+#include <iostream>
 
 #define epicsExportSharedSymbols
-#include <pv/convert.h>
 #include <pv/timer.h>
 
 using std::string;

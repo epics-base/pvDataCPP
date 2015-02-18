@@ -14,7 +14,6 @@
 
 #define epicsExportSharedSymbols
 #include <pv/pvData.h>
-#include <pv/convert.h>
 #include <pv/factory.h>
 #include <pv/serializeHelper.h>
 
@@ -240,5 +239,25 @@ std::ostream& PVUnionArray::dumpValue(std::ostream& o, std::size_t index) const
     }
     return o;
 }
+
+void PVUnionArray::copy(const PVUnionArray& from)
+{
+    if(isImmutable())
+        throw std::invalid_argument("destination is immutable");
+
+    if(*getUnionArray() != *from.getUnionArray())
+        throw std::invalid_argument("unionArray definitions do not match");
+
+    copyUnchecked(from);
+}
+
+void PVUnionArray::copyUnchecked(const PVUnionArray& from)
+{
+    if (this == &from)
+        return;
+
+    replace(from.view());
+}
+
 
 }}

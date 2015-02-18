@@ -21,7 +21,6 @@
 #include <pv/lock.h>
 #include <pv/pvIntrospect.h>
 #include <pv/pvData.h>
-#include <pv/convert.h>
 #include <pv/factory.h>
 #include <pv/serializeHelper.h>
 
@@ -537,7 +536,7 @@ PVFieldPtr PVDataCreate::createPVField(PVFieldPtr const & fieldToClone)
              StructureArrayConstPtr structureArray = from->getStructureArray();
              PVStructureArrayPtr to = createPVStructureArray(
                  structureArray);
-             getConvert()->copyStructureArray(from, to);
+             to->copyUnchecked(*from);
              return to;
          }
      case union_:
@@ -552,7 +551,7 @@ PVFieldPtr PVDataCreate::createPVField(PVFieldPtr const & fieldToClone)
                  = static_pointer_cast<PVUnionArray>(fieldToClone);
              UnionArrayConstPtr unionArray = from->getUnionArray();
              PVUnionArrayPtr to = createPVUnionArray(unionArray);
-             getConvert()->copyUnionArray(from, to);
+             to->copyUnchecked(*from);
              return to;
          }
      }
@@ -602,7 +601,7 @@ PVScalarPtr PVDataCreate::createPVScalar(PVScalarPtr const & scalarToClone)
 {
      ScalarType scalarType = scalarToClone->getScalar()->getScalarType();
      PVScalarPtr pvScalar = createPVScalar(scalarType);
-     getConvert()->copyScalar(scalarToClone, pvScalar);
+     pvScalar->copyUnchecked(*scalarToClone);
      return pvScalar;
 }
 
@@ -712,7 +711,7 @@ PVStructurePtr PVDataCreate::createPVStructure(PVStructurePtr const & structToCl
     }
     StructureConstPtr structure = structToClone->getStructure();
     PVStructurePtr pvStructure(new PVStructure(structure));
-    getConvert()->copyStructure(structToClone,pvStructure);
+    pvStructure->copyUnchecked(*structToClone);
     return pvStructure;
 }
 

@@ -18,7 +18,6 @@
 #include <pv/thread.h>
 
 #include <pv/pvCopy.h>
-#include <pv/convert.h>
 
 using std::tr1::static_pointer_cast;
 using std::tr1::dynamic_pointer_cast;
@@ -28,6 +27,18 @@ using std::cout;
 using std::endl;
 
 namespace epics { namespace pvData { 
+
+/**
+ * Convenience method for implementing dump.
+ * It generates a newline and inserts blanks at the beginning of the newline.
+ * @param builder The std::string * being constructed.
+ * @param indentLevel Indent level, Each level is four spaces.
+ */
+static void newLine(string *buffer, int indentLevel)
+{
+    *buffer += "\n";
+    *buffer += string(indentLevel*4, ' ');
+}
 
 static PVCopyPtr NULLPVCopy;
 static FieldConstPtr NULLField;
@@ -243,10 +254,9 @@ void PVCopy::updateCopySetBitSet(
             updateSubFieldSetBitSet(copyPVField,pvMasterField,bitSet);
             return;
         }
-        ConvertPtr convert = getConvert();
-        bool isEqual = convert->equals(copyPVField,pvField);
+        bool isEqual = (*copyPVField == *pvField);
         if(!isEqual) {
-            convert->copy(pvField, copyPVField);
+            copyPVField->copyUnchecked(*pvField);
             bitSet->set(copyPVField->getFieldOffset());
         }
     }
@@ -292,7 +302,7 @@ string PVCopy::dump()
 
 void PVCopy::dump(string *builder,CopyNodePtr const &node,int indentLevel)
 {
-    getConvert()->newLine(builder,indentLevel);
+    newLine(builder,indentLevel);
     std::stringstream ss;
     ss << (node->isStructure ? "structureNode" : "masterNode");
     ss << " structureOffset " << node->structureOffset;
@@ -300,14 +310,14 @@ void PVCopy::dump(string *builder,CopyNodePtr const &node,int indentLevel)
     *builder +=  ss.str();
     PVStructurePtr options = node->options;
     if(options) {
-        getConvert()->newLine(builder,indentLevel +1);
+        newLine(builder,indentLevel +1);
         
         // TODO !!! ugly
         std::ostringstream oss;
         oss << *options;
         *builder += oss.str();
         
-        getConvert()->newLine(builder,indentLevel);
+        newLine(builder,indentLevel);
     }
     if(!node->isStructure) {
         CopyMasterNodePtr masterNode = static_pointer_cast<CopyMasterNode>(node);
@@ -320,7 +330,7 @@ void PVCopy::dump(string *builder,CopyNodePtr const &node,int indentLevel)
     CopyNodePtrArrayPtr nodes = structureNode->nodes;
     for(size_t i=0; i<nodes->size(); ++i) {
         if((*nodes)[i].get()==NULL) {
-            getConvert()->newLine(builder,indentLevel +1);
+            newLine(builder,indentLevel +1);
             ss.str("");
             ss << "node[" << i << "] is null";
             *builder += ss.str();
@@ -499,17 +509,16 @@ void PVCopy::updateSubFieldSetBitSet(
     FieldConstPtr field = pvCopy->getField();
     Type type = field->getType();
     if(type!=epics::pvData::structure) {
-        ConvertPtr convert = getConvert();
-        bool isEqual = convert->equals(pvCopy,pvMaster);
+        bool isEqual = (*pvCopy == *pvMaster);
     	if(isEqual) {
     	    if(type==structureArray) {
     	        // always act as though a change occurred.
     	        // Note that array elements are shared.
-		bitSet->set(pvCopy->getFieldOffset());
+                bitSet->set(pvCopy->getFieldOffset());
     	    }
     	}
         if(isEqual) return;
-        convert->copy(pvMaster, pvCopy);
+        pvCopy->copyUnchecked(*pvMaster);
         bitSet->set(pvCopy->getFieldOffset());
         return;
     }
@@ -574,7 +583,6 @@ void PVCopy::updateSubFieldFromBitSet(
         if(nextSet==string::npos) return;
         if(nextSet>=pvCopy->getNextFieldOffset()) return;
     }
-    ConvertPtr convert = getConvert();
     if(pvCopy->getField()->getType()==epics::pvData::structure) {
         PVStructurePtr pvCopyStructure =
             static_pointer_cast<PVStructure>(pvCopy);
@@ -595,9 +603,9 @@ void PVCopy::updateSubFieldFromBitSet(
         }
     } else {
         if(toCopy) {
-            convert->copy(pvMasterField, pvCopy);
+            pvCopy->copyUnchecked(*pvMasterField);
         } else {
-            convert->copy(pvCopy, pvMasterField);
+            pvMasterField->copyUnchecked(*pvCopy);
         }
     }
 }

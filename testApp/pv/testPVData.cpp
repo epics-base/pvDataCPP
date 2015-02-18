@@ -21,6 +21,8 @@
 #include <pv/convert.h>
 #include <pv/standardField.h>
 #include <pv/standardPVField.h>
+#include <pv/pvTimeStamp.h>
+#include <pv/bitSet.h>
 
 using namespace epics::pvData;
 using std::tr1::static_pointer_cast;
@@ -415,9 +417,117 @@ cout << "fieldName " << fieldName << " fullName " << fullName << endl;
 
 }
 
+#define STRINGIZE(A) #A
+#define TEST_COPY(T, V) testCopyCase<T>(V, STRINGIZE(T))
+
+template<typename T>
+void testCopyCase(typename T::value_type val, const char* typeName)
+{
+    typename T::shared_pointer pv = pvDataCreate->createPVScalar<T>();
+    pv->put(val);
+
+    typename T::shared_pointer pv2 = pvDataCreate->createPVScalar<T>();
+    pv2->copy(*pv);
+
+    testOk(*pv == *pv2, "testCopyCase (copy) for type '%s'", typeName);
+
+    typename T::shared_pointer pv3 = pvDataCreate->createPVScalar<T>();
+    pv3->copy(*pv);
+
+    testOk(*pv == *pv3, "testCopyCase (copyUnchecked) for type '%s'", typeName);
+}
+
+static void testCopy()
+{
+    if(debug)
+        std::cout << std::endl << "testCopy" << std::endl;
+
+    TEST_COPY(PVBoolean, 1);
+    TEST_COPY(PVByte, 12);
+    TEST_COPY(PVShort, 128);
+    TEST_COPY(PVInt, 128000);
+    TEST_COPY(PVLong, 128000000);
+    TEST_COPY(PVUByte, 12);
+    TEST_COPY(PVUShort, 128);
+    TEST_COPY(PVUInt, 128000);
+    TEST_COPY(PVULong, 128000000);
+    TEST_COPY(PVFloat, 12.8);
+    TEST_COPY(PVDouble, 8.12);
+    TEST_COPY(PVString, "jikes");
+
+    int32 testValue = 128;
+
+    // PVStructure test
+    PVStructurePtr pvStructure =
+            standardPVField->scalar(pvInt, alarmTimeStampValueAlarm);
+    pvStructure->getSubField<PVInt>("value")->put(testValue);
+
+    PVTimeStamp timeStamp;
+    timeStamp.attach(pvStructure->getSubField<PVStructure>("timeStamp"));
+    TimeStamp current;
+    current.getCurrent();
+    timeStamp.set(current);
+
+    PVStructurePtr pvStructureCopy =
+            standardPVField->scalar(pvInt, alarmTimeStampValueAlarm);
+    pvStructureCopy->copy(*pvStructure);
+    testOk(*pvStructure == *pvStructureCopy, "PVStructure copy");
+
+
+    PVStructurePtr pvStructureCopy2 =
+            standardPVField->scalar(pvInt, alarmTimeStampValueAlarm);
+    pvStructureCopy2->copyUnchecked(*pvStructure);
+    testOk(*pvStructure == *pvStructureCopy2, "PVStructure copyUnchecked");
+
+    BitSet mask(pvStructure->getNumberFields());
+    PVStructurePtr pvStructureCopy3 =
+            standardPVField->scalar(pvInt, alarmTimeStampValueAlarm);
+    PVStructurePtr pvStructureCopy4 =
+            standardPVField->scalar(pvInt, alarmTimeStampValueAlarm);
+    pvStructureCopy3->copyUnchecked(*pvStructure, mask);
+    testOk(*pvStructureCopy3 == *pvStructureCopy4, "PVStructure copyUnchecked w/ cleared mask");
+
+    mask.set(pvStructure->getSubField<PVInt>("value")->getFieldOffset());
+    pvStructureCopy3->copyUnchecked(*pvStructure, mask);
+    pvStructureCopy4->getSubField<PVInt>("value")->put(testValue);
+    testOk(*pvStructureCopy3 == *pvStructureCopy4, "PVStructure copyUnchecked w/ value mask only");
+
+    mask.set(pvStructure->getSubField<PVStructure>("timeStamp")->getFieldOffset());
+    PVStructurePtr pvStructureCopy5 =
+            standardPVField->scalar(pvInt, alarmTimeStampValueAlarm);
+    pvStructureCopy5->copyUnchecked(*pvStructure, mask);
+    testOk(*pvStructure == *pvStructureCopy5, "PVStructure copyUnchecked w/ value+timeStamp mask");
+
+
+    UnionConstPtr _union = fieldCreate->createFieldBuilder()->
+        add("doubleValue", pvDouble)->
+        add("intValue", pvInt)->
+        add("timeStamp",standardField->timeStamp())->
+        createUnion();
+
+    PVUnionPtr pvUnion = pvDataCreate->createPVUnion(_union);
+    PVUnionPtr pvUnion2 = pvDataCreate->createPVUnion(_union);
+    pvUnion2->copy(*pvUnion);
+    testOk(*pvUnion == *pvUnion2, "null PVUnion copy");
+
+    pvUnion->select<PVInt>("intValue")->put(123);
+    pvUnion2->copy(*pvUnion);
+    testOk(*pvUnion == *pvUnion2, "PVUnion scalar copy, to null PVUnion");
+
+    pvUnion->select("doubleValue");
+    pvUnion2->copy(*pvUnion);
+    testOk(*pvUnion == *pvUnion2, "PVUnion scalar copy, to different type PVUnion");
+
+    pvUnion->select<PVStructure>("timeStamp")->copy(
+        *pvStructure->getSubField<PVStructure>("timeStamp")
+    );
+    pvUnion2->copy(*pvUnion);
+    testOk(*pvUnion == *pvUnion2, "PVUnion PVStructure copy, to different type PVUnion");
+}
+
 MAIN(testPVData)
 {
-    testPlan(189);
+    testPlan(222);
     fieldCreate = getFieldCreate();
     pvDataCreate = getPVDataCreate();
     standardField = getStandardField();
@@ -427,6 +537,7 @@ MAIN(testPVData)
     testPVScalar();
     testScalarArray();
     testRequest();
+    testCopy();
     return testDone();
 }
 

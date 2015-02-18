@@ -22,40 +22,6 @@
 
 namespace epics { namespace pvData { 
 
-bool epicsShareExtern operator==(const PVField&, const PVField&);
-
-static inline bool operator!=(const PVField& a, const PVField& b)
-{return !(a==b);}
-
-
-bool epicsShareExtern operator==(const Field&, const Field&);
-bool epicsShareExtern operator==(const Scalar&, const Scalar&);
-bool epicsShareExtern operator==(const ScalarArray&, const ScalarArray&);
-bool epicsShareExtern operator==(const Structure&, const Structure&);
-bool epicsShareExtern operator==(const StructureArray&, const StructureArray&);
-bool epicsShareExtern operator==(const Union&, const Union&);
-bool epicsShareExtern operator==(const UnionArray&, const UnionArray&);
-bool epicsShareExtern operator==(const BoundedString&, const BoundedString&);
-
-static inline bool operator!=(const Field& a, const Field& b)
-{return !(a==b);}
-static inline bool operator!=(const Scalar& a, const Scalar& b)
-{return !(a==b);}
-static inline bool operator!=(const ScalarArray& a, const ScalarArray& b)
-{return !(a==b);}
-static inline bool operator!=(const Structure& a, const Structure& b)
-{return !(a==b);}
-static inline bool operator!=(const StructureArray& a, const StructureArray& b)
-{return !(a==b);}
-static inline bool operator!=(const Union& a, const Union& b)
-{return !(a==b);}
-static inline bool operator!=(const UnionArray& a, const UnionArray& b)
-{return !(a==b);}
-static inline bool operator!=(const BoundedString& a, const BoundedString& b)
-{return !(a==b);}
-
-
-
 class Convert;
 typedef std::tr1::shared_ptr<Convert> ConvertPtr;
 
@@ -83,38 +49,18 @@ typedef std::tr1::shared_ptr<Convert> ConvertPtr;
 class epicsShareClass Convert {
 public:
     static ConvertPtr getConvert();
-    /**
-     * Get the full fieldName for the pvField.
-     * @param buf The string that will have the result.
-     * @param pvField The pvField.
-     */
-    void getFullName(std::string *buf,PVFieldPtr const & pvField)
-    {
-        *buf = pvField->getFullName();
-    }
 
     /**
-     * Do fields have the same definition.
-     *
-     * @param a First field
-     * @param b Second field
-     * @return (false, true) if the fields (are not, are) the same.
+     * Copy from a PVField to another PVField.
+     * This calls one on copyScalar, copyArray, copyStructure.
+     * The two arguments must be compatible.
+     * @param from The source.
+     * @param to The destination
+     * @throws std::invalid_argument if the arguments are not compatible.
+     * @DEPRECATED use "to->copy[Unchecked](*from)" instead
      */
-    inline bool equals(PVFieldPtr const &a,PVFieldPtr const &b)
-    {
-        return *a==*b;
-    }
-
-    /**
-     * Do fields have the same definition.
-     *
-     * @param a First field
-     * @param b Second field
-     * @return (false, true) if the fields (are not, are) the same.
-     */
-    inline bool equals(PVField &a,PVField &b)
-    {
-        return a==b;
+    void copy(PVFieldPtr const & from, PVFieldPtr const & to) {
+        to->copy(*from);
     }
 
     /**
@@ -197,128 +143,6 @@ public:
         std::size_t length,
         StringArray & to,
         std::size_t toOffset);
-    /**
-     * Are from and to valid arguments to copy.
-     * This first checks of both arguments have the same Type.
-     * Then calls one of isCopyScalarCompatible,
-     * isCopyArrayCompatible, or isCopyStructureCompatible.
-     * @param from The source.
-     * @param to The destination.
-     * @return (false,true) is the arguments (are not, are) compatible.
-     */
-    bool isCopyCompatible(FieldConstPtr const & from, FieldConstPtr const & to);
-    /**
-     * Copy from a PVField to another PVField.
-     * This calls one on copyScalar, copyArray, copyStructure.
-     * The two arguments must be compatible.
-     * @param from The source.
-     * @param to The destination
-     * @throws std::invalid_argument if the arguments are not compatible.
-     */
-    void copy(PVFieldPtr const & from, PVFieldPtr const & to);
-    /**
-     * Are from and to valid arguments to copyScalar.
-     * false will be returned if either argument is not a scalar as defined by Type.isScalar().
-     * If both are scalars the return value is true if any of the following are true.
-     * <ul>
-     *   <li>Both arguments are numeric.</li>
-     *   <li>Both arguments have the same type.</li>
-     *   <li>Either argument is a string.</li>
-     * </ul>
-     * @param from The introspection interface for the from data.
-     * @param to The introspection interface for the to data..
-     * @return (false,true) If the arguments (are not, are) compatible.
-     */
-    bool isCopyScalarCompatible(
-        ScalarConstPtr const & from,
-        ScalarConstPtr const & to);
-    /**
-     * Copy from a scalar pv to another scalar pv.
-     * @param from the source.
-     * @param to the destination.
-     * @throws std::invalid_argument if the arguments are not compatible.
-     */
-    void copyScalar(PVScalarPtr const & from, PVScalarPtr const & to);
-    /**
-     * Are from and to valid arguments to copyArray.
-     * The results are like isCopyScalarCompatible except that the tests are made on the elementType.
-     * @param from The from array.
-     * @param to The to array.
-     * @return (false,true) If the arguments (are not, are) compatible.
-     */
-    bool isCopyScalarArrayCompatible(
-        ScalarArrayConstPtr const & from,
-        ScalarArrayConstPtr const & to);
-    /**
-     * Are from and to valid arguments for copyStructure.
-     * They are only compatible if they have the same Structure description.
-     * @param from from structure.
-     * @param to structure.
-     * @return (false,true) If the arguments (are not, are) compatible.
-     */
-    bool isCopyStructureCompatible(
-        StructureConstPtr const & from, StructureConstPtr const & to);
-    /**
-     * Copy from a structure pv to another structure pv.
-     * NOTE: Only compatible nodes are copied. This means:
-     * <ul>
-     *    <li>For scalar nodes this means that isCopyScalarCompatible is true.</li>
-     *    <li>For array nodes this means that isCopyArrayCompatible is true.</li>
-     *    <li>For structure nodes this means that isCopyStructureCompatible is true.</li>
-     *    <li>Link nodes are not copied.</li>
-     * </ul>
-     * @param from The source.
-     * @param to The destination.
-     * @throws std::invalid_argument if the arguments are not compatible.
-     */
-    void copyStructure(PVStructurePtr const & from, PVStructurePtr const & to);
-    /**
-     * Are from and to valid for copyStructureArray.
-     * @param from The from StructureArray.
-     * @param to The to StructureArray.
-     * @return (false,true) If the arguments (are not, are) compatible.
-     */
-    bool isCopyStructureArrayCompatible(
-        StructureArrayConstPtr const & from, StructureArrayConstPtr const & to);
-     /**
-      * Copy from a structure array to another structure array.
-      * @param from The source array.
-      * @param to The destination array.
-      */
-    void copyStructureArray(
-        PVStructureArrayPtr const & from, PVStructureArrayPtr const & to);
-    /**
-     * Are from and to valid arguments for copyUnion.
-     * They are only compatible if they have the same Union description.
-     * @param from from union.
-     * @param to union.
-     * @return (false,true) If the arguments (are not, are) compatible.
-     */
-    bool isCopyUnionCompatible(
-        UnionConstPtr const & from, UnionConstPtr const & to);
-    /**
-     * Copy from a union pv to another union pv.
-     * NOTE: Only compatible nodes are copied.
-     * @param from The source.
-     * @param to The destination.
-     * @throws std::invalid_argument if the arguments are not compatible.
-     */
-    void copyUnion(PVUnionPtr const & from, PVUnionPtr const & to);
-    /**
-     * Are from and to valid for copyUnionArray.
-     * @param from The from UnionArray.
-     * @param to The to UnionArray.
-     * @return (false,true) If the arguments (are not, are) compatible.
-     */
-    bool isCopyUnionArrayCompatible(
-        UnionArrayConstPtr const & from, UnionArrayConstPtr const & to);
-     /**
-      * Copy from a union array to another union array.
-      * @param from The source array.
-      * @param to The destination array.
-      */
-    void copyUnionArray(
-        PVUnionArrayPtr const & from, PVUnionArrayPtr const & to);
     /**
      * Convert a PV to a <byte>.
      * @param pv a PV
@@ -464,13 +288,6 @@ public:
      */
     inline void fromDouble(PVScalarPtr const & pv, double from) { pv->putFrom<double>(from); }
 
-    /**
-     * Convenience method for implementing dump.
-     * It generates a newline and inserts blanks at the beginning of the newline.
-     * @param builder The std::string * being constructed.
-     * @param indentLevel Indent level, Each level is four spaces.
-     */
-    void newLine(std::string * buf, int indentLevel);
 };
 
 static inline ConvertPtr getConvert() { return Convert::getConvert(); }

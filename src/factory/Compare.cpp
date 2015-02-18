@@ -12,7 +12,7 @@
 #include <sstream>
 
 #define epicsExportSharedSymbols
-#include <pv/convert.h>
+#include <pv/pvData.h>
 
 using std::string;
 
