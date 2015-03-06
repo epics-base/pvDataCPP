@@ -241,7 +241,7 @@ protected:
     {
         return shared_from_this();
     }
-    PVField(FieldConstPtr field);
+    explicit PVField(FieldConstPtr field);
     void setParentAndName(PVStructure *parent, std::string const & fieldName);
 private:
     static void computeOffset(const PVField *pvField);
@@ -327,7 +327,7 @@ public:
     virtual void copyUnchecked(const PVScalar& from) = 0;
 
 protected:
-    PVScalar(ScalarConstPtr const & scalar);
+    explicit PVScalar(ScalarConstPtr const & scalar);
 };
 
 /**
@@ -411,7 +411,7 @@ public:
     }
 
 protected:
-    PVScalarValue(ScalarConstPtr const & scalar)
+    explicit PVScalarValue(ScalarConstPtr const & scalar)
     : PVScalar(scalar) {}
     virtual void getAs(void * result, ScalarType rtype) const
     {
@@ -466,7 +466,7 @@ public:
      */
     virtual ~PVString() {}
 protected:
-    PVString(ScalarConstPtr const & scalar)
+    explicit PVString(ScalarConstPtr const & scalar)
     : PVScalarValue<std::string>(scalar) {}
 };
 typedef std::tr1::shared_ptr<PVString> PVStringPtr;
@@ -535,7 +535,7 @@ public:
     virtual std::ostream& dumpValue(std::ostream& o, std::size_t index) const = 0;
 
 protected:
-    PVArray(FieldConstPtr const & field);
+    explicit PVArray(FieldConstPtr const & field);
     void checkLength(size_t length);
 private:
     bool capacityMutable;
@@ -634,7 +634,7 @@ public:
     }
 
 protected:
-    PVScalarArray(ScalarArrayConstPtr const & scalarArray);
+    explicit PVScalarArray(ScalarArrayConstPtr const & scalarArray);
 private:
     friend class PVDataCreate;
 };
@@ -859,7 +859,7 @@ public:
      * Constructor
      * @param structure The introspection interface.
      */
-    PVStructure(StructureConstPtr const & structure);
+    explicit PVStructure(StructureConstPtr const & structure);
     /**
      * Constructor
      * @param structure The introspection interface.
@@ -1023,7 +1023,7 @@ public:
      * Constructor
      * @param punion The introspection interface.
      */
-    PVUnion(UnionConstPtr const & punion);
+    explicit PVUnion(UnionConstPtr const & punion);
 
     virtual std::ostream& dumpValue(std::ostream& o) const;
 
@@ -1071,7 +1071,7 @@ namespace detail {
         PVVectorStorage() : Base() {}
 
         template<typename A>
-        PVVectorStorage(A a) : Base(a) {}
+        explicit PVVectorStorage(A a) : Base(a) {}
     public:
         virtual ~PVVectorStorage(){};
 
@@ -1185,7 +1185,7 @@ protected:
         this->replace(shared_vector_convert<const T>(in));
     }
 
-    PVValueArray(ScalarArrayConstPtr const & scalar)
+    explicit PVValueArray(ScalarArrayConstPtr const & scalar)
     : base_t(scalar) {}
     friend class PVDataCreate;
 };
@@ -1279,7 +1279,7 @@ public:
     void copyUnchecked(const PVStructureArray& from);
 
 protected:
-    PVValueArray(StructureArrayConstPtr const & structureArray)
+    explicit PVValueArray(StructureArrayConstPtr const & structureArray)
         :base_t(structureArray)
         ,structureArray(structureArray)
     {}
@@ -1379,7 +1379,7 @@ public:
     void copyUnchecked(const PVUnionArray& from);
 
 protected:
-    PVValueArray(UnionArrayConstPtr const & unionArray)
+    explicit PVValueArray(UnionArrayConstPtr const & unionArray)
         :base_t(unionArray)
         ,unionArray(unionArray)
     {}
