@@ -496,7 +496,9 @@ void Structure::dumpFields(std::ostream& o) const
             case structureArray:
             {
                 format::indent_scope s(o);
-                o << *pfield;
+                Field const *xxx = pfield.get();
+                StructureArray const *pstructureArray = static_cast<StructureArray const*>(xxx);
+                o << *pstructureArray->getStructure();
                 break;
             }
             case union_:
@@ -510,7 +512,9 @@ void Structure::dumpFields(std::ostream& o) const
             case unionArray:
             {
                 format::indent_scope s(o);
-                o << *pfield;
+                Field const *xxx = pfield.get();
+                UnionArray const *punionArray = static_cast<UnionArray const*>(xxx);
+                o << *punionArray->getUnion();
                 break;
             }
         }
