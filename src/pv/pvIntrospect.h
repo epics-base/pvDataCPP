@@ -670,6 +670,17 @@ public:
      * This will hold a null pointer if the field is not in the structure.
      */
     FieldConstPtr getField(std::string const &fieldName) const;
+
+    template<typename FT>
+    std::tr1::shared_ptr<const FT> getField(std::string const &fieldName) const
+    {
+        FieldConstPtr field = getField(fieldName);
+        if (field.get())
+            return std::tr1::dynamic_pointer_cast<const FT>(field);
+        else
+            return std::tr1::shared_ptr<const FT>();
+    }
+
     /**
      * Get the field for the specified fieldName.
      * @param fieldName The index of the field to get;
@@ -677,6 +688,17 @@ public:
      * This will hold a null pointer if the field is not in the structure.
      */
     FieldConstPtr getField(std::size_t index) const {return fields.at(index);}
+
+    template<typename FT>
+    std::tr1::shared_ptr<const FT> getField(std::size_t index) const
+    {
+        FieldConstPtr field = getField(index);
+        if (field.get())
+            return std::tr1::dynamic_pointer_cast<const FT>(field);
+        else
+            return std::tr1::shared_ptr<const FT>();
+    }
+
     /**
      * Get the field index for the specified fieldName.
      * @return The introspection interface.
@@ -757,6 +779,17 @@ public:
      * This will hold a null pointer if the field is not in the union.
      */
     FieldConstPtr getField(std::string const &fieldName) const;
+
+    template<typename FT>
+    std::tr1::shared_ptr<const FT> getField(std::string const &fieldName) const
+    {
+        FieldConstPtr field = getField(fieldName);
+        if (field.get())
+            return std::tr1::dynamic_pointer_cast<const FT>(field);
+        else
+            return std::tr1::shared_ptr<const FT>();
+    }
+
     /**
      * Get the field for the specified fieldName.
      * @param fieldName The index of the field to get;
@@ -764,6 +797,17 @@ public:
      * This will hold a null pointer if the field is not in the union.
      */
     FieldConstPtr getField(std::size_t index) const {return fields.at(index);}
+
+    template<typename FT>
+    std::tr1::shared_ptr<const FT> getField(std::size_t index) const
+    {
+        FieldConstPtr field = getField(index);
+        if (field.get())
+            return std::tr1::dynamic_pointer_cast<const FT>(field);
+        else
+            return std::tr1::shared_ptr<const FT>();
+    }
+
     /**
      * Get the field index for the specified fieldName.
      * @return The introspection interface.
