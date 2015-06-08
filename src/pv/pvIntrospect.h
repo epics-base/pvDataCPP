@@ -650,6 +650,11 @@ public:
      * Default structure ID.
      */
     static std::string DEFAULT_ID;
+
+    /**
+     * Get the default structure ID.
+     * @return The default structure ID.
+     */
     static std::string & defaultId();
 
     /**
@@ -755,12 +760,22 @@ public:
      * Default union ID.
      */
     static std::string DEFAULT_ID;
+
+    /**
+     * Get the default union ID.
+     * @return The default union ID.
+     */
     static std::string & defaultId();
 
     /**
      * Default variant union ID.
      */
     static std::string ANY_ID;
+
+    /**
+     * Get the default variant union ID.
+     * @return The default variant union ID.
+     */
     static std::string & anyId();
 
     /**
