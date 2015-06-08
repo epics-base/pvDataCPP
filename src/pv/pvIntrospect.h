@@ -650,6 +650,7 @@ public:
      * Default structure ID.
      */
     static std::string DEFAULT_ID;
+    static std::string & defaultId();
 
     /**
      * Destructor.
@@ -730,7 +731,7 @@ public:
     virtual void deserialize(ByteBuffer *buffer, DeserializableControl *control);
     
 protected:
-    Structure(StringArray const & fieldNames, FieldConstPtrArray const & fields, std::string const & id = DEFAULT_ID);
+    Structure(StringArray const & fieldNames, FieldConstPtrArray const & fields, std::string const & id = defaultId());
 private:
     StringArray fieldNames;
     FieldConstPtrArray fields;
@@ -754,11 +755,13 @@ public:
      * Default union ID.
      */
     static std::string DEFAULT_ID;
+    static std::string & defaultId();
 
     /**
      * Default variant union ID.
      */
     static std::string ANY_ID;
+    static std::string & anyId();
 
     /**
      * Destructor.
@@ -845,7 +848,7 @@ public:
     
 protected:
    Union();
-   Union(StringArray const & fieldNames, FieldConstPtrArray const & fields, std::string const & id = DEFAULT_ID);
+   Union(StringArray const & fieldNames, FieldConstPtrArray const & fields, std::string const & id = defaultId());
 private:
    StringArray fieldNames;
    FieldConstPtrArray fields;
