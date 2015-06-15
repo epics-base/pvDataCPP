@@ -51,7 +51,7 @@ Scalar::Scalar(ScalarType scalarType)
        : Field(scalar),scalarType(scalarType)
 {
     if(scalarType<0 || scalarType>MAX_SCALAR_TYPE)
-        throw std::invalid_argument("Can't construct Scalar from invalid ScalarType");
+        THROW_EXCEPTION2(std::invalid_argument, "Can't construct Scalar from invalid ScalarType");
 }
 
 Scalar::~Scalar(){}
@@ -136,7 +136,7 @@ BoundedString::BoundedString(std::size_t maxStringLength) :
     Scalar(pvString), maxLength(maxStringLength)
 {
     if (maxLength == 0)
-        throw std::invalid_argument("maxLength == 0");
+        THROW_EXCEPTION2(std::invalid_argument, "maxLength == 0");
 }
 
 BoundedString::~BoundedString() {}
@@ -417,27 +417,27 @@ Structure::Structure (
       id(inid)
 {
     if(inid.empty()) {
-        throw std::invalid_argument("id is empty");
+        THROW_EXCEPTION2(std::invalid_argument, "Can't construct Structure, id is empty string");
     }
     if(fieldNames.size()!=fields.size()) {
-        throw std::invalid_argument("fieldNames.size()!=fields.size()");
+        THROW_EXCEPTION2(std::invalid_argument, "Can't construct Structure, fieldNames.size()!=fields.size()");
     }
     size_t number = fields.size();
     for(size_t i=0; i<number; i++) {
         const string& name = fieldNames[i];
         if(name.empty()) {
-            throw std::invalid_argument("fieldNames has a zero length string");
+            THROW_EXCEPTION2(std::invalid_argument, "Can't construct Structure, empty string in fieldNames");
         }
         if(fields[i].get()==NULL)
-            throw std::invalid_argument("Can't construct Structure with NULL Field");
+            THROW_EXCEPTION2(std::invalid_argument, "Can't construct Structure, NULL in fields");
         // look for duplicates
         for(size_t j=i+1; j<number; j++) {
             string otherName = fieldNames[j];
             int result = name.compare(otherName);
             if(result==0) {
-                string  message("duplicate fieldName ");
+                string  message("Can't construct Structure, duplicate fieldName ");
                 message += name;
-                throw std::invalid_argument(message);
+                THROW_EXCEPTION2(std::invalid_argument, message);
             }
         }
     }
@@ -572,31 +572,31 @@ Union::Union (
       id(inid)
 {
     if(inid.empty()) {
-        throw std::invalid_argument("id is empty");
+        THROW_EXCEPTION2(std::invalid_argument, "Can't construct Union, id is empty string");
     }
     if(fieldNames.size()!=fields.size()) {
-        throw std::invalid_argument("fieldNames.size()!=fields.size()");
+        THROW_EXCEPTION2(std::invalid_argument, "Can't construct Union, fieldNames.size()!=fields.size()");
     }
     if(fields.size()==0 && inid!=ANY_ID) {
-        throw std::invalid_argument("no fields but id is different than " + ANY_ID);
+        THROW_EXCEPTION2(std::invalid_argument, "Can't construct Union, no fields only allowed when id = " + ANY_ID);
     }
 
     size_t number = fields.size();
     for(size_t i=0; i<number; i++) {
         const string& name = fieldNames[i];
         if(name.empty()) {
-            throw std::invalid_argument("fieldNames has a zero length string");
+            THROW_EXCEPTION2(std::invalid_argument, "Can't construct Union, empty string in fieldNames");
         }
         if(fields[i].get()==NULL)
-            throw std::invalid_argument("Can't construct Union with NULL Field");
+            THROW_EXCEPTION2(std::invalid_argument, "Can't construct Union, NULL in fields");
         // look for duplicates
         for(size_t j=i+1; j<number; j++) {
             string otherName = fieldNames[j];
             int result = name.compare(otherName);
             if(result==0) {
-                string  message("duplicate fieldName ");
+                string  message("Can't construct Union, duplicate fieldName ");
                 message += name;
-                throw std::invalid_argument(message);
+                THROW_EXCEPTION2(std::invalid_argument, message);
             }
         }
     }
@@ -778,7 +778,7 @@ FieldBuilderPtr FieldBuilder::addArray(string const & name, FieldConstPtr const 
         case scalar:
 
             if (std::tr1::dynamic_pointer_cast<const BoundedString>(element).get())
-                throw std::invalid_argument("bounded string arrays are not supported");
+                THROW_EXCEPTION2(std::invalid_argument, "bounded string arrays are not supported");
 
             fields.push_back(fieldCreate->createScalarArray(static_pointer_cast<const Scalar>(element)->getScalarType()));
             break;
@@ -786,7 +786,7 @@ FieldBuilderPtr FieldBuilder::addArray(string const & name, FieldConstPtr const 
         default:
             std::ostringstream msg("unsupported array element type: ");
             msg << element->getType();
-            throw std::invalid_argument(msg.str());
+            THROW_EXCEPTION2(std::invalid_argument, msg.str());
     }
     
     fieldNames.push_back(name);
@@ -815,7 +815,7 @@ FieldConstPtr FieldBuilder::createFieldInternal(Type type)
     {
         std::ostringstream msg("unsupported type: ");
         msg << type;
-        throw std::invalid_argument(msg.str());
+        THROW_EXCEPTION2(std::invalid_argument, msg.str());
     }
 }
 
@@ -823,7 +823,7 @@ FieldConstPtr FieldBuilder::createFieldInternal(Type type)
 StructureConstPtr FieldBuilder::createStructure()
 {
     if (parentBuilder.get())
-        throw std::runtime_error("createStructure() called in nested FieldBuilder");
+        THROW_EXCEPTION2(std::runtime_error, "createStructure() called in nested FieldBuilder");
 	
     StructureConstPtr field(static_pointer_cast<const Structure>(createFieldInternal(structure)));
     reset();
@@ -833,7 +833,7 @@ StructureConstPtr FieldBuilder::createStructure()
 UnionConstPtr FieldBuilder::createUnion()
 {
     if (parentBuilder.get())
-        throw std::runtime_error("createUnion() called in nested FieldBuilder");
+        THROW_EXCEPTION2(std::runtime_error, "createUnion() called in nested FieldBuilder");
 	
     UnionConstPtr field(static_pointer_cast<const Union>(createFieldInternal(union_)));
     reset();
@@ -865,7 +865,7 @@ FieldBuilderPtr FieldBuilder::addNestedUnionArray(string const & name)
 FieldBuilderPtr FieldBuilder::endNested()
 {
     if (!parentBuilder.get())
-        throw std::runtime_error("this method can only be called to create nested fields");
+        THROW_EXCEPTION2(std::runtime_error, "this method can only be called to create nested fields");
         
     FieldConstPtr nestedField = createFieldInternal(nestedClassToBuild);
     if (nestedArray)
@@ -884,8 +884,11 @@ FieldBuilderPtr FieldCreate::createFieldBuilder() const
 
 ScalarConstPtr FieldCreate::createScalar(ScalarType scalarType) const
 {
-    if(scalarType<0 || scalarType>MAX_SCALAR_TYPE)
-        throw std::invalid_argument("Can't construct Scalar from invalid ScalarType");
+    if(scalarType<0 || scalarType>MAX_SCALAR_TYPE) {
+        std::ostringstream strm("Can't construct Scalar from invalid ScalarType ");
+        strm << scalarType;
+        THROW_EXCEPTION2(std::invalid_argument, strm.str());
+    }
 
     return scalars[scalarType];
 }
@@ -900,16 +903,22 @@ BoundedStringConstPtr FieldCreate::createBoundedString(std::size_t maxLength) co
 
 ScalarArrayConstPtr FieldCreate::createScalarArray(ScalarType elementType) const
 {
-    if(elementType<0 || elementType>MAX_SCALAR_TYPE)
-        throw std::invalid_argument("Can't construct ScalarArray from invalid ScalarType");
+    if(elementType<0 || elementType>MAX_SCALAR_TYPE) {
+        std::ostringstream strm("Can't construct ScalarArray from invalid ScalarType ");
+        strm << elementType;
+        THROW_EXCEPTION2(std::invalid_argument, strm.str());
+    }
         
     return scalarArrays[elementType];
 }
 
 ScalarArrayConstPtr FieldCreate::createFixedScalarArray(ScalarType elementType, size_t size) const
 {
-    if(elementType<0 || elementType>MAX_SCALAR_TYPE)
-        throw std::invalid_argument("Can't construct ScalarArray from invalid ScalarType");
+    if(elementType<0 || elementType>MAX_SCALAR_TYPE) {
+        std::ostringstream strm("Can't construct fixed ScalarArray from invalid ScalarType ");
+        strm << elementType;
+        THROW_EXCEPTION2(std::invalid_argument, strm.str());
+    }
 
     // TODO use std::make_shared
     std::tr1::shared_ptr<ScalarArray> s(new FixedScalarArray(elementType, size), Field::Deleter());
@@ -919,8 +928,11 @@ ScalarArrayConstPtr FieldCreate::createFixedScalarArray(ScalarType elementType, 
 
 ScalarArrayConstPtr FieldCreate::createBoundedScalarArray(ScalarType elementType, size_t size) const
 {
-    if(elementType<0 || elementType>MAX_SCALAR_TYPE)
-        throw std::invalid_argument("Can't construct ScalarArray from invalid ScalarType");
+    if(elementType<0 || elementType>MAX_SCALAR_TYPE) {
+        std::ostringstream strm("Can't construct bounded ScalarArray from invalid ScalarType ");
+        strm << elementType;
+        THROW_EXCEPTION2(std::invalid_argument, strm.str());
+    }
 
     // TODO use std::make_shared
     std::tr1::shared_ptr<ScalarArray> s(new BoundedScalarArray(elementType, size), Field::Deleter());
