@@ -399,11 +399,11 @@ void UnionArray::deserialize(ByteBuffer* /*buffer*/, DeserializableControl* /*co
     throw std::runtime_error("not valid operation, use FieldCreate::deserialize instead");
 }
 
-string Structure::DEFAULT_ID = Structure::defaultId();
+const string Structure::DEFAULT_ID = Structure::defaultId();
 
-string & Structure::defaultId()
+const string & Structure::defaultId()
 {
-    static string id = "structure";
+    static const string id = "structure";
     return id;
 }
 
@@ -537,19 +537,19 @@ void Structure::deserialize(ByteBuffer* /*buffer*/, DeserializableControl* /*con
     throw std::runtime_error("not valid operation, use FieldCreate::deserialize instead");
 }
 
-string Union::DEFAULT_ID = Union::defaultId();
+const string Union::DEFAULT_ID = Union::defaultId();
 
-string & Union::defaultId()
+const string & Union::defaultId()
 {
-    static string id = "union";
+    static const string id = "union";
     return id;
 }
 
-string Union::ANY_ID = Union::anyId();
+const string Union::ANY_ID = Union::anyId();
 
-string & Union::anyId()
+const string & Union::anyId()
 {
-    static string id = "any";
+    static const string id = "any";
     return id;
 }
 
