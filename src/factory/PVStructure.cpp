@@ -44,10 +44,6 @@ PVUnionPtr PVStructure::nullPVUnion;
 PVUnionArrayPtr PVStructure::nullPVUnionArray;
 PVScalarArrayPtr PVStructure::nullPVScalarArray;
 
-static PVFieldPtr findSubField(
-    string const &fieldName,
-    const PVStructure *pvStructure);
-
 PVStructure::PVStructure(StructureConstPtr const & structurePtr)
 : PVField(structurePtr),
   structurePtr(structurePtr),
@@ -111,7 +107,11 @@ const PVFieldPtrArray & PVStructure::getPVFields() const
 
 PVFieldPtr  PVStructure::getSubField(string const &fieldName) const
 {
-    return findSubField(fieldName,this);
+    try{
+        return GetAsImpl(fieldName.c_str())->shared_from_this();
+    }catch(...){
+        return PVFieldPtr();
+    }
 }
 
 
@@ -256,21 +256,22 @@ PVUnionPtr PVStructure::getUnionField(string const &fieldName)
 PVScalarArrayPtr PVStructure::getScalarArrayField(
     string const &fieldName,ScalarType elementType)
 {
-    PVFieldPtr pvField  = findSubField(fieldName,this);
-    if(pvField.get()==NULL) {
+    try{
+        PVFieldPtr pvField = GetAsImpl(fieldName.c_str())->shared_from_this();
+        FieldConstPtr field = pvField->getField();
+        Type type = field->getType();
+        if(type!=scalarArray) {
+            return nullPVScalarArray;
+        }
+        ScalarArrayConstPtr pscalarArray
+            = static_pointer_cast<const ScalarArray>(pvField->getField());
+        if(pscalarArray->getElementType()!=elementType) {
+            return nullPVScalarArray;
+        }
+        return std::tr1::static_pointer_cast<PVScalarArray>(pvField);
+    }catch(...){
         return nullPVScalarArray;
     }
-    FieldConstPtr field = pvField->getField();
-    Type type = field->getType();
-    if(type!=scalarArray) {
-        return nullPVScalarArray;
-    }
-    ScalarArrayConstPtr pscalarArray
-        = static_pointer_cast<const ScalarArray>(pvField->getField());
-    if(pscalarArray->getElementType()!=elementType) {
-        return nullPVScalarArray;
-    }
-    return std::tr1::static_pointer_cast<PVScalarArray>(pvField);
 }
 
 PVStructureArrayPtr PVStructure::getStructureArrayField(
@@ -373,37 +374,6 @@ void PVStructure::deserialize(ByteBuffer *pbuffer,
             pvStructure->deserialize(pbuffer, pcontrol, pbitSet);
         }
     }
-}
-
-static PVFieldPtr findSubField(
-    string const & fieldName,
-    PVStructure const *pvStructure)
-{
-    if( fieldName.length()<1) return PVFieldPtr();
-    string::size_type index = fieldName.find('.');
-    string name = fieldName;
-    string restOfName = string();
-    if(index>0) {
-        name = fieldName.substr(0, index);
-        if(fieldName.length()>index) {
-            restOfName = fieldName.substr(index+1);
-        }
-    }
-    PVFieldPtrArray const & pvFields = pvStructure->getPVFields();
-    PVFieldPtr pvField;
-    size_t numFields = pvStructure->getStructure()->getNumberFields();
-    for(size_t i=0; i<numFields; i++) {
-        pvField = pvFields[i];
-        size_t result = pvField->getFieldName().compare(name);
-        if(result==0) {
-            if(restOfName.length()==0) return pvFields[i];
-            if(pvField->getField()->getType()!=structure) return PVFieldPtr();
-            PVStructurePtr pvStructure =
-                std::tr1::static_pointer_cast<PVStructure>(pvField);
-            return findSubField(restOfName,pvStructure.get());
-        }
-    }
-    return PVFieldPtr();
 }
 
 std::ostream& PVStructure::dumpValue(std::ostream& o) const
