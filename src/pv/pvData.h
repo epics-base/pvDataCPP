@@ -703,6 +703,34 @@ public:
             return std::tr1::shared_ptr<PVT>();
     }
 
+private:
+    PVField *GetAsImpl(const char *name) const;
+public:
+
+    /**
+     * Get a subfield with the specified name.
+     * @param name a '.' seperated list of child field names (no whitespace allowed)
+     * @returns A reference to the sub-field (never NULL)
+     * @throws std::runtime_error if the requested sub-field doesn't exist, or has a different type
+     * @code
+     *   PVInt& ref = pvStruct->getAs<PVInt>("substruct.leaffield");
+     * @endcode
+     */
+    template<typename PVT>
+    PVT& getAs(const char *name) const
+    {
+        PVT *raw = dynamic_cast<PVT*>(GetAsImpl(name));
+        if(!raw)
+            throw std::runtime_error("Field has wrong type");
+        return *raw;
+    }
+
+    template<typename PVT>
+    FORCE_INLINE PVT& getAs(std::string const &fieldName) const
+    {
+        return this->getAs<PVT>(fieldName.c_str());
+    }
+
     /**
      * Get a boolean field with the specified name.
      * @deprecated No longer needed. Use templete version of getSubField

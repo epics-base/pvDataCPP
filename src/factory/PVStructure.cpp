@@ -134,6 +134,54 @@ PVFieldPtr  PVStructure::getSubField(size_t fieldOffset) const
     throw std::logic_error("PVStructure.getSubField: Logic error");
 }
 
+PVField* PVStructure::GetAsImpl(const char *name) const
+{
+    const PVStructure *parent = this;
+    if(!name)
+        throw std::invalid_argument("field name is NULL string");
+
+    while(true) {
+        const char *sep=name;
+        while(*sep!='\0' && *sep!='.' && *sep!=' ') sep++;
+        if(*sep==' ')
+            throw std::runtime_error("No spaces allowed in field name");
+
+        size_t N = sep-name;
+        if(N==0)
+            throw std::runtime_error("zero-length field name encountered");
+
+        const PVFieldPtrArray& pvFields = parent->getPVFields();
+
+        PVField *child = NULL;
+
+        for(size_t i=0, n=pvFields.size(); i!=n; i++) {
+            const PVFieldPtr& fld = pvFields[i];
+            const std::string& fname = fld->getFieldName();
+
+            if(fname.size()==N && memcmp(name, fname.c_str(), N)==0) {
+                child = fld.get();
+                break;
+            }
+        }
+
+        if(!child)
+            throw std::runtime_error("field not found"); //TODO: which sub field?
+
+        if(*sep) {
+            // this is not the requested leaf
+            parent = dynamic_cast<PVStructure*>(child);
+            if(!child)
+                throw std::runtime_error("mid-field is not a PVStructure"); //TODO: which sub field?
+            child = NULL;
+            name = sep+1; // skip past '.'
+            // loop around to new parent
+
+        } else {
+            return child;
+        }
+    }
+}
+
 
 PVBooleanPtr PVStructure::getBooleanField(string const &fieldName)
 {
