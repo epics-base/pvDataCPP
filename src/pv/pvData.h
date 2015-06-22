@@ -33,6 +33,14 @@
 typedef class std::ios std::ios_base;
 #endif
 
+#if defined(__GNUC__) && !(defined(__vxworks) && !defined(_WRS_VXWORKS_MAJOR))
+#define USAGE_DEPRECATED __attribute__((deprecated))
+#define USAGE_ERROR(MSG) __attribute__((error(MSG)))
+#else
+#define USAGE_DEPRECATED
+#define USAGE_ERROR(MSG) { throw std::runtime_error(MSG); }
+#endif
+
 namespace epics { namespace pvData { 
 
 class PostHandler;
@@ -709,84 +717,84 @@ public:
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
-    PVBooleanPtr getBooleanField(std::string const &fieldName) ;
+    PVBooleanPtr getBooleanField(std::string const &fieldName) USAGE_DEPRECATED;
     /**
      * Get a byte field with the specified name.
      * @deprecated No longer needed. Use templete version of getSubField
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
-    PVBytePtr getByteField(std::string const &fieldName) ;
+    PVBytePtr getByteField(std::string const &fieldName) USAGE_DEPRECATED;
     /**
      * Get a short field with the specified name.
      * @deprecated No longer needed. Use templete version of getSubField
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
-    PVShortPtr getShortField(std::string const &fieldName) ;
+    PVShortPtr getShortField(std::string const &fieldName) USAGE_DEPRECATED;
     /**
      * Get a int field with the specified name.
      * @deprecated No longer needed. Use templete version of getSubField
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
-    PVIntPtr getIntField(std::string const &fieldName) ;
+    PVIntPtr getIntField(std::string const &fieldName) USAGE_DEPRECATED;
     /**
      * Get a long field with the specified name.
      * @deprecated No longer needed. Use templete version of getSubField
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
-    PVLongPtr getLongField(std::string const &fieldName) ;
+    PVLongPtr getLongField(std::string const &fieldName) USAGE_DEPRECATED;
     /**
      * Get an unsigned byte field with the specified name.
      * @deprecated No longer needed. Use templete version of getSubField
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
-    PVUBytePtr getUByteField(std::string const &fieldName) ;
+    PVUBytePtr getUByteField(std::string const &fieldName) USAGE_DEPRECATED;
     /**
      * Get an unsigned short field with the specified name.
      * @deprecated No longer needed. Use templete version of getSubField
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
-    PVUShortPtr getUShortField(std::string const &fieldName) ;
+    PVUShortPtr getUShortField(std::string const &fieldName) USAGE_DEPRECATED;
     /**
      * Get an unsigned int field with the specified name.
      * @deprecated No longer needed. Use templete version of getSubField
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
-    PVUIntPtr getUIntField(std::string const &fieldName) ;
+    PVUIntPtr getUIntField(std::string const &fieldName) USAGE_DEPRECATED;
     /**
      * Get an unsigned long field with the specified name.
      * @deprecated No longer needed. Use templete version of getSubField
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
-    PVULongPtr getULongField(std::string const &fieldName) ;
+    PVULongPtr getULongField(std::string const &fieldName) USAGE_DEPRECATED;
     /**
      * Get a float field with the specified name.
      * @deprecated No longer needed. Use templete version of getSubField
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
-    PVFloatPtr getFloatField(std::string const &fieldName) ;
+    PVFloatPtr getFloatField(std::string const &fieldName) USAGE_DEPRECATED;
     /**
      * Get a double field with the specified name.
      * @deprecated No longer needed. Use templete version of getSubField
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
-    PVDoublePtr getDoubleField(std::string const &fieldName) ;
+    PVDoublePtr getDoubleField(std::string const &fieldName) USAGE_DEPRECATED;
     /**
      * Get a string field with the specified name.
      * @deprecated No longer needed. Use templete version of getSubField
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
-    PVStringPtr getStringField(std::string const &fieldName) ;
+    PVStringPtr getStringField(std::string const &fieldName) USAGE_DEPRECATED;
     
     /**
      * Get a structure field with the specified name.
@@ -794,14 +802,14 @@ public:
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
-    PVStructurePtr getStructureField(std::string const &fieldName) ;
+    PVStructurePtr getStructureField(std::string const &fieldName) USAGE_DEPRECATED;
     /**
      * Get a union field with the specified name.
      * @deprecated No longer needed. Use templete version of getSubField
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
-    PVUnionPtr getUnionField(std::string const &fieldName) ;
+    PVUnionPtr getUnionField(std::string const &fieldName) USAGE_DEPRECATED;
     /**
      * Get a scalarArray field with the specified name.
      * @deprecated No longer needed. Use templete version of getSubField
@@ -810,21 +818,21 @@ public:
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
     PVScalarArrayPtr getScalarArrayField(
-        std::string const &fieldName,ScalarType elementType) ;
+        std::string const &fieldName,ScalarType elementType);
     /**
      * Get a structureArray field with the specified name.
      * @deprecated No longer needed. Use templete version of getSubField
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
-    PVStructureArrayPtr getStructureArrayField(std::string const &fieldName) ;
+    PVStructureArrayPtr getStructureArrayField(std::string const &fieldName) USAGE_DEPRECATED;
     /**
      * Get a unionArray field with the specified name.
      * @deprecated No longer needed. Use templete version of getSubField
      * @param fieldName The name of the field to get.
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
-    PVUnionArrayPtr getUnionArrayField(std::string const &fieldName) ;
+    PVUnionArrayPtr getUnionArrayField(std::string const &fieldName) USAGE_DEPRECATED;
     /**
      * Serialize.
      * @param pbuffer The byte buffer.
@@ -1620,6 +1628,9 @@ static inline bool operator!=(const PVField& a, const PVField& b)
 namespace std{
     epicsShareExtern std::ostream& operator<<(std::ostream& o, const epics::pvData::PVField *ptr);
 }
+
+#undef USAGE_DEPRECATED
+#undef USAGE_ERROR
 
 #endif  /* PVDATA_H */
 
