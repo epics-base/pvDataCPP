@@ -28,14 +28,14 @@ bool PVAlarm::attach(PVFieldPtr const & pvField)
 {
     if(pvField->getField()->getType()!=structure) return false;
     PVStructurePtr pvStructure = static_pointer_cast<PVStructure>(pvField);
-    pvSeverity = pvStructure->getIntField("severity");
+    pvSeverity = pvStructure->getSubField<PVInt>("severity");
     if(pvSeverity.get()==NULL) return false;
-    pvStatus = pvStructure->getIntField("status");
+    pvStatus = pvStructure->getSubField<PVInt>("status");
     if(pvStatus.get()==NULL) {
         pvSeverity.reset();
         return false;
     }
-    pvMessage = pvStructure->getStringField("message");
+    pvMessage = pvStructure->getSubField<PVString>("message");
     if(pvMessage.get()==NULL) {
         pvSeverity.reset();
         pvStatus.reset();

@@ -31,7 +31,7 @@ MAIN(testOperators)
 
     const double testDV = 12.8;
 
-    PVDoublePtr pvValue = pvStructure->getDoubleField("value");
+    PVDoublePtr pvValue = pvStructure->getSubField<PVDouble>("value");
     *pvValue <<= testDV;
 
     double dv;
@@ -41,7 +41,7 @@ MAIN(testOperators)
 
     const string testSV = "test message";
 
-    PVStringPtr pvMessage = pvStructure->getStringField("alarm.message");
+    PVStringPtr pvMessage = pvStructure->getSubField<PVString>("alarm.message");
     *pvMessage <<= testSV;
 
     string sv;
@@ -90,7 +90,7 @@ MAIN(testOperators)
         pvStructures[i]=
             pvDataCreate->createPVStructure(structure);
     }
-    PVStructureArrayPtr pvStructureArray = pvStructure->getStructureArrayField("value");
+    PVStructureArrayPtr pvStructureArray = pvStructure->getSubField<PVStructureArray>("value");
     pvStructureArray->replace(freeze(pvStructures));
     std::cout << *pvStructure << std::endl;
 

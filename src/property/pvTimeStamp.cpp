@@ -30,11 +30,11 @@ bool PVTimeStamp::attach(PVFieldPtr const & pvField)
     PVStructurePtr xxx = static_pointer_cast<PVStructure>(pvField);
     PVStructure* pvStructure = xxx.get();
     while(true) {
-        PVLongPtr pvLong = pvStructure->getLongField("secondsPastEpoch");
+        PVLongPtr pvLong = pvStructure->getSubField<PVLong>("secondsPastEpoch");
         if(pvLong.get()!=NULL) {
             pvSecs = pvLong;
-            pvNano = pvStructure->getIntField("nanoseconds");
-            pvUserTag = pvStructure->getIntField("userTag");
+            pvNano = pvStructure->getSubField<PVInt>("nanoseconds");
+            pvUserTag = pvStructure->getSubField<PVInt>("userTag");
         }
         if(pvSecs.get()!=NULL
         && pvNano.get()!=NULL

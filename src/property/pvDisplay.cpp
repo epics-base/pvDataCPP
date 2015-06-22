@@ -28,24 +28,24 @@ bool PVDisplay::attach(PVFieldPtr const & pvField)
 {
     if(pvField->getField()->getType()!=structure) return false;
     PVStructurePtr pvStructure = static_pointer_cast<PVStructure>(pvField);
-    pvDescription = pvStructure->getStringField("description");
+    pvDescription = pvStructure->getSubField<PVString>("description");
     if(pvDescription.get()==NULL) return false;
-    pvFormat = pvStructure->getStringField("format");
+    pvFormat = pvStructure->getSubField<PVString>("format");
     if(pvFormat.get()==NULL) {
         detach();
         return false;
     }
-    pvUnits = pvStructure->getStringField("units");
+    pvUnits = pvStructure->getSubField<PVString>("units");
     if(pvUnits.get()==NULL) {
         detach();
         return false;
     }
-    pvLow = pvStructure->getDoubleField(string("limitLow"));
+    pvLow = pvStructure->getSubField<PVDouble>(string("limitLow"));
     if(pvLow.get()==NULL) {
         detach();
         return false;
     }
-    pvHigh = pvStructure->getDoubleField(string("limitHigh"));
+    pvHigh = pvStructure->getSubField<PVDouble>(string("limitHigh"));
     if(pvHigh.get()==NULL) {
         detach();
         return false;

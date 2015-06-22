@@ -45,11 +45,11 @@ MAIN(testStandardPVField)
     testPlan(1);
     PVStructurePtr pvStructure = standardPVField->scalar(pvDouble,
         "alarm,timeStamp,display,control,valueAlarm");
-    PVDoublePtr pvValue = pvStructure->getDoubleField("value");
+    PVDoublePtr pvValue = pvStructure->getSubField<PVDouble>("value");
     pvValue->put(10.0);
-    PVIntPtr pvSeverity = pvStructure->getIntField("alarm.severity");
+    PVIntPtr pvSeverity = pvStructure->getSubField<PVInt>("alarm.severity");
     pvSeverity->put(2);
-    PVStringPtr pvMessage = pvStructure->getStringField("alarm.message");
+    PVStringPtr pvMessage = pvStructure->getSubField<PVString>("alarm.message");
     pvMessage->put("test message");
     print("scalarTest", pvStructure);
     pvStructure = standardPVField->scalar(pvBoolean,"alarm,timeStamp,valueAlarm");
@@ -71,7 +71,7 @@ MAIN(testStandardPVField)
         pvStructures[i]=
             pvDataCreate->createPVStructure(structure);
     }
-    PVStructureArrayPtr pvStructureArray = pvStructure->getStructureArrayField("value");
+    PVStructureArrayPtr pvStructureArray = pvStructure->getSubField<PVStructureArray>("value");
     pvStructureArray->replace(freeze(pvStructures));
     print("structureArrayTest", pvStructure);
     testPass("testStandardPVField");
