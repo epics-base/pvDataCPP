@@ -78,11 +78,11 @@ PVCopyPtr PVCopy::create(
     PVStructurePtr pvStructure(pvRequest);
     if(structureName.size()>0) {
         if(pvRequest->getStructure()->getNumberFields()>0) {
-            pvStructure = pvRequest->getStructureField(structureName);
+            pvStructure = pvRequest->getSubField<PVStructure>(structureName);
             if(!pvStructure) return NULLPVCopy;
         }
     } else if(pvStructure->getSubField("field")) {
-        pvStructure = pvRequest->getStructureField("field");
+        pvStructure = pvRequest->getSubField<PVStructure>("field");
     }
     PVCopyPtr pvCopy = PVCopyPtr(new PVCopy(pvMaster));
     bool result = pvCopy->init(pvStructure);
@@ -349,7 +349,7 @@ bool PVCopy::init(epics::pvData::PVStructurePtr const &pvRequest)
     if(len==0) entireMaster = true;
     PVStructurePtr pvOptions;
     if(len==1 && pvRequest->getSubField("_options")) {
-        pvOptions = pvRequest->getStructureField("_options");
+        pvOptions = pvRequest->getSubField<PVStructure>("_options");
     }
     if(entireMaster) {
         structure = pvMasterStructure->getStructure();

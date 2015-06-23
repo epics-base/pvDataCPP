@@ -28,7 +28,7 @@ bool PVEnumerated::attach(PVFieldPtr const & pvField)
 {
     if(pvField->getField()->getType()!=structure) return false;
     PVStructurePtr pvStructure = static_pointer_cast<PVStructure>(pvField);
-    pvIndex = pvStructure->getIntField("index");
+    pvIndex = pvStructure->getSubField<PVInt>("index");
     if(pvIndex.get()==NULL) return false;
     PVScalarArrayPtr pvScalarArray = pvStructure->getScalarArrayField(
         "choices",pvString);

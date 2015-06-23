@@ -28,14 +28,14 @@ bool PVControl::attach(PVFieldPtr const & pvField)
 {
     if(pvField->getField()->getType()!=structure) return false;
     PVStructurePtr pvStructure = static_pointer_cast<PVStructure>(pvField);
-    pvLow = pvStructure->getDoubleField("limitLow");
+    pvLow = pvStructure->getSubField<PVDouble>("limitLow");
     if(pvLow.get()==NULL) return false;
-    pvHigh = pvStructure->getDoubleField("limitHigh");
+    pvHigh = pvStructure->getSubField<PVDouble>("limitHigh");
     if(pvHigh.get()==NULL) {
         pvLow.reset();
         return false;
     }
-    pvMinStep = pvStructure->getDoubleField("minStep");
+    pvMinStep = pvStructure->getSubField<PVDouble>("minStep");
     if(pvMinStep.get()==NULL) {
         pvLow.reset();
         pvHigh.reset();
