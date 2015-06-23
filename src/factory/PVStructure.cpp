@@ -44,10 +44,6 @@ PVUnionPtr PVStructure::nullPVUnion;
 PVUnionArrayPtr PVStructure::nullPVUnionArray;
 PVScalarArrayPtr PVStructure::nullPVScalarArray;
 
-static PVFieldPtr findSubField(
-    string const &fieldName,
-    const PVStructure *pvStructure);
-
 PVStructure::PVStructure(StructureConstPtr const & structurePtr)
 : PVField(structurePtr),
   structurePtr(structurePtr),
@@ -111,7 +107,11 @@ const PVFieldPtrArray & PVStructure::getPVFields() const
 
 PVFieldPtr  PVStructure::getSubField(string const &fieldName) const
 {
-    return findSubField(fieldName,this);
+    try{
+        return GetAsImpl(fieldName.c_str())->shared_from_this();
+    }catch(...){
+        return PVFieldPtr();
+    }
 }
 
 
@@ -132,6 +132,54 @@ PVFieldPtr  PVStructure::getSubField(size_t fieldOffset) const
         }
     }
     throw std::logic_error("PVStructure.getSubField: Logic error");
+}
+
+PVField* PVStructure::GetAsImpl(const char *name) const
+{
+    const PVStructure *parent = this;
+    if(!name)
+        throw std::invalid_argument("field name is NULL string");
+
+    while(true) {
+        const char *sep=name;
+        while(*sep!='\0' && *sep!='.' && *sep!=' ') sep++;
+        if(*sep==' ')
+            throw std::runtime_error("No spaces allowed in field name");
+
+        size_t N = sep-name;
+        if(N==0)
+            throw std::runtime_error("zero-length field name encountered");
+
+        const PVFieldPtrArray& pvFields = parent->getPVFields();
+
+        PVField *child = NULL;
+
+        for(size_t i=0, n=pvFields.size(); i!=n; i++) {
+            const PVFieldPtr& fld = pvFields[i];
+            const std::string& fname = fld->getFieldName();
+
+            if(fname.size()==N && memcmp(name, fname.c_str(), N)==0) {
+                child = fld.get();
+                break;
+            }
+        }
+
+        if(!child)
+            throw std::runtime_error("field not found"); //TODO: which sub field?
+
+        if(*sep) {
+            // this is not the requested leaf
+            parent = dynamic_cast<PVStructure*>(child);
+            if(!child)
+                throw std::runtime_error("mid-field is not a PVStructure"); //TODO: which sub field?
+            child = NULL;
+            name = sep+1; // skip past '.'
+            // loop around to new parent
+
+        } else {
+            return child;
+        }
+    }
 }
 
 
@@ -208,21 +256,22 @@ PVUnionPtr PVStructure::getUnionField(string const &fieldName)
 PVScalarArrayPtr PVStructure::getScalarArrayField(
     string const &fieldName,ScalarType elementType)
 {
-    PVFieldPtr pvField  = findSubField(fieldName,this);
-    if(pvField.get()==NULL) {
+    try{
+        PVFieldPtr pvField = GetAsImpl(fieldName.c_str())->shared_from_this();
+        FieldConstPtr field = pvField->getField();
+        Type type = field->getType();
+        if(type!=scalarArray) {
+            return nullPVScalarArray;
+        }
+        ScalarArrayConstPtr pscalarArray
+            = static_pointer_cast<const ScalarArray>(pvField->getField());
+        if(pscalarArray->getElementType()!=elementType) {
+            return nullPVScalarArray;
+        }
+        return std::tr1::static_pointer_cast<PVScalarArray>(pvField);
+    }catch(...){
         return nullPVScalarArray;
     }
-    FieldConstPtr field = pvField->getField();
-    Type type = field->getType();
-    if(type!=scalarArray) {
-        return nullPVScalarArray;
-    }
-    ScalarArrayConstPtr pscalarArray
-        = static_pointer_cast<const ScalarArray>(pvField->getField());
-    if(pscalarArray->getElementType()!=elementType) {
-        return nullPVScalarArray;
-    }
-    return std::tr1::static_pointer_cast<PVScalarArray>(pvField);
 }
 
 PVStructureArrayPtr PVStructure::getStructureArrayField(
@@ -325,37 +374,6 @@ void PVStructure::deserialize(ByteBuffer *pbuffer,
             pvStructure->deserialize(pbuffer, pcontrol, pbitSet);
         }
     }
-}
-
-static PVFieldPtr findSubField(
-    string const & fieldName,
-    PVStructure const *pvStructure)
-{
-    if( fieldName.length()<1) return PVFieldPtr();
-    string::size_type index = fieldName.find('.');
-    string name = fieldName;
-    string restOfName = string();
-    if(index>0) {
-        name = fieldName.substr(0, index);
-        if(fieldName.length()>index) {
-            restOfName = fieldName.substr(index+1);
-        }
-    }
-    PVFieldPtrArray const & pvFields = pvStructure->getPVFields();
-    PVFieldPtr pvField;
-    size_t numFields = pvStructure->getStructure()->getNumberFields();
-    for(size_t i=0; i<numFields; i++) {
-        pvField = pvFields[i];
-        size_t result = pvField->getFieldName().compare(name);
-        if(result==0) {
-            if(restOfName.length()==0) return pvFields[i];
-            if(pvField->getField()->getType()!=structure) return PVFieldPtr();
-            PVStructurePtr pvStructure =
-                std::tr1::static_pointer_cast<PVStructure>(pvField);
-            return findSubField(restOfName,pvStructure.get());
-        }
-    }
-    return PVFieldPtr();
 }
 
 std::ostream& PVStructure::dumpValue(std::ostream& o) const

@@ -525,9 +525,72 @@ static void testCopy()
     testOk(*pvUnion == *pvUnion2, "PVUnion PVStructure copy, to different type PVUnion");
 }
 
+static void testFieldAccess()
+{
+    testDiag("Check methods for accessing structure fields");
+
+    StructureConstPtr tdef = fieldCreate->createFieldBuilder()->
+            add("test", pvInt)->
+            addNestedStructure("hello")->
+              add("world", pvInt)->
+            endNested()->
+            createStructure();
+
+    PVStructurePtr fld = pvDataCreate->createPVStructure(tdef);
+
+    PVIntPtr a = fld->getSubField<PVInt>("test");
+    testOk1(a!=NULL);
+    if(a.get()) {
+        PVInt& b = fld->getAs<PVInt>("test");
+        testOk(&b==a.get(), "%p == %p", &b, a.get());
+    } else
+        testSkip(1, "test doesn't exist?");
+
+    a = fld->getSubField<PVInt>("hello.world");
+    testOk1(a!=NULL);
+    if(a.get()) {
+        PVInt& b = fld->getAs<PVInt>("hello.world");
+        testOk(&b==a.get(), "%p == %p", &b, a.get());
+    } else
+        testSkip(1, "hello.world doesn't exist?");
+
+    // non-existant
+    testOk1(fld->getSubField<PVInt>("invalid").get()==NULL);
+
+    // wrong type
+    testOk1(fld->getSubField<PVDouble>("test").get()==NULL);
+
+    // intermediate struct non existant
+    testOk1(fld->getSubField<PVDouble>("helo.world").get()==NULL);
+
+    // empty leaf field name
+    testOk1(fld->getSubField<PVDouble>("hello.").get()==NULL);
+
+    // empty field name
+    testOk1(fld->getSubField<PVDouble>("hello..world").get()==NULL);
+    testOk1(fld->getSubField<PVDouble>(".").get()==NULL);
+
+    // whitespace
+    testOk1(fld->getSubField<PVInt>(" test").get()==NULL);
+
+    try{
+        fld->getAs<PVInt>("invalid");
+        testFail("missing requried exception");
+    }catch(std::runtime_error& e){
+        testPass("caught expected exception: %s", e.what());
+    }
+
+    try{
+        fld->getAs<PVDouble>("test");
+        testFail("missing requried exception");
+    }catch(std::runtime_error& e){
+        testPass("caught expected exception: %s", e.what());
+    }
+}
+
 MAIN(testPVData)
 {
-    testPlan(222);
+    testPlan(235);
     fieldCreate = getFieldCreate();
     pvDataCreate = getPVDataCreate();
     standardField = getStandardField();
@@ -538,6 +601,7 @@ MAIN(testPVData)
     testScalarArray();
     testRequest();
     testCopy();
+    testFieldAccess();
     return testDone();
 }
 
