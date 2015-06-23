@@ -1,10 +1,26 @@
 <h1>Release 4.1 IN DEVELOPMENT</h1>
 <p>The main changes since release 4.0 are:</p>
 <ul>
+<li>Convert copy methods and equals operators (re)moved</li>
 <li>Convert::copyUnion now always copies between subfields.</li>
 <li>CreateRequest prevents a possible SEGFAULT.</li>
 <li>New stream operators for Field and PVField are provided.</li>
+<li>New method getAs that is like getSubField except that it throws exception</li>
 </ul>
+<h2>Convert copy methods and equals operators</h2>
+<p>Convert copy methods where moved and replaced with methods
+on PVField classes, i.e.</p>
+<pre><code>PVField::copy(const PVField&amp; from)
+</code></pre>
+<p>Methods</p>
+<pre><code>PVField::copyUnchecked(const PVField&amp; from)
+</code></pre>
+<p>where added to allow unchecked copies, to gain performance
+where checked are not needed (anymore).</p>
+<p>In addition:
+- isCompatibleXXX methods were removed in favour of Field::operator==.
+- equals methods were remove in favour of PVField::operator==.
+- operator== methods where moved to pvIntrospect.h and pvData.h</p>
 <h2>Convert::copyUnion</h2>
 <p>Before this method, depending on types for to and from,
 sometimes did a shallow cppy, i. e. just made to shared_ptr for to 
@@ -39,6 +55,10 @@ it was necessary to have code like:</p>
      cout &lt;&lt; pv &lt;&lt; endl;
  }
 </code></pre>
+<h2>New method getAs that is like getSubField except that it throws exception</h2>
+<p><b>PVStructure</b> has a new template member <b>getAs(const char *name)</b>
+that is like <b>getSubField</b> except that it throws a runtime_error
+instead of returning null.</p>
 <h1>Release 4.0</h1>
 <p>The main changes since release 3.0.2 are:</p>
 <ul>
