@@ -22,7 +22,6 @@ INC += status.h
 INC += sharedPtr.h
 INC += localStaticLock.h
 INC += typeCast.h
-INC += printer.h
 INC += sharedVector.h
 INC += templateMeta.h
 INC += current_function.h
