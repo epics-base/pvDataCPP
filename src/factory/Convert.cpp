@@ -52,9 +52,6 @@ void Convert::getString(string *buf,PVField const *pvField,int /*indentLevel*/)
     std::ostringstream strm;
     pvField->dumpValue(strm);
     strm << std::endl;
-//    PrinterPlain p;
-//    p.setStream(strm);
-//    p.print(*pvField);
     strm.str().swap(*buf);
 }
 

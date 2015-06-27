@@ -1,11 +1,6 @@
 TODO
 ===========
 
-printer
-------------
-
-pv/printer.h is not used.
-
 doxygen
 -------
 
