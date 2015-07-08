@@ -62,7 +62,7 @@ bool operator==(const Field& a, const Field& b)
             return A==B;
         }
     default:
-        throw std::logic_error("Invalid Field type in comparision");
+        throw std::logic_error("Invalid Field type in comparison");
     }
 }
 

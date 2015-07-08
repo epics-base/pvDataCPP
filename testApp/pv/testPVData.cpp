@@ -575,14 +575,14 @@ static void testFieldAccess()
 
     try{
         fld->getAs<PVInt>("invalid");
-        testFail("missing requried exception");
+        testFail("missing required exception");
     }catch(std::runtime_error& e){
         testPass("caught expected exception: %s", e.what());
     }
 
     try{
         fld->getAs<PVDouble>("test");
-        testFail("missing requried exception");
+        testFail("missing required exception");
     }catch(std::runtime_error& e){
         testPass("caught expected exception: %s", e.what());
     }

@@ -356,7 +356,7 @@ static void testPush()
 
 static void testVoid()
 {
-    testDiag("Test vecter cast to/from void");
+    testDiag("Test vector cast to/from void");
 
     epics::pvData::shared_vector<int32> typed(4);
 
