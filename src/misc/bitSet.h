@@ -208,7 +208,7 @@ namespace epics { namespace pvData {
         BitSet& operator^=(const BitSet& set);
 
         /**
-          * Assigment operator.
+          * Assignment operator.
           */
         BitSet& operator=(const BitSet &set);
 

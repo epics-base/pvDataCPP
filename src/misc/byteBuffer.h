@@ -714,7 +714,7 @@ private:
         }
         else
         {
-            // NOTE: this check and branching does not always payoff
+            // NOTE: this check and branching does not always pay off
             if (ADAPTIVE_ACCESS && is_aligned(_position, sizeof(T)))
             {
                 *((T*)_position) = value;
@@ -757,12 +757,12 @@ private:
 
         if (UNALIGNED_ACCESS)
         {
-            // NOTE: some CPU handle unaligned access preety good (e.g. x86)
+            // NOTE: some CPU handle unaligned access pretty good (e.g. x86)
             *((T*)(_buffer + index)) = value;
         }
         else
         {
-            // NOTE: this check and branching does not always payoff
+            // NOTE: this check and branching does not always pay off
             if (ADAPTIVE_ACCESS && is_aligned(_position, sizeof(T)))
             {
                 *((T*)(_buffer + index)) = value;
@@ -805,13 +805,13 @@ private:
 
         if (UNALIGNED_ACCESS)
         {
-            // NOTE: some CPU handle unaligned access preety good (e.g. x86)
+            // NOTE: some CPU handle unaligned access pretty good (e.g. x86)
             value = *((T*)_position);
             _position += sizeof(T);
         }
         else
         {
-            // NOTE: this check and branching does not always payoff
+            // NOTE: this check and branching does not always pay off
             if (ADAPTIVE_ACCESS && is_aligned(_position, sizeof(T)))
             {
                 value = *((T*)_position);
@@ -857,12 +857,12 @@ private:
 
         if (UNALIGNED_ACCESS)
         {
-            // NOTE: some CPU handle unaligned access preety good (e.g. x86)
+            // NOTE: some CPU handle unaligned access pretty good (e.g. x86)
             value = *((T*)(_buffer + index));
         }
         else
         {
-            // NOTE: this check and branching does not always payoff
+            // NOTE: this check and branching does not always pay off
             if (ADAPTIVE_ACCESS && is_aligned(_position, sizeof(T)))
             {
                 value = *((T*)(_buffer + index));
@@ -909,7 +909,7 @@ private:
         memcpy(_position, values, n);
         _position += n;
 
-        // ... so that we can be fast changing endianess
+        // ... so that we can be fast changing endianness
         if (ENDIANESS_SUPPORT && reverse<T>())
         {
             for (std::size_t i = 0; i < count; i++)
@@ -937,7 +937,7 @@ private:
         memcpy(values, _position, n);
         _position += n;
 
-        // ... so that we can be fast changing endianess
+        // ... so that we can be fast changing endianness
         if (ENDIANESS_SUPPORT && reverse<T>())
         {
             for (std::size_t i = 0; i < count; i++)

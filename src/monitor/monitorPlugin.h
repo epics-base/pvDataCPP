@@ -38,7 +38,7 @@ typedef std::tr1::shared_ptr<MonitorPluginManager> MonitorPluginManagerPtr;
  * This is for use by pvAccess servers that support monitors.
  * Since the interface has only a dependence on pvData it
  * can be used for other purposes.
- * A monitor is assumed to be associated with a field of a top level
+ * A monitor is assumed to be associated with a field of a top-level
  * structure.
  */
 class epicsShareClass MonitorPlugin
@@ -53,8 +53,8 @@ public:
     /**
      * Should a monitor be raised?
      * @param pvField The field being monitored.
-     * @param pvTop The top level sructure in which the field resides.
-     * @param monitorElement The client data and bitSets.
+     * @param pvTop The top-level structure in which the field resides.
+     * @param monitorElement The client data and bitsets.
      * @returns true or false.
      * True is returned if the change to this field should cause a monitor.
      * False is returned in a change only to this field should not cause a
@@ -68,7 +68,7 @@ public:
      * A monitor will be sent to the client.
      * @param pvField The copy of the field being monitored.
      * The plugin can modify the data.
-     * @param pvTop The top level sructure in which the field resides.
+     * @param pvTop The top-level structure in which the field resides.
      * @param monitorElement The data for the client.
      * The plugin is allowed to change the data values.
      */
@@ -105,7 +105,7 @@ public:
     /**
      * Create a monitor plugin.
      * @param field The introspection interface for the field monitored.
-     * @param top The introspsction interface for the client structure.
+     * @param top The introspection interface for the client structure.
      * @param pvFieldOptions The options the client requested.
      * The structure has a set of PVString subfields.
      * The options are a set of name,value pairs.

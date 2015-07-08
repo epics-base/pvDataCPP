@@ -61,7 +61,7 @@ rtems_task Init (rtems_task_argument argument);
 /*
  * This should be made BSP dependent, not CPU dependent but I know of no
  * appropriate conditionals to use.
- * The new general time support makes including the RTC driverr less important.
+ * The new general time support makes including the RTC driver less important.
  */
 #if !defined(mpc604) && !defined(__mc68040__) && !defined(__mcf5200__) && !defined(mpc7455) && !defined(__arm__)  /* don't have RTC code */
 #define CONFIGURE_APPLICATION_NEEDS_RTC_DRIVER

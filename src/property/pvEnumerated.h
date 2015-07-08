@@ -98,7 +98,7 @@ public:
     int32 getNumberChoices();
     /**
      * Get the choices.
-     * @param choics The new value for choices.`
+     * @param choices The new value for choices.`
      * @return (false,true) if choices (was not was) replaced.
      * @throw if not attached.
      */

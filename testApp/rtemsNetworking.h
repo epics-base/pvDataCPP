@@ -45,7 +45,7 @@
 
 
 /*
- * This file can be copied to an application source dirctory
+ * This file can be copied to an application source directory
  * and modified to override the values shown below.
  *
  * The following CPP symbols may be passed from the Makefile:
@@ -111,7 +111,7 @@
 #define NETWORK_TASK_PRIORITY   150  /* within EPICS' range */
 #endif
 
-/* make publicily available for startup scripts... */
+/* make publicly available for startup scripts... */
 const int gesysNetworkTaskPriority = NETWORK_TASK_PRIORITY;
 
 #ifdef  FIXED_IP_ADDR

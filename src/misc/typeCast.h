@@ -59,7 +59,7 @@ namespace detail {
         typedef T return_t;
         static FORCE_INLINE return_t op(const T& i) { return i; }
     };
-    // trick std::ostream into treating char's as numbers
+    // trick std::ostream into treating chars as numbers
     // by promoting char to int
     template<>
     struct print_convolute<int8> {
@@ -142,7 +142,7 @@ namespace detail {
  * - float -> double
  *
  * Conversions where out of range inputs always produce
- * a defined result, but may not be reversable.
+ * a defined result, but may not be reversible.
  *
  * - double -> float.  When abs(value) is outside the range
  *    [FLT_MIN, FLT_MAX] the value is clipped to FLT_MIN or FLT_MAX

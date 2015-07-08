@@ -86,7 +86,7 @@ public:
     StructureConstPtr regUnion(
         UnionConstPtr const & punion,
         std::string const & properties);
-    /** Create a structure that has a varient union value field.
+    /** Create a structure that has a variant union value field.
      * @param properties A comma separated list of properties.
      * This is some combination of "alarm,timeStamp,display,control,valueAlarm".
      * @return The const shared pointer to the structure.

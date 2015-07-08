@@ -73,7 +73,7 @@ public:
     /**
      * copy the values from TimeStamp to the timeStamp structure.
      * @param timeStamp An instance of class TimeStamp
-     * @return (false,true) if pvField (immutable, muttable)
+     * @return (false,true) if pvField (immutable, mutable)
      * @throw If not attached to a pvField.
      */
     bool set(TimeStamp const & timeStamp);

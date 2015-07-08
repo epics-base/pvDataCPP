@@ -183,51 +183,51 @@ epicsShareExtern std::ostream& operator<<(std::ostream& o, const Type& type);
  */
 enum ScalarType {
     /**
-     * The type is boolean, i. e. value can be {@code false} or {@code true}
+     * The type is boolean, i.e. value can be {@code false} or {@code true}
      */
     pvBoolean,
     /**
-     * The type is byte, i. e. a 8 bit signed integer.
+     * The type is byte, i.e. a 8 bit signed integer.
      */
     pvByte,
     /**
-     * The type is short, i. e. a 16 bit signed integer.
+     * The type is short, i.e. a 16 bit signed integer.
      */
     pvShort,
     /**
-     * The type is int, i. e. a 32 bit signed integer.
+     * The type is int, i.e. a 32 bit signed integer.
      */
     pvInt,
     /**
-     * The type is long, i. e. a 64 bit signed integer.
+     * The type is long, i.e. a 64 bit signed integer.
      */
     pvLong,
     /**
-     * The type is unsigned byte, i. e. a 8 bit unsigned integer.
+     * The type is unsigned byte, i.e. a 8 bit unsigned integer.
      */
     pvUByte,
     /**
-     * The type is unsigned short, i. e. a 16 bit unsigned integer.
+     * The type is unsigned short, i.e. a 16 bit unsigned integer.
      */
     pvUShort,
     /**
-     * The type is unsigned int, i. e. a 32 bit unsigned integer.
+     * The type is unsigned int, i.e. a 32 bit unsigned integer.
      */
     pvUInt,
     /**
-     * The type is unsigned long, i. e. a 64 bit unsigned integer.
+     * The type is unsigned long, i.e. a 64 bit unsigned integer.
      */
     pvULong,
     /**
-     * The type is float, i. e. 32 bit IEEE floating point,
+     * The type is float, i.e. 32 bit IEEE floating point,
      */
     pvFloat,
     /**
-     * The type is float, i. e. 64 bit IEEE floating point,
+     * The type is float, i.e. 64 bit IEEE floating point,
      */
     pvDouble,
     /**
-     * The type is string, i. e. a UTF8 character string.
+     * The type is string, i.e. a UTF8 character string.
      */
     pvString
 };
@@ -240,25 +240,25 @@ enum ScalarType {
  */
 namespace ScalarTypeFunc {
     /**
-     * Is the type an integer, i. e. is it one of byte,...ulong
+     * Is the type an integer, i.e. is it one of byte,...ulong
      * @param  scalarType The type.
      * @return (false,true) if the scalarType is an integer.
      */
     epicsShareExtern bool isInteger(ScalarType scalarType);
     /**
-     * Is the type an unsigned integer, i. e. is it one of ubyte,...ulong
+     * Is the type an unsigned integer, i.e. is it one of ubyte,...ulong
      * @param  scalarType The type.
      * @return (false,true) if the scalarType is an integer.
      */
     epicsShareExtern bool isUInteger(ScalarType scalarType);
     /**
-     * Is the type numeric, i. e. is it one of byte,...,double
+     * Is the type numeric, i.e. is it one of byte,...,double
      * @param  scalarType The type.
      * @return (false,true) if the scalarType is a numeric
      */
     epicsShareExtern bool isNumeric(ScalarType scalarType);
     /**
-     * Is the type primitive, i. e. not string
+     * Is the type primitive, i.e. not string
      * @param  scalarType The type.
      * @return (false,true) if the scalarType is primitive.
      */
@@ -1200,7 +1200,7 @@ private:
 };
 
 /**
- * Get the single class that implemnents FieldCreate,
+ * Get the single class that implements FieldCreate,
  * @param The fieldCreate factory.
  */
 epicsShareExtern FieldCreatePtr getFieldCreate();

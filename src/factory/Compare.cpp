@@ -18,7 +18,7 @@ using std::string;
 
 namespace epics { namespace pvData {
 
-// Introspection object comparision
+// Introspection object comparison
 
 /** Field equality conditions:
  * 1) same instance

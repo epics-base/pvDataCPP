@@ -48,7 +48,7 @@ namespace epics { namespace pvData {
         virtual void ensureBuffer(std::size_t size) =0;
         /**
          * Add pad bytes to buffer.
-         * @param alignment allignment required.
+         * @param alignment alignment required.
          */
         virtual void alignBuffer(std::size_t alignment) =0;
         /**

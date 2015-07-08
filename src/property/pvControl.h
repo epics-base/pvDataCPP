@@ -68,7 +68,7 @@ public:
     /**
      * copy the values from Control to the control structure.
      * @param control An instance of class Control
-     * @return (false,true) if pvField (immutable, muttable)
+     * @return (false,true) if pvField (immutable, mutable)
      * @throw If not attached to a pvField.
      */
     bool set(Control const & control);

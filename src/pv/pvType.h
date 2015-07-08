@@ -49,7 +49,7 @@ namespace detail {
 }
 
 /**
- * This is a set of typdefs used by pvData.
+ * This is a set of typedefs used by pvData.
  */
 
 /**

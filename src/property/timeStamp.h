@@ -97,7 +97,7 @@ public:
     }
     /**
      * Get nanoseconds.
-     * @return nanoseconds withing timeStamp.
+     * @return nanoseconds within timeStamp.
      */
     int32 getNanoseconds() const  {return nanoseconds;}
     /**

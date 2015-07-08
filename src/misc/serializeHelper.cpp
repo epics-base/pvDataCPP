@@ -7,7 +7,7 @@
  * serializeHelper.cpp
  *
  *  Created on: Oct 22, 2010
- *      Author: Miha vitorovic
+ *      Author: Miha Vitorovic
  */
 
 #include <algorithm>

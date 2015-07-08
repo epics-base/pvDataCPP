@@ -72,7 +72,7 @@ public:
     /**
      * copy the values from Display to the display structure.
      * @param display An instance of class Display
-     * @return (false,true) if pvField (immutable, muttable)
+     * @return (false,true) if pvField (immutable, mutable)
      * @throw If not attached to a pvField.
      */
     bool set(Display const & display);

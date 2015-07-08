@@ -230,7 +230,7 @@ namespace detail {
     };
 }
 
-/** @brief A holder for a contigious piece of memory.
+/** @brief A holder for a contiguous piece of memory.
  *
  * Data is shared, but offset and length are not.
  * This allows one vector to have access to only a
@@ -427,7 +427,7 @@ public:
      *  owner of the data array.
      *
      * If a copy is needed, memory is allocated with new[].  If this is
-     * not desireable then do something like the following.
+     * not desirable then do something like the following.
      @code
        shared_vector<E> original(...);
 
@@ -864,7 +864,7 @@ std::ostream& operator<<(std::ostream& strm, const epics::pvData::shared_vector<
  * The copy constructor and assignment operator allow implicit
  * casting from type 'shared_vector<T>' to 'shared_vector<const T>'.
  *
- * To faciliate safe modification the methods unique() and
+ * To facilitate safe modification the methods unique() and
  * make_unique() are provided.
  *
  * The slice() method selects a sub-set of the shared_vector.

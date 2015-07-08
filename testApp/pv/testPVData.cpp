@@ -554,13 +554,13 @@ static void testFieldAccess()
     } else
         testSkip(1, "hello.world doesn't exist?");
 
-    // non-existant
+    // non-existent
     testOk1(fld->getSubField<PVInt>("invalid").get()==NULL);
 
     // wrong type
     testOk1(fld->getSubField<PVDouble>("test").get()==NULL);
 
-    // intermediate struct non existant
+    // intermediate struct non-existent
     testOk1(fld->getSubField<PVDouble>("helo.world").get()==NULL);
 
     // empty leaf field name

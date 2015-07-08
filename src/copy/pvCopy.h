@@ -66,8 +66,8 @@ public:
     POINTER_DEFINITIONS(PVCopy);
     /**
      * Create a new pvCopy
-     * @param pvMaster The top level sructure for which a copy of
-     * an arbritary subset of the fields in master will be created and managed.
+     * @param pvMaster The top-level structure for which a copy of
+     * an arbitrary subset of the fields in master will be created and managed.
      * @param pvRequest Selects the set of subfields desired and options for each field.
      * @param structureName The name for the top level of any PVStructure created.
      */
@@ -78,8 +78,8 @@ public:
     virtual ~PVCopy(){}
     virtual void destroy();
     /**
-     * Get the top level structure of master
-     * @returns The master top level structure.
+     * Get the top-level structure of master
+     * @returns The master top-level structure.
      * This should not be modified.
      */
     PVStructurePtr getPVMaster();
@@ -97,7 +97,7 @@ public:
     StructureConstPtr getStructure();
     /**
      * Create a copy instance. Monitors keep a queue of monitor elements.
-     * Since each element needs a PVStructure, multiple top level structures will be created.
+     * Since each element needs a PVStructure, multiple top-level structures will be created.
      */
     PVStructurePtr createPVStructure();
     /**
@@ -124,7 +124,7 @@ public:
      * Initialize the fields in copyPVStructure by giving each field
      * the value from the corresponding field in pvMaster.
      * bitSet will be set to show that all fields are changed.
-     * @param copyPVStructure A copy top level structure.
+     * @param copyPVStructure A copy top-level structure.
      * @param bitSet A bitSet for copyPVStructure.
      */
     void initCopy(
@@ -133,7 +133,7 @@ public:
     /**
      * Set all fields in copyPVStructure to the value of the corresponding field in pvMaster.
      * Each field that is changed has it's corresponding bit set in bitSet.
-     * @param copyPVStructure A copy top level structure.
+     * @param copyPVStructure A copy top-level structure.
      * @param bitSet A bitSet for copyPVStructure.
      */
     void updateCopySetBitSet(
@@ -141,8 +141,8 @@ public:
         BitSetPtr const  &bitSet);
     /**
      * For each set bit in bitSet
-     * set the field in copyPVStructure to the value of the corrseponding field in pvMaster.
-     * @param copyPVStructure A copy top level structure.
+     * set the field in copyPVStructure to the value of the corresponding field in pvMaster.
+     * @param copyPVStructure A copy top-level structure.
      * @param bitSet A bitSet for copyPVStructure.
      */
     void updateCopyFromBitSet(
@@ -150,8 +150,8 @@ public:
         BitSetPtr const  &bitSet);
     /**
      * For each set bit in bitSet
-     * set the field in pvMaster to the value of the corrseponding field in copyPVStructure
-     * @param copyPVStructure A copy top level structure.
+     * set the field in pvMaster to the value of the corresponding field in copyPVStructure
+     * @param copyPVStructure A copy top-level structure.
      * @param bitSet A bitSet for copyPVStructure.
      */
     void updateMaster(

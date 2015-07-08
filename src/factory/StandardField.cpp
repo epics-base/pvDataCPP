@@ -554,7 +554,7 @@ StructureConstPtr StandardField::enumerated()
     fields[0] = fieldCreate->createScalar(pvInt);
     fields[1] = fieldCreate->createScalarArray(pvString);
     return fieldCreate->createStructure("enum_t",names,fields);
-    // NOTE: if this method is used to get NTEnum wihtout properties the ID will be wrong!
+    // NOTE: if this method is used to get NTEnum without properties the ID will be wrong!
 }
 
 StructureConstPtr StandardField::enumerated(string  const &properties)

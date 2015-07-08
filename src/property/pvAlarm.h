@@ -76,7 +76,7 @@ public:
     /**
      * copy the values from Alarm to the alarm structure.
      * @param alarm An instance of class Alarm
-     * @return (false,true) if pvField (immutable, muttable)
+     * @return (false,true) if pvField (immutable, mutable)
      * @throw If not attached to a pvField.
      */
     bool set(Alarm const & alarm);

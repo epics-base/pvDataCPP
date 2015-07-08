@@ -33,7 +33,7 @@ protected:
      */
     ~NoDefaultMethods(){}
     private:
-    // do not implment
+    // do not implement
     NoDefaultMethods(const NoDefaultMethods&);
     NoDefaultMethods & operator=(const NoDefaultMethods &);
 };

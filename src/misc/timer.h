@@ -71,7 +71,7 @@ class epicsShareClass Timer : public Runnable {
 public:
     POINTER_DEFINITIONS(Timer);
     /**
-     * Contructor
+     * Constructor
      * @param threadName name for the timer thread.
      * @param priority thread priority
      */
@@ -81,7 +81,7 @@ public:
      */
     virtual ~Timer();
     /**
-     * The thead run method. This is called automatically.
+     * The thread run method. This is called automatically.
      */
     virtual void run();
     /**
