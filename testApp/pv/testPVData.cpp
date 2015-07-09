@@ -586,11 +586,18 @@ static void testFieldAccess()
     }catch(std::runtime_error& e){
         testPass("caught expected exception: %s", e.what());
     }
+
+    try{
+        fld->getAs<PVDouble>("hello.world.invalid");
+        testFail("missing required exception");
+    }catch(std::runtime_error& e){
+        testPass("caught expected exception: %s", e.what());
+    }
 }
 
 MAIN(testPVData)
 {
-    testPlan(235);
+    testPlan(236);
     fieldCreate = getFieldCreate();
     pvDataCreate = getPVDataCreate();
     standardField = getStandardField();
