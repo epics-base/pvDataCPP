@@ -170,7 +170,7 @@ PVField* PVStructure::GetAsImpl(const char *name) const
         if(*sep) {
             // this is not the requested leaf
             parent = dynamic_cast<PVStructure*>(child);
-            if(!child)
+            if(!parent)
                 throw std::runtime_error("mid-field is not a PVStructure"); //TODO: which sub field?
             child = NULL;
             name = sep+1; // skip past '.'
