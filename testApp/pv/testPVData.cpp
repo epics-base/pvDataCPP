@@ -541,16 +541,16 @@ static void testFieldAccess()
     PVIntPtr a = fld->getSubField<PVInt>("test");
     testOk1(a!=NULL);
     if(a.get()) {
-        PVInt& b = fld->getSubFieldT<PVInt>("test");
-        testOk(&b==a.get(), "%p == %p", &b, a.get());
+        PVIntPtr b = fld->getSubFieldT<PVInt>("test");
+        testOk(b.get()==a.get(), "%p == %p", b.get(), a.get());
     } else
         testSkip(1, "test doesn't exist?");
 
     a = fld->getSubField<PVInt>("hello.world");
     testOk1(a!=NULL);
     if(a.get()) {
-        PVInt& b = fld->getSubFieldT<PVInt>("hello.world");
-        testOk(&b==a.get(), "%p == %p", &b, a.get());
+        PVIntPtr b = fld->getSubFieldT<PVInt>("hello.world");
+        testOk(b.get()==a.get(), "%p == %p", b.get(), a.get());
     } else
         testSkip(1, "hello.world doesn't exist?");
 

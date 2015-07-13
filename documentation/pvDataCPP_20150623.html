@@ -2309,15 +2309,15 @@ public:
     template&lt;typename PVT&gt;
     std::tr1::shared_ptr&lt;PVT&gt; getSubField(std::size_t fieldOffset) const
 
-    PVField&amp; getSubFieldT(std::string const &amp;fieldName) const;
+    PVFieldPtr getSubFieldT(std::string const &amp;fieldName) const;
 
     template&lt;typename PVT&gt;
-    PVT&amp; getSubFieldT(std::string const &amp;fieldName) const
+    std::tr1::shared_ptr&lt;PVT&gt; getSubFieldT(std::string const &amp;fieldName) const
 
-    PVField&amp; getSubFieldT(std::size_t fieldOffset) const;
+    PVFieldPtr getSubFieldT(std::size_t fieldOffset) const;
 
     template&lt;typename PVT&gt;
-    PVT&amp; getSubFieldT(std::size_t fieldOffset) const
+    std::tr1::shared_ptr&lt;PVT&gt; getSubFieldT(std::size_t fieldOffset) const
 
     virtual void serialize(
         ByteBuffer *pbuffer,SerializableControl *pflusher) const ;

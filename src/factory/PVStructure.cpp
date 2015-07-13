@@ -134,11 +134,11 @@ PVFieldPtr  PVStructure::getSubField(size_t fieldOffset) const
     throw std::logic_error("PVStructure.getSubField: Logic error");
 }
 
-PVField& PVStructure::getSubFieldT(std::size_t fieldOffset) const
+PVFieldPtr PVStructure::getSubFieldT(std::size_t fieldOffset) const
 {
-    PVField * raw = getSubField(fieldOffset).get();
-    if (raw)
-        return *raw;
+    PVFieldPtr pvField = getSubField(fieldOffset);
+    if (pvField.get())
+        return pvField;
     else
     {
         std::stringstream ss;
