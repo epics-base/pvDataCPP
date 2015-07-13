@@ -712,7 +712,7 @@ public:
     }
 
 private:
-    PVField *GetAsImpl(const char *name) const;
+    PVField *GetAsImpl(const char *name, bool throws = true) const;
 public:
 
     /**
