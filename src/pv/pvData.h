@@ -712,7 +712,7 @@ public:
     }
 
 private:
-    PVField *GetAsImpl(const char *name, bool throws = true) const;
+    PVField *getSubFieldImpl(const char *name, bool throws = true) const;
 public:
 
     /**
@@ -721,13 +721,13 @@ public:
      * @returns A reference to the sub-field (never NULL)
      * @throws std::runtime_error if the requested sub-field doesn't exist, or has a different type
      * @code
-     *   PVInt& ref = pvStruct->getAs<PVInt>("substruct.leaffield");
+     *   PVInt& ref = pvStruct->getSubFieldT<PVInt>("substruct.leaffield");
      * @endcode
      */
     template<typename PVT>
-    PVT& getAs(const char *name) const
+    PVT& getSubFieldT(const char *name) const
     {
-        PVT *raw = dynamic_cast<PVT*>(GetAsImpl(name));
+        PVT *raw = dynamic_cast<PVT*>(getSubFieldImpl(name));
         if(!raw)
         {
             std::stringstream ss;
@@ -738,9 +738,9 @@ public:
     }
 
     template<typename PVT>
-    FORCE_INLINE PVT& getAs(std::string const &fieldName) const
+    FORCE_INLINE PVT& getSubFieldT(std::string const &fieldName) const
     {
-        return this->getAs<PVT>(fieldName.c_str());
+        return this->getSubFieldT<PVT>(fieldName.c_str());
     }
 
     /**

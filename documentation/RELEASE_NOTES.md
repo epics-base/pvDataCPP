@@ -7,7 +7,7 @@ The main changes since release 4.0 are:
 * Convert::copyUnion now always copies between subfields.
 * CreateRequest prevents a possible SEGFAULT.
 * New stream operators for Field and PVField are provided.
-* New method getAs that is like getSubField except that it throws exception
+* New method getSubFieldT that is like getSubField except that it throws exception
 
 Convert copy methods and equals operators
 -----------------------------------------
@@ -73,10 +73,10 @@ Now it can be done as follows:
          cout << pv << endl;
      }
 
-New method getAs that is like getSubField except that it throws exception
+New method getSubFieldT that is like getSubField except that it throws exception
 --------------------
 
-<b>PVStructure</b> has a new template member <b>getAs(const char *name)</b>
+<b>PVStructure</b> has a new template member <b>getSubFieldT(std::string const &fieldName)</b>
 that is like <b>getSubField</b> except that it throws a runtime_error
 instead of returning null.
 

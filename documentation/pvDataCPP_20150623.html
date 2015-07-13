@@ -465,10 +465,10 @@ structure
     PVStructurePtr doubleValue = getPVDataCreate()-&gt;createPVStructure(
         getStandardField()-&gt;scalar(pvDouble,"alarm,timeStamp"));
     PVDoublePtr pvdouble =
-        doubleValue-&gt;getAs&lt;PVDouble&gt;("value");
+        doubleValue-&gt;getSubField&lt;PVDouble&gt;("value");
     pvdouble-&gt;put(1e5);
     cout &lt;&lt; *doubleValue &lt;&lt; endl;
-    double value = doubleValue-&gt;getAs&lt;PVDouble&gt;("value")-&gt;get();
+    double value = doubleValue-&gt;getSubField&lt;PVDouble&gt;("value")-&gt;get();
     cout &lt;&lt; "from get " &lt;&lt; value &lt;&lt; "\n\n";
 </pre>
 This produces:
@@ -491,7 +491,7 @@ from get 100000
     PVStructurePtr doubleArrayValue = pvDataCreate-&gt;createPVStructure(
         standardField-&gt;scalarArray(pvDouble,"alarm,timeStamp"));
     PVDoubleArrayPtr pvDoubleArray =
-         doubleArrayValue-&gt;getAs&lt;PVDoubleArray&gt;("value");
+         doubleArrayValue-&gt;getSubField&lt;PVDoubleArray&gt;("value");
     size_t len = 10;
     shared_vector&lt;double&gt; xxx(len);
     for(size_t i=0; i&lt; len; ++i) xxx[i] = i;
@@ -605,10 +605,10 @@ structure
                 createUnion(),
             "alarm,timeStamp"));
     PVStructurePtr pvTimeStamp =
-        pvStructure-&gt;getAs&lt;PVUnion&gt;("value")-&gt;select&lt;PVStructure&gt;(2);
-    pvTimeStamp-&gt;getAs&lt;PVLong&gt;("secondsPastEpoch")-&gt;put(1000);
+        pvStructure-&gt;getSubField&lt;PVUnion&gt;("value")-&gt;select&lt;PVStructure&gt;(2);
+    pvTimeStamp-&gt;getSubField&lt;PVLong&gt;("secondsPastEpoch")-&gt;put(1000);
     cout &lt;&lt; *pvStructure) &lt;&lt; "\n";
-    pvStructure-&gt;getAs&lt;PVUnion&gt;("value")-&gt;select&lt;PVDouble&gt;(0)-&gt;put(1e5);
+    pvStructure-&gt;getSubField&lt;PVUnion&gt;("value")-&gt;select&lt;PVDouble&gt;(0)-&gt;put(1e5);
     cout &lt;&lt; *pvStructure &lt;&lt; "\n\n";
 </pre>
 This produces:
@@ -648,13 +648,13 @@ epics:nt/NTUnion:1.0
         standardField-&gt;variantUnion("alarm,timeStamp"));
     PVStructurePtr pvTimeStamp =
         pvDataCreate-&gt;createPVStructure(standardField-&gt;timeStamp());
-    pvStructure-&gt;getAs&lt;PVUnion&gt;("value")-&gt;set(pvTimeStamp);
-    pvTimeStamp-&gt;getAs&lt;PVLong&gt;("secondsPastEpoch")-&gt;put(1000);
+    pvStructure-&gt;getSubField&lt;PVUnion&gt;("value")-&gt;set(pvTimeStamp);
+    pvTimeStamp-&gt;getSubField&lt;PVLong&gt;("secondsPastEpoch")-&gt;put(1000);
     cout &lt;&lt; *pvStructure &lt;&lt; "\n";
-    pvStructure-&gt;getAs&lt;PVUnion&gt;("value")-&gt;set(
+    pvStructure-&gt;getSubField&lt;PVUnion&gt;("value")-&gt;set(
         pvDataCreate-&gt;createPVScalar(pvDouble));
     PVDoublePtr pvValue = static_pointer_cast&lt;PVDouble&gt;(
-        pvStructure-&gt;getAs&lt;PVUnion&gt;("value")-&gt;get());
+        pvStructure-&gt;getSubField&lt;PVUnion&gt;("value")-&gt;get());
     pvValue-&gt;put(1e5);
     cout &lt;&lt; *pvStructure &lt;&lt; "\n\n";
 </pre>
@@ -718,7 +718,7 @@ epics:nt/NTUnion:1.0
     cout &lt;&lt; *pvStructure-&gt;getStructure() &lt;&lt; endl;
     cout &lt;&lt; "data\n";
     cout &lt;&lt; *pvStructure &lt;&lt; "\n";
-    PVUnionPtr pvUnion = pvStructure-&gt;getAs&lt;PVUnion&gt;("value");;
+    PVUnionPtr pvUnion = pvStructure-&gt;getSubField&lt;PVUnion&gt;("value");;
     pvUnion-&gt;select("doubleValue");
     PVDoublePtr pvDouble = pvUnion-&gt;get&lt;PVDouble&gt;();
     pvDouble-&gt;put(1.55);
@@ -726,7 +726,7 @@ epics:nt/NTUnion:1.0
     cout &lt;&lt; *pvStructure &lt;&lt; "\n";
     cout &lt;&lt; "value = " &lt;&lt; pvDouble-&gt;get() &lt;&lt; "\n";
     pvUnion-&gt;select("structValue");
-    pvDouble = pvUnion-&gt;get&lt;PVStructure&gt;()-&gt;getAs&lt;PVDouble&gt;("doubleValue");
+    pvDouble = pvUnion-&gt;get&lt;PVStructure&gt;()-&gt;getSubField&lt;PVDouble&gt;("doubleValue");
     pvDouble-&gt;put(1.65);
     cout &lt;&lt; "select structValue\n";
     cout &lt;&lt; *pvStructure &lt;&lt; "\n";
@@ -2304,13 +2304,13 @@ public:
     template&lt;typename PVT&gt;
     std::tr1::shared_ptr&lt;PVT&gt; getSubField(std::string const &amp;fieldName) const
 
-    template&lt;typename PVT&gt;
-    PVT&amp; getAs(const char *name) const;
-
     PVFieldPtr getSubField(std::size_t fieldOffset) const;
 
     template&lt;typename PVT&gt;
     std::tr1::shared_ptr&lt;PVT&gt; getSubField(std::size_t fieldOffset) const
+
+    template&lt;typename PVT&gt;
+    PVT&amp; getSubFieldT(std::string const &amp;fieldName) const;
 
     virtual void serialize(
         ByteBuffer *pbuffer,SerializableControl *pflusher) const ;
@@ -2332,9 +2332,6 @@ public:
   <dt>getPVFields</dt>
     <dd>Returns the array of subfields. The set of subfields must all have
       different field names.</dd>
-  <dt>getAs(const char *name)</dt>
-     <dd>Like the getSubField except that it throws std::runtime_error if
-       the field does not exists or has the wrong type.</dd>
   <dt>getSubField(std::string fieldName)</dt>
     <dd>
       Get a subField of a field.d
@@ -2353,6 +2350,9 @@ public:
       <br />
       <b>Note</b> The template version replaces getBooleanField, etc.<br/>
     </dd>
+  <dt>getSubFieldT(std::string const &amp;fieldName)</dt>
+     <dd>Like getSubField except that it throws std::runtime_error if
+       the field does not exists or has the wrong type.</dd>
   <dt>dumpValue</dt>
      <dd>Method for streams I/O.</dd>
 </dl>
@@ -5414,7 +5414,7 @@ public:
         raiseMonitor = true;
         if(pvFieldOptions!=NULL) {
             PVStringPtr pvString =
-                pvFieldOptions-&gt;getAs&lt;PVString&gt;("raiseMonitor");
+                pvFieldOptions-&gt;getSubField&lt;PVString&gt;("raiseMonitor");
                 if(pvString!=NULL) {
                     std::string value = pvString-&gt;get();
                     if(value.compare("false")==0) raiseMonitor = false;

@@ -107,7 +107,7 @@ const PVFieldPtrArray & PVStructure::getPVFields() const
 
 PVFieldPtr  PVStructure::getSubField(string const &fieldName) const
 {
-    PVField * field = GetAsImpl(fieldName.c_str(), false);
+    PVField * field = getSubFieldImpl(fieldName.c_str(), false);
     if (field)
        return field->shared_from_this();
     else
@@ -134,7 +134,7 @@ PVFieldPtr  PVStructure::getSubField(size_t fieldOffset) const
     throw std::logic_error("PVStructure.getSubField: Logic error");
 }
 
-PVField* PVStructure::GetAsImpl(const char *name, bool throws) const
+PVField* PVStructure::getSubFieldImpl(const char *name, bool throws) const
 {
     const PVStructure *parent = this;
     if(!name)
