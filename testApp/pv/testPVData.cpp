@@ -573,6 +573,19 @@ static void testFieldAccess()
     // whitespace
     testOk1(fld->getSubField<PVInt>(" test").get()==NULL);
 
+    // intermediate field not structure
+    testOk1(fld->getSubField<PVInt>("hello.world.invalid").get()==NULL);
+
+    // null string
+    try{
+        char * name = NULL;
+        fld->getAs<PVInt>(name);
+        testFail("missing required exception");
+    }catch(std::invalid_argument& e){
+        testPass("caught expected exception: %s", e.what());
+    }
+
+    // non-existent
     try{
         fld->getAs<PVInt>("invalid");
         testFail("missing required exception");
@@ -580,6 +593,7 @@ static void testFieldAccess()
         testPass("caught expected exception: %s", e.what());
     }
 
+    // wrong type
     try{
         fld->getAs<PVDouble>("test");
         testFail("missing required exception");
@@ -587,6 +601,37 @@ static void testFieldAccess()
         testPass("caught expected exception: %s", e.what());
     }
 
+    // empty leaf field name
+    try{
+        fld->getAs<PVDouble>("hello.");
+        testFail("missing required exception");
+    }catch(std::runtime_error& e){
+        testPass("caught expected exception: %s", e.what());
+    }
+
+    // empty field name
+    try{
+        fld->getAs<PVDouble>("hello..world");
+        testFail("missing required exception");
+    }catch(std::runtime_error& e){
+        testPass("caught expected exception: %s", e.what());
+    }
+    try{
+        fld->getAs<PVDouble>(".");
+        testFail("missing required exception");
+    }catch(std::runtime_error& e){
+        testPass("caught expected exception: %s", e.what());
+    }
+
+    // whitespace
+    try{
+        fld->getAs<PVDouble>(" test");
+        testFail("missing required exception");
+    }catch(std::runtime_error& e){
+        testPass("caught expected exception: %s", e.what());
+    }
+
+    // intermediate field not structure
     try{
         fld->getAs<PVDouble>("hello.world.invalid");
         testFail("missing required exception");
@@ -597,7 +642,7 @@ static void testFieldAccess()
 
 MAIN(testPVData)
 {
-    testPlan(236);
+    testPlan(242);
     fieldCreate = getFieldCreate();
     pvDataCreate = getPVDataCreate();
     standardField = getStandardField();
