@@ -684,23 +684,42 @@ public:
      */
     PVFieldPtr getSubField(std::string const &fieldName) const;
 
+    /**
+     * Get a subfield with the specified name.
+     * @param fieldName a '.' separated list of child field names (no whitespace allowed)
+     * @returns A pointer to the sub-field or null if field does not exist or has a different type
+     * @code
+     *   PVIntPtr ptr = pvStruct->getSubField<PVInt>("substruct.leaffield");
+     * @endcode
+     */
     template<typename PVT>
-    std::tr1::shared_ptr<PVT> getSubField(std::string const &fieldName) const
+    FORCE_INLINE std::tr1::shared_ptr<PVT> getSubField(std::string const &fieldName) const
     {
-        PVFieldPtr pvField = getSubField(fieldName);
-        if (pvField.get())
-            return std::tr1::dynamic_pointer_cast<PVT>(pvField);
+        return this->getSubField<PVT>(fieldName.c_str());
+    }
+
+    template<typename PVT>
+    std::tr1::shared_ptr<PVT> getSubField(const char *name) const
+    {
+        PVField *raw = getSubFieldImpl(name, false);
+        if (raw)
+            return std::tr1::dynamic_pointer_cast<PVT>(raw->shared_from_this());
         else
             return std::tr1::shared_ptr<PVT>();
     }
-    
+
     /**
      * Get the subfield with the specified offset.
      * @param fieldOffset The offset.
      * @return Pointer to the field or null if field does not exist.
      */
     PVFieldPtr getSubField(std::size_t fieldOffset) const;
-    
+
+    /**
+     * Get the subfield with the specified offset.
+     * @param fieldOffset The offset.
+     * @return Pointer to the field or null if field does not exist.
+     */
     template<typename PVT>
     std::tr1::shared_ptr<PVT> getSubField(std::size_t fieldOffset) const
     {
@@ -711,19 +730,32 @@ public:
             return std::tr1::shared_ptr<PVT>();
     }
 
-private:
-    PVField *getSubFieldImpl(const char *name, bool throws = true) const;
-public:
+    /**
+     * Get a subfield with the specified name.
+     * @param fieldName a '.' separated list of child field names (no whitespace allowed)
+     * @returns A reference to the sub-field (never NULL)
+     * @throws std::runtime_error if the requested sub-field doesn't exist, or has a different type
+     */
+    FORCE_INLINE PVField& getSubFieldT(std::string const &fieldName) const
+    {
+        return *getSubFieldImpl(fieldName.c_str());
+    }
 
     /**
      * Get a subfield with the specified name.
-     * @param name a '.' separated list of child field names (no whitespace allowed)
+     * @param fieldName a '.' separated list of child field names (no whitespace allowed)
      * @returns A reference to the sub-field (never NULL)
      * @throws std::runtime_error if the requested sub-field doesn't exist, or has a different type
      * @code
      *   PVInt& ref = pvStruct->getSubFieldT<PVInt>("substruct.leaffield");
      * @endcode
      */
+    template<typename PVT>
+    FORCE_INLINE PVT& getSubFieldT(std::string const &fieldName) const
+    {
+        return this->getSubFieldT<PVT>(fieldName.c_str());
+    }
+
     template<typename PVT>
     PVT& getSubFieldT(const char *name) const
     {
@@ -737,10 +769,33 @@ public:
         return *raw;
     }
 
+    /**
+     * Get the subfield with the specified offset.
+     * @param fieldOffset The offset.
+     * @returns A reference to the sub-field (never NULL)
+     * @throws std::runtime_error if the requested sub-field doesn't exist
+     */
+    PVField& getSubFieldT(std::size_t fieldOffset) const;
+
+    /**
+     * Get the subfield with the specified offset.
+     * @param fieldOffset The offset.
+     * @returns A reference to the sub-field (never NULL)
+     * @throws std::runtime_error if the requested sub-field doesn't exist, or has a different type 
+     */
     template<typename PVT>
-    FORCE_INLINE PVT& getSubFieldT(std::string const &fieldName) const
+    PVT& getSubFieldT(std::size_t fieldOffset) const
     {
-        return this->getSubFieldT<PVT>(fieldName.c_str());
+        PVT* raw = dynamic_cast<PVT*>(&getSubFieldT(fieldOffset));
+        if (raw)
+            return *raw;
+        else
+        {
+            std::stringstream ss;
+            ss << "Failed to get field with offset "
+               << fieldOffset << " (Field has wrong type)";
+            throw std::runtime_error(ss.str());
+        }
     }
 
     /**
@@ -915,6 +970,8 @@ public:
     void copyUnchecked(const PVStructure& from, const BitSet& maskBitSet, bool inverse = false);
 
 private:
+    PVField *getSubFieldImpl(const char *name, bool throws = true) const;
+
     static PVFieldPtr nullPVField;
     static PVBooleanPtr nullPVBoolean;
     static PVBytePtr nullPVByte;

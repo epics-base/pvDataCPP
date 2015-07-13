@@ -134,6 +134,20 @@ PVFieldPtr  PVStructure::getSubField(size_t fieldOffset) const
     throw std::logic_error("PVStructure.getSubField: Logic error");
 }
 
+PVField& PVStructure::getSubFieldT(std::size_t fieldOffset) const
+{
+    PVField * raw = getSubField(fieldOffset).get();
+    if (raw)
+        return *raw;
+    else
+    {
+        std::stringstream ss;
+        ss << "Failed to get field with offset "
+           << fieldOffset << "(Invalid offset)" ;
+        throw std::runtime_error(ss.str());
+    }
+}
+
 PVField* PVStructure::getSubFieldImpl(const char *name, bool throws) const
 {
     const PVStructure *parent = this;

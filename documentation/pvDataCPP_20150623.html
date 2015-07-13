@@ -2309,8 +2309,15 @@ public:
     template&lt;typename PVT&gt;
     std::tr1::shared_ptr&lt;PVT&gt; getSubField(std::size_t fieldOffset) const
 
+    PVField&amp; getSubFieldT(std::string const &amp;fieldName) const;
+
     template&lt;typename PVT&gt;
-    PVT&amp; getSubFieldT(std::string const &amp;fieldName) const;
+    PVT&amp; getSubFieldT(std::string const &amp;fieldName) const
+
+    PVField&amp; getSubFieldT(std::size_t fieldOffset) const;
+
+    template&lt;typename PVT&gt;
+    PVT&amp; getSubFieldT(std::size_t fieldOffset) const
 
     virtual void serialize(
         ByteBuffer *pbuffer,SerializableControl *pflusher) const ;
@@ -2332,7 +2339,7 @@ public:
   <dt>getPVFields</dt>
     <dd>Returns the array of subfields. The set of subfields must all have
       different field names.</dd>
-  <dt>getSubField(std::string fieldName)</dt>
+  <dt>getSubField(std::string const &amp;fieldName)</dt>
     <dd>
       Get a subField of a field.d
       A non-null result is
@@ -2347,11 +2354,12 @@ public:
     <dd>Get the field located a fieldOffset, where fieldOffset is relative to
       the top level structure. This returns null if the specified field is not
       located within this PVStructure.
-      <br />
-      <b>Note</b> The template version replaces getBooleanField, etc.<br/>
     </dd>
   <dt>getSubFieldT(std::string const &amp;fieldName)</dt>
      <dd>Like getSubField except that it throws std::runtime_error if
+       the field does not exists or has the wrong type.</dd>
+  <dt>getSubFieldT(int fieldOffset)</dt>
+    <dd>Like getSubField except that it throws std::runtime_error if
        the field does not exists or has the wrong type.</dd>
   <dt>dumpValue</dt>
      <dd>Method for streams I/O.</dd>
