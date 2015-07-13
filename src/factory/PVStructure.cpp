@@ -140,17 +140,23 @@ PVField* PVStructure::GetAsImpl(const char *name, bool throws) const
     if(!name)
     {
         if (throws)
-            throw std::invalid_argument("field name is NULL string");
+            throw std::invalid_argument("Failed to get field: (Field name is NULL string)");
         else
             return NULL;
     }
+    const char *fullName = name;
     while(true) {
         const char *sep=name;
         while(*sep!='\0' && *sep!='.' && *sep!=' ') sep++;
         if(*sep==' ')
         {
             if (throws)
-                throw std::runtime_error("No spaces allowed in field name ");
+            {
+                std::stringstream ss;
+                ss << "Failed to get field: " << fullName
+                   << " (No spaces allowed in field name)";
+                throw std::runtime_error(ss.str());
+            }
             else
                 return NULL;
         }
@@ -158,7 +164,12 @@ PVField* PVStructure::GetAsImpl(const char *name, bool throws) const
         if(N==0)
         {
             if (throws)
-                throw std::runtime_error("zero-length field name encountered");
+            {
+                std::stringstream ss;
+                ss << "Failed to get field: " << fullName
+                   << " (Zero-length field name encountered)";
+                throw std::runtime_error(ss.str());
+            }
             else
                 return NULL;
         }
@@ -180,7 +191,12 @@ PVField* PVStructure::GetAsImpl(const char *name, bool throws) const
         if(!child)
         {
             if (throws)
-                throw std::runtime_error("field not found"); //TODO: which sub field?
+            {
+                std::stringstream ss;
+                ss << "Failed to get field: " << fullName << " ("
+                   << std::string(fullName, sep) << " not found)";
+                throw std::runtime_error(ss.str());   
+            }
             else
                 return NULL;
         }
@@ -191,7 +207,13 @@ PVField* PVStructure::GetAsImpl(const char *name, bool throws) const
             if(!parent)
             {
                 if (throws)
-                    throw std::runtime_error("mid-field is not a PVStructure"); //TODO: which sub field?
+                {
+                    std::stringstream ss;
+                    ss << "Failed to get field: " << fullName
+                       << " (" << std::string(fullName, sep)
+                       <<  " is not a structure)"; 
+                    throw std::runtime_error(ss.str());
+                }
                 else
                     return NULL;
             }

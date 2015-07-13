@@ -729,7 +729,11 @@ public:
     {
         PVT *raw = dynamic_cast<PVT*>(GetAsImpl(name));
         if(!raw)
-            throw std::runtime_error("Field has wrong type");
+        {
+            std::stringstream ss;
+            ss << "Failed to get field: " << name << " (Field has wrong type)";
+            throw std::runtime_error(ss.str());
+        }
         return *raw;
     }
 
