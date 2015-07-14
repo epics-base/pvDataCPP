@@ -107,11 +107,11 @@ const PVFieldPtrArray & PVStructure::getPVFields() const
 
 PVFieldPtr  PVStructure::getSubField(string const &fieldName) const
 {
-    try{
-        return GetAsImpl(fieldName.c_str())->shared_from_this();
-    }catch(...){
-        return PVFieldPtr();
-    }
+    PVField * field = getSubFieldImpl(fieldName.c_str(), false);
+    if (field)
+       return field->shared_from_this();
+    else
+       return PVFieldPtr();
 }
 
 
@@ -134,21 +134,59 @@ PVFieldPtr  PVStructure::getSubField(size_t fieldOffset) const
     throw std::logic_error("PVStructure.getSubField: Logic error");
 }
 
-PVField* PVStructure::GetAsImpl(const char *name) const
+PVFieldPtr PVStructure::getSubFieldT(std::size_t fieldOffset) const
+{
+    PVFieldPtr pvField = getSubField(fieldOffset);
+    if (pvField.get())
+        return pvField;
+    else
+    {
+        std::stringstream ss;
+        ss << "Failed to get field with offset "
+           << fieldOffset << "(Invalid offset)" ;
+        throw std::runtime_error(ss.str());
+    }
+}
+
+PVField* PVStructure::getSubFieldImpl(const char *name, bool throws) const
 {
     const PVStructure *parent = this;
     if(!name)
-        throw std::invalid_argument("field name is NULL string");
-
+    {
+        if (throws)
+            throw std::invalid_argument("Failed to get field: (Field name is NULL string)");
+        else
+            return NULL;
+    }
+    const char *fullName = name;
     while(true) {
         const char *sep=name;
         while(*sep!='\0' && *sep!='.' && *sep!=' ') sep++;
         if(*sep==' ')
-            throw std::runtime_error("No spaces allowed in field name");
-
+        {
+            if (throws)
+            {
+                std::stringstream ss;
+                ss << "Failed to get field: " << fullName
+                   << " (No spaces allowed in field name)";
+                throw std::runtime_error(ss.str());
+            }
+            else
+                return NULL;
+        }
         size_t N = sep-name;
         if(N==0)
-            throw std::runtime_error("zero-length field name encountered");
+        {
+            if (throws)
+            {
+                std::stringstream ss;
+                ss << "Failed to get field: " << fullName
+                   << " (Zero-length field name encountered)";
+                throw std::runtime_error(ss.str());
+            }
+            else
+                return NULL;
+        }
 
         const PVFieldPtrArray& pvFields = parent->getPVFields();
 
@@ -165,13 +203,34 @@ PVField* PVStructure::GetAsImpl(const char *name) const
         }
 
         if(!child)
-            throw std::runtime_error("field not found"); //TODO: which sub field?
+        {
+            if (throws)
+            {
+                std::stringstream ss;
+                ss << "Failed to get field: " << fullName << " ("
+                   << std::string(fullName, sep) << " not found)";
+                throw std::runtime_error(ss.str());   
+            }
+            else
+                return NULL;
+        }
 
         if(*sep) {
             // this is not the requested leaf
             parent = dynamic_cast<PVStructure*>(child);
             if(!parent)
-                throw std::runtime_error("mid-field is not a PVStructure"); //TODO: which sub field?
+            {
+                if (throws)
+                {
+                    std::stringstream ss;
+                    ss << "Failed to get field: " << fullName
+                       << " (" << std::string(fullName, sep)
+                       <<  " is not a structure)"; 
+                    throw std::runtime_error(ss.str());
+                }
+                else
+                    return NULL;
+            }
             child = NULL;
             name = sep+1; // skip past '.'
             // loop around to new parent
@@ -256,22 +315,13 @@ PVUnionPtr PVStructure::getUnionField(string const &fieldName)
 PVScalarArrayPtr PVStructure::getScalarArrayField(
     string const &fieldName,ScalarType elementType)
 {
-    try{
-        PVFieldPtr pvField = GetAsImpl(fieldName.c_str())->shared_from_this();
-        FieldConstPtr field = pvField->getField();
-        Type type = field->getType();
-        if(type!=scalarArray) {
-            return nullPVScalarArray;
-        }
-        ScalarArrayConstPtr pscalarArray
-            = static_pointer_cast<const ScalarArray>(pvField->getField());
-        if(pscalarArray->getElementType()!=elementType) {
-            return nullPVScalarArray;
-        }
-        return std::tr1::static_pointer_cast<PVScalarArray>(pvField);
-    }catch(...){
+     PVScalarArrayPtr arrayField = getSubField<PVScalarArray>(fieldName);
+     if (arrayField.get() &&
+         arrayField->getScalarArray()->getElementType()!=elementType)
+     {
         return nullPVScalarArray;
-    }
+     }
+     return arrayField;
 }
 
 PVStructureArrayPtr PVStructure::getStructureArrayField(

@@ -541,16 +541,16 @@ static void testFieldAccess()
     PVIntPtr a = fld->getSubField<PVInt>("test");
     testOk1(a!=NULL);
     if(a.get()) {
-        PVInt& b = fld->getAs<PVInt>("test");
-        testOk(&b==a.get(), "%p == %p", &b, a.get());
+        PVIntPtr b = fld->getSubFieldT<PVInt>("test");
+        testOk(b.get()==a.get(), "%p == %p", b.get(), a.get());
     } else
         testSkip(1, "test doesn't exist?");
 
     a = fld->getSubField<PVInt>("hello.world");
     testOk1(a!=NULL);
     if(a.get()) {
-        PVInt& b = fld->getAs<PVInt>("hello.world");
-        testOk(&b==a.get(), "%p == %p", &b, a.get());
+        PVIntPtr b = fld->getSubFieldT<PVInt>("hello.world");
+        testOk(b.get()==a.get(), "%p == %p", b.get(), a.get());
     } else
         testSkip(1, "hello.world doesn't exist?");
 
@@ -573,22 +573,67 @@ static void testFieldAccess()
     // whitespace
     testOk1(fld->getSubField<PVInt>(" test").get()==NULL);
 
+    // intermediate field not structure
+    testOk1(fld->getSubField<PVInt>("hello.world.invalid").get()==NULL);
+
+    // null string
     try{
-        fld->getAs<PVInt>("invalid");
+        char * name = NULL;
+        fld->getSubFieldT<PVInt>(name);
+        testFail("missing required exception");
+    }catch(std::invalid_argument& e){
+        testPass("caught expected exception: %s", e.what());
+    }
+
+    // non-existent
+    try{
+        fld->getSubFieldT<PVInt>("invalid");
         testFail("missing required exception");
     }catch(std::runtime_error& e){
         testPass("caught expected exception: %s", e.what());
     }
 
+    // wrong type
     try{
-        fld->getAs<PVDouble>("test");
+        fld->getSubFieldT<PVDouble>("test");
         testFail("missing required exception");
     }catch(std::runtime_error& e){
         testPass("caught expected exception: %s", e.what());
     }
 
+    // empty leaf field name
     try{
-        fld->getAs<PVDouble>("hello.world.invalid");
+        fld->getSubFieldT<PVDouble>("hello.");
+        testFail("missing required exception");
+    }catch(std::runtime_error& e){
+        testPass("caught expected exception: %s", e.what());
+    }
+
+    // empty field name
+    try{
+        fld->getSubFieldT<PVDouble>("hello..world");
+        testFail("missing required exception");
+    }catch(std::runtime_error& e){
+        testPass("caught expected exception: %s", e.what());
+    }
+    try{
+        fld->getSubFieldT<PVDouble>(".");
+        testFail("missing required exception");
+    }catch(std::runtime_error& e){
+        testPass("caught expected exception: %s", e.what());
+    }
+
+    // whitespace
+    try{
+        fld->getSubFieldT<PVDouble>(" test");
+        testFail("missing required exception");
+    }catch(std::runtime_error& e){
+        testPass("caught expected exception: %s", e.what());
+    }
+
+    // intermediate field not structure
+    try{
+        fld->getSubFieldT<PVDouble>("hello.world.invalid");
         testFail("missing required exception");
     }catch(std::runtime_error& e){
         testPass("caught expected exception: %s", e.what());
@@ -597,7 +642,7 @@ static void testFieldAccess()
 
 MAIN(testPVData)
 {
-    testPlan(236);
+    testPlan(242);
     fieldCreate = getFieldCreate();
     pvDataCreate = getPVDataCreate();
     standardField = getStandardField();
