@@ -108,7 +108,6 @@ static void testPVScalar(
 }
 
 static void testPVScalarArray(
-    ScalarType scalarType,
     string const & valueNameMaster,
     string const & valueNameCopy,
     PVStructurePtr const & pvMaster,
@@ -256,7 +255,7 @@ static void arrayTest()
     if(debug) { cout << "pvRequest\n" << *pvRequest << endl; }
     pvCopy = PVCopy::create(pvMaster,pvRequest,"");
     valueNameCopy = "value";
-    testPVScalarArray(pvDouble,valueNameMaster,valueNameCopy,pvMaster,pvCopy);
+    testPVScalarArray(valueNameMaster,valueNameCopy,pvMaster,pvCopy);
     request = "";
     valueNameMaster = "value";
     pvRequest = createRequest->createRequest(request);
@@ -264,7 +263,7 @@ static void arrayTest()
     if(debug) { cout << "pvRequest\n" << *pvRequest << endl; }
     pvCopy = PVCopy::create(pvMaster,pvRequest,"");
     valueNameCopy = "value";
-    testPVScalarArray(pvDouble,valueNameMaster,valueNameCopy,pvMaster,pvCopy);
+    testPVScalarArray(valueNameMaster,valueNameCopy,pvMaster,pvCopy);
     request = "alarm,timeStamp,value";
     valueNameMaster = "value";
     pvRequest = createRequest->createRequest(request);
@@ -272,7 +271,7 @@ static void arrayTest()
     if(debug) { cout << "pvRequest\n" << *pvRequest << endl; }
     pvCopy = PVCopy::create(pvMaster,pvRequest,"");
     valueNameCopy = "value";
-    testPVScalarArray(pvDouble,valueNameMaster,valueNameCopy,pvMaster,pvCopy);
+    testPVScalarArray(valueNameMaster,valueNameCopy,pvMaster,pvCopy);
 }
 
 static PVStructurePtr createPowerSupply()
