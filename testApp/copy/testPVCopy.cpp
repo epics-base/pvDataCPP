@@ -123,14 +123,14 @@ static void testPVScalarArray(
     shared_vector<double> values(n);
     shared_vector<const double> cvalues;
 
-    pvValueMaster = pvMaster->getScalarArrayField(valueNameMaster,scalarType);
+    pvValueMaster = pvMaster->getSubField<PVScalarArray>(valueNameMaster);
     for(size_t i=0; i<n; i++) values[i] = i;
     const shared_vector<const double> xxx(freeze(values));
     pvValueMaster->putFrom(xxx);
     StructureConstPtr structure = pvCopy->getStructure();
     if(debug) { cout << "structure from copy" << endl << *structure << endl;}
     pvStructureCopy = pvCopy->createPVStructure();
-    pvValueCopy = pvStructureCopy->getScalarArrayField(valueNameCopy,scalarType);
+    pvValueCopy = pvStructureCopy->getSubField<PVScalarArray>(valueNameCopy);
     bitSet = BitSetPtr(new BitSet(pvStructureCopy->getNumberFields()));
     pvCopy->initCopy(pvStructureCopy, bitSet);
     if(debug) { cout << "after initCopy pvValueCopy " << *pvValueCopy << endl; }

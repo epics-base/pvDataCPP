@@ -328,8 +328,7 @@ static void testScalarArrayCommon(string /*fieldName*/,ScalarType stype)
 {
     PVStructurePtr pvStructure = standardPVField->scalarArray(
         stype,alarmTimeStamp);
-    PVScalarArrayPtr scalarArray = pvStructure->getScalarArrayField(
-        "value",stype);
+    PVScalarArrayPtr scalarArray = pvStructure->getSubField<PVScalarArray>("value");
     testOk1(scalarArray.get()!=0);
     if(stype==pvBoolean) {
         StringArray values(3);
