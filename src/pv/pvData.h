@@ -908,7 +908,7 @@ public:
      * @return Pointer to the field of null if a field with that name and type does not exist.
      */
     PVScalarArrayPtr getScalarArrayField(
-        std::string const &fieldName,ScalarType elementType);
+        std::string const &fieldName,ScalarType elementType) USAGE_DEPRECATED;
     /**
      * Get a structureArray field with the specified name.
      * @deprecated No longer needed. Use template version of getSubField
