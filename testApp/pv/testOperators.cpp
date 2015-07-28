@@ -76,7 +76,7 @@ MAIN(testOperators)
     
     PVDoubleArray::svector values(3);
     values[0] = 1.1; values[1] = 2.2; values[2] = 3.3;
-    PVDoubleArrayPtr darray = std::tr1::dynamic_pointer_cast<PVDoubleArray>(pvStructure->getScalarArrayField("value", pvDouble));
+    PVDoubleArrayPtr darray = pvStructure->getSubField<PVDoubleArray>("value");
     darray->replace(freeze(values));
     std::cout << *darray << std::endl;
     std::cout << format::array_at(1) << *darray << std::endl;

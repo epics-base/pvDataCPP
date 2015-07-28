@@ -30,13 +30,12 @@ bool PVEnumerated::attach(PVFieldPtr const & pvField)
     PVStructurePtr pvStructure = static_pointer_cast<PVStructure>(pvField);
     pvIndex = pvStructure->getSubField<PVInt>("index");
     if(pvIndex.get()==NULL) return false;
-    PVScalarArrayPtr pvScalarArray = pvStructure->getScalarArrayField(
-        "choices",pvString);
-    if(pvScalarArray.get()==NULL) {
+    PVStringArrayPtr pvStringArray = pvStructure->getSubField<PVStringArray>("choices");
+    if(pvStringArray.get()==NULL) {
         pvIndex.reset();
         return false;
     }
-    pvChoices = static_pointer_cast<PVStringArray>(pvScalarArray);
+    pvChoices = pvStringArray;
     return true;
 }
 
