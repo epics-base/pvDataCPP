@@ -538,7 +538,7 @@ static void testFieldAccess()
     PVStructurePtr fld = pvDataCreate->createPVStructure(tdef);
 
     PVIntPtr a = fld->getSubField<PVInt>("test");
-    testOk1(a!=NULL);
+    testOk1(a.get() != NULL);
     if(a.get()) {
         PVIntPtr b = fld->getSubFieldT<PVInt>("test");
         testOk(b.get()==a.get(), "%p == %p", b.get(), a.get());
@@ -546,7 +546,7 @@ static void testFieldAccess()
         testSkip(1, "test doesn't exist?");
 
     a = fld->getSubField<PVInt>("hello.world");
-    testOk1(a!=NULL);
+    testOk1(a.get() != NULL);
     if(a.get()) {
         PVIntPtr b = fld->getSubFieldT<PVInt>("hello.world");
         testOk(b.get()==a.get(), "%p == %p", b.get(), a.get());
