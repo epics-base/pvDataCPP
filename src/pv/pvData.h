@@ -757,20 +757,8 @@ public:
     }
 
     template<typename PVT>
-    std::tr1::shared_ptr<PVT> getSubFieldT(const char *name) const
-    {
-        std::tr1::shared_ptr<PVT> pvField = std::tr1::dynamic_pointer_cast<PVT>(
-            getSubFieldImpl(name)->shared_from_this());
+    std::tr1::shared_ptr<PVT> getSubFieldT(const char *name) const;
 
-        if (pvField.get())
-            return pvField;
-        else
-        {
-            std::stringstream ss;
-            ss << "Failed to get field: " << name << " (Field has wrong type)";
-            throw std::runtime_error(ss.str());
-        }
-    }
     /**
      * Get the subfield with the specified offset.
      * @param fieldOffset The offset.
@@ -786,20 +774,7 @@ public:
      * @throws std::runtime_error if the requested sub-field doesn't exist, or has a different type 
      */
     template<typename PVT>
-    std::tr1::shared_ptr<PVT> getSubFieldT(std::size_t fieldOffset) const
-    {
-        std::tr1::shared_ptr<PVT> pvField = std::tr1::dynamic_pointer_cast<PVT>(
-            getSubFieldT(fieldOffset));
-        if (pvField.get())
-            return pvField;
-        else
-        {
-            std::stringstream ss;
-            ss << "Failed to get field with offset "
-               << fieldOffset << " (Field has wrong type)";
-            throw std::runtime_error(ss.str());
-        }
-    }
+    std::tr1::shared_ptr<PVT> getSubFieldT(std::size_t fieldOffset) const;
 
     /**
      * Serialize.
@@ -878,6 +853,38 @@ private:
     friend class PVDataCreate;
 };
 
+
+template<typename PVT>
+std::tr1::shared_ptr<PVT> PVStructure::getSubFieldT(const char *name) const
+{
+    std::tr1::shared_ptr<PVT> pvField = std::tr1::dynamic_pointer_cast<PVT>(
+        getSubFieldImpl(name)->shared_from_this());
+
+    if (pvField.get())
+        return pvField;
+    else
+    {
+        std::stringstream ss;
+        ss << "Failed to get field: " << name << " (Field has wrong type)";
+        throw std::runtime_error(ss.str());
+    }
+}
+
+template<typename PVT>
+std::tr1::shared_ptr<PVT> PVStructure::getSubFieldT(std::size_t fieldOffset) const
+{
+    std::tr1::shared_ptr<PVT> pvField = std::tr1::dynamic_pointer_cast<PVT>(
+        getSubFieldT(fieldOffset));
+    if (pvField.get())
+        return pvField;
+    else
+    {
+        std::stringstream ss;
+        ss << "Failed to get field with offset "
+           << fieldOffset << " (Field has wrong type)";
+        throw std::runtime_error(ss.str());
+    }
+}
 
 /**
  * @brief PVUnion has a single subfield.
