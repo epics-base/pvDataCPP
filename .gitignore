@@ -8,6 +8,8 @@ documentation/html
 documentation/*.tag
 envPaths
 configure/*.local
+configure/RELEASE.*
+configure/CONFIG_SITE.*
 !configure/ExampleRELEASE.local
 **/O.*
 QtC-*
