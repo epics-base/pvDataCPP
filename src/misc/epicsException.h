@@ -175,7 +175,7 @@ do { \
 
 #define PRINT_EXCEPTION2(EI, FP) \
 do { \
-    ExceptionMixin *_em_p=dynamic_cast<ExceptionMixin*>(&EI); \
+    ::epics::pvData::ExceptionMixin *_em_p=dynamic_cast< ::epics::pvData::ExceptionMixin*>(&EI); \
     if (_em_p) {_em_p->print(FP);} \
 }while(0)
 
@@ -185,7 +185,7 @@ do { \
 #  define SHOW_EXCEPTION(EI) ::epics::pvData::detail::showException(EI)
 #else
 #  define SHOW_EXCEPTION(EI) \
-    ({ ExceptionMixin *_mx=dynamic_cast<ExceptionMixin*>(&(EI)); \
+    ({ ::epics::pvData::ExceptionMixin *_mx=dynamic_cast< ::epics::pvData::ExceptionMixin*>(&(EI)); \
                            _mx ? _mx->show() : std::string(); \
                        })
 #endif
