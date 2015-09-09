@@ -15,6 +15,7 @@
 #include <cstddef>
 #include <string>
 #include <cstdio>
+#include <cstring>
 #include <list>
 
 #include <epicsUnitTest.h>
@@ -42,11 +43,11 @@ public:
     Event begin, end;
     Action(): actuallyRan(false) {}
     virtual void run() {
-        printf("Action waiting\n");
+        testDiag("Action waiting");
         begin.signal();
         bool waited=end.wait();
         actuallyRan=true;
-        printf("Action %s\n", waited?"true":"false");
+        testDiag("Action %s", waited?"true":"false");
     }
 };
 
@@ -56,13 +57,13 @@ static void testThreadRun() {
     {
         ThreadPtr tr(new Thread(actionName,lowPriority,ax.get()));
         bool w=ax->begin.wait();
-        printf( "main %s\n", w?"true":"false");
-        printf( "Action is %s\n", ax->actuallyRan?"true":"false");
+        testDiag( "main %s", w?"true":"false");
+        testDiag( "Action is %s", ax->actuallyRan?"true":"false");
         ax->end.signal();
     }
     testOk1(ax->actuallyRan==true);
-    printf( "Action is %s\n", ax->actuallyRan?"true":"false");
-    printf("testThreadRun PASSED\n");
+    testDiag( "Action is %s", ax->actuallyRan?"true":"false");
+    testDiag("testThreadRun PASSED");
 }
 
 class Basic;
@@ -84,7 +85,7 @@ public:
         executor->execute(getPtrSelf());
         bool result = wait.wait();
         testOk1(result==true);
-        if(result==false) printf("basic::run wait returned false\n");
+        if(result==false) testDiag("basic::run wait returned false");
     }
     virtual void command()
     {
@@ -105,7 +106,96 @@ static void testBasic() {
     ExecutorPtr executor(new Executor(string("basic"),middlePriority));
     BasicPtr basic( new Basic(executor));
     basic->run();
-    printf("testBasic PASSED\n");
+    testDiag("testBasic PASSED");
+}
+
+namespace {
+struct fninfo {
+    int cnt;
+    epicsEvent evnt;
+};
+
+static void threadFN(void *raw)
+{
+    fninfo *arg = (fninfo*)raw;
+    arg->evnt.signal();
+    arg->cnt++;
+}
+
+struct classMeth {
+    int cnt;
+    epicsEvent evnt;
+    classMeth() :cnt(0) {}
+    void inc() {
+        const char *tname = epicsThreadGetNameSelf();
+        testOk(strcmp(tname, "test2")==0, "thread name '%s' == 'test2' ", tname);
+        evnt.signal();
+        cnt++;
+    }
+};
+}
+
+static void testBinders()
+{
+    testDiag("Testing thread bindables");
+
+    testDiag("C style function");
+    {
+        fninfo info;
+        info.cnt = 0;
+        Thread foo(Thread::Config(&threadFN, (void*)&info)
+                   .name("test1")
+                   .prio(epicsThreadPriorityMedium)
+                   .autostart(true)
+                   );
+
+        info.evnt.wait();
+
+        foo.exitWait();
+
+        testOk(info.cnt==1, "cnt (%d) == 1", info.cnt);
+    }
+
+    testDiag("class method");
+    {
+        classMeth inst;
+
+        Thread foo(Thread::Config(&inst, &classMeth::inc)
+                   .prio(epicsThreadPriorityMedium)
+                   .autostart(false)
+                   <<"test"<<2
+                   );
+
+        epicsThreadSleep(0.1);
+
+        testOk(inst.cnt==0, "inst.cnt (%d) == 0", inst.cnt);
+
+        foo.start();
+        inst.evnt.wait();
+        foo.exitWait();
+
+        testOk(inst.cnt==1, "inst.cnt (%d) == 1", inst.cnt);
+    }
+
+    testDiag("C++11 style lambda");
+#if __cplusplus>=201103L
+    {
+        int cnt = 0;
+        epicsEvent evnt;
+        auto fn = [&cnt,&evnt]() mutable {evnt.signal(); cnt++;};
+        Thread foo(Thread::Config(fn)
+                   .name("test3")
+                   .prio(epicsThreadPriorityMedium)
+                   .autostart(true)
+                   );
+        evnt.wait();
+        foo.exitWait();
+
+        testOk(cnt==1, "cnt (%d) == 1", cnt);
+    }
+#else
+    testSkip(1, "Not built as C++11");
+#endif
 }
 
 class MyFunc : public TimeFunctionRequester {
@@ -137,17 +227,18 @@ static void testThreadContext() {
     TimeFunctionPtr timeFunction(new TimeFunction(myFunc));
     double perCall = timeFunction->timeCall();
     perCall *= 1e6;
-    printf("time per call %f microseconds\n",perCall);
-    printf("testThreadContext PASSED\n");
+    testDiag("time per call %f microseconds",perCall);
+    testDiag("testThreadContext PASSED");
 }
 #endif
 
 MAIN(testThread)
 {
-    testPlan(2);
+    testPlan(7);
     testDiag("Tests thread");
     testThreadRun();
     testBasic();
+    testBinders();
 #ifdef TESTTHREADCONTEXT
     testThreadContext();
 #endif
