@@ -947,9 +947,41 @@ StructureConstPtr FieldCreate::createStructure () const
       return createStructure(fieldNames,fields);
 }
 
+namespace {
+void validateFieldName(const std::string& n)
+{
+    for(size_t i=0, N=n.size(); i<N; i++)
+    {
+        char c = n[i];
+        if(c>='a' && c<='z') {}
+        else if(c>='A' && c<='Z') {}
+        else if(c>='0' && c<='9') {}
+        else {
+            switch(c){
+            case '_':
+                break;
+            default:
+            {
+                std::ostringstream msg;
+                msg<<"Invalid charactor '"<<c<<"' ("<<(int)c<<") in field name \""<<n<<"\"";
+                throw std::invalid_argument(msg.str());
+            }
+            }
+        }
+    }
+}
+
+void validateFieldNames(const StringArray& l)
+{
+    for(StringArray::const_iterator it=l.begin(), end=l.end(); it!=end; ++it)
+        validateFieldName(*it);
+}
+}
+
 StructureConstPtr FieldCreate::createStructure (
     StringArray const & fieldNames,FieldConstPtrArray const & fields) const
 {
+      validateFieldNames(fieldNames);
       // TODO use std::make_shared
       std::tr1::shared_ptr<Structure> sp(new Structure(fieldNames,fields), Field::Deleter());
       StructureConstPtr structure = sp;
@@ -961,6 +993,7 @@ StructureConstPtr FieldCreate::createStructure (
     StringArray const & fieldNames,
     FieldConstPtrArray const & fields) const
 {
+      validateFieldNames(fieldNames);
       // TODO use std::make_shared
       std::tr1::shared_ptr<Structure> sp(new Structure(fieldNames,fields,id), Field::Deleter());
       StructureConstPtr structure = sp;
@@ -979,6 +1012,7 @@ StructureArrayConstPtr FieldCreate::createStructureArray(
 UnionConstPtr FieldCreate::createUnion (
     StringArray const & fieldNames,FieldConstPtrArray const & fields) const
 {
+      validateFieldNames(fieldNames);
       // TODO use std::make_shared
       std::tr1::shared_ptr<Union> sp(new Union(fieldNames,fields), Field::Deleter());
       UnionConstPtr punion = sp;
@@ -990,6 +1024,7 @@ UnionConstPtr FieldCreate::createUnion (
     StringArray const & fieldNames,
     FieldConstPtrArray const & fields) const
 {
+      validateFieldNames(fieldNames);
       // TODO use std::make_shared
       std::tr1::shared_ptr<Union> sp(new Union(fieldNames,fields,id), Field::Deleter());
       UnionConstPtr punion = sp;
@@ -1039,6 +1074,7 @@ StructureConstPtr FieldCreate::appendFields(
     StringArray const & fieldNames,
     FieldConstPtrArray const & fields) const
 {
+    validateFieldNames(fieldNames);
     StringArray const & oldNames = structure->getFieldNames();
     FieldConstPtrArray const & oldFields = structure->getFields();
     size_t oldLen = oldNames.size();
