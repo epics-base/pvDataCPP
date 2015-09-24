@@ -79,6 +79,7 @@ static void testCreatePVStructureWithInvalidName()
             fieldNames,pvFields);
         testFail("Creation of invalid field name '%s' was allowed", fieldNames[1].c_str());
     } catch(std::invalid_argument& e) {
+        testDiag("Exception: \"%s\"", e.what());
         testPass("Creation of invalid field name '%s' fails as expected", fieldNames[1].c_str());
     }
 }

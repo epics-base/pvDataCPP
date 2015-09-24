@@ -948,14 +948,19 @@ StructureConstPtr FieldCreate::createStructure () const
 }
 
 namespace {
+bool xisalnum(char c)
+{
+    return (c>='a' && c<='z') || (c>='A' && c<='Z') || (c>='0' && c<='9');
+}
+
 void validateFieldName(const std::string& n)
 {
+    if(n.size()==0)
+        throw std::invalid_argument("zero length field names not allowed");
     for(size_t i=0, N=n.size(); i<N; i++)
     {
         char c = n[i];
-        if(c>='a' && c<='z') {}
-        else if(c>='A' && c<='Z') {}
-        else if(c>='0' && c<='9') {}
+        if(xisalnum(c)) {}
         else {
             switch(c){
             case '_':
