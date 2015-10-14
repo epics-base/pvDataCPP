@@ -54,7 +54,7 @@ public:
     PVStructurePtr scalar(ScalarType type,std::string const & properties);
     /**
      * Create a structure that has a scalar array value field.
-     * @param type The type.
+     * @param elementType The element scalar type.
      * @param properties A comma separated list of properties.
      * This is some combination of "alarm,timeStamp,display,control,valueAlarm".
      * @return The const shared pointer to the structure.
@@ -62,7 +62,7 @@ public:
     PVStructurePtr scalarArray(ScalarType elementType, std::string const & properties);
     /**
      * Create a structure that has a structure array value field.
-     * @param type The type.
+     * @param structure The Structure introspection object for elements of the value field.
      * @param properties A comma separated list of properties.
      * This is some combination of "alarm,timeStamp,display,control,valueAlarm".
      * @return The const shared pointer to the structure.
@@ -70,7 +70,7 @@ public:
     PVStructurePtr structureArray(StructureConstPtr const &structure,std::string const & properties);
     /**
      * Create a structure that has a union array value field.
-     * @param type The type.
+     * @param punion The Union introspection object for elements of the value field.
      * @param properties A comma separated list of properties.
      * This is some combination of "alarm,timeStamp,display,control,valueAlarm".
      * @return The const shared pointer to the structure.

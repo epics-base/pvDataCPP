@@ -363,7 +363,7 @@ public:
     virtual T get() const = 0;
     /**
      * Put a new value into the PVScalar.
-     * @param The value.
+     * @param value The value.
      */
     virtual void put(T value) = 0;
 
@@ -515,7 +515,7 @@ public:
     virtual std::size_t getLength() const = 0;
     /**
      * Set the array length.
-     * @param The length.
+     * @param length The length.
      */
     virtual void setLength(std::size_t length) = 0;
     /**
@@ -535,7 +535,7 @@ public:
     void setCapacityMutable(bool isMutable);
     /**
      * Set the array capacity.
-     * @param The capacity.
+     * @param capacity The capacity.
      */
     virtual void setCapacity(std::size_t capacity) = 0;
 
@@ -931,7 +931,7 @@ public:
      * Select field (set index) and get the field at the index.
      * @param index index of the field to select.
      * @return corresponding PVField (of undetermined value), {@code null} if {@code index == UNDEFINED_INDEX}.
-     * @throws {@code std::invalid_argument} if index is invalid (out of range).
+     * @throws std::invalid_argument if index is invalid (out of range).
      */
     PVFieldPtr select(int32 index);
 
@@ -944,7 +944,7 @@ public:
      * Select field (set index) and get the field by given name.
      * @param fieldName the name of the field to select.
      * @return corresponding PVField (of undetermined value).
-     * @throws {@code std::invalid_argument} if field does not exist.
+     * @throws std::invalid_argument if field does not exist.
      */
     PVFieldPtr select(std::string const & fieldName);
 
@@ -974,19 +974,19 @@ public:
     /**
      * Set the {@code PVField} (by reference!) as field at given index.
      * If a value is not a valid union field an {@code std::invalid_argument} exception is thrown.
-     * Use {@code select(int)} to put by value.
+     * Use {@code select(int32)} to put by value.
      * @param index index of a field to put.
      * @param value the field to set.
-     * @see #select(int)
+     * @see #select(int32)
      */
     void set(int32 index, PVFieldPtr const & value);
     /**
      * Set the {@code PVField} (by reference!) as field by given name.
      * If a value is not a valid union field an {@code std::invalid_argument} exception is thrown.
-     * Use {@code select(std::string)} to put by value.
+     * Use {@code select(std::string const &)} to put by value.
      * @param fieldName Name of the field to put.
      * @param value the field to set.
-     * @see #select(std::string)
+     * @see #select(std::string const &)
      */
     void set(std::string const & fieldName, PVFieldPtr const & value);
 
@@ -1447,7 +1447,7 @@ public:
     PVScalarPtr createPVScalar(ScalarConstPtr const & scalar);
     /**
      * Create an implementation of a scalar field. A Scalar introspection interface is created.
-     * @param fieldType The field type.
+     * @param scalarType The scalar type.
      * @return The PVScalar implementation.
      */
     PVScalarPtr createPVScalar(ScalarType scalarType);
@@ -1460,7 +1460,7 @@ public:
     PVScalarPtr createPVScalar(PVScalarPtr const & scalarToClone);
     /**
      * template version
-     * @param PVT must be a valid pvType
+     * @tparam PVT must be a valid PVType
      * @return The PVScalar implementation.
      */
     template<typename PVT>
@@ -1492,7 +1492,7 @@ public:
 
     /**
      * Create implementation for PVUnion.
-     * @param union The introspection interface.
+     * @param punion The introspection interface.
      * @return The PVUnion implementation
      */
     PVUnionPtr createPVUnion(UnionConstPtr const & punion);
@@ -1510,13 +1510,12 @@ public:
 
     /**
      * Create an implementation of an array field reusing the Array introspection interface.
-     * @param array The introspection interface.
+     * @param scalarArray The introspection interface.
      * @return The PVScalarArray implementation.
      */
     PVScalarArrayPtr createPVScalarArray(ScalarArrayConstPtr const & scalarArray);
     /**
      * Create an implementation for an array field. An Array introspection interface is created.
-     * @param parent The parent interface.
      * @param elementType The element type.
      * @return The PVScalarArray implementation.
      */
@@ -1524,13 +1523,13 @@ public:
     /**
      * Create an implementation of an array field by cloning an existing PVArray.
      * The new PVArray will have the same value and auxInfo as the original.
-     * @param arrayToClone The PVScalarArray to clone.
+     * @param scalarArrayToClone The PVScalarArray to clone.
      * @return The PVScalarArray implementation.
      */
     PVScalarArrayPtr createPVScalarArray(PVScalarArrayPtr const  & scalarArrayToClone);
     /**
      * template version
-     * @param PVT must be a valid pvType
+     * @tparam PVT must be a valid pvType
      * @return The PVScalarArray implementation.
      */
     template<typename PVAT>
@@ -1587,9 +1586,8 @@ private:
 
 /**
  * Get the single class that implements PVDataCreate
- * @param The PVDataCreate factory.
+ * @return The PVDataCreate factory.
  */
-
 epicsShareExtern PVDataCreatePtr getPVDataCreate();
 
 bool epicsShareExtern operator==(const PVField&, const PVField&);

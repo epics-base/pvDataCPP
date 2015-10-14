@@ -107,7 +107,7 @@ public:
     int32 getUserTag() const {return userTag;}
     /**
      * Set userTag.
-     * @param useTag application specific.
+     * @param userTag application specific.
      */
     void setUserTag(int userTag) {this->userTag = userTag;}
     /**
@@ -162,7 +162,7 @@ public:
     /**
      * Return a-b as a  double value with units of seconds.
      * @param a first timeStamp
-     * @param n second timeStamp
+     * @param b second timeStamp
      * @return time difference in seconds.
      */
     static double diff(TimeStamp const & a,TimeStamp const & b);

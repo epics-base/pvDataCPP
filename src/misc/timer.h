@@ -115,7 +115,7 @@ public:
     bool isScheduled(TimerCallbackPtr const &timerCallback);
     /**
      * show the elements in the timer queue.
-     * @parm o The output stream for the output
+     * @param o The output stream for the output
      */
     void dump(std::ostream& o);
 

@@ -318,7 +318,7 @@ public:
 protected:
     /**
      * Constructor
-     * @param  fieldName The field type.
+     * @param  type The field type.
      */
    Field(Type type);
 private:
@@ -433,7 +433,7 @@ public:
 protected:
     /**
      * Constructor
-     * @param  fieldName The field type.
+     * @param type The field type.
      */
    Array(Type type);
 
@@ -626,7 +626,7 @@ public:
 protected:
     /**
      * Constructor.
-     * @param union The introspection interface for the elements.
+     * @param _punion The introspection interface for the elements.
      */
     UnionArray(UnionConstPtr const & _punion);
     /**
@@ -689,7 +689,7 @@ public:
 
     /**
      * Get the field for the specified fieldName.
-     * @param fieldName The index of the field to get;
+     * @param index The index of the field to get;
      * @return The introspection interface.
      * This will hold a null pointer if the field is not in the structure.
      */
@@ -810,7 +810,7 @@ public:
 
     /**
      * Get the field for the specified fieldName.
-     * @param fieldName The index of the field to get;
+     * @param index The index of the field to get;
      * @return The introspection interface.
      * This will hold a null pointer if the field is not in the union.
      */
@@ -952,7 +952,7 @@ public:
     /**
      * Add array of {@code Field} elements.
      * @param name name of the array.
-     * @param field a type of an array element.
+     * @param element a type of an array element.
      * @return this instance of a {@code FieldBuilder}.
      */
     FieldBuilderPtr addArray(std::string const & name, FieldConstPtr const & element);
@@ -1013,8 +1013,8 @@ public:
 
     /**
      * Complete the creation of a nested object.
-     * @see #addNestedStructure(std::string)
-     * @see #addNestedUnion(std::string)
+     * @see #addNestedStructure(std::string const & name)
+     * @see #addNestedUnion(std::string const & name)
      * @return a previous (parent) {@code FieldBuilder}.
      */
     FieldBuilderPtr endNested();
@@ -1062,14 +1062,14 @@ public:
      * Create a {@code ScalarField}.
      * @param scalarType The scalar type.
      * @return a {@code Scalar} interface for the newly created object.
-     * @throws An {@code IllegalArgumentException} if an illegal type is specified.
+     * @throws IllegalArgumentException if an illegal type is specified.
      */
     ScalarConstPtr createScalar(ScalarType scalarType) const;
     /**
      * Create a {@code BoundedString}.
      * @param maxLength a string maximum length.
      * @return a {@code BoundedString} interface for the newly created object.
-     * @throws An {@code IllegalArgumentException} if maxLength == 0.
+     * @throws IllegalArgumentException if maxLength == 0.
      */
     BoundedStringConstPtr createBoundedString(std::size_t maxLength) const;
     /**
@@ -1088,14 +1088,13 @@ public:
     /**
      * Create an {@code Array} field, bounded size array.
      * @param elementType The {@code scalarType} for array elements
-     * @param size Array maximum capacity (bound).
+     * @param bound Array maximum capacity.
      * @return An {@code Array} Interface for the newly created object.
      */
      ScalarArrayConstPtr createBoundedScalarArray(ScalarType elementType, std::size_t bound) const;
      /**
       * Create an {@code Array} field that is has element type <i>Structure</i>
-      * @param fieldName The field name
-      * @param elementStructure The {@code Structure} for each array element.
+      * @param structure The {@code Structure} for each array element.
       * @return An {@code Array} Interface for the newly created object.
       */
     StructureArrayConstPtr createStructureArray(StructureConstPtr const & structure) const;
@@ -1126,8 +1125,7 @@ public:
         FieldConstPtrArray const & fields) const;
      /**
       * Create an {@code Array} field that is has element type <i>Union</i>
-      * @param fieldName The field name
-      * @param elementUnion The {@code Union} for each array element.
+      * @param punion The {@code Union} for each array element.
       * @return An {@code Array} Interface for the newly created object.
       */
     UnionArrayConstPtr createUnionArray(UnionConstPtr const & punion) const;
@@ -1174,8 +1172,8 @@ public:
     /**
      * Append fields to a structure.
      * @param structure The structure to which the fields appended.
-     * @param fieldName The names of the fields.
-     * @param field The fields.
+     * @param fieldNames The names of the fields.
+     * @param fields The fields.
      * @return a {@code Structure} interface for the newly created object.
      */
     StructureConstPtr appendFields(
@@ -1201,7 +1199,7 @@ private:
 
 /**
  * Get the single class that implements FieldCreate,
- * @param The fieldCreate factory.
+ * @return The fieldCreate factory.
  */
 epicsShareExtern FieldCreatePtr getFieldCreate();
 

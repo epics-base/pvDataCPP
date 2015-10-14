@@ -399,9 +399,9 @@ public:
      * Put a sub-array of bytes into the byte buffer.
      * The position is increased by the count.
      *
-     * @param  src    The source array.
-     * @param  offset The starting position within src.
-     * @param  count  The number of bytes to put into the byte buffer,
+     * @param  src        The source array.
+     * @param  src_offset The starting position within src.
+     * @param  count      The number of bytes to put into the byte buffer,
      */
     inline void put(const char* src, std::size_t src_offset, std::size_t count) {
         //if(count>getRemaining()) THROW_BASE_EXCEPTION("buffer overflow");
@@ -412,9 +412,9 @@ public:
      * Get a sub-array of bytes from the byte buffer.
      * The position is increased by the count.
      *
-     * @param  dest    The destination array.
-     * @param  offset The starting position within src.
-     * @param  count  The number of bytes to put into the byte buffer,
+     * @param  dest        The destination array.
+     * @param  dest_offset The starting position within src.
+     * @param  count       The number of bytes to put into the byte buffer.
      */
     inline void get(char* dest, std::size_t dest_offset, std::size_t count) {
         //if(count>getRemaining()) THROW_BASE_EXCEPTION("buffer overflow");
@@ -637,7 +637,7 @@ public:
     /**
      * Get a boolean value from the byte buffer at the specified index.
      *
-     * @param  double The offset in the byte buffer.
+     * @param  index The offset in the byte buffer.
      * @return The value.
      */
     inline double getDouble (std::size_t  index) { return get<double>(index); }

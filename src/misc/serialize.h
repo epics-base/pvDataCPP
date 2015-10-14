@@ -118,7 +118,6 @@ namespace epics { namespace pvData {
             std::size_t elementSize) = 0;
         /**
          * deserialize via cache
-         * @param field instance to be deserialized
          * @param buffer buffer to be deserialized from
          */
         virtual std::tr1::shared_ptr<const Field> cachedDeserialize(
@@ -196,7 +195,7 @@ namespace epics { namespace pvData {
          * Serialize field into given buffer.
          * @param buffer serialization buffer.
          * @param flusher flush interface.
-         * &param offset offset in elements.
+         * @param offset offset in elements.
          * @param count number of elements
          */
         virtual void serialize(
