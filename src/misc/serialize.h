@@ -165,7 +165,7 @@ namespace epics { namespace pvData {
          * Serialize field into given buffer.
          * @param buffer serialization buffer.
          * @param flusher flush interface.
-         * &param bitSet The bitSet to serialize.
+         * @param bitSet The bitSet to serialize.
          */
         virtual void serialize(ByteBuffer *buffer,
             SerializableControl *flusher,BitSet *bitSet) const = 0;
@@ -173,7 +173,7 @@ namespace epics { namespace pvData {
          * Deserialize buffer.
          * @param buffer serialization buffer.
          * @param flusher deserialization control.
-         * &param bitSet The bitSet to deserialize.
+         * @param bitSet The bitSet to deserialize.
          */
         virtual void deserialize(ByteBuffer *buffer,
             DeserializableControl *flusher,BitSet *bitSet) = 0;

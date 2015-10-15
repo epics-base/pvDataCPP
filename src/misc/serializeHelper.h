@@ -31,19 +31,25 @@ namespace epics {
         public:
 
             /**
-             * Serialize array size.
+             * Serialize the specified array size into the specified
+             * buffer, flushing when necessary.
+             * The specified SerializableControl manages any flushing
+             * required.
              *
              * @param[in] s size to encode
              * @param[in] buffer serialization buffer
-             * @param[in] flusher flusher
+             * @param[in] flusher SerializableControl to manage the flushing
              */
             static void writeSize(std::size_t s, ByteBuffer* buffer,
                     SerializableControl* flusher);
 
             /**
              * Deserialize array size.
+             * The specified DeserializableControl ensures
+             * sufficient bytes are available.
              *
              * @param[in] buffer deserialization buffer.
+             * @param[in] control the DeserializableControl.
              * @returns array size.
              */
             static std::size_t readSize(ByteBuffer* buffer,
