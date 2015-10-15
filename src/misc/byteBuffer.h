@@ -208,7 +208,7 @@ inline double swap(double val)
 /**
  * @brief This class implements a Bytebuffer that is like the java.nio.ByteBuffer.
  * 
- * <p>A {@code BitSet} is not safe for multithreaded use without
+ * <p>A @c BitSet is not safe for multithreaded use without
  * external synchronization.
  *
  * Based on Java implementation.
@@ -373,7 +373,7 @@ public:
     template<typename T>
     inline void put(std::size_t index, T value);
     /**
-     * Get the new object from  the byte buffer. The item MUST have type {@code T}.
+     * Get the new object from  the byte buffer. The item MUST have type @c T.
      * The position is adjusted based on the type.
      *
      * @return The object.
@@ -387,7 +387,7 @@ public:
 #endif
     /**
      * Get the new object from  the byte buffer at the specified index.
-     * The item MUST have type {@code T}.
+     * The item MUST have type @c T.
      * The position is adjusted based on the type.
      *
      * @param index The location in the byte buffer.
@@ -422,7 +422,7 @@ public:
         _position += count;
     }
     /**
-     * Put an array of type {@code T} into the byte buffer.
+     * Put an array of type @c T into the byte buffer.
      * The position is adjusted.
      *
      * @param  values The input array.
@@ -431,7 +431,7 @@ public:
     template<typename T>
     inline void putArray(const T* values, std::size_t count);
     /**
-     * Get an array of type {@code T} from the byte buffer.
+     * Get an array of type @c T from the byte buffer.
      * The position is adjusted.
      *
      * @param  values The destination array.

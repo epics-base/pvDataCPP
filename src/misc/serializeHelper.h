@@ -63,7 +63,7 @@ namespace epics {
              * std::string serialization helper method.
              *
              * @param[in] value std::string to serialize
-             * @param[in] offset start of the substring in {@code value}
+             * @param[in] offset start of the substring in value
              * @param[in] count the number of characters to write
              * @param[in] buffer serialization buffer
              * @param[in] flusher flusher

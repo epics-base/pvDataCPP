@@ -906,7 +906,7 @@ public:
 	/**
 	 * Undefined index.
 	 * Default value upon PVUnion construction. Can be set by the user.
-	 * Corresponds to {@code null} value.
+	 * Corresponds to @c null value.
 	 */
 	static int32 UNDEFINED_INDEX;
 
@@ -917,8 +917,8 @@ public:
     UnionConstPtr getUnion() const;
 
     /**
-     * Get the {@code PVField} value stored in the field.
-     * @return {@code PVField} value of field, {@code null} if {@code getSelectedIndex() == UNDEFINED_INDEX}.
+     * Get the @c PVField value stored in the field.
+     * @return @c PVField value of field, @c null if {@code getSelectedIndex() == UNDEFINED_INDEX}.
      */
     PVFieldPtr get() const;
    
@@ -930,7 +930,7 @@ public:
     /**
      * Select field (set index) and get the field at the index.
      * @param index index of the field to select.
-     * @return corresponding PVField (of undetermined value), {@code null} if {@code index == UNDEFINED_INDEX}.
+     * @return corresponding PVField (of undetermined value), @c null if {@code index == UNDEFINED_INDEX}.
      * @throws std::invalid_argument if index is invalid (out of range).
      */
     PVFieldPtr select(int32 index);
@@ -966,24 +966,27 @@ public:
     std::string getSelectedFieldName() const;
     
     /**
-     * Set the {@code PVField} (by reference!) as selected field.
-     * If a value is not a valid union field an {@code std::invalid_argument} exception is thrown.
+     * Set the @c PVField (by reference!) as selected field.
+     * If a value is not a valid union field an @c std::invalid_argument
+     * exception is thrown.
      * @param value the field to set.
      */
     void set(PVFieldPtr const & value);
     /**
-     * Set the {@code PVField} (by reference!) as field at given index.
-     * If a value is not a valid union field an {@code std::invalid_argument} exception is thrown.
-     * Use {@code select(int32)} to put by value.
+     * Set the @c PVField (by reference!) as field at given index.
+     * If a value is not a valid union field an @c std::invalid_argument
+     * exception is thrown.
+     * Use @c select(int32) to put by value.
      * @param index index of a field to put.
      * @param value the field to set.
      * @see #select(int32)
      */
     void set(int32 index, PVFieldPtr const & value);
     /**
-     * Set the {@code PVField} (by reference!) as field by given name.
-     * If a value is not a valid union field an {@code std::invalid_argument} exception is thrown.
-     * Use {@code select(std::string const &)} to put by value.
+     * Set the @c PVField (by reference!) as field by given name.
+     * If a value is not a valid union field an @c std::invalid_argument
+     * exception is thrown.
+     * Use @c select(std::string const &) to put by value.
      * @param fieldName Name of the field to put.
      * @param value the field to set.
      * @see #select(std::string const &)

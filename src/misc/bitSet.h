@@ -27,15 +27,15 @@ namespace epics { namespace pvData {
      * @brief A vector of bits.
      *
      * This class implements a vector of bits that grows as needed. Each
-     * component of the bit set has a {@code bool} value. The
-     * bits of a {@code BitSet} are indexed by nonnegative integers.
-     * Individual indexed bits can be examined, set, or cleared. One
-     * {@code BitSet} may be used to modify the contents of another
-     * {@code BitSet} through logical AND, logical inclusive OR, and
-     * logical exclusive OR operations.
+     * component of the bit set has a @c bool value. The bits of a
+     * @c BitSet are indexed by nonnegative integers. Individual
+     * indexed bits can be examined, set, or cleared. One @c BitSet may
+     * be used to modify the contents of another @c BitSet through
+     * logical AND, logical inclusive OR, and logical exclusive OR
+     * operations.
      *
      * <p>By default, all bits in the set initially have the value
-     * {@code false}.
+     * @c false.
      *
      * <p>Every bit set has a current size, which is the number of bits
      * of space currently in use by the bit set. Note that the size is
@@ -43,8 +43,8 @@ namespace epics { namespace pvData {
      * implementation. The length of a bit set relates to logical length
      * of a bit set and is defined independently of implementation.
      *
-     * <p>A {@code BitSet} is not safe for multithreaded use without
-     * external synchronization.
+     * <p>A @c BitSet is not safe for multithreaded use without external
+     * synchronization.
      *
      * Based on Java implementation.
      */
@@ -53,14 +53,14 @@ namespace epics { namespace pvData {
         POINTER_DEFINITIONS(BitSet);
         static BitSetPtr create(uint32 nbits);
         /**
-         * Creates a new bit set. All bits are initially {@code false}.
+         * Creates a new bit set. All bits are initially @c false.
          */
         BitSet();
 
         /**
          * Creates a bit set whose initial size is large enough to explicitly
-         * represent bits with indices in the range {@code 0} through
-         * {@code nbits-1}. All bits are initially {@code false}.
+         * represent bits with indices in the range @c 0 through
+         * @c nbits-1. All bits are initially @c false.
          *
          * @param  nbits the initial size of the bit set
          */
@@ -80,14 +80,14 @@ namespace epics { namespace pvData {
         void flip(uint32 bitIndex);
 
         /**
-         * Sets the bit at the specified index to {@code true}.
+         * Sets the bit at the specified index to @c true.
          *
          * @param  bitIndex a bit index
          */
         void set(uint32 bitIndex);
 
         /**
-         * Sets the bit specified by the index to {@code false}.
+         * Sets the bit specified by the index to @c false.
          *
          * @param  bitIndex the index of the bit to be cleared
          */
@@ -103,9 +103,8 @@ namespace epics { namespace pvData {
 
         /**
          * Returns the value of the bit with the specified index. The value
-         * is {@code true} if the bit with the index {@code bitIndex}
-         * is currently set in this {@code BitSet}; otherwise, the result
-         * is {@code false}.
+         * is @c true if the bit with the index @c bitIndex is currently
+         * set in this @c BitSet; otherwise, the result is @c false.
          *
          * @param  bitIndex   the bit index
          * @return the value of the bit with the specified index
@@ -113,16 +112,16 @@ namespace epics { namespace pvData {
         bool get(uint32 bitIndex) const;
 
         /**
-         * Sets all of the bits in this BitSet to {@code false}.
+         * Sets all of the bits in this BitSet to @c false.
          */
         void clear();
 
         /**
-         * Returns the index of the first bit that is set to {@code true}
-         * that occurs on or after the specified starting index. If no such
-         * bit exists then {@code -1} is returned.
+         * Returns the index of the first bit that is set to @c true that
+         * occurs on or after the specified starting index. If no such bit
+         * exists then @c -1 is returned.
          *
-         * <p>To iterate over the {@code true} bits in a {@code BitSet},
+         * <p>To iterate over the @c true bits in a @c BitSet,
          * use the following loop:
          *
          *  <pre> {@code
@@ -131,13 +130,13 @@ namespace epics { namespace pvData {
          * }}</pre>
          *
          * @param  fromIndex the index to start checking from (inclusive)
-         * @return the index of the next set bit, or {@code -1} if there
+         * @return the index of the next set bit, or @c -1 if there
          *         is no such bit
          */
         int32 nextSetBit(uint32 fromIndex) const;
 
         /**
-         * Returns the index of the first bit that is set to {@code false}
+         * Returns the index of the first bit that is set to @c false
          * that occurs on or after the specified starting index.
          *
          * @param  fromIndex the index to start checking from (inclusive)
@@ -146,23 +145,23 @@ namespace epics { namespace pvData {
         int32 nextClearBit(uint32 fromIndex) const;
 
         /**
-         * Returns true if this {@code BitSet} contains no bits that are set
-         * to {@code true}.
+         * Returns true if this @c BitSet contains no bits that are set
+         * to @c true.
          *
-         * @return indicating whether this {@code BitSet} is empty
+         * @return indicating whether this @c BitSet is empty
          */
         bool isEmpty() const;
 
         /**
-         * Returns the number of bits set to {@code true} in this {@code BitSet}.
+         * Returns the number of bits set to @c true in this @c BitSet.
          *
-         * @return the number of bits set to {@code true} in this {@code BitSet}
+         * @return the number of bits set to @c true in this @c BitSet
          */
         uint32 cardinality() const;
 
         /**
          * Returns the number of bits of space actually in use by this
-         * {@code BitSet} to represent bit values.
+         * @c BitSet to represent bit values.
          * The maximum element in the set is the size - 1st element.
          *
          * @return the number of bits currently in this bit set
@@ -172,9 +171,9 @@ namespace epics { namespace pvData {
         /**
          * Performs a logical <b>AND</b> of this target bit set with the
          * argument bit set. This bit set is modified so that each bit in it
-         * has the value {@code true} if and only if it both initially
-         * had the value {@code true} and the corresponding bit in the
-         * bit set argument also had the value {@code true}.
+         * has the value @c true if and only if it both initially
+         * had the value @c true and the corresponding bit in the
+         * bit set argument also had the value @c true.
          *
          * @param set a bit set
          */
@@ -183,9 +182,9 @@ namespace epics { namespace pvData {
         /**
          * Performs a logical <b>OR</b> of this bit set with the bit set
          * argument. This bit set is modified so that a bit in it has the
-         * value {@code true} if and only if it either already had the
-         * value {@code true} or the corresponding bit in the bit set
-         * argument has the value {@code true}.
+         * value @c true if and only if it either already had the
+         * value @c true or the corresponding bit in the bit set
+         * argument has the value @c true.
          *
          * @param set a bit set
          */
@@ -194,13 +193,13 @@ namespace epics { namespace pvData {
         /**
          * Performs a logical <b>XOR</b> of this bit set with the bit set
          * argument. This bit set is modified so that a bit in it has the
-         * value {@code true} if and only if one of the following
+         * value @c true if and only if one of the following
          * statements holds:
          * <ul>
-         * <li>The bit initially has the value {@code true}, and the
-         *     corresponding bit in the argument has the value {@code false}.
-         * <li>The bit initially has the value {@code false}, and the
-         *     corresponding bit in the argument has the value {@code true}.
+         * <li>The bit initially has the value @c true, and the
+         *     corresponding bit in the argument has the value @c false.
+         * <li>The bit initially has the value @c false, and the
+         *     corresponding bit in the argument has the value @c true.
          * </ul>
          *
          * @param  set a bit set

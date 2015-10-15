@@ -183,7 +183,7 @@ epicsShareExtern std::ostream& operator<<(std::ostream& o, const Type& type);
  */
 enum ScalarType {
     /**
-     * The type is boolean, i.e. value can be {@code false} or {@code true}
+     * The type is boolean, i.e. value can be @c false or @c true
      */
     pvBoolean,
     /**
@@ -884,7 +884,7 @@ typedef std::tr1::shared_ptr<FieldBuilder> FieldBuilderPtr;
 /**
  * @brief Interface for in-line creating of introspection interfaces.
  *
- * One instance can be used to create multiple {@code Field} instances.
+ * One instance can be used to create multiple @c Field instances.
  * An instance of this object must not be used concurrently (an object has a state).
  * @author mse
  */
@@ -895,118 +895,118 @@ public:
 	/**
 	 * Set ID of an object to be created.
 	 * @param id id to be set.
-     * @return this instance of a {@code FieldBuilder}.
+     * @return this instance of a @c FieldBuilder.
 	 */
 	FieldBuilderPtr setId(std::string const & id);
 
     /**
-     * Add a {@code Scalar}.
+     * Add a @c Scalar.
      * @param name name of the array.
      * @param scalarType type of a scalar to add.
-     * @return this instance of a {@code FieldBuilder}.
+     * @return this instance of a @c FieldBuilder.
      */
     FieldBuilderPtr add(std::string const & name, ScalarType scalarType);
 
     /**
-     * Add a {@code BoundedString}.
+     * Add a @c BoundedString.
      * @param name name of the array.
      * @param maxLength a string maximum length.
-     * @return this instance of a {@code FieldBuilder}.
+     * @return this instance of a @c FieldBuilder.
      */
     FieldBuilderPtr addBoundedString(std::string const & name, std::size_t maxLength);
 
     /**
-     * Add a {@code Field} (e.g. {@code Structure}, {@code Union}).
+     * Add a @c Field (e.g. @c Structure, @c Union).
      * @param name name of the array.
      * @param field a field to add.
-     * @return this instance of a {@code FieldBuilder}.
+     * @return this instance of a @c FieldBuilder.
      */
     FieldBuilderPtr add(std::string const & name, FieldConstPtr const & field);
 
     /**
-     * Add variable size array of {@code Scalar} elements.
+     * Add variable size array of @c Scalar elements.
      * @param name name of the array.
      * @param scalarType type of a scalar element.
-     * @return this instance of a {@code FieldBuilder}.
+     * @return this instance of a @c FieldBuilder.
      */
     FieldBuilderPtr addArray(std::string const & name, ScalarType scalarType);
     
     /**
-     * Add fixed-size array of {@code Scalar} elements.
+     * Add fixed-size array of @c Scalar elements.
      * @param name name of the array.
      * @param scalarType type of a scalar element.
      * @param size Array fixed size.
-     * @return this instance of a {@code FieldBuilder}.
+     * @return this instance of a @c FieldBuilder.
      */
     FieldBuilderPtr addFixedArray(std::string const & name, ScalarType scalarType, std::size_t size);
 
     /**
-     * Add bounded-size array of {@code Scalar} elements.
+     * Add bounded-size array of @c Scalar elements.
      * @param name name of the array.
      * @param scalarType type of a scalar element.
      * @param bound Array maximum capacity (size).
-     * @return this instance of a {@code FieldBuilder}.
+     * @return this instance of a @c FieldBuilder.
      */
     FieldBuilderPtr addBoundedArray(std::string const & name, ScalarType scalarType, std::size_t bound);
 
     /**
-     * Add array of {@code Field} elements.
+     * Add array of @c Field elements.
      * @param name name of the array.
      * @param element a type of an array element.
-     * @return this instance of a {@code FieldBuilder}.
+     * @return this instance of a @c FieldBuilder.
      */
     FieldBuilderPtr addArray(std::string const & name, FieldConstPtr const & element);
 
     /**
-     * Create a {@code Structure}.
-     * This resets this instance state and allows new {@code Field} instance to be created.
-     * @return a new instance of a {@code Structure}.
+     * Create a @c Structure.
+     * This resets this instance state and allows new @c Field instance to be created.
+     * @return a new instance of a @c Structure.
      */
     StructureConstPtr createStructure();
     
     /**
-     * Create an {@code Union}.
-     * This resets this instance state and allows new {@code Field} instance to be created.
-     * @return a new instance of an {@code Union}.
+     * Create an @c Union.
+     * This resets this instance state and allows new @c Field instance to be created.
+     * @return a new instance of an @c Union.
      */
     UnionConstPtr createUnion();
 
     /**
-     * Add new nested {@code Structure}.
-     * {@code endNested()} method must be called
-     * to complete creation of the nested {@code Structure}.
+     * Add new nested @c Structure.
+     * endNested()  method must be called
+     * to complete creation of the nested @c Structure.
      * @param name nested structure name.
-     * @return a new instance of a {@code FieldBuilder} is returned.
+     * @return a new instance of a @c FieldBuilder is returned.
      * @see #endNested()
      */
     FieldBuilderPtr addNestedStructure(std::string const & name); 
     
     /**
-     * Add new nested {@code Union}.
-     * {@code endNested()} method must be called
-     * to complete creation of the nested {@code Union}.
+     * Add new nested @c Union.
+     * endNested() method must be called
+     * to complete creation of the nested @c Union.
      * @param name nested union name.
-     * @return a new instance of a {@code FieldBuilder} is returned.
+     * @return a new instance of a @c FieldBuilder is returned.
      * @see #endNested()
      */
     FieldBuilderPtr addNestedUnion(std::string const & name);
     
     /**
-     * Add new nested {@code Structure[]}.
-     * {@code endNested()} method must be called
-     * to complete creation of the nested {@code Structure}.
+     * Add new nested @c Structure[].
+     * endNested() method must be called
+     * to complete creation of the nested @c Structure.
      * @param name nested structure name.
-     * @return a new instance of a {@code FieldBuilder} is returned.
+     * @return a new instance of a @c FieldBuilder is returned.
      * @see #endNested()
      */
     FieldBuilderPtr addNestedStructureArray(std::string const & name); 
     
     /**
-     * Add new nested {@code Union[]}.
-     * {@code endNested()} method must be called
-     * to complete creation of the nested {@code Union}.
+     * Add new nested @c Union[].
+     * endNested() method must be called
+     * to complete creation of the nested @c Union.
      * @param name nested union name.
-     * @return a new instance of a {@code FieldBuilder} is returned.
+     * @return a new instance of a @c FieldBuilder is returned.
      * @see #endNested()
      */
     FieldBuilderPtr addNestedUnionArray(std::string const & name);
@@ -1015,7 +1015,7 @@ public:
      * Complete the creation of a nested object.
      * @see #addNestedStructure(std::string const & name)
      * @see #addNestedUnion(std::string const & name)
-     * @return a previous (parent) {@code FieldBuilder}.
+     * @return a previous (parent) @c FieldBuilder.
      */
     FieldBuilderPtr endNested();
 
@@ -1054,106 +1054,106 @@ class epicsShareClass FieldCreate {
 public:
     static FieldCreatePtr getFieldCreate();
 	/**
-	 * Create a new instance of in-line {@code Field} builder.
-	 * @return a new instance of a {@code FieldBuilder}.
+	 * Create a new instance of in-line @c Field builder.
+	 * @return a new instance of a @c FieldBuilder.
 	 */
 	FieldBuilderPtr createFieldBuilder() const;
     /**
-     * Create a {@code ScalarField}.
+     * Create a @c ScalarField.
      * @param scalarType The scalar type.
-     * @return a {@code Scalar} interface for the newly created object.
+     * @return a @c Scalar interface for the newly created object.
      * @throws IllegalArgumentException if an illegal type is specified.
      */
     ScalarConstPtr createScalar(ScalarType scalarType) const;
     /**
-     * Create a {@code BoundedString}.
+     * Create a @c BoundedString.
      * @param maxLength a string maximum length.
-     * @return a {@code BoundedString} interface for the newly created object.
+     * @return a @c BoundedString interface for the newly created object.
      * @throws IllegalArgumentException if maxLength == 0.
      */
     BoundedStringConstPtr createBoundedString(std::size_t maxLength) const;
     /**
-     * Create an {@code Array} field, variable size array.
-     * @param elementType The {@code scalarType} for array elements
-     * @return An {@code Array} Interface for the newly created object.
+     * Create an @c Array field, variable size array.
+     * @param elementType The @c ScalarType for array elements
+     * @return An @c Array Interface for the newly created object.
      */
     ScalarArrayConstPtr createScalarArray(ScalarType elementType) const;
     /*
-     * Create an {@code Array} field, fixed size array.
-     * @param elementType The {@code scalarType} for array elements
+     * Create an @c Array field, fixed size array.
+     * @param elementType The @c ScalarType for array elements
      * @param size Fixed array size.
-     * @return An {@code Array} Interface for the newly created object.
+     * @return An @c Array Interface for the newly created object.
      */
     ScalarArrayConstPtr createFixedScalarArray(ScalarType elementType, std::size_t size) const;
     /**
-     * Create an {@code Array} field, bounded size array.
-     * @param elementType The {@code scalarType} for array elements
+     * Create an @c Array field, bounded size array.
+     * @param elementType The @c ScalarType for array elements
      * @param bound Array maximum capacity.
-     * @return An {@code Array} Interface for the newly created object.
+     * @return An @c Array Interface for the newly created object.
      */
      ScalarArrayConstPtr createBoundedScalarArray(ScalarType elementType, std::size_t bound) const;
      /**
-      * Create an {@code Array} field that is has element type <i>Structure</i>
-      * @param structure The {@code Structure} for each array element.
-      * @return An {@code Array} Interface for the newly created object.
+      * Create an @c Array field that is has element type @c Structure
+      * @param structure The @c Structure for each array element.
+      * @return An @c Array Interface for the newly created object.
       */
     StructureArrayConstPtr createStructureArray(StructureConstPtr const & structure) const;
     /**
-     * Create a {@code Structure} field.
-     * @return a {@code Structure} interface for the newly created object.
+     * Create a @c Structure field.
+     * @return a @c Structure interface for the newly created object.
      */
     StructureConstPtr createStructure () const;
     /**
-     * Create a {@code Structure} field.
-     * @param fieldNames The array of {@code fieldNames} for the structure.
-     * @param fields The array of {@code fields} for the structure.
-     * @return a {@code Structure} interface for the newly created object.
+     * Create a @c Structure field.
+     * @param fieldNames the names of the fields for the structure.
+     * @param fields The array of @c Field objects for the structure.
+     * @return a @c Structure interface for the newly created object.
      */
     StructureConstPtr createStructure (
         StringArray const & fieldNames,
         FieldConstPtrArray const & fields) const;
     /**
-     * Create a {@code Structure} field with identification string.
+     * Create a @c Structure field with identification string.
      * @param id The identification string for the structure.
-     * @param fieldNames The array of {@code fieldNames} for the structure.
-     * @param fields The array of {@code fields} for the structure.
-     * @return a {@code Structure} interface for the newly created object.
+     * @param fieldNames the names of the fields for the structure.
+     * @param fields The array of @c Field objects for the structure.
+     * @return a @c Structure interface for the newly created object.
      */
     StructureConstPtr createStructure (
     	std::string const & id,
         StringArray const & fieldNames,
         FieldConstPtrArray const & fields) const;
      /**
-      * Create an {@code Array} field that is has element type <i>Union</i>
-      * @param punion The {@code Union} for each array element.
-      * @return An {@code Array} Interface for the newly created object.
+      * Create an @c Array field that is has element type @c Union
+      * @param punion The @c Union for each array element.
+      * @return An @c Array Interface for the newly created object.
       */
     UnionArrayConstPtr createUnionArray(UnionConstPtr const & punion) const;
     /**
-     * Create a variant {@code UnionArray} (aka any type) field.
-     * @return a {@code UnionArray} interface for the newly created object.
+     * Create a variant @c UnionArray (aka any type) field.
+     * @return a @c UnionArray interface for the newly created object.
      */
     UnionArrayConstPtr createVariantUnionArray() const;
     /**
-     * Create a variant {@code Union} (aka any type) field.
-     * @return a {@code Union} interface for the newly created object.
+     * Create a variant @c Union (aka any type) field.
+     * @return a @c Union interface for the newly created object.
      */
     UnionConstPtr createVariantUnion() const;
     /**
-     * Create a {@code Union} field.
-     * @param fieldNames The array of {@code fieldNames} for the union.
-     * @param fields The array of {@code fields} for the union.
-     * @return a {@code Union} interface for the newly created object.
+     * Create a @c Union field.
+     * @param fieldNames the names of the fields for the union.
+     * @param fields The @c Field for each fields for the union.
+     * @return a @c Union interface for the newly created object.
      */
     UnionConstPtr createUnion (
         StringArray const & fieldNames,
         FieldConstPtrArray const & fields) const;
     /**
-     * Create a {@code Union} field with identification string.
+     * Create a @c Union field with identification string.
      * @param id The identification string for the union.
-     * @param fieldNames The array of {@code fieldNames} for the union.
-     * @param fields The array of {@code fields} for the union.
-     * @return a {@code Union} interface for the newly created object.
+     * @param fieldNames the names of the fields for the union.
+     * @param fields The array of @c Field objects for the union.
+     * @return a @c Union interface for the newly created object.
      */
     UnionConstPtr createUnion (
     	std::string const & id,
@@ -1164,7 +1164,7 @@ public:
      * @param structure The structure to which the field is appended.
      * @param fieldName The name of the field.
      * @param field The field.
-     * @return a {@code Structure} interface for the newly created object.
+     * @return a @c Structure interface for the newly created object.
      */
     StructureConstPtr appendField(
         StructureConstPtr const & structure,
@@ -1174,17 +1174,17 @@ public:
      * @param structure The structure to which the fields appended.
      * @param fieldNames The names of the fields.
      * @param fields The fields.
-     * @return a {@code Structure} interface for the newly created object.
+     * @return a @c Structure interface for the newly created object.
      */
     StructureConstPtr appendFields(
         StructureConstPtr const & structure,
         StringArray const & fieldNames,
         FieldConstPtrArray const & fields) const;
     /**
-     * Deserialize {@code Field} instance from given byte buffer.
-     * @param buffer Buffer containing serialized {@code Field} instance. 
+     * Deserialize @c Field instance from given byte buffer.
+     * @param buffer Buffer containing serialized @c Field instance. 
      * @param control Deserialization control instance.
-     * @return a deserialized {@code Field} instance.
+     * @return a deserialized @c Field instance.
      */
     FieldConstPtr deserialize(ByteBuffer* buffer, DeserializableControl* control) const;
         
