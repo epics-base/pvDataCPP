@@ -66,9 +66,6 @@ public:
         MonitorElementPtr const &monitorElement) = 0;
     /**
      * A monitor will be sent to the client.
-     * @param pvField The copy of the field being monitored.
-     * The plugin can modify the data.
-     * @param pvTop The top-level structure in which the field resides.
      * @param monitorElement The data for the client.
      * The plugin is allowed to change the data values.
      */

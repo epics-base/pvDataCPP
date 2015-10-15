@@ -1,13 +1,39 @@
-Release 4.1 IN DEVELOPMENT
+Release 5.0
 ===========
 
 The main changes since release 4.0 are:
 
+* Deprecated getXXXField() methods have been removed from PVStructure
 * Convert copy methods and equals operators (re)moved
 * Convert::copyUnion now always copies between subfields.
-* CreateRequest prevents a possible SEGFAULT.
-* New stream operators for Field and PVField are provided.
-* New method getSubFieldT that is like getSubField except that it throws exception
+* New method getSubFieldT, like getSubField except it throws an exception
+* findSubField method removed from PVStructure
+* New stream operators for Field and PVField are provided
+* New template versions of Structure::getField
+* Fixes for static initialisation order issues
+* CreateRequest prevents a possible SEGFAULT
+
+
+Deprecated getXXXField methods have been removed from PVStructure
+-------------------------------------------------------------------
+
+The following methods have been removed from PVStructure
+
+* getBooleanField
+* getByteField, getShortField, getIntField, getLongField
+* getUByteField, getUShortField, getUIntField, getULongField
+* getStringField
+* getStructureField, getUnionField
+* getScalarArrayField, getStructureArrayField, getUnionArrayField
+
+Use template getSubField instead, e.g. use
+
+    getSubField< PVInt >(fieldName)
+
+in place of
+
+    getIntField(fieldName)
+
 
 Convert copy methods and equals operators
 -----------------------------------------
@@ -21,7 +47,7 @@ Methods
 
     PVField::copyUnchecked(const PVField& from)
 
-where added to allow unchecked copies, to gain performance
+were added to allow unchecked copies, to gain performance
 where checked are not needed (anymore).
 
 In addition:
@@ -29,20 +55,33 @@ In addition:
 - equals methods were remove in favour of PVField::operator==.
 - operator== methods where moved to pvIntrospect.h and pvData.h
 
+
 Convert::copyUnion
 -----------------
 
 Before this method, depending on types for to and from,
-sometimes did a shallow cppy, i. e. just made to shared_ptr for to 
+sometimes did a shallow copy, i.e. just made to shared_ptr for to 
 share the same data as from.
 Now it always copies between the subfield of to and from.
 
-CreateRequest change
+
+New method getSubFieldT, like getSubField except it throws an exception
 --------------------
 
-createRequest could cause a SEGFAULT if passed a bad argument.
-This has been changed so the it returns a null pvStructure
-and provies an error.
+PVStructure has a new template member
+
+    getSubFieldT(std::string const &fieldName)
+
+that is like <b>getSubField</b> except that it throws a runtime_error
+instead of returning null.
+
+
+findSubField method removed from PVStructure
+--------------------------------------------
+
+This was mainly used in the implementation of getSubField. With a change to
+the latter, findSubField was removed.
+
 
 New stream operators
 --------------------
@@ -51,15 +90,15 @@ New steam operators are available for Field and PVField.
 Before to print a Field (or any extension) or a PVField (or any extension)
 it was necessary to have code like:
 
-     void print(StructureConstPtr struct, PVStructurePtr pv)
+     void print(StructureConstPtr struc, PVStructurePtr pv)
      {
-         if(struct) {
-             cout << *struct << endl;
+         if(struc) {
+             cout << *struc << endl;
          } else {
              cout << "nullptr\n"
          }
          if(pv) {
-             cout << *.struct << endl;
+             cout << *.struc << endl;
          } else {
              cout << "nullptr\n"
          }
@@ -67,18 +106,40 @@ it was necessary to have code like:
 
 Now it can be done as follows:
 
-     void print(StructureConstPtr struct, PVStructurePtr pv)
+     void print(StructureConstPtr struc, PVStructurePtr pv)
      {
-         cout << struct << endl;
+         cout << struc << endl;
          cout << pv << endl;
      }
 
-New method getSubFieldT that is like getSubField except that it throws exception
+
+New template version of Structure::getField
+--------------------------------------------
+
+A new template getField method has been added to Structure
+
+template<typename FT >
+std::tr1::shared_ptr< const FT > getField(std::string const &fieldName) const 
+
+Can be used, for example, as follows:
+
+    StructurePtr tsStruc = struc->getField<Structure>("timeStamp");
+
+
+Fixes for static initialisation order issues
+--------------------------------------------
+
+Certain static builds (in particular Windows builds) of applications using
+pvData had issues due to PVStructure::DEFAULT_ID being used before being initialised. This has been fixed.
+
+
+CreateRequest change
 --------------------
 
-<b>PVStructure</b> has a new template member <b>getSubFieldT(std::string const &fieldName)</b>
-that is like <b>getSubField</b> except that it throws a runtime_error
-instead of returning null.
+createRequest could cause a SEGFAULT if passed a bad argument.
+This has been changed so the it returns a null pvStructure
+and provides an error.
+
 
 Release 4.0
 ===========
@@ -113,7 +174,7 @@ timeStamp and valueAlarm name changes
 
 In timeStamp nanoSeconds is changed to nanoseconds.
 
-In valueAlarm hystersis is changed to hysteresis
+In valueAlarm hysteresis is changed to hysteresis
 
 
 toString replaced by stream I/O
@@ -147,7 +208,7 @@ There are two new basic types: union_t and unionArray.
 A union is like a structure that has a single subfield.
 There are two flavors:
 
-* <b>varient union</b> The field can have any type.
+* <b>variant union</b> The field can have any type.
 * <b>union</b> The field can any of specified set of types.
 
 The field type can be dynamically changed.
@@ -158,7 +219,7 @@ copy
 This consists of createRequest and pvCopy.
 createRequest was moved from pvAccess to here.
 pvCopy is moved from pvDatabaseCPP and now depends
-only on pvData, i. e. it no longer has any knowledge of PVRecord.
+only on pvData, i.e. it no longer has any knowledge of PVRecord.
 
 monitorPlugin
 -------------

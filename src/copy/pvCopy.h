@@ -116,8 +116,8 @@ public:
         PVStructurePtr const  &masterPVStructure,
         PVFieldPtr const  &masterPVField);
     /**
-     * Given a offset in the copy get the corresponding field in pvMaster.
-     * @param offset The offset in the copy.
+     * Given an offset in the copy get the corresponding field in pvMaster.
+     * @param structureOffset The offset in the copy.
      */
     PVFieldPtr getMasterPVField(std::size_t structureOffset);
     /**
@@ -159,7 +159,7 @@ public:
         BitSetPtr const  &bitSet);
     /**
      * Get the options for the field at the specified offset.
-     * @param offset the offset in copy.
+     * @param fieldOffset the offset in copy.
      * @returns A NULL is returned if no options were specified for the field.
      * If options were specified,PVStructurePtr is a structures
      *  with a set of PVString subfields that specify name,value pairs.s

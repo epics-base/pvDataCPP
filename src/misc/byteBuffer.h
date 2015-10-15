@@ -208,7 +208,7 @@ inline double swap(double val)
 /**
  * @brief This class implements a Bytebuffer that is like the java.nio.ByteBuffer.
  * 
- * <p>A {@code BitSet} is not safe for multithreaded use without
+ * <p>A @c BitSet is not safe for multithreaded use without
  * external synchronization.
  *
  * Based on Java implementation.
@@ -373,7 +373,7 @@ public:
     template<typename T>
     inline void put(std::size_t index, T value);
     /**
-     * Get the new object from  the byte buffer. The item MUST have type {@code T}.
+     * Get the new object from  the byte buffer. The item MUST have type @c T.
      * The position is adjusted based on the type.
      *
      * @return The object.
@@ -387,7 +387,7 @@ public:
 #endif
     /**
      * Get the new object from  the byte buffer at the specified index.
-     * The item MUST have type {@code T}.
+     * The item MUST have type @c T.
      * The position is adjusted based on the type.
      *
      * @param index The location in the byte buffer.
@@ -399,9 +399,9 @@ public:
      * Put a sub-array of bytes into the byte buffer.
      * The position is increased by the count.
      *
-     * @param  src    The source array.
-     * @param  offset The starting position within src.
-     * @param  count  The number of bytes to put into the byte buffer,
+     * @param  src        The source array.
+     * @param  src_offset The starting position within src.
+     * @param  count      The number of bytes to put into the byte buffer,
      */
     inline void put(const char* src, std::size_t src_offset, std::size_t count) {
         //if(count>getRemaining()) THROW_BASE_EXCEPTION("buffer overflow");
@@ -412,9 +412,9 @@ public:
      * Get a sub-array of bytes from the byte buffer.
      * The position is increased by the count.
      *
-     * @param  dest    The destination array.
-     * @param  offset The starting position within src.
-     * @param  count  The number of bytes to put into the byte buffer,
+     * @param  dest        The destination array.
+     * @param  dest_offset The starting position within src.
+     * @param  count       The number of bytes to put into the byte buffer.
      */
     inline void get(char* dest, std::size_t dest_offset, std::size_t count) {
         //if(count>getRemaining()) THROW_BASE_EXCEPTION("buffer overflow");
@@ -422,7 +422,7 @@ public:
         _position += count;
     }
     /**
-     * Put an array of type {@code T} into the byte buffer.
+     * Put an array of type @c T into the byte buffer.
      * The position is adjusted.
      *
      * @param  values The input array.
@@ -431,7 +431,7 @@ public:
     template<typename T>
     inline void putArray(const T* values, std::size_t count);
     /**
-     * Get an array of type {@code T} from the byte buffer.
+     * Get an array of type @c T from the byte buffer.
      * The position is adjusted.
      *
      * @param  values The destination array.
@@ -637,7 +637,7 @@ public:
     /**
      * Get a boolean value from the byte buffer at the specified index.
      *
-     * @param  double The offset in the byte buffer.
+     * @param  index The offset in the byte buffer.
      * @return The value.
      */
     inline double getDouble (std::size_t  index) { return get<double>(index); }

@@ -71,7 +71,7 @@ epicsShareExtern void copy(
     PVStructureArray & pvFrom,
     size_t fromOffset,
     size_t fromStride,
-    PVStructureArray & pvToo,
+    PVStructureArray & pvTo,
     size_t toOffset,
     size_t toStride,
     size_t count);
@@ -91,7 +91,7 @@ epicsShareExtern void copy(
     PVArray & pvFrom,
     size_t fromOffset,
     size_t fromStride,
-    PVArray & pvToo,
+    PVArray & pvTo,
     size_t toOffset,
     size_t toStride,
     size_t count);
@@ -111,7 +111,7 @@ epicsShareExtern void copy(
     PVArray::shared_pointer const & pvFrom,
     size_t fromOffset,
     size_t fromStride,
-    PVArray::shared_pointer & pvToo,
+    PVArray::shared_pointer & pvTo,
     size_t toOffset,
     size_t toStride,
     size_t count);

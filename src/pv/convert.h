@@ -57,7 +57,7 @@ public:
      * @param from The source.
      * @param to The destination
      * @throws std::invalid_argument if the arguments are not compatible.
-     * @DEPRECATED use "to->copy[Unchecked](*from)" instead
+     * @deprecated use "to->copy[Unchecked](*from)" instead
      */
     void copy(PVFieldPtr const & from, PVFieldPtr const & to) {
         to->copy(*from);
@@ -144,7 +144,7 @@ public:
         StringArray & to,
         std::size_t toOffset);
     /**
-     * Convert a PV to a <byte>.
+     * Convert a PV to a byte.
      * @param pv a PV
      * @return converted value
      */

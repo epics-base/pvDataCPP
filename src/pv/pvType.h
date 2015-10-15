@@ -53,7 +53,7 @@ namespace detail {
  */
 
 /**
- * boolean, i.e. can only have the values {@code false} or {@code true}
+ * boolean, i.e. can only have the values @c false or @c true
  */
 typedef detail::pick_type<int8_t, signed char,
                           detail::pick_type<uint8_t, char, unsigned char>::type

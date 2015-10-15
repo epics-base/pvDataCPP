@@ -38,7 +38,6 @@ class epicsShareClass CreateRequest {
     * Create a request structure for the create calls in Channel.
     * See the package overview documentation for details.
     * @param request The field request. See the package overview documentation for details.
-    * @param requester The requester;
     * @return The request PVStructure if a valid request was given.
     * If a NULL PVStructure is returned then getMessage will return
     * the reason.
