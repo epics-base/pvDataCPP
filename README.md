@@ -20,7 +20,7 @@ Prerequisites
 The pvDataCPP  requires recent versions of the following software:
 
 1. EPICS Base (v3.14.12.3 or later)
-2. EPICS4 pvCommonCPP (4.1.0 or later pvCommonCPP may not be needed)
+2. EPICS4 pvCommonCPP (4.1.0 or later)
 
 (pvCommonCPP may not be needed depending on host/compiler.)
 
