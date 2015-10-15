@@ -81,6 +81,12 @@ class epicsShareClass Monitor : public Destroyable{
      * @param monitorElement
      */
     virtual void release(MonitorElementPtr const & monitorElement) = 0;
+
+    /**
+     * Report remote queue status.
+     * @param freeElements number of free elements.
+     */
+    virtual void reportRemoteQueueStatus(int32 freeElements) {}; //= 0;
 };
 
 
