@@ -224,19 +224,20 @@ public:
      * Must be one of EPICS_BYTE_ORDER,EPICS_ENDIAN_LITTLE,EPICS_ENDIAN_BIG.
      */
     ByteBuffer(std::size_t size, int byteOrder = EPICS_BYTE_ORDER) :
-        _buffer(0), _size(size),
+        _buffer((char*)malloc(size)), _size(size),
         _reverseEndianess(byteOrder != EPICS_BYTE_ORDER),
         _reverseFloatEndianess(byteOrder != EPICS_FLOAT_WORD_ORDER),
         _wrapped(false)
     {
-        _buffer = (char*)malloc(size);
+        if(!_buffer)
+            throw std::bad_alloc();
         clear();
     }
 
     /**
      * Constructor for wrapping existing buffers.
      * Given buffer will not be released by the ByteBuffer instance.
-     * @param  buffer    Existing buffer.
+     * @param  buffer    Existing buffer.  (will be free'd with free())
      * @param  size      The number of bytes.
      * @param  byteOrder The byte order.
      * Must be one of EPICS_BYTE_ORDER,EPICS_ENDIAN_LITTLE,EPICS_ENDIAN_BIG.
@@ -247,6 +248,8 @@ public:
         _reverseFloatEndianess(byteOrder != EPICS_FLOAT_WORD_ORDER),
         _wrapped(true)
     {
+        if(!_buffer)
+            throw std::bad_alloc();
         clear();
     }
     /**
@@ -271,7 +274,7 @@ public:
      * Get the raw buffer data.
      * @return the raw buffer data.
      */
-    inline const char* getBuffer()
+    inline const char* getBuffer() const
     {
         return _buffer;
     }
@@ -303,7 +306,7 @@ public:
      * Returns the current position.
      * @return The current position in the raw data.
      */
-    inline std::size_t getPosition()
+    inline std::size_t getPosition() const
     {
         return (std::size_t)(((std::ptrdiff_t)(const void *)_position) - ((std::ptrdiff_t)(const void *)_buffer));
     }
@@ -323,7 +326,7 @@ public:
      *
      * @return The offset into the raw buffer.
      */
-    inline std::size_t getLimit()
+    inline std::size_t getLimit() const
     {
         return (std::size_t)(((std::ptrdiff_t)(const void *)_limit) - ((std::ptrdiff_t)(const void *)_buffer));
     }
@@ -344,7 +347,7 @@ public:
      *
      * @return The number of elements remaining in this buffer.
      */
-    inline std::size_t getRemaining()
+    inline std::size_t getRemaining() const
     {
         return (std::size_t)(((std::ptrdiff_t)(const void *)_limit) - ((std::ptrdiff_t)(const void *)_position));
     }
@@ -353,7 +356,7 @@ public:
      *
      * @return The size of the raw data buffer.
      */
-    inline std::size_t getSize()
+    inline std::size_t getSize() const
     {
         return _size;
     }
@@ -444,7 +447,7 @@ public:
      * @return (false,true) if (is, is not) the EPICS_BYTE_ORDER
      */
     template<typename T>
-    inline bool reverse()
+    inline bool reverse() const
     {
         return _reverseEndianess;
     }
@@ -643,48 +646,48 @@ public:
     inline double getDouble (std::size_t  index) { return get<double>(index); }
 
     // TODO remove
-    inline const char* getArray()
+    inline const char* getArray() const
     {
         return _buffer;
     }
 
     
 private:
-    char* _buffer;
+    char* const _buffer;
     char* _position;
     char* _limit;
-    std::size_t  _size;
+    const std::size_t  _size;
     bool _reverseEndianess; 
     bool _reverseFloatEndianess;
-    bool _wrapped;
+    const bool _wrapped;
 };
 
     template<>
-    inline bool ByteBuffer::reverse<bool>()
+    inline bool ByteBuffer::reverse<bool>() const
     {
         return false;
     }
 
     template<>
-    inline bool ByteBuffer::reverse<int8>()
+    inline bool ByteBuffer::reverse<int8>() const
     {
         return false;
     }
 
     template<>
-    inline bool ByteBuffer::reverse<uint8>()
+    inline bool ByteBuffer::reverse<uint8>() const
     {
         return false;
     }
 
     template<>
-    inline bool ByteBuffer::reverse<float>()
+    inline bool ByteBuffer::reverse<float>() const
     {
         return _reverseFloatEndianess;
     }
 
     template<>
-    inline bool ByteBuffer::reverse<double>()
+    inline bool ByteBuffer::reverse<double>() const
     {
         return _reverseFloatEndianess;
     }
