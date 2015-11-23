@@ -955,8 +955,14 @@ bool xisalnum(char c)
 
 void validateFieldName(const std::string& n)
 {
+    // enforce [A-Za-z_][A-Za-z0-9_]*
     if(n.size()==0)
         throw std::invalid_argument("zero length field names not allowed");
+    if(n[0]>='0' && n[0]<='9') {
+        std::ostringstream msg;
+        msg<<"Field name \""<<n<<"\" must begin with A-Z, a-z, or '_'";
+        throw std::invalid_argument(msg.str());
+    }
     for(size_t i=0, N=n.size(); i<N; i++)
     {
         char c = n[i];
@@ -968,7 +974,8 @@ void validateFieldName(const std::string& n)
             default:
             {
                 std::ostringstream msg;
-                msg<<"Invalid charactor '"<<c<<"' ("<<(int)c<<") in field name \""<<n<<"\"";
+                msg<<"Invalid charactor '"<<c<<"' ("<<(int)c<<") in field name \""<<n<<"\" "
+                     "must be A-Z, a-z, 0-9, or '_'";
                 throw std::invalid_argument(msg.str());
             }
             }
