@@ -10,6 +10,8 @@
 #ifndef SERIALIZE_H
 #define SERIALIZE_H
 
+#include <epicsTypes.h>
+
 #include <pv/byteBuffer.h>
 #include <pv/sharedPtr.h>
 
@@ -150,6 +152,17 @@ namespace epics { namespace pvData {
             DeserializableControl *flusher) = 0;
     };
 
+    /**
+     * @brief Push serialize and append to the provided byte vector.
+     * No caching is done.  Only complete serialization.
+     *
+     * @param S A Serializable object
+     * @param byteOrder Byte order to write (EPICS_ENDIAN_LITTLE or EPICS_ENDIAN_BIG)
+     * @param out The output vector.  Results are appended
+     */
+    void serializeToVector(const Serializable *S,
+                           int byteOrder,
+                           std::vector<epicsUInt8>& out);
 
     /**
      * @brief Class for serializing bitSets.
