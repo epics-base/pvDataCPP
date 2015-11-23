@@ -216,8 +216,8 @@ static void testCreateRequestInternal() {
     testPass("request %s",request.c_str());
 
     request = string("field(alarm,timeStamp,supply{")
-    	+ "0{voltage.value,current.value,power.value},"
-        + "1{voltage.value,current.value,power.value}"
+        + "zero{voltage.value,current.value,power.value},"
+        + "one{voltage.value,current.value,power.value}"
         + "})";
     if(debug) { cout  << "request " << request <<endl;}
     pvRequest = createRequest->createRequest(request);
@@ -226,12 +226,12 @@ static void testCreateRequestInternal() {
     testOk1(pvRequest.get()!=NULL);
     testOk1(pvRequest->getSubField("field.alarm").get()!=NULL);
     testOk1(pvRequest->getSubField("field.timeStamp").get()!=NULL);
-    testOk1(pvRequest->getSubField("field.supply.0.voltage.value").get()!=NULL);
-    testOk1(pvRequest->getSubField("field.supply.0.current.value").get()!=NULL);
-    testOk1(pvRequest->getSubField("field.supply.0.power.value").get()!=NULL);
-    testOk1(pvRequest->getSubField("field.supply.1.voltage.value").get()!=NULL);
-    testOk1(pvRequest->getSubField("field.supply.1.current.value").get()!=NULL);
-    testOk1(pvRequest->getSubField("field.supply.1.power.value").get()!=NULL);
+    testOk1(pvRequest->getSubField("field.supply.zero.voltage.value").get()!=NULL);
+    testOk1(pvRequest->getSubField("field.supply.zero.current.value").get()!=NULL);
+    testOk1(pvRequest->getSubField("field.supply.zero.power.value").get()!=NULL);
+    testOk1(pvRequest->getSubField("field.supply.one.voltage.value").get()!=NULL);
+    testOk1(pvRequest->getSubField("field.supply.one.current.value").get()!=NULL);
+    testOk1(pvRequest->getSubField("field.supply.one.power.value").get()!=NULL);
     testPass("request %s",request.c_str());
 
     request = string("record[process=true,xxx=yyy]")
