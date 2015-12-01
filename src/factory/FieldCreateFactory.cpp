@@ -947,9 +947,53 @@ StructureConstPtr FieldCreate::createStructure () const
       return createStructure(fieldNames,fields);
 }
 
+namespace {
+bool xisalnum(char c)
+{
+    return (c>='a' && c<='z') || (c>='A' && c<='Z') || (c>='0' && c<='9');
+}
+
+void validateFieldName(const std::string& n)
+{
+    // enforce [A-Za-z_][A-Za-z0-9_]*
+    if(n.size()==0)
+        throw std::invalid_argument("zero length field names not allowed");
+    if(n[0]>='0' && n[0]<='9') {
+        std::ostringstream msg;
+        msg<<"Field name \""<<n<<"\" must begin with A-Z, a-z, or '_'";
+        throw std::invalid_argument(msg.str());
+    }
+    for(size_t i=0, N=n.size(); i<N; i++)
+    {
+        char c = n[i];
+        if(xisalnum(c)) {}
+        else {
+            switch(c){
+            case '_':
+                break;
+            default:
+            {
+                std::ostringstream msg;
+                msg<<"Invalid charactor '"<<c<<"' ("<<(int)c<<") in field name \""<<n<<"\" "
+                     "must be A-Z, a-z, 0-9, or '_'";
+                throw std::invalid_argument(msg.str());
+            }
+            }
+        }
+    }
+}
+
+void validateFieldNames(const StringArray& l)
+{
+    for(StringArray::const_iterator it=l.begin(), end=l.end(); it!=end; ++it)
+        validateFieldName(*it);
+}
+}
+
 StructureConstPtr FieldCreate::createStructure (
     StringArray const & fieldNames,FieldConstPtrArray const & fields) const
 {
+      validateFieldNames(fieldNames);
       // TODO use std::make_shared
       std::tr1::shared_ptr<Structure> sp(new Structure(fieldNames,fields), Field::Deleter());
       StructureConstPtr structure = sp;
@@ -961,6 +1005,7 @@ StructureConstPtr FieldCreate::createStructure (
     StringArray const & fieldNames,
     FieldConstPtrArray const & fields) const
 {
+      validateFieldNames(fieldNames);
       // TODO use std::make_shared
       std::tr1::shared_ptr<Structure> sp(new Structure(fieldNames,fields,id), Field::Deleter());
       StructureConstPtr structure = sp;
@@ -979,6 +1024,7 @@ StructureArrayConstPtr FieldCreate::createStructureArray(
 UnionConstPtr FieldCreate::createUnion (
     StringArray const & fieldNames,FieldConstPtrArray const & fields) const
 {
+      validateFieldNames(fieldNames);
       // TODO use std::make_shared
       std::tr1::shared_ptr<Union> sp(new Union(fieldNames,fields), Field::Deleter());
       UnionConstPtr punion = sp;
@@ -990,6 +1036,7 @@ UnionConstPtr FieldCreate::createUnion (
     StringArray const & fieldNames,
     FieldConstPtrArray const & fields) const
 {
+      validateFieldNames(fieldNames);
       // TODO use std::make_shared
       std::tr1::shared_ptr<Union> sp(new Union(fieldNames,fields,id), Field::Deleter());
       UnionConstPtr punion = sp;
@@ -1039,6 +1086,7 @@ StructureConstPtr FieldCreate::appendFields(
     StringArray const & fieldNames,
     FieldConstPtrArray const & fields) const
 {
+    validateFieldNames(fieldNames);
     StringArray const & oldNames = structure->getFieldNames();
     FieldConstPtrArray const & oldFields = structure->getFields();
     size_t oldLen = oldNames.size();

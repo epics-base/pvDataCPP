@@ -65,6 +65,25 @@ static void testCreatePVStructure()
     std::cout << "testCreatePVStructure PASSED" << std::endl;
 }
 
+static void testCreatePVStructureWithInvalidName()
+{
+    testDiag("testCreatePVStructureWithInvalidName");
+    StringArray fieldNames;
+    fieldNames.push_back("ok");
+    fieldNames.push_back("this.is-wrong");
+    PVFieldPtrArray pvFields;
+    pvFields.push_back(pvDataCreate->createPVScalar(pvString));
+    pvFields.push_back(pvDataCreate->createPVScalar(pvInt));
+    try{
+        PVStructurePtr pvParent = pvDataCreate->createPVStructure(
+            fieldNames,pvFields);
+        testFail("Creation of invalid field name '%s' was allowed", fieldNames[1].c_str());
+    } catch(std::invalid_argument& e) {
+        testDiag("Exception: \"%s\"", e.what());
+        testPass("Creation of invalid field name '%s' fails as expected", fieldNames[1].c_str());
+    }
+}
+
 static void testPVScalarCommon(string /*fieldName*/,ScalarType stype)
 {
     PVScalarPtr pvScalar = pvDataCreate->createPVScalar(stype);
@@ -641,13 +660,14 @@ static void testFieldAccess()
 
 MAIN(testPVData)
 {
-    testPlan(242);
+    testPlan(243);
     fieldCreate = getFieldCreate();
     pvDataCreate = getPVDataCreate();
     standardField = getStandardField();
     standardPVField = getStandardPVField();
     convert = getConvert();
     testCreatePVStructure();
+    testCreatePVStructureWithInvalidName();
     testPVScalar();
     testScalarArray();
     testRequest();
