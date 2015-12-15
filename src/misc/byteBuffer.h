@@ -235,9 +235,9 @@ public:
     }
 
     /**
-     * Constructor for wrapping existing buffers.
+     * Constructor for wrapping an existing buffer.
      * Given buffer will not be released by the ByteBuffer instance.
-     * @param  buffer    Existing buffer.  (will be free'd with free())
+     * @param  buffer    Existing buffer.
      * @param  size      The number of bytes.
      * @param  byteOrder The byte order.
      * Must be one of EPICS_BYTE_ORDER,EPICS_ENDIAN_LITTLE,EPICS_ENDIAN_BIG.
