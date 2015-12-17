@@ -237,7 +237,7 @@ public:
     /**
      * Constructor for wrapping an existing buffer.
      * Given buffer will not be released by the ByteBuffer instance.
-     * @param  buffer    Existing buffer.
+     * @param  buffer    Existing buffer.  May not be NULL.
      * @param  size      The number of bytes.
      * @param  byteOrder The byte order.
      * Must be one of EPICS_BYTE_ORDER,EPICS_ENDIAN_LITTLE,EPICS_ENDIAN_BIG.
@@ -249,7 +249,7 @@ public:
         _wrapped(true)
     {
         if(!_buffer)
-            throw std::bad_alloc();
+            throw std::invalid_argument("ByteBuffer can't be constructed with NULL");
         clear();
     }
     /**
