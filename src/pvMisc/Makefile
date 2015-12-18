@@ -2,7 +2,7 @@
 
 SRC_DIRS += $(PVDATA_SRC)/pvMisc
 
-INC += bitSetUtil.h
+INC += pv/bitSetUtil.h
 
 LIBSRCS += bitSetUtil.cpp
 
