@@ -12,7 +12,7 @@
 #include <epicsConvert.h>
 
 #define epicsExportSharedSymbols
-#include "typeCast.h"
+#include "pv/typeCast.h"
 
 using std::string;
 

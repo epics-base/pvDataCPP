@@ -2,7 +2,7 @@
 
 SRC_DIRS += $(PVDATA_SRC)/factory
 
-INC += factory.h
+INC += pv/factory.h
 LIBSRCS += TypeFunc.cpp
 LIBSRCS += FieldCreateFactory.cpp
 LIBSRCS += PVField.cpp
