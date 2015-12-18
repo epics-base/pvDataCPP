@@ -28,3 +28,5 @@ USR_CPPFLAGS += --coverage
 USR_LDFLAGS += --coverage
 endif
 
+# shared library ABI version.
+SHRLIB_VERSION ?= 5.0
