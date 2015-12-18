@@ -2,8 +2,8 @@
 
 SRC_DIRS += $(PVDATA_SRC)/copy
 
-INC += createRequest.h
-INC += pvCopy.h
+INC += pv/createRequest.h
+INC += pv/pvCopy.h
 
 LIBSRCS += createRequest.cpp
 LIBSRCS += pvCopy.cpp

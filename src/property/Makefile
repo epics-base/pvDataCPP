@@ -2,15 +2,15 @@
 
 SRC_DIRS += $(PVDATA_SRC)/property
 
-INC += alarm.h
-INC += pvAlarm.h
-INC += control.h
-INC += pvControl.h
-INC += display.h
-INC += pvDisplay.h
-INC += pvEnumerated.h
-INC += timeStamp.h
-INC += pvTimeStamp.h
+INC += pv/alarm.h
+INC += pv/pvAlarm.h
+INC += pv/control.h
+INC += pv/pvControl.h
+INC += pv/display.h
+INC += pv/pvDisplay.h
+INC += pv/pvEnumerated.h
+INC += pv/timeStamp.h
+INC += pv/pvTimeStamp.h
 
 LIBSRCS += alarm.cpp
 LIBSRCS += pvAlarm.cpp
