@@ -15,179 +15,153 @@
 
 #include <epicsEndian.h>
 #include <shareLib.h>
+#include <epicsAssert.h>
 
+#include <pv/templateMeta.h>
 #include <pv/pvType.h>
 #include <pv/epicsException.h>
 
 
-namespace epics { 
-    namespace pvData {
-        
-/*
-TODO can be used:
+#ifndef EPICS_ALWAYS_INLINE
+#  define EPICS_ALWAYS_INLINE inline
+#endif
 
-MS Visual C++:
+/* various compilers provide builtins for byte order swaps.
+ * conditions based on boost endian library
+ */
+#if defined(__GNUC__) && ((__GNUC__>4) || (__GNUC__==4 && __GNUC_MINOR__>=3))
 
-You include intrin.h and call the following functions:
+#if (__GNUC__>4) || (__GNUC__==4 && __GNUC_MINOR__>=8)
+#define _PVA_swap16(X) __builtin_bswap16(X)
+#endif
 
-For 16 bit numbers:
-unsigned short _byteswap_ushort(unsigned short value);
+#define _PVA_swap32(X) __builtin_bswap32(X)
+#define _PVA_swap64(X) __builtin_bswap64(X)
 
-For 32 bit numbers:
-unsigned long _byteswap_ulong(unsigned long value);
+#elif defined(__clang__)
 
-For 64 bit numbers:
-unsigned __int64 _byteswap_uint64(unsigned __int64 value);
-*/
+#if __has_builtin(__builtin_bswap16)
+#define _PVA_swap16(X) __builtin_bswap16(X)
+#endif
+#if __has_builtin(__builtin_bswap32)
+#define _PVA_swap32(X) __builtin_bswap32(X)
+#endif
+#if __has_builtin(__builtin_bswap64)
+#define _PVA_swap64(X) __builtin_bswap64(X)
+#endif
 
-/*
-For floats and doubles it's more difficult as with plain integers as these may or not may be in the host machines byte-order.
-You can get little-endian floats on big-endian machines and vice versa.
-*/
+#elif defined(_MSC_VER)
 
-
-
-#define GCC_VERSION_SINCE(major, minor, patchlevel) \
-  (defined(__GNUC__) && !defined(__INTEL_COMPILER) && \
-   ((__GNUC__ > (major)) ||  \
-    (__GNUC__ == (major) && __GNUC_MINOR__ > (minor)) || \
-    (__GNUC__ == (major) && __GNUC_MINOR__ == (minor) && __GNUC_PATCHLEVEL__ >= (patchlevel))))
-    
- 
-#if GCC_VERSION_SINCE(4,3,0)
-
-#define swap32(x) __builtin_bswap32(x)
-#define swap64(x) __builtin_bswap64(x)
-
-#define __byte_swap16(x) \
-        (((x) >> 8) | \
-         ((x) << 8))
-
-static inline uint16_t
-swap16(uint16_t _x)
-{
-    return (__byte_swap16(_x));
-}
-
-#else
-
-
-#define __byte_swap16(x) \
-        (((x) >> 8) | \
-         ((x) << 8))
-
-#define __byte_swap32(x) \
-        ((((x) & 0xff000000) >> 24) | \
-         (((x) & 0x00ff0000) >>  8) | \
-         (((x) & 0x0000ff00) <<  8) | \
-         (((x) & 0x000000ff) << 24))
-
-#define __byte_swap64(x) \
-        (((x) >> 56) | \
-        (((x) >> 40) & 0xff00) | \
-        (((x) >> 24) & 0xff0000) | \
-        (((x) >> 8)  & 0xff000000) | \
-        (((x) << 8)  & ((uint64_t)0xff << 32)) | \
-        (((x) << 24) & ((uint64_t)0xff << 40)) | \
-        (((x) << 40) & ((uint64_t)0xff << 48)) | \
-        (((x) << 56)))
-   
-static inline uint16_t
-swap16(uint16_t _x)
-{
-    return (__byte_swap16(_x));
-}
-
-static inline uint32_t
-swap32(uint32_t _x)
-{
-    return (__byte_swap32(_x));
-}
-
-static inline uint64_t
-swap64(uint64_t _x)
-{
-    return (__byte_swap64(_x));
-}
+#define _PVA_swap16(X) _byteswap_ushort(X)
+#define _PVA_swap32(X) _byteswap_ulong(X)
+#define _PVA_swap64(X) _byteswap_uint64(X)
 
 #endif
 
+namespace epics {namespace pvData {
 
+namespace detail {
 template<typename T>
-inline T swap(T val) { return val; }  // not valid
-
+struct asInt {
+    static EPICS_ALWAYS_INLINE T from(T v) { return v; }
+    static EPICS_ALWAYS_INLINE T to(T v) { return v; }
+};
 template<>
-inline int16 swap(int16 val)
-{
-    return swap16(val);
-}
-
+struct asInt<float> {
+    union pun {float f; uint32 i;};
+    static EPICS_ALWAYS_INLINE float from(uint32 v) {
+        pun P;
+        P.i = v;
+        return P.f;
+    }
+    static EPICS_ALWAYS_INLINE uint32 to(float v) {
+        pun P;
+        P.f = v;
+        return P.i;
+    }
+};
 template<>
-inline int32 swap(int32 val)
-{
-    return swap32(val);
-}
+struct asInt<double> {
+    union pun {double f; uint64 i;};
+    static EPICS_ALWAYS_INLINE double from(uint64 v) {
+        pun P;
+        P.i = v;
+        return P.f;
+    }
+    static EPICS_ALWAYS_INLINE uint64 to(double v) {
+        pun P;
+        P.f = v;
+        return P.i;
+    }
+};
 
+template<int N>
+struct swap; // no default
 template<>
-inline int64 swap(int64 val)
-{
-    return swap64(val);
-}
+struct swap<1> {
+    static EPICS_ALWAYS_INLINE uint8 op(uint8 v) { return v; }
+};
+template<>
+struct swap<2> {
+    static EPICS_ALWAYS_INLINE uint16 op(uint16 v) {
+#ifdef _PVA_swap16
+        return _PVA_swap16(v);
+#else
+        return (((v) >> 8) | ((v) << 8));
+#endif
+    }
+};
+template<>
+struct swap<4> {
+    static EPICS_ALWAYS_INLINE uint32 op(uint32 v) {
+#ifdef _PVA_swap32
+        return _PVA_swap32(v);
+#else
+        return ((((v) & 0xff000000) >> 24) |
+                (((v) & 0x00ff0000) >>  8) |
+                (((v) & 0x0000ff00) <<  8) |
+                (((v) & 0x000000ff) << 24));
+#endif
+    }
+};
+template<>
+struct swap<8> {
+#ifdef _PVA_swap64
+    static EPICS_ALWAYS_INLINE uint64 op(uint64 v) {
+        return _PVA_swap64(v);
+    }
+#else
+    static inline uint64 op(uint64 v) {
+        return (((v) >> 56) | \
+                (((v) >> 40) & 0x0000ff00) | \
+                (((v) >> 24) & 0x00ff0000) | \
+                (((v) >> 8)  & 0xff000000) | \
+                (((v) << 8)  & ((uint64_t)0xff << 32)) | \
+                (((v) << 24) & ((uint64_t)0xff << 40)) | \
+                (((v) << 40) & ((uint64_t)0xff << 48)) | \
+                (((v) << 56)));
+    }
+#endif
+};
 
-template<>
-inline uint16 swap(uint16 val)
-{
-    return swap16(val);
-}
+#undef _PVA_swap16
+#undef _PVA_swap32
+#undef _PVA_swap64
 
-template<>
-inline uint32 swap(uint32 val)
-{
-    return swap32(val);
-}
+} // namespace detail
 
-template<>
-inline uint64 swap(uint64 val)
+//! Unconditional byte order swap.
+//! defined for integer and floating point types
+template<typename T>
+EPICS_ALWAYS_INLINE T swap(T val)
 {
-    return swap64(val);
-}
-
-template<>
-inline float swap(float val)
-{
-    union {
-        int32 i;
-        float f;
-    } conv;
-    conv.f = val;
-    conv.i = swap32(conv.i);
-    return conv.f;
-}
-
-template<>
-inline double swap(double val)
-{
-    union {
-        int64 i;
-        double d;
-    } conv;
-    conv.d = val;
-    conv.i = swap64(conv.i);
-    return conv.d;
+    return detail::asInt<T>::from(
+                detail::swap<sizeof(T)>::op(
+                    detail::asInt<T>::to(val)));
 }
 
 #define is_aligned(POINTER, BYTE_COUNT) \
-    (((std::ptrdiff_t)(const void *)(POINTER)) % (BYTE_COUNT) == 0)
-
-/*template <bool ENDIANESS_SUPPORT = false,
-          bool UNALIGNED_ACCESS = false,
-          bool ADAPTIVE_ACCESS = true,
-          bool USE_INLINE_MEMCPY = true>*/
-
-#define ENDIANESS_SUPPORT true
-#define UNALIGNED_ACCESS true
-#define ADAPTIVE_ACCESS true
-#define USE_INLINE_MEMCPY true
+    (((std::size_t)(POINTER)) % (BYTE_COUNT) == 0)
 
 #if defined (__GNUC__) && (__GNUC__ < 3)
 #define GET(T) get((T*)0)
@@ -278,8 +252,18 @@ public:
         _limit = _buffer + _size;
     }
     /**
-     * Makes a buffer ready for a new sequence of channel-write or relative get operations:
-     * It sets the limit to the current position and then sets the position to zero. 
+     * Makes a buffer ready to read out previously written values.
+     *
+     * Typically _limit==_buffer+_size is the initial state, but this is not
+     * required.
+     *
+     * V _buffer             V _position          V _limit         V _buffer+_size
+     * |_______written_______|____uninitialized___|____allocated___|
+     *
+     * becomes
+     *
+     * V _buffer/_position   V _limit                              V _buffer+size
+     * |_______written_______|________________allocated____________|
      */
     inline void flip() {
         _limit = _position;
@@ -288,6 +272,16 @@ public:
     /**
      * Makes a buffer ready for re-reading the data that it already contains:
      * It leaves the limit unchanged and sets the position to zero.
+     *
+     * Note that this may allow reading of uninitialized values.  flip() should be considered
+     *
+     * V _buffer             V _position          V _limit         V _buffer+_size
+     * |_______written_______|____uninitialized___|____allocated___|
+     *
+     * becomes
+     *
+     * V _buffer/_position                        V _limit         V _buffer+size
+     * |_______written_______|____uninitialized___|____allocated___|
      */
     inline void rewind() {
         _position = _buffer;
@@ -298,7 +292,7 @@ public:
      */
     inline std::size_t getPosition() const
     {
-        return (std::size_t)(((std::ptrdiff_t)(const void *)_position) - ((std::ptrdiff_t)(const void *)_buffer));
+        return _position - _buffer;
     }
     /**
      * Sets the buffer position.
@@ -309,7 +303,9 @@ public:
      */
     inline void setPosition(std::size_t pos)
     {
+        assert(pos<=_size);
         _position = _buffer + pos;
+        assert(_position<=_limit);
     }
     /**
      * Returns this buffer's limit. 
@@ -318,7 +314,7 @@ public:
      */
     inline std::size_t getLimit() const
     {
-        return (std::size_t)(((std::ptrdiff_t)(const void *)_limit) - ((std::ptrdiff_t)(const void *)_buffer));
+        return _limit - _buffer;
     }
     /**
      * Sets this buffer's limit.
@@ -330,7 +326,9 @@ public:
      */
     inline void setLimit(std::size_t limit)
     {
+        assert(limit<=_size);
         _limit = _buffer + limit;
+        assert(_position<=_limit);
     }
     /**
      * Returns the number of elements between the current position and the limit.
@@ -339,7 +337,7 @@ public:
      */
     inline std::size_t getRemaining() const
     {
-        return (std::size_t)(((std::ptrdiff_t)(const void *)_limit) - ((std::ptrdiff_t)(const void *)_position));
+        return _limit - _position;
     }
     /**
      * Returns The size, i.e. capacity of the raw data buffer in bytes.
@@ -364,7 +362,7 @@ public:
      * @param  value The value to be put into the byte buffer.
      */
     template<typename T>
-    inline void put(std::size_t index, T value);
+    inline void put(std::size_t index, T value) const;
     /**
      * Get the new object from  the byte buffer. The item MUST have type @c T.
      * The position is adjusted based on the type.
@@ -387,17 +385,18 @@ public:
      * @return The object.
      */
     template<typename T>
-    inline T get(std::size_t index);
+    inline T get(std::size_t index) const;
     /**
      * Put a sub-array of bytes into the byte buffer.
      * The position is increased by the count.
      *
      * @param  src        The source array.
      * @param  src_offset The starting position within src.
-     * @param  count      The number of bytes to put into the byte buffer,
+     * @param  count      The number of bytes to put into the byte buffer.
+     *                    Must be less than getRemaining()
      */
     inline void put(const char* src, std::size_t src_offset, std::size_t count) {
-        //if(count>getRemaining()) THROW_BASE_EXCEPTION("buffer overflow");
+        assert(count<=getRemaining());
         memcpy(_position, src + src_offset, count);
         _position += count;
     }
@@ -408,9 +407,10 @@ public:
      * @param  dest        The destination array.
      * @param  dest_offset The starting position within src.
      * @param  count       The number of bytes to put into the byte buffer.
+     *                     Must be less than getRemaining()
      */
     inline void get(char* dest, std::size_t dest_offset, std::size_t count) {
-        //if(count>getRemaining()) THROW_BASE_EXCEPTION("buffer overflow");
+        assert(count<=getRemaining());
         memcpy(dest + dest_offset, _position, count);
         _position += count;
     }
@@ -437,19 +437,26 @@ public:
      * @return (false,true) if (is, is not) the EPICS_BYTE_ORDER
      */
     template<typename T>
-    inline bool reverse() const
+    EPICS_ALWAYS_INLINE bool reverse() const
     {
-        return _reverseEndianess;
+        return sizeof(T)>1 && _reverseEndianess;
     }
     /**
-     * Adjust position so that it is aligned to the specified size.
-     * Size MUST be a power of 2.
-     * @param  size The alignment requirement.
+     * Adjust position to the next multiple of 'size.
+     * @param  size The alignment requirement, must be a power of 2. (unchecked)
+     * @param  fill value to use for padding bytes (default '\0').
+     *
+     * @note This alignment is absolute, not necessarily with respect to _buffer.
      */
-    inline void align(std::size_t size)
+    inline void align(std::size_t size, char fill='\0')
     {
-        const std::size_t k = size - 1;
-        _position = (char*)((((std::ptrdiff_t)(const void *)_position) + k) & ~(k));
+        const std::size_t k = size - 1, bufidx = (std::size_t)_position;
+        if(bufidx&k) {
+            std::size_t npad = size-(bufidx&k);
+            assert(npad<=getRemaining());
+            std::fill(_position, _position+npad, fill);
+            _position += npad;
+        }
     }
     /**
      * Put a boolean value into the byte buffer.
@@ -687,96 +694,26 @@ private:
     template<typename T>
     inline void ByteBuffer::put(T value)
     {
-        // this avoids int8 specialization, compiler will take care if optimization, -O2 or more
-        if (sizeof(T) == 1)
-        {
-            *(_position++) = (int8)value;
-            return;
-        }
+        assert(sizeof(T)<=getRemaining());
 
-        if (ENDIANESS_SUPPORT && reverse<T>())
-        {
+        if(reverse<T>())
             value = swap<T>(value);
-        }
 
-        if (UNALIGNED_ACCESS)
-        {
-            // NOTE: some CPU handle unaligned access pretty good (e.g. x86)
-            *((T*)_position) = value;
-            _position += sizeof(T);
-        }
-        else
-        {
-            // NOTE: this check and branching does not always pay off
-            if (ADAPTIVE_ACCESS && is_aligned(_position, sizeof(T)))
-            {
-                *((T*)_position) = value;
-                _position += sizeof(T);
-            }
-            else
-            {
-                if (USE_INLINE_MEMCPY)
-                {
-                    // NOTE: it turns out that this compiler can optimize this with inline code, e.g. gcc
-                    memcpy(_position, &value, sizeof(T));
-                    _position += sizeof(T);
-                }
-                else
-                {
-                    // NOTE: compiler should optimize this and unroll the loop
-                    for (size_t i = 0; i < sizeof(T); i++)
-                        _position[i] = ((char*)&value)[i];
-                    _position += sizeof(T);
-                }
-            }
-        }
-
+        //assert(is_aligned(_position, sizeof(T)));
+        *((T*)_position) = value;
+        _position += sizeof(T);
     }
 
     template<typename T>
-    inline void ByteBuffer::put(std::size_t index, T value)
+    inline void ByteBuffer::put(std::size_t index, T value) const
     {
-        // this avoids int8 specialization, compiler will take care if optimization, -O2 or more
-        if (sizeof(T) == 1)
-        {
-            *(_buffer + index) = (int8)value;
-            return;
-        }
+        assert(_buffer+index<=_limit);
 
-        if (ENDIANESS_SUPPORT && reverse<T>())
-        {
+        if(reverse<T>())
             value = swap<T>(value);
-        }
 
-        if (UNALIGNED_ACCESS)
-        {
-            // NOTE: some CPU handle unaligned access pretty good (e.g. x86)
-            *((T*)(_buffer + index)) = value;
-        }
-        else
-        {
-            // NOTE: this check and branching does not always pay off
-            if (ADAPTIVE_ACCESS && is_aligned(_position, sizeof(T)))
-            {
-                *((T*)(_buffer + index)) = value;
-            }
-            else
-            {
-                if (USE_INLINE_MEMCPY)
-                {
-                    // NOTE: it turns out that this compiler can optimize this with inline code, e.g. gcc
-                    memcpy(_buffer + index, &value, sizeof(T));
-                }
-                else
-                {
-                    // NOTE: compiler should optimize this and unroll the loop
-                    char *p = _buffer + index;
-                    for (size_t i = 0; i < sizeof(T); i++)
-                        p[i] = ((char*)&value)[i];
-                }
-            }
-        }
-
+        //assert(is_aligned(_buffer+index, sizeof(T))); //TODO: special case for targets which support unaligned access
+        *((T*)(_buffer+index)) = value;
     }
 
 #if defined (__GNUC__) && (__GNUC__ < 3)
@@ -787,160 +724,65 @@ private:
     inline T ByteBuffer::get()
 #endif
     {
-        // this avoids int8 specialization, compiler will take care if optimization, -O2 or more
-        if (sizeof(T) == 1)
-        {
-            return (int8)(*(_position++));
-        }
+        assert(sizeof(T)<=getRemaining());
 
+        //assert(is_aligned(_position, sizeof(T)));
+        T value = *((T*)_position);
+        _position += sizeof(T);
 
-        T value;
-
-        if (UNALIGNED_ACCESS)
-        {
-            // NOTE: some CPU handle unaligned access pretty good (e.g. x86)
-            value = *((T*)_position);
-            _position += sizeof(T);
-        }
-        else
-        {
-            // NOTE: this check and branching does not always pay off
-            if (ADAPTIVE_ACCESS && is_aligned(_position, sizeof(T)))
-            {
-                value = *((T*)_position);
-                _position += sizeof(T);
-            }
-            else
-            {
-                if (USE_INLINE_MEMCPY)
-                {
-                    // NOTE: it turns out that this compiler can optimize this with inline code, e.g. gcc
-                    memcpy(&value, _position, sizeof(T));
-                    _position += sizeof(T);
-                }
-                else
-                {
-                    // NOTE: compiler should optimize this and unroll the loop
-                    for (size_t i = 0; i < sizeof(T); i++)
-                        ((char*)&value)[i] = _position[i];
-                    _position += sizeof(T);
-                }
-            }
-        }
-
-        if (ENDIANESS_SUPPORT && reverse<T>())
-        {
+        if(reverse<T>())
             value = swap<T>(value);
-        }
-
         return value;
     }
 
     template<typename T>
-    inline T ByteBuffer::get(std::size_t index)
+    inline T ByteBuffer::get(std::size_t index) const
     {
-        // this avoids int8 specialization, compiler will take care if optimization, -O2 or more
-        if (sizeof(T) == 1)
-        {
-            return (int8)(*(_buffer + index));
-        }
+        assert(_buffer+index<=_limit);
 
+        //assert(is_aligned(_position, sizeof(T)));
+        T value = *((T*)(_buffer + index));
 
-        T value;
-
-        if (UNALIGNED_ACCESS)
-        {
-            // NOTE: some CPU handle unaligned access pretty good (e.g. x86)
-            value = *((T*)(_buffer + index));
-        }
-        else
-        {
-            // NOTE: this check and branching does not always pay off
-            if (ADAPTIVE_ACCESS && is_aligned(_position, sizeof(T)))
-            {
-                value = *((T*)(_buffer + index));
-            }
-            else
-            {
-                if (USE_INLINE_MEMCPY)
-                {
-                    // NOTE: it turns out that this compiler can optimize this with inline code, e.g. gcc
-                    memcpy(&value, _buffer + index, sizeof(T));
-                }
-                else
-                {
-                    // NOTE: compiler should optimize this and unroll the loop
-                    char* p = _buffer + index;
-                    for (size_t i = 0; i < sizeof(T); i++)
-                        ((char*)&value)[i] = p[i];
-                }
-            }
-        }
-
-        if (ENDIANESS_SUPPORT && reverse<T>())
-        {
+        if(reverse<T>())
             value = swap<T>(value);
-        }
-
         return value;
     }
 
     template<typename T>
     inline void ByteBuffer::putArray(const T* values, std::size_t count)
     {
-        // this avoids int8 specialization, compiler will take care if optimization, -O2 or more
-        if (sizeof(T) == 1)
-        {
-            put((const char*)values, 0, count);
-            return;
-        }
-
-        T* start = (T*)_position;
-
-        size_t n = sizeof(T)*count;
         // we require aligned arrays...
-        memcpy(_position, values, n);
-        _position += n;
+        //assert(is_aligned(_position, sizeof(T)));
+        T* start = (T*)_position;
+        size_t n = sizeof(T)*count; // bytes
+        assert(n<=getRemaining());
 
-        // ... so that we can be fast changing endianness
-        if (ENDIANESS_SUPPORT && reverse<T>())
-        {
-            for (std::size_t i = 0; i < count; i++)
-            {
-                *start = swap<T>(*start);
-                start++;
-            }
+        if (reverse<T>()) {
+            for(std::size_t i=0; i<count; i++)
+                start[i] = swap<T>(values[i]);
+        } else {
+            memcpy(start, values, n);
         }
+        _position += n;
     }
 
     template<typename T>
     inline void ByteBuffer::getArray(T* values, std::size_t count)
     {
-        // this avoids int8 specialization, compiler will take care if optimization, -O2 or more
-        if (sizeof(T) == 1)
-        {
-            get((char*)values, 0, count);
-            return;
-        }
-
-        T* start = (T*)values;
-
-        size_t n = sizeof(T)*count;
         // we require aligned arrays...
-        memcpy(values, _position, n);
-        _position += n;
+        //assert(is_aligned(_position, sizeof(T)));
+        const T* start = (T*)_position;
+        size_t n = sizeof(T)*count; // bytes
+        assert(n<=getRemaining());
 
-        // ... so that we can be fast changing endianness
-        if (ENDIANESS_SUPPORT && reverse<T>())
-        {
-            for (std::size_t i = 0; i < count; i++)
-            {
-                *start = swap<T>(*start);
-                start++;
-            }
+        if (reverse<T>()) {
+            for(std::size_t i=0; i<count; i++)
+                values[i] = swap<T>(start[i]);
+        } else {
+            memcpy(values, start, n);
         }
+        _position += n;
     }
 
-    }
-}
+}}
 #endif  /* BYTEBUFFER_H */
