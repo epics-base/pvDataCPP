@@ -135,6 +135,7 @@ static void testOperators()
     testOk1((b1.cardinality() == 2 && b1.get(1) == true && b1.get(256) == true));
     
 
+    testOk1(b1 != b2);
     // assign
     b1 = b2;
     testOk1(b1 == b2);
@@ -151,7 +152,7 @@ static void testOperators()
 
 MAIN(testBitSet)
 {
-    testPlan(29);
+    testPlan(30);
     testGetSetClearFlip();
     testOperators();
     return testDone();
