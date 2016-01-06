@@ -68,7 +68,7 @@ PVStructurePtr StandardPVField::enumerated(StringArray const &choices)
     PVStructurePtr pvStructure = pvDataCreate->createPVStructure(field);
     PVStringArray::svector cdata(choices.size());
     std::copy(choices.begin(), choices.end(), cdata.begin());
-    pvStructure->getSubField<PVStringArray>("choices")->replace(freeze(cdata));
+    pvStructure->getSubFieldT<PVStringArray>("choices")->replace(freeze(cdata));
     return pvStructure;
 }
 
@@ -79,7 +79,7 @@ PVStructurePtr StandardPVField::enumerated(
     PVStructurePtr pvStructure =  pvDataCreate->createPVStructure(field);
     PVStringArray::svector cdata(choices.size());
     std::copy(choices.begin(), choices.end(), cdata.begin());
-    pvStructure->getSubField<PVStringArray>("value.choices")->replace(freeze(cdata));
+    pvStructure->getSubFieldT<PVStringArray>("value.choices")->replace(freeze(cdata));
     return pvStructure;
 }
 

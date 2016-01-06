@@ -38,7 +38,7 @@ static bool checkBitSetPVField(
     PVStructurePtr pvStructure = static_pointer_cast<PVStructure>(pvField);
     offset = static_cast<int32>(pvStructure->getFieldOffset()) + 1;
     while(offset<initialOffset + nbits) {
-        PVFieldPtr pvSubField = pvStructure->getSubField(offset);
+        PVFieldPtr pvSubField = pvStructure->getSubFieldT(offset);
         int32 nbitsNow = static_cast<int32>(pvSubField->getNumberFields());
         if(nbitsNow==1) {
             if(bitSet->get(offset)) {
