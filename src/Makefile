@@ -20,5 +20,8 @@ LIBRARY = pvData
 
 pvData_LIBS += Com
 
+# shared library ABI version.
+SHRLIB_VERSION ?= 5.0
+
 include $(TOP)/configure/RULES
 
