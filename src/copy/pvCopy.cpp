@@ -348,7 +348,7 @@ bool PVCopy::init(epics::pvData::PVStructurePtr const &pvRequest)
     if(len==string::npos) entireMaster = true;
     if(len==0) entireMaster = true;
     PVStructurePtr pvOptions;
-    if(len==1 && pvRequest->getSubField<PVStructure>("_options")) {
+    if(len==1) {
         pvOptions = pvRequest->getSubField<PVStructure>("_options");
     }
     if(entireMaster) {
