@@ -145,10 +145,10 @@ void PVUnion::serialize(ByteBuffer *pbuffer, SerializableControl *pflusher) cons
     if (variant)
     {
         // write introspection data
-        if (value.get() == 0)
+        if (value.get() == 0) {
+            pflusher->ensureBuffer(1);
             pbuffer->put((int8)-1);
-        else
-        {
+        }else {
             pflusher->cachedSerialize(value->getField(), pbuffer);
             value->serialize(pbuffer, pflusher);
         }
