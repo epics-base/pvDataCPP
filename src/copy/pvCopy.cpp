@@ -348,7 +348,7 @@ bool PVCopy::init(epics::pvData::PVStructurePtr const &pvRequest)
     if(len==string::npos) entireMaster = true;
     if(len==0) entireMaster = true;
     PVStructurePtr pvOptions;
-    if(len==1 && pvRequest->getSubField("_options")) {
+    if(len==1) {
         pvOptions = pvRequest->getSubField<PVStructure>("_options");
     }
     if(entireMaster) {
@@ -441,8 +441,7 @@ CopyNodePtr PVCopy::createStructureNodes(
         PVFieldPtr copyPVField = copyPVFields[i];
         string fieldName = copyPVField->getFieldName();
         
-        PVStructurePtr requestPVStructure = static_pointer_cast<PVStructure>(
-              pvFromRequest->getSubField(fieldName));
+        PVStructurePtr requestPVStructure = pvFromRequest->getSubField<PVStructure>(fieldName);
         PVStructurePtr pvSubFieldOptions;
         PVFieldPtr pvField = requestPVStructure->getSubField("_options");
         if(pvField) pvSubFieldOptions = static_pointer_cast<PVStructure>(pvField);
@@ -551,7 +550,7 @@ void PVCopy::updateStructureNodeFromBitSet(
     CopyNodePtrArrayPtr  nodes = structureNode->nodes;
     for(size_t i=0; i<nodes->size(); i++) {
         CopyNodePtr node = (*nodes)[i];
-        PVFieldPtr pvField = pvCopy->getSubField(node->structureOffset);
+        PVFieldPtr pvField = pvCopy->getSubFieldT(node->structureOffset);
         if(node->isStructure) {
             PVStructurePtr xxx = static_pointer_cast<PVStructure>(pvField);
             CopyStructureNodePtr subStructureNode =
