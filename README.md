@@ -1,7 +1,8 @@
 pvaDataCPP
 ==========
 
-pvDataCPP is a set of data types and utilities that form part of the EPICS V4 project.
+pvDataCPP is a set of data types and utilities that form part of the EPICS V4 
+project.
 
 
 Further Info
