@@ -1,6 +1,16 @@
-<h1>Release 5.0</h1>
+<h1>Release 5.0.3</h1>
 
-<p>The main changes since release 4.0 are:</p>
+<p>The only change since release 5.0.2 is:</p>
+
+<h2>Fixed buffer overflow in PVUnion::serialize() (issue #20)</h2>
+
+<p>A PVUnion whose stored value was null was serialized without checking 
+whether the buffer had sufficient capacity. This has been fixed by calling
+ensureBuffer().</p>
+
+<h1>Release 5.0.2</h1>
+
+<p>The main changes since release 4.0.3 are:</p>
 
 <ul>
 <li>Deprecated getXXXField() methods have been removed from PVStructure</li>
@@ -133,7 +143,7 @@ pvData had issues due to PVStructure::DEFAULT_ID being used before being initial
 This has been changed so the it returns a null pvStructure
 and provides an error.</p>
 
-<h1>Release 4.0</h1>
+<h1>Release 4.0.3</h1>
 
 <p>The main changes since release 3.0.2 are:</p>
 
