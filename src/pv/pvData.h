@@ -33,11 +33,11 @@
 typedef class std::ios std::ios_base;
 #endif
 
+#define USAGE_DEPRECATED EPICS_DEPRECATED
+
 #if defined(__GNUC__) && !(defined(vxWorks) && !defined(_WRS_VXWORKS_MAJOR))
-#define USAGE_DEPRECATED __attribute__((deprecated))
 #define USAGE_ERROR(MSG) __attribute__((error(MSG)))
 #else
-#define USAGE_DEPRECATED
 #define USAGE_ERROR(MSG) { throw std::runtime_error(MSG); }
 #endif
 
