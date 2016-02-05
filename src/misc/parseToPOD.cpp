@@ -251,7 +251,7 @@ epicsParseFloat(const char *str, float *to, char **units)
 
 // MS Visual Studio 2013 defines strtoll, etc.
 #if defined(_WIN32) && !defined(_MINGW)
-#    define NEED_OLL_FUNCS (_MSC_VER < 1800)
+#    define NEED_OLL_FUNCS (EPICS_VERSION_INT < VERSION_INT(3,15,0,1))
 #elif defined(vxWorks)
 #    define NEED_OLL_FUNCS !defined(_WRS_VXWORKS_MAJOR)
 #else
