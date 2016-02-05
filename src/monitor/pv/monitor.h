@@ -80,6 +80,16 @@ class epicsShareClass Monitor : public Destroyable{
      * @param monitorElement
      */
     virtual void release(MonitorElementPtr const & monitorElement) = 0;
+
+    struct Stats {
+        size_t nfilled; //!< # of elements ready to be poll()d
+        size_t noutstanding; //!< # of elements poll()d but not released()d
+        size_t nempty; //!< # of elements available for new remote data
+    };
+
+    virtual void getStats(Stats& s) const {
+        s.nfilled = s.noutstanding = s.nempty = 0;
+    }
 };
 
 
