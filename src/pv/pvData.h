@@ -10,7 +10,7 @@
 #ifndef PVDATA_H
 #define PVDATA_H
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(NOMINMAX)
 #define NOMINMAX
 #endif
 
