@@ -437,6 +437,16 @@ private:
 };
 
 /**
+ * @brief Some explicit specializations exist (defined in PVScalar.cpp)
+ */
+template<>
+    std::ostream& PVScalarValue<int8>::dumpValue(std::ostream& o) const;
+template<>
+    std::ostream& PVScalarValue<uint8>::dumpValue(std::ostream& o) const;
+template<>
+    std::ostream& PVScalarValue<boolean>::dumpValue(std::ostream& o) const;
+
+/**
  * typedefs for the various possible scalar types.
  */
 typedef PVScalarValue<boolean> PVBoolean;
