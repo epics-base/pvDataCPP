@@ -250,17 +250,15 @@ epicsParseFloat(const char *str, float *to, char **units)
 #endif
 
 // MS Visual Studio 2013 defines strtoll, etc.
-#if defined(_WIN32)
-#  if (_MSC_VER >= 1800)
-#    define WIN_NEEDS_OLL_FUNC 0
-#  else
-#    define WIN_NEEDS_OLL_FUNC 1
-#  endif
+#if defined(_WIN32) && !defined(_MINGW)
+#    define NEED_OLL_FUNCS (_MSC_VER < 1800)
+#elif defined(vxWorks)
+#    define NEED_OLL_FUNCS !defined(_WRS_VXWORKS_MAJOR)
 #else
-#  define WIN_NEEDS_OLL_FUNC 0
+#    define NEED_OLL_FUNCS 0
 #endif
 
-#if defined(NEED_LONGLONG) && (defined(__vxworks) || WIN_NEEDS_OLL_FUNC)
+#if defined(NEED_LONGLONG) && NEED_OLL_FUNCS
 static
 long long strtoll(const char *ptr, char ** endp, int base)
 {
