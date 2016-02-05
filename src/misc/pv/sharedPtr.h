@@ -26,7 +26,7 @@
 
 // where should we look?
 
-#if defined(__GNUC__) && __GNUC__>=4 && !defined(__vxworks)
+#if defined(__GNUC__) && __GNUC__>=4 && !defined(vxWorks)
    // GCC >=4.0.0
 #  define SHARED_FROM_TR1
 

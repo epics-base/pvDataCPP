@@ -27,7 +27,7 @@
 #include <string>
 #include <vector>
 
-#if defined(__vxworks) && \
+#if defined(vxWorks) && \
     (_WRS_VXWORKS_MAJOR+0 <= 6) && (_WRS_VXWORKS_MINOR+0 < 9)
 typedef int intptr_t;
 typedef unsigned int uintptr_t;

@@ -29,11 +29,11 @@
 #include <shareLib.h>
 #include <compilerDependencies.h>
 
-#if defined(__vxworks) && !defined(_WRS_VXWORKS_MAJOR)
+#if defined(vxWorks) && !defined(_WRS_VXWORKS_MAJOR)
 typedef class std::ios std::ios_base;
 #endif
 
-#if defined(__GNUC__) && !(defined(__vxworks) && !defined(_WRS_VXWORKS_MAJOR))
+#if defined(__GNUC__) && !(defined(vxWorks) && !defined(_WRS_VXWORKS_MAJOR))
 #define USAGE_DEPRECATED __attribute__((deprecated))
 #define USAGE_ERROR(MSG) __attribute__((error(MSG)))
 #else

@@ -308,7 +308,7 @@ noconvert:
     return 0;
 }
 
-#if defined(__vxworks)
+#if defined(vxWorks)
 /* vxworks version of std::istringstream >>uint64_t is buggy, we use out own implementation */
 static
 unsigned long long strtoull(const char *nptr, char **endptr, int base)
@@ -551,7 +551,7 @@ void parseToPOD(const string& in, float *out) {
 void parseToPOD(const string& in, double *out) {
     int err = epicsParseDouble(in.c_str(), out, NULL);
     if(err)   handleParseError(err);
-#if defined(__vxworks)
+#if defined(vxWorks)
     /* vxWorks strtod returns [-]epicsINF when it should return ERANGE error
      * if [-]epicsINF is returned and first char is a digit then translate this into ERANGE error
      */
