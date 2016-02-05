@@ -11,7 +11,8 @@
 #define BYTEBUFFER_H
 
 #include <string>
-#include <string.h>
+#include <cstring>
+#include <cstdlib>
 
 #ifdef epicsExportSharedSymbols
 #define byteBufferepicsExportSharedSymbols
@@ -224,7 +225,7 @@ public:
      * Must be one of EPICS_BYTE_ORDER,EPICS_ENDIAN_LITTLE,EPICS_ENDIAN_BIG.
      */
     ByteBuffer(std::size_t size, int byteOrder = EPICS_BYTE_ORDER) :
-        _buffer((char*)malloc(size)), _size(size),
+        _buffer((char*)std::malloc(size)), _size(size),
         _reverseEndianess(byteOrder != EPICS_BYTE_ORDER),
         _reverseFloatEndianess(byteOrder != EPICS_FLOAT_WORD_ORDER),
         _wrapped(false)
@@ -257,7 +258,7 @@ public:
      */
     ~ByteBuffer()
     {
-        if (_buffer && !_wrapped) free(_buffer);
+        if (_buffer && !_wrapped) std::free(_buffer);
     }
     /**
      * Set the byte order.
