@@ -17,6 +17,10 @@
 
 #ifdef _WIN32
 #define NOMINMAX
+#endif
+
+#if defined(_WIN32) && !defined(_MINGW)
+#pragma warning( push )
 #pragma warning(disable: 4251)
 #endif
 
@@ -126,7 +130,9 @@ typedef std::vector<std::string>::iterator StringArray_iterator;
 typedef std::vector<std::string>::const_iterator StringArray_const_iterator;
 
 }}
+
+#if defined(_WIN32) && !defined(_MINGW)
+#pragma warning( pop )
+#endif
+
 #endif  /* PVTYPE_H */
-
-
-
