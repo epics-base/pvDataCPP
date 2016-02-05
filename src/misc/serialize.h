@@ -165,6 +165,24 @@ namespace epics { namespace pvData {
                            std::vector<epicsUInt8>& out);
 
     /**
+     * @brief deserializeFromBuffer Deserialize into S from provided vector
+     * @param S A Serializeable object.  The current contents will be replaced
+     * @param byteOrder Byte order to write (EPICS_ENDIAN_LITTLE or EPICS_ENDIAN_BIG)
+     * @param in The input buffer (byte order of this buffer is used)
+     * @throws std::logic_error if input buffer is too small.  State of S is then undefined.
+     */
+    void deserializeFromBuffer(Serializable *S,
+                               ByteBuffer& in);
+
+    inline void deserializeFromVector(Serializable *S,
+                                      int byteOrder,
+                                      const std::vector<epicsUInt8>& in)
+    {
+        ByteBuffer B((char*)&in[0], in.size(), byteOrder); // we promise not the modify 'in'
+        deserializeFromBuffer(S, B);
+    }
+
+    /**
      * @brief Class for serializing bitSets.
      *
      */

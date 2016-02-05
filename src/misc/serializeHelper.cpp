@@ -215,3 +215,57 @@ namespace epics {
         }
     }
 }
+
+namespace {
+struct FromString : public epics::pvData::DeserializableControl
+{
+    ByteBuffer &buf;
+    epics::pvData::FieldCreatePtr create;
+
+    FromString(ByteBuffer& b)
+        :buf(b)
+        ,create(epics::pvData::getFieldCreate())
+    {}
+
+    virtual void ensureData(std::size_t size)
+    {
+        if(size>buf.getRemaining())
+            throw std::logic_error("Incomplete buffer");
+    }
+
+    virtual void alignData(std::size_t alignment)
+    {
+        size_t pos = buf.getPosition(), k = alignment-1;
+        if(pos&k) {
+            std::size_t npad = alignment-(pos&k);
+            ensureData(npad);
+            buf.align(alignment);
+        }
+    }
+
+    virtual bool directDeserialize(
+        ByteBuffer *existingBuffer,
+        char* deserializeTo,
+        std::size_t elementCount,
+        std::size_t elementSize)
+    {
+        return false;
+    }
+    virtual std::tr1::shared_ptr<const Field> cachedDeserialize(
+        ByteBuffer* buffer)
+    {
+        return create->deserialize(buffer, this);
+    }
+};
+}
+
+namespace epics {
+    namespace pvData {
+        void deserializeFromBuffer(Serializable *S,
+                                   ByteBuffer& buf)
+        {
+            FromString F(buf);
+            S->deserialize(&buf, &F);
+        }
+    }
+}

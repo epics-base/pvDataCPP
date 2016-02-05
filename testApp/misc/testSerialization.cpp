@@ -834,11 +834,35 @@ void testToString(int byteOrder)
     printbytes(bytes.size(), &bytes[0]);
 }
 
+void testFromString(int byteOrder)
+{
+    testDiag("testFromString(%d)", byteOrder);
+
+    StructureConstPtr _type = getFieldCreate()->createFieldBuilder()
+            ->add("X", pvInt)->add("Y", pvString)
+            ->createStructure();
+
+    PVStructurePtr _data = getPVDataCreate()->createPVStructure(_type);
+
+    if(byteOrder==EPICS_ENDIAN_LITTLE) {
+        ByteBuffer buf((char*)expected_le, NELEMENTS(expected_le)-1, byteOrder);
+        deserializeFromBuffer(_data.get(), buf);
+    } else if(byteOrder==EPICS_ENDIAN_BIG) {
+        ByteBuffer buf((char*)expected_be, NELEMENTS(expected_be)-1, byteOrder);
+        deserializeFromBuffer(_data.get(), buf);
+    } else {
+        throw std::logic_error("Unsupported mixed endian");
+    }
+
+    testOk1(_data->getSubFieldT<PVInt>("X")->get()==42);
+    testOk1(_data->getSubFieldT<PVString>("Y")->get()=="testing");
+}
+
 } // end namespace
 
 MAIN(testSerialization) {
 
-    testPlan(230);
+    testPlan(234);
 
     flusher = new SerializableControlImpl();
     control = new DeserializableControlImpl();
@@ -862,6 +886,8 @@ MAIN(testSerialization) {
 
     testToString(EPICS_ENDIAN_BIG);
     testToString(EPICS_ENDIAN_LITTLE);
+    testFromString(EPICS_ENDIAN_BIG);
+    testFromString(EPICS_ENDIAN_LITTLE);
 
     delete buffer;
     delete control;
