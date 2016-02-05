@@ -53,7 +53,7 @@
 #  include <execinfo.h>
 #  include <cxxabi.h>
 #  define EXCEPT_USE_BACKTRACE
-#elif defined(_WIN32) && !defined(__MINGW__) && !defined(SKIP_DBGHELP)
+#elif defined(_WIN32) && !defined(_MINGW) && !defined(SKIP_DBGHELP)
 #  define _WINSOCKAPI_
 #  include <windows.h>
 #  include <dbghelp.h>
