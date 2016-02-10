@@ -160,7 +160,7 @@ namespace epics { namespace pvData {
      * @param byteOrder Byte order to write (EPICS_ENDIAN_LITTLE or EPICS_ENDIAN_BIG)
      * @param out The output vector.  Results are appended
      */
-    void serializeToVector(const Serializable *S,
+    void epicsShareFunc serializeToVector(const Serializable *S,
                            int byteOrder,
                            std::vector<epicsUInt8>& out);
 
@@ -170,7 +170,7 @@ namespace epics { namespace pvData {
      * @param in The input buffer (byte order of this buffer is used)
      * @throws std::logic_error if input buffer is too small.  State of S is then undefined.
      */
-    void deserializeFromBuffer(Serializable *S,
+    void epicsShareFunc deserializeFromBuffer(Serializable *S,
                                ByteBuffer& in);
 
     /**
