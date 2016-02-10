@@ -14,6 +14,7 @@
 
 #define epicsExportSharedSymbols
 #include <pv/pvType.h>
+#include <pv/byteBuffer.h>
 #include <pv/epicsException.h>
 #include <pv/byteBuffer.h>
 #include <pv/serializeHelper.h>
@@ -139,6 +140,132 @@ namespace epics {
             else
                 return emptyStringtring;
         }
+    }
+}
 
+namespace {
+using namespace epics::pvData;
+
+struct ToString : public epics::pvData::SerializableControl
+{
+    typedef std::vector<epicsUInt8> buf_type;
+    buf_type buf;
+    buf_type& out;
+    ByteBuffer bufwrap;
+
+    ToString(buf_type& out, int byteOrder = EPICS_BYTE_ORDER)
+        :buf(16*1024)
+        ,out(out)
+        ,bufwrap((char*)&buf[0], buf.size(), byteOrder)
+    {}
+
+    virtual void flushSerializeBuffer()
+    {
+        size_t N = out.size();
+        out.resize(out.size()+bufwrap.getPosition());
+        std::copy(buf.begin(),
+                  buf.begin()+bufwrap.getPosition(),
+                  out.begin()+N);
+        bufwrap.clear();
+    }
+
+    virtual void ensureBuffer(std::size_t size)
+    {
+        flushSerializeBuffer();
+        assert(bufwrap.getRemaining()>0);
+    }
+
+    virtual void alignBuffer(std::size_t alignment)
+    {
+        if(bufwrap.getRemaining()<alignment)
+            flushSerializeBuffer();
+        assert(bufwrap.getRemaining()>=alignment);
+        bufwrap.align(alignment);
+    }
+
+    virtual bool directSerialize(
+        ByteBuffer *existingBuffer,
+        const char* toSerialize,
+        std::size_t elementCount,
+        std::size_t elementSize)
+    {
+        return false;
+    }
+
+    virtual void cachedSerialize(
+        std::tr1::shared_ptr<const Field> const & field,
+        ByteBuffer* buffer)
+    {
+        field->serialize(buffer, this);
+    }
+};
+
+} // namespace
+
+namespace epics {
+    namespace pvData {
+        void serializeToVector(const Serializable *S,
+                               int byteOrder,
+                               std::vector<epicsUInt8>& out)
+        {
+            ToString TS(out, byteOrder);
+            S->serialize(&TS.bufwrap, &TS);
+            TS.flushSerializeBuffer();
+            assert(TS.bufwrap.getPosition()==0);
+        }
+    }
+}
+
+namespace {
+struct FromString : public epics::pvData::DeserializableControl
+{
+    ByteBuffer &buf;
+    epics::pvData::FieldCreatePtr create;
+
+    FromString(ByteBuffer& b)
+        :buf(b)
+        ,create(epics::pvData::getFieldCreate())
+    {}
+
+    virtual void ensureData(std::size_t size)
+    {
+        if(size>buf.getRemaining())
+            throw std::logic_error("Incomplete buffer");
+    }
+
+    virtual void alignData(std::size_t alignment)
+    {
+        size_t pos = buf.getPosition(), k = alignment-1;
+        if(pos&k) {
+            std::size_t npad = alignment-(pos&k);
+            ensureData(npad);
+            buf.align(alignment);
+        }
+    }
+
+    virtual bool directDeserialize(
+        ByteBuffer *existingBuffer,
+        char* deserializeTo,
+        std::size_t elementCount,
+        std::size_t elementSize)
+    {
+        return false;
+    }
+    virtual std::tr1::shared_ptr<const Field> cachedDeserialize(
+        ByteBuffer* buffer)
+    {
+        return create->deserialize(buffer, this);
+    }
+};
+}
+
+namespace epics {
+    namespace pvData {
+        void deserializeFromBuffer(Serializable *S,
+                                   ByteBuffer& buf)
+        {
+            FromString F(buf);
+            S->deserialize(&buf, &F);
+        }
     }
 }

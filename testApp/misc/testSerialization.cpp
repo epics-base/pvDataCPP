@@ -18,6 +18,7 @@
 #include <fstream>
 
 #include <epicsUnitTest.h>
+#include <epicsTypes.h>
 #include <testMain.h>
 #include <dbDefs.h> // for NELEMENTS
 
@@ -761,11 +762,107 @@ void testStringCopy() {
         testDiag("implementation of string assignment operator does not share content");
 }
 
+static
+void printbytes(size_t N, const epicsUInt8 *buf)
+{
+    bool needeol = false;
+    for(size_t i=0; i<N; i++)
+    {
+        if(i%16==0) {
+            printf("# %04x ", (unsigned)i);
+            needeol = true;
+        }
+        printf("%02x", buf[i]);
+        if(i%16==15) {
+            printf("\n");
+            needeol = false;
+        } else if(i%4==3) {
+            printf(" ");
+        }
+    }
+    if(needeol)
+        printf("\n");
+}
+
+static
+const char expected_le[] = "\x2a\000\000\000\x07testing";
+
+static
+const char expected_be[] = "\000\000\000\x2a\x07testing";
+
+static
+void testToString(int byteOrder)
+{
+    testDiag("testToString(%d)", byteOrder);
+
+    StructureConstPtr _type = getFieldCreate()->createFieldBuilder()
+            ->add("X", pvInt)->add("Y", pvString)
+            ->createStructure();
+
+    PVStructurePtr _data = getPVDataCreate()->createPVStructure(_type);
+
+    _data->getSubFieldT<PVInt>("X")->put(42);
+    _data->getSubFieldT<PVString>("Y")->put("testing");
+
+    std::vector<epicsUInt8> bytes;
+    serializeToVector(_data.get(), byteOrder, bytes);
+
+    const char *expected;
+    size_t count;
+    if(byteOrder==EPICS_ENDIAN_LITTLE) {
+        expected = expected_le;
+        count = NELEMENTS(expected_le)-1;
+    } else if(byteOrder==EPICS_ENDIAN_BIG) {
+        expected = expected_be;
+        count = NELEMENTS(expected_be)-1;
+    } else {
+        throw std::logic_error("Unsupported mixed endian");
+    }
+
+    testOk(bytes.size()==count,
+           "%u == %u", (unsigned)bytes.size(),
+           (unsigned)count);
+
+    size_t N = std::min(bytes.size(), count);
+
+    testOk(memcmp(&bytes[0], expected, N)==0, "Match [0,%u)", (unsigned)N);
+
+    testDiag("Expected (%u)", (unsigned)bytes.size());
+    printbytes(count, (epicsUInt8*)expected);
+
+    testDiag("Actual (%u)", (unsigned)count);
+    printbytes(bytes.size(), &bytes[0]);
+}
+
+void testFromString(int byteOrder)
+{
+    testDiag("testFromString(%d)", byteOrder);
+
+    StructureConstPtr _type = getFieldCreate()->createFieldBuilder()
+            ->add("X", pvInt)->add("Y", pvString)
+            ->createStructure();
+
+    PVStructurePtr _data = getPVDataCreate()->createPVStructure(_type);
+
+    if(byteOrder==EPICS_ENDIAN_LITTLE) {
+        ByteBuffer buf((char*)expected_le, NELEMENTS(expected_le)-1, byteOrder);
+        deserializeFromBuffer(_data.get(), buf);
+    } else if(byteOrder==EPICS_ENDIAN_BIG) {
+        ByteBuffer buf((char*)expected_be, NELEMENTS(expected_be)-1, byteOrder);
+        deserializeFromBuffer(_data.get(), buf);
+    } else {
+        throw std::logic_error("Unsupported mixed endian");
+    }
+
+    testOk1(_data->getSubFieldT<PVInt>("X")->get()==42);
+    testOk1(_data->getSubFieldT<PVString>("Y")->get()=="testing");
+}
+
 } // end namespace
 
 MAIN(testSerialization) {
 
-    testPlan(226);
+    testPlan(234);
 
     flusher = new SerializableControlImpl();
     control = new DeserializableControlImpl();
@@ -787,6 +884,10 @@ MAIN(testSerialization) {
     testArraySizeType();
     testBoundedString();
 
+    testToString(EPICS_ENDIAN_BIG);
+    testToString(EPICS_ENDIAN_LITTLE);
+    testFromString(EPICS_ENDIAN_BIG);
+    testFromString(EPICS_ENDIAN_LITTLE);
 
     delete buffer;
     delete control;

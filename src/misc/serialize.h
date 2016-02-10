@@ -10,6 +10,8 @@
 #ifndef SERIALIZE_H
 #define SERIALIZE_H
 
+#include <epicsTypes.h>
+
 #include <pv/byteBuffer.h>
 #include <pv/sharedPtr.h>
 
@@ -150,6 +152,41 @@ namespace epics { namespace pvData {
             DeserializableControl *flusher) = 0;
     };
 
+    /**
+     * @brief Push serialize and append to the provided byte vector.
+     * No caching is done.  Only complete serialization.
+     *
+     * @param S A Serializable object
+     * @param byteOrder Byte order to write (EPICS_ENDIAN_LITTLE or EPICS_ENDIAN_BIG)
+     * @param out The output vector.  Results are appended
+     */
+    void serializeToVector(const Serializable *S,
+                           int byteOrder,
+                           std::vector<epicsUInt8>& out);
+
+    /**
+     * @brief deserializeFromBuffer Deserialize into S from provided vector
+     * @param S A Serializeable object.  The current contents will be replaced
+     * @param in The input buffer (byte order of this buffer is used)
+     * @throws std::logic_error if input buffer is too small.  State of S is then undefined.
+     */
+    void deserializeFromBuffer(Serializable *S,
+                               ByteBuffer& in);
+
+    /**
+     * @brief deserializeFromBuffer Deserialize into S from provided vector
+     * @param S A Serializeable object.  The current contents will be replaced
+     * @param byteOrder Byte order to write (EPICS_ENDIAN_LITTLE or EPICS_ENDIAN_BIG)
+     * @param in The input vector
+     * @throws std::logic_error if input buffer is too small.  State of S is then undefined.
+     */
+    inline void deserializeFromVector(Serializable *S,
+                                      int byteOrder,
+                                      const std::vector<epicsUInt8>& in)
+    {
+        ByteBuffer B((char*)&in[0], in.size(), byteOrder); // we promise not the modify 'in'
+        deserializeFromBuffer(S, B);
+    }
 
     /**
      * @brief Class for serializing bitSets.
