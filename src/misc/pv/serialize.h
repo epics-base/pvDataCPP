@@ -54,14 +54,18 @@ namespace epics { namespace pvData {
          */
         virtual void alignBuffer(std::size_t alignment) =0;
         /**
-         * method for serializing array data.
-         * This should only be used for arrays of primitive types.
-         * i. e. boolean,byte,...,double.
-         * It can not be called for string, structure, or union arrays.
+         * Method for serializing primitive array data.
+         * Hook for supplying custom serialization implementation.
+         * The serialization implementation need not be provided.
+         * Returns true if method performs serialization, false otherwise.
+         * This should only be used for arrays of primitive types,
+         * i. e. boolean, byte,..., double.
+         * It cannot be called for string, structure, or union arrays.
          * @param existingBuffer the existing buffer from the caller.
          * @param toSerialize location of data to be put into buffer.
          * @param elementCount number of elements.
          * @param elementSize element size.
+         * @returns true if serialization performed, else false.
          */
         virtual bool directSerialize(
             ByteBuffer *existingBuffer,
@@ -104,14 +108,18 @@ namespace epics { namespace pvData {
          */
         virtual void alignData(std::size_t alignment) =0;
         /**
-         * method for deserializing array data.
+         * Method for deserializing array data.
+         * Hook for supplying custom deserialization implementation.
+         * The deserialization implementation need not be provided.
+         * Returns true if method performs deserialization, false otherwise.
          * This should only be used for arrays of primitive types.
-         * i. e. boolean,byte,...,double.
-         * It can not be called for string, structure, or union arrays.
+         * i.e. boolean, byte,..., double.
+         * It cannot be called for string, structure, or union arrays.
          * @param existingBuffer the existing buffer from the caller.
          * @param deserializeTo location of data.
          * @param elementCount number of elements.
          * @param elementSize element size.
+         * @returns true if deserialization performed, else false.
          */
         virtual bool directDeserialize(
             ByteBuffer *existingBuffer,
