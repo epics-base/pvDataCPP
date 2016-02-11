@@ -64,7 +64,8 @@
 
 #if defined(_WIN32) && !defined(_MINGW)
 #pragma warning( push )
-#pragma warning(disable: 4275) // warning C4275: non dll-interface class used as base for dll-interface class (std::logic_error)
+#pragma warning(disable: 4275) // non dll-interface class used as base for dll-interface class (std::logic_error)
+#pragma warning(disable: 4251) // class std::string needs to have dll-interface to be used by clients
 #endif
 
 namespace epics { namespace pvData {
