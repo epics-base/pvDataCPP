@@ -7,6 +7,7 @@
 /* Author:  Matej Sekoranja Date: 2010.10.18 */
 
 #include <iostream>
+#include <iomanip>
 #include <stddef.h>
 #include <stdlib.h>
 #include <stddef.h>
@@ -14,7 +15,10 @@
 #include <stdio.h>
 #include <sstream>
 
+#include <dbDefs.h>
+
 #include <pv/bitSet.h>
+#include <pv/serializeHelper.h>
 
 #include <epicsUnitTest.h>
 #include <testMain.h>
@@ -148,12 +152,116 @@ static void testOperators()
     testOk1(str == "{2, 128}");
 }
 
+static void tofrostring(const BitSet& in, const char *expect, size_t elen, int byteOrder)
+{
+    {
+        std::vector<epicsUInt8> buf;
+        serializeToVector(&in, byteOrder, buf);
+
+        std::ostringstream astrm, estrm;
+
+        bool match = buf.size()==elen;
+        if(!match) testDiag("Lengths differ %u != %u", (unsigned)buf.size(), (unsigned)elen);
+        for(size_t i=0, e=std::min(elen, buf.size()); i<e; i++) {
+            astrm<<" "<<std::hex<<std::setfill('0')<<std::setw(2)<<int(buf[i]&0xff);
+            estrm<<" "<<std::hex<<std::setfill('0')<<std::setw(2)<<int(expect[i]&0xff);
+            match &= (buf[i]&0xff)==(expect[i]&0xff);
+        }
+
+        testDiag("expect %s", estrm.str().c_str());
+        testDiag("actual %s", astrm.str().c_str());
+        testOk(match, "Serialization %s", (byteOrder==EPICS_ENDIAN_BIG)?"BIG":"LITTLE");
+    }
+
+    {
+        BitSet other;
+        ByteBuffer ebuf((char*)expect, elen, byteOrder);
+        try{
+            deserializeFromBuffer(&other, ebuf);
+        }catch(std::exception& e){
+            testFail("Exception during deserialization");
+            testSkip(1, "deserialize failed");
+            return;
+        }
+        testOk(ebuf.getRemaining()==0, "buffer remaining 0 == %u", (unsigned)ebuf.getRemaining());
+
+        std::ostringstream astrm, estrm;
+        astrm << other;
+        estrm << in;
+
+        testOk(other==in,"%s == %s", astrm.str().c_str(), estrm.str().c_str());
+    }
+}
+
+static void testSerialize()
+{
+    testDiag("testSerialization");
+
+#define TOFRO(BB, BES, LES) do{tofrostring(BB, BES, NELEMENTS(LES)-1, EPICS_ENDIAN_BIG); \
+    tofrostring(BB, LES, NELEMENTS(LES)-1, EPICS_ENDIAN_LITTLE);}while(0)
+    {
+        BitSet dut;
+        TOFRO(dut, "\x00",
+                   "\x00"); // zero size
+    }
+    {
+        BitSet dut;
+        dut.set(0);
+        TOFRO(dut, "\x01\x01",
+                   "\x01\x01");
+    }
+    {
+        BitSet dut;
+        dut.set(1);
+        TOFRO(dut, "\x01\x02",
+                   "\x01\x02");
+    }
+    {
+        BitSet dut;
+        dut.set(8);
+        TOFRO(dut, "\x02\x00\x01",
+                   "\x02\x00\x01"); // high 64-bit word always LSB
+    }
+    {
+        BitSet dut;
+        dut.set(55);
+        dut.set(1);
+        TOFRO(dut, "\x07\x02\x00\x00\x00\x00\x00\x80",
+                   "\x07\x02\x00\x00\x00\x00\x00\x80");
+    }
+    {
+        BitSet dut;
+        dut.set(63);
+        dut.set(1);
+        TOFRO(dut, "\x08\x80\x00\x00\x00\x00\x00\x00\x02",
+                   "\x08\x02\x00\x00\x00\x00\x00\x00\x80");
+    }
+    {
+        BitSet dut;
+        dut.set(64);
+        dut.set(63);
+        dut.set(8);
+        dut.set(1);
+        TOFRO(dut, "\x09\x80\x00\x00\x00\x00\x00\x01\x02\x01",
+                   "\x09\x02\x01\x00\x00\x00\x00\x00\x80\x01");
+    }
+    {
+        BitSet dut;
+        dut.set(126);
+        dut.set(64);
+        dut.set(63);
+        dut.set(1);
+        TOFRO(dut, "\x10\x80\x00\x00\x00\x00\x00\x00\x02\x40\x00\x00\x00\x00\x00\x00\x01",
+                   "\x10\x02\x00\x00\x00\x00\x00\x00\x80\x01\x00\x00\x00\x00\x00\x00\x40");
+    }
+#undef TOFRO
+}
 
 MAIN(testBitSet)
 {
-    testPlan(29);
+    testPlan(77);
     testGetSetClearFlip();
     testOperators();
+    testSerialize();
     return testDone();
 }
-
