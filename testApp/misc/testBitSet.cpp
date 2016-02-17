@@ -152,9 +152,7 @@ static void testOperators()
     b3.clear(); b3.set(1);
     std::cout<<"# "<<toString(b3)<<" |= "<<toString(b1)<<" & "<<toString(b2)<<"\n";
     b3.or_and(b1, b2);
-    testTodoBegin("Bug in or_and");
     testOk(toString(b3) == "{1}", "%s == {1}", toString(b3).c_str());
-    testTodoEnd();
 }
 
 
