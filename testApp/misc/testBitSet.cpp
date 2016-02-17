@@ -158,7 +158,7 @@ static void testOperators()
 
 MAIN(testBitSet)
 {
-    testPlan(29);
+    testPlan(30);
     testGetSetClearFlip();
     testOperators();
     return testDone();
