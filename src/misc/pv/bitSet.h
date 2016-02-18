@@ -10,7 +10,7 @@
 #ifndef BITSET_H
 #define BITSET_H
 
-#include <stdexcept>
+#include <vector>
 
 #include <pv/pvType.h>
 #include <pv/serialize.h>
@@ -211,6 +211,9 @@ namespace epics { namespace pvData {
           */
         BitSet& operator=(const BitSet &set);
 
+        //! Swap contents
+        void swap(BitSet& set);
+
         /**
          * Perform AND operation on <code>set1</code> and <code>set2</code>,
          * and OR on result and this instance.
@@ -233,42 +236,11 @@ namespace epics { namespace pvData {
 
     private:
 
-        /*
-         * BitSets are packed into arrays of "words."  Currently a word is
-         * a long, which consists of 64 bits, requiring 6 address bits.
-         * The choice of word size is determined purely by performance concerns.
-         */
-        static const uint32 ADDRESS_BITS_PER_WORD = 6;
-        static const uint32 BITS_PER_WORD = 1 << ADDRESS_BITS_PER_WORD;
-        static const uint32 BIT_INDEX_MASK = BITS_PER_WORD - 1;
-
-        /** Used to shift left or right for a partial word mask */
-        static const uint64 WORD_MASK = ~((uint64)0);
-
+        typedef std::vector<uint64> words_t;
         /** The internal field corresponding to the serialField "bits". */
-        uint64* words;
-
-        /** The internal field corresponding to the size of words[] array. */
-        uint32 wordsLength;
-
-        /** The number of words in the logical size of this BitSet. */
-        uint32 wordsInUse;
-
+        words_t words;
 
     private:
-
-        /**
-         * Given a bit index, return word index containing it.
-         */
-        static inline uint32 wordIndex(uint32 bitIndex) {
-            return bitIndex >> ADDRESS_BITS_PER_WORD;
-        }
-
-        /**
-         * Creates a new word array.
-         */
-        void initWords(uint32 nbits);
-
         /**
          * Sets the field wordsInUse to the logical size in words of the bit set.
          * WARNING: This method assumes that the number of words actually in use is
