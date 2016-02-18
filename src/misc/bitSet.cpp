@@ -358,7 +358,7 @@ namespace epics { namespace pvData {
             words[j] = 0;
     
         for (uint32 remaining = (bytes - longs * 8), j = 0; j < remaining; j++)
-            words[i] |= (buffer->getByte() & 0xffL) << (8 * j);
+            words[i] |= (buffer->getByte() & 0xffLL) << (8 * j);
     
     }
     
