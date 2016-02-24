@@ -556,6 +556,63 @@ static void testICE()
     }
 }
 
+static
+void testBad()
+{
+    epics::pvData::shared_vector<int> I;
+    epics::pvData::shared_vector<const int> CI;
+    epics::pvData::shared_vector<float> F;
+    epics::pvData::shared_vector<const float> CF;
+    epics::pvData::shared_vector<void> V;
+    epics::pvData::shared_vector<const void> CV;
+    (void)I;
+    (void)CI;
+    (void)F;
+    (void)CF;
+    (void)V;
+    (void)CV;
+
+    // Tests which should result in compile failure.
+    // as there is no established way to test this automatically,
+    // uncomment one at a time
+
+    // No copy from const to non-const
+    //CI = I;
+    //I = CI;
+    //epics::pvData::shared_vector<const int> CI2(I);
+    //epics::pvData::shared_vector<int> I2(CI);
+
+    // shared_vector_convert can't thaw()
+    //I = epics::pvData::shared_vector_convert<int>(CI);
+    //V = epics::pvData::shared_vector_convert<void>(CV);
+
+    // shared_vector_convert can't freeze()
+    //CI = epics::pvData::shared_vector_convert<const int>(I);
+    //CV = epics::pvData::shared_vector_convert<const void>(V);
+
+    // static_shared_vector_cast can't thaw()
+    //I = epics::pvData::static_shared_vector_cast<int>(CI);
+    //V = epics::pvData::static_shared_vector_cast<void>(CV);
+
+    // static_shared_vector_cast can't freeze()
+    //CI = epics::pvData::static_shared_vector_cast<const int>(I);
+    //CV = epics::pvData::static_shared_vector_cast<const void>(V);
+
+    // freeze() can't change type.
+    // the error here will be with the assignment
+    //I = epics::pvData::freeze(CV);
+    //I = epics::pvData::freeze(CF);
+    //CI = epics::pvData::freeze(V);
+    //CI = epics::pvData::freeze(F);
+
+    // that() can't change type.
+    // the error here will be with the assignment
+    //CI = epics::pvData::thaw(V);
+    //CI = epics::pvData::thaw(F);
+    //I = epics::pvData::thaw(CV);
+    //I = epics::pvData::that(CF);
+}
+
 MAIN(testSharedVector)
 {
     testPlan(167);
@@ -577,5 +634,6 @@ MAIN(testSharedVector)
     testVectorConvert();
     testWeak();
     testICE();
+    testBad();
     return testDone();
 }
