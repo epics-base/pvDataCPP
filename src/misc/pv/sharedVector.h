@@ -432,8 +432,8 @@ public:
        shared_vector<E> original(...);
 
        if(!original.unique()){
-         shared_vector<E> temp(myallocator(original.size()),
-                               0, original.size());
+         std::tr1::shared_ptr<E> sptr(myalloc(original.size()), myfree);
+         shared_vector<E> temp(sptr, 0, original.size());
          std::copy(original.begin(), original.end(), temp.begin());
          original.swap(temp);
        }
@@ -532,6 +532,20 @@ public:
  *
  * Does not allow access or iteration of contents
  * other than as void* or const void*
+ *
+ * In order to support shared_vector_convert<>()
+ * information about the type of the underlying allocation
+ * is stored.
+ * This is implicitly set by static_shared_vector_cast<>()
+ * and may be explicitly checked/changed using
+ * original_type()/set_original_type().
+ *
+ * A shared_vector<void> directly constructed
+ * from a smart pointer does not have an associated
+ * original_type().
+ * Use epics::pvData::ScalarTypeFunc::allocArray()
+ * to convienently allocate an array with a known
+ * original_type().
  */
 template<typename E>
 class shared_vector<E, typename meta::is_void<E>::type >
@@ -726,8 +740,10 @@ namespace detail {
  *
  * Converting to/from void is supported.  Convert to void
  * is an alias for static_shared_vector_cast<void>().
- * Convert from void utilizes shared_vector<void>::original_type()
- * and throws std::runtime_error if this is not valid.
+ * Convert from void utilizes shared_vector<void>::original_type().
+ *
+ * @throws std::runtime_error if cast is not valid.
+ * @throws std::bad_alloc for out of memory condition
  */
 template<typename TO, typename FROM>
 static FORCE_INLINE
@@ -903,8 +919,11 @@ std::ostream& operator<<(std::ostream& strm, const epics::pvData::shared_vector<
  * shared_vector has additional constructors from raw pointers
  * and shared_ptr s.
  *
- * The copy constructor and assignment operator allow implicit
- * casting from type 'shared_vector<T>' to 'shared_vector<const T>'.
+ * Implicit casting is not allowed.  Instead use
+ * const_shared_vector_cast()/freeze()/thaw() (@ref vectorconst)
+ * to casting between 'T' and 'const T'.
+ * Use static_shared_vector_cast() to cast between
+ * void and non-void (same const-ness).
  *
  * To facilitate safe modification the methods unique() and
  * make_unique() are provided.
@@ -1006,17 +1025,15 @@ Type #2 is constant reference to a mutable value.
 Type #3 is a mutable reference to a constant value.
 Type #4 is a constant reference to a constant value.
 
-Casting between const and non-const references of the same value type
-is governed by the normal C++ casting rules.
-
 Casting between const and non-const values does @b not follow the normal
-C++ casting rules.
+C++ casting rules (no implicit cast).
 
 For casting between shared_vector<T> and shared_vector<const T>
 explicit casting operations are required.  These operations are
 @b freeze() (non-const to const) and @b thaw() (const to non-const).
 
-A shared_vector<const T> is "frozen" as its value can not be modified.
+A 'shared_vector<const T>' is "frozen" as its value can not be modified.
+However it can still be sliced because the reference is not const.
 
 These functions are defined like:
 
@@ -1040,17 +1057,18 @@ The following guarantees are provided by both functions:
 # The returned reference points to a value which is only referenced by
  shared_vectors with the same value const-ness as the returned reference.
 
-Please note that the argument of both freeze and thaw is a non-const
+@note The argument of both freeze() and thaw() is a non-const
 reference which will always be cleared.
 
 @section vfreeze Freezing
 
 The act of freezing a shared_vector requires that the shared_vector
-passed in must be unique() or an exception is thrown.  This is
-done to reduce the possibility of accidental copying.
+passed in must be unique() or an exception is thrown.
+No copy is made.
 
-This possibility can be avoided by calling the make_unique() on a
+The possibility of an exception can be avoided by calling the make_unique() on a
 shared_vector before passing it to freeze().
+This will make a copy if necessary.
 
 @section vthaw Thawing
 
