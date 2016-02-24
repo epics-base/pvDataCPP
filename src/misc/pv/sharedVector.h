@@ -575,12 +575,12 @@ public:
 
     shared_vector(shared_vector<void>& O,
                   detail::_shared_vector_freeze_tag t)
-        :base_t(O,t)
+        :base_t(O,t), m_vtype(O.m_vtype)
     {}
 
     shared_vector(shared_vector<const void>& O,
                   detail::_shared_vector_thaw_tag t)
-        :base_t(O,t)
+        :base_t(O,t), m_vtype(O.m_vtype)
     {}
 
     shared_vector& operator=(const shared_vector& o)
@@ -692,7 +692,7 @@ namespace detail {
             return shared_vector<TO>(src, detail::_shared_vector_cast_tag());
         }
     };
-    
+
     // convert from void uses original type or throws an exception.
     template<typename TO, typename FROM>
     struct shared_vector_converter<TO,FROM,
