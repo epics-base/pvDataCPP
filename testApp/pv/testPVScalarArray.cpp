@@ -177,11 +177,32 @@ static void testShare()
     testOk1(!cdata.unique());
 }
 
+static void testVoid()
+{
+    testDiag("Check PVScalarArray put/get from void");
+
+    PVIntArrayPtr iarr = static_pointer_cast<PVIntArray>(getPVDataCreate()->createPVScalarArray(pvInt));
+
+    PVIntArray::const_svector idata(4, 1);
+    iarr->PVScalarArray::putFrom(idata);
+    idata.clear();
+
+    shared_vector<const void> cvbuf;
+    iarr->PVScalarArray::getAs(cvbuf);
+
+    idata = static_shared_vector_cast<const PVIntArray::value_type>(cvbuf);
+    testOk1(idata.size()==4);
+
+    iarr->PVScalarArray::putFrom(cvbuf);
+
+    testOk1(iarr->getLength()==4);
+}
+
 } // end namespace
 
 MAIN(testPVScalarArray)
 {
-    testPlan(156);
+    testPlan(158);
     testFactory();
     testBasic<PVByteArray>();
     testBasic<PVUByteArray>();
@@ -189,5 +210,6 @@ MAIN(testPVScalarArray)
     testBasic<PVDoubleArray>();
     testBasic<PVStringArray>();
     testShare();
+    testVoid();
     return testDone();
 }

@@ -360,17 +360,36 @@ static void testVoid()
 
     epics::pvData::shared_vector<int32> typed(4);
 
-    epics::pvData::shared_vector<void> untyped2(epics::pvData::static_shared_vector_cast<void>(typed));
+    epics::pvData::shared_vector<void> untyped(epics::pvData::static_shared_vector_cast<void>(typed));
 
-    testOk1(typed.dataPtr().get()==untyped2.dataPtr().get());
-    testOk1(typed.size()*sizeof(int)==untyped2.size());
+    testOk1(typed.dataPtr().get()==untyped.dataPtr().get());
+    testOk1(typed.size()*sizeof(int)==untyped.size());
 
-    untyped2.slice(sizeof(int), 2*sizeof(int));
+    untyped.slice(sizeof(int), 2*sizeof(int));
 
-    typed = epics::pvData::static_shared_vector_cast<int32>(untyped2);
+    typed = epics::pvData::static_shared_vector_cast<int32>(untyped);
 
     testOk1(typed.dataOffset()==1);
     testOk1(typed.size()==2);
+    untyped.clear();
+
+    testDiag("Test vector cast to/from const void");
+
+    epics::pvData::shared_vector<const int32> ctyped(4);
+
+    epics::pvData::shared_vector<const void> cuntyped(epics::pvData::static_shared_vector_cast<const void>(ctyped));
+    // case const void to const void
+    epics::pvData::shared_vector<const void> cuntyped2(epics::pvData::static_shared_vector_cast<const void>(cuntyped));
+
+    testOk1(ctyped.dataPtr().get()==cuntyped2.dataPtr().get());
+    testOk1(ctyped.size()*sizeof(int)==cuntyped2.size());
+
+    cuntyped2.slice(sizeof(int), 2*sizeof(int));
+
+    ctyped = epics::pvData::static_shared_vector_cast<const int32>(cuntyped2);
+
+    testOk1(ctyped.dataOffset()==1);
+    testOk1(ctyped.size()==2);
 }
 
 struct dummyStruct {};
@@ -539,7 +558,7 @@ static void testICE()
 
 MAIN(testSharedVector)
 {
-    testPlan(163);
+    testPlan(167);
     testDiag("Tests for shared_vector");
 
     testDiag("sizeof(shared_vector<int32>)=%lu",

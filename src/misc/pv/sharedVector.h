@@ -326,7 +326,7 @@ public:
     //! Internal for static_shared_vector_cast
     template<typename FROM>
     shared_vector(const shared_vector<FROM> &src,
-                  typename meta::is_void<FROM, detail::_shared_vector_cast_tag>::type)
+                  detail::_shared_vector_cast_tag)
         :base_t(std::tr1::static_pointer_cast<E>(src.dataPtr()),
                 src.dataOffset()/sizeof(E),
                 src.dataCount()/sizeof(E))
@@ -566,7 +566,7 @@ public:
     //! Internal for static_shared_vector_cast
     template<typename FROM>
     shared_vector(const shared_vector<FROM> &src,
-                  typename meta::is_not_void<FROM, detail::_shared_vector_cast_tag>::type)
+                  detail::_shared_vector_cast_tag)
         :base_t(std::tr1::static_pointer_cast<E>(src.dataPtr()),
                 src.dataOffset()*sizeof(FROM),
                 src.dataCount()*sizeof(FROM))
@@ -601,6 +601,64 @@ public:
     shared_vector& set_original_type(ScalarType t) { m_vtype=t; return *this; }
     ScalarType original_type() const {return m_vtype;}
 };
+
+namespace detail {
+    template<typename TO, typename FROM, class Enable = void>
+    struct static_shared_vector_caster { /* no default */ };
+    // from void to non-void with same const-ness
+    template<typename TO>
+    struct static_shared_vector_caster<TO, void,
+                                       typename meta::_and<meta::same_const<TO,void>, meta::is_not_void<TO> >::type> {
+        static inline shared_vector<TO> op(const shared_vector<void>& src) {
+            return shared_vector<TO>(src, detail::_shared_vector_cast_tag());
+        }
+    };
+    template<typename TO>
+    struct static_shared_vector_caster<TO, const void,
+                                       typename meta::_and<meta::same_const<TO,const void>, meta::is_not_void<TO> >::type> {
+        static inline shared_vector<TO> op(const shared_vector<const void>& src) {
+            return shared_vector<TO>(src, detail::_shared_vector_cast_tag());
+        }
+    };
+    // from non-void to void with same const-ness
+    template<typename FROM>
+    struct static_shared_vector_caster<void, FROM,
+                                       typename meta::_and<meta::same_const<void,FROM>, meta::is_not_void<FROM> >::type> {
+        static FORCE_INLINE shared_vector<void> op(const shared_vector<FROM>& src) {
+            return shared_vector<void>(src, detail::_shared_vector_cast_tag());
+        }
+    };
+    template<typename FROM>
+    struct static_shared_vector_caster<const void, FROM,
+                                       typename meta::_and<meta::same_const<const void,FROM>, meta::is_not_void<FROM> >::type> {
+        static FORCE_INLINE shared_vector<const void> op(const shared_vector<FROM>& src) {
+            return shared_vector<const void>(src, detail::_shared_vector_cast_tag());
+        }
+    };
+
+    // cast to same type, no-op
+    template<typename TOFRO>
+    struct static_shared_vector_caster<TOFRO,TOFRO,void> {
+        static FORCE_INLINE const shared_vector<TOFRO>& op(const shared_vector<TOFRO>& src) {
+            return src;
+        }
+    };
+} // namespace detail
+
+/** @brief Allow casting of shared_vector between types
+ *
+ * Currently only to/from void is implemented.
+ *
+ @warning Casting from void is undefined unless the offset and length
+ *        are integer multiples of the size of the destination type.
+ */
+template<typename TO, typename FROM>
+static FORCE_INLINE
+shared_vector<TO>
+static_shared_vector_cast(const shared_vector<FROM>& src)
+{
+    return detail::static_shared_vector_caster<TO,FROM>::op(src);
+}
 
 namespace detail {
 
@@ -660,22 +718,6 @@ namespace detail {
             }
         }
     };
-}
-
-/** @brief Allow casting of shared_vector between types
- *
- * Currently only to/from void is implemented.
- *
- @warning Casting from void is undefined unless the offset and length
- *        are integer multiples of the size of the destination type.
- */
-template<typename TO, typename FROM>
-static FORCE_INLINE
-shared_vector<TO>
-static_shared_vector_cast(const shared_vector<FROM>& src,
-                          typename meta::same_const<TO,FROM,int>::type = 0)
-{
-    return shared_vector<TO>(src, detail::_shared_vector_cast_tag());
 }
 
 /** @brief Allow converting of shared_vector between types
