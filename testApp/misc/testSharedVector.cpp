@@ -372,7 +372,10 @@ static void testVoid()
     testOk1(typed.dataOffset()==1);
     testOk1(typed.size()==2);
     untyped.clear();
+}
 
+static void testConstVoid()
+{
     testDiag("Test vector cast to/from const void");
 
     epics::pvData::shared_vector<const int32> ctyped(4);
@@ -390,6 +393,11 @@ static void testVoid()
 
     testOk1(ctyped.dataOffset()==1);
     testOk1(ctyped.size()==2);
+
+    epics::pvData::shared_vector<void> untyped;
+    // not possible to thaw() void as shared_vector<void> has no make_unique()
+    //untyped = thaw(cuntyped);
+    cuntyped = freeze(untyped);
 }
 
 struct dummyStruct {};
@@ -630,6 +638,7 @@ MAIN(testSharedVector)
     testSlice();
     testPush();
     testVoid();
+    testConstVoid();
     testNonPOD();
     testVectorConvert();
     testWeak();

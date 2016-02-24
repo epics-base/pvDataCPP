@@ -553,7 +553,11 @@ class shared_vector<E, typename meta::is_void<E>::type >
 {
     typedef detail::shared_vector_base<E> base_t;
     ScalarType m_vtype;
+
+    // allow specialization for all E to be friends
+    template<typename E1, class Enable1> friend class shared_vector;
 public:
+    typedef E value_type;
     typedef E* pointer;
     typedef ptrdiff_t difference_type;
     typedef size_t size_type;
