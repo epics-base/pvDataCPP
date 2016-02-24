@@ -254,7 +254,6 @@ protected:
 private:
     static void computeOffset(const PVField *pvField);
     static void computeOffset(const PVField *pvField,std::size_t offset);
-    std::string notImplemented;
     std::string fieldName;
     PVStructure *parent;
     FieldConstPtr field;
