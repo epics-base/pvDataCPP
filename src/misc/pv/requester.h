@@ -65,7 +65,7 @@ public:
      };
      @endcode
      */
-    virtual void message(std::string const & message,MessageType messageType) = 0;
+    virtual void message(std::string const & message,MessageType messageType);
 };
 
 }}
