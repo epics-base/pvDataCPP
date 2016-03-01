@@ -358,46 +358,46 @@ static void testVoid()
 {
     testDiag("Test vector cast to/from void");
 
-    epics::pvData::shared_vector<int32> typed(4);
+    epics::pvData::shared_vector<int32> IV(4);
 
-    epics::pvData::shared_vector<void> untyped(epics::pvData::static_shared_vector_cast<void>(typed));
+    epics::pvData::shared_vector<void> VV(epics::pvData::static_shared_vector_cast<void>(IV));
 
-    testOk1(typed.dataPtr().get()==untyped.dataPtr().get());
-    testOk1(typed.size()*sizeof(int)==untyped.size());
+    testOk1(IV.dataPtr().get()==VV.dataPtr().get());
+    testOk1(IV.size()*sizeof(int)==VV.size());
 
-    untyped.slice(sizeof(int), 2*sizeof(int));
+    VV.slice(sizeof(int), 2*sizeof(int));
 
-    typed = epics::pvData::static_shared_vector_cast<int32>(untyped);
+    IV = epics::pvData::static_shared_vector_cast<int32>(VV);
 
-    testOk1(typed.dataOffset()==1);
-    testOk1(typed.size()==2);
-    untyped.clear();
+    testOk1(IV.dataOffset()==1);
+    testOk1(IV.size()==2);
+    VV.clear();
 }
 
 static void testConstVoid()
 {
     testDiag("Test vector cast to/from const void");
 
-    epics::pvData::shared_vector<const int32> ctyped(4);
+    epics::pvData::shared_vector<const int32> CIV(4);
 
-    epics::pvData::shared_vector<const void> cuntyped(epics::pvData::static_shared_vector_cast<const void>(ctyped));
+    epics::pvData::shared_vector<const void> CVV(epics::pvData::static_shared_vector_cast<const void>(CIV));
     // case const void to const void
-    epics::pvData::shared_vector<const void> cuntyped2(epics::pvData::static_shared_vector_cast<const void>(cuntyped));
+    epics::pvData::shared_vector<const void> CVV2(epics::pvData::static_shared_vector_cast<const void>(CVV));
 
-    testOk1(ctyped.dataPtr().get()==cuntyped2.dataPtr().get());
-    testOk1(ctyped.size()*sizeof(int)==cuntyped2.size());
+    testOk1(CIV.dataPtr().get()==CVV2.dataPtr().get());
+    testOk1(CIV.size()*sizeof(int)==CVV2.size());
 
-    cuntyped2.slice(sizeof(int), 2*sizeof(int));
+    CVV2.slice(sizeof(int), 2*sizeof(int));
 
-    ctyped = epics::pvData::static_shared_vector_cast<const int32>(cuntyped2);
+    CIV = epics::pvData::static_shared_vector_cast<const int32>(CVV2);
 
-    testOk1(ctyped.dataOffset()==1);
-    testOk1(ctyped.size()==2);
+    testOk1(CIV.dataOffset()==1);
+    testOk1(CIV.size()==2);
 
-    epics::pvData::shared_vector<void> untyped;
+    epics::pvData::shared_vector<void> VV;
     // not possible to thaw() void as shared_vector<void> has no make_unique()
-    //untyped = thaw(cuntyped);
-    cuntyped = freeze(untyped);
+    //VV = thaw(CVV);
+    CVV = freeze(VV);
 }
 
 struct dummyStruct {};
