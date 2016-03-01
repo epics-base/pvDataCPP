@@ -623,33 +623,21 @@ namespace detail {
     template<typename TO, typename FROM, class Enable = void>
     struct static_shared_vector_caster { /* no default */ };
     // from void to non-void with same const-ness
-    template<typename TO>
-    struct static_shared_vector_caster<TO, void,
-                                       typename meta::_and<meta::same_const<TO,void>, meta::is_not_void<TO> >::type> {
-        static inline shared_vector<TO> op(const shared_vector<void>& src) {
-            return shared_vector<TO>(src, detail::_shared_vector_cast_tag());
-        }
-    };
-    template<typename TO>
-    struct static_shared_vector_caster<TO, const void,
-                                       typename meta::_and<meta::same_const<TO,const void>, meta::is_not_void<TO> >::type> {
-        static inline shared_vector<TO> op(const shared_vector<const void>& src) {
+    template<typename TO, typename FROM>
+    struct static_shared_vector_caster<TO, FROM,
+                                       typename meta::_and<meta::_and<meta::is_not_void<TO>, meta::is_void<FROM> >,
+                                                           meta::same_const<TO,FROM> >::type> {
+        static inline shared_vector<TO> op(const shared_vector<FROM>& src) {
             return shared_vector<TO>(src, detail::_shared_vector_cast_tag());
         }
     };
     // from non-void to void with same const-ness
-    template<typename FROM>
-    struct static_shared_vector_caster<void, FROM,
-                                       typename meta::_and<meta::same_const<void,FROM>, meta::is_not_void<FROM> >::type> {
-        static FORCE_INLINE shared_vector<void> op(const shared_vector<FROM>& src) {
-            return shared_vector<void>(src, detail::_shared_vector_cast_tag());
-        }
-    };
-    template<typename FROM>
-    struct static_shared_vector_caster<const void, FROM,
-                                       typename meta::_and<meta::same_const<const void,FROM>, meta::is_not_void<FROM> >::type> {
-        static FORCE_INLINE shared_vector<const void> op(const shared_vector<FROM>& src) {
-            return shared_vector<const void>(src, detail::_shared_vector_cast_tag());
+    template<typename TO, typename FROM>
+    struct static_shared_vector_caster<TO, FROM,
+                                       typename meta::_and<meta::_and<meta::is_void<TO>, meta::is_not_void<FROM> >,
+                                                           meta::same_const<TO,FROM> >::type> {
+        static FORCE_INLINE shared_vector<TO> op(const shared_vector<FROM>& src) {
+            return shared_vector<TO>(src, detail::_shared_vector_cast_tag());
         }
     };
 
