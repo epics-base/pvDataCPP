@@ -167,8 +167,13 @@ namespace epics { namespace pvData {
          */
         uint32 size() const;
 
+        //! Returns true if any bit is set in both *this and other
+        bool logical_and(const BitSet& other) const;
+        //! Returns true if any bit is set in both *this or other
+        bool logical_or(const BitSet& other) const;
+
         /**
-         * Performs a logical <b>AND</b> of this target bit set with the
+         * Performs a bitwise <b>AND</b> of this target bit set with the
          * argument bit set. This bit set is modified so that each bit in it
          * has the value @c true if and only if it both initially
          * had the value @c true and the corresponding bit in the
@@ -179,7 +184,7 @@ namespace epics { namespace pvData {
         BitSet& operator&=(const BitSet& set);
 
         /**
-         * Performs a logical <b>OR</b> of this bit set with the bit set
+         * Performs a bitwise <b>OR</b> of this bit set with the bit set
          * argument. This bit set is modified so that a bit in it has the
          * value @c true if and only if it either already had the
          * value @c true or the corresponding bit in the bit set
@@ -190,7 +195,7 @@ namespace epics { namespace pvData {
         BitSet& operator|=(const BitSet& set);
 
         /**
-         * Performs a logical <b>XOR</b> of this bit set with the bit set
+         * Performs a bitwise <b>XOR</b> of this bit set with the bit set
          * argument. This bit set is modified so that a bit in it has the
          * value @c true if and only if one of the following
          * statements holds:

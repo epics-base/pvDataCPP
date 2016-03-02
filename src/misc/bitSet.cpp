@@ -196,6 +196,20 @@ namespace epics { namespace pvData {
         return words.size() * BITS_PER_WORD;
     }
 
+    bool BitSet::logical_and(const BitSet& set) const
+    {
+        size_t nwords = std::min(words.size(), set.words.size());
+        for(size_t i=0; i<nwords; i++) {
+            if(words[i] & set.words[i])
+                return true;
+        }
+        return false;
+    }
+    bool BitSet::logical_or(const BitSet& set) const
+    {
+        return !words.empty() || !set.words.empty();
+    }
+
     BitSet& BitSet::operator&=(const BitSet& set) {
         // Check for self-assignment!
         if (this == &set) return *this;

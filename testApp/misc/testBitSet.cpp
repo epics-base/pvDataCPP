@@ -164,6 +164,29 @@ static void testOperators()
     testOk(toString(b3) == "{1}", "%s == {1}", toString(b3).c_str());
 }
 
+static void testLogical()
+{
+    BitSet A, B;
+
+    testOk1(!A.logical_and(B));
+    testOk1(!A.logical_or(B));
+
+    A.set(41);
+
+    testOk1(!A.logical_and(B));
+    testOk1(A.logical_or(B));
+
+    A.set(42);
+
+    testOk1(!A.logical_and(B));
+    testOk1(A.logical_or(B));
+
+    B.set(41);
+
+    testOk1(A.logical_and(B));
+    testOk1(A.logical_or(B));
+}
+
 static void tofrostring(const BitSet& in, const char *expect, size_t elen, int byteOrder)
 {
     {
@@ -271,9 +294,10 @@ static void testSerialize()
 
 MAIN(testBitSet)
 {
-    testPlan(79);
+    testPlan(87);
     testGetSetClearFlip();
     testOperators();
+    testLogical();
     testSerialize();
     return testDone();
 }
