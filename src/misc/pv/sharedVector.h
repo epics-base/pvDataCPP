@@ -326,7 +326,7 @@ public:
     //! Internal for static_shared_vector_cast
     template<typename FROM>
     shared_vector(const shared_vector<FROM> &src,
-                  typename meta::is_void<FROM, detail::_shared_vector_cast_tag>::type)
+                  detail::_shared_vector_cast_tag)
         :base_t(std::tr1::static_pointer_cast<E>(src.dataPtr()),
                 src.dataOffset()/sizeof(E),
                 src.dataCount()/sizeof(E))
@@ -432,8 +432,8 @@ public:
        shared_vector<E> original(...);
 
        if(!original.unique()){
-         shared_vector<E> temp(myallocator(original.size()),
-                               0, original.size());
+         std::tr1::shared_ptr<E> sptr(myalloc(original.size()), myfree);
+         shared_vector<E> temp(sptr, 0, original.size());
          std::copy(original.begin(), original.end(), temp.begin());
          original.swap(temp);
        }
@@ -532,6 +532,20 @@ public:
  *
  * Does not allow access or iteration of contents
  * other than as void* or const void*
+ *
+ * In order to support shared_vector_convert<>()
+ * information about the type of the underlying allocation
+ * is stored.
+ * This is implicitly set by static_shared_vector_cast<>()
+ * and may be explicitly checked/changed using
+ * original_type()/set_original_type().
+ *
+ * A shared_vector<void> directly constructed
+ * from a smart pointer does not have an associated
+ * original_type().
+ * Use epics::pvData::ScalarTypeFunc::allocArray()
+ * to convienently allocate an array with a known
+ * original_type().
  */
 template<typename E>
 class shared_vector<E, typename meta::is_void<E>::type >
@@ -539,7 +553,11 @@ class shared_vector<E, typename meta::is_void<E>::type >
 {
     typedef detail::shared_vector_base<E> base_t;
     ScalarType m_vtype;
+
+    // allow specialization for all E to be friends
+    template<typename E1, class Enable1> friend class shared_vector;
 public:
+    typedef E value_type;
     typedef E* pointer;
     typedef ptrdiff_t difference_type;
     typedef size_t size_type;
@@ -566,7 +584,7 @@ public:
     //! Internal for static_shared_vector_cast
     template<typename FROM>
     shared_vector(const shared_vector<FROM> &src,
-                  typename meta::is_not_void<FROM, detail::_shared_vector_cast_tag>::type)
+                  detail::_shared_vector_cast_tag)
         :base_t(std::tr1::static_pointer_cast<E>(src.dataPtr()),
                 src.dataOffset()*sizeof(FROM),
                 src.dataCount()*sizeof(FROM))
@@ -575,12 +593,12 @@ public:
 
     shared_vector(shared_vector<void>& O,
                   detail::_shared_vector_freeze_tag t)
-        :base_t(O,t)
+        :base_t(O,t), m_vtype(O.m_vtype)
     {}
 
     shared_vector(shared_vector<const void>& O,
                   detail::_shared_vector_thaw_tag t)
-        :base_t(O,t)
+        :base_t(O,t), m_vtype(O.m_vtype)
     {}
 
     shared_vector& operator=(const shared_vector& o)
@@ -601,6 +619,64 @@ public:
     shared_vector& set_original_type(ScalarType t) { m_vtype=t; return *this; }
     ScalarType original_type() const {return m_vtype;}
 };
+
+namespace detail {
+    template<typename TO, typename FROM, class Enable = void>
+    struct static_shared_vector_caster { /* no default */ };
+    // from void to non-void with same const-ness
+    template<typename TO>
+    struct static_shared_vector_caster<TO, void,
+                                       typename meta::_and<meta::same_const<TO,void>, meta::is_not_void<TO> >::type> {
+        static inline shared_vector<TO> op(const shared_vector<void>& src) {
+            return shared_vector<TO>(src, detail::_shared_vector_cast_tag());
+        }
+    };
+    template<typename TO>
+    struct static_shared_vector_caster<TO, const void,
+                                       typename meta::_and<meta::same_const<TO,const void>, meta::is_not_void<TO> >::type> {
+        static inline shared_vector<TO> op(const shared_vector<const void>& src) {
+            return shared_vector<TO>(src, detail::_shared_vector_cast_tag());
+        }
+    };
+    // from non-void to void with same const-ness
+    template<typename FROM>
+    struct static_shared_vector_caster<void, FROM,
+                                       typename meta::_and<meta::same_const<void,FROM>, meta::is_not_void<FROM> >::type> {
+        static FORCE_INLINE shared_vector<void> op(const shared_vector<FROM>& src) {
+            return shared_vector<void>(src, detail::_shared_vector_cast_tag());
+        }
+    };
+    template<typename FROM>
+    struct static_shared_vector_caster<const void, FROM,
+                                       typename meta::_and<meta::same_const<const void,FROM>, meta::is_not_void<FROM> >::type> {
+        static FORCE_INLINE shared_vector<const void> op(const shared_vector<FROM>& src) {
+            return shared_vector<const void>(src, detail::_shared_vector_cast_tag());
+        }
+    };
+
+    // cast to same type, no-op
+    template<typename TOFRO>
+    struct static_shared_vector_caster<TOFRO,TOFRO,void> {
+        static FORCE_INLINE const shared_vector<TOFRO>& op(const shared_vector<TOFRO>& src) {
+            return src;
+        }
+    };
+} // namespace detail
+
+/** @brief Allow casting of shared_vector between types
+ *
+ * Currently only to/from void is implemented.
+ *
+ @warning Casting from void is undefined unless the offset and length
+ *        are integer multiples of the size of the destination type.
+ */
+template<typename TO, typename FROM>
+static FORCE_INLINE
+shared_vector<TO>
+static_shared_vector_cast(const shared_vector<FROM>& src)
+{
+    return detail::static_shared_vector_caster<TO,FROM>::op(src);
+}
 
 namespace detail {
 
@@ -634,7 +710,7 @@ namespace detail {
             return shared_vector<TO>(src, detail::_shared_vector_cast_tag());
         }
     };
-    
+
     // convert from void uses original type or throws an exception.
     template<typename TO, typename FROM>
     struct shared_vector_converter<TO,FROM,
@@ -662,30 +738,16 @@ namespace detail {
     };
 }
 
-/** @brief Allow casting of shared_vector between types
- *
- * Currently only to/from void is implemented.
- *
- @warning Casting from void is undefined unless the offset and length
- *        are integer multiples of the size of the destination type.
- */
-template<typename TO, typename FROM>
-static FORCE_INLINE
-shared_vector<TO>
-static_shared_vector_cast(const shared_vector<FROM>& src,
-                          typename meta::same_const<TO,FROM,int>::type = 0)
-{
-    return shared_vector<TO>(src, detail::_shared_vector_cast_tag());
-}
-
 /** @brief Allow converting of shared_vector between types
  *
  * Conversion utilizes castUnsafe<TO,FROM>().
  *
  * Converting to/from void is supported.  Convert to void
  * is an alias for static_shared_vector_cast<void>().
- * Convert from void utilizes shared_vector<void>::original_type()
- * and throws std::runtime_error if this is not valid.
+ * Convert from void utilizes shared_vector<void>::original_type().
+ *
+ * @throws std::runtime_error if cast is not valid.
+ * @throws std::bad_alloc for out of memory condition
  */
 template<typename TO, typename FROM>
 static FORCE_INLINE
@@ -861,8 +923,11 @@ std::ostream& operator<<(std::ostream& strm, const epics::pvData::shared_vector<
  * shared_vector has additional constructors from raw pointers
  * and shared_ptr s.
  *
- * The copy constructor and assignment operator allow implicit
- * casting from type 'shared_vector<T>' to 'shared_vector<const T>'.
+ * Implicit casting is not allowed.  Instead use
+ * const_shared_vector_cast()/freeze()/thaw() (@ref vectorconst)
+ * to casting between 'T' and 'const T'.
+ * Use static_shared_vector_cast() to cast between
+ * void and non-void (same const-ness).
  *
  * To facilitate safe modification the methods unique() and
  * make_unique() are provided.
@@ -964,17 +1029,15 @@ Type #2 is constant reference to a mutable value.
 Type #3 is a mutable reference to a constant value.
 Type #4 is a constant reference to a constant value.
 
-Casting between const and non-const references of the same value type
-is governed by the normal C++ casting rules.
-
 Casting between const and non-const values does @b not follow the normal
-C++ casting rules.
+C++ casting rules (no implicit cast).
 
 For casting between shared_vector<T> and shared_vector<const T>
 explicit casting operations are required.  These operations are
 @b freeze() (non-const to const) and @b thaw() (const to non-const).
 
-A shared_vector<const T> is "frozen" as its value can not be modified.
+A 'shared_vector<const T>' is "frozen" as its value can not be modified.
+However it can still be sliced because the reference is not const.
 
 These functions are defined like:
 
@@ -998,17 +1061,18 @@ The following guarantees are provided by both functions:
 # The returned reference points to a value which is only referenced by
  shared_vectors with the same value const-ness as the returned reference.
 
-Please note that the argument of both freeze and thaw is a non-const
+@note The argument of both freeze() and thaw() is a non-const
 reference which will always be cleared.
 
 @section vfreeze Freezing
 
 The act of freezing a shared_vector requires that the shared_vector
-passed in must be unique() or an exception is thrown.  This is
-done to reduce the possibility of accidental copying.
+passed in must be unique() or an exception is thrown.
+No copy is made.
 
-This possibility can be avoided by calling the make_unique() on a
+The possibility of an exception can be avoided by calling the make_unique() on a
 shared_vector before passing it to freeze().
+This will make a copy if necessary.
 
 @section vthaw Thawing
 
