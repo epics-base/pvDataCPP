@@ -322,12 +322,14 @@ namespace epics { namespace pvData {
     
         SerializeHelper::writeSize(len, buffer, flusher);
         flusher->ensureBuffer(len);
-    
-        for (uint32 i = 0; i < n - 1; i++)
+   
+        n = len / 8; 
+        for (uint32 i = 0; i < n; i++)
             buffer->putLong(words[i]);
-    
-        for (uint64 x = words[n - 1]; x != 0; x >>= 8)
-            buffer->putByte((int8) (x & 0xff));
+   
+        if (n < wordsInUse) 
+            for (uint64 x = words[wordsInUse - 1]; x != 0; x >>= 8)
+                buffer->putByte((int8) (x & 0xff));
     }
     
     void BitSet::deserialize(ByteBuffer* buffer, DeserializableControl* control) {
