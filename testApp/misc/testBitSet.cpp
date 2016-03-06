@@ -6,6 +6,10 @@
  */
 /* Author:  Matej Sekoranja Date: 2010.10.18 */
 
+#ifdef _WIN32
+#define NOMINMAX
+#endif
+
 #include <iostream>
 #include <iomanip>
 #include <stddef.h>
@@ -14,6 +18,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <sstream>
+#include <algorithm>
 
 #include <dbDefs.h>
 
