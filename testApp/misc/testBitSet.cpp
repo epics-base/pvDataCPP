@@ -109,13 +109,13 @@ static void testOperators()
     b1.set(1);
     testOk1(!(b1 == b2));
 
-    // different internal length, but the same
+    testDiag("different internal length, but the same");
     b2.set(100);
     b2.set(1);
     b2.flip(100);
     testOk1(b1 == b2);
 
-    // OR test
+    testDiag("OR test");
     b2.set(65);
     b2.set(106);
     b2.set(105);
@@ -127,12 +127,12 @@ static void testOperators()
     str = toString(b1);
     testOk1(str == "{1, 65, 105, 106}");
 
-    // AND test
+    testDiag("AND test");
     b1.set(128);
     b1 &= b2;
     testOk1(b1 == b2);
 
-    // XOR test
+    testDiag("XOR test");
     b1.set(128);
     b1 ^= b2;
     testOk1((b1.cardinality() == 1 && b1.get(128) == true));
@@ -144,17 +144,24 @@ static void testOperators()
     testOk1((b1.cardinality() == 2 && b1.get(1) == true && b1.get(256) == true));
     
 
-    // assign
+    testDiag("assign");
     b1 = b2;
     testOk1(b1 == b2);
 
-    // or_and
+    testDiag("or_and");
     b1.clear(); b1.set(2);
     b2.clear(); b2.set(66); b2.set(128);
     BitSet b3; b3.set(128); b3.set(520);
     b1.or_and(b2, b3);
     str = toString(b1);
     testOk1(str == "{2, 128}");
+
+    b1.clear(); b1.set(1);
+    b2.clear();
+    b3.clear(); b3.set(1);
+    std::cout<<"# "<<toString(b3)<<" |= "<<toString(b1)<<" & "<<toString(b2)<<"\n";
+    b3.or_and(b1, b2);
+    testOk(toString(b3) == "{1}", "%s == {1}", toString(b3).c_str());
 }
 
 static void tofrostring(const BitSet& in, const char *expect, size_t elen, int byteOrder)
@@ -264,7 +271,7 @@ static void testSerialize()
 
 MAIN(testBitSet)
 {
-    testPlan(77);
+    testPlan(78);
     testGetSetClearFlip();
     testOperators();
     testSerialize();

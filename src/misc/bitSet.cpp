@@ -279,7 +279,8 @@ namespace epics { namespace pvData {
         uint32 inUse = (set1.wordsInUse < set2.wordsInUse) ? set1.wordsInUse : set2.wordsInUse;
 
         ensureCapacity(inUse);
-        wordsInUse = inUse;
+        if(inUse>wordsInUse)
+            wordsInUse = inUse;
 
         // Perform logical AND on words in common
         for (uint32 i = 0; i < inUse; i++)
@@ -358,7 +359,7 @@ namespace epics { namespace pvData {
             words[j] = 0;
     
         for (uint32 remaining = (bytes - longs * 8), j = 0; j < remaining; j++)
-            words[i] |= (buffer->getByte() & 0xffL) << (8 * j);
+            words[i] |= (buffer->getByte() & 0xffLL) << (8 * j);
     
     }
     

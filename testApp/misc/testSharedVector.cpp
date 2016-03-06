@@ -358,19 +358,46 @@ static void testVoid()
 {
     testDiag("Test vector cast to/from void");
 
-    epics::pvData::shared_vector<int32> typed(4);
+    epics::pvData::shared_vector<int32> IV(4);
 
-    epics::pvData::shared_vector<void> untyped2(epics::pvData::static_shared_vector_cast<void>(typed));
+    epics::pvData::shared_vector<void> VV(epics::pvData::static_shared_vector_cast<void>(IV));
 
-    testOk1(typed.dataPtr().get()==untyped2.dataPtr().get());
-    testOk1(typed.size()*sizeof(int)==untyped2.size());
+    testOk1(IV.dataPtr().get()==VV.dataPtr().get());
+    testOk1(IV.size()*sizeof(int)==VV.size());
 
-    untyped2.slice(sizeof(int), 2*sizeof(int));
+    VV.slice(sizeof(int), 2*sizeof(int));
 
-    typed = epics::pvData::static_shared_vector_cast<int32>(untyped2);
+    IV = epics::pvData::static_shared_vector_cast<int32>(VV);
 
-    testOk1(typed.dataOffset()==1);
-    testOk1(typed.size()==2);
+    testOk1(IV.dataOffset()==1);
+    testOk1(IV.size()==2);
+    VV.clear();
+}
+
+static void testConstVoid()
+{
+    testDiag("Test vector cast to/from const void");
+
+    epics::pvData::shared_vector<const int32> CIV(4);
+
+    epics::pvData::shared_vector<const void> CVV(epics::pvData::static_shared_vector_cast<const void>(CIV));
+    // case const void to const void
+    epics::pvData::shared_vector<const void> CVV2(epics::pvData::static_shared_vector_cast<const void>(CVV));
+
+    testOk1(CIV.dataPtr().get()==CVV2.dataPtr().get());
+    testOk1(CIV.size()*sizeof(int)==CVV2.size());
+
+    CVV2.slice(sizeof(int), 2*sizeof(int));
+
+    CIV = epics::pvData::static_shared_vector_cast<const int32>(CVV2);
+
+    testOk1(CIV.dataOffset()==1);
+    testOk1(CIV.size()==2);
+
+    epics::pvData::shared_vector<void> VV;
+    // not possible to thaw() void as shared_vector<void> has no make_unique()
+    //VV = thaw(CVV);
+    CVV = freeze(VV);
 }
 
 struct dummyStruct {};
@@ -537,9 +564,66 @@ static void testICE()
     }
 }
 
+static
+void testBad()
+{
+    epics::pvData::shared_vector<int> I;
+    epics::pvData::shared_vector<const int> CI;
+    epics::pvData::shared_vector<float> F;
+    epics::pvData::shared_vector<const float> CF;
+    epics::pvData::shared_vector<void> V;
+    epics::pvData::shared_vector<const void> CV;
+    (void)I;
+    (void)CI;
+    (void)F;
+    (void)CF;
+    (void)V;
+    (void)CV;
+
+    // Tests which should result in compile failure.
+    // as there is no established way to test this automatically,
+    // uncomment one at a time
+
+    // No copy from const to non-const
+    //CI = I;
+    //I = CI;
+    //epics::pvData::shared_vector<const int> CI2(I);
+    //epics::pvData::shared_vector<int> I2(CI);
+
+    // shared_vector_convert can't thaw()
+    //I = epics::pvData::shared_vector_convert<int>(CI);
+    //V = epics::pvData::shared_vector_convert<void>(CV);
+
+    // shared_vector_convert can't freeze()
+    //CI = epics::pvData::shared_vector_convert<const int>(I);
+    //CV = epics::pvData::shared_vector_convert<const void>(V);
+
+    // static_shared_vector_cast can't thaw()
+    //I = epics::pvData::static_shared_vector_cast<int>(CI);
+    //V = epics::pvData::static_shared_vector_cast<void>(CV);
+
+    // static_shared_vector_cast can't freeze()
+    //CI = epics::pvData::static_shared_vector_cast<const int>(I);
+    //CV = epics::pvData::static_shared_vector_cast<const void>(V);
+
+    // freeze() can't change type.
+    // the error here will be with the assignment
+    //I = epics::pvData::freeze(CV);
+    //I = epics::pvData::freeze(CF);
+    //CI = epics::pvData::freeze(V);
+    //CI = epics::pvData::freeze(F);
+
+    // that() can't change type.
+    // the error here will be with the assignment
+    //CI = epics::pvData::thaw(V);
+    //CI = epics::pvData::thaw(F);
+    //I = epics::pvData::thaw(CV);
+    //I = epics::pvData::that(CF);
+}
+
 MAIN(testSharedVector)
 {
-    testPlan(163);
+    testPlan(167);
     testDiag("Tests for shared_vector");
 
     testDiag("sizeof(shared_vector<int32>)=%lu",
@@ -554,9 +638,11 @@ MAIN(testSharedVector)
     testSlice();
     testPush();
     testVoid();
+    testConstVoid();
     testNonPOD();
     testVectorConvert();
     testWeak();
     testICE();
+    testBad();
     return testDone();
 }
