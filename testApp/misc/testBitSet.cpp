@@ -146,12 +146,19 @@ static void testOperators()
     b1.or_and(b2, b3);
     str = toString(b1);
     testOk1(str == "{2, 128}");
+
+    b1.clear(); b1.set(1);
+    b2.clear();
+    b3.clear(); b3.set(1);
+    std::cout<<"# "<<toString(b3)<<" |= "<<toString(b1)<<" & "<<toString(b2)<<"\n";
+    b3.or_and(b1, b2);
+    testOk(toString(b3) == "{1}", "%s == {1}", toString(b3).c_str());
 }
 
 
 MAIN(testBitSet)
 {
-    testPlan(29);
+    testPlan(30);
     testGetSetClearFlip();
     testOperators();
     return testDone();

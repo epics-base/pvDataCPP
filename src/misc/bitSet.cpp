@@ -279,7 +279,8 @@ namespace epics { namespace pvData {
         uint32 inUse = (set1.wordsInUse < set2.wordsInUse) ? set1.wordsInUse : set2.wordsInUse;
 
         ensureCapacity(inUse);
-        wordsInUse = inUse;
+        if(inUse>wordsInUse)
+            wordsInUse = inUse;
 
         // Perform logical AND on words in common
         for (uint32 i = 0; i < inUse; i++)
@@ -322,12 +323,14 @@ namespace epics { namespace pvData {
     
         SerializeHelper::writeSize(len, buffer, flusher);
         flusher->ensureBuffer(len);
-    
-        for (uint32 i = 0; i < n - 1; i++)
+   
+        n = len / 8; 
+        for (uint32 i = 0; i < n; i++)
             buffer->putLong(words[i]);
-    
-        for (uint64 x = words[n - 1]; x != 0; x >>= 8)
-            buffer->putByte((int8) (x & 0xff));
+   
+        if (n < wordsInUse) 
+            for (uint64 x = words[wordsInUse - 1]; x != 0; x >>= 8)
+                buffer->putByte((int8) (x & 0xff));
     }
     
     void BitSet::deserialize(ByteBuffer* buffer, DeserializableControl* control) {
@@ -356,7 +359,7 @@ namespace epics { namespace pvData {
             words[j] = 0;
     
         for (uint32 remaining = (bytes - longs * 8), j = 0; j < remaining; j++)
-            words[i] |= (buffer->getByte() & 0xffL) << (8 * j);
+            words[i] |= (buffer->getByte() & 0xffLL) << (8 * j);
     
     }
     
