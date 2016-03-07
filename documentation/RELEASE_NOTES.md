@@ -10,7 +10,8 @@ Fixed bitset serialization (issue #24)
 --------------------------------------
 
 C++ bitset serialization was not consistent with the C++ deserialization and
-Java code in some instances (depending on the endianness of the serializer and deserializer) when the number of bits was 56-63 modulo 64. C++ serialization
+Java code in some instances (depending on the endianness of the serializer and
+deserializer) when the number of bits was 56-63 modulo 64. C++ serialization
 has been fixed.
 
 Fix exposed issue in deserialization on 32-bit platforms which
