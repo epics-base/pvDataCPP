@@ -71,8 +71,8 @@ static void testAlarm()
     Alarm alarm;
     PVAlarm pvAlarm; 
     bool result;
-    PVFieldPtr pvField = doubleRecord->getSubField(string("alarm"));
-    if(pvField.get()==NULL) {
+    PVFieldPtr pvField = doubleRecord->getSubField<PVField>(string("alarm"));
+    if(!pvField) {
         printf("testAlarm ERROR did not find field alarm\n");
         return;
     }
@@ -104,8 +104,8 @@ static void testTimeStamp()
     TimeStamp timeStamp;
     PVTimeStamp pvTimeStamp; 
     bool result;
-    PVFieldPtr pvField = doubleRecord->getSubField(string("timeStamp"));
-    if(pvField.get()==NULL) {
+    PVFieldPtr pvField = doubleRecord->getSubField<PVField>(string("timeStamp"));
+    if(!pvField) {
         printf("testTimeStamp ERROR did not find field timeStamp\n");
         return;
     }
@@ -144,8 +144,8 @@ static void testControl()
     Control control;
     PVControl pvControl; 
     bool result;
-    PVFieldPtr pvField = doubleRecord->getSubField(string("control"));
-    if(pvField.get()==NULL) {
+    PVFieldPtr pvField = doubleRecord->getSubField<PVField>(string("control"));
+    if(!pvField) {
         printf("testControl ERROR did not find field control\n");
         return;
     }
@@ -171,8 +171,8 @@ static void testDisplay()
     Display display;
     PVDisplay pvDisplay; 
     bool result;
-    PVFieldPtr pvField = doubleRecord->getSubField(string("display"));
-    if(pvField.get()==NULL) {
+    PVFieldPtr pvField = doubleRecord->getSubField<PVField>(string("display"));
+    if(!pvField) {
         printf("testDisplay ERROR did not find field display\n");
         return;
     }
@@ -203,8 +203,8 @@ static void testEnumerated()
     if(debug) printf("testEnumerated\n");
     PVEnumerated pvEnumerated; 
     bool result;
-    PVFieldPtr pvField = enumeratedRecord->getSubField(string("value"));
-    if(pvField.get()==NULL) {
+    PVFieldPtr pvField = enumeratedRecord->getSubField<PVField>(string("value"));
+    if(!pvField) {
         printf("testEnumerated ERROR did not find field enumerated\n");
         return;
     }
