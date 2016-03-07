@@ -1,7 +1,6 @@
 /* pvCopy.cpp */
 /*
- * Copyright information and license terms for this software can be
- * found in the file LICENSE that is included with the distribution
+ * License terms for this software can be found in the file LICENSE that is included with the distribution
  */
 /**
  * @author Marty Kraimer

@@ -1,7 +1,6 @@
 /*PVStructure.cpp*/
 /*
- * Copyright information and license terms for this software can be
- * found in the file LICENSE that is included with the distribution
+ * License terms for this software can be found in the file LICENSE that is included with the distribution
  */
 /**
  *  @author mrk
@@ -135,15 +134,10 @@ PVFieldPtr  PVStructure::getSubField(size_t fieldOffset) const
 PVFieldPtr PVStructure::getSubFieldT(std::size_t fieldOffset) const
 {
     PVFieldPtr pvField = getSubField(fieldOffset);
-    if (pvField.get())
-        return pvField;
-    else
-    {
-        std::stringstream ss;
-        ss << "Failed to get field with offset "
-           << fieldOffset << "(Invalid offset)" ;
-        throw std::runtime_error(ss.str());
-    }
+    if (pvField) return pvField;
+    std::stringstream ss;
+    ss << "Failed to get field with offset "  << fieldOffset << "(Invalid offset)" ;
+    throw std::runtime_error(ss.str());
 }
 
 PVField* PVStructure::getSubFieldImpl(const char *name, bool throws) const
