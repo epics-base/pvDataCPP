@@ -18,6 +18,16 @@
 
 #include <shareLib.h>
 
+#if !defined(IN_MONITORPLUGIN_CPP)
+#warning monitorPlugin.h is deprecated
+#endif
+
+#if !defined(IN_MONITORPLUGIN_CPP) && defined(__GNUC__) && !(defined(__vxworks) && !defined(_WRS_VXWORKS_MAJOR))
+#define USAGE_DEPRECATED __attribute__((deprecated))
+#else
+#define USAGE_DEPRECATED
+#endif
+
 namespace epics { namespace pvData { 
 
 class MonitorPlugin;
@@ -41,7 +51,7 @@ typedef std::tr1::shared_ptr<MonitorPluginManager> MonitorPluginManagerPtr;
  * A monitor is assumed to be associated with a field of a top-level
  * structure.
  */
-class epicsShareClass MonitorPlugin
+class epicsShareClass USAGE_DEPRECATED MonitorPlugin
 {
 public:
     virtual ~MonitorPlugin(){}
@@ -95,7 +105,7 @@ public:
  *
  * Normlly a plugin is created for a single client.
  */
-class epicsShareClass MonitorPluginCreator
+class epicsShareClass USAGE_DEPRECATED MonitorPluginCreator
 {
 public:
     virtual ~MonitorPluginCreator() {}
@@ -127,7 +137,7 @@ public:
  * This manages a set of monitor plugins.
  * @author mrk
  */
-class epicsShareClass MonitorPluginManager
+class epicsShareClass USAGE_DEPRECATED MonitorPluginManager
 {
 public:
     POINTER_DEFINITIONS(MonitorPluginManager);
@@ -165,7 +175,7 @@ private:
      epics::pvData::Mutex mutex;
 };
 
-
+#undef USAGE_DEPRECATED
 
 }}
 #endif  /* MONITORPLUGIN_H */
