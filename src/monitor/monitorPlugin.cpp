@@ -8,6 +8,7 @@
  *  @author mrk
  */
 
+#define IN_MONITORPLUGIN_CPP
 #define epicsExportSharedSymbols
 
 #include <pv/monitorPlugin.h>
