@@ -52,7 +52,6 @@ PVStructure::PVStructure(StructureConstPtr const & structurePtr)
     size_t numberFields = structurePtr->getNumberFields();
     FieldConstPtrArray const & fields = structurePtr->getFields();
     StringArray const & fieldNames = structurePtr->getFieldNames();
-//    PVFieldPtrArray * xxx = const_cast<PVFieldPtrArray *>(&pvFields);
     pvFields.reserve(numberFields);
     PVDataCreatePtr pvDataCreate = getPVDataCreate();
     for(size_t i=0; i<numberFields; i++) {
@@ -259,9 +258,8 @@ void PVStructure::deserialize(ByteBuffer *pbuffer,
 
 void PVStructure::serialize(ByteBuffer *pbuffer,
         SerializableControl *pflusher, BitSet *pbitSet) const {
-	PVStructure* nonConstThis = const_cast<PVStructure*>(this);
-    size_t numberFields = nonConstThis->getNumberFields();
-    size_t offset = nonConstThis->getFieldOffset();
+    size_t numberFields = this->getNumberFields();
+    size_t offset = this->getFieldOffset();
     int32 next = pbitSet->nextSetBit(static_cast<uint32>(offset));
 
     // no more changes or no changes in this structure
