@@ -46,6 +46,10 @@ namespace epics { namespace pvData {
         	
         	static Status Ok;
 
+            static inline Status warn(const std::string& m) { return Status(STATUSTYPE_WARNING, m); }
+            static inline Status error(const std::string& m) { return Status(STATUSTYPE_ERROR, m); }
+            static inline Status fatal(const std::string& m) { return Status(STATUSTYPE_FATAL, m); }
+
             /**
              * Creates OK status; STATUSTYPE_OK, empty message and stackDump.
              */
