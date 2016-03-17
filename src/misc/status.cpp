@@ -17,7 +17,6 @@ using std::string;
 namespace epics { namespace pvData {
 
 const char* Status::StatusTypeName[] = { "OK", "WARNING", "ERROR", "FATAL" };
-string Status::m_emptyStringtring;
 
 Status Status::Ok;
 
@@ -102,7 +101,8 @@ void Status::deserialize(ByteBuffer *buffer, DeserializableControl *flusher)
 	   if (m_statusType != STATUSTYPE_OK)
 	   {
 	       m_statusType = STATUSTYPE_OK;
-	       m_message = m_stackDump = m_emptyStringtring;
+           m_message.clear();
+           m_stackDump.clear();
 	   }
 	}
 	else
