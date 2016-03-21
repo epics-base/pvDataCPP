@@ -103,9 +103,7 @@ namespace epics { namespace pvData {
             void dump(std::ostream& o) const;
 
             private:
-            
-            static std::string m_emptyStringtring;
-            
+                        
             StatusType m_statusType;
             std::string m_message;
             std::string m_stackDump;

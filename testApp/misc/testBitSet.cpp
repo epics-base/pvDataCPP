@@ -145,6 +145,7 @@ static void testOperators()
     
 
     testDiag("assign");
+    testOk1(b1 != b2);
     b1 = b2;
     testOk1(b1 == b2);
 
@@ -271,7 +272,7 @@ static void testSerialize()
 
 MAIN(testBitSet)
 {
-    testPlan(78);
+    testPlan(79);
     testGetSetClearFlip();
     testOperators();
     testSerialize();
