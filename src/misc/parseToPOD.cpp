@@ -27,7 +27,7 @@ using std::string;
 #endif
 
 #if EPICS_VERSION_INT < VERSION_INT(3,15,0,1)
-/* integer conversion primitives added to epicsStdlib.c in 3.15.0.1 */
+/* These integer conversion primitives added to epicsStdlib.c in 3.15.0.1 */
 
 #define S_stdlib_noConversion 1 /* No digits to convert */
 #define S_stdlib_extraneous   2 /* Extraneous characters */
@@ -249,11 +249,11 @@ epicsParseFloat(const char *str, float *to, char **units)
 }
 #endif
 
-// MS Visual Studio 2013 defines strtoll, etc.
+// Sometimes we have to provide our own copy of strtoll()
 #if defined(_WIN32) && !defined(_MINGW)
 #    define NEED_OLL_FUNCS (EPICS_VERSION_INT < VERSION_INT(3,15,0,1))
-#elif defined(vxWorks)
-#    define NEED_OLL_FUNCS !defined(_WRS_VXWORKS_MAJOR)
+#elif defined(vxWorks) && !defined(_WRS_VXWORKS_MAJOR)
+#    define NEED_OLL_FUNCS 1
 #else
 #    define NEED_OLL_FUNCS 0
 #endif
@@ -307,7 +307,9 @@ noconvert:
 }
 
 #if defined(vxWorks)
-/* vxworks version of std::istringstream >>uint64_t is buggy, we use out own implementation */
+/* The VxWorks version of std::istringstream >> uint64_t is buggy,
+ * provide our own implementation
+ */
 static
 unsigned long long strtoull(const char *nptr, char **endptr, int base)
 {
@@ -550,8 +552,9 @@ void parseToPOD(const string& in, double *out) {
     int err = epicsParseDouble(in.c_str(), out, NULL);
     if(err)   handleParseError(err);
 #if defined(vxWorks)
-    /* vxWorks strtod returns [-]epicsINF when it should return ERANGE error
-     * if [-]epicsINF is returned and first char is a digit then translate this into ERANGE error
+    /* vxWorks strtod returns [-]epicsINF when it should return ERANGE error.
+     * If [-]epicsINF is returned and the first char is a digit we translate
+     * this into an ERANGE error
      */
     else if (*out == epicsINF || *out == -epicsINF) {
         const char* s = in.c_str();
