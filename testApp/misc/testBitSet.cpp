@@ -6,7 +6,7 @@
  */
 /* Author:  Matej Sekoranja Date: 2010.10.18 */
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(NOMINMAX)
 #define NOMINMAX
 #endif
 
