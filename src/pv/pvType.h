@@ -15,15 +15,19 @@
 #ifndef PVTYPE_H
 #define PVTYPE_H
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(NOMINMAX)
 #define NOMINMAX
+#endif
+
+#if defined(_WIN32) && !defined(_MINGW)
+#pragma warning( push )
 #pragma warning(disable: 4251)
 #endif
 
 #include <string>
 #include <vector>
 
-#if defined(__vxworks) && \
+#if defined(vxWorks) && \
     (_WRS_VXWORKS_MAJOR+0 <= 6) && (_WRS_VXWORKS_MINOR+0 < 9)
 typedef int intptr_t;
 typedef unsigned int uintptr_t;
@@ -126,7 +130,9 @@ typedef std::vector<std::string>::iterator StringArray_iterator;
 typedef std::vector<std::string>::const_iterator StringArray_const_iterator;
 
 }}
+
+#if defined(_WIN32) && !defined(_MINGW)
+#pragma warning( pop )
+#endif
+
 #endif  /* PVTYPE_H */
-
-
-

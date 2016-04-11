@@ -27,7 +27,7 @@ using std::string;
 #endif
 
 #if EPICS_VERSION_INT < VERSION_INT(3,15,0,1)
-/* integer conversion primitives added to epicsStdlib.c in 3.15.0.1 */
+/* These integer conversion primitives added to epicsStdlib.c in 3.15.0.1 */
 
 #define S_stdlib_noConversion 1 /* No digits to convert */
 #define S_stdlib_extraneous   2 /* Extraneous characters */
@@ -249,18 +249,16 @@ epicsParseFloat(const char *str, float *to, char **units)
 }
 #endif
 
-// MS Visual Studio 2013 defines strtoll, etc.
-#if defined(_WIN32)
-#  if (_MSC_VER >= 1800)
-#    define WIN_NEEDS_OLL_FUNC 0
-#  else
-#    define WIN_NEEDS_OLL_FUNC 1
-#  endif
+// Sometimes we have to provide our own copy of strtoll()
+#if defined(_WIN32) && !defined(_MINGW)
+#    define NEED_OLL_FUNCS (EPICS_VERSION_INT < VERSION_INT(3,15,0,1))
+#elif defined(vxWorks) && !defined(_WRS_VXWORKS_MAJOR)
+#    define NEED_OLL_FUNCS 1
 #else
-#  define WIN_NEEDS_OLL_FUNC 0
+#    define NEED_OLL_FUNCS 0
 #endif
 
-#if defined(NEED_LONGLONG) && (defined(__vxworks) || WIN_NEEDS_OLL_FUNC)
+#if defined(NEED_LONGLONG) && NEED_OLL_FUNCS
 static
 long long strtoll(const char *ptr, char ** endp, int base)
 {
@@ -308,8 +306,10 @@ noconvert:
     return 0;
 }
 
-#if defined(__vxworks)
-/* vxworks version of std::istringstream >>uint64_t is buggy, we use out own implementation */
+#if defined(vxWorks)
+/* The VxWorks version of std::istringstream >> uint64_t is buggy,
+ * provide our own implementation
+ */
 static
 unsigned long long strtoull(const char *nptr, char **endptr, int base)
 {
@@ -551,9 +551,10 @@ void parseToPOD(const string& in, float *out) {
 void parseToPOD(const string& in, double *out) {
     int err = epicsParseDouble(in.c_str(), out, NULL);
     if(err)   handleParseError(err);
-#if defined(__vxworks)
-    /* vxWorks strtod returns [-]epicsINF when it should return ERANGE error
-     * if [-]epicsINF is returned and first char is a digit then translate this into ERANGE error
+#if defined(vxWorks)
+    /* vxWorks strtod returns [-]epicsINF when it should return ERANGE error.
+     * If [-]epicsINF is returned and the first char is a digit we translate
+     * this into an ERANGE error
      */
     else if (*out == epicsINF || *out == -epicsINF) {
         const char* s = in.c_str();

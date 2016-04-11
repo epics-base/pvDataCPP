@@ -10,6 +10,7 @@
 #include <sstream>
 #include <cstdio>
 #include <cstring>
+#include <cstdlib>
 #include <string>
 
 #define epicsExportSharedSymbols
@@ -50,7 +51,7 @@ ExceptionMixin::show() const
             out<<symbols[i]<<"\n";
         }
 
-        free(symbols);
+        std::free(symbols);
     }
 
 #endif

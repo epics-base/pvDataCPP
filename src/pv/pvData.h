@@ -10,7 +10,7 @@
 #ifndef PVDATA_H
 #define PVDATA_H
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(NOMINMAX)
 #define NOMINMAX
 #endif
 
@@ -29,15 +29,15 @@
 #include <shareLib.h>
 #include <compilerDependencies.h>
 
-#if defined(__vxworks) && !defined(_WRS_VXWORKS_MAJOR)
+#if defined(vxWorks) && !defined(_WRS_VXWORKS_MAJOR)
 typedef class std::ios std::ios_base;
 #endif
 
-#if defined(__GNUC__) && !(defined(__vxworks) && !defined(_WRS_VXWORKS_MAJOR))
-#define USAGE_DEPRECATED __attribute__((deprecated))
+#define USAGE_DEPRECATED EPICS_DEPRECATED
+
+#if defined(__GNUC__) && !(defined(vxWorks) && !defined(_WRS_VXWORKS_MAJOR))
 #define USAGE_ERROR(MSG) __attribute__((error(MSG)))
 #else
-#define USAGE_DEPRECATED
 #define USAGE_ERROR(MSG) { throw std::runtime_error(MSG); }
 #endif
 
@@ -435,6 +435,16 @@ protected:
 private:
     friend class PVDataCreate;
 };
+
+/**
+ * @brief Some explicit specializations exist (defined in PVScalar.cpp)
+ */
+template<>
+    std::ostream& PVScalarValue<int8>::dumpValue(std::ostream& o) const;
+template<>
+    std::ostream& PVScalarValue<uint8>::dumpValue(std::ostream& o) const;
+template<>
+    std::ostream& PVScalarValue<boolean>::dumpValue(std::ostream& o) const;
 
 /**
  * typedefs for the various possible scalar types.

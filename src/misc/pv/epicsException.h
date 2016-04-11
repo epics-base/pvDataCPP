@@ -34,18 +34,13 @@
 #ifndef EPICSEXCEPTION_H_
 #define EPICSEXCEPTION_H_
 
-#ifdef _WIN32
-#pragma warning( push )
-#pragma warning(disable: 4275) // warning C4275: non dll-interface class used as base for dll-interface class (std::logic_error)
+#if defined(_WIN32) && !defined(NOMINMAX)
+#define NOMINMAX
 #endif
 
 #include <stdexcept>
 #include <string>
-
 #include <cstdio>
-
-#include <stdio.h>
-#include <stdlib.h>
 
 #include <shareLib.h>
 
@@ -58,13 +53,19 @@
 #  include <execinfo.h>
 #  include <cxxabi.h>
 #  define EXCEPT_USE_BACKTRACE
-#elif defined(_WIN32) && !defined(__MINGW__) && !defined(SKIP_DBGHELP)
+#elif defined(_WIN32) && !defined(_MINGW) && !defined(SKIP_DBGHELP)
 #  define _WINSOCKAPI_
 #  include <windows.h>
 #  include <dbghelp.h>
 #  define EXCEPT_USE_CAPTURE
 #else
 #  define EXCEPT_USE_NONE
+#endif
+
+#if defined(_WIN32) && !defined(_MINGW)
+#pragma warning( push )
+#pragma warning(disable: 4275) // non dll-interface class used as base for dll-interface class (std::logic_error)
+#pragma warning(disable: 4251) // class std::string needs to have dll-interface to be used by clients
 #endif
 
 namespace epics { namespace pvData {
@@ -228,7 +229,7 @@ private:
     mutable std::string base_msg;
 };
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(_MINGW)
 #pragma warning( pop )
 #endif
 
