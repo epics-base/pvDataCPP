@@ -12,21 +12,11 @@
 
 #include <stdexcept>
 
-#ifdef epicsExportSharedSymbols
-#define lockepicsExportSharedSymbols
-#undef epicsExportSharedSymbols
-#endif
-
 #include <epicsMutex.h>
-
-#ifdef lockepicsExportSharedSymbols
-#define epicsExportSharedSymbols
-#undef lockepicsExportSharedSymbols
-#endif
+#include <shareLib.h>
 
 #include <pv/noDefaultMethods.h>
 
-#include <shareLib.h>
 
 /* This is based on item 14 of 
  * Effective C++, Third Edition, Scott Meyers

@@ -6,3 +6,6 @@
 /**
  *  @author mse
  */
+
+#define epicsExportSharedSymbols
+#include <pv/byteBuffer.h>

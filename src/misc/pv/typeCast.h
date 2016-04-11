@@ -10,23 +10,13 @@
 #include <stdexcept>
 #include <sstream>
 
-#ifdef epicsExportSharedSymbols
-#define typeCastepicsExportSharedSymbols
-#undef epicsExportSharedSymbols
-#endif
-
 #include <epicsConvert.h>
-
-#ifdef typeCastepicsExportSharedSymbols
-#define epicsExportSharedSymbols
-#undef typeCastepicsExportSharedSymbols
-#endif
+#include <shareLib.h>
 
 #include <pv/pvType.h>
 #include <pv/pvIntrospect.h>
 #include <pv/templateMeta.h>
 
-#include <shareLib.h>
 
 namespace epics { namespace pvData {
 

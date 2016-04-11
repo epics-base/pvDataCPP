@@ -10,8 +10,9 @@
 #include <string.h>
 #include <stdio.h>
 #include <iostream>
-
 #include <stdexcept>
+
+#include <epicsMutex.h>
 
 #define epicsExportSharedSymbols
 #include <pv/lock.h>

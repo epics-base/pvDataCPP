@@ -14,22 +14,12 @@
 #include <cstring>
 #include <cstdlib>
 
-#ifdef epicsExportSharedSymbols
-#define byteBufferepicsExportSharedSymbols
-#undef epicsExportSharedSymbols
-#endif
-
 #include <epicsEndian.h>
-
-#ifdef byteBufferepicsExportSharedSymbols
-#define epicsExportSharedSymbols
-#undef byteBufferepicsExportSharedSymbols
-#endif
+#include <shareLib.h>
 
 #include <pv/pvType.h>
 #include <pv/epicsException.h>
 
-#include <shareLib.h>
 
 namespace epics { 
     namespace pvData {

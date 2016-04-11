@@ -17,22 +17,12 @@
 #include <functional>
 #endif
 
-#ifdef epicsExportSharedSymbols
-#define threadepicsExportSharedSymbols
-#undef epicsExportSharedSymbols
-#endif
-
 #include <epicsThread.h>
-
-#ifdef threadepicsExportSharedSymbols
-#define epicsExportSharedSymbols
-#undef threadepicsExportSharedSymbols
-#endif
+#include <shareLib.h>
 
 #include <pv/noDefaultMethods.h>
 #include <pv/pvType.h>
 
-#include <shareLib.h>
 
 namespace epics { namespace pvData {
 

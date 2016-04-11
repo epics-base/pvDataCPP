@@ -12,6 +12,8 @@
 
 #include <algorithm>
 
+#include <epicsEndian.h>
+
 #define epicsExportSharedSymbols
 #include <pv/pvType.h>
 #include <pv/byteBuffer.h>

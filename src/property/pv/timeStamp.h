@@ -12,21 +12,11 @@
 
 #include <ctime>
 
-#ifdef epicsExportSharedSymbols
-#define timeStampepicsExportSharedSymbols
-#undef epicsExportSharedSymbols
-#endif
-
 #include <epicsTime.h>
-
-#ifdef timeStampepicsExportSharedSymbols
-#define epicsExportSharedSymbols
-#undef timeStampepicsExportSharedSymbols
-#endif
+#include <shareLib.h>
 
 #include <pv/pvType.h>
 
-#include <shareLib.h>
 
 namespace epics { namespace pvData { 
 

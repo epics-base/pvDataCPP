@@ -13,6 +13,8 @@
 #include <string>
 #include <cstdio>
 
+#include <epicsTime.h>
+
 #define epicsExportSharedSymbols
 #include <pv/pvType.h>
 #include <pv/timeStamp.h>

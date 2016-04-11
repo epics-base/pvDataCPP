@@ -13,6 +13,8 @@
 #include <stdexcept>
 #include <typeinfo>
 
+#include <epicsMutex.h>
+
 #define epicsExportSharedSymbols
 #include <pv/lock.h>
 #include <pv/pvIntrospect.h>

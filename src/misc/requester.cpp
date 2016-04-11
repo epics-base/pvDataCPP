@@ -10,6 +10,8 @@
 #include <string>
 #include <cstdio>
 
+#include <epicsMutex.h>
+
 #define epicsExportSharedSymbols
 #include <pv/lock.h>
 #include <pv/requester.h>

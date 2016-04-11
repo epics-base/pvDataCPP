@@ -7,6 +7,8 @@
 #include <string>
 #include <sstream>
 
+#include <epicsMutex.h>
+
 #define epicsExportSharedSymbols
 
 #include <pv/pvData.h>

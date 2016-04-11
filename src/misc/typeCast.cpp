@@ -7,6 +7,8 @@
 #include <algorithm>
 #include <sstream>
 
+#include <epicsConvert.h>
+
 #define epicsExportSharedSymbols
 #include "pv/typeCast.h"
 
