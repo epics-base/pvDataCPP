@@ -17,8 +17,18 @@
 #include <functional>
 #endif
 
+#ifdef epicsExportSharedSymbols
+#   define ThreadEpicsExportSharedSymbols
+#   undef epicsExportSharedSymbols
+#endif
+
 #include <epicsThread.h>
 #include <shareLib.h>
+
+#ifdef ThreadEpicsExportSharedSymbols
+#   undef ThreadEpicsExportSharedSymbols
+#   define epicsExportSharedSymbols
+#endif
 
 #include <pv/noDefaultMethods.h>
 #include <pv/pvType.h>
