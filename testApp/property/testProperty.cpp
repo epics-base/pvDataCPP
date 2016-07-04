@@ -71,7 +71,7 @@ static void testAlarm()
     Alarm alarm;
     PVAlarm pvAlarm; 
     bool result;
-    PVFieldPtr pvField = doubleRecord->getSubField(string("alarm"));
+    PVFieldPtr pvField = doubleRecord->getSubField<PVStructure>(string("alarm"));
     if(pvField.get()==NULL) {
         printf("testAlarm ERROR did not find field alarm\n");
         return;
@@ -104,7 +104,7 @@ static void testTimeStamp()
     TimeStamp timeStamp;
     PVTimeStamp pvTimeStamp; 
     bool result;
-    PVFieldPtr pvField = doubleRecord->getSubField(string("timeStamp"));
+    PVFieldPtr pvField = doubleRecord->getSubField<PVStructure>(string("timeStamp"));
     if(pvField.get()==NULL) {
         printf("testTimeStamp ERROR did not find field timeStamp\n");
         return;
@@ -144,7 +144,7 @@ static void testControl()
     Control control;
     PVControl pvControl; 
     bool result;
-    PVFieldPtr pvField = doubleRecord->getSubField(string("control"));
+    PVFieldPtr pvField = doubleRecord->getSubField<PVStructure>(string("control"));
     if(pvField.get()==NULL) {
         printf("testControl ERROR did not find field control\n");
         return;
@@ -171,7 +171,7 @@ static void testDisplay()
     Display display;
     PVDisplay pvDisplay; 
     bool result;
-    PVFieldPtr pvField = doubleRecord->getSubField(string("display"));
+    PVFieldPtr pvField = doubleRecord->getSubField<PVStructure>(string("display"));
     if(pvField.get()==NULL) {
         printf("testDisplay ERROR did not find field display\n");
         return;
@@ -203,7 +203,7 @@ static void testEnumerated()
     if(debug) printf("testEnumerated\n");
     PVEnumerated pvEnumerated; 
     bool result;
-    PVFieldPtr pvField = enumeratedRecord->getSubField(string("value"));
+    PVFieldPtr pvField = enumeratedRecord->getSubField<PVStructure>(string("value"));
     if(pvField.get()==NULL) {
         printf("testEnumerated ERROR did not find field enumerated\n");
         return;

@@ -84,13 +84,13 @@ static void test()
         std::cout << oss.str();
     }     
     bitSet->clear();
-    PVFieldPtr pvField = pvs->getSubField("timeStamp");
+    PVFieldPtr pvField = pvs->getSubField<PVStructure>("timeStamp");
     int32 offsetTimeStamp = (int32)pvField->getFieldOffset();
-    pvField = pvs->getSubField("timeStamp.secondsPastEpoch");
+    pvField = pvs->getSubField<PVLong>("timeStamp.secondsPastEpoch");
     int32 offsetSeconds = (int32)pvField->getFieldOffset();
-    pvField = pvs->getSubField("timeStamp.nanoseconds");
+    pvField = pvs->getSubField<PVInt>("timeStamp.nanoseconds");
     int32 offsetNano = (int32)pvField->getFieldOffset();
-    pvField = pvs->getSubField("timeStamp.userTag");
+    pvField = pvs->getSubField<PVInt>("timeStamp.userTag");
     int32 offsetUserTag = (int32)pvField->getFieldOffset();
     bitSet->set(offsetSeconds);
     BitSetUtil::compress(bitSet,pvs);
@@ -114,17 +114,17 @@ static void test()
     }     
     bitSet->clear();
 
-    pvField = pvs->getSubField("current");
+    pvField = pvs->getSubField<PVStructure>("current");
     int32 offsetCurrent = (int32)pvField->getFieldOffset();
-    pvField = pvs->getSubField("current.value");
+    pvField = pvs->getSubField<PVDouble>("current.value");
     int32 offsetValue = (int32)pvField->getFieldOffset();
-    pvField = pvs->getSubField("current.alarm");
+    pvField = pvs->getSubField<PVStructure>("current.alarm");
     int32 offsetAlarm = (int32)pvField->getFieldOffset();
-    pvField = pvs->getSubField("current.alarm.severity");
+    pvField = pvs->getSubField<PVInt>("current.alarm.severity");
     int32 offsetSeverity = (int32)pvField->getFieldOffset();
-    pvField = pvs->getSubField("current.alarm.status");
+    pvField = pvs->getSubField<PVInt>("current.alarm.status");
     int32 offsetStatus = (int32)pvField->getFieldOffset();
-    pvField = pvs->getSubField("current.alarm.message");
+    pvField = pvs->getSubField<PVString>("current.alarm.message");
     int32 offsetMessage = (int32)pvField->getFieldOffset();
     bitSet->set(offsetValue);
     bitSet->set(offsetSeverity);
