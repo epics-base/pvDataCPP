@@ -702,7 +702,12 @@ public:
      * @param fieldName The name of the field.
      * @return Pointer to the field or null if field does not exist.
      */
-    PVFieldPtr getSubField(std::string const &fieldName) const;
+    FORCE_INLINE PVFieldPtr getSubField(std::string const &fieldName) const
+    {
+        return getSubField(fieldName.c_str());
+    }
+
+    PVFieldPtr getSubField(const char *fieldName) const;
 
     /**
      * Get a subfield with the specified name.

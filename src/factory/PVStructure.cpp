@@ -104,9 +104,9 @@ const PVFieldPtrArray & PVStructure::getPVFields() const
     return pvFields;
 }
 
-PVFieldPtr  PVStructure::getSubField(string const &fieldName) const
+PVFieldPtr  PVStructure::getSubField(const char * fieldName) const
 {
-    PVField * field = getSubFieldImpl(fieldName.c_str(), false);
+    PVField * field = getSubFieldImpl(fieldName, false);
     if (field)
        return field->shared_from_this();
     else
