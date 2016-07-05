@@ -260,18 +260,12 @@ static void testPVScalarWithProperties(
         limit->put(9.0);
     }
     if(hasValueAlarm) {
-        PVFieldPtr  pvField = pvStructure->getSubField(
-            string("valueAlarm.active"));
-        PVBooleanPtr pvBoolean = static_pointer_cast<PVBoolean>(pvField);
+        PVBooleanPtr pvBoolean = pvStructure->getSubField<PVBoolean>("valueAlarm.active");
         pvBoolean->put(true);
-        pvField = pvStructure->getSubField(
-            string("valueAlarm.lowAlarmLimit"));
-        PVScalarPtr pvtemp = static_pointer_cast<PVScalar>(pvField);
+        PVScalarPtr pvtemp = pvStructure->getSubField<PVScalar>("valueAlarm.lowAlarmLimit");
         testOk1(pvtemp.get()!=0);
         convert->fromDouble(pvtemp,1.0);
-        pvField = pvStructure->getSubField(
-            string("valueAlarm.highAlarmLimit"));
-        pvtemp = static_pointer_cast<PVScalar>(pvField);
+        pvtemp = pvStructure->getSubField<PVScalar>("valueAlarm.highAlarmLimit");
         testOk1(pvtemp.get()!=0);
         convert->fromDouble(pvtemp,9.0);
         severity = pvStructure->getSubField<PVInt>(
@@ -288,9 +282,7 @@ static void testPVScalarWithProperties(
         active->put(true);
     }
     if(hasBooleanAlarm) {
-        PVFieldPtr  pvField = pvStructure->getSubField(
-            string("valueAlarm.active"));
-        PVBooleanPtr pvBoolean = static_pointer_cast<PVBoolean>(pvField);
+        PVBooleanPtr pvBoolean = pvStructure->getSubField<PVBoolean>("valueAlarm.active");
         pvBoolean->put(true);
         severity = pvStructure->getSubField<PVInt>(
             string("valueAlarm.falseSeverity"));
@@ -364,7 +356,7 @@ static void testScalarArrayCommon(string /*fieldName*/,ScalarType stype)
     }
     if(debug)
         std::cout << *pvStructure << std::endl;
-    PVFieldPtr pvField = pvStructure->getSubField("alarm.status");
+    PVFieldPtr pvField = pvStructure->getSubField<PVInt>("alarm.status");
     testOk1(pvField.get()!=0);
 }
 
@@ -425,7 +417,7 @@ pvString->put("true");
 cout << *pvTop << endl;
 
 string subName("record._options.process");
-PVFieldPtr pvField = pvTop->getSubField(subName);
+PVFieldPtr pvField = pvTop->getSubField<PVString>(subName);
 string fieldName = pvField->getFieldName();
 string fullName = pvField->getFullName();
 cout << "fieldName " << fieldName << " fullName " << fullName << endl;
