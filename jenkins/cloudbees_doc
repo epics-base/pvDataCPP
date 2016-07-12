@@ -6,7 +6,7 @@
 #
 # Author: Ralph Lange <ralph.lange@gmx.de>
 # Copyright (C) 2013 Helmholtz-Zentrum Berlin für Materialien und Energie GmbH
-# Copyright (C) 2014-2015 ITER Organization.
+# Copyright (C) 2014-2016 ITER Organization.
 # All rights reserved. Use is subject to license terms.
 
 ###########################################
@@ -32,7 +32,7 @@ tar -xzf doxygen-1.8.3.CB-dist.tar.gz
 
 cd ${WORKSPACE}
 
-wget -nv https://openepics.ci.cloudbees.com/job/e4-cpp-pvData-master-build/BASE=${BASE},MICROBENCH=NO_MICROBENCH/lastSuccessfulBuild/artifact/pvData.CB-dist.tar.gz
+wget -nv https://openepics.ci.cloudbees.com/job/e4-cpp-pvData-master-build/BASE=${BASE},MB=NO_MICROBENCH/lastSuccessfulBuild/artifact/pvData.CB-dist.tar.gz
 tar -xzf pvData.CB-dist.tar.gz
 
 export PATH=${STUFF}/bin:${PATH}

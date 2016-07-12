@@ -15,7 +15,7 @@
 DEFAULT_BASE=3.15.4
 
 BASE=${BASE:-${DEFAULT_BASE}}
-MICROBENCH=${MICROBENCH:-"NO_MICROBENCH"}
+MB=${MB:-"NO_MICROBENCH"}
 
 ###########################################
 # Fetch and unpack dependencies
