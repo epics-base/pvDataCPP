@@ -10,16 +10,16 @@
 # All rights reserved. Use is subject to license terms.
 
 installTool () {
-    local module = $1
-    local version = $2
+    local module=$1
+    local version=$2
 
     wget -nv https://openepics.ci.cloudbees.com/job/${module}-${version}_Build/lastSuccessfulBuild/artifact/${module,,}-${version}.CB-dist.tar.gz
     tar -xzf ${module,,}-${version}.CB-dist.tar.gz
 }
 
 installE4 () {
-    local module = $1
-    local branch = $2
+    local module=$1
+    local branch=$2
 
     wget -nv https://openepics.ci.cloudbees.com/job/e4-cpp-${module}-${branch}-build/BASE=${BASE},MB=${MB}/lastSuccessfulBuild/artifact/${module}.CB-dist.tar.gz
     # If microbench version does not exist, try without
