@@ -13,6 +13,10 @@
 #include <string>
 #include <cstdio>
 
+#include <epicsEvent.h>
+#include <epicsMutex.h>
+#include <epicsThread.h>
+
 #define epicsExportSharedSymbols
 #include <pv/executor.h>
 
