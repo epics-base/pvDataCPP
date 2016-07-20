@@ -16,6 +16,8 @@
 #include <string>
 #include <iostream>
 
+#include <epicsThread.h>
+
 #define epicsExportSharedSymbols
 #include <pv/timer.h>
 
