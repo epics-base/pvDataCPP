@@ -1,4 +1,8 @@
 /* testCreateRequest.cpp */
+/*
+ * Copyright information and license terms for this software can be
+ * found in the file LICENSE that is included with the distribution
+ */
 /* Author:  Matej Sekoranja Date: 2010.12.27 */
 
 #include <stddef.h>

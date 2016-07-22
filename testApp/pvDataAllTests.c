@@ -1,4 +1,8 @@
 /*
+ * Copyright information and license terms for this software can be
+ * found in the file LICENSE that is included with the distribution
+ */
+/*
  * Run pvData tests as a batch.
  *
  * Do *not* include performance measurements here, they don't help to

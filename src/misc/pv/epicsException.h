@@ -1,10 +1,9 @@
-/**
- * Copyright - See the COPYRIGHT that is included with this distribution.
- * EPICS pvData is distributed subject to a Software License Agreement found
- * in file LICENSE that is included with this distribution.
+/*
+ * Copyright information and license terms for this software can be
+ * found in the file LICENSE that is included with the distribution
  */
 /*
- * epicsException.hpp
+ * epicsException.h
  *
  *  Created on: Oct 20, 2010
  *      Author: Matej Sekoranja
