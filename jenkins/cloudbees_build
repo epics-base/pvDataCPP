@@ -75,4 +75,4 @@ make runtests
 ###########################################
 # Create distribution
 
-tar czf pvData.CB-dist.tar.gz lib include COPYRIGHT LICENSE
+tar czf pvData.CB-dist.tar.gz lib include LICENSE
