@@ -1,7 +1,50 @@
-Release 5.0
-===========
+Release 5.0.4
+=============
 
-The main changes since release 4.0 are:
+The changes since release 5.0.3 are:
+
+* Fixed bitset serialization (issue #24)
+* Fixed truncation in BitSet::or_and (issue #27)
+
+Fixed bitset serialization (issue #24)
+--------------------------------------
+
+C++ bitset serialization was not consistent with the C++ deserialization and
+Java code in some instances (depending on the endianness of the serializer and
+deserializer) when the number of bits was 56-63 modulo 64. C++ serialization
+has been fixed.
+
+Fix exposed issue in deserialization on 32-bit platforms which
+has also been corrected. 
+
+Fixed truncation in BitSet::or_and (issue #27)
+----------------------------------------------
+
+If n, n1 and n2 words are used to store the values of the bitsets bitset,
+bitset1 and bitset2 respectively then max(n, min(n1,n2)) words are needed
+to store bitset.or_(bitset1, bitset2).
+
+Previously min(n1,n2) words were used and the result would be truncated in
+some instances. This has been fixed.
+
+
+Release 5.0.3
+=============
+
+The only change since release 5.0.2 is:
+
+Fixed buffer overflow in PVUnion::serialize() (issue #20)
+---------------------------------------------------------
+
+A PVUnion whose stored value was null was serialized without checking 
+whether the buffer had sufficient capacity. This has been fixed by calling
+ensureBuffer().
+
+
+Release 5.0.2
+=============
+
+The main changes since release 4.0.3 are:
 
 * Deprecated getXXXField() methods have been removed from PVStructure
 * Convert copy methods and equals operators (re)moved
@@ -15,7 +58,7 @@ The main changes since release 4.0 are:
 
 
 Deprecated getXXXField methods have been removed from PVStructure
--------------------------------------------------------------------
+-----------------------------------------------------------------
 
 The following methods have been removed from PVStructure
 
@@ -141,8 +184,8 @@ This has been changed so the it returns a null pvStructure
 and provides an error.
 
 
-Release 4.0
-===========
+Release 4.0.3
+=============
 
 The main changes since release 3.0.2 are:
 
