@@ -36,7 +36,7 @@
 <div class="head">
 <h1>EPICS pvDataCPP</h1>
 
-<h2 class="nocount">Release 5.1-DEV - 2016.03.18</h2>
+<h2 class="nocount">Release 6.0.0 - 2016.08.01</h2>
 
   <dl>
     <dt>Editors:</dt>
@@ -66,7 +66,7 @@ V4 control system programming environment:<br />
 
 <h2 class="nocount">Status of this Document</h2>
 
-<p>This is the 18-March-2016 version for the 5.1-development release of the
+<p>This is the 01-August-2016 version for the 6.0.0 release of the
 C++ implementation of pvData.
 </p>
 
@@ -4875,7 +4875,7 @@ Monitor provides:
     monitor. It, together with the queue facility, provides support for
     monitor queues.
     </dd>
-  <dt>monitorPlugin</dt>
+  <dt>monitorPlugin [Deprecated]</dt>
     <dd>This is support for implementing monitor plugins.
      A monitor plugin can be developed that has no knowledge
      of pvAccess but only pvData.
@@ -5057,7 +5057,7 @@ where
 <dl>
    <dt>monitor</dt>
      <dd>Used by code that implements pvAccess monitors.</dd>
-   <dt>monitorPlugin</dt>
+   <dt>monitorPlugin [Deprecated]</dt>
       <dd>Code that provides special semantics for monitors.</dd>
 </dl>
 <h3>monitor</h3>
@@ -5173,6 +5173,8 @@ It has the methods:</p>
 </dl>
 
 <h3>monitorPlugin</h3>
+<p>[ MonitorPlugin and related classes MonitorPluginCreator and 
+MonitorPluginManager are deprecated.]</p>
 <pre>
 class MonitorPlugin
 {
