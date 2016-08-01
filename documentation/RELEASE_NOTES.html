@@ -1,3 +1,62 @@
+<h1>Release 6.0.0</h1>
+
+<p>The main changes since release 5.0.4 are:</p>
+
+<ul>
+<li>Linux shared library version added</li>
+<li>Headers have been moved into pv directories</li>
+<li>Bitset functions declared const where possible</li>
+<li>Bitset::swap added</li>
+<li>Requester::message has default implementation</li>
+<li>Serialization/deserialization helpers added</li>
+<li>Non-template getSubField char* overload added</li>
+<li>MonitorPlugin deprecated</li>
+<li>Field name validation performed</li>
+<li>Now builds for Cygwin and MinGW targets</li>
+<li>Fix for debug build issue.</li>
+<li>New license file replaces LICENSE and COPYRIGHT</li>
+</ul>
+
+<h2>Shared library version added</h2>
+
+<p>Linux shared library version numbers have been added by setting SHRLIB_VERSION
+(to 6.0 in this case). So shared object will be libpvData.so.6.0 instead of
+libpvData.so.</p>
+
+<h2>Headers have been moved into pv directories</h2>
+
+<p>E.g. src/property/alarm.h -> src/property/pv/alarm.h</p>
+
+<p>This facilitates using some IDEs such as Qt Creator.</p>
+
+<h2>Requester::message has default implementation</h2>
+
+<p>Requester::message is no longer pure virtual. Default implementation sends
+string to std::cerr.</p>
+
+<h2>Serialization/deserialization helpers added</h2>
+
+<p>A helper function, serializeToVector, has been added which serializes a 
+Serializable object into a standard vector of UInt8s.</p>
+
+<p>Similarly a function deserializeFromVector deserializes a standard vector into
+a Deserializable object.</p>
+
+<p>A function deserializeFromBuffer deserializes a ByteBuffer into a 
+Deserializable object.</p>
+
+<h2>Field name validation performed</h2>
+
+<p>On creating a Structure or Union the field names are now validated.</p>
+
+<p>Valid characters for a field name are upper or lowercase letters, numbers and
+underscores and intial numbers are invalid, i.e. names must be of the form
+[A-Za-z<em>][A-Za-z0-9</em>]*.</p>
+
+<h2>Now builds for Cygwin and MinGW targets</h2>
+
+<p>Includes cross-compiling MinGW on Linux.</p>
+
 <h1>Release 5.0.4</h1>
 
 <p>The changes since release 5.0.3 are:</p>
@@ -10,7 +69,8 @@
 <h2>Fixed bitset serialization (issue #24)</h2>
 
 <p>C++ bitset serialization was not consistent with the C++ deserialization and
-Java code in some instances (depending on the endianness of the serializer and deserializer) when the number of bits was 56-63 modulo 64. C++ serialization
+Java code in some instances (depending on the endianness of the serializer and
+deserializer) when the number of bits was 56-63 modulo 64. C++ serialization
 has been fixed.</p>
 
 <p>Fix exposed issue in deserialization on 32-bit platforms which

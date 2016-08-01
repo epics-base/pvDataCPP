@@ -1,3 +1,68 @@
+Release 6.0.0
+=============
+
+The main changes since release 5.0.4 are:
+
+* Linux shared library version added
+* Headers have been moved into pv directories
+* Bitset functions declared const where possible
+* Bitset::swap added
+* Requester::message has default implementation
+* Serialization/deserialization helpers added
+* Non-template getSubField char* overload added
+* MonitorPlugin deprecated
+* Field name validation performed
+* Now builds for Cygwin and MinGW targets
+* Fix for debug build issue.
+* New license file replaces LICENSE and COPYRIGHT
+
+Shared library version added
+----------------------------
+
+Linux shared library version numbers have been added by setting SHRLIB_VERSION
+(to 6.0 in this case). So shared object will be libpvData.so.6.0 instead of
+libpvData.so.
+
+Headers have been moved into pv directories
+-------------------------------------------
+
+E.g. src/property/alarm.h -> src/property/pv/alarm.h
+
+This facilitates using some IDEs such as Qt Creator.
+
+Requester::message has default implementation
+---------------------------------------------
+
+Requester::message is no longer pure virtual. Default implementation sends
+string to std::cerr.
+
+Serialization/deserialization helpers added
+-------------------------------------------
+
+A helper function, serializeToVector, has been added which serializes a 
+Serializable object into a standard vector of UInt8s.
+
+Similarly a function deserializeFromVector deserializes a standard vector into
+a Deserializable object.
+
+A function deserializeFromBuffer deserializes a ByteBuffer into a 
+Deserializable object.
+
+Field name validation performed
+-------------------------------
+
+On creating a Structure or Union the field names are now validated.
+
+Valid characters for a field name are upper or lowercase letters, numbers and
+underscores and intial numbers are invalid, i.e. names must be of the form
+[A-Za-z_][A-Za-z0-9_]*.
+
+Now builds for Cygwin and MinGW targets
+---------------------------------------
+
+Includes cross-compiling MinGW on Linux.
+
+
 Release 5.0.4
 =============
 
