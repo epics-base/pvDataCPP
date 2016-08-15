@@ -32,6 +32,12 @@
 typedef class std::ios std::ios_base;
 #endif
 
+#if defined(_WIN32) && !defined(_MINGW)
+#pragma warning(disable: 4344) // A call to a function using explicit template
+// arguments calls a different function than it would if explicit arguments had not been specified
+// Removes warnings for template getSubField.
+#endif
+
 #define USAGE_DEPRECATED EPICS_DEPRECATED
 
 #if defined(__GNUC__) && !(defined(vxWorks) && !defined(_WRS_VXWORKS_MAJOR))
