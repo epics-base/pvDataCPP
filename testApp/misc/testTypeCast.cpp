@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <float.h>
 #include <epicsMath.h>
+#include <epicsString.h>
 
 #include <epicsUnitTest.h>
 #include <testMain.h>
@@ -29,6 +30,14 @@
 using std::string;
 
 namespace {
+
+    std::string escapedFromRaw(const std::string & s)
+    {
+        std::vector<char> result;
+        result.resize(epicsStrnEscapedFromRawSize(s.c_str(), s.length())+1);
+        epicsStrnEscapedFromRaw(&result[0], result.size(), s.c_str(), s.length());
+        return std::string(&result[0]);
+    }
 
     template<typename T>
     struct testequal {
@@ -57,7 +66,7 @@ namespace {
                    <<inp<<" ("<<typeid(FROM).name()<<") -> "
                    <<expect<<" ("<<typeid(TO).name()<<")\n Error: "
                    <<typeid(e).name()<<"("<<e.what()<<")";
-                testFail("%s", msg.str().c_str());
+                testFail("%s", escapedFromRaw(msg.str()).c_str());
                 return;
             }
             if(!testequal<TO>::op(actual, expect)) {
@@ -65,14 +74,14 @@ namespace {
                    <<inp<<" ("<<typeid(FROM).name()<<") -> "
                    <<expect<<" ("<<typeid(TO).name()<<") yields: "
                    <<actual;
-                testFail("%s", msg.str().c_str());
+                testFail("%s", escapedFromRaw(msg.str()).c_str());
                 return;
             }
             msg<<"cast "
                <<inp<<" ("<<typeid(FROM).name()<<") -> "
                <<expect<<" ("<<typeid(TO).name()<<") yields: "
                <<actual;
-            testPass("%s", msg.str().c_str());
+            testPass("%s", escapedFromRaw(msg.str()).c_str());
             return;
         }
     };
@@ -89,14 +98,14 @@ namespace {
                    <<inp<<" ("<<typeid(FROM).name()<<") -> ("
                    <<typeid(TO).name()<<") yields: "
                    <<actual;
-                testFail("%s", msg.str().c_str());
+                testFail("%s", escapedFromRaw(msg.str()).c_str());
                 return;
             } catch(std::runtime_error& e) {
                 msg<<"Got expected error "
                    <<inp<<" ("<<typeid(FROM).name()<<") -> ("
                    <<typeid(TO).name()<<") fails with: "
                    <<e.what();
-                testPass("%s", msg.str().c_str());
+                testPass("%s", escapedFromRaw(msg.str()).c_str());
                 return;
             }
         }
