@@ -1,3 +1,10 @@
+Release 6.0.1
+=============
+
+The only change since release 6.0.0 is:
+
+* Fix "Problem building pvDataCPP for win32-x86-mingw" (issue #42)
+
 Release 6.0.0
 =============
 
