@@ -1,9 +1,12 @@
 Release 6.0.1
 =============
 
-The only change since release 6.0.0 is:
+The changes since release 6.0.0 are:
 
 * Fix "Problem building pvDataCPP for win32-x86-mingw" (issue #42)
+* In src/misc/bitSet.cpp #include <algorithm> required for MSVS 2015
+* In testApp/misc/testTypeCast.cpp print (u)int8 values as integers
+* Minor documentation updates
 
 Release 6.0.0
 =============
