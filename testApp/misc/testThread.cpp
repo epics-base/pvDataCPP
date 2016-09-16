@@ -54,7 +54,7 @@ static void testThreadRun() {
     // show that we can control thread start and stop
     ActionPtr ax(new Action());
     {
-        ThreadPtr tr(new Thread(actionName,lowPriority,ax.get()));
+        epics::pvData::ThreadPtr tr(new epics::pvData::Thread(actionName,lowPriority,ax.get()));
         bool w=ax->begin.wait();
         testDiag( "main %s", w?"true":"false");
         testDiag( "Action is %s", ax->actuallyRan?"true":"false");
@@ -142,7 +142,7 @@ static void testBinders()
     {
         fninfo info;
         info.cnt = 0;
-        Thread foo(Thread::Config(&threadFN, (void*)&info)
+        epics::pvData::Thread foo(epics::pvData::Thread::Config(&threadFN, (void*)&info)
                    .name("test1")
                    .prio(epicsThreadPriorityMedium)
                    .autostart(true)
@@ -159,7 +159,7 @@ static void testBinders()
     {
         classMeth inst;
 
-        Thread foo(Thread::Config(&inst, &classMeth::inc)
+        epics::pvData::Thread foo(epics::pvData::Thread::Config(&inst, &classMeth::inc)
                    .prio(epicsThreadPriorityMedium)
                    .autostart(false)
                    <<"test"<<2
@@ -182,7 +182,7 @@ static void testBinders()
         int cnt = 0;
         epicsEvent evnt;
         auto fn = [&cnt,&evnt]() mutable {evnt.signal(); cnt++;};
-        Thread foo(Thread::Config(fn)
+        epics::pvData::Thread foo(epics::pvData::Thread::Config(fn)
                    .name("test3")
                    .prio(epicsThreadPriorityMedium)
                    .autostart(true)
