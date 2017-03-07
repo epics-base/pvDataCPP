@@ -133,10 +133,8 @@ void PVUnion::set(int32 index, PVFieldPtr const & value)
 void PVUnion::set(string const & fieldName, PVFieldPtr const & value)
 {
     int32 index = variant ? -1 : static_cast<int32>(unionPtr->getFieldIndex(fieldName));
-    if (index == -1)
-        throw std::invalid_argument("no such fieldName");
-
-	set(index, value);
+    if (index == -1) throw std::invalid_argument("no such fieldName");
+    set(index, value);
 }
 
 void PVUnion::serialize(ByteBuffer *pbuffer, SerializableControl *pflusher) const
