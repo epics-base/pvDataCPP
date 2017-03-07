@@ -225,7 +225,7 @@ PVFieldPtr PVCopy::getMasterPVField(size_t structureOffset)
     if(diff==0) return pvMasterField;
     PVStructurePtr pvStructure
         = static_pointer_cast<PVStructure>(pvMasterField);
-    return pvStructure->getSubField(
+    return pvStructure->getSubField<PVField>(
         pvMasterField->getFieldOffset() + diff);
 }
 
@@ -396,7 +396,7 @@ StructureConstPtr PVCopy::createStructure(
     StringArray fieldNames; fields.reserve(length);
     for(size_t i=0; i<length; ++i) {
         string const &fieldName = fromRequestFieldNames[i];
-        PVFieldPtr pvMasterField = pvMaster->getSubField(fieldName);
+        PVFieldPtr pvMasterField = pvMaster->getSubField<PVField>(fieldName);
         if(!pvMasterField) continue;
         FieldConstPtr field = pvMasterField->getField();
         if(field->getType()==epics::pvData::structure) {
@@ -432,7 +432,7 @@ CopyNodePtr PVCopy::createStructureNodes(
 {
     PVFieldPtrArray const & copyPVFields = pvFromCopy->getPVFields();
     PVStructurePtr pvOptions;
-    PVFieldPtr pvField = pvFromRequest->getSubField("_options");
+    PVFieldPtr pvField = pvFromRequest->getSubField<PVField>("_options");
     if(pvField) pvOptions = static_pointer_cast<PVStructure>(pvField);
     size_t number = copyPVFields.size();
     CopyNodePtrArrayPtr nodes(new CopyNodePtrArray());
@@ -484,7 +484,7 @@ void PVCopy::updateStructureNodeSetBitSet(
 {
     for(size_t i=0; i<structureNode->nodes->size(); i++) {
         CopyNodePtr node = (*structureNode->nodes)[i];
-        PVFieldPtr pvField = pvCopy->getSubField(node->structureOffset);
+        PVFieldPtr pvField = pvCopy->getSubField<PVField>(node->structureOffset);
         if(node->isStructure) {
             PVStructurePtr xxx = static_pointer_cast<PVStructure>(pvField);
             CopyStructureNodePtr yyy =
