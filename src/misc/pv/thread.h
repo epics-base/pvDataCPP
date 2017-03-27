@@ -111,7 +111,7 @@ public:
      * The defaults may be used except for the runnable, which must be given
      * either in the constructor, or the @method run() method.
      *
-     * @note Instances of @class Config may not be reused.
+     * @note Instances of class Config may not be reused.
      *
      * Defaults:
      *  name: ""
@@ -266,7 +266,7 @@ public:
     }
 
     //! @brief Create a new thread using the given @class Config
-    //! @throws std::logic_error for improper @class Config (ie. missing runner)
+    //! @throws std::logic_error for improper class Config (ie. missing runner)
     Thread(Config& c)
         :epicsThread(c.x_getrunner(), c.p_strm.str().c_str(),
                      c.p_stack, c.p_prio)

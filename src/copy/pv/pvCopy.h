@@ -46,8 +46,7 @@ typedef std::tr1::shared_ptr<PVCopy> PVCopyPtr;
 
 struct CopyNode;
 typedef std::tr1::shared_ptr<CopyNode> CopyNodePtr;
-struct CopyMasterNode;
-typedef std::tr1::shared_ptr<CopyMasterNode> CopyMasterNodePtr;
+
 struct CopyStructureNode;
 typedef std::tr1::shared_ptr<CopyStructureNode> CopyStructureNodePtr;
 
@@ -86,10 +85,7 @@ public:
      * Traverse all the fields in master.
      * @param callback This is called for each field on master.
      */
-    void traverseMaster(PVCopyTraverseMasterCallbackPtr const & callback)
-    {
-        traverseMaster(headNode,callback);
-    }
+    void traverseMaster(PVCopyTraverseMasterCallbackPtr const & callback);
     /**
      * Get the introspection interface for a PVStructure for e copy.
      */
@@ -170,27 +166,36 @@ public:
      */
     std::string dump();
 private:
-    void dump(
-        std::string *builder,
-        CopyNodePtr const &node,
-        int indentLevel);
+    
     PVCopyPtr getPtrSelf()
     {
         return shared_from_this();
     }
-    void traverseMaster(CopyNodePtr const &node, PVCopyTraverseMasterCallbackPtr const & callback);
-
+    
     PVStructurePtr pvMaster;
     StructureConstPtr structure;
     CopyNodePtr headNode;
     PVStructurePtr cacheInitStructure;
-    PVCopy(PVStructurePtr const &pvMaster);
-    friend class PVCopyMonitor;
-    bool init(PVStructurePtr const &pvRequest);
-    std::string dump(
-        std::string const &value,
+    BitSetPtr ignorechangeBitSet;
+
+    void traverseMaster(
         CopyNodePtr const &node,
-        int indentLevel);
+        PVCopyTraverseMasterCallbackPtr const & callback);
+    void updateCopySetBitSet(
+        PVFieldPtr const &pvCopy,
+        CopyNodePtr const &node,
+        BitSetPtr const &bitSet);
+    void updateCopyFromBitSet(
+        PVFieldPtr const &pvCopy,
+        CopyNodePtr const &node,
+        BitSetPtr const &bitSet);
+    void updateMaster(
+        PVFieldPtr const &pvCopy,
+        CopyNodePtr const &node,
+        BitSetPtr const &bitSet);
+
+    PVCopy(PVStructurePtr const &pvMaster);
+    bool init(PVStructurePtr const &pvRequest);
     StructureConstPtr createStructure(
         PVStructurePtr const &pvMaster,
         PVStructurePtr const &pvFromRequest);
@@ -198,33 +203,28 @@ private:
         PVStructurePtr const &pvMasterStructure,
         PVStructurePtr const &pvFromRequest,
         PVStructurePtr const &pvFromField);
-    void updateStructureNodeSetBitSet(
-        PVStructurePtr const &pvCopy,
-        CopyStructureNodePtr const &structureNode,
-        BitSetPtr const &bitSet);
-    void updateSubFieldSetBitSet(
-        PVFieldPtr const &pvCopy,
-        PVFieldPtr const &pvMaster,
-        BitSetPtr const &bitSet);
-    void updateStructureNodeFromBitSet(
-        PVStructurePtr const &pvCopy,
-        CopyStructureNodePtr const &structureNode,
-        BitSetPtr const &bitSet,
-        bool toCopy,
-        bool doAll);
-    void updateSubFieldFromBitSet(
-        PVFieldPtr const &pvCopy,
-        PVFieldPtr const &pvMasterField,
-        BitSetPtr const &bitSet,
-        bool toCopy,
-        bool doAll);
-    CopyMasterNodePtr getCopyOffset(
+    void initPlugin(
+        CopyNodePtr const & node,
+        PVStructurePtr const & pvOptions,
+        PVFieldPtr const & pvMasterField);
+    void traverseMasterInitPlugin();
+    void traverseMasterInitPlugin(CopyNodePtr const & node);
+
+    CopyNodePtr getCopyOffset(
         CopyStructureNodePtr const &structureNode,
         PVFieldPtr const &masterPVField);
-    CopyMasterNodePtr getMasterNode(
+    void checkIgnore(
+        PVStructurePtr const & copyPVStructure,
+        BitSetPtr const & bitSet);
+    void setIgnore(CopyNodePtr const & node);
+    CopyNodePtr getMasterNode(
         CopyStructureNodePtr const &structureNode,
         std::size_t structureOffset);
-    
+    void dump(
+        std::string *builder,
+        CopyNodePtr const &node,
+        int indentLevel);
+    friend class PVCopyMonitor;
 };
 
 }}
