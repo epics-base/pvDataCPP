@@ -342,6 +342,9 @@ public:
         string const & crequest)
     {
         try {
+            message = "";
+            fullFieldName = "";
+            optionList.clear();
             string request = crequest;
             if (!request.empty()) removeBlanks(request);
             if (request.empty())

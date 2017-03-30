@@ -183,6 +183,10 @@ private:
         PVCopyTraverseMasterCallbackPtr const & callback);
     void updateCopySetBitSet(
         PVFieldPtr const &pvCopy,
+        PVFieldPtr const &pvMaster,
+        BitSetPtr const &bitSet);
+    void updateCopySetBitSet(
+        PVFieldPtr const &pvCopy,
         CopyNodePtr const &node,
         BitSetPtr const &bitSet);
     void updateCopyFromBitSet(

@@ -3,7 +3,5 @@
 SRC_DIRS += $(PVDATA_SRC)/monitor
 
 INC += pv/monitor.h
-INC += pv/monitorPlugin.h
 
 LIBSRCS += monitor.cpp
-LIBSRCS += monitorPlugin.cpp

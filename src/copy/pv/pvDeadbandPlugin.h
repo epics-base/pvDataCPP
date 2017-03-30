@@ -26,7 +26,8 @@ typedef std::tr1::shared_ptr<PVDeadbandFilter> PVDeadbandFilterPtr;
 
 
 /**
- * A plugin for a filter that gets a sub array from a PVScalarDeadband.
+ * @brief  A plugin for a filter that gets a sub array from a PVScalarDeadband.
+ *
  * @author mrk
  * @since date 2017.02.23
  */
@@ -56,7 +57,7 @@ public:
 };
 
 /**
- * A Plugin for a filter that gets a sub array from a PVScalarDeadband.
+ * @brief  A Plugin for a filter that gets a sub array from a PVScalarDeadband.
  */
 class PVDeadbandFilter : public PVFilter
 {

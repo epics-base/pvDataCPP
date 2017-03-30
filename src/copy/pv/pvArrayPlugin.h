@@ -26,7 +26,8 @@ typedef std::tr1::shared_ptr<PVArrayFilter> PVArrayFilterPtr;
 
 
 /**
- * A plugin for a filter that gets a sub array from a PVScalarArray.
+ * @brief A plugin for a filter that gets a sub array from a PVScalarArray.
+ *
  * @author mrk
  * @since date 2017.02.23
  */
@@ -56,7 +57,7 @@ public:
 };
 
 /**
- * A filter that gets a sub array from a PVScalarArray.
+ * @brief  A filter that gets a sub array from a PVScalarArray.
  */
 class PVArrayFilter : public PVFilter
 {

@@ -30,7 +30,8 @@ typedef std::map<std::string,PVPluginPtr> PVPluginMap;
 
 
 /**
- * A filter plugin that attaches to a field of a PVStrcture.
+ * @brief A filter plugin that attaches to a field of a PVStrcture.
+ *
  * PVCopy looks for plugins defined in pvRequest and calls the filter when a pvCopy is updated.
  * @author mrk
  * @since 2017.03.17
@@ -58,7 +59,8 @@ public:
 };
 
 /**
- * A Filter that is called when a copy PVStructure is being updated.
+ * @brief  A Filter that is called when a copy PVStructure is being updated.
+ *
  * This interface defines a filter to update a copy of a field from a master PVStructure.
  * of the data in the master.
  */
@@ -82,7 +84,7 @@ public:
     virtual std::string getName() = 0;
 };
 /**
- * A registry for filter plugins for PVCopy.
+ * @brief  A registry for filter plugins for PVCopy.
  *
  */
 class epicsShareClass PVPluginRegistry {

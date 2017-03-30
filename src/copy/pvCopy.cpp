@@ -94,7 +94,7 @@ PVCopyPtr PVCopy::create(
     }
     PVCopyPtr pvCopy = PVCopyPtr(new PVCopy(pvMaster));
     bool result = pvCopy->init(pvStructure);
-    if(!result) pvCopy.reset();
+    if(!result) return PVCopyPtr();
     pvCopy->traverseMasterInitPlugin();
 //cout << pvCopy->dump() << endl;
     return pvCopy;
@@ -286,6 +286,25 @@ void PVCopy::traverseMaster(
 
 void PVCopy::updateCopySetBitSet(
     PVFieldPtr const & pvCopy,
+    PVFieldPtr const & pvMaster,
+    BitSetPtr const & bitSet)
+{
+    if(pvCopy->getField()->getType()!=epics::pvData::structure) {
+        if(*pvCopy==*pvMaster) return;
+        pvCopy->copy(*pvMaster);
+        bitSet->set(pvCopy->getFieldOffset());
+        return;
+    }
+    PVStructurePtr pvCopyStructure = static_pointer_cast<PVStructure>(pvCopy);
+    PVFieldPtrArray const & pvCopyFields = pvCopyStructure->getPVFields();
+    for(size_t i=0; i<pvCopyFields.size(); ++i) {
+        PVFieldPtr master = getMasterPVField(pvCopyFields[i]->getFieldOffset());
+        updateCopySetBitSet(pvCopyFields[i],master,bitSet);
+    }
+}
+
+void PVCopy::updateCopySetBitSet(
+    PVFieldPtr const & pvCopy,
     CopyNodePtr const & node,
     BitSetPtr const & bitSet)
 {
@@ -296,10 +315,7 @@ void PVCopy::updateCopySetBitSet(
     }
     if(!node->isStructure) {
         if(result) return;
-        PVFieldPtr pvMaster = node->masterPVField;
-        if(pvCopy==pvMaster) return;
-        pvCopy->copy(*pvMaster);
-        bitSet->set(pvCopy->getFieldOffset());
+        updateCopySetBitSet(pvCopy,node->masterPVField,bitSet);
         return;
     }
     CopyStructureNodePtr structureNode = static_pointer_cast<CopyStructureNode>(node);
@@ -582,20 +598,18 @@ void PVCopy::checkIgnore(
      BitSetPtr const & bitSet)
 {
     if(!ignorechangeBitSet) return;
-    if( ((*ignorechangeBitSet)&=(*bitSet)).cardinality()>0 )
-    {
-        int32 numFields = copyPVStructure->getNumberFields();
-        BitSet temp(numFields);
-        int32 ind = 0;
-        while(true) {
-            ind = ignorechangeBitSet->nextSetBit(ind);
-            if(ind<0) break;
-            temp.clear(ind);
-            ind++;
-            if(ind>=numFields) break;
-       }
-       if(temp.cardinality()==0) bitSet->clear();
+    int32 numFields = copyPVStructure->getNumberFields();
+    BitSet temp(numFields);
+    temp = *bitSet;
+    int32 ind = 0;
+    while(true) {
+        ind = ignorechangeBitSet->nextSetBit(ind);
+        if(ind<0) break;
+        temp.clear(ind);
+        ind++;
+        if(ind>=numFields) break;
     }
+    if(temp.nextSetBit(0)<0) bitSet->clear();
 }
 
 void PVCopy::setIgnore(CopyNodePtr const &node) {

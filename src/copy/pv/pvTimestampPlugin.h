@@ -27,7 +27,8 @@ typedef std::tr1::shared_ptr<PVTimestampFilter> PVTimestampFilterPtr;
 
 
 /**
- * A plugin for a filter that sets a timeStamp to the current time.
+ * @brief  A plugin for a filter that sets a timeStamp to the current time.
+ *
  * @author mrk
  * @since date 2017.03.24
  */
@@ -57,7 +58,7 @@ public:
 };
 
 /**
- * A filter that sets a timeStamp to the current time.
+ * @brief  A filter that sets a timeStamp to the current time.
  */
 class PVTimestampFilter : public PVFilter
 {

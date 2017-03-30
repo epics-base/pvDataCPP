@@ -1,3 +1,13 @@
+Release 6.0
+===========
+
+The main changes since release 5.0 are:
+
+* pvCopy now implements filter plugins.
+* monitorPlugin has been removed.
+
+
+
 Release 5.0
 ===========
 
