@@ -3,6 +3,8 @@
  * The License for this software can be found in the file LICENSE that is included with the distribution.
  */
 
+#include <stdlib.h>
+
 #include <pv/pvArrayPlugin.h>
 #include <pv/convert.h>
 #include <pv/pvSubArrayCopy.h>
@@ -84,39 +86,39 @@ PVArrayFilterPtr PVArrayFilter::create(
     if(num==1) {
         value = values[0];
         try {
-            start = std::stol(value);
+            start = strtol(value.c_str(),0,10);
         } catch(std::exception const & ex) {
             ok = false;
         }
     } else if(num==2) {
         value = values[0];
         try {
-            start = std::stol(value);
+            start = strtol(value.c_str(),0,10);
         } catch(std::exception const & ex) {
             ok = false;
         }
         value = values[1];
         try {
-            end = std::stol(value);
+            end = strtol(value.c_str(),0,10);
         } catch(std::exception const & ex) {
             ok = false;
         }
     } else if(num==3) {
         value = values[0];
         try {
-            start = std::stol(value);
+            start = strtol(value.c_str(),0,10);
         } catch(std::exception const & ex) {
             ok = false;
         }
         value = values[1];
         try {
-            increment = std::stol(value);
+            increment = strtol(value.c_str(),0,10);
         } catch(std::exception const & ex) {
             ok = false;
         }
         value = values[2];
         try {
-            end = std::stol(value);
+            end = strtol(value.c_str(),0,10);
         } catch(std::exception const & ex) {
             ok = false;
         }
