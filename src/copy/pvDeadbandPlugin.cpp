@@ -2,6 +2,7 @@
 /*
  * The License for this software can be found in the file LICENSE that is included with the distribution.
  */
+#include <stdlib.h>
 
 #include <pv/pvDeadbandPlugin.h>
 #include <pv/convert.h>
@@ -65,7 +66,7 @@ PVDeadbandFilterPtr PVDeadbandFilter::create(
     size_t ind = requestValue.find(':');
     if(ind==string::npos) return PVDeadbandFilterPtr();
     string svalue = requestValue.substr(ind+1);
-    double deadband = std::stod(svalue);
+    double deadband = atof(svalue.c_str());
     PVDeadbandFilterPtr filter =
          PVDeadbandFilterPtr(
              new PVDeadbandFilter(
