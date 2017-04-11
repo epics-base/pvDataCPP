@@ -67,6 +67,7 @@ PVDeadbandFilterPtr PVDeadbandFilter::create(
     if(ind==string::npos) return PVDeadbandFilterPtr();
     string svalue = requestValue.substr(ind+1);
     double deadband = atof(svalue.c_str());
+    if(deadband==0.0) return PVDeadbandFilterPtr();
     PVDeadbandFilterPtr filter =
          PVDeadbandFilterPtr(
              new PVDeadbandFilter(

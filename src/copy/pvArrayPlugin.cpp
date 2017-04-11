@@ -85,43 +85,19 @@ PVArrayFilterPtr PVArrayFilter::create(
     string value;
     if(num==1) {
         value = values[0];
-        try {
-            start = strtol(value.c_str(),0,10);
-        } catch(std::exception const & ex) {
-            ok = false;
-        }
+        start = strtol(value.c_str(),0,10);
     } else if(num==2) {
         value = values[0];
-        try {
-            start = strtol(value.c_str(),0,10);
-        } catch(std::exception const & ex) {
-            ok = false;
-        }
+        start = strtol(value.c_str(),0,10);
         value = values[1];
-        try {
-            end = strtol(value.c_str(),0,10);
-        } catch(std::exception const & ex) {
-            ok = false;
-        }
+        end = strtol(value.c_str(),0,10);
     } else if(num==3) {
         value = values[0];
-        try {
-            start = strtol(value.c_str(),0,10);
-        } catch(std::exception const & ex) {
-            ok = false;
-        }
+        start = strtol(value.c_str(),0,10);
         value = values[1];
-        try {
-            increment = strtol(value.c_str(),0,10);
-        } catch(std::exception const & ex) {
-            ok = false;
-        }
+        increment = strtol(value.c_str(),0,10);
         value = values[2];
-        try {
-            end = strtol(value.c_str(),0,10);
-        } catch(std::exception const & ex) {
-            ok = false;
-        }
+        end = strtol(value.c_str(),0,10);
     } else {
         ok = false;
     }
