@@ -27,8 +27,6 @@ using std::string;
 using std::cout;
 using std::endl;
 
-static bool debug = false;
-
 static FieldCreatePtr fieldCreate = getFieldCreate();
 static PVDataCreatePtr pvDataCreate = getPVDataCreate();
 static StandardFieldPtr standardField = getStandardField();
@@ -36,8 +34,7 @@ static StandardPVFieldPtr standardPVField = getStandardPVField();
 
 static void testPVUnionType()
 {
-    if(debug) 
-        std::cout << std::endl << "testPVUnion" << std::endl;
+    testDiag("testPVUnionType");
     PVStructurePtr pvStructure = pvDataCreate->createPVStructure(
         standardField->regUnion(
             fieldCreate->createFieldBuilder()->
@@ -69,8 +66,7 @@ static void testPVUnionType()
 
 static void testPVUnionArray()
 {
-    if(debug) 
-        std::cout << std::endl << "testPVUnion" << std::endl;
+    testDiag("testPVUnionArray");
     PVStructurePtr pvStructure = pvDataCreate->createPVStructure(
         standardField->unionArray(
             fieldCreate->createFieldBuilder()->
@@ -111,12 +107,100 @@ static void testPVUnionArray()
     std::cout << "testPVUnionArray PASSED" << std::endl;
 }
 
+static void testClearUnion()
+{
+    testDiag("testClearUnion w/ variant");
+
+    PVUnionPtr variant(pvDataCreate->createPVVariantUnion());
+
+    testOk(!variant->get(), "Initially empty");
+
+    variant->select(PVUnion::UNDEFINED_INDEX);
+
+    testOk(!variant->get(), "Still empty");
+
+    {
+        PVFieldPtr bval(pvDataCreate->createPVScalar<PVBoolean>());
+        variant->set(bval);
+
+        testOk(variant->get().get()==bval.get(), "Now with bool");
+
+        variant->set(PVUnion::UNDEFINED_INDEX, PVFieldPtr());
+
+        testOk(!variant->get(), "Again empty");
+    }
+
+    {
+        PVFieldPtr bval(pvDataCreate->createPVScalar<PVBoolean>());
+        variant->set(bval);
+
+        testOk(variant->get().get()==bval.get(), "Now with bool");
+
+        variant->select(PVUnion::UNDEFINED_INDEX);
+
+        testOk(!variant->get(), "Again empty");
+    }
+
+    testDiag("testClearUnion w/ discriminating");
+
+    PVUnionPtr discrim(pvDataCreate->createPVUnion(
+                fieldCreate->createFieldBuilder()->
+                        add("doubleValue", pvDouble)->
+                        add("intValue", pvInt)->
+                        add("timeStamp",standardField->timeStamp())->
+                    createUnion()
+                ));
+
+
+    testOk(!discrim->get(), "Initially empty");
+
+    discrim->select(PVUnion::UNDEFINED_INDEX);
+
+    testOk(!discrim->get(), "Still empty");
+
+    {
+        PVFieldPtr bval(pvDataCreate->createPVScalar<PVDouble>());
+
+        try {
+            discrim->set(bval);
+            testFail("set(bval) with UNDEFINED_INDEX didn't fail as expected");
+        }catch (std::invalid_argument&){
+            testPass("cause expected invalid_argument");
+        }
+
+        testOk(!discrim->get(), "Still empty");
+
+        discrim->select("doubleValue");
+        discrim->set(bval);
+
+        testOk(discrim->get().get()==bval.get(), "Now with bool");
+
+        discrim->set(PVUnion::UNDEFINED_INDEX, PVFieldPtr());
+
+        testOk(!discrim->get(), "Again empty");
+    }
+
+    {
+        PVFieldPtr bval(pvDataCreate->createPVScalar<PVDouble>());
+
+        testOk(!discrim->get(), "Still empty");
+
+        discrim->set("doubleValue", bval);
+
+        testOk(discrim->get().get()==bval.get(), "Now with bool");
+
+        discrim->set(PVUnion::UNDEFINED_INDEX, PVFieldPtr());
+
+        testOk(!discrim->get(), "Again empty");
+    }
+}
 
 MAIN(testPVUnion)
 {
-    testPlan(6);
+    testPlan(21);
     testPVUnionType();
     testPVUnionArray();
+    testClearUnion();
     return testDone();
 }
 
