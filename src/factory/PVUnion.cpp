@@ -25,7 +25,7 @@ using std::string;
 namespace epics { namespace pvData {
 	
 #define PVUNION_UNDEFINED_INDEX -1
-int32 PVUnion::UNDEFINED_INDEX = PVUNION_UNDEFINED_INDEX;
+const int32 PVUnion::UNDEFINED_INDEX = PVUNION_UNDEFINED_INDEX;
 
 PVDataCreatePtr PVUnion::pvDataCreate(getPVDataCreate());
 

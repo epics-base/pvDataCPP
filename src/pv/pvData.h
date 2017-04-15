@@ -932,7 +932,7 @@ public:
 	 * Default value upon PVUnion construction. Can be set by the user.
 	 * Corresponds to @c null value.
 	 */
-	static int32 UNDEFINED_INDEX;
+    static const int32 UNDEFINED_INDEX;
 
     /**
      * Get the introspection interface
