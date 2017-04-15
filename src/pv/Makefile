@@ -9,4 +9,7 @@ INC += pv/convert.h
 INC += pv/standardField.h
 INC += pv/standardPVField.h
 INC += pv/pvSubArrayCopy.h
+INC += pv/pvdVersion.h
+INC += pv/pvdVersionNum.h
 
+LIBSRCS += pvdVersion.cpp

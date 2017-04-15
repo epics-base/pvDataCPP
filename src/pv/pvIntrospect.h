@@ -17,6 +17,7 @@
 #include <pv/pvType.h>
 #include <pv/byteBuffer.h>
 #include <pv/serialize.h>
+#include <pv/pvdVersion.h>
 
 #include <shareLib.h>
 
