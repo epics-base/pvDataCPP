@@ -70,8 +70,11 @@ string PVUnion::getSelectedFieldName() const
 
 PVFieldPtr PVUnion::select(int32 index)
 {
+    if (variant && index != UNDEFINED_INDEX)
+        throw std::invalid_argument("index out of bounds");
+
     // no change
-    if (selector == index)
+    if (selector == index && !variant)
         return value;
 
     if (index == UNDEFINED_INDEX)
@@ -80,9 +83,7 @@ PVFieldPtr PVUnion::select(int32 index)
         value.reset();
         return value;
     }
-    else if (variant)
-        throw std::invalid_argument("index out of bounds");
-    else if (index < 0 || index > static_cast<int32>(unionPtr->getFields().size()))
+    else if (index < 0 || size_t(index) >= unionPtr->getFields().size())
         throw std::invalid_argument("index out of bounds");
 
     FieldConstPtr field = unionPtr->getField(index);
@@ -114,14 +115,14 @@ void PVUnion::set(int32 index, PVFieldPtr const & value)
         if (index == UNDEFINED_INDEX)
         {
             // for undefined index we accept only null values
-            if (value.get())
+            if (value)
 				throw std::invalid_argument("non-null value for index == UNDEFINED_INDEX");
         }
-        else if (index < 0 || index > static_cast<int32>(unionPtr->getFields().size()))
+        else if (index < 0 || size_t(index) >= unionPtr->getFields().size())
             throw std::invalid_argument("index out of bounds");
-
-        // value type must match
-        if (value->getField() != unionPtr->getField(index))
+        else if (!value)
+            throw std::invalid_argument("Can't set defined index w/ NULL");
+        else if (value->getField() != unionPtr->getField(index))
 			throw std::invalid_argument("selected field and its introspection data do not match");
     }
 
