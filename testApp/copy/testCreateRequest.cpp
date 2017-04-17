@@ -322,11 +322,20 @@ static void testCreateRequestInternal() {
     cout << "reason " << createRequest->getMessage() << endl;
     testOk1(pvRequest.get()==NULL);
     testPass("request %s",request.c_str());
+
+    request = "record[]field()getField()putField()";
+    if(debug) { cout  << "request " << request <<endl;}
+    cout << endl << "No Error Expected for next call!!" << endl;
+    pvRequest = createRequest->createRequest(request);
+    if(!pvRequest) { cout<< createRequest->getMessage() << endl;}
+    if(debug) { cout << pvRequest << endl;}
+    testOk1(pvRequest.get()!=NULL);
+
 }
 
 MAIN(testCreateRequest)
 {
-    testPlan(121);
+    testPlan(122);
     testCreateRequestInternal();
     return testDone();
 }

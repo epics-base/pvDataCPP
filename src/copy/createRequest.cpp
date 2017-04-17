@@ -176,6 +176,24 @@ private:
         return node;
     }
 
+    string createTopOption(Node &node,string const & request)
+    {
+         size_t length = request.length();
+         if(length<=0) return request;
+         char open = request[0];
+         if(open!='[') return request;
+         size_t end = 0;
+         for(size_t i=0; i<length; ++i) {
+            char chr= request[i];
+            if(chr==']') {end = i; break;}
+         }
+         if(end==0)return request;
+         string options = request.substr(1,end-1);
+         Node optionNode = createRequestOptions(options);
+         node.nodes.push_back(optionNode);
+         if(end+1<length && request[end+1]==',') end = end+1;
+         return request.substr(end+1) ;
+    }
 
     void createSubNode(Node &node,string const & crequest)
     {
@@ -324,6 +342,9 @@ public:
         string const & crequest)
     {
         try {
+            message = "";
+            fullFieldName = "";
+            optionList.clear();
             string request = crequest;
             if (!request.empty()) removeBlanks(request);
             if (request.empty())
@@ -402,7 +423,9 @@ public:
                         return PVStructurePtr();
                     }
                     if(closeParan>openParan+1) {
-                        createSubNode(node,request.substr(openParan+1,closeParan-openParan-1));
+                        string req = request.substr(openParan+1,closeParan-openParan-1);
+                        req = createTopOption(node,req);
+                        createSubNode(node,req);
                     }
                     top.push_back(node);
                 }
@@ -417,7 +440,9 @@ public:
                         return PVStructurePtr();
                     }
                     if(closeParan>openParan+1) {
-                        createSubNode(node,request.substr(openParan+1,closeParan-openParan-1));
+                        string req = request.substr(openParan+1,closeParan-openParan-1);
+                        req = createTopOption(node,req);
+                        createSubNode(node,req);
                     }
                     top.push_back(node);
                 }
@@ -432,7 +457,9 @@ public:
                         return PVStructurePtr();
                     }
                     if(closeParan>openParan+1) {
-                        createSubNode(node,request.substr(openParan+1,closeParan-openParan-1));
+                         string req = request.substr(openParan+1,closeParan-openParan-1);
+                        req = createTopOption(node,req);
+                        createSubNode(node,req);
                     }
                     top.push_back(node);
                 }
