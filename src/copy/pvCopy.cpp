@@ -41,13 +41,6 @@ static void newLine(string *buffer, int indentLevel)
     *buffer += string(indentLevel*4, ' ');
 }
 
-static PVCopyPtr NULLPVCopy;
-static FieldConstPtr NULLField;
-static StructureConstPtr NULLStructure;
-static PVStructurePtr NULLPVStructure;
-static CopyNodePtr NULLCopyNode;
-static CopyMasterNodePtr NULLCopyMasterNode;
-
 struct CopyNode {
     CopyNode()
     : isStructure(false),
@@ -80,12 +73,12 @@ PVCopyPtr PVCopy::create(
     if(structureName.size()>0) {
         if(pvRequest->getStructure()->getNumberFields()>0) {
             pvStructure = pvRequest->getSubField<PVStructure>(structureName);
-            if(!pvStructure) return NULLPVCopy;
+            if(!pvStructure) return PVCopyPtr();
         }
     } else if(pvStructure->getSubField<PVStructure>("field")) {
         pvStructure = pvRequest->getSubField<PVStructure>("field");
     }
-    PVCopyPtr pvCopy = PVCopyPtr(new PVCopy(pvMaster));
+    PVCopyPtr pvCopy(new PVCopy(pvMaster));
     bool result = pvCopy->init(pvStructure);
     if(!result) pvCopy.reset();
     return pvCopy;
@@ -147,7 +140,7 @@ PVStructurePtr PVCopy::getOptions(std::size_t fieldOffset)
     while(true) {
         if(!node->isStructure) {
             if(node->structureOffset==fieldOffset) return node->options;
-            return NULLPVStructure;
+            return PVStructurePtr();
         }
         CopyStructureNodePtr structNode = static_pointer_cast<CopyStructureNode>(node);
         CopyNodePtrArrayPtr nodes = structNode->nodes;
@@ -158,7 +151,7 @@ PVStructurePtr PVCopy::getOptions(std::size_t fieldOffset)
             if(fieldOffset>=soff && fieldOffset<soff+node->nfields) {
                 if(fieldOffset==soff) return node->options;
                 if(!node->isStructure) {
-                    return NULLPVStructure;
+                    return PVStructurePtr();
                 }
                 okToContinue = true;
                 break;
@@ -392,7 +385,7 @@ StructureConstPtr PVCopy::createStructure(
     PVFieldPtrArray const &pvFromRequestFields = pvFromRequest->getPVFields();
     StringArray const &fromRequestFieldNames = pvFromRequest->getStructure()->getFieldNames();
     size_t length = pvFromRequestFields.size();
-    if(length==0) return NULLStructure;
+    if(length==0) return StructureConstPtr();
     FieldConstPtrArray fields; fields.reserve(length);
     StringArray fieldNames; fields.reserve(length);
     for(size_t i=0; i<length; ++i) {
@@ -422,7 +415,7 @@ StructureConstPtr PVCopy::createStructure(
         fields.push_back(field);
     }
     size_t numsubfields = fields.size();
-    if(numsubfields==0) return NULLStructure;
+    if(numsubfields==0) return StructureConstPtr();
     return getFieldCreate()->createStructure(fieldNames, fields);
 }
 
@@ -630,7 +623,7 @@ CopyMasterNodePtr PVCopy::getCopyOffset(
             if(masterNode) return masterNode;
         }
     }
-    return NULLCopyMasterNode;
+    return CopyMasterNodePtr();
 }
 
 CopyMasterNodePtr PVCopy::getMasterNode(
@@ -650,7 +643,7 @@ CopyMasterNodePtr PVCopy::getMasterNode(
             static_pointer_cast<CopyStructureNode>(node);
         return  getMasterNode(subNode,structureOffset);
     }
-    return NULLCopyMasterNode;
+    return CopyMasterNodePtr();
 }
 
 }}

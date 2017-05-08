@@ -75,7 +75,7 @@ public:
         PVStructurePtr const &pvRequest,
         std::string const & structureName);
     virtual ~PVCopy(){}
-    virtual void destroy();
+    void destroy();
     /**
      * Get the top-level structure of master
      * @returns The master top-level structure.
