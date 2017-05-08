@@ -916,25 +916,6 @@ public:
 private:
     PVField *getSubFieldImpl(const char *name, bool throws = true) const;
 
-    static PVFieldPtr nullPVField;
-    static PVBooleanPtr nullPVBoolean;
-    static PVBytePtr nullPVByte;
-    static PVShortPtr nullPVShort;
-    static PVIntPtr nullPVInt;
-    static PVLongPtr nullPVLong;
-    static PVUBytePtr nullPVUByte;
-    static PVUShortPtr nullPVUShort;
-    static PVUIntPtr nullPVUInt;
-    static PVULongPtr nullPVULong;
-    static PVFloatPtr nullPVFloat;
-    static PVDoublePtr nullPVDouble;
-    static PVStringPtr nullPVString;
-    static PVStructurePtr nullPVStructure;
-    static PVStructureArrayPtr nullPVStructureArray;
-    static PVUnionPtr nullPVUnion;
-    static PVUnionArrayPtr nullPVUnionArray;
-    static PVScalarArrayPtr nullPVScalarArray;
-
     PVFieldPtrArray pvFields;
     StructureConstPtr structurePtr;
     std::string extendsStructureName;

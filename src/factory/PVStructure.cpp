@@ -24,25 +24,6 @@ using std::string;
 
 namespace epics { namespace pvData {
 
-PVFieldPtr PVStructure::nullPVField;
-PVBooleanPtr PVStructure::nullPVBoolean;
-PVBytePtr PVStructure::nullPVByte;
-PVShortPtr PVStructure::nullPVShort;
-PVIntPtr PVStructure::nullPVInt;
-PVLongPtr PVStructure::nullPVLong;
-PVUBytePtr PVStructure::nullPVUByte;
-PVUShortPtr PVStructure::nullPVUShort;
-PVUIntPtr PVStructure::nullPVUInt;
-PVULongPtr PVStructure::nullPVULong;
-PVFloatPtr PVStructure::nullPVFloat;
-PVDoublePtr PVStructure::nullPVDouble;
-PVStringPtr PVStructure::nullPVString;
-PVStructurePtr PVStructure::nullPVStructure;
-PVStructureArrayPtr PVStructure::nullPVStructureArray;
-PVUnionPtr PVStructure::nullPVUnion;
-PVUnionArrayPtr PVStructure::nullPVUnionArray;
-PVScalarArrayPtr PVStructure::nullPVScalarArray;
-
 PVStructure::PVStructure(StructureConstPtr const & structurePtr)
 : PVField(structurePtr),
   structurePtr(structurePtr),
@@ -116,9 +97,9 @@ PVFieldPtr  PVStructure::getSubField(const char * fieldName) const
 PVFieldPtr  PVStructure::getSubField(size_t fieldOffset) const
 {
     if(fieldOffset<=getFieldOffset()) {
-        return nullPVField;
+        return PVFieldPtr();
     }
-    if(fieldOffset>getNextFieldOffset()) return nullPVField;
+    if(fieldOffset>getNextFieldOffset()) return PVFieldPtr();
     size_t numFields = pvFields.size();
     for(size_t i=0; i<numFields; i++) {
         PVFieldPtr pvField  = pvFields[i];
