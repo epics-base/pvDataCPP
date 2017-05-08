@@ -40,6 +40,31 @@ typedef class std::ios std::ios_base;
 #define USAGE_ERROR(MSG) { throw std::runtime_error(MSG); }
 #endif
 
+/* C++11 keywords
+ @code
+ struct Base {
+   virtual void foo();
+ };
+ struct Class : public Base {
+   virtual void foo() OVERRIDE FINAL;
+ };
+ @endcode
+ */
+#ifndef FINAL
+#  if __cplusplus>=201103L
+#    define FINAL final
+#  else
+#    define FINAL
+#  endif
+#endif
+#ifndef OVERRIDE
+#  if __cplusplus>=201103L
+#    define OVERRIDE override
+#  else
+#    define OVERRIDE
+#  endif
+#endif
+
 namespace epics { namespace pvData { 
 
 class PostHandler;
@@ -427,17 +452,17 @@ public:
         put(castUnsafe<T,T1>(val));
     }
 
-    virtual void assign(const PVScalar& scalar)
+    virtual void assign(const PVScalar& scalar) OVERRIDE
     {
         if(isImmutable())
             throw std::invalid_argument("destination is immutable");
         copyUnchecked(scalar);
     }
-    virtual void copy(const PVScalar& from)
+    virtual void copy(const PVScalar& from) OVERRIDE
     {
         assign(from);
     }
-    virtual void copyUnchecked(const PVScalar& from)
+    virtual void copyUnchecked(const PVScalar& from) OVERRIDE
     {
         if(this==&from)
             return;
@@ -447,19 +472,19 @@ public:
     }
 
     virtual void serialize(ByteBuffer *pbuffer,
-        SerializableControl *pflusher) const;
+        SerializableControl *pflusher) const OVERRIDE;
     virtual void deserialize(ByteBuffer *pbuffer,
-        DeserializableControl *pflusher);
+        DeserializableControl *pflusher) OVERRIDE;
 
 protected:
     explicit PVScalarValue(ScalarConstPtr const & scalar)
     : PVScalar(scalar), storage() {}
-    virtual void getAs(void * result, ScalarType rtype) const
+    virtual void getAs(void * result, ScalarType rtype) const OVERRIDE
     {
         const T src = get();
         castUnsafeV(1, rtype, result, typeCode, (const void*)&src);
     }
-    virtual void putFrom(const void *src, ScalarType stype)
+    virtual void putFrom(const void *src, ScalarType stype) OVERRIDE
     {
         T result;
         castUnsafeV(1, typeCode, (void*)&result, stype, src);
@@ -529,7 +554,7 @@ public:
     virtual ~PVString() {}
 
     virtual void serialize(ByteBuffer *pbuffer,
-        SerializableControl *pflusher, size_t offset, size_t count) const;
+        SerializableControl *pflusher, size_t offset, size_t count) const OVERRIDE;
 protected:
     explicit PVString(ScalarConstPtr const & scalar);
 
@@ -565,7 +590,7 @@ public:
      * Set the field to be immutable, i.e. it can no longer be modified.
      * This is permanent, i.e. once done the field cannot be made mutable.
      */
-    virtual void setImmutable();
+    virtual void setImmutable() OVERRIDE;
     /**
      * Get the array length.
      * @return The length.
@@ -724,7 +749,7 @@ public:
      * Set the field to be immutable, i.e. it can no longer be modified.
      * This is permanent, i.e. once done the field cannot be made mutable.
      */
-    virtual void setImmutable();
+    virtual void setImmutable() OVERRIDE;
     /**
      * Get the introspection interface
      * @return The interface.
@@ -845,14 +870,14 @@ public:
      * @param pflusher Interface to call when buffer is full.
      */
     virtual void serialize(
-        ByteBuffer *pbuffer,SerializableControl *pflusher) const ;
+        ByteBuffer *pbuffer,SerializableControl *pflusher) const OVERRIDE;
     /**
      * Deserialize
      * @param pbuffer The byte buffer.
      * @param pflusher Interface to call when buffer is empty.
      */
     virtual void deserialize(
-        ByteBuffer *pbuffer,DeserializableControl *pflusher);
+        ByteBuffer *pbuffer,DeserializableControl *pflusher) OVERRIDE;
     /**
      * Serialize.
      * @param pbuffer The byte buffer.
@@ -860,7 +885,7 @@ public:
      * @param pbitSet A bitset the specifies which fields to serialize.
     */
     virtual void serialize(ByteBuffer *pbuffer,
-        SerializableControl *pflusher,BitSet *pbitSet) const;
+        SerializableControl *pflusher,BitSet *pbitSet) const OVERRIDE;
     /**
      * Deserialize
      * @param pbuffer The byte buffer.
@@ -868,7 +893,7 @@ public:
      * @param pbitSet A bitset the specifies which fields to deserialize.
      */
     virtual void deserialize(ByteBuffer *pbuffer,
-        DeserializableControl*pflusher,BitSet *pbitSet);
+        DeserializableControl*pflusher,BitSet *pbitSet) OVERRIDE;
     /**
      * Constructor
      * @param structure The introspection interface.
@@ -881,7 +906,7 @@ public:
      */
     PVStructure(StructureConstPtr const & structure,PVFieldPtrArray const & pvFields);
 
-    virtual std::ostream& dumpValue(std::ostream& o) const;
+    virtual std::ostream& dumpValue(std::ostream& o) const OVERRIDE;
 
     void copy(const PVStructure& from);
 
@@ -1062,14 +1087,14 @@ public:
      * @param pflusher Interface to call when buffer is full.
      */
     virtual void serialize(
-        ByteBuffer *pbuffer,SerializableControl *pflusher) const ;
+        ByteBuffer *pbuffer,SerializableControl *pflusher) const OVERRIDE;
     /**
      * Deserialize
      * @param pbuffer The byte buffer.
      * @param pflusher Interface to call when buffer is empty.
      */
     virtual void deserialize(
-        ByteBuffer *pbuffer,DeserializableControl *pflusher);
+        ByteBuffer *pbuffer,DeserializableControl *pflusher) OVERRIDE;
     /**
      * Constructor
      * @param punion The introspection interface.
@@ -1199,7 +1224,7 @@ public:
     /**
      * Get introspection interface.
      */
-    virtual ArrayConstPtr getArray() const
+    virtual ArrayConstPtr getArray() const OVERRIDE
     {
         return std::tr1::static_pointer_cast<const Array>(this->getField());
     }
@@ -1219,34 +1244,34 @@ public:
     	return o << ']';
     }
 
-    virtual size_t getLength() const {return value.size();}
-    virtual size_t getCapacity() const {return value.capacity();}
+    virtual size_t getLength() const OVERRIDE {return value.size();}
+    virtual size_t getCapacity() const OVERRIDE {return value.capacity();}
 
-    virtual void setCapacity(size_t capacity);
-    virtual void setLength(size_t length);
+    virtual void setCapacity(size_t capacity) OVERRIDE;
+    virtual void setLength(size_t length) OVERRIDE;
 
-    virtual const_svector view() const {return value;}
-    virtual void swap(const_svector &other);
-    virtual void replace(const const_svector& next);
+    virtual const_svector view() const OVERRIDE {return value;}
+    virtual void swap(const_svector &other) OVERRIDE;
+    virtual void replace(const const_svector& next) OVERRIDE;
 
     // from Serializable
-    virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) const;
-    virtual void deserialize(ByteBuffer *pbuffer,DeserializableControl *pflusher);
+    virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) const OVERRIDE;
+    virtual void deserialize(ByteBuffer *pbuffer,DeserializableControl *pflusher) OVERRIDE;
     virtual void serialize(ByteBuffer *pbuffer,
-                           SerializableControl *pflusher, size_t offset, size_t count) const;
+                           SerializableControl *pflusher, size_t offset, size_t count) const OVERRIDE;
 
-    std::ostream& dumpValue(std::ostream& o, size_t index) const
+    std::ostream& dumpValue(std::ostream& o, size_t index) const OVERRIDE
     {
         return o << print_cast(this->view().at(index));
     }
 
 protected:
-    virtual void _getAsVoid(epics::pvData::shared_vector<const void>& out) const
+    virtual void _getAsVoid(epics::pvData::shared_vector<const void>& out) const OVERRIDE
     {
         out = static_shared_vector_cast<const void>(this->view());
     }
 
-    virtual void _putFromVoid(const epics::pvData::shared_vector<const void>& in)
+    virtual void _putFromVoid(const epics::pvData::shared_vector<const void>& in) OVERRIDE
     {
         // TODO: try to re-use storage
         this->replace(shared_vector_convert<const T>(in));
@@ -1282,24 +1307,24 @@ public:
      */
     virtual ~PVValueArray() {}
 
-    virtual ArrayConstPtr getArray() const
+    virtual ArrayConstPtr getArray() const OVERRIDE
     {
         return std::tr1::static_pointer_cast<const Array>(structureArray);
     }
 
-    virtual size_t getLength() const {return value.size();}
-    virtual size_t getCapacity() const {return value.capacity();}
+    virtual size_t getLength() const OVERRIDE {return value.size();}
+    virtual size_t getCapacity() const OVERRIDE {return value.capacity();}
 
     /**
      * Set the array capacity.
      * @param capacity The length.
      */
-    virtual void setCapacity(size_t capacity);
+    virtual void setCapacity(size_t capacity) OVERRIDE;
     /**
      * Set the array length.
      * @param length The length.
      */
-    virtual void setLength(std::size_t length);
+    virtual void setLength(std::size_t length) OVERRIDE;
 
     /**
      * Get the introspection interface
@@ -1311,36 +1336,36 @@ public:
      * @param number The number of elements to add.
      * @return the new length of the array.
      */
-    virtual std::size_t append(std::size_t number);
+    virtual std::size_t append(std::size_t number) FINAL;
     /**
      * Remove elements from the array.
      * @param offset The offset of the first element to remove.
      * @param number The number of elements to remove.
      * @return (false,true) if the elements were removed.
      */
-    virtual bool remove(std::size_t offset,std::size_t number);
+    virtual bool remove(std::size_t offset,std::size_t number) FINAL;
     /**
      * Compress. This removes all null elements from the array.
      */
-    virtual void compress();
+    virtual void compress() FINAL;
 
-    virtual const_svector view() const { return value; }
-    virtual void swap(const_svector &other);
-    virtual void replace(const const_svector &other) {
+    virtual const_svector view() const OVERRIDE { return value; }
+    virtual void swap(const_svector &other) OVERRIDE;
+    virtual void replace(const const_svector &other) OVERRIDE {
         checkLength(other.size());
         value = other;
         PVField::postPut();
     }
 
     virtual void serialize(ByteBuffer *pbuffer,
-        SerializableControl *pflusher) const;
+        SerializableControl *pflusher) const OVERRIDE;
     virtual void deserialize(ByteBuffer *buffer,
-        DeserializableControl *pflusher);
+        DeserializableControl *pflusher) OVERRIDE;
     virtual void serialize(ByteBuffer *pbuffer,
-        SerializableControl *pflusher, std::size_t offset, std::size_t count) const ;
+        SerializableControl *pflusher, std::size_t offset, std::size_t count) const OVERRIDE;
 
-    virtual std::ostream& dumpValue(std::ostream& o) const;
-    virtual std::ostream& dumpValue(std::ostream& o, std::size_t index) const;
+    virtual std::ostream& dumpValue(std::ostream& o) const OVERRIDE;
+    virtual std::ostream& dumpValue(std::ostream& o, std::size_t index) const OVERRIDE;
 
     void copy(const PVStructureArray& from);
     void copyUnchecked(const PVStructureArray& from);
@@ -1379,24 +1404,24 @@ public:
      */
     virtual ~PVValueArray() {}
 
-    virtual ArrayConstPtr getArray() const
+    virtual ArrayConstPtr getArray() const OVERRIDE
     {
         return std::tr1::static_pointer_cast<const Array>(unionArray);
     }
 
-    virtual size_t getLength() const {return value.size();}
-    virtual size_t getCapacity() const {return value.capacity();}
+    virtual size_t getLength() const OVERRIDE {return value.size();}
+    virtual size_t getCapacity() const OVERRIDE {return value.capacity();}
 
     /**
      * Set the array capacity.
      * @param capacity The length.
      */
-    virtual void setCapacity(size_t capacity);
+    virtual void setCapacity(size_t capacity) OVERRIDE;
     /**
      * Set the array length.
      * @param length The length.
      */
-    virtual void setLength(std::size_t length);
+    virtual void setLength(std::size_t length) OVERRIDE;
 
     /**
      * Get the introspection interface
@@ -1408,36 +1433,36 @@ public:
      * @param number The number of elements to add.
      * @return the new length of the array.
      */
-    virtual std::size_t append(std::size_t number);
+    virtual std::size_t append(std::size_t number) FINAL;
     /**
      * Remove elements from the array.
      * @param offset The offset of the first element to remove.
      * @param number The number of elements to remove.
      * @return (false,true) if the elements were removed.
      */
-    virtual bool remove(std::size_t offset,std::size_t number);
+    virtual bool remove(std::size_t offset,std::size_t number) FINAL;
     /**
      * Compress. This removes all null elements from the array.
      */
-    virtual void compress();
+    virtual void compress() FINAL;
 
-    virtual const_svector view() const { return value; }
-    virtual void swap(const_svector &other);
-    virtual void replace(const const_svector &other) {
+    virtual const_svector view() const OVERRIDE { return value; }
+    virtual void swap(const_svector &other) OVERRIDE;
+    virtual void replace(const const_svector &other) OVERRIDE {
         checkLength(other.size());
         value = other;
         PVField::postPut();
     }
 
     virtual void serialize(ByteBuffer *pbuffer,
-        SerializableControl *pflusher) const;
+        SerializableControl *pflusher) const OVERRIDE;
     virtual void deserialize(ByteBuffer *buffer,
-        DeserializableControl *pflusher);
+        DeserializableControl *pflusher) OVERRIDE;
     virtual void serialize(ByteBuffer *pbuffer,
-        SerializableControl *pflusher, std::size_t offset, std::size_t count) const ;
+        SerializableControl *pflusher, std::size_t offset, std::size_t count) const OVERRIDE;
 
-    virtual std::ostream& dumpValue(std::ostream& o) const;
-    virtual std::ostream& dumpValue(std::ostream& o, std::size_t index) const;
+    virtual std::ostream& dumpValue(std::ostream& o) const OVERRIDE;
+    virtual std::ostream& dumpValue(std::ostream& o, std::size_t index) const OVERRIDE;
 
     void copy(const PVUnionArray& from);
     void copyUnchecked(const PVUnionArray& from);
