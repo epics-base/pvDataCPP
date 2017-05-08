@@ -22,13 +22,13 @@ using std::endl;
 using std::string;
 using std::vector;
 
-namespace epics { namespace pvData {
+namespace {
+using namespace epics::pvData;
 
 static PVDataCreatePtr pvDataCreate = getPVDataCreate();
 static FieldCreatePtr fieldCreate = getFieldCreate();
 
-class CreateRequestImpl : public CreateRequest {
-private:
+struct CreateRequestImpl {
 
     struct Node 
     {
@@ -54,12 +54,7 @@ private:
     string fullFieldName;
 
 
-public:
-    CreateRequestImpl()
-    {
-        fullFieldName = "";
-    }
-private:
+    CreateRequestImpl() {}
          
 
     void removeBlanks(string& str)
@@ -75,8 +70,7 @@ private:
         size_t openBrace = request.find('{', index+1);
         size_t closeBrace = request.find('}', index+1);
         if(openBrace == string::npos && closeBrace == string::npos){
-             message = request + " mismatched {}";
-             throw std::logic_error("message");
+             throw std::logic_error(request + " mismatched {}");
         }
         if (openBrace != string::npos && openBrace!=0) {
             if(openBrace<closeBrace) return findMatchingBrace(request,openBrace,numOpen+1);
@@ -91,14 +85,12 @@ private:
         for(size_t i=index+1; i< request.size(); ++i) {
             if(request[i] == ']') {
                 if(i==index+1) {
-                     message = request + " mismatched []";
-                     throw std::logic_error("message");
+                     throw std::logic_error(request + " mismatched []");
                 }
                 return i;
             }
         }
-        message = request + " missing ]";
-        throw std::logic_error("message");
+        throw std::logic_error(request + " missing ]");
     }
 
     size_t findEndField(string& request) {
@@ -163,8 +155,7 @@ private:
             string item = items[j];
             size_t equals = item.find('=');
             if(equals==string::npos || equals==0) {
-                message = item + " illegal option " + request;
-                throw std::logic_error("message");
+                throw std::logic_error(item + " illegal option " + request);
             }
             top.push_back(Node(item.substr(0,equals)));
             string name = fullFieldName + "._options." + item.substr(0,equals);
@@ -318,12 +309,11 @@ private:
         return structure;
     }
 
-public:
 
-    virtual PVStructurePtr createRequest(
+    PVStructurePtr createRequest(
         string const & crequest)
     {
-        try {
+        {
             string request = crequest;
             if (!request.empty()) removeBlanks(request);
             if (request.empty())
@@ -357,20 +347,17 @@ public:
             if(numParan!=0) {
                 ostringstream oss;
                 oss << "mismatched () " << numParan;
-                message = oss.str();
-                return PVStructurePtr();
+                throw std::logic_error(oss.str());
             }
             if(numBrace!=0) {
                 ostringstream oss;
                 oss << "mismatched {} " << numBrace;
-                message = oss.str();
-                return PVStructurePtr();
+                throw std::logic_error(oss.str());
             }
             if(numBracket!=0) {
                 ostringstream oss;
                 oss << "mismatched [] " << numBracket;
-                message = oss.str();
-                return PVStructurePtr();
+                throw std::logic_error(oss.str());
             }
             vector<Node> top;
             try {
@@ -379,9 +366,8 @@ public:
                     size_t openBracket = request.find('[', offsetRecord);
                     size_t closeBracket = request.find(']', openBracket);
                     if(closeBracket==string::npos) {
-                        message = request.substr(offsetRecord) +
-                            "record[ does not have matching ]";
-                        return PVStructurePtr();
+                        throw std::logic_error(request.substr(offsetRecord) +
+                            "record[ does not have matching ]");
                     }
                     if(closeBracket-openBracket > 3) {
                         Node node("record");
@@ -397,9 +383,8 @@ public:
                     size_t openParan = request.find('(', offsetField);
                     size_t closeParan = request.find(')', openParan);
                     if(closeParan==string::npos) {
-                        message = request.substr(offsetField)
-                                + " field( does not have matching )";
-                        return PVStructurePtr();
+                        throw std::logic_error(request.substr(offsetField)
+                                + " field( does not have matching )");
                     }
                     if(closeParan>openParan+1) {
                         createSubNode(node,request.substr(openParan+1,closeParan-openParan-1));
@@ -412,9 +397,8 @@ public:
                     size_t openParan = request.find('(', offsetGetField);
                     size_t closeParan = request.find(')', openParan);
                     if(closeParan==string::npos) {
-                        message = request.substr(offsetField)
-                                + " getField( does not have matching )";
-                        return PVStructurePtr();
+                        throw std::logic_error(request.substr(offsetField)
+                                + " getField( does not have matching )");
                     }
                     if(closeParan>openParan+1) {
                         createSubNode(node,request.substr(openParan+1,closeParan-openParan-1));
@@ -427,9 +411,8 @@ public:
                     size_t openParan = request.find('(', offsetPutField);
                     size_t closeParan = request.find(')', openParan);
                     if(closeParan==string::npos) {
-                        message = request.substr(offsetField)
-                                + " putField( does not have matching )";
-                        return PVStructurePtr();
+                        throw std::logic_error(request.substr(offsetField)
+                                + " putField( does not have matching )");
                     }
                     if(closeParan>openParan+1) {
                         createSubNode(node,request.substr(openParan+1,closeParan-openParan-1));
@@ -437,9 +420,7 @@ public:
                     top.push_back(node);
                 }
             } catch (std::exception &e) {
-                string xxx = e.what();
-                message = "while creating Structure exception " + xxx;
-                return PVStructurePtr();
+                throw std::logic_error(std::string("while creating Structure exception ")+e.what());
             }
             size_t num = top.size();
             StringArray names(num);
@@ -467,20 +448,38 @@ public:
             }
             optionList.clear();
             return pvStructure;
-        } catch (std::exception &e) {
-             message = e.what();
-             return PVStructurePtr();
         }
     }
 
 
 };
 
+} // namespace
+
+namespace epics {namespace pvData {
+
 CreateRequest::shared_pointer CreateRequest::create()
 {
-    CreateRequest::shared_pointer createRequest(new CreateRequestImpl());
+    CreateRequest::shared_pointer createRequest(new CreateRequest());
     return createRequest;
 }
 
-}}
+PVStructure::shared_pointer CreateRequest::createRequest(std::string const & request)
+{
+    try {
+        return ::createRequest(request);
+    } catch(std::exception& e) {
+        message = e.what();
+        return PVStructure::shared_pointer();
+    }
+}
+
+PVStructure::shared_pointer createRequest(std::string const & request)
+{
+    CreateRequestImpl I;
+    return I.createRequest(request);
+}
+
+
+}} // namespace
 

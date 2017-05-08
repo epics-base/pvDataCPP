@@ -32,7 +32,7 @@ class epicsShareClass CreateRequest {
      * @returns A shared pointer to the new instance.
      */
     static CreateRequest::shared_pointer create();
-    virtual ~CreateRequest() {};
+    ~CreateRequest() {};
     /**
     * Create a request structure for the create calls in Channel.
     * See the package overview documentation for details.
@@ -41,7 +41,7 @@ class epicsShareClass CreateRequest {
     * If a NULL PVStructure is returned then getMessage will return
     * the reason.
     */
-    virtual PVStructure::shared_pointer createRequest(std::string const & request) = 0;
+    PVStructure::shared_pointer createRequest(std::string const & request);
     /**
      * Get the error message of createRequest returns NULL
      * return the error message
@@ -52,6 +52,14 @@ protected:
     std::string message;
 };
 
+/** Parse and build pvRequest structure.
+ *
+ @params request the Request string to be parsed.  eg. "field(value)"
+ @returns The resulting strucuture.  Never NULL
+ @throws std::exception for various parsing errors
+ */
+epicsShareExtern
+PVStructure::shared_pointer createRequest(std::string const & request);
 
 }}
 
