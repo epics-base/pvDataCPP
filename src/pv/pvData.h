@@ -336,12 +336,39 @@ protected:
     explicit PVScalar(ScalarConstPtr const & scalar);
 };
 
+namespace detail {
+template<typename T>
+struct ScalarStorageOps {
+    T value;
+    typedef T arg_type;
+    inline void store(T v) {
+        value = v;
+    }
+    ScalarStorageOps() :value(0) {}
+};
+template<>
+struct ScalarStorageOps<std::string> {
+    std::string value;
+    size_t maxLength;
+    typedef const std::string& arg_type;
+    void store(const std::string& val) {
+        if (maxLength > 0 && val.length() > maxLength)
+            throw std::overflow_error("string too long");
+
+        value = val;
+    }
+
+    ScalarStorageOps(): value(), maxLength(0) {} // initialized in PVString::PVString
+};
+} // namespace detail
+
 /**
  * @brief Class that holds the data for each possible scalar type.
  *
  */
 template<typename T>
 class epicsShareClass PVScalarValue : public PVScalar {
+    typedef detail::ScalarStorageOps<T> storage_t;
 public:
     POINTER_DEFINITIONS(PVScalarValue);
     typedef T value_type;
@@ -358,12 +385,15 @@ public:
      * Get the value.
      * @return The value.
      */
-    virtual T get() const = 0;
+    typename storage_t::arg_type get() const { return storage.value; }
     /**
      * Put a new value into the PVScalar.
      * @param value The value.
      */
-    virtual void put(T value) = 0;
+    void put(typename storage_t::arg_type v) {
+        storage.store(v);
+        PVField::postPut();
+    }
 
     std::ostream& dumpValue(std::ostream& o) const
     {
@@ -381,7 +411,7 @@ public:
     // put operator
     // double value = 12.8; doubleField <<= value;
     // NOTE: virtual is needed for MS C++ compiler to get this operator exported
-    virtual void operator<<=(T value)
+    virtual void operator<<=(typename storage_t::arg_type value)
 	{
     	put(value);
 	}
@@ -393,7 +423,7 @@ public:
     }
 
     template<typename T1>
-    inline void putFrom(T1 val) {
+    inline void putFrom(typename detail::ScalarStorageOps<T1>::arg_type val) {
         put(castUnsafe<T,T1>(val));
     }
 
@@ -416,9 +446,14 @@ public:
         put(result);
     }
 
+    virtual void serialize(ByteBuffer *pbuffer,
+        SerializableControl *pflusher) const;
+    virtual void deserialize(ByteBuffer *pbuffer,
+        DeserializableControl *pflusher);
+
 protected:
     explicit PVScalarValue(ScalarConstPtr const & scalar)
-    : PVScalar(scalar) {}
+    : PVScalar(scalar), storage() {}
     virtual void getAs(void * result, ScalarType rtype) const
     {
         const T src = get();
@@ -431,8 +466,8 @@ protected:
         put(result);
     }
 
-private:
     friend class PVDataCreate;
+    storage_t storage;
 };
 
 /**
@@ -492,9 +527,13 @@ public:
      * Destructor
      */
     virtual ~PVString() {}
+
+    virtual void serialize(ByteBuffer *pbuffer,
+        SerializableControl *pflusher, size_t offset, size_t count) const;
 protected:
-    explicit PVString(ScalarConstPtr const & scalar)
-    : PVScalarValue<std::string>(scalar) {}
+    explicit PVString(ScalarConstPtr const & scalar);
+
+    friend class PVDataCreate;
 };
 typedef std::tr1::shared_ptr<PVString> PVStringPtr;
 
@@ -563,7 +602,7 @@ public:
 
 protected:
     explicit PVArray(FieldConstPtr const & field);
-    void checkLength(size_t length);
+    void checkLength(size_t length) const;
 private:
     bool capacityMutable;
     friend class PVDataCreate;
@@ -1180,6 +1219,22 @@ public:
     	return o << ']';
     }
 
+    virtual size_t getLength() const {return value.size();}
+    virtual size_t getCapacity() const {return value.capacity();}
+
+    virtual void setCapacity(size_t capacity);
+    virtual void setLength(size_t length);
+
+    virtual const_svector view() const {return value;}
+    virtual void swap(const_svector &other);
+    virtual void replace(const const_svector& next);
+
+    // from Serializable
+    virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) const;
+    virtual void deserialize(ByteBuffer *pbuffer,DeserializableControl *pflusher);
+    virtual void serialize(ByteBuffer *pbuffer,
+                           SerializableControl *pflusher, size_t offset, size_t count) const;
+
     std::ostream& dumpValue(std::ostream& o, size_t index) const
     {
         return o << print_cast(this->view().at(index));
@@ -1197,8 +1252,8 @@ protected:
         this->replace(shared_vector_convert<const T>(in));
     }
 
-    explicit PVValueArray(ScalarArrayConstPtr const & scalar)
-    : base_t(scalar) {}
+    explicit PVValueArray(ScalarArrayConstPtr const & scalar);
+    const_svector value;
     friend class PVDataCreate;
 };
 
@@ -1291,10 +1346,7 @@ public:
     void copyUnchecked(const PVStructureArray& from);
 
 protected:
-    explicit PVValueArray(StructureArrayConstPtr const & structureArray)
-        :base_t(structureArray)
-        ,structureArray(structureArray)
-    {}
+     PVValueArray(StructureArrayConstPtr const & structureArray);
 private:
     StructureArrayConstPtr structureArray;
     const_svector value;
@@ -1391,10 +1443,7 @@ public:
     void copyUnchecked(const PVUnionArray& from);
 
 protected:
-    explicit PVValueArray(UnionArrayConstPtr const & unionArray)
-        :base_t(unionArray)
-        ,unionArray(unionArray)
-    {}
+    explicit PVValueArray(UnionArrayConstPtr const & unionArray);
 private:
     UnionArrayConstPtr unionArray;
     const_svector value;

@@ -59,135 +59,50 @@ template<> const ScalarType PVFloatArray::typeCode = pvFloat;
 template<> const ScalarType PVDoubleArray::typeCode = pvDouble;
 template<> const ScalarType PVStringArray::typeCode = pvString;
 
-/** Default storage for scalar values
- */
 template<typename T>
-class BasePVScalar : public PVScalarValue<T> {
-public:
-    typedef T  value_type;
-    typedef T* pointer;
-    typedef const T* const_pointer;
-
-    BasePVScalar(ScalarConstPtr const & scalar);
-    virtual ~BasePVScalar();
-    virtual T get() const ;
-    virtual void put(T val);
-    virtual void serialize(ByteBuffer *pbuffer,
-        SerializableControl *pflusher) const;
-    virtual void deserialize(ByteBuffer *pbuffer,
-        DeserializableControl *pflusher);
-private:
-    T value;
-};
-
-template<typename T>
-BasePVScalar<T>::BasePVScalar(ScalarConstPtr const & scalar)
-    : PVScalarValue<T>(scalar),value(0)
-{}
-//Note: '0' is a suitable default for all POD types (not string)
-
-template<typename T>
-BasePVScalar<T>::~BasePVScalar() {}
-
-template<typename T>
-T BasePVScalar<T>::get() const  { return value;}
-
-template<typename T>
-void BasePVScalar<T>::put(T val)
-{
-    value = val;
-    PVField::postPut();
-}
-
-template<typename T>
-void BasePVScalar<T>::serialize(ByteBuffer *pbuffer,
+void PVScalarValue<T>::serialize(ByteBuffer *pbuffer,
     SerializableControl *pflusher) const {
     pflusher->ensureBuffer(sizeof(T));
-    pbuffer->put(value);
+    pbuffer->put(storage.value);
+}
+
+template<>
+void PVScalarValue<std::string>::serialize(ByteBuffer *pbuffer,
+    SerializableControl *pflusher) const {
+    SerializeHelper::serializeString(storage.value, pbuffer, pflusher);
 }
 
 template<typename T>
-void BasePVScalar<T>::deserialize(ByteBuffer *pbuffer,
+void PVScalarValue<T>::deserialize(ByteBuffer *pbuffer,
     DeserializableControl *pflusher)
 {
     pflusher->ensureData(sizeof(T));
-    value = pbuffer->GET(T);
+    storage.value = pbuffer->GET(T);
 }
 
-typedef BasePVScalar<boolean> BasePVBoolean;
-typedef BasePVScalar<int8> BasePVByte;
-typedef BasePVScalar<int16> BasePVShort;
-typedef BasePVScalar<int32> BasePVInt;
-typedef BasePVScalar<int64> BasePVLong;
-typedef BasePVScalar<uint8> BasePVUByte;
-typedef BasePVScalar<uint16> BasePVUShort;
-typedef BasePVScalar<uint32> BasePVUInt;
-typedef BasePVScalar<uint64> BasePVULong;
-typedef BasePVScalar<float> BasePVFloat;
-typedef BasePVScalar<double> BasePVDouble;
+template<>
+void PVScalarValue<std::string>::deserialize(ByteBuffer *pbuffer,
+    DeserializableControl *pflusher)
+{
+    storage.value = SerializeHelper::deserializeString(pbuffer, pflusher);
+    // TODO: check for violations of maxLength?
+}
 
-// BasePVString is special case, since it implements SerializableArray
-class BasePVString : public PVString {
-public:
-    typedef string value_type;
-    typedef string* pointer;
-    typedef const string* const_pointer;
-
-    BasePVString(ScalarConstPtr const & scalar);
-    virtual ~BasePVString();
-    virtual string get() const ;
-    virtual void put(string val);
-    virtual void serialize(ByteBuffer *pbuffer,
-        SerializableControl *pflusher) const;
-    virtual void deserialize(ByteBuffer *pbuffer,
-        DeserializableControl *pflusher);
-    virtual void serialize(ByteBuffer *pbuffer,
-        SerializableControl *pflusher, size_t offset, size_t count) const;
-private:
-    string value;
-    std::size_t maxLength;
-};
-
-BasePVString::BasePVString(ScalarConstPtr const & scalar)
-    : PVString(scalar),value()
+PVString::PVString(ScalarConstPtr const & scalar)
+    : PVScalarValue<std::string>(scalar)
 {
     BoundedStringConstPtr boundedString = std::tr1::dynamic_pointer_cast<const BoundedString>(scalar);
     if (boundedString.get())
-        maxLength = boundedString->getMaximumLength();
+        storage.maxLength = boundedString->getMaximumLength();
     else
-        maxLength = 0;
+        storage.maxLength = 0;
 }
 
-BasePVString::~BasePVString() {}
-
-string BasePVString::get() const  { return value;}
-
-void BasePVString::put(string val)
-{
-    if (maxLength > 0 && val.length() > maxLength)
-        throw std::overflow_error("string too long");
-
-    value = val;
-    postPut();
-}
-
-void BasePVString::serialize(ByteBuffer *pbuffer,
-    SerializableControl *pflusher) const
-{
-    SerializeHelper::serializeString(value, pbuffer, pflusher);
-}
-
-void BasePVString::deserialize(ByteBuffer *pbuffer,
-    DeserializableControl *pflusher)
-{
-    value = SerializeHelper::deserializeString(pbuffer, pflusher);
-}
-
-void BasePVString::serialize(ByteBuffer *pbuffer,
+void PVString::serialize(ByteBuffer *pbuffer,
     SerializableControl *pflusher, size_t offset, size_t count) const
 {
 	// check bounds
-	const size_t length = /*(value == null) ? 0 :*/ value.length();
+    const size_t length = storage.value.length();
 	/*if (offset < 0) offset = 0;
 	else*/ if (offset > length) offset = length;
 	//if (count < 0) count = length;
@@ -197,10 +112,10 @@ void BasePVString::serialize(ByteBuffer *pbuffer,
 		count = maxCount;
 	
 	// write
-	SerializeHelper::serializeSubstring(value, offset, count, pbuffer, pflusher);
+    SerializeHelper::serializeSubstring(storage.value, offset, count, pbuffer, pflusher);
 }
 
-void PVArray::checkLength(size_t len)
+void PVArray::checkLength(size_t len) const
 {
     Array::ArraySizeType type = getArray()->getArraySizeType();
     if (type != Array::variable)
@@ -213,61 +128,26 @@ void PVArray::checkLength(size_t len)
     }
 }
 
-/** Default storage for arrays
- */
 template<typename T>
-class DefaultPVArray : public PVValueArray<T> {
-public:
-    typedef T* pointer;
-    typedef const T* const_pointer;
-    typedef std::vector<T> vector;
-    typedef const std::vector<T> const_vector;
-    typedef std::tr1::shared_ptr<vector> shared_vector;
-
-    typedef ::epics::pvData::shared_vector<T> svector;
-    typedef ::epics::pvData::shared_vector<const T> const_svector;
-
-    DefaultPVArray(ScalarArrayConstPtr const & scalarArray);
-    virtual ~DefaultPVArray();
-
-    virtual size_t getLength() const {return value.size();}
-    virtual size_t getCapacity() const {return value.capacity();}
-
-    virtual void setCapacity(size_t capacity);
-    virtual void setLength(size_t length);
-
-    virtual const_svector view() const {return value;}
-    virtual void swap(const_svector &other);
-    virtual void replace(const const_svector& next);
-
-    // from Serializable
-    virtual void serialize(ByteBuffer *pbuffer,SerializableControl *pflusher) const;
-    virtual void deserialize(ByteBuffer *pbuffer,DeserializableControl *pflusher);
-    virtual void serialize(ByteBuffer *pbuffer,
-         SerializableControl *pflusher, size_t offset, size_t count) const;
-private:
-    const_svector value;
-};
-
-template<typename T>
-DefaultPVArray<T>::DefaultPVArray(ScalarArrayConstPtr const & scalarArray)
-: PVValueArray<T>(scalarArray),
-    value()
+PVValueArray<T>::PVValueArray(ScalarArrayConstPtr const & scalarArray)
+    :base_t(scalarArray)
+    ,value()
   
-{
-    ArrayConstPtr array = this->getArray();
-    if (array->getArraySizeType() == Array::fixed)
-    {
-        // this->setLength(array->getMaximumCapacity());
-        this->setCapacityMutable(false);
-    }
-}
+{}
+
+PVValueArray<PVStructurePtr>::PVValueArray(StructureArrayConstPtr const & structureArray)
+    :base_t(structureArray)
+    ,structureArray(structureArray)
+
+{}
+
+PVValueArray<PVUnionPtr>::PVValueArray(UnionArrayConstPtr const & unionArray)
+    :base_t(unionArray)
+    ,unionArray(unionArray)
+{}
 
 template<typename T>
-DefaultPVArray<T>::~DefaultPVArray()
-{ }
-template<typename T>
-void DefaultPVArray<T>::setCapacity(size_t capacity)
+void PVValueArray<T>::setCapacity(size_t capacity)
 {
     if(this->isCapacityMutable()) {
         this->checkLength(capacity);
@@ -278,7 +158,7 @@ void DefaultPVArray<T>::setCapacity(size_t capacity)
 }
 
 template<typename T>
-void DefaultPVArray<T>::setLength(size_t length)
+void PVValueArray<T>::setLength(size_t length)
 {
     if(this->isImmutable())
         THROW_EXCEPTION2(std::logic_error, "immutable");
@@ -295,7 +175,7 @@ void DefaultPVArray<T>::setLength(size_t length)
 }
 
 template<typename T>
-void DefaultPVArray<T>::replace(const const_svector& next)
+void PVValueArray<T>::replace(const const_svector& next)
 {
     this->checkLength(next.size());
 
@@ -304,7 +184,7 @@ void DefaultPVArray<T>::replace(const const_svector& next)
 }
 
 template<typename T>
-void DefaultPVArray<T>::swap(const_svector &other)
+void PVValueArray<T>::swap(const_svector &other)
 {
     if (this->isImmutable())
         THROW_EXCEPTION2(std::logic_error, "immutable");
@@ -316,13 +196,13 @@ void DefaultPVArray<T>::swap(const_svector &other)
 
 
 template<typename T>
-void DefaultPVArray<T>::serialize(ByteBuffer *pbuffer,
+void PVValueArray<T>::serialize(ByteBuffer *pbuffer,
             SerializableControl *pflusher) const {
     serialize(pbuffer, pflusher, 0, this->getLength());
 }
 
 template<typename T>
-void DefaultPVArray<T>::deserialize(ByteBuffer *pbuffer,
+void PVValueArray<T>::deserialize(ByteBuffer *pbuffer,
         DeserializableControl *pcontrol) {
 
     size_t size = this->getArray()->getArraySizeType() == Array::fixed ?
@@ -371,7 +251,7 @@ void DefaultPVArray<T>::deserialize(ByteBuffer *pbuffer,
 }
 
 template<typename T>
-void DefaultPVArray<T>::serialize(ByteBuffer *pbuffer,
+void PVValueArray<T>::serialize(ByteBuffer *pbuffer,
         SerializableControl *pflusher, size_t offset, size_t count) const
 {
     //TODO: avoid incrementing the ref counter...
@@ -415,7 +295,7 @@ void DefaultPVArray<T>::serialize(ByteBuffer *pbuffer,
 // specializations for string
 
 template<>
-void DefaultPVArray<string>::deserialize(ByteBuffer *pbuffer,
+void PVValueArray<string>::deserialize(ByteBuffer *pbuffer,
         DeserializableControl *pcontrol) {
 
     size_t size = this->getArray()->getArraySizeType() == Array::fixed ?
@@ -442,7 +322,7 @@ void DefaultPVArray<string>::deserialize(ByteBuffer *pbuffer,
 }
 
 template<>
-void DefaultPVArray<string>::serialize(ByteBuffer *pbuffer,
+void PVValueArray<string>::serialize(ByteBuffer *pbuffer,
         SerializableControl *pflusher, size_t offset, size_t count) const {
 
     const_svector temp(value);
@@ -457,19 +337,6 @@ void DefaultPVArray<string>::serialize(ByteBuffer *pbuffer,
         SerializeHelper::serializeString(pvalue[i], pbuffer, pflusher);
     }
 }
-
-typedef DefaultPVArray<boolean> DefaultPVBooleanArray;
-typedef DefaultPVArray<int8> BasePVByteArray;
-typedef DefaultPVArray<int16> BasePVShortArray;
-typedef DefaultPVArray<int32> BasePVIntArray;
-typedef DefaultPVArray<int64> BasePVLongArray;
-typedef DefaultPVArray<uint8> BasePVUByteArray;
-typedef DefaultPVArray<uint16> BasePVUShortArray;
-typedef DefaultPVArray<uint32> BasePVUIntArray;
-typedef DefaultPVArray<uint64> BasePVULongArray;
-typedef DefaultPVArray<float> BasePVFloatArray;
-typedef DefaultPVArray<double> BasePVDoubleArray;
-typedef DefaultPVArray<string> BasePVStringArray;
 
 // Factory
 
@@ -564,29 +431,29 @@ PVScalarPtr PVDataCreate::createPVScalar(ScalarConstPtr const & scalar)
      ScalarType scalarType = scalar->getScalarType();
      switch(scalarType) {
      case pvBoolean:
-         return PVScalarPtr(new BasePVBoolean(scalar));
+         return PVScalarPtr(new PVBoolean(scalar));
      case pvByte:
-         return PVScalarPtr(new BasePVByte(scalar));
+         return PVScalarPtr(new PVByte(scalar));
      case pvShort:
-         return PVScalarPtr(new BasePVShort(scalar));
+         return PVScalarPtr(new PVShort(scalar));
      case pvInt:
-         return PVScalarPtr(new BasePVInt(scalar));
+         return PVScalarPtr(new PVInt(scalar));
      case pvLong:
-         return PVScalarPtr(new BasePVLong(scalar));
+         return PVScalarPtr(new PVLong(scalar));
      case pvUByte:
-         return PVScalarPtr(new BasePVUByte(scalar));
+         return PVScalarPtr(new PVUByte(scalar));
      case pvUShort:
-         return PVScalarPtr(new BasePVUShort(scalar));
+         return PVScalarPtr(new PVUShort(scalar));
      case pvUInt:
-         return PVScalarPtr(new BasePVUInt(scalar));
+         return PVScalarPtr(new PVUInt(scalar));
      case pvULong:
-         return PVScalarPtr(new BasePVULong(scalar));
+         return PVScalarPtr(new PVULong(scalar));
      case pvFloat:
-         return PVScalarPtr(new BasePVFloat(scalar));
+         return PVScalarPtr(new PVFloat(scalar));
      case pvDouble:
-         return PVScalarPtr(new BasePVDouble(scalar));
+         return PVScalarPtr(new PVDouble(scalar));
      case pvString:
-         return PVScalarPtr(new BasePVString(scalar));
+         return PVScalarPtr(new PVString(scalar));
      }
      throw std::logic_error("PVDataCreate::createPVScalar should never get here");
 }
@@ -611,29 +478,29 @@ PVScalarArrayPtr PVDataCreate::createPVScalarArray(
 {
      switch(scalarArray->getElementType()) {
      case pvBoolean:
-           return PVScalarArrayPtr(new DefaultPVBooleanArray(scalarArray));
+           return PVScalarArrayPtr(new PVBooleanArray(scalarArray));
      case pvByte:
-           return PVScalarArrayPtr(new BasePVByteArray(scalarArray));
+           return PVScalarArrayPtr(new PVByteArray(scalarArray));
      case pvShort:
-           return PVScalarArrayPtr(new BasePVShortArray(scalarArray));
+           return PVScalarArrayPtr(new PVShortArray(scalarArray));
      case pvInt:
-           return PVScalarArrayPtr(new BasePVIntArray(scalarArray));
+           return PVScalarArrayPtr(new PVIntArray(scalarArray));
      case pvLong:
-           return PVScalarArrayPtr(new BasePVLongArray(scalarArray));
+           return PVScalarArrayPtr(new PVLongArray(scalarArray));
      case pvUByte:
-           return PVScalarArrayPtr(new BasePVUByteArray(scalarArray));
+           return PVScalarArrayPtr(new PVUByteArray(scalarArray));
      case pvUShort:
-           return PVScalarArrayPtr(new BasePVUShortArray(scalarArray));
+           return PVScalarArrayPtr(new PVUShortArray(scalarArray));
      case pvUInt:
-           return PVScalarArrayPtr(new BasePVUIntArray(scalarArray));
+           return PVScalarArrayPtr(new PVUIntArray(scalarArray));
      case pvULong:
-           return PVScalarArrayPtr(new BasePVULongArray(scalarArray));
+           return PVScalarArrayPtr(new PVULongArray(scalarArray));
      case pvFloat:
-           return PVScalarArrayPtr(new BasePVFloatArray(scalarArray));
+           return PVScalarArrayPtr(new PVFloatArray(scalarArray));
      case pvDouble:
-           return PVScalarArrayPtr(new BasePVDoubleArray(scalarArray));
+           return PVScalarArrayPtr(new PVDoubleArray(scalarArray));
      case pvString:
-           return PVScalarArrayPtr(new BasePVStringArray(scalarArray));
+           return PVScalarArrayPtr(new PVStringArray(scalarArray));
      }
      throw std::logic_error("PVDataCreate::createPVScalarArray should never get here");
      
