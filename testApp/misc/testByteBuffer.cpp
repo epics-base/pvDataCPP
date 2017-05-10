@@ -12,6 +12,7 @@
 #include <iostream>
 #include <fstream>
 #include <cstring>
+#include <memory>
 
 #include <epicsUnitTest.h>
 #include <testMain.h>
@@ -23,11 +24,12 @@ using namespace epics::pvData;
 using std::string;
 using std::cout;
 
+static
 void testBasicOperations() {
+    std::auto_ptr<ByteBuffer> buff(new ByteBuffer(32));
 
-    ByteBuffer* buff = new ByteBuffer(32);
     testOk1(buff->getSize()==32);
-//    testOk1(buff->getByteOrder()==EPICS_BYTE_ORDER);
+
     testOk1(buff->getPosition()==0);
     testOk1(buff->getLimit()==32);
     testOk1(buff->getRemaining()==32);
@@ -70,18 +72,6 @@ void testBasicOperations() {
     testOk1(buff->getLong(8)==2345678123LL);
     testOk1(buff->getFloat(16)==testFloat);
     testOk1(buff->getDouble(20)==testDouble);
-/*
-    std::size_t sp = buff->getPosition();
-    buff->setPosition(0);
-    testOk1(buff->getBoolean()==true);
-    testOk1(buff->getByte()==-12);
-    testOk1(buff->getShort()==10516);
-    testOk1(buff->getInt()==0x1937628B);
-    testOk1(buff->getLong()==2345678123LL);
-    testOk1(buff->getFloat()==testFloat);
-    testOk1(buff->getDouble()==testDouble);
-    buff->setPosition(sp);
-*/
 
     buff->flip();
     testOk1(buff->getLimit()==28);
@@ -134,19 +124,7 @@ void testBasicOperations() {
     buff->putLong(8, 2345678123LL);
     buff->putFloat(16, testFloat);
     buff->putDouble(20, testDouble);
-/*
-    buff->clear();
-    buff->setPosition(28);
-    sp = buff->getPosition();
-    buff->putBoolean(true);
-    buff->putByte(-12);
-    buff->putShort(10516);
-    buff->putInt(0x1937628B);
-    buff->putLong(2345678123LL);
-    buff->putFloat(testFloat);
-    buff->putDouble(testDouble);
-    buff->setPosition(sp);
-*/
+
     buff->flip();
     testOk1(buff->getLimit()==28);
     testOk1(buff->getPosition()==0);
@@ -197,19 +175,19 @@ void testBasicOperations() {
     testOk1(buff->getPosition()==6);
     testOk1(strncmp(&src[2],&dst[2],6)==0);
 
-    cout<<"    First 10 characters of destination: >>"<<string(dst, 10)<<"<<\n";
-
-    delete buff;
-
+    cout<<"#    First 10 characters of destination: >>"<<string(dst, 10)<<"<<\n";
 }
 
+static
 void testInverseEndianness() {
+    testDiag("check byte swapping features");
 
 #if EPICS_BYTE_ORDER==EPICS_ENDIAN_BIG
-    ByteBuffer* buff = new ByteBuffer(32,EPICS_ENDIAN_LITTLE);
+    std::auto_ptr<ByteBuffer> buf(new ByteBuffer(32,EPICS_ENDIAN_LITTLE));
     char refBuffer[] =
     {   (char)0x02, (char)0x01, (char)0x0D, (char)0x0C, (char)0x0B, (char)0x0A};
 #else
+    std::auto_ptr<ByteBuffer> buf(new ByteBuffer(32,EPICS_ENDIAN_BIG));
     ByteBuffer* buff = new ByteBuffer(32, EPICS_ENDIAN_BIG);
     char refBuffer[] = { (char)0x01, (char)0x02, (char)0x0A, (char)0x0B,
             (char)0x0C, (char)0x0D };
@@ -224,15 +202,70 @@ void testInverseEndianness() {
 
     testOk1(buff->getShort()==0x0102);
     testOk1(buff->getInt()==0x0A0B0C0D);
+}
 
-    delete buff;
+static
+void testSwap()
+{
+    testDiag("Check epics::pvData::swap<T>(v)");
+    testOk1(swap<uint8>(0x80)==0x80);
+    testOk1(swap<uint16>(0x7080)==0x8070);
+    testOk1(swap<uint32>(0x10203040)==0x40302010);
+    uint64 a = 0x10203040,
+           b = 0x80706050;
+    a <<= 32;
+    b <<= 32;
+    a |= 0x50607080;
+    b |= 0x40302010;
+    testOk1(swap<uint64>(a)==b);
+}
+
+static
+void testUnaligned()
+{
+    testDiag("test correctness of unaligned access");
+
+    ByteBuffer buf(32, EPICS_ENDIAN_BIG);
+
+    // malloc() should give us a buffer aligned to at least native integer size
+    buf.align(sizeof(int));
+    testOk1(buf.getPosition()==0);
+
+    buf.clear();
+    buf.put<uint8>(0x42);
+    buf.put<uint16>(0x1020);
+    buf.align(2, '\x41');
+    testOk1(buf.getPosition()==4);
+
+    testOk1(memcmp(buf.getBuffer(), "\x42\x10\x20\x41", 4)==0);
+
+    buf.clear();
+    buf.put<uint8>(0x42);
+    buf.put<uint32>(0x12345678);
+    buf.align(4, '\x41');
+    testOk1(buf.getPosition()==8);
+
+    testOk1(memcmp(buf.getBuffer(), "\x42\x12\x34\x56\x78\x41\x41\x41", 8)==0);
+
+    buf.clear();
+    buf.put<uint8>(0x42);
+    uint64 val = 0x12345678;
+    val<<=32;
+    val |= 0x90abcdef;
+    buf.put<uint64>(val);
+    buf.align(8, '\x41');
+    testOk1(buf.getPosition()==16);
+
+    testOk1(memcmp(buf.getBuffer(), "\x42\x12\x34\x56\x78\x90\xab\xcd\xef\x41\x41\x41", 8)==0);
 }
 
 MAIN(testByteBuffer)
 {
-    testPlan(82);
+    testPlan(93);
     testDiag("Tests byteBuffer");
     testBasicOperations();
     testInverseEndianness();
+    testSwap();
+    testUnaligned();
     return testDone();
 }
