@@ -1027,15 +1027,16 @@ private:
 			
 	void reset();
 	FieldConstPtr createFieldInternal(Type type);
-			
+
+    void checkFieldName(const std::string &name);
+
     friend class FieldCreate;
     
     FieldCreatePtr fieldCreate;
 
 	std::string id;
 	bool idSet;
-	
-	// NOTE: this preserves order, however it does not handle duplicates
+
     StringArray fieldNames;
     FieldConstPtrArray fields;
     

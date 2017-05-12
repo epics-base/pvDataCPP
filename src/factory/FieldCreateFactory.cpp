@@ -730,44 +730,62 @@ FieldBuilderPtr FieldBuilder::setId(string const & id)
     return shared_from_this();
 }
 
+void FieldBuilder::checkFieldName(const std::string& name)
+{
+    // linear search on the theory that the number of fields is small
+    for(StringArray::const_iterator it = fieldNames.begin(), end = fieldNames.end();
+        it != end; ++it)
+    {
+        if(name==*it)
+            throw std::invalid_argument("duplicate fieldName "+name);
+    }
+}
+
 FieldBuilderPtr FieldBuilder::add(string const & name, ScalarType scalarType)
 {
+    checkFieldName(name);
     fields.push_back(fieldCreate->createScalar(scalarType)); fieldNames.push_back(name); 
 	return shared_from_this();
 }
 
 FieldBuilderPtr FieldBuilder::addBoundedString(std::string const & name, std::size_t maxLength)
 {
+    checkFieldName(name);
     fields.push_back(fieldCreate->createBoundedString(maxLength)); fieldNames.push_back(name);
     return shared_from_this();
 }
 
 FieldBuilderPtr FieldBuilder::add(string const & name, FieldConstPtr const & field)
 {
+    checkFieldName(name);
     fields.push_back(field); fieldNames.push_back(name);
 	return shared_from_this();
 }
 
 FieldBuilderPtr FieldBuilder::addArray(string const & name, ScalarType scalarType)
 {
+    checkFieldName(name);
     fields.push_back(fieldCreate->createScalarArray(scalarType)); fieldNames.push_back(name);
 	return shared_from_this();
 }
 
 FieldBuilderPtr FieldBuilder::addFixedArray(string const & name, ScalarType scalarType, size_t size)
 {
+    checkFieldName(name);
     fields.push_back(fieldCreate->createFixedScalarArray(scalarType, size)); fieldNames.push_back(name);
     return shared_from_this();
 }
 
 FieldBuilderPtr FieldBuilder::addBoundedArray(string const & name, ScalarType scalarType, size_t size)
 {
+    checkFieldName(name);
     fields.push_back(fieldCreate->createBoundedScalarArray(scalarType, size)); fieldNames.push_back(name);
     return shared_from_this();
 }
 
 FieldBuilderPtr FieldBuilder::addArray(string const & name, FieldConstPtr const & element)
 {
+    checkFieldName(name);
     switch (element->getType())
     {
         case structure:
