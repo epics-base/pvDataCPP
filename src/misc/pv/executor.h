@@ -11,6 +11,8 @@
 
 #include <memory>
 
+#include <compilerDependencies.h>
+
 #include <pv/pvType.h>
 #include <pv/lock.h>
 #include <pv/event.h>
@@ -30,7 +32,7 @@ typedef std::tr1::shared_ptr<Executor> ExecutorPtr;
  * @brief A command to be called by Executor
  *
  */
-class epicsShareClass Command {
+class epicsShareClass EPICS_DEPRECATED Command {
 public:
     POINTER_DEFINITIONS(Command);
     /**
@@ -52,7 +54,7 @@ private:
  * @brief A class that executes commands.
  *
  */
-class epicsShareClass Executor : public Runnable{
+class epicsShareClass EPICS_DEPRECATED Executor : public Runnable{
 public:
     POINTER_DEFINITIONS(Executor);
     /**

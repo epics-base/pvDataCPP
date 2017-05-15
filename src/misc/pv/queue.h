@@ -13,6 +13,7 @@
 #include <cstddef>
 #include <stdexcept>
 
+#include <compilerDependencies.h>
 #include <pv/sharedPtr.h>
 
 namespace epics { namespace pvData { 
@@ -24,7 +25,7 @@ namespace epics { namespace pvData {
  * but must create a std::vector of shared_ptr to queueElements.
  */
 template <typename T>
-class Queue
+class EPICS_DEPRECATED Queue
 {
 public:
     POINTER_DEFINITIONS(Queue);

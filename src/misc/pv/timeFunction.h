@@ -9,6 +9,8 @@
 #ifndef TIMEFUNCTION_H
 #define TIMEFUNCTION_H
 
+#include <compilerDependencies.h>
+
 #include <pv/sharedPtr.h>
 
 #include <shareLib.h>
@@ -24,7 +26,7 @@ typedef std::tr1::shared_ptr<TimeFunction> TimeFunctionPtr;
  * @brief Class that must be implemented by timeFunction requester.
  *
  */
-class epicsShareClass TimeFunctionRequester {
+class epicsShareClass EPICS_DEPRECATED TimeFunctionRequester {
 public:
     POINTER_DEFINITIONS(TimeFunctionRequester);
     /** 
@@ -43,7 +45,7 @@ public:
  * @brief Class for measuring time it takes to execute a function.
  *
  */
-class epicsShareClass TimeFunction {
+class epicsShareClass EPICS_DEPRECATED TimeFunction {
 public:
     POINTER_DEFINITIONS(TimeFunction);
     /**

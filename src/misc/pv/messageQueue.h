@@ -59,7 +59,7 @@ private:
  *
  *
  */
-class epicsShareClass MessageQueue : public Queue<MessageNode> {
+class epicsShareClass EPICS_DEPRECATED MessageQueue : public Queue<MessageNode> {
 public:
     POINTER_DEFINITIONS(MessageQueue);
     /**
