@@ -64,7 +64,7 @@ public:
      * @return a shared_ptr to the queue element.
      * This is null if queue was full.
      */
-    queueElementPtr & getFree();
+    queueElementPtr getFree();
     /**
      * Set the element returned by getFree as used.
      * Until this is called getUsed will not return it.
@@ -77,14 +77,13 @@ public:
      * @return a shared_ptr to the queue element.
      * This is null if no used element is available.`
      */
-    queueElementPtr & getUsed();
+    queueElementPtr getUsed();
     /**
      * Release the element obtained by the most recent call to getUsed.
      * @param element The element.
      */
     void releaseUsed(queueElementPtr const &element);
 private:
-    queueElementPtr nullElement;
     queueElementPtrArray elements;
     // TODO use size_t instead
     int size;
@@ -133,9 +132,9 @@ void Queue<T>::clear()
 }
 
 template <typename T>
-std::tr1::shared_ptr<T> & Queue<T>::getFree()
+std::tr1::shared_ptr<T> Queue<T>::getFree()
 {
-    if(numberFree==0) return nullElement;
+    if(numberFree==0) return queueElementPtr();
     numberFree--;
     int ind = nextGetFree;
     std::tr1::shared_ptr<T> queueElement = elements[nextGetFree++];
@@ -154,9 +153,9 @@ void Queue<T>::setUsed(std::tr1::shared_ptr<T> const &element)
 }
 
 template <typename T>
-std::tr1::shared_ptr<T> & Queue<T>::getUsed()
+std::tr1::shared_ptr<T> Queue<T>::getUsed()
 {
-    if(numberUsed==0) return nullElement;
+    if(numberUsed==0) return queueElementPtr();
     int ind = nextGetUsed;
     std::tr1::shared_ptr<T> queueElement = elements[nextGetUsed++];
     if(nextGetUsed>=size) nextGetUsed = 0;
