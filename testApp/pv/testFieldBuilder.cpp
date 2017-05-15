@@ -8,6 +8,7 @@
 #include <testMain.h>
 
 #include <pv/pvData.h>
+#include <pv/epicsException.h>
 
 using namespace epics::pvData;
 
@@ -241,21 +242,73 @@ void test_nestedStructureArray()
 
 }
 
+void test_extendStructure()
+{
+    testDiag("test_extendStructure()");
+    Structure::const_shared_pointer X(getFieldCreate()->createFieldBuilder()
+                                      ->add("A", pvInt)
+                                      ->addNestedStructure("nest")
+                                        ->add("B", pvInt)
+                                      ->endNested()
+                                      ->createStructure());
+
+    Structure::const_shared_pointer Y(getFieldCreate()->createFieldBuilder(X)
+                                      ->add("A2", pvInt)
+                                      ->addNestedStructure("nest")
+                                        ->add("B2", pvInt)
+                                      ->endNested()
+                                      ->createStructure());
+
+    testOk1(X.get()!=Y.get());
+    testOk1(X->getField("A")==Y->getField("A"));
+    testOk1(!X->getField("A2"));
+    testOk1(!!Y->getField("A2"));
+    testOk1(X->getField("nest")!=Y->getField("nest"));
+    testOk1(X->getField<Structure>("nest")->getField("B")==Y->getField<Structure>("nest")->getField("B"));
+    testOk1(!X->getField<Structure>("nest")->getField("B2"));
+    testOk1(!!Y->getField<Structure>("nest")->getField("B2"));
+
+    try {
+        Structure::const_shared_pointer Z(getFieldCreate()->createFieldBuilder(Y)
+                                          ->add("A2", pvDouble)
+                                          ->createStructure());
+        testFail("Unexpected success in adding duplicate field");
+    }catch(std::exception& e){
+        testPass("catch expected exception: %s", e.what());
+    }
+
+    try {
+        Structure::const_shared_pointer Z(getFieldCreate()->createFieldBuilder(Y)
+                                          ->addNestedStructure("nest")
+                                            ->add("B2", pvDouble)
+                                          ->endNested()
+                                          ->createStructure());
+        testFail("Unexpected success in adding duplicate nested field");
+    }catch(std::exception& e){
+        testPass("catch expected exception: %s", e.what());
+    }
+}
+
 } // namespace
 
 MAIN(testFieldBuilder)
 {
-    testPlan(68);
-    testDiag("Tests for FieldBuilder");
+    testPlan(78);
+    try {
+        testDiag("Tests for FieldBuilder");
 
-    test_factory();
-    test_structure();
-    test_arraySizeTypes();
-    test_nestedStructure();
-    test_nestedStructureArray();
-    
-    
-    test_invalid();
+        test_factory();
+        test_structure();
+        test_arraySizeTypes();
+        test_nestedStructure();
+        test_nestedStructureArray();
+        test_extendStructure();
+
+        test_invalid();
+    }catch(std::exception& e) {
+        PRINT_EXCEPTION(e);
+        testAbort("Unhandled exception: %s", e.what());
+    }
 
     return testDone();
 }

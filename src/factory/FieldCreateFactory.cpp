@@ -701,18 +701,52 @@ void Union::deserialize(ByteBuffer* /*buffer*/, DeserializableControl* /*control
     throw std::runtime_error("not valid operation, use FieldCreate::deserialize instead");
 }
 
+FieldBuilder::FieldBuilder()
+    :fieldCreate(getFieldCreate())
+    ,idSet(false)
+    ,nestedClassToBuild(structure)
+    ,nestedArray(false)
+    ,createNested(true)
+{}
 
-FieldBuilder::FieldBuilder() : fieldCreate(getFieldCreate()), idSet(false) {}
+FieldBuilder::FieldBuilder(const Structure* S)
+    :fieldCreate(getFieldCreate())
+    ,id(S->getID())
+    ,idSet(!id.empty())
+    ,fieldNames(S->getFieldNames())
+    ,fields(S->getFields())
+    ,parentBuilder()
+    ,nestedClassToBuild(structure)
+    ,nestedName()
+    ,nestedArray(false)
+    ,createNested(false)
+{}
+
+FieldBuilder::FieldBuilder(const FieldBuilderPtr & _parentBuilder,
+                           const std::string& name,
+                           const Structure* S)
+    :fieldCreate(_parentBuilder->fieldCreate)
+    ,id(S->getID())
+    ,idSet(!id.empty())
+    ,fieldNames(S->getFieldNames())
+    ,fields(S->getFields())
+    ,parentBuilder(_parentBuilder)
+    ,nestedClassToBuild(structure)
+    ,nestedName(name)
+    ,nestedArray(false)
+    ,createNested(false)
+{}
 
 FieldBuilder::FieldBuilder(FieldBuilderPtr const & _parentBuilder,
 			string const & _nestedName,
-			Type _nestedClassToBuild, bool _nestedArray) :
-		fieldCreate(getFieldCreate()),
-		idSet(false),
-		parentBuilder(_parentBuilder),
-		nestedClassToBuild(_nestedClassToBuild),
-		nestedName(_nestedName),
-		nestedArray(_nestedArray)
+            Type _nestedClassToBuild, bool _nestedArray)
+    :fieldCreate(_parentBuilder->fieldCreate)
+    ,idSet(false)
+    ,parentBuilder(_parentBuilder)
+    ,nestedClassToBuild(_nestedClassToBuild)
+    ,nestedName(_nestedName)
+    ,nestedArray(_nestedArray)
+    ,createNested(true)
 {}
 
 void FieldBuilder::reset()
@@ -737,7 +771,7 @@ void FieldBuilder::checkFieldName(const std::string& name)
         it != end; ++it)
     {
         if(name==*it)
-            throw std::invalid_argument("duplicate fieldName "+name);
+            THROW_EXCEPTION2(std::invalid_argument, std::string("duplicate fieldName ")+name);
     }
 }
 
@@ -861,6 +895,18 @@ UnionConstPtr FieldBuilder::createUnion()
 
 FieldBuilderPtr FieldBuilder::addNestedStructure(string const & name)
 {
+    // linear search on the theory that the number of fields is small
+    for(size_t i=0; i<fieldNames.size(); i++)
+    {
+        if(name!=fieldNames[i])
+            continue;
+
+        if(fields[i]->getType()!=structure)
+            THROW_EXCEPTION2(std::invalid_argument, "nested field not structure: "+name);
+
+        return FieldBuilderPtr(new FieldBuilder(shared_from_this(), name,
+                                                static_cast<const Structure*>(fields[i].get())));
+    }
     return FieldBuilderPtr(new FieldBuilder(shared_from_this(), name, structure, false));
 }
 
@@ -887,18 +933,37 @@ FieldBuilderPtr FieldBuilder::endNested()
         THROW_EXCEPTION2(std::runtime_error, "this method can only be called to create nested fields");
         
     FieldConstPtr nestedField = createFieldInternal(nestedClassToBuild);
-    if (nestedArray)
-        parentBuilder->addArray(nestedName, nestedField);
-    else
-        parentBuilder->add(nestedName, nestedField);
-        
-    return parentBuilder;
-}
 
+    if(createNested) {
+        if (nestedArray)
+            parentBuilder->addArray(nestedName, nestedField);
+        else
+            parentBuilder->add(nestedName, nestedField);
+        return parentBuilder;
+    } else {
+        for(size_t i=0, N = parentBuilder->fieldNames.size(); i<N; i++)
+        {
+            if(nestedName!=parentBuilder->fieldNames[i])
+                continue;
+            assert(parentBuilder->fields[i]->getType()==structure);
+
+            parentBuilder->fields[i] = nestedField;
+            return parentBuilder;
+        }
+        // this only reached if bug in ctor
+        THROW_EXCEPTION2(std::logic_error, "no nested field field?");
+    }
+}
 
 FieldBuilderPtr FieldCreate::createFieldBuilder() const
 {
     return FieldBuilderPtr(new FieldBuilder());
+}
+
+FieldBuilderPtr FieldCreate::createFieldBuilder(StructureConstPtr S) const
+{
+    FieldBuilderPtr ret(new FieldBuilder(S.get()));
+    return ret;
 }
 
 ScalarConstPtr FieldCreate::createScalar(ScalarType scalarType) const

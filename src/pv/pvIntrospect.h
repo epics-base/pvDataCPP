@@ -1021,6 +1021,8 @@ public:
 
 private:
     FieldBuilder();
+    FieldBuilder(const Structure*);
+    FieldBuilder(const FieldBuilderPtr & _parentBuilder, const std::string& name, const Structure*);
     FieldBuilder(FieldBuilderPtr const & parentBuilder,
 			std::string const & nestedName,
 			Type nestedClassToBuild, bool nestedArray);
@@ -1032,7 +1034,7 @@ private:
 
     friend class FieldCreate;
     
-    FieldCreatePtr fieldCreate;
+    const FieldCreatePtr fieldCreate;
 
 	std::string id;
 	bool idSet;
@@ -1040,11 +1042,11 @@ private:
     StringArray fieldNames;
     FieldConstPtrArray fields;
     
-	FieldBuilderPtr parentBuilder;
-	Type nestedClassToBuild;
-	std::string nestedName;
-	bool nestedArray;
-   
+    const FieldBuilderPtr parentBuilder;
+    const Type nestedClassToBuild;
+    const std::string nestedName;
+    const bool nestedArray;
+    const bool createNested; // true - endNested() creates in parent, false - endNested() appends to parent
 };
 
 /**
@@ -1059,6 +1061,11 @@ public:
 	 * @return a new instance of a @c FieldBuilder.
 	 */
 	FieldBuilderPtr createFieldBuilder() const;
+    /**
+     * Create a new instance of in-line @c Field builder pre-initialized with and existing Structure
+     * @return a new instance of a @c FieldBuilder.
+     */
+    FieldBuilderPtr createFieldBuilder(StructureConstPtr S) const;
     /**
      * Create a @c ScalarField.
      * @param scalarType The scalar type.
