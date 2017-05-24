@@ -11,7 +11,6 @@ include $(PVDATA_SRC)/factory/Makefile
 include $(PVDATA_SRC)/property/Makefile
 include $(PVDATA_SRC)/copy/Makefile
 include $(PVDATA_SRC)/pvMisc/Makefile
-include $(PVDATA_SRC)/monitor/Makefile
 
 LIBRARY = pvData
 

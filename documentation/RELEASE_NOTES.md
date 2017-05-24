@@ -1,8 +1,8 @@
-Release 6.0
+Release 7.0
 ===========
 
 * Deprecated monitorPlugin.h is removed.
-* Deprecate Queue, MessageQueue, Executor, and TimeFunction.  Will be removed in 7.0.
+* Deprecate Queue, MessageQueue, Executor, and TimeFunction.  Will be removed in 8.0.
 * FieldBuilder allow Structure defintion to be changed/appended
 * Add createRequest() function.  Simpler alternative to CreateRequest class.
 
