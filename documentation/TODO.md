@@ -12,9 +12,3 @@ valueAlarm
 normativeTypes.html describes valueAlarm only for a value field that has type
 double.
 The implementation also supports all the numeric scalar types.
-
-monitorPlugin
--------------
-
-A debate is on-going about what semantics should be.
-
