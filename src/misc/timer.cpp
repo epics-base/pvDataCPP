@@ -32,7 +32,6 @@ TimerCallback::TimerCallback()
 
 Timer::Timer(string threadName,ThreadPriority priority)
 : waitForWork(false),
-  waitForDone(false),
   alive(true),
   thread(threadName,priority,this)
 {}
@@ -139,7 +138,6 @@ void Timer::run()
              waitForWork.wait(delay);
          }
     } 
-    waitForDone.signal();
 }
 
 Timer::~Timer() {
@@ -148,7 +146,7 @@ Timer::~Timer() {
          alive = false;
     }
     waitForWork.signal();
-    waitForDone.wait();
+    thread.exitWait();
     TimerCallbackPtr timerCallback;
     while(true) {
         timerCallback = head;

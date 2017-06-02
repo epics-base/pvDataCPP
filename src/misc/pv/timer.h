@@ -123,7 +123,6 @@ private:
     TimerCallbackPtr head;
     Mutex mutex;
     Event waitForWork;
-    Event waitForDone;
     bool alive;
     Thread thread;
 };
