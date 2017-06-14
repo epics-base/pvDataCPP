@@ -23,9 +23,22 @@
  * function enable_shared_from_this
  */
 
-// where should we look?
+/* where should we look? (In decending order of preference)
+ *
+ * # manual (per source file) selection
+ * # c++11 version of <memory>, then alias into tr1
+ * # <tr1/memory>
+ * # boost version of tr1/memory
+ */
 
-#if defined(__GNUC__) && __GNUC__>=4 && !defined(vxWorks)
+#if defined(SHARED_FROM_MANUAL)
+// define SHARED_FROM_MANUAL if from some reason it is desirable to manually select
+// which shared_ptr implementation to use
+#elif __cplusplus>=201103L || (defined(_MSC_VER) && (_MSC_VER>=1600))
+// c++11 or MSVC 2010
+#  define SHARED_FROM_STD
+
+#elif defined(__GNUC__) && __GNUC__>=4 && !defined(vxWorks)
    // GCC >=4.0.0
 #  define SHARED_FROM_TR1
 
@@ -37,20 +50,15 @@
 #  define SHARED_FROM_BOOST
 #endif
 
-#if defined(_MSC_VER) && (_MSC_VER>=1600)
-// MSVC 2010 has it in <memory>
-#  undef SHARED_FROM_BOOST
-#  undef SHARED_FROM_TR1
-#endif
+// go and get it
 
-#if defined(__clang__)
-#  undef SHARED_FROM_BOOST
-#  undef SHARED_FROM_TR1
+#if defined(SHARED_FROM_MANUAL)
+// no-op
+#elif defined(SHARED_FROM_STD)
 
 #include <memory>
 
-// import std classes into std::tr1
-namespace std { 
+namespace std {
     namespace tr1 {
         using std::shared_ptr;
         using std::weak_ptr;
@@ -60,11 +68,8 @@ namespace std {
         using std::enable_shared_from_this;
     }
 }
-#endif
 
-// go and get it
-
-#if defined(SHARED_FROM_TR1)
+#elif defined(SHARED_FROM_TR1)
 #  include <tr1/memory>
 
 #elif defined(SHARED_FROM_BOOST)
@@ -77,11 +82,14 @@ namespace std {
 #  include <boost/tr1/memory.hpp>
 
 #else
-   // eventually...
-#  include <memory>
+#  error No shared_ptr selection
 #endif
 
 // cleanup
+
+#ifdef SHARED_FROM_STD
+#  undef SHARED_FROM_STD
+#endif
 
 #ifdef SHARED_FROM_TR1
 #  undef SHARED_FROM_TR1
