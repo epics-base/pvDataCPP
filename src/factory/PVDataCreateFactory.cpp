@@ -98,6 +98,14 @@ PVString::PVString(ScalarConstPtr const & scalar)
         storage.maxLength = 0;
 }
 
+/* mixing overrides (virtual functions) and overloads (different argument lists) is fun...
+ * we override all overloads to avoid the "hides overloaded virtual function" warning from clang.
+ * In this case we don't need/want to, so just delegate to the base class.
+ */
+void PVString::serialize(ByteBuffer *pbuffer,
+    SerializableControl *pflusher) const
+{PVScalarValue<std::string>::serialize(pbuffer, pflusher);}
+
 void PVString::serialize(ByteBuffer *pbuffer,
     SerializableControl *pflusher, size_t offset, size_t count) const
 {

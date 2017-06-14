@@ -554,6 +554,8 @@ public:
     virtual ~PVString() {}
 
     virtual void serialize(ByteBuffer *pbuffer,
+        SerializableControl *pflusher) const OVERRIDE;
+    virtual void serialize(ByteBuffer *pbuffer,
         SerializableControl *pflusher, size_t offset, size_t count) const OVERRIDE;
 protected:
     explicit PVString(ScalarConstPtr const & scalar);
