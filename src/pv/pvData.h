@@ -420,7 +420,7 @@ public:
         PVField::postPut();
     }
 
-    std::ostream& dumpValue(std::ostream& o) const
+    std::ostream& dumpValue(std::ostream& o) const OVERRIDE
     {
     	return o << get();
     }
@@ -1084,7 +1084,7 @@ public:
      */
     explicit PVUnion(UnionConstPtr const & punion);
 
-    virtual std::ostream& dumpValue(std::ostream& o) const;
+    virtual std::ostream& dumpValue(std::ostream& o) const OVERRIDE;
 
     void copy(const PVUnion& from);
     void copyUnchecked(const PVUnion& from);
@@ -1212,7 +1212,7 @@ public:
         return std::tr1::static_pointer_cast<const Array>(this->getField());
     }
 
-    std::ostream& dumpValue(std::ostream& o) const
+    std::ostream& dumpValue(std::ostream& o) const OVERRIDE
     {
         const_svector v(this->view());
         typename const_svector::const_iterator it(v.begin()),
