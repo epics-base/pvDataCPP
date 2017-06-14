@@ -4,8 +4,6 @@ doc/
 include/
 db/
 dbd/
-documentation/html
-documentation/*.tag
 envPaths
 configure/*.local
 configure/RELEASE.*
