@@ -34,8 +34,9 @@
 #if defined(SHARED_FROM_MANUAL)
 // define SHARED_FROM_MANUAL if from some reason it is desirable to manually select
 // which shared_ptr implementation to use
-#elif __cplusplus>=201103L || (defined(_MSC_VER) && (_MSC_VER>=1600))
+#elif __cplusplus>=201103L || (defined(_MSC_VER) && (_MSC_VER>=1600)) || (__clang__ && __APPLE__)
 // c++11 or MSVC 2010
+// clang on linux has tr1/memory, clang on OSX doesn't
 #  define SHARED_FROM_STD
 
 #elif defined(__GNUC__) && __GNUC__>=4 && !defined(vxWorks)
