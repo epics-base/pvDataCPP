@@ -29,8 +29,6 @@ using std::string;
 using std::cout;
 using std::endl;
 
-static bool debug = false;
-
 static FieldCreatePtr fieldCreate;
 static PVDataCreatePtr pvDataCreate;
 static StandardFieldPtr standardField;
@@ -42,8 +40,6 @@ static string allProperties("alarm,timeStamp,display,control,valueAlarm");
 
 static void testCreatePVStructure()
 {
-    if(debug) 
-        std::cout << std::endl << "testCreatePVStructure" << std::endl;
     PVStructurePtr pv0 = standardPVField->scalar(
          pvDouble,alarmTimeStampValueAlarm);
     PVScalarPtr pv1 = pvDataCreate->createPVScalar(pvString);
@@ -57,9 +53,6 @@ static void testCreatePVStructure()
     pvFields.push_back(pv1);
     PVStructurePtr pvParent = pvDataCreate->createPVStructure(
         fieldNames,pvFields);
-
-    if(debug)
-        std::cout << *pvParent << std::endl;
         
     std::cout << "testCreatePVStructure PASSED" << std::endl;
 }
@@ -91,8 +84,6 @@ static void testPVScalarCommon(string /*fieldName*/,ScalarType stype)
     } else {
         convert->fromString(pvScalar,string("10"));
     }
-    if(debug)
-        std::cout << *pvScalar << std::endl;
 }
 
 static void testPVScalarWithProperties(
@@ -296,14 +287,10 @@ static void testPVScalarWithProperties(
         testOk1(severity.get()!=0);
         severity->put(1);
     }
-    if(debug)
-        std::cout << *pvStructure << std::endl;
 }
 
 static void testPVScalar()
 {
-    if(debug)
-        std::cout << std::endl << "testScalar" << std::endl;
     testPVScalarCommon(string("boolean"),pvByte);
     testPVScalarCommon(string("byte"),pvByte);
     testPVScalarCommon(string("short"),pvShort);
@@ -353,16 +340,12 @@ static void testScalarArrayCommon(string /*fieldName*/,ScalarType stype)
         values[2] = "2";
         convert->fromStringArray(scalarArray, 0,3,values,0);
     }
-    if(debug)
-        std::cout << *pvStructure << std::endl;
     PVFieldPtr pvField = pvStructure->getSubField<PVInt>("alarm.status");
     testOk1(pvField.get()!=0);
 }
 
 static void testScalarArray()
 {
-    if(debug) 
-        std::cout << std::endl << "testScalarArray" << std::endl;
     testScalarArrayCommon(string("boolean"),pvBoolean);
     testScalarArrayCommon(string("byte"),pvByte);
     testScalarArrayCommon(string("short"),pvShort);
@@ -375,10 +358,7 @@ static void testScalarArray()
 }
 
 static void testRequest()
-{
-    if(debug)
-        std::cout << std::endl << "testScalarArray" << std::endl;
-        
+{        
     StringArray nullNames;
     FieldConstPtrArray nullFields;
     StringArray optionNames(1);
@@ -448,9 +428,6 @@ void testCopyCase(typename T::value_type val, const char* typeName)
 
 static void testCopy()
 {
-    if(debug)
-        std::cout << std::endl << "testCopy" << std::endl;
-
     TEST_COPY(PVBoolean, 1);
     TEST_COPY(PVByte, 12);
     TEST_COPY(PVShort, 128);

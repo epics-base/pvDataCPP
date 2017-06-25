@@ -32,7 +32,6 @@ static double oneDelay = 4.0;
 static double twoDelay = 2.0;
 static double threeDelay = 1.0;
 static int ntimes = 3;
-static bool debug = false;
 
 class MyCallback;
 typedef std::tr1::shared_ptr<MyCallback> MyCallbackPtr;
@@ -66,10 +65,9 @@ private:
 
 static void testBasic()
 {
-    if(debug) {
-        printf("\n\ntestBasic oneDelay %lf twoDelay %lf threeDaley %lf\n",
-            oneDelay,twoDelay,threeDelay);
-    }
+    testDiag("\n\ntestBasic oneDelay %lf twoDelay %lf threeDaley %lf\n",
+             oneDelay,twoDelay,threeDelay);
+
     string one("one");
     string two("two");
     string three("three");
@@ -91,10 +89,7 @@ static void testBasic()
         if(oneDelay>.1) testOk1(timer->isScheduled(callbackOne));
         if(twoDelay>.1) testOk1(timer->isScheduled(callbackTwo));
         if(threeDelay>.1) testOk1(timer->isScheduled(callbackThree));
-        if(debug) {
-            std::cout << "timerQueue" << std::endl;
-            std::cout << *timer;
-        }
+
         eventOne->wait();
         eventTwo->wait();
         eventThree->wait();
@@ -103,28 +98,19 @@ static void testBasic()
         diff = TimeStamp::diff(
             callbackOne->getTimeStamp(),currentTimeStamp);
         delta = diff - oneDelay;
-        if(debug) {
-            printf("one requested %f  actual %f delta %f\n",
-                 oneDelay,diff,delta);
-        }
+
         if(delta<0.0) delta = -delta;
         testOk1(delta<.1);
         diff = TimeStamp::diff(
             callbackTwo->getTimeStamp(),currentTimeStamp);
         delta = diff - twoDelay;
-        if(debug) {
-            printf("two requested %f  actual %f delta %f\n",
-                twoDelay,diff,delta);
-        }
+
         if(delta<0.0) delta = -delta;
         testOk1(delta<.1);
         diff = TimeStamp::diff(
             callbackThree->getTimeStamp(),currentTimeStamp);
         delta = diff - threeDelay;
-        if(debug) {
-            printf("three requested %f  actual %f delta %f\n",
-                threeDelay,diff,delta);
-        }
+
         if(delta<0.0) delta = -delta;
         testOk1(delta<.1);
     }
@@ -133,10 +119,9 @@ static void testBasic()
 
 static void testCancel()
 {
-    if(debug) {
-        printf("\n\ntestCancel oneDelay %lf twoDelay %lf threeDaley %lf\n",
-            oneDelay,twoDelay,threeDelay);
-    }
+    testDiag("\n\ntestCancel oneDelay %lf twoDelay %lf threeDaley %lf\n",
+             oneDelay,twoDelay,threeDelay);
+
     string one("one");
     string two("two");
     string three("three");
@@ -159,10 +144,7 @@ static void testCancel()
         if(oneDelay>.1) testOk1(timer->isScheduled(callbackOne));
         testOk1(!timer->isScheduled(callbackTwo));
         if(threeDelay>.1) testOk1(timer->isScheduled(callbackThree));
-        if(debug) {
-            std::cout << "timerQueue" << std::endl;
-            std::cout << *timer;
-        }
+
         eventOne->wait();
         eventThree->wait();
         double diff;
@@ -170,19 +152,13 @@ static void testCancel()
         diff = TimeStamp::diff(
             callbackOne->getTimeStamp(),currentTimeStamp);
         delta = diff - oneDelay;
-        if(debug) {
-            printf("one requested %f  actual %f delta %f\n",
-                 oneDelay,diff,delta);
-        }
+
         if(delta<0.0) delta = -delta;
         testOk1(delta<.1);
         diff = TimeStamp::diff(
             callbackThree->getTimeStamp(),currentTimeStamp);
         delta = diff - threeDelay;
-        if(debug) {
-            printf("three requested %f  actual %f delta %f\n",
-                threeDelay,diff,delta);
-        }
+
         if(delta<0.0) delta = -delta;
         testOk1(delta<.1);
     }

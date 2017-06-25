@@ -24,8 +24,6 @@ using namespace epics::pvData;
 using std::string;
 using std::tr1::static_pointer_cast;
 
-static bool debug = false;
-
 static FieldCreatePtr fieldCreate;
 static PVDataCreatePtr pvDataCreate;
 static StandardFieldPtr standardField;
@@ -35,7 +33,7 @@ static void test()
 {
     std::ostringstream oss;
     
-    if(debug) printf("\ntestBitSetUtil\n");
+    testDiag("\ntestBitSetUtil\n");
     StringArray fieldNames;
     PVFieldPtrArray pvFields;
     fieldNames.reserve(5);
@@ -60,28 +58,13 @@ static void test()
             standardField->scalar(pvDouble,"alarm")));
     PVStructurePtr pvs =  pvDataCreate->createPVStructure(
          fieldNames,pvFields);
-    if(debug) {
-        oss.clear();
-        oss << "pvs" << std::endl;
-        oss << *pvs << std::endl;
-        std::cout << oss.str();
-    }     
+
     int32 nfields = (int32)pvs->getNumberFields();
     BitSetPtr bitSet = BitSet::create(nfields);
     for(int32 i=0; i<nfields; i++) bitSet->set(i);
-    if(debug) {
-        oss.clear();
-        oss << "bitSet" << std::endl;
-        oss << *bitSet << std::endl;
-        std::cout << oss.str();
-    }     
+
     BitSetUtil::compress(bitSet,pvs);
-    if(debug) {
-        oss.clear();
-        oss << "bitSet" << std::endl;
-        oss << *bitSet << std::endl;
-        std::cout << oss.str();
-    }     
+
     bitSet->clear();
     PVFieldPtr pvField = pvs->getSubField<PVStructure>("timeStamp");
     int32 offsetTimeStamp = (int32)pvField->getFieldOffset();
@@ -96,21 +79,11 @@ static void test()
     testOk1(bitSet->get(offsetSeconds)==true);
     bitSet->set(offsetNano);
     bitSet->set(offsetUserTag);
-    if(debug) {
-        oss.clear();
-        oss << "bitSet" << std::endl;
-        oss << *bitSet << std::endl;
-        std::cout << oss.str();
-    }     
+
     BitSetUtil::compress(bitSet,pvs);
     testOk1(bitSet->get(offsetSeconds)==false);
     testOk1(bitSet->get(offsetTimeStamp)==true);
-    if(debug) {
-        oss.clear();
-        oss << "bitSet" << std::endl;
-        oss << *bitSet << std::endl;
-        std::cout << oss.str();
-    }     
+
     bitSet->clear();
 
     pvField = pvs->getSubField<PVStructure>("current");
@@ -129,37 +102,17 @@ static void test()
     bitSet->set(offsetSeverity);
     bitSet->set(offsetStatus);
     bitSet->set(offsetMessage);
-    if(debug) {
-        oss.clear();
-        oss << "bitSet" << std::endl;
-        oss << *bitSet << std::endl;
-        std::cout << oss.str();
-    }     
+
     BitSetUtil::compress(bitSet,pvs);
-    if(debug) {
-        oss.clear();
-        oss << "bitSet" << std::endl;
-        oss << *bitSet << std::endl;
-        std::cout << oss.str();
-    }     
+
     testOk1(bitSet->get(offsetCurrent)==true);
     bitSet->clear();
     bitSet->set(offsetSeverity);
     bitSet->set(offsetStatus);
     bitSet->set(offsetMessage);
-    if(debug) {
-        oss.clear();
-        oss << "bitSet" << std::endl;
-        oss << *bitSet << std::endl;
-        std::cout << oss.str();
-    }     
+
     BitSetUtil::compress(bitSet,pvs);
-    if(debug) {
-        oss.clear();
-        oss << "bitSet" << std::endl;
-        oss << *bitSet << std::endl;
-        std::cout << oss.str();
-    }     
+
     testOk1(bitSet->get(offsetAlarm)==true);
     bitSet->clear();
     printf("testBitSetUtil PASSED\n");

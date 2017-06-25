@@ -33,8 +33,6 @@
 using namespace epics::pvData;
 using std::string;
 
-static bool debug = false;
-
 static FieldCreatePtr fieldCreate;
 static PVDataCreatePtr pvDataCreate;
 static StandardFieldPtr standardField;
@@ -47,8 +45,8 @@ static PVStructurePtr enumeratedRecord;
 
 static void printRecords()
 {
-    std::cout << "doubleRecord" << std::endl << *doubleRecord << std::endl;
-    std::cout << "enumeratedRecord" << std::endl << *enumeratedRecord << std::endl;
+    std::cout << "# doubleRecord" << std::endl << *doubleRecord << std::endl;
+    std::cout << "# enumeratedRecord" << std::endl << *enumeratedRecord << std::endl;
 }
 
 static void createRecords()
@@ -61,18 +59,17 @@ static void createRecords()
     choices.push_back("3");
     choices.push_back("4");
     enumeratedRecord = standardPVField->enumerated(choices,alarmTimeStamp);
-    if(debug) printRecords();
 }
 
 static void testAlarm()
 {
-    if(debug) printf("testAlarm\n");
+    testDiag("testAlarm\n");
     Alarm alarm;
     PVAlarm pvAlarm; 
     bool result;
     PVFieldPtr pvField = doubleRecord->getSubField<PVStructure>(string("alarm"));
     if(pvField.get()==NULL) {
-        printf("testAlarm ERROR did not find field alarm\n");
+        testFail("testAlarm ERROR did not find field alarm\n");
         return;
     }
     result = pvAlarm.attach(pvField);
@@ -90,22 +87,18 @@ static void testAlarm()
     string message = alarm.getMessage();
     string severity = (*AlarmSeverityFunc::getSeverityNames())[alarm.getSeverity()];
     string status = (*AlarmStatusFunc::getStatusNames())[alarm.getStatus()];
-    if(debug) {
-        printf(" message %s severity %s status %s\n",
-            message.c_str(),severity.c_str(),status.c_str());
-    }
-    printf("testAlarm PASSED\n");
+    testPass("testAlarm PASSED");
 }
 
 static void testTimeStamp()
 {
-    if(debug) printf("testTimeStamp\n");
+    testDiag("testTimeStamp\n");
     TimeStamp timeStamp;
     PVTimeStamp pvTimeStamp; 
     bool result;
     PVFieldPtr pvField = doubleRecord->getSubField<PVStructure>(string("timeStamp"));
     if(pvField.get()==NULL) {
-        printf("testTimeStamp ERROR did not find field timeStamp\n");
+        testFail("testTimeStamp ERROR did not find field timeStamp");
         return;
     }
     result = pvTimeStamp.attach(pvField);
@@ -123,29 +116,28 @@ static void testTimeStamp()
     timeStamp.toTime_t(tt);
     struct tm ctm;
     memcpy(&ctm,localtime(&tt),sizeof(struct tm));
-    if(debug) {
-        printf(
-            "%4.4d.%2.2d.%2.2d %2.2d:%2.2d:%2.2d %d nanoseconds isDst %s userTag %d\n",
-            ctm.tm_year+1900,ctm.tm_mon + 1,ctm.tm_mday,
-            ctm.tm_hour,ctm.tm_min,ctm.tm_sec,
-            (int)timeStamp.getNanoseconds(),
-            (ctm.tm_isdst==0) ? "false" : "true",
-            (int)timeStamp.getUserTag());
-    }
+    testDiag(
+                "%4.4d.%2.2d.%2.2d %2.2d:%2.2d:%2.2d %d nanoseconds isDst %s userTag %d",
+                ctm.tm_year+1900,ctm.tm_mon + 1,ctm.tm_mday,
+                ctm.tm_hour,ctm.tm_min,ctm.tm_sec,
+                (int)timeStamp.getNanoseconds(),
+                (ctm.tm_isdst==0) ? "false" : "true",
+                (int)timeStamp.getUserTag());
+
     timeStamp.put(0,0);
     pvTimeStamp.set(timeStamp);
-    printf("testTimeStamp PASSED\n");
+    testPass("testTimeStamp PASSED\n");
 }
 
 static void testControl()
 {
-    if(debug) printf("testControl\n");
+    testDiag("testControl\n");
     Control control;
     PVControl pvControl; 
     bool result;
     PVFieldPtr pvField = doubleRecord->getSubField<PVStructure>(string("control"));
     if(pvField.get()==NULL) {
-        printf("testControl ERROR did not find field control\n");
+        testFail("testControl ERROR did not find field control\n");
         return;
     }
     result = pvControl.attach(pvField);
@@ -160,19 +152,19 @@ static void testControl()
     testOk1(cl.getHigh()==control.getHigh());
     double low = control.getLow();
     double high = control.getHigh();
-    if(debug) printf(" low %f high %f\n",low,high);
-    printf("testControl PASSED\n");
+    testDiag(" low %f high %f\n",low,high);
+    testPass("testControl PASSED\n");
 }
 
 static void testDisplay()
 {
-    if(debug) printf("testDisplay\n");
+    testDiag("testDisplay\n");
     Display display;
     PVDisplay pvDisplay; 
     bool result;
     PVFieldPtr pvField = doubleRecord->getSubField<PVStructure>(string("display"));
     if(pvField.get()==NULL) {
-        printf("testDisplay ERROR did not find field display\n");
+        testFail("testDisplay ERROR did not find field display\n");
         return;
     }
     result = pvDisplay.attach(pvField);
@@ -193,18 +185,18 @@ static void testDisplay()
     testOk1(dy.getUnits().compare(display.getUnits())==0);
     double low = display.getLow();
     double high = display.getHigh();
-    if(debug) printf(" low %f high %f\n",low,high);
-    printf("testDisplay PASSED\n");
+    testDiag(" low %f high %f\n",low,high);
+    testPass("testDisplay PASSED\n");
 }
 
 static void testEnumerated()
 {
-    if(debug) printf("testEnumerated\n");
+    testDiag("testEnumerated\n");
     PVEnumerated pvEnumerated; 
     bool result;
     PVFieldPtr pvField = enumeratedRecord->getSubField<PVStructure>(string("value"));
     if(pvField.get()==NULL) {
-        printf("testEnumerated ERROR did not find field enumerated\n");
+        testFail("testEnumerated ERROR did not find field enumerated\n");
         return;
     }
     result = pvEnumerated.attach(pvField);
@@ -213,21 +205,20 @@ static void testEnumerated()
     string choice = pvEnumerated.getChoice();
     PVStringArray::const_svector choices = pvEnumerated.getChoices();
     int32 numChoices = pvEnumerated.getNumberChoices();
-    if(debug) {
-        printf("index %d choice %s choices",(int)index,choice.c_str());
-        for(int i=0; i<numChoices; i++ ) printf(" %s",choices[i].c_str());
-        printf("\n");
-    }
+    testDiag("index %d choice %s choices",(int)index,choice.c_str());
+    for(int i=0; i<numChoices; i++ )
+        testDiag(" %s",choices[i].c_str());
+
     pvEnumerated.setIndex(2);
     index = pvEnumerated.getIndex();
     choice = pvEnumerated.getChoice();
-    if(debug) printf("index %d choice %s\n",(int)index,choice.c_str());
-    printf("testEnumerated PASSED\n");
+    testDiag("index %d choice %s\n",(int)index,choice.c_str());
+    testPass("testEnumerated PASSED\n");
 }
 
 MAIN(testProperty)
 {
-    testPlan(22);
+    testPlan(27);
     testDiag("Tests property");
     fieldCreate = getFieldCreate();
     pvDataCreate = getPVDataCreate();
@@ -239,7 +230,7 @@ MAIN(testProperty)
     testControl();
     testDisplay();
     testEnumerated();
-    if(debug) printRecords();
+    printRecords();
     return testDone();;
 }
 

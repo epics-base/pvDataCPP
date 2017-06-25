@@ -26,17 +26,15 @@ using namespace epics::pvData;
 using std::tr1::static_pointer_cast;
 using std::string;
 
-static bool debug = false;
-
 static PVDataCreatePtr pvDataCreate = getPVDataCreate();
 static StandardFieldPtr standardField = getStandardField();
 static StandardPVFieldPtr standardPVField = getStandardPVField();
 
 static void print(const string& name, PVFieldPtr const & f)
 {
-    if(debug) {
-        std::cout << std::endl << name << std::endl << f << std::endl;
-    }
+    std::ostringstream strm;
+    strm << std::endl << name << std::endl << f << std::endl;
+    testDiag("%s", strm.str().c_str());
 }
 
 MAIN(testStandardPVField)

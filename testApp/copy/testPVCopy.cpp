@@ -31,8 +31,6 @@ using namespace std;
 using std::tr1::static_pointer_cast;
 using namespace epics::pvData;
 
-static bool debug = true;
-
 static void testPVScalar(
     string const & valueNameMaster,
     string const & valueNameCopy,
@@ -49,58 +47,34 @@ static void testPVScalar(
     pvValueMaster = pvMaster->getSubField<PVScalar>(valueNameMaster);
     convert->fromDouble(pvValueMaster,.04);
     StructureConstPtr structure = pvCopy->getStructure();
-    if(debug) { cout << "structure from copy" << endl << *structure << endl; }
     pvStructureCopy = pvCopy->createPVStructure();
     pvValueCopy = pvStructureCopy->getSubField<PVScalar>(valueNameCopy);
     bitSet = BitSetPtr(new BitSet(pvStructureCopy->getNumberFields()));
     pvCopy->initCopy(pvStructureCopy, bitSet);
-    if(debug) { cout << "after initCopy pvValueCopy " << convert->toDouble(pvValueCopy); }
-    if(debug) { cout << endl; }
+
     convert->fromDouble(pvValueMaster,.06);
     testOk1(convert->toDouble(pvValueCopy)==.04);
     pvCopy->updateCopySetBitSet(pvStructureCopy,bitSet);
     testOk1(convert->toDouble(pvValueCopy)==.06);
     testOk1(bitSet->get(pvValueCopy->getFieldOffset()));
-    if(debug) { cout << "after put(.06) pvValueCopy " << convert->toDouble(pvValueCopy); }
-    if(debug) { cout << " bitSet " << *bitSet; }
-    if(debug) { cout << endl; }
+
     offset = pvCopy->getCopyOffset(pvValueMaster);
-    if(debug) { cout << "getCopyOffset() " << offset; }
-    if(debug) { cout << " pvValueCopy->getOffset() " << pvValueCopy->getFieldOffset(); }
-    if(debug) { cout << " pvValueMaster->getOffset() " << pvValueMaster->getFieldOffset(); }
-    if(debug) { cout << " bitSet " << *bitSet; }
-    if(debug) { cout << endl; }
+
     bitSet->clear();
     convert->fromDouble(pvValueMaster,1.0);
-    if(debug) { cout << "before updateCopyFromBitSet"; }
-    if(debug) { cout << " masterValue " << convert->toDouble(pvValueMaster); }
-    if(debug) { cout << " copyValue " << convert->toDouble(pvValueCopy); }
-    if(debug) { cout << " bitSet " << *bitSet; }
-    if(debug) { cout << endl; }
+
     bitSet->set(0);
     testOk1(convert->toDouble(pvValueCopy)==0.06);
     pvCopy->updateCopyFromBitSet(pvStructureCopy,bitSet);
     testOk1(convert->toDouble(pvValueCopy)==1.0);
-    if(debug) { cout << "after updateCopyFromBitSet"; }
-    if(debug) { cout << " masterValue " << convert->toDouble(pvValueMaster); }
-    if(debug) { cout << " copyValue " << convert->toDouble(pvValueCopy); }
-    if(debug) { cout << " bitSet " << *bitSet; }
-    if(debug) { cout << endl; }
+
     convert->fromDouble(pvValueCopy,2.0);
     bitSet->set(0);
-    if(debug) { cout << "before updateMaster"; }
-    if(debug) { cout << " masterValue " << convert->toDouble(pvValueMaster); }
-    if(debug) { cout << " copyValue " << convert->toDouble(pvValueCopy); }
-    if(debug) { cout << " bitSet " << *bitSet; }
-    if(debug) { cout << endl; }
+
     testOk1(convert->toDouble(pvValueMaster)==1.0);
     pvCopy->updateMaster(pvStructureCopy,bitSet);
     testOk1(convert->toDouble(pvValueMaster)==2.0);
-    if(debug) { cout << "after updateMaster"; }
-    if(debug) { cout << " masterValue " << convert->toDouble(pvValueMaster); }
-    if(debug) { cout << " copyValue " << convert->toDouble(pvValueCopy); }
-    if(debug) { cout << " bitSet " << *bitSet; }
-    if(debug) { cout << endl; }
+
 }
 
 static void testPVScalarArray(
@@ -123,13 +97,12 @@ static void testPVScalarArray(
     const shared_vector<const double> xxx(freeze(values));
     pvValueMaster->putFrom(xxx);
     StructureConstPtr structure = pvCopy->getStructure();
-    if(debug) { cout << "structure from copy" << endl << *structure << endl;}
+
     pvStructureCopy = pvCopy->createPVStructure();
     pvValueCopy = pvStructureCopy->getSubField<PVScalarArray>(valueNameCopy);
     bitSet = BitSetPtr(new BitSet(pvStructureCopy->getNumberFields()));
     pvCopy->initCopy(pvStructureCopy, bitSet);
-    if(debug) { cout << "after initCopy pvValueCopy " << *pvValueCopy << endl; }
-    if(debug) { cout << endl; }
+
     values.resize(n);
     for(size_t i=0; i<n; i++) values[i] = i + .06;
     const shared_vector<const double> yyy(freeze(values));
@@ -139,61 +112,38 @@ static void testPVScalarArray(
     pvCopy->updateCopySetBitSet(pvStructureCopy,bitSet);
     pvValueCopy->getAs(cvalues);
     testOk1(cvalues[0]==0.06);
-    if(debug) { cout << "after put(i+ .06) pvValueCopy " << *pvValueCopy << endl; }
-    if(debug) { cout << " bitSet " << *bitSet; }
-    if(debug) { cout << endl; }
+
     offset = pvCopy->getCopyOffset(pvValueMaster);
-    if(debug) { cout << "getCopyOffset() " << offset; }
-    if(debug) { cout << " pvValueCopy->getOffset() " << pvValueCopy->getFieldOffset(); }
-    if(debug) { cout << " pvValueMaster->getOffset() " << pvValueMaster->getFieldOffset(); }
-    if(debug) { cout << " bitSet " << *bitSet; }
-    if(debug) { cout << endl; }
+
     bitSet->clear();
     values.resize(n);
     for(size_t i=0; i<n; i++) values[i] = i + 1.0;
     const shared_vector<const double> zzz(freeze(values));
     pvValueMaster->putFrom(zzz);
-    if(debug) { cout << "before updateCopyFromBitSet"; }
-    if(debug) { cout << " masterValue " << *pvValueMaster << endl; }
-    if(debug) { cout << " copyValue " << *pvValueCopy << endl; }
-    if(debug) { cout << " bitSet " << *bitSet; }
-    if(debug) { cout << endl; }
+
     bitSet->set(0);
     pvValueCopy->getAs(cvalues);
     testOk1(cvalues[0]==0.06);
     pvCopy->updateCopyFromBitSet(pvStructureCopy,bitSet);
     pvValueCopy->getAs(cvalues);
     testOk1(cvalues[0]==1.0);
-    if(debug) { cout << "after updateCopyFromBitSet"; }
-    if(debug) { cout << " masterValue " << *pvValueMaster << endl; }
-    if(debug) { cout << " copyValue " << *pvValueCopy << endl; }
-    if(debug) { cout << " bitSet " << *bitSet; }
-    if(debug) { cout << endl; }
+
     values.resize(n);
     for(size_t i=0; i<n; i++) values[i] = i + 2.0;
     const shared_vector<const double> ttt(freeze(values));
     pvValueMaster->putFrom(ttt);
     bitSet->set(0);
-    if(debug) { cout << "before updateMaster"; }
-    if(debug) { cout << " masterValue " << *pvValueMaster << endl; }
-    if(debug) { cout << " copyValue " << *pvValueCopy << endl; }
-    if(debug) { cout << " bitSet " << *bitSet; }
-    if(debug) { cout << endl; }
+
     pvValueMaster->getAs(cvalues);
     testOk1(cvalues[0]==2.0);
     pvCopy->updateMaster(pvStructureCopy,bitSet);
     pvValueMaster->getAs(cvalues);
     testOk1(cvalues[0]==1.0);
-    if(debug) { cout << "before updateMaster"; }
-    if(debug) { cout << " masterValue " << *pvValueMaster << endl; }
-    if(debug) { cout << " copyValue " << *pvValueCopy << endl; }
-    if(debug) { cout << " bitSet " << *bitSet; }
-    if(debug) { cout << endl; }
 }
     
 static void scalarTest()
 {
-    if(debug) { cout << endl << endl << "****scalarTest****" << endl; }
+    testDiag("scalarTest()");
     PVStructurePtr pvMaster;
     string request;
     PVStructurePtr pvRequest;
@@ -208,24 +158,20 @@ static void scalarTest()
     valueNameMaster = request = "value";
     CreateRequest::shared_pointer createRequest = CreateRequest::create();
     pvRequest = createRequest->createRequest(request);
-    if(debug) { cout << "request " << request << endl; }
-    if(debug) { cout << "pvRequest\n" << *pvRequest << endl; }
     pvCopy = PVCopy::create(pvMaster,pvRequest,"");
     valueNameCopy = "value";
     testPVScalar(valueNameMaster,valueNameCopy,pvMaster,pvCopy);
     request = "";
     valueNameMaster = "value";
     pvRequest = createRequest->createRequest(request);
-    if(debug) { cout << "request " << request << endl; }
-    if(debug) { cout << "pvRequest\n" << *pvRequest << endl; }
+
     pvCopy = PVCopy::create(pvMaster,pvRequest,"");
     valueNameCopy = "value";
     testPVScalar(valueNameMaster,valueNameCopy,pvMaster,pvCopy);
     request = "alarm,timeStamp,value";
     valueNameMaster = "value";
     pvRequest = createRequest->createRequest(request);
-    if(debug) { cout << "request " << request << endl; }
-    if(debug) { cout << "pvRequest\n" << *pvRequest << endl; }
+
     pvCopy = PVCopy::create(pvMaster,pvRequest,"");
     valueNameCopy = "value";
     testPVScalar(valueNameMaster,valueNameCopy,pvMaster,pvCopy);
@@ -233,7 +179,8 @@ static void scalarTest()
 
 static void arrayTest()
 {
-    if(debug) { cout << endl << endl << "****arrayTest****" << endl; }
+    testDiag("arrayTest");
+
     PVStructurePtr pvMaster;
     string request;
     PVStructurePtr pvRequest;
@@ -247,24 +194,21 @@ static void arrayTest()
     pvMaster = standardPVField->scalarArray(pvDouble,"alarm,timeStamp");
     valueNameMaster = request = "value";
     pvRequest = createRequest->createRequest(request);
-    if(debug) { cout << "request " << request << endl; }
-    if(debug) { cout << "pvRequest\n" << *pvRequest << endl; }
+
     pvCopy = PVCopy::create(pvMaster,pvRequest,"");
     valueNameCopy = "value";
     testPVScalarArray(valueNameMaster,valueNameCopy,pvMaster,pvCopy);
     request = "";
     valueNameMaster = "value";
     pvRequest = createRequest->createRequest(request);
-    if(debug) { cout << "request " << request << endl; }
-    if(debug) { cout << "pvRequest\n" << *pvRequest << endl; }
+
     pvCopy = PVCopy::create(pvMaster,pvRequest,"");
     valueNameCopy = "value";
     testPVScalarArray(valueNameMaster,valueNameCopy,pvMaster,pvCopy);
     request = "alarm,timeStamp,value";
     valueNameMaster = "value";
     pvRequest = createRequest->createRequest(request);
-    if(debug) { cout << "request " << request << endl; }
-    if(debug) { cout << "pvRequest\n" << *pvRequest << endl; }
+
     pvCopy = PVCopy::create(pvMaster,pvRequest,"");
     valueNameCopy = "value";
     testPVScalarArray(valueNameMaster,valueNameCopy,pvMaster,pvCopy);
@@ -300,7 +244,8 @@ static PVStructurePtr createPowerSupply()
 
 static void powerSupplyTest()
 {
-    if(debug) { cout << endl << endl << "****powerSupplyTest****" << endl; }
+    testDiag("powerSupplyTest");
+
     PVStructurePtr pvMaster;
     string request;
     PVStructurePtr pvRequest;
@@ -314,32 +259,28 @@ static void powerSupplyTest()
     pvMaster = createPowerSupply();
     valueNameMaster = request = "power.value";
     pvRequest = createRequest->createRequest(request);
-    if(debug) { cout << "request " << request << endl; }
-    if(debug) { cout << "pvRequest\n" << *pvRequest << endl; }
+
     pvCopy = PVCopy::create(pvMaster,pvRequest,"");
     valueNameCopy = "power.value";
     testPVScalar(valueNameMaster,valueNameCopy,pvMaster,pvCopy);
     request = "";
     valueNameMaster = "power.value";
     pvRequest = createRequest->createRequest(request);
-    if(debug) { cout << "request " << request << endl; }
-    if(debug) { cout << "pvRequest\n" << *pvRequest << endl; }
+
     pvCopy = PVCopy::create(pvMaster,pvRequest,"");
     valueNameCopy = "power.value";
     testPVScalar(valueNameMaster,valueNameCopy,pvMaster,pvCopy);
     request = "alarm,timeStamp,voltage.value,power.value,current.value";
     valueNameMaster = "power.value";
     pvRequest = createRequest->createRequest(request);
-    if(debug) { cout << "request " << request << endl; }
-    if(debug) { cout << "pvRequest\n" << *pvRequest << endl; }
+
     pvCopy = PVCopy::create(pvMaster,pvRequest,"");
     valueNameCopy = "power.value";
     testPVScalar(valueNameMaster,valueNameCopy,pvMaster,pvCopy);
     request = "alarm,timeStamp,voltage{value,alarm},power{value,alarm,display},current.value";
     valueNameMaster = "power.value";
     pvRequest = createRequest->createRequest(request);
-    if(debug) { cout << "request " << request << endl; }
-    if(debug) { cout << "pvRequest\n" << *pvRequest << endl; }
+
     pvCopy = PVCopy::create(pvMaster,pvRequest,"");
     valueNameCopy = "power.value";
     testPVScalar(valueNameMaster,valueNameCopy,pvMaster,pvCopy);
