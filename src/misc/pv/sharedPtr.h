@@ -31,6 +31,32 @@
  * # boost version of tr1/memory
  */
 
+/* Debugging shared_ptr with debugPtr.h requires >= c++11
+ *
+ * Define DEBUG_SHARED_PTR globally to cause epics::debug::shared_ptr
+ * to be injected as std::tr1::shared_ptr and the macro
+ * HAVE_SHOW_REFS will be defined.
+ *
+ * epics::debug::shared_ptr wraps std::shared_ptr with additional
+ * tracking of backwards references.
+ * std::shared_ptr::use_count() gives the number of shared_ptr
+ * (strong refs) to the referenced object.
+ *
+ * If use_count()==5 then epics::debug::shared_ptr::show_refs() will print
+ * 5 lines of the format
+ *
+ *   # <addr>: <IP0> <IP1> ...
+ *
+ * Given the numberic address of each shared_ptr as well as the call stack
+ * at the point where it was initialized.
+ * Use the 'addr2line' utility to interpret the stack addresses.
+ *
+ * On linux w/ ASLR it is necessary to turn on static linking to meaningfully
+ * interpret call stack addresses.
+ * Append "STATIC_BUILD=YES" to configure/CONFIG_SITE
+ */
+//#define DEBUG_SHARED_PTR
+
 #if defined(SHARED_FROM_MANUAL)
 // define SHARED_FROM_MANUAL if from some reason it is desirable to manually select
 // which shared_ptr implementation to use
@@ -59,17 +85,38 @@
 
 #include <memory>
 
+#ifndef DEBUG_SHARED_PTR
+
 namespace std {
     namespace tr1 {
-        using std::shared_ptr;
-        using std::weak_ptr;
-        using std::static_pointer_cast;
-        using std::dynamic_pointer_cast;
-        using std::const_pointer_cast;
-        using std::enable_shared_from_this;
-        using std::bad_weak_ptr;
+        using ::std::shared_ptr;
+        using ::std::weak_ptr;
+        using ::std::static_pointer_cast;
+        using ::std::dynamic_pointer_cast;
+        using ::std::const_pointer_cast;
+        using ::std::enable_shared_from_this;
+        using ::std::bad_weak_ptr;
     }
 }
+
+#else // DEBUG_SHARED_PTR
+
+#include "debugPtr.h"
+
+namespace std {
+    namespace tr1 {
+        using ::epics::debug::shared_ptr;
+        using ::epics::debug::weak_ptr;
+        using ::epics::debug::static_pointer_cast;
+        using ::epics::debug::dynamic_pointer_cast;
+        using ::epics::debug::const_pointer_cast;
+        using ::epics::debug::enable_shared_from_this;
+        using ::std::bad_weak_ptr;
+    }
+}
+
+
+#endif // DEBUG_SHARED_PTR
 
 #elif defined(SHARED_FROM_TR1)
 #  include <tr1/memory>
@@ -100,6 +147,42 @@ namespace std {
 #ifdef SHARED_FROM_BOOST
 #  undef SHARED_FROM_BOOST
 #endif
+
+namespace detail {
+template<typename T>
+struct ref_shower {
+    const std::tr1::shared_ptr<T>& ptr;
+    bool self, weak;
+    ref_shower(const std::tr1::shared_ptr<T>& ptr, bool self, bool weak) :ptr(ptr),self(self),weak(weak) {}
+};
+}
+
+/** Print a list (one per line) of shared_ptr which refer to the same object
+ *
+ * @param ptr Use the object pointed to by this shared_ptr
+ * @param self include or omit a line for this shared_ptr
+ * @param weak include a line for each weak_ptr (not implemented)
+ @code
+   shared_ptr<int> x;
+   std::cout << show_referrers(x);
+ @endcode
+ */
+template<typename T>
+inline detail::ref_shower<T> show_referrers(const std::tr1::shared_ptr<T>& ptr, bool self=true, bool weak=false)
+{
+    return detail::ref_shower<T>(ptr, self, weak);
+}
+
+namespace std{
+template<typename T>
+inline std::ostream& operator<<(std::ostream& strm, const ::detail::ref_shower<T>& refs)
+{
+#ifdef HAVE_SHOW_REFS
+    refs.ptr.show_refs(strm, refs.self, refs.weak);
+#endif // HAVE_SHOW_REFS
+    return strm;
+}
+}//namespace std
 
 #define POINTER_DEFINITIONS(clazz) \
     typedef std::tr1::shared_ptr<clazz> shared_pointer; \

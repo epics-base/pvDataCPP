@@ -20,6 +20,7 @@ INC += pv/messageQueue.h
 INC += pv/destroyable.h
 INC += pv/status.h
 INC += pv/sharedPtr.h
+INC += pv/debugPtr.h
 INC += pv/localStaticLock.h
 INC += pv/typeCast.h
 INC += pv/sharedVector.h
@@ -40,4 +41,4 @@ LIBSRCS += messageQueue.cpp
 LIBSRCS += localStaticLock.cpp
 LIBSRCS += typeCast.cpp
 LIBSRCS += parseToPOD.cpp
-
+LIBSRCS += debugPtr.cpp
