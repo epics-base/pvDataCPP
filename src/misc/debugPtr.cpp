@@ -3,6 +3,8 @@
  * found in the file LICENSE that is included with the distribution
  */
 
+#if __cplusplus>=201103L
+
 #include <pv/debugPtr.h>
 
 namespace epics {
@@ -143,3 +145,5 @@ void ptr_base::spy_refs(ref_set_t &refs) const
 }
 
 }} // namespace epics::debug
+
+#endif // __cplusplus>=201103L
