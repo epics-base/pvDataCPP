@@ -13,6 +13,19 @@ git clone --quiet --depth 5 --branch "$BRBASE" https://github.com/${REPOBASE:-ep
 
 EPICS_HOST_ARCH=`sh epics-base/startup/EpicsHostArch`
 
+# requires wine and g++-mingw-w64-i686
+if [ "$WINE" = "32" ]
+then
+  echo "Cross mingw32"
+  sed -i -e '/CMPLR_PREFIX/d' epics-base/configure/os/CONFIG_SITE.linux-x86.win32-x86-mingw
+  cat << EOF >> configure/os/CONFIG_SITE.linux-x86.win32-x86-mingw
+CMPLR_PREFIX=i686-w64-mingw32-
+EOF
+  cat << EOF >> epics-base/configure/CONFIG_SITE
+CROSS_COMPILER_TARGET_ARCHS+=win32-x86-mingw
+EOF
+fi
+
 case "$CMPLR" in
 clang)
   echo "Host compiler is clang"
