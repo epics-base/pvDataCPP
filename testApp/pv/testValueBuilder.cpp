@@ -140,7 +140,7 @@ void testAppend()
 
 MAIN(testValueBuilder)
 {
-    testPlan(13);
+    testPlan(27);
     try {
         testBuild();
         testSubStruct();
