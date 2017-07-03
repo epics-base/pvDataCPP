@@ -61,3 +61,7 @@ TESTPROD_HOST += testFieldBuilder
 testFieldBuilder_SRCS += testFieldBuilder.cpp
 testHarness_SRCS += testFieldBuilder.cpp
 TESTS += testFieldBuilder
+
+TESTPROD_HOST += testValueBuilder
+testValueBuilder_SRCS += testValueBuilder.cpp
+TESTS += testValueBuilder

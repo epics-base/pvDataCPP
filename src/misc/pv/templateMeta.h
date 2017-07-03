@@ -116,6 +116,31 @@ struct _and {};
 template<typename A, typename B, class R>
 struct _and<A,B, typename A::type, typename B::type, R> { typedef R type; };
 
+/** Mangle type to best pass as an argument.
+ *
+ * POD types passed by value.
+ * All others by const reference.
+ */
+template<typename T>
+struct arg_type {typedef const T& type;};
+#define SIMPLE_ARG_TYPE(TYPE) template<> struct arg_type<TYPE> { typedef TYPE type; };
+SIMPLE_ARG_TYPE(bool)
+SIMPLE_ARG_TYPE(char)
+SIMPLE_ARG_TYPE(signed char)
+SIMPLE_ARG_TYPE(unsigned char)
+SIMPLE_ARG_TYPE(short)
+SIMPLE_ARG_TYPE(unsigned short)
+SIMPLE_ARG_TYPE(int)
+SIMPLE_ARG_TYPE(unsigned int)
+SIMPLE_ARG_TYPE(long)
+SIMPLE_ARG_TYPE(unsigned long)
+SIMPLE_ARG_TYPE(long long)
+SIMPLE_ARG_TYPE(unsigned long long)
+SIMPLE_ARG_TYPE(float)
+SIMPLE_ARG_TYPE(double)
+SIMPLE_ARG_TYPE(long double)
+#undef SIMPLE_ARG_TYPE
+
 }}}
 
 #endif // TEMPLATEMETA_H
