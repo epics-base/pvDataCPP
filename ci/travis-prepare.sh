@@ -18,7 +18,7 @@ if [ "$WINE" = "32" ]
 then
   echo "Cross mingw32"
   sed -i -e '/CMPLR_PREFIX/d' epics-base/configure/os/CONFIG_SITE.linux-x86.win32-x86-mingw
-  cat << EOF >> configure/os/CONFIG_SITE.linux-x86.win32-x86-mingw
+  cat << EOF >> epics-base/configure/os/CONFIG_SITE.linux-x86.win32-x86-mingw
 CMPLR_PREFIX=i686-w64-mingw32-
 EOF
   cat << EOF >> epics-base/configure/CONFIG_SITE
