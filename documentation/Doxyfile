@@ -766,7 +766,8 @@ WARN_LOGFILE           =
 INPUT                  = ../src/pv \
                          ./mainpage.h \
                          ../src/copy/pv \
-                         ../src/misc/pv
+                         ../src/misc/pv \
+                         ./release_notes.h
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses

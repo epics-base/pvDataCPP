@@ -3,6 +3,9 @@
 /**
 @mainpage pvDataCPP documentation
 
+- [Download](https://sourceforge.net/projects/epics-pvdata/files/)
+- @ref release_notes
+
 The epics::pvData namespace.
 See pv/pvData.h header.
 

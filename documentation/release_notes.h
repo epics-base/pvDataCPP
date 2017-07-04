@@ -1,25 +1,41 @@
-Release 7.0
-===========
+/**
 
-* Deprecated monitorPlugin.h is removed.
-* Deprecate Queue, MessageQueue, Executor, and TimeFunction.  Will be removed in 8.0.
-* FieldBuilder allow Structure defintion to be changed/appended
-* Add createRequest() function.  Simpler alternative to CreateRequest class.
+@page release_notes Release Notes
 
-Release 5.0
-===========
+Release 7.0 (XYZ 2017)
+======================
+
+- Add pv/pvdVersion.h which is included by pv/pvIntrospect.h
+- Remove monitor.h.  Migrated to the pvAccessCPP module.
+- Deprecated monitorPlugin.h is removed.
+- Deprecate the following utility classes, to be removed in 8.0.
+ - epics::pvData::Queue
+ - epics::pvData::MessageQueue
+ - epics::pvData::Executor
+ - epics::pvData::TimeFunction
+- Add epics::pvData::createRequest() function.  Alternative to CreateRequest class which throws on error.
+- epics::pvData::FieldBuilder allow Structure defintion to be changed/appended
+- Add epics::pvData::ValueBuilder like FieldBuilder also sets initial values.
+ - Can also be constructed using an existing PVStructure to allow "editing".
+- Add debugPtr.h wrapper with reference tracking to assist in troubleshooting shared_ptr related ref. loops.
+
+Release 6.0 (Aug. 2016)
+=======================
+
+Release 5.0 (Sep. 2015)
+=======================
 
 The main changes since release 4.0 are:
 
-* Deprecated getXXXField() methods have been removed from PVStructure
-* Convert copy methods and equals operators (re)moved
-* Convert::copyUnion now always copies between subfields.
-* New method getSubFieldT, like getSubField except it throws an exception
-* findSubField method removed from PVStructure
-* New stream operators for Field and PVField are provided
-* New template versions of Structure::getField
-* Fixes for static initialisation order issues
-* CreateRequest prevents a possible SEGFAULT
+- Deprecated getXXXField() methods have been removed from PVStructure
+- Convert copy methods and equals operators (re)moved
+- Convert::copyUnion now always copies between subfields.
+- New method getSubFieldT, like getSubField except it throws an exception
+- findSubField method removed from PVStructure
+- New stream operators for Field and PVField are provided
+- New template versions of Structure::getField
+- Fixes for static initialisation order issues
+- CreateRequest prevents a possible SEGFAULT
 
 
 Deprecated getXXXField methods have been removed from PVStructure
@@ -27,12 +43,12 @@ Deprecated getXXXField methods have been removed from PVStructure
 
 The following methods have been removed from PVStructure
 
-* getBooleanField
-* getByteField, getShortField, getIntField, getLongField
-* getUByteField, getUShortField, getUIntField, getULongField
-* getStringField
-* getStructureField, getUnionField
-* getScalarArrayField, getStructureArrayField, getUnionArrayField
+- getBooleanField
+- getByteField, getShortField, getIntField, getLongField
+- getUByteField, getUShortField, getUIntField, getULongField
+- getStringField
+- getStructureField, getUnionField
+- getScalarArrayField, getStructureArrayField, getUnionArrayField
 
 Use template getSubField instead, e.g. use
 
@@ -154,13 +170,13 @@ Release 4.0
 
 The main changes since release 3.0.2 are:
 
-* array semantics now enforce Copy On Write.
-* String no longer defined.
-* timeStamp and valueAlarm name changes
-* toString replaced by stream I/O 
-* union is new type.
-* copy is new.
-* monitorPlugin is new.
+- array semantics now enforce Copy On Write.
+- String no longer defined.
+- timeStamp and valueAlarm name changes
+- toString replaced by stream I/O 
+- union is new type.
+- copy is new.
+- monitorPlugin is new.
 
 New Semantics for Arrays
 --------
@@ -216,8 +232,8 @@ There are two new basic types: union_t and unionArray.
 A union is like a structure that has a single subfield.
 There are two flavors:
 
-* <b>variant union</b> The field can have any type.
-* <b>union</b> The field can any of specified set of types.
+- *variant union* The field can have any type.
+- *union* The field can any of specified set of types.
 
 The field type can be dynamically changed.
 
@@ -238,3 +254,5 @@ This is prototype and is subject to debate.
 Release 3.0.2
 ==========
 This was the starting point for RELEASE_NOTES
+
+*/
