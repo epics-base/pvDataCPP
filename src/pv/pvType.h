@@ -41,7 +41,10 @@ typedef unsigned int uintptr_t;
 #include <pv/sharedPtr.h>
 #include <pv/localStaticLock.h>
 
-namespace epics { namespace pvData { 
+//! epics
+namespace epics {
+//! pvData
+namespace pvData {
 
 namespace detail {
     // Pick either type If or type Else to not be Cond
