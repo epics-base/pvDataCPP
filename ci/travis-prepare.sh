@@ -26,6 +26,15 @@ CROSS_COMPILER_TARGET_ARCHS+=win32-x86-mingw
 EOF
 fi
 
+if [ "$STATIC" = "YES" ]
+then
+  echo "Build static libraries/executables"
+  cat << EOF >> epics-base/configure/CONFIG_SITE
+SHARED_LIBRARIES=NO
+STATIC_BUILD=YES
+EOF
+fi
+
 case "$CMPLR" in
 clang)
   echo "Host compiler is clang"
