@@ -27,7 +27,7 @@ class PVStructure;
                                    .buildPVStructure());
  @endcode
  */
-class ValueBuilder
+class epicsShareClass ValueBuilder
 {
 public:
     //! empty structure

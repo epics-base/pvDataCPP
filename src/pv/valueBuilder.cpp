@@ -5,9 +5,9 @@
 
 #include <memory>
 
+#define epicsExportSharedSymbols
 #include <pv/pvData.h>
-
-#include "valueBuilder.h"
+#include <pv/valueBuilder.h>
 
 namespace epics{namespace pvData{
 
