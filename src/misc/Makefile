@@ -17,7 +17,6 @@ INC += pv/timeFunction.h
 INC += pv/timer.h
 INC += pv/queue.h
 INC += pv/messageQueue.h
-INC += pv/destroyable.h
 INC += pv/status.h
 INC += pv/sharedPtr.h
 INC += pv/debugPtr.h

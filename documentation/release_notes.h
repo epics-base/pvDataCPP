@@ -7,7 +7,8 @@ Release 7.0 (XYZ 2017)
 
 - Add pv/pvdVersion.h which is included by pv/pvIntrospect.h
 - Remove monitor.h.  Migrated to the pvAccessCPP module.
-- Deprecated monitorPlugin.h is removed.
+- Remove destroyable.h.  Migrated to the pvAccessCPP module.
+- Previously deprecated monitorPlugin.h is removed.
 - Deprecate the following utility classes, to be removed in 8.0.
  - epics::pvData::Queue
  - epics::pvData::MessageQueue
