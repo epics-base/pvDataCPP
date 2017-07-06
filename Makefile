@@ -11,4 +11,7 @@ src_DEPEND_DIRS = configure
 DIRS += testApp
 testApp_DEPEND_DIRS = src
 
+DIRS += examples
+examples_DEPEND_DIRS = src
+
 include $(TOP)/configure/RULES_TOP

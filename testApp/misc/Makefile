@@ -73,3 +73,7 @@ TESTPROD_HOST += testTypeCast
 testTypeCast_SRCS += testTypeCast.cpp
 testHarness_SRCS += testTypeCast.cpp
 TESTS += testTypeCast
+
+TESTPROD_HOST += testUnitTest
+testUnitTest_SRCS += testUnitTest.cpp
+TESTS += testUnitTest

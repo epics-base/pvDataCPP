@@ -25,6 +25,7 @@ INC += pv/typeCast.h
 INC += pv/sharedVector.h
 INC += pv/templateMeta.h
 INC += pv/current_function.h
+INC += pv/pvUnitTest.h
 
 LIBSRCS += byteBuffer.cpp
 LIBSRCS += bitSet.cpp
