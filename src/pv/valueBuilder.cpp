@@ -162,7 +162,7 @@ void ValueBuilder::_add(const std::string& name, ScalarType stype, const void *V
 
     std::auto_ptr<child> store;
     switch(stype) {
-#define STYPE(stype) case stype: store.reset(new child_scalar<typename ScalarTypeTraits<stype>::type>(V)); break
+#define STYPE(stype) case stype: store.reset(new child_scalar<ScalarTypeTraits<stype>::type>(V)); break
     STYPE(pvBoolean);
     STYPE(pvByte);
     STYPE(pvShort);
