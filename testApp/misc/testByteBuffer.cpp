@@ -178,30 +178,24 @@ void testBasicOperations() {
     cout<<"#    First 10 characters of destination: >>"<<string(dst, 10)<<"<<\n";
 }
 
+static const char expect_be[] = "abcdef";
+static const char expect_le[] = "bafedc";
+
 static
-void testInverseEndianness() {
-    testDiag("check byte swapping features");
+void testInverseEndianness(int order, const char *expect) {
+    testDiag("check byte swapping features order=%d", order);
 
-#if EPICS_BYTE_ORDER==EPICS_ENDIAN_BIG
-    std::auto_ptr<ByteBuffer> buf(new ByteBuffer(32,EPICS_ENDIAN_LITTLE));
-    char refBuffer[] =
-    {   (char)0x02, (char)0x01, (char)0x0D, (char)0x0C, (char)0x0B, (char)0x0A};
-#else
-    std::auto_ptr<ByteBuffer> buf(new ByteBuffer(32,EPICS_ENDIAN_BIG));
-    ByteBuffer* buff = new ByteBuffer(32, EPICS_ENDIAN_BIG);
-    char refBuffer[] = { (char)0x01, (char)0x02, (char)0x0A, (char)0x0B,
-            (char)0x0C, (char)0x0D };
-#endif
+    std::auto_ptr<ByteBuffer> buf(new ByteBuffer(32,order));
 
-    buff->putShort(0x0102);
-    buff->putInt(0x0A0B0C0D);
+    buf->putShort(0x6162);
+    buf->putInt(0x63646566);
 
-    testOk1(strncmp(buff->getArray(),refBuffer,6)==0);
+    testOk1(strncmp(buf->getArray(),expect,6)==0);
 
-    buff->flip();
+    buf->flip();
 
-    testOk1(buff->getShort()==0x0102);
-    testOk1(buff->getInt()==0x0A0B0C0D);
+    testOk1(buf->getShort()==0x6162);
+    testOk1(buf->getInt()==0x63646566);
 }
 
 static
@@ -261,10 +255,11 @@ void testUnaligned()
 
 MAIN(testByteBuffer)
 {
-    testPlan(93);
+    testPlan(96);
     testDiag("Tests byteBuffer");
     testBasicOperations();
-    testInverseEndianness();
+    testInverseEndianness(EPICS_ENDIAN_BIG, expect_be);
+    testInverseEndianness(EPICS_ENDIAN_LITTLE, expect_le);
     testSwap();
     testUnaligned();
     return testDone();
