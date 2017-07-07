@@ -74,7 +74,7 @@ void PVStructure::setImmutable()
     PVField::setImmutable();
 }
 
-StructureConstPtr PVStructure::getStructure() const
+const StructureConstPtr& PVStructure::getStructure() const
 {
     return structurePtr;
 }

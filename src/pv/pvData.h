@@ -756,7 +756,7 @@ public:
      * Get the introspection interface
      * @return The interface.
      */
-    StructureConstPtr getStructure() const;
+    const StructureConstPtr &getStructure() const;
     /**
      * Get the array of pointers to the subfields in the structure.
      * @return The array.
