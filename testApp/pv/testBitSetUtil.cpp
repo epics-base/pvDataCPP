@@ -15,7 +15,6 @@
 #include <epicsUnitTest.h>
 #include <testMain.h>
 
-#include <pv/requester.h>
 #include <pv/bitSetUtil.h>
 #include <pv/standardField.h>
 #include <pv/standardPVField.h>

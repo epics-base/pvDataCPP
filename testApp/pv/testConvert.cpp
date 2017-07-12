@@ -16,7 +16,6 @@
 #include <epicsUnitTest.h>
 #include <testMain.h>
 
-#include <pv/requester.h>
 #include <pv/pvIntrospect.h>
 #include <pv/pvData.h>
 #include <pv/convert.h>

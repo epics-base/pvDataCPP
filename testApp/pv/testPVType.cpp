@@ -14,7 +14,6 @@
 #include <epicsUnitTest.h>
 #include <testMain.h>
 
-#include <pv/requester.h>
 #include <pv/pvType.h>
 
 using namespace epics::pvData;

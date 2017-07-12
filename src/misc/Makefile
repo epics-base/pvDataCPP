@@ -4,7 +4,6 @@ SRC_DIRS += $(PVDATA_SRC)/misc
 
 INC += pv/noDefaultMethods.h
 INC += pv/lock.h
-INC += pv/requester.h
 INC += pv/serialize.h
 INC += pv/bitSet.h
 INC += pv/byteBuffer.h
@@ -29,7 +28,6 @@ INC += pv/pvUnitTest.h
 LIBSRCS += byteBuffer.cpp
 LIBSRCS += bitSet.cpp
 LIBSRCS += epicsException.cpp
-LIBSRCS += requester.cpp
 LIBSRCS += serializeHelper.cpp
 LIBSRCS += event.cpp
 LIBSRCS += executor.cpp

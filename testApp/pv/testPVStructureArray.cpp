@@ -14,7 +14,6 @@
 #include <epicsAssert.h>
 #include <epicsExit.h>
 
-#include <pv/requester.h>
 #include <pv/pvIntrospect.h>
 #include <pv/pvData.h>
 #include <pv/convert.h>
