@@ -9,6 +9,7 @@
 
 #include <pv/templateMeta.h>
 #include <pv/pvIntrospect.h>
+#include <pv/sharedVector.h>
 
 namespace epics{namespace pvData{
 
@@ -44,6 +45,14 @@ public:
         return *this;
     }
 
+    //! Add a scalar array field
+    template<class T>
+    FORCE_INLINE ValueBuilder& add(const std::string& name, const shared_vector<const T>& V)
+    {
+        _add(name, V);
+        return *this;
+    }
+
     FORCE_INLINE ValueBuilder& add(const std::string& name, const PVStructure& V) {
         _add(name, V);
         return *this;
@@ -62,6 +71,7 @@ public:
 
 private:
     void _add(const std::string& name, ScalarType stype, const void *V);
+    void _add(const std::string& name, const shared_vector<const void> &V);
     void _add(const std::string& name, const PVStructure& V);
 
     ValueBuilder(ValueBuilder*, const std::string &id = std::string());
@@ -73,10 +83,10 @@ private:
     friend struct child_struct;
     struct child_scalar_base;
     friend struct child_scalar_base;
-    template <typename T>
-    struct child_scalar;
-    template <typename T>
-    friend struct child_scalar;
+    template <typename T> struct child_scalar;
+    template <typename T> friend struct child_scalar;
+    struct child_scalar_array;
+    friend struct child_scalar_array;
 
     typedef std::map<std::string, child*> children_t;
     children_t children;

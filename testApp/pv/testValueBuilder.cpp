@@ -10,6 +10,7 @@
 #include <pv/valueBuilder.h>
 #include <pv/pvData.h>
 #include <pv/createRequest.h>
+#include <pv/pvUnitTest.h>
 
 namespace pvd = epics::pvData;
 
@@ -136,16 +137,39 @@ void testAppend()
     testOk1(mod->getSubFieldT<pvd::PVInt>("record._options.foo")->get()==1);
 }
 
+void testArray()
+{
+    testDiag("testArray()");
+
+    pvd::ValueBuilder builder;
+
+    pvd::shared_vector<pvd::int32> V(2);
+    V[0] = 1;
+    V[1] = 2;
+    pvd::shared_vector<const pvd::int32> SV(pvd::freeze(V));
+
+    pvd::PVStructurePtr S(builder
+                          .add("foo", pvd::static_shared_vector_cast<const void>(SV))
+                          .buildPVStructure());
+
+    pvd::PVIntArrayPtr I(S->getSubFieldT<pvd::PVIntArray>("foo"));
+
+    pvd::PVIntArray::const_svector out(I->view());
+
+    testFieldEqual<pvd::PVIntArray>(S, "foo", SV);
+}
+
 } // namespace
 
 MAIN(testValueBuilder)
 {
-    testPlan(27);
+    testPlan(28);
     try {
         testBuild();
         testSubStruct();
         testReplace();
         testAppend();
+        testArray();
     }catch(std::exception& e){
         PRINT_EXCEPTION(e);
         testAbort("Unexpected exception: %s", e.what());

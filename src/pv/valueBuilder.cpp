@@ -64,6 +64,26 @@ struct ValueBuilder::child_scalar_base : public ValueBuilder::child
     }
 };
 
+struct ValueBuilder::child_scalar_array : public ValueBuilder::child
+{
+    virtual ~child_scalar_array() {}
+    shared_vector<const void> array;
+    child_scalar_array(const shared_vector<const void>& v) : child(scalarArray), array(v) {}
+
+    virtual void build(const std::string& name, FieldBuilderPtr& builder) OVERRIDE FINAL
+    {
+        builder->addArray(name, array.original_type());
+    }
+    virtual void store(const PVFieldPtr& val)
+    {
+        if(val->getField()->getType()!=scalarArray)
+            THROW_EXCEPTION2(std::logic_error, "Scalar Array type mis-match");
+
+        PVScalarArrayPtr arr(std::tr1::static_pointer_cast<PVScalarArray>(val));
+        arr->putFrom(array);
+    }
+};
+
 template <typename T>
 struct ValueBuilder::child_scalar : public ValueBuilder::child_scalar_base
 {
@@ -184,6 +204,20 @@ void ValueBuilder::_add(const std::string& name, ScalarType stype, const void *V
         delete it->second;
         children.erase(it);
     }
+    children[name] = store.get();
+    store.release();
+}
+
+void ValueBuilder::_add(const std::string& name, const shared_vector<const void>& V)
+{
+    const children_t::iterator it(children.find(name));
+    if(it!=children.end()) {
+        if(it->second->type!=scalar && it->second->type!=scalarArray)
+            THROW_EXCEPTION2(std::logic_error, "Not allowed to replace field.  wrong type");
+    }
+
+    std::auto_ptr<child> store(new child_scalar_array(V));
+
     children[name] = store.get();
     store.release();
 }
