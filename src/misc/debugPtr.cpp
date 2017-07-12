@@ -5,6 +5,7 @@
 
 #if __cplusplus>=201103L
 
+#define epicsExportSharedSymbols
 #include <pv/debugPtr.h>
 
 namespace epics {

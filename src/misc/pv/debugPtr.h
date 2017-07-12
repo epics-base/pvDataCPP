@@ -22,6 +22,8 @@
 
 #include <pv/epicsException.h>
 
+#include <shareLib.h>
+
 //! User code should test this macro
 //! before calling epics::debug::shared_ptr::show_refs()
 #define HAVE_SHOW_REFS
@@ -32,7 +34,7 @@ namespace debug {
 struct tracker;
 class shared_ptr_base;
 
-class ptr_base {
+class epicsShareClass ptr_base {
     friend class shared_ptr_base;
     template<typename A>
     friend class shared_ptr;
@@ -54,12 +56,12 @@ public:
     void show_refs(std::ostream&, bool self=true, bool weak=false) const;
     void spy_refs(ref_set_t&) const;
 };
-class weak_ptr_base : public ptr_base {
+class epicsShareClass weak_ptr_base : public ptr_base {
 protected:
     weak_ptr_base() {}
     weak_ptr_base(const track_t& track) :ptr_base(track) {}
 };
-class shared_ptr_base : public ptr_base {
+class epicsShareClass shared_ptr_base : public ptr_base {
 protected:
     shared_ptr_base() noexcept
 #ifndef EXCEPT_USE_NONE
@@ -102,7 +104,7 @@ template<class Base>
 class enable_shared_from_this;
 
 template<typename Store, typename Actual>
-void
+inline void
 do_enable_shared_from_this(const shared_ptr<Store>& dest,
                             enable_shared_from_this<Actual>* self
                             );
@@ -299,7 +301,7 @@ public:
 };
 
 template<typename Store, typename Actual>
-void
+inline void
 do_enable_shared_from_this(const shared_ptr<Store>& dest,
                             enable_shared_from_this<Actual>* self
                             )
@@ -313,7 +315,7 @@ do_enable_shared_from_this(const shared_ptr<Store>& dest,
 }} // namespace epics::debug
 
 template<typename T>
-std::ostream& operator<<(std::ostream& strm, const epics::debug::shared_ptr<T>& ptr)
+inline std::ostream& operator<<(std::ostream& strm, const epics::debug::shared_ptr<T>& ptr)
 {
     strm<<ptr.get();
     return strm;
