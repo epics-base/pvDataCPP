@@ -466,6 +466,7 @@ CreateRequest::shared_pointer CreateRequest::create()
 
 PVStructure::shared_pointer CreateRequest::createRequest(std::string const & request)
 {
+    message.clear();
     try {
         return ::createRequest(request);
     } catch(std::exception& e) {
