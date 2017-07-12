@@ -817,7 +817,7 @@ const_shared_vector_cast(shared_vector<FROM>& src)
 
 namespace ScalarTypeFunc {
     //! Allocate an untyped array based on ScalarType
-    shared_vector<void> allocArray(ScalarType id, size_t len);
+    epicsShareFunc shared_vector<void> allocArray(ScalarType id, size_t len);
 
     //! Allocate an untyped array based on ScalarType
     template<ScalarType ID>
