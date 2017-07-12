@@ -9,9 +9,9 @@ Release 7.0 (XYZ 2017)
 - Remove monitor.h.  Migrated to the pvAccessCPP module.
 - Remove destroyable.h.  Migrated to the pvAccessCPP module.
 - Previously deprecated monitorPlugin.h is removed.
+- Remove pv/messageQueue.h and epics::pvData::MessageQueue
 - Deprecate the following utility classes, to be removed in 8.0.
  - epics::pvData::Queue
- - epics::pvData::MessageQueue
  - epics::pvData::Executor
  - epics::pvData::TimeFunction
 - Add epics::pvData::createRequest() function.  Alternative to CreateRequest class which throws on error.
