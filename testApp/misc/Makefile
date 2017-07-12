@@ -64,11 +64,6 @@ testQueue_SRCS += testQueue.cpp
 testHarness_SRCS += testQueue.cpp
 TESTS += testQueue
 
-TESTPROD_HOST += testMessageQueue
-testMessageQueue_SRCS += testMessageQueue.cpp
-testHarness_SRCS += testMessageQueue.cpp
-TESTS += testMessageQueue
-
 TESTPROD_HOST += testTypeCast
 testTypeCast_SRCS += testTypeCast.cpp
 testHarness_SRCS += testTypeCast.cpp

@@ -21,7 +21,6 @@ int testPVCopy(void);
 int testBaseException(void);
 int testBitSet(void);
 int testByteBuffer(void);
-int testMessageQueue(void);
 int testOverrunBitSet(void);
 int testQueue(void);
 int testSerialization(void);
@@ -71,7 +70,6 @@ void pvDataAllTests(void)
     runTest(testBaseException);
     runTest(testBitSet);
     runTest(testByteBuffer);
-    runTest(testMessageQueue);
     runTest(testOverrunBitSet);
     runTest(testQueue);
     runTest(testSerialization);
