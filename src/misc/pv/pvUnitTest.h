@@ -136,6 +136,22 @@ testFieldEqual(const std::tr1::shared_ptr<epics::pvData::PVStructure>& val, cons
     }
 }
 
+template<typename PVD>
+::detail::testPassx
+testFieldEqual(const std::tr1::shared_ptr<epics::pvData::PVStructure>& val, const char *name, typename PVD::const_svector expect)
+{
+    if(!val) {
+        return ::detail::testPassx(false)<<" null structure pointer";
+    }
+    typename PVD::shared_pointer fval(val->getSubField<PVD>(name));
+    if(!fval) {
+        return ::detail::testPassx(false)<<" field '"<<name<<"' with type "<<typeid(PVD).name()<<" does not exist";
+    } else {
+        typename PVD::const_svector actual(fval->view());
+        return ::detail::testPassx(actual==expect)<<name<<" ("<<actual<<") == "<<expect;
+    }
+}
+
 /** @} */
 
 #endif // PVUNITTEST_H
