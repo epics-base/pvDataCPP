@@ -227,6 +227,8 @@ MAIN(testjson)
 
 #else // EPICS_VERSION_INT
 
+#include <epicsUnitTest.h>
+
 MAIN(testjson)
 {
     testPlan(1);
