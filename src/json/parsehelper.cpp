@@ -6,11 +6,11 @@
 #include <stdexcept>
 #include <sstream>
 
+#define epicsExportSharedSymbols
 #include <pv/pvdVersion.h>
 
 #if EPICS_VERSION_INT>=VERSION_INT(3,15,0,1)
 
-#define epicsExportSharedSymbols
 #include "pv/json.h"
 
 namespace {

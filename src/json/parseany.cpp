@@ -5,15 +5,13 @@
 
 #include <sstream>
 
+#define epicsExportSharedSymbols
 #include <pv/pvdVersion.h>
 #include <pv/pvData.h>
 #include <pv/valueBuilder.h>
 
 #if EPICS_VERSION_INT>=VERSION_INT(3,15,0,1)
 
-#include <yajl_parse.h>
-
-#define epicsExportSharedSymbols
 #include "pv/json.h"
 
 namespace pvd = epics::pvData;
