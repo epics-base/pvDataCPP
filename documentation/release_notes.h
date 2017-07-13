@@ -5,20 +5,22 @@
 Release 7.0 (XYZ 2017)
 ======================
 
-- Add pv/pvdVersion.h which is included by pv/pvIntrospect.h
-- Remove monitor.h.  Migrated to the pvAccessCPP module.
-- Remove destroyable.h.  Migrated to the pvAccessCPP module.
-- Previously deprecated monitorPlugin.h is removed.
-- Remove pv/messageQueue.h and epics::pvData::MessageQueue
+- Removals
+ - Remove requester.h, monitor.h, and destroyable.h..  Migrated to the pvAccessCPP module.
+ - Previously deprecated monitorPlugin.h is removed.
+ - Remove pv/messageQueue.h and epics::pvData::MessageQueue
 - Deprecate the following utility classes, to be removed in 8.0.
  - epics::pvData::Queue
  - epics::pvData::Executor
  - epics::pvData::TimeFunction
-- Add epics::pvData::createRequest() function.  Alternative to CreateRequest class which throws on error.
-- epics::pvData::FieldBuilder allow Structure defintion to be changed/appended
-- Add epics::pvData::ValueBuilder like FieldBuilder also sets initial values.
- - Can also be constructed using an existing PVStructure to allow "editing".
-- Add debugPtr.h wrapper with reference tracking to assist in troubleshooting shared_ptr related ref. loops.
+- Additions
+ - Add pv/pvdVersion.h which is included by pv/pvIntrospect.h
+ - Add epics::pvData::createRequest() function.  Alternative to epics::pvData::CreateRequest class which throws on error.
+ - epics::pvData::FieldBuilder allow Structure defintion to be changed/appended
+ - Add epics::pvData::ValueBuilder like FieldBuilder also sets initial values.
+  - Can also be constructed using an existing PVStructure to allow "editing".
+ - Add debugPtr.h wrapper with reference tracking to assist in troubleshooting shared_ptr related ref. loops.
+ - Add @ref pvjson utilities
 
 Release 6.0 (Aug. 2016)
 =======================

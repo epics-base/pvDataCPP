@@ -101,7 +101,6 @@ void testAppend()
     testDiag("testAppend()");
 
     pvd::PVStructurePtr base(pvd::createRequest("field(foo)record[bar=5]"));
-    std::cerr<<base<<"\n";
 
     testOk1(!!base->getSubField<pvd::PVStructure>("field.foo"));
     testOk1(!base->getSubField<pvd::PVStructure>("field.other"));
@@ -120,7 +119,6 @@ void testAppend()
                                 .endNested()
                             .endNested()
                             .buildPVStructure());
-    std::cerr<<mod<<"\n";
 
     testOk1(base->getField().get()!=mod->getField().get());
     testOk1(base->getField()!=mod->getField());

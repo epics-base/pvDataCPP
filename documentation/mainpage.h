@@ -4,6 +4,7 @@
 @mainpage pvDataCPP documentation
 
 - [Download](https://sourceforge.net/projects/epics-pvdata/files/)
+- @htmlonly <a href="modules.html">API components</a> @endhtmlonly
 - @ref release_notes
 
 The epics::pvData namespace.

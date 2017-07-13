@@ -67,6 +67,11 @@ typedef class std::ios std::ios_base;
 
 namespace epics { namespace pvData { 
 
+/** @defgroup pvcontainer Value containers
+ *
+ * The core of the pvDataCPP library are the typed, structured, data containers.
+ */
+
 class PostHandler;
 
 class PVField;
@@ -175,6 +180,8 @@ public:
  * @brief PVField is the base class for each PVData field.
  *
  * Each PVData field has an interface that extends PVField.
+ *
+ * @ingroup pvcontainer
  */
 class epicsShareClass PVField
 : virtual public Serializable,
@@ -294,6 +301,7 @@ epicsShareExtern std::ostream& operator<<(std::ostream& o, const PVField& f);
 /**
  * @brief PVScalar is the base class for each scalar field.
  *
+ * @ingroup pvcontainer
  */
 class epicsShareClass PVScalar : public PVField {
     // friend our child class(s) so that it
@@ -390,6 +398,7 @@ struct ScalarStorageOps<std::string> {
 /**
  * @brief Class that holds the data for each possible scalar type.
  *
+ * @ingroup pvcontainer
  */
 template<typename T>
 class epicsShareClass PVScalarValue : public PVScalar {
@@ -516,7 +525,7 @@ std::ostream& PVScalarValue<boolean>::dumpValue(std::ostream& o) const
     return o << std::boolalpha << static_cast<bool>(get());
 }
 
-/**
+/*
  * typedefs for the various possible scalar types.
  */
 typedef PVScalarValue<boolean> PVBoolean;
@@ -545,6 +554,7 @@ typedef std::tr1::shared_ptr<PVDouble> PVDoublePtr;
 /**
  * @brief PVString is special case, since it implements SerializableArray
  *
+ * @ingroup pvcontainer
  */
 class epicsShareClass PVString : public PVScalarValue<std::string>, SerializableArray {
 public:
@@ -571,6 +581,7 @@ typedef std::tr1::shared_ptr<PVString> PVStringPtr;
  * The array types are unionArray, strucrtureArray and scalarArray.
  * There is a scalarArray type for each scalarType.
  *
+ * @ingroup pvcontainer
  */
 class epicsShareClass PVArray : public PVField, public SerializableArray {
 public:
@@ -640,6 +651,7 @@ epicsShareExtern std::ostream& operator<<(format::array_at_internal const& manip
 /**
  * @brief Base class for a scalarArray.
  *
+ * @ingroup pvcontainer
  */
 class epicsShareClass PVScalarArray : public PVArray {
 public:
@@ -736,6 +748,7 @@ private:
 /**
  * @brief Data interface for a structure,
  *
+ * @ingroup pvcontainer
  */
 class epicsShareClass PVStructure : public PVField, public BitSetSerializable
 {
@@ -962,6 +975,7 @@ std::tr1::shared_ptr<PVT> PVStructure::getSubFieldT(std::size_t fieldOffset) con
  *
  * The type for the subfield is specified by a union introspection interface.
  *
+ * @ingroup pvcontainer
  */
 class epicsShareClass PVUnion : public PVField
 {
@@ -1113,6 +1127,7 @@ namespace detail {
         void operator()(T*){vec.reset();}
     };
 
+    //! Common code for PV*Array
     template<typename T, class Base>
     class PVVectorStorage : public Base
     {
@@ -1182,6 +1197,7 @@ namespace detail {
  * The direct extensions are pvBooleanArray, pvByteArray, ..., pvStringArray.
  * There are specializations for PVStringArray, PVStructureArray, and PVUnionArray.
  *
+ * @ingroup pvcontainer
  */
 template<typename T>
 class epicsShareClass PVValueArray : public detail::PVVectorStorage<T,PVScalarArray> {
@@ -1269,6 +1285,7 @@ protected:
 /**
  * @brief Data class for a structureArray
  *
+ * @ingroup pvcontainer
  */
 template<>
 class epicsShareClass PVValueArray<PVStructurePtr> : public detail::PVVectorStorage<PVStructurePtr,PVArray>
@@ -1366,6 +1383,7 @@ private:
 /**
  * @brief Data class for a unionArray
  *
+ * @ingroup pvcontainer
  */
 template<>
 class epicsShareClass PVValueArray<PVUnionPtr> : public detail::PVVectorStorage<PVUnionPtr,PVArray>
@@ -1671,6 +1689,8 @@ private:
 /**
  * Get the single class that implements PVDataCreate
  * @return The PVDataCreate factory.
+ *
+ * @ingroup pvcontainer
  */
 epicsShareExtern PVDataCreatePtr getPVDataCreate();
 
