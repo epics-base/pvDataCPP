@@ -232,11 +232,7 @@ MAIN(testjson)
 MAIN(testjson)
 {
     testPlan(1);
-    try {
-        testSkip(1, "JSON parser requires Base >=3.15.0.1");
-    }catch(std::exception& e){
-        testAbort("Unexpected exception: %s", e.what());
-    }
+    testSkip(1, "JSON parser requires Base >=3.15.0.1");
     return testDone();
 }
 #endif //EPICS_VERSION_INT
