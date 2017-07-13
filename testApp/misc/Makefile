@@ -72,3 +72,7 @@ TESTS += testTypeCast
 TESTPROD_HOST += testUnitTest
 testUnitTest_SRCS += testUnitTest.cpp
 TESTS += testUnitTest
+
+TESTPROD_HOST += testjson
+testjson_SRCS += testjson.cpp
+TESTS += testjson

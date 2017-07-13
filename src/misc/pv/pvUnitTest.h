@@ -113,6 +113,8 @@ inline testPassx testEqualx(const char *nLHS, const char *nRHS, LHS l, RHS r)
  */
 #define testTrue(B) ::detail::testPassx(!!(B))<<#B
 
+#define testThrows(EXC, CODE) try{ CODE; testFail("unexpected success of " #CODE); }catch(EXC& e){testPass("catch expected exception: %s", e.what());}
+
 /** Compare value of PVStructure field
  *
  @code
