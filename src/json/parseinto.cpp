@@ -236,10 +236,10 @@ epicsShareFunc
 void parseJSON(std::istream& strm,
                const PVField::shared_pointer& dest)
 {
-    yajl_parser_config conf = {
-        .allowComments = 1,
-        .checkUTF8 = 1,
-    };
+    yajl_parser_config conf;
+    memset(&conf, 0, sizeof(conf));
+    conf.allowComments = 1;
+    conf.checkUTF8 = 1;
 
     context ctxt(dest);
 

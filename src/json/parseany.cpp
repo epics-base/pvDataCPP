@@ -254,10 +254,10 @@ namespace epics{namespace pvData{
 epics::pvData::PVStructure::shared_pointer
 parseJSON(std::istream& strm)
 {
-    yajl_parser_config conf = {
-        .allowComments = 1,
-        .checkUTF8 = 1,
-    };
+    yajl_parser_config conf;
+    memset(&conf, 0, sizeof(conf));
+    conf.allowComments = 1;
+    conf.checkUTF8 = 1;
 
     context ctxt;
 
