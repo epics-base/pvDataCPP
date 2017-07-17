@@ -137,7 +137,7 @@ void PVUnion::set(string const & fieldName, PVFieldPtr const & value)
     if (index == -1)
         throw std::invalid_argument("no such fieldName");
 
-	set(index, value);
+    set(index, value);
 }
 
 void PVUnion::serialize(ByteBuffer *pbuffer, SerializableControl *pflusher) const
