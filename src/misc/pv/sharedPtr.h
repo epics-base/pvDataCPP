@@ -168,9 +168,9 @@ struct ref_shower {
  @endcode
  */
 template<typename T>
-inline detail::ref_shower<T> show_referrers(const std::tr1::shared_ptr<T>& ptr, bool self=true, bool weak=false)
+inline ::detail::ref_shower<T> show_referrers(const std::tr1::shared_ptr<T>& ptr, bool self=true, bool weak=false)
 {
-    return detail::ref_shower<T>(ptr, self, weak);
+    return ::detail::ref_shower<T>(ptr, self, weak);
 }
 
 namespace std{
