@@ -33,7 +33,7 @@ typedef epicsMutex Mutex;
  * This is based on item 14 of 
  *  * Effective C++, Third Edition, Scott Meyers
  */
-class epicsShareClass Lock : private NoDefaultMethods {
+class Lock : private NoDefaultMethods {
 public:
     /**
      * Constructor

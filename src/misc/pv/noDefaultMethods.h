@@ -21,20 +21,18 @@ namespace epics { namespace pvData {
  *
  * Note that copy constructor a copy methods are declared private.
  */
-class epicsShareClass NoDefaultMethods {
-protected:
-    /**
-     * Constructor
-     */
-    NoDefaultMethods(){};
-    /**
-     * Destructor
-     */
-    ~NoDefaultMethods(){}
-    private:
+class NoDefaultMethods {
+public:
+    NoDefaultMethods() {}
+private:
+#if __cplusplus>=201103L
+    NoDefaultMethods(const NoDefaultMethods&) = delete;
+    NoDefaultMethods & operator=(const NoDefaultMethods &) = delete;
+#else
     // do not implement
     NoDefaultMethods(const NoDefaultMethods&);
     NoDefaultMethods & operator=(const NoDefaultMethods &);
+#endif
 };
 
 }}
