@@ -356,9 +356,10 @@ public:
     inline void putFrom(T val) {
         this->putFrom((const void*)&val, (ScalarType)ScalarTypeID<T>::value);
     }
-protected:
+
+    //! Convert and assign
     virtual void putFrom(const void *, ScalarType) = 0;
-public:
+
 
     virtual void assign(const PVScalar&) = 0;
 
@@ -493,12 +494,14 @@ protected:
         const T src = get();
         castUnsafeV(1, rtype, result, typeCode, (const void*)&src);
     }
+public:
     virtual void putFrom(const void *src, ScalarType stype) OVERRIDE
     {
         T result;
         castUnsafeV(1, typeCode, (void*)&result, stype, src);
         put(result);
     }
+protected:
 
     friend class PVDataCreate;
     storage_t storage;
