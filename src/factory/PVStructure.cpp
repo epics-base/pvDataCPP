@@ -84,50 +84,41 @@ const PVFieldPtrArray & PVStructure::getPVFields() const
     return pvFields;
 }
 
-PVFieldPtr  PVStructure::getSubField(const char * fieldName) const
+PVFieldPtr  PVStructure::getSubFieldImpl(size_t fieldOffset, bool throws) const
 {
-    PVField * field = getSubFieldImpl(fieldName, false);
-    if (field)
-       return field->shared_from_this();
-    else
-       return PVFieldPtr();
-}
+    const PVStructure *current = this;
 
-
-PVFieldPtr  PVStructure::getSubField(size_t fieldOffset) const
-{
-    if(fieldOffset<=getFieldOffset()) {
-        return PVFieldPtr();
-    }
-    if(fieldOffset>getNextFieldOffset()) return PVFieldPtr();
-    size_t numFields = pvFields.size();
-    for(size_t i=0; i<numFields; i++) {
-        PVFieldPtr pvField  = pvFields[i];
-        if(pvField->getFieldOffset()==fieldOffset) return pvFields[i];
-        if(pvField->getNextFieldOffset()<=fieldOffset) continue;
-        if(pvField->getField()->getType()==structure) {
-            PVStructure *pvStructure = static_cast<PVStructure *>(pvField.get());
-            return pvStructure->getSubField(fieldOffset);
+recurse:
+    if(fieldOffset<=current->getFieldOffset() || fieldOffset>current->getNextFieldOffset()) {
+        if(throws) {
+            std::stringstream ss;
+            ss << "Failed to get field with offset "
+               << fieldOffset << " (Invalid offset)" ;
+            throw std::runtime_error(ss.str());
+        } else {
+            return PVFieldPtr();
         }
     }
+
+    for(size_t i=0, numFields = current->pvFields.size(); i<numFields; i++) {
+        const PVFieldPtr& pvField  = current->pvFields[i];
+
+        if(pvField->getFieldOffset()==fieldOffset) {
+            return pvFields[i];
+
+        } else if(pvField->getNextFieldOffset()<=fieldOffset) {
+            continue;
+
+        } else if(pvField->getField()->getType()==structure) {
+            current = static_cast<PVStructure *>(pvField.get());
+            goto recurse;
+        }
+    }
+    // the first test against current->getNextFieldOffset() would avoid this
     throw std::logic_error("PVStructure.getSubField: Logic error");
 }
 
-PVFieldPtr PVStructure::getSubFieldT(std::size_t fieldOffset) const
-{
-    PVFieldPtr pvField = getSubField(fieldOffset);
-    if (pvField.get())
-        return pvField;
-    else
-    {
-        std::stringstream ss;
-        ss << "Failed to get field with offset "
-           << fieldOffset << "(Invalid offset)" ;
-        throw std::runtime_error(ss.str());
-    }
-}
-
-PVField* PVStructure::getSubFieldImpl(const char *name, bool throws) const
+PVFieldPtr PVStructure::getSubFieldImpl(const char *name, bool throws) const
 {
     const PVStructure *parent = this;
     if(!name)
@@ -135,7 +126,7 @@ PVField* PVStructure::getSubFieldImpl(const char *name, bool throws) const
         if (throws)
             throw std::invalid_argument("Failed to get field: (Field name is NULL string)");
         else
-            return NULL;
+            return PVFieldPtr();
     }
     const char *fullName = name;
     while(true) {
@@ -151,7 +142,7 @@ PVField* PVStructure::getSubFieldImpl(const char *name, bool throws) const
                 throw std::runtime_error(ss.str());
             }
             else
-                return NULL;
+                return PVFieldPtr();
         }
         size_t N = sep-name;
         if(N==0)
@@ -164,7 +155,7 @@ PVField* PVStructure::getSubFieldImpl(const char *name, bool throws) const
                 throw std::runtime_error(ss.str());
             }
             else
-                return NULL;
+                return PVFieldPtr();
         }
 
         const PVFieldPtrArray& pvFields = parent->getPVFields();
@@ -191,7 +182,7 @@ PVField* PVStructure::getSubFieldImpl(const char *name, bool throws) const
                 throw std::runtime_error(ss.str());   
             }
             else
-                return NULL;
+                return PVFieldPtr();
         }
 
         if(*sep) {
@@ -215,11 +206,25 @@ PVField* PVStructure::getSubFieldImpl(const char *name, bool throws) const
             // loop around to new parent
 
         } else {
-            return child;
+            return child->shared_from_this();
         }
     }
 }
 
+void PVStructure::throwBadFieldType(const char *name)
+{
+    std::ostringstream ss;
+    ss << "Failed to get field: " << name << " (Field has wrong type)";
+    throw std::runtime_error(ss.str());
+}
+
+void PVStructure::throwBadFieldType(std::size_t fieldOffset)
+{
+    std::stringstream ss;
+    ss << "Failed to get field with offset "
+       << fieldOffset << " (Field has wrong type)";
+    throw std::runtime_error(ss.str());
+}
 
 void PVStructure::serialize(ByteBuffer *pbuffer,
         SerializableControl *pflusher) const {

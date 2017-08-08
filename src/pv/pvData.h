@@ -778,17 +778,6 @@ public:
      * @return The array.
      */
     const PVFieldPtrArray & getPVFields() const;
-    /**
-     * Get the subfield with the specified name.
-     * @param fieldName The name of the field.
-     * @return Pointer to the field or null if field does not exist.
-     */
-    FORCE_INLINE PVFieldPtr getSubField(std::string const &fieldName) const
-    {
-        return getSubField(fieldName.c_str());
-    }
-
-    PVFieldPtr getSubField(const char *fieldName) const;
 
     /**
      * Get a subfield with the specified name.
@@ -798,20 +787,16 @@ public:
      *   PVIntPtr ptr = pvStruct->getSubField<PVInt>("substruct.leaffield");
      * @endcode
      */
-    template<typename PVT>
+    template<typename PVT = PVField>
     FORCE_INLINE std::tr1::shared_ptr<PVT> getSubField(std::string const &fieldName) const
     {
         return this->getSubField<PVT>(fieldName.c_str());
     }
 
-    template<typename PVT>
+    template<typename PVT = PVField>
     std::tr1::shared_ptr<PVT> getSubField(const char *name) const
     {
-        PVField *raw = getSubFieldImpl(name, false);
-        if (raw)
-            return std::tr1::dynamic_pointer_cast<PVT>(raw->shared_from_this());
-        else
-            return std::tr1::shared_ptr<PVT>();
+        return std::tr1::dynamic_pointer_cast<PVT>(getSubFieldImpl(name, false));
     }
 
     /**
@@ -819,32 +804,10 @@ public:
      * @param fieldOffset The offset.
      * @return Pointer to the field or null if field does not exist.
      */
-    PVFieldPtr getSubField(std::size_t fieldOffset) const;
-
-    /**
-     * Get the subfield with the specified offset.
-     * @param fieldOffset The offset.
-     * @return Pointer to the field or null if field does not exist.
-     */
-    template<typename PVT>
+    template<typename PVT = PVField>
     std::tr1::shared_ptr<PVT> getSubField(std::size_t fieldOffset) const
     {
-        PVFieldPtr pvField = getSubField(fieldOffset);
-        if (pvField.get())
-            return std::tr1::dynamic_pointer_cast<PVT>(pvField);
-        else
-            return std::tr1::shared_ptr<PVT>();
-    }
-
-    /**
-     * Get a subfield with the specified name.
-     * @param fieldName a '.' separated list of child field names (no whitespace allowed)
-     * @returns A reference to the sub-field (never NULL)
-     * @throws std::runtime_error if the requested sub-field doesn't exist, or has a different type
-     */
-    FORCE_INLINE PVFieldPtr getSubFieldT(std::string const &fieldName) const
-    {
-        return getSubFieldImpl(fieldName.c_str())->shared_from_this();
+        return std::tr1::dynamic_pointer_cast<PVT>(getSubFieldImpl(fieldOffset, false));
     }
 
     /**
@@ -856,22 +819,29 @@ public:
      *   PVIntPtr ptr = pvStruct->getSubFieldT<PVInt>("substruct.leaffield");
      * @endcode
      */
-    template<typename PVT>
+    template<typename PVT = PVField>
     FORCE_INLINE std::tr1::shared_ptr<PVT> getSubFieldT(std::string const &fieldName) const
     {
         return this->getSubFieldT<PVT>(fieldName.c_str());
     }
 
-    template<typename PVT>
-    std::tr1::shared_ptr<PVT> getSubFieldT(const char *name) const;
+private:
+    static void throwBadFieldType(const char *name);
+public:
 
-    /**
-     * Get the subfield with the specified offset.
-     * @param fieldOffset The offset.
-     * @returns A reference to the sub-field (never NULL)
-     * @throws std::runtime_error if the requested sub-field doesn't exist
-     */
-    PVFieldPtr getSubFieldT(std::size_t fieldOffset) const;
+    template<typename PVT = PVField>
+    std::tr1::shared_ptr<PVT> getSubFieldT(const char *name) const
+    {
+        std::tr1::shared_ptr<PVT> pvField(std::tr1::dynamic_pointer_cast<PVT>(
+                                              getSubFieldImpl(name, true)));
+        if(!pvField)
+            throwBadFieldType(name);
+        return pvField;
+    }
+
+private:
+    static void throwBadFieldType(std::size_t fieldOffset);
+public:
 
     /**
      * Get the subfield with the specified offset.
@@ -879,8 +849,16 @@ public:
      * @returns A reference to the sub-field (never NULL)
      * @throws std::runtime_error if the requested sub-field doesn't exist, or has a different type 
      */
-    template<typename PVT>
-    std::tr1::shared_ptr<PVT> getSubFieldT(std::size_t fieldOffset) const;
+    template<typename PVT = PVField>
+    std::tr1::shared_ptr<PVT> getSubFieldT(std::size_t fieldOffset) const
+    {
+        std::tr1::shared_ptr<PVT> pvField = std::tr1::dynamic_pointer_cast<PVT>(
+            getSubFieldImpl(fieldOffset, true));
+        if(!pvField)
+            throwBadFieldType(fieldOffset);
+        return pvField;
+    }
+
 
     /**
      * Serialize.
@@ -932,46 +910,14 @@ public:
     void copyUnchecked(const PVStructure& from, const BitSet& maskBitSet, bool inverse = false);
 
 private:
-    PVField *getSubFieldImpl(const char *name, bool throws = true) const;
+    PVFieldPtr getSubFieldImpl(const char *name, bool throws) const;
+    PVFieldPtr getSubFieldImpl(std::size_t fieldOffset, bool throws) const;
 
     PVFieldPtrArray pvFields;
     StructureConstPtr structurePtr;
     std::string extendsStructureName;
     friend class PVDataCreate;
 };
-
-
-template<typename PVT>
-std::tr1::shared_ptr<PVT> PVStructure::getSubFieldT(const char *name) const
-{
-    std::tr1::shared_ptr<PVT> pvField = std::tr1::dynamic_pointer_cast<PVT>(
-        getSubFieldImpl(name)->shared_from_this());
-
-    if (pvField.get())
-        return pvField;
-    else
-    {
-        std::stringstream ss;
-        ss << "Failed to get field: " << name << " (Field has wrong type)";
-        throw std::runtime_error(ss.str());
-    }
-}
-
-template<typename PVT>
-std::tr1::shared_ptr<PVT> PVStructure::getSubFieldT(std::size_t fieldOffset) const
-{
-    std::tr1::shared_ptr<PVT> pvField = std::tr1::dynamic_pointer_cast<PVT>(
-        getSubFieldT(fieldOffset));
-    if (pvField.get())
-        return pvField;
-    else
-    {
-        std::stringstream ss;
-        ss << "Failed to get field with offset "
-           << fieldOffset << " (Field has wrong type)";
-        throw std::runtime_error(ss.str());
-    }
-}
 
 /**
  * @brief PVUnion has a single subfield.
