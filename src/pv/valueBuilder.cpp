@@ -109,16 +109,16 @@ void ValueBuilder::child_struct::fillStruct(ValueBuilder& self, const PVStructur
     const StringArray& field = type->getFieldNames();
     for(StringArray::const_iterator it=field.begin(), end=field.end(); it!=end; ++it)
     {
-        PVFieldPtr sub(val.getSubField(*it));
+        PVField::const_shared_pointer sub(val.getSubField(*it));
         assert(sub);
         FieldConstPtr subtype(sub->getField());
         switch(subtype->getType()) {
         case scalar:
         {
-            PVScalar* subs(static_cast<PVScalar*>(sub.get()));
+            const PVScalar* subs(static_cast<const PVScalar*>(sub.get()));
             ScalarType stype = subs->getScalar()->getScalarType();
             switch(stype) {
-#define STYPE(stype) case pv##stype: { PV ##stype* ptr(static_cast<PV##stype*>(subs)); PV##stype::value_type temp(ptr->get()); self._add(*it, pv##stype, &temp); } break
+#define STYPE(stype) case pv##stype: { const PV ##stype* ptr(static_cast<const PV##stype*>(subs)); PV##stype::value_type temp(ptr->get()); self._add(*it, pv##stype, &temp); } break
             STYPE(Boolean);
             STYPE(Byte);
             STYPE(Short);
@@ -136,7 +136,7 @@ void ValueBuilder::child_struct::fillStruct(ValueBuilder& self, const PVStructur
         }
             break;
         case structure:
-            self._add(*it, *static_cast<PVStructure*>(sub.get()));
+            self._add(*it, *static_cast<const PVStructure*>(sub.get()));
             break;
         default:
             THROW_EXCEPTION2(std::runtime_error, "ValueBuilder can only clone scalar and structure");

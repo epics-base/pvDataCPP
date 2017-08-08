@@ -788,13 +788,25 @@ public:
      * @endcode
      */
     template<typename PVT = PVField>
-    FORCE_INLINE std::tr1::shared_ptr<PVT> getSubField(std::string const &fieldName) const
+    FORCE_INLINE std::tr1::shared_ptr<PVT> getSubField(std::string const &fieldName)
     {
         return this->getSubField<PVT>(fieldName.c_str());
     }
 
     template<typename PVT = PVField>
-    std::tr1::shared_ptr<PVT> getSubField(const char *name) const
+    FORCE_INLINE std::tr1::shared_ptr<const PVT> getSubField(std::string const &fieldName) const
+    {
+        return this->getSubField<PVT>(fieldName.c_str());
+    }
+
+    template<typename PVT = PVField>
+    std::tr1::shared_ptr<PVT> getSubField(const char *name)
+    {
+        return std::tr1::dynamic_pointer_cast<PVT>(getSubFieldImpl(name, false));
+    }
+
+    template<typename PVT = PVField>
+    std::tr1::shared_ptr<const PVT> getSubField(const char *name) const
     {
         return std::tr1::dynamic_pointer_cast<PVT>(getSubFieldImpl(name, false));
     }
@@ -805,7 +817,12 @@ public:
      * @return Pointer to the field or null if field does not exist.
      */
     template<typename PVT = PVField>
-    std::tr1::shared_ptr<PVT> getSubField(std::size_t fieldOffset) const
+    std::tr1::shared_ptr<PVT> getSubField(std::size_t fieldOffset)
+    {
+        return std::tr1::dynamic_pointer_cast<PVT>(getSubFieldImpl(fieldOffset, false));
+    }
+    template<typename PVT = PVField>
+    std::tr1::shared_ptr<const PVT> getSubField(std::size_t fieldOffset) const
     {
         return std::tr1::dynamic_pointer_cast<PVT>(getSubFieldImpl(fieldOffset, false));
     }
@@ -820,7 +837,13 @@ public:
      * @endcode
      */
     template<typename PVT = PVField>
-    FORCE_INLINE std::tr1::shared_ptr<PVT> getSubFieldT(std::string const &fieldName) const
+    FORCE_INLINE std::tr1::shared_ptr<PVT> getSubFieldT(std::string const &fieldName)
+    {
+        return this->getSubFieldT<PVT>(fieldName.c_str());
+    }
+
+    template<typename PVT = PVField>
+    FORCE_INLINE std::tr1::shared_ptr<const PVT> getSubFieldT(std::string const &fieldName) const
     {
         return this->getSubFieldT<PVT>(fieldName.c_str());
     }
@@ -830,7 +853,17 @@ private:
 public:
 
     template<typename PVT = PVField>
-    std::tr1::shared_ptr<PVT> getSubFieldT(const char *name) const
+    std::tr1::shared_ptr<PVT> getSubFieldT(const char *name)
+    {
+        std::tr1::shared_ptr<PVT> pvField(std::tr1::dynamic_pointer_cast<PVT>(
+                                              getSubFieldImpl(name, true)));
+        if(!pvField)
+            throwBadFieldType(name);
+        return pvField;
+    }
+
+    template<typename PVT = PVField>
+    std::tr1::shared_ptr<const PVT> getSubFieldT(const char *name) const
     {
         std::tr1::shared_ptr<PVT> pvField(std::tr1::dynamic_pointer_cast<PVT>(
                                               getSubFieldImpl(name, true)));
@@ -850,7 +883,17 @@ public:
      * @throws std::runtime_error if the requested sub-field doesn't exist, or has a different type 
      */
     template<typename PVT = PVField>
-    std::tr1::shared_ptr<PVT> getSubFieldT(std::size_t fieldOffset) const
+    std::tr1::shared_ptr<PVT> getSubFieldT(std::size_t fieldOffset)
+    {
+        std::tr1::shared_ptr<PVT> pvField = std::tr1::dynamic_pointer_cast<PVT>(
+            getSubFieldImpl(fieldOffset, true));
+        if(!pvField)
+            throwBadFieldType(fieldOffset);
+        return pvField;
+    }
+
+    template<typename PVT = PVField>
+    std::tr1::shared_ptr<const PVT> getSubFieldT(std::size_t fieldOffset) const
     {
         std::tr1::shared_ptr<PVT> pvField = std::tr1::dynamic_pointer_cast<PVT>(
             getSubFieldImpl(fieldOffset, true));
