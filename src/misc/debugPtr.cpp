@@ -57,7 +57,9 @@ void shared_ptr_base::track_clear()
         track->refs.erase(this);
     }
     track.reset();
+#ifndef EXCEPT_USE_NONE
     m_depth = 0;
+#endif
 }
 
 void shared_ptr_base::swap(shared_ptr_base &o)
@@ -82,7 +84,9 @@ void shared_ptr_base::swap(shared_ptr_base &o)
 void shared_ptr_base::snap_stack()
 {
     if(!track) {
+#ifndef EXCEPT_USE_NONE
         m_depth = 0;
+#endif
         return;
     }
 #if defined(EXCEPT_USE_BACKTRACE)
@@ -98,7 +102,9 @@ void shared_ptr_base::snap_stack()
 void shared_ptr_base::show_stack(std::ostream& strm) const
 {
     strm<<"ptr "<<this;
+#ifndef EXCEPT_USE_NONE
     if(m_depth<=0) return;
+#endif
 #if 0 && defined(EXCEPT_USE_BACKTRACE)
     {
 
@@ -111,7 +117,7 @@ void shared_ptr_base::show_stack(std::ostream& strm) const
 
         std::free(symbols);
     }
-#else
+#elif !defined(EXCEPT_USE_NONE)
     {
         strm<<": ";
         for(int i=0; i<m_depth; i++) {
