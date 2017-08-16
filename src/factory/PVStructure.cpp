@@ -199,7 +199,7 @@ PVFieldPtr PVStructure::getSubFieldImpl(const char *name, bool throws) const
                     throw std::runtime_error(ss.str());
                 }
                 else
-                    return NULL;
+                    return PVFieldPtr();
             }
             child = NULL;
             name = sep+1; // skip past '.'
