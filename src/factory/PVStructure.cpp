@@ -89,7 +89,8 @@ PVFieldPtr  PVStructure::getSubFieldImpl(size_t fieldOffset, bool throws) const
     const PVStructure *current = this;
 
 recurse:
-    if(fieldOffset<=current->getFieldOffset() || fieldOffset>current->getNextFieldOffset()) {
+    // we don't permit self lookup
+    if(fieldOffset<=current->getFieldOffset() || fieldOffset>=current->getNextFieldOffset()) {
         if(throws) {
             std::stringstream ss;
             ss << "Failed to get field with offset "
@@ -104,7 +105,7 @@ recurse:
         const PVFieldPtr& pvField  = current->pvFields[i];
 
         if(pvField->getFieldOffset()==fieldOffset) {
-            return pvFields[i];
+            return pvField;
 
         } else if(pvField->getNextFieldOffset()<=fieldOffset) {
             continue;

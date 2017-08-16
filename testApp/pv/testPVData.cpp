@@ -16,6 +16,7 @@
 
 #include <pv/pvIntrospect.h>
 #include <pv/pvData.h>
+#include <pv/valueBuilder.h>
 #include <pv/convert.h>
 #include <pv/standardField.h>
 #include <pv/standardPVField.h>
@@ -625,21 +626,77 @@ static void testFieldAccess()
     }
 }
 
+static void testSubField()
+{
+    PVStructurePtr value(ValueBuilder()
+                         .add<pvInt>("a", 0)
+                         .addNested("B")
+                            .add<pvInt>("b", 0)
+                            .addNested("C")
+                                .add<pvInt>("c", 0)
+                                .add<pvInt>("d", 0)
+                            .endNested()
+                            .add<pvInt>("e", 0)
+                         .endNested()
+                         .add<pvInt>("z", 0)
+                         .buildPVStructure());
+
+#define SHOW(FLD) testDiag("index '" FLD "' -> %u", unsigned(value->getSubFieldT(FLD)->getFieldOffset()))
+    SHOW("a");
+    SHOW("B");
+    SHOW("B.b");
+    SHOW("B.C");
+    SHOW("B.C.c");
+    SHOW("B.C.d");
+    SHOW("B.e");
+    SHOW("z");
+#undef SHOW
+
+#define SHOW(IDX) testDiag("index " #IDX " -> %s", value->getSubFieldT(IDX)->getFullName().c_str())
+    SHOW(1);
+    SHOW(2);
+    SHOW(3);
+    SHOW(4);
+    SHOW(5);
+    SHOW(6);
+    SHOW(7);
+    SHOW(8);
+#undef SHOW
+
+#define CHECK(FLD) testOk1(value->getSubFieldT(FLD)==value->getSubFieldT(value->getSubFieldT(FLD)->getFieldOffset()))
+    CHECK("a");
+    CHECK("B");
+    CHECK("B.b");
+    CHECK("B.C");
+    CHECK("B.C.c");
+    CHECK("B.C.d");
+    CHECK("B.e");
+    CHECK("z");
+#undef CHECK
+
+}
+
 MAIN(testPVData)
 {
-    testPlan(243);
-    fieldCreate = getFieldCreate();
-    pvDataCreate = getPVDataCreate();
-    standardField = getStandardField();
-    standardPVField = getStandardPVField();
-    convert = getConvert();
-    testCreatePVStructure();
-    testCreatePVStructureWithInvalidName();
-    testPVScalar();
-    testScalarArray();
-    testRequest();
-    testCopy();
-    testFieldAccess();
+    testPlan(251);
+    try{
+        fieldCreate = getFieldCreate();
+        pvDataCreate = getPVDataCreate();
+        standardField = getStandardField();
+        standardPVField = getStandardPVField();
+        convert = getConvert();
+        testCreatePVStructure();
+        testCreatePVStructureWithInvalidName();
+        testPVScalar();
+        testScalarArray();
+        testRequest();
+        testCopy();
+        testFieldAccess();
+        testSubField();
+    }catch(std::exception& e){
+        PRINT_EXCEPTION(e);
+        testAbort("Unhandled Exception: %s", e.what());
+    }
     return testDone();
 }
 
