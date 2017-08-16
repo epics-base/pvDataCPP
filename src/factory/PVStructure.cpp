@@ -259,7 +259,7 @@ void PVStructure::serialize(ByteBuffer *pbuffer,
 
     size_t fieldsSize = pvFields.size();
     for(size_t i = 0; i<fieldsSize; i++) {
-        PVFieldPtr pvField = pvFields[i];
+        PVField* pvField = pvFields[i].get();
         offset = pvField->getFieldOffset();
         int32 inumberFields = static_cast<int32>(pvField->getNumberFields());
         next = pbitSet->nextSetBit(static_cast<uint32>(offset));
@@ -273,8 +273,7 @@ void PVStructure::serialize(ByteBuffer *pbuffer,
         if(inumberFields==1) {
             pvField->serialize(pbuffer, pflusher);
         } else {
-            PVStructurePtr pvStructure = std::tr1::static_pointer_cast<PVStructure>(pvField);
-            pvStructure->serialize(pbuffer, pflusher, pbitSet);
+            static_cast<PVStructure*>(pvField)->serialize(pbuffer, pflusher, pbitSet);
        }
     }
 }
