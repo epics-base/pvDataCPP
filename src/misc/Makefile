@@ -24,6 +24,7 @@ INC += pv/sharedVector.h
 INC += pv/templateMeta.h
 INC += pv/current_function.h
 INC += pv/pvUnitTest.h
+INC += pv/reftrack.h
 
 LIBSRCS += byteBuffer.cpp
 LIBSRCS += bitSet.cpp
@@ -38,3 +39,4 @@ LIBSRCS += localStaticLock.cpp
 LIBSRCS += typeCast.cpp
 LIBSRCS += parseToPOD.cpp
 LIBSRCS += debugPtr.cpp
+LIBSRCS += reftrack.cpp
