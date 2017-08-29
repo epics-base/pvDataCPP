@@ -190,10 +190,6 @@ class epicsShareClass PVField
 public:
     POINTER_DEFINITIONS(PVField);
     /**
-     * Constructor
-     */
-    PVField() {};
-    /**
      * Destructor
      */
     virtual ~PVField();
@@ -590,10 +586,6 @@ class epicsShareClass PVArray : public PVField, public SerializableArray {
 public:
     POINTER_DEFINITIONS(PVArray);
     /**
-     * Constructor
-     */
-    PVArray(){};
-    /**
      * Destructor
      */
     virtual ~PVArray(){};
@@ -659,10 +651,6 @@ epicsShareExtern std::ostream& operator<<(format::array_at_internal const& manip
 class epicsShareClass PVScalarArray : public PVArray {
 public:
     POINTER_DEFINITIONS(PVScalarArray);
-    /**
-     * Constructor
-     */
-    PVScalarArray() {};
     /**
      * Destructor
      */
