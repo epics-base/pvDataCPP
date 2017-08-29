@@ -271,6 +271,7 @@ public:
     void copy(const PVField& from);
     void copyUnchecked(const PVField& from);
 
+    static size_t num_instances; // use atomic::get() or volatile* access
 protected:
     PVField::shared_pointer getPtrSelf()
     {

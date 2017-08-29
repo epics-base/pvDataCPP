@@ -17,6 +17,7 @@
 #include <pv/lock.h>
 #include <pv/pvData.h>
 #include <pv/factory.h>
+#include <pv/reftrack.h>
 
 using std::tr1::const_pointer_cast;
 using std::size_t;
@@ -24,15 +25,20 @@ using std::string;
 
 namespace epics { namespace pvData {
 
+size_t PVField::num_instances;
+
 PVField::PVField(FieldConstPtr field)
 : parent(NULL),field(field),
   fieldOffset(0), nextFieldOffset(0),
   immutable(false)
 {
+    REFTRACE_INCREMENT(num_instances);
 }
 
 PVField::~PVField()
-{ }
+{
+    REFTRACE_DECREMENT(num_instances);
+}
 
 
 size_t PVField::getFieldOffset() const

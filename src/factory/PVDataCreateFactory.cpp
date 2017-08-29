@@ -24,6 +24,7 @@
 #include <pv/pvData.h>
 #include <pv/factory.h>
 #include <pv/serializeHelper.h>
+#include <pv/reftrack.h>
 
 using std::tr1::static_pointer_cast;
 using std::size_t;
@@ -607,7 +608,10 @@ PVDataCreatePtr PVDataCreate::getPVDataCreate()
     static Mutex mutex;
     Lock xx(mutex);
 
-    if(pvDataCreate.get()==0) pvDataCreate = PVDataCreatePtr(new PVDataCreate());
+    if(pvDataCreate.get()==0) {
+        registerRefCounter("PVField", &PVField::num_instances);
+        pvDataCreate = PVDataCreatePtr(new PVDataCreate());
+    }
     return pvDataCreate;
 }
 
