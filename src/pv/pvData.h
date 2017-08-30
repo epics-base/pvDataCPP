@@ -1085,12 +1085,10 @@ namespace detail {
 
 
     protected:
-        PVVectorStorage() : Base() {}
-
         template<typename A>
         explicit PVVectorStorage(A a) : Base(a) {}
     public:
-        virtual ~PVVectorStorage(){};
+        virtual ~PVVectorStorage(){}
 
         // Primitive array manipulations
 
