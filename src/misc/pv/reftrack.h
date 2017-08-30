@@ -95,16 +95,13 @@ public:
         counts.swap(o.counts);
     }
 
-    friend RefSnapshot operator-(const RefSnapshot& lhs, const RefSnapshot& rhs);
+    /** Compute the difference lhs - rhs
+     *
+     * Returned RefSnapshot has Count::current=lhs.current
+     * and Count::delta= lhs.current - rhs.current
+     */
+    RefSnapshot operator-(const RefSnapshot& rhs) const;
 };
-
-/** Compute the difference lhs - rhs
- *
- * Returned RefSnapshot has Count::current=lhs.current
- * and Count::delta= lhs.current - rhs.current
- */
-epicsShareFunc
-RefSnapshot operator-(const RefSnapshot& lhs, const RefSnapshot& rhs);
 
 //! Print all counters with a non-zero delta
 epicsShareFunc

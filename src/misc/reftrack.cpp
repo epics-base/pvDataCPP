@@ -121,12 +121,12 @@ void RefSnapshot::update()
     }
 }
 
-RefSnapshot operator-(const RefSnapshot& lhs, const RefSnapshot& rhs)
+RefSnapshot RefSnapshot::operator-(const RefSnapshot& rhs) const
 {
     RefSnapshot ret;
 
-    RefSnapshot::cnt_map_t::const_iterator lit = lhs.counts.begin(),
-                                           lend= lhs.counts.end(),
+    RefSnapshot::cnt_map_t::const_iterator lit = counts.begin(),
+                                           lend= counts.end(),
                                            rit = rhs.counts.begin(),
                                            rend= rhs.counts.end();
 
@@ -137,7 +137,7 @@ RefSnapshot operator-(const RefSnapshot& lhs, const RefSnapshot& rhs)
             ++rit;
 
         } else if(rit==rend || lit->first < rit->first) {
-            ret.counts[lit->first] = RefSnapshot::Count(lit->second.current, lit->second.current);
+            ret.counts[lit->first] = RefSnapshot::Count(lit->second.current, long(lit->second.current));
             ++lit;
 
         } else { // !end and lit->first == rit->first
