@@ -133,7 +133,7 @@ RefSnapshot operator-(const RefSnapshot& lhs, const RefSnapshot& rhs)
     while(lit!=lend || rit!=rend)
     {
         if(lit==lend || (rit!=rend && lit->first > rit->first)) {
-            ret.counts[rit->first] = RefSnapshot::Count(0, -ssize_t(rit->second.current));
+            ret.counts[rit->first] = RefSnapshot::Count(0, -long(rit->second.current));
             ++rit;
 
         } else if(rit==rend || lit->first < rit->first) {
@@ -142,7 +142,7 @@ RefSnapshot operator-(const RefSnapshot& lhs, const RefSnapshot& rhs)
 
         } else { // !end and lit->first == rit->first
             ret.counts[lit->first] = RefSnapshot::Count(lit->second.current,
-                                                        ssize_t(lit->second.current) - ssize_t(rit->second.current));
+                                                        long(lit->second.current) - long(rit->second.current));
             ++lit;
             ++rit;
         }

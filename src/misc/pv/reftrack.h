@@ -59,9 +59,9 @@ public:
     //! A single count
     struct Count {
         size_t current;
-        ssize_t delta; //!< current - previous
+        long delta; //!< current - previous
         Count() :current(0u), delta(0) {}
-        explicit Count(size_t c, ssize_t d) :current(c), delta(d) {}
+        explicit Count(size_t c, long d) :current(c), delta(d) {}
         bool operator==(const Count& o) const
         { return current==o.current && delta==o.delta; }
     };
