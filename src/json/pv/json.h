@@ -73,7 +73,8 @@ PVStructure::shared_pointer parseJSON(std::istream& strm);
  *
  * Restrictions:
  *
- * - Union or array of union not permitted
+ * - array of union not permitted
+ * - Only scalar value assigned to union
  */
 epicsShareFunc
 void parseJSON(std::istream& strm,

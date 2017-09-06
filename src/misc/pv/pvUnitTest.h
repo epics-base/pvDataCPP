@@ -131,6 +131,11 @@ testFieldEqual(const std::tr1::shared_ptr<epics::pvData::PVStructure>& val, cons
     }
     typename PVD::shared_pointer fval(val->getSubField<PVD>(name));
     if(!fval) {
+        epics::pvData::PVUnionPtr uval(val->getSubField<epics::pvData::PVUnion>(name));
+        if(uval)
+            fval = uval->get<PVD>();
+    }
+    if(!fval) {
         return ::detail::testPassx(false)<<" field '"<<name<<"' with type "<<typeid(PVD).name()<<" does not exist";
     } else {
         typename PVD::value_type actual(fval->get());

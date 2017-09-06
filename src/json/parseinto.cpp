@@ -43,14 +43,13 @@ int jtree_null(void * ctx)
     }CATCH()
 }
 
-template<typename PVD>
-void valueAssign(context *self, typename PVD::value_type val)
+template<typename PVScalarT, typename PVArrayT>
+void valueAssign(context *self, typename PVScalarT::value_type val)
 {
     pvd::Type type(self->stack.back()->getField()->getType());
     if(type==pvd::scalar) {
         pvd::PVScalar* fld(static_cast<pvd::PVScalar*>(self->stack.back().get()));
-        if(!fld)
-            throw std::invalid_argument("Not a scalar field");
+
         fld->putFrom(val);
         self->stack.pop_back();
         // structure back at the top of the stack
@@ -58,20 +57,61 @@ void valueAssign(context *self, typename PVD::value_type val)
     } else if(type==pvd::scalarArray) {
         pvd::PVScalarArray* fld(static_cast<pvd::PVScalarArray*>(self->stack.back().get()));
 
-        PVD* arrfld(dynamic_cast<PVD*>(fld));
+        PVArrayT* arrfld(dynamic_cast<PVArrayT*>(fld));
         if(!arrfld)
             throw std::invalid_argument("wrong type for scalar array");
 
-        typename PVD::const_svector carr;
+        typename PVArrayT::const_svector carr;
         arrfld->swap(carr);
 
-        typename PVD::svector arr(pvd::thaw(carr));
+        typename PVArrayT::svector arr(pvd::thaw(carr));
 
         arr.push_back(val);
 
         arrfld->replace(pvd::freeze(arr));
 
         // leave array field at top of stack
+
+    } else if(type==pvd::union_) {
+        pvd::PVUnion* fld(static_cast<pvd::PVUnion*>(self->stack.back().get()));
+        pvd::UnionConstPtr utype(fld->getUnion());
+
+        if(utype->isVariant()) {
+            typename PVScalarT::shared_pointer elem(pvd::getPVDataCreate()->createPVScalar<PVScalarT>());
+
+            elem->put(val);
+
+            fld->set(elem);
+
+        } else {
+            // attempt automagic assignment
+
+            const pvd::StringArray& names = utype->getFieldNames();
+            const pvd::FieldConstPtrArray types = utype->getFields();
+            assert(names.size()==types.size());
+
+            bool assigned = false;
+            for(size_t i=0, N=names.size(); i<N; i++) {
+                if(types[i]->getType()!=pvd::scalar) continue;
+
+                pvd::PVScalarPtr ufld(fld->select<pvd::PVScalar>(i));
+                try{
+                    ufld->putFrom(val);
+                    assigned = true;
+                }catch(std::runtime_error&){
+                    if(i==N-1)
+                        throw;
+                    continue;
+                }
+
+                break;
+            }
+            if(!assigned)
+                throw std::runtime_error("Unable to select union member");
+        }
+        self->stack.pop_back();
+        // structure back at the top of the stack
+
     } else {
         throw std::invalid_argument("Can't assign value");
     }
@@ -80,7 +120,7 @@ void valueAssign(context *self, typename PVD::value_type val)
 int jtree_boolean(void * ctx, int boolVal)
 {
     TRY {
-        valueAssign<pvd::PVBooleanArray>(self, !!boolVal);
+        valueAssign<pvd::PVBoolean, pvd::PVBooleanArray>(self, !!boolVal);
         return 1;
     }CATCH()
 }
@@ -88,7 +128,7 @@ int jtree_boolean(void * ctx, int boolVal)
 int jtree_integer(void * ctx, long integerVal)
 {
     TRY {
-        valueAssign<pvd::PVLongArray>(self, integerVal);
+        valueAssign<pvd::PVLong, pvd::PVLongArray>(self, integerVal);
         return 1;
     }CATCH()
 }
@@ -96,7 +136,7 @@ int jtree_integer(void * ctx, long integerVal)
 int jtree_double(void * ctx, double doubleVal)
 {
     TRY {
-        valueAssign<pvd::PVDoubleArray>(self, doubleVal);
+        valueAssign<pvd::PVDouble, pvd::PVDoubleArray>(self, doubleVal);
         return 1;
     }CATCH()
 }
@@ -106,7 +146,7 @@ int jtree_string(void * ctx, const unsigned char * stringVal,
 {
     TRY {
         std::string val((const char*)stringVal, stringLen);
-        valueAssign<pvd::PVStringArray>(self, val);
+        valueAssign<pvd::PVString, pvd::PVStringArray>(self, val);
         return 1;
     }CATCH()
 }

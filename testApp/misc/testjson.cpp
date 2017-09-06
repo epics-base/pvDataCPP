@@ -47,6 +47,38 @@ void testparseanyarray()
     testFieldEqual<pvd::PVLongArray>(val, "hello", sarr);
 }
 
+void testparsebare()
+{
+    testDiag("testparsebare()");
+    {
+        std::istringstream strm("5");
+
+        pvd::PVIntPtr fld(pvd::getPVDataCreate()->createPVScalar<pvd::PVInt>());
+
+        pvd::parseJSON(strm, fld);
+
+        testOk1(fld->get()==5);
+    }
+    {
+        std::istringstream strm("\"5\"");
+
+        pvd::PVIntPtr fld(pvd::getPVDataCreate()->createPVScalar<pvd::PVInt>());
+
+        pvd::parseJSON(strm, fld);
+
+        testOk1(fld->get()==5);
+    }
+    {
+        std::istringstream strm("\"hello\"");
+
+        pvd::PVStringPtr fld(pvd::getPVDataCreate()->createPVScalar<pvd::PVString>());
+
+        pvd::parseJSON(strm, fld);
+
+        testOk1(fld->get()=="hello");
+    }
+}
+
 void testparseanyjunk()
 {
     testDiag("testparseanyjunk()");
@@ -84,7 +116,9 @@ const char bigtest[] =
         "   {\"a\":5, \"b\":6}\n"
         "  ,{\"a\":7, \"b\":8}\n"
         "  ,{\"a\":9, \"b\":10}\n"
-        "  ]\n"
+        "  ],\n"
+        " \"any\": \"4.2\",\n"
+        " \"almost\": \"hello\"\n"
         "}";
 
 pvd::StructureConstPtr bigtype(pvd::getFieldCreate()->createFieldBuilder()
@@ -99,6 +133,11 @@ pvd::StructureConstPtr bigtype(pvd::getFieldCreate()->createFieldBuilder()
                             ->addNestedStructureArray("sarr")
                                 ->add("a", pvd::pvInt)
                                 ->add("b", pvd::pvInt)
+                            ->endNested()
+                            ->add("any", pvd::getFieldCreate()->createVariantUnion())
+                            ->addNestedUnion("almost")
+                                ->add("one", pvd::pvInt)
+                                ->add("two", pvd::pvString)
                             ->endNested()
                             ->createStructure()
                             );
@@ -145,6 +184,9 @@ void testInto()
         testFieldEqual<pvd::PVInt>(elems[2], "a", 9);
         testFieldEqual<pvd::PVInt>(elems[2], "b", 10);
     }
+
+    testFieldEqual<pvd::PVString>(val, "any", "4.2");
+    testFieldEqual<pvd::PVString>(val, "almost", "hello");
 }
 
 void testroundtrip()
@@ -204,7 +246,9 @@ void testroundtrip()
                        "}},"
                        "\"sarr\": [{\"a\": 5,\"b\": 6},"
                                   "{\"a\": 7,\"b\": 8},"
-                                  "{\"a\": 9,\"b\": 10}]"
+                                  "{\"a\": 9,\"b\": 10}],"
+                      "\"any\": \"4.2\","
+                      "\"almost\": \"hello\""
                       "}");
 }
 
@@ -212,10 +256,11 @@ void testroundtrip()
 
 MAIN(testjson)
 {
-    testPlan(22);
+    testPlan(27);
     try {
         testparseany();
         testparseanyarray();
+        testparsebare();
         testparseanyjunk();
         testInto();
         testroundtrip();

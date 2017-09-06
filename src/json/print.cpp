@@ -127,6 +127,18 @@ void show_field(args& A, const pvd::PVField* fld)
         A.strm.put(']');
     }
         break;
+    case pvd::union_:
+    {
+        const pvd::PVUnion *U=static_cast<const pvd::PVUnion*>(fld);
+        pvd::PVFieldPtr C(U->get());
+
+        if(!C) {
+            A.strm<<"null";
+        } else {
+            show_field(A, C.get());
+        }
+    }
+        break;
     default:
         if(A.opts.ignoreUnprintable)
             A.strm<<"// unprintable field type";
