@@ -31,6 +31,8 @@
 
 namespace epics{namespace pvData{
 
+class BitSet;
+
 /** @defgroup pvjson JSON print/parse
  *
  * Printing PVField as JSON and parsing JSON into PVField.
@@ -73,12 +75,18 @@ PVStructure::shared_pointer parseJSON(std::istream& strm);
  *
  * Restrictions:
  *
- * - array of union not permitted
+ * - array of union not supported
  * - Only scalar value assigned to union
+ *
+ * @param strm Read JSON text from stream
+ * @param dest Store in fields of this structure
+ * @param assigned Which fields of _dest_ were assigned. (Optional)
+ * @throws std::runtime_error on failure.  dest and assigned may be modified.
  */
 epicsShareFunc
 void parseJSON(std::istream& strm,
-               const PVField::shared_pointer& dest);
+               const PVField::shared_pointer& dest,
+               BitSet *assigned=0);
 
 
 /** Wrapper around yajl_parse()

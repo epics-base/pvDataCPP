@@ -10,6 +10,7 @@
 #if EPICS_VERSION_INT>=VERSION_INT(3,15,0,1)
 
 #include <pv/json.h>
+#include <pv/bitSet.h>
 #include <pv/valueBuilder.h>
 #include <pv/pvUnitTest.h>
 
@@ -54,10 +55,12 @@ void testparsebare()
         std::istringstream strm("5");
 
         pvd::PVIntPtr fld(pvd::getPVDataCreate()->createPVScalar<pvd::PVInt>());
+        pvd::BitSet bits;
 
-        pvd::parseJSON(strm, fld);
+        pvd::parseJSON(strm, fld, &bits);
 
         testOk1(fld->get()==5);
+        testEqual(bits, pvd::BitSet().set(0));
     }
     {
         std::istringstream strm("\"5\"");
@@ -120,6 +123,7 @@ const char bigtest[] =
         " \"any\": \"4.2\",\n"
         " \"almost\": \"hello\"\n"
         "}";
+// intentionally not setting "extra"
 
 pvd::StructureConstPtr bigtype(pvd::getFieldCreate()->createFieldBuilder()
                             ->add("scalar", pvd::pvInt)
@@ -130,6 +134,7 @@ pvd::StructureConstPtr bigtype(pvd::getFieldCreate()->createFieldBuilder()
                                     ->add("y", pvd::pvInt)
                                 ->endNested()
                             ->endNested()
+                            ->add("extra", pvd::pvInt)
                             ->addNestedStructureArray("sarr")
                                 ->add("a", pvd::pvInt)
                                 ->add("b", pvd::pvInt)
@@ -149,10 +154,21 @@ void testInto()
     pvd::PVStructurePtr val(pvd::getPVDataCreate()->createPVStructure(bigtype));
 
     std::istringstream strm(bigtest);
+    pvd::BitSet assigned;
 
     std::cout<<val;
 
-    pvd::parseJSON(strm, val);
+    pvd::parseJSON(strm, val, &assigned);
+
+    testEqual(assigned, pvd::BitSet()
+              .set(val->getSubField("scalar")->getFieldOffset())
+              .set(val->getSubField("ivec")->getFieldOffset())
+              .set(val->getSubField("svec")->getFieldOffset())
+              .set(val->getSubField("sub.x.y")->getFieldOffset())
+              // "extra" not set
+              .set(val->getSubField("sarr")->getFieldOffset())
+              .set(val->getSubField("any")->getFieldOffset())
+              .set(val->getSubField("almost")->getFieldOffset()));
 
     std::cout<<val;
 
@@ -244,6 +260,7 @@ void testroundtrip()
                          "\"x\": {"
                           "\"y\": 43"
                        "}},"
+                       "\"extra\": 0,"
                        "\"sarr\": [{\"a\": 5,\"b\": 6},"
                                   "{\"a\": 7,\"b\": 8},"
                                   "{\"a\": 9,\"b\": 10}],"
@@ -256,7 +273,7 @@ void testroundtrip()
 
 MAIN(testjson)
 {
-    testPlan(27);
+    testPlan(29);
     try {
         testparseany();
         testparseanyarray();

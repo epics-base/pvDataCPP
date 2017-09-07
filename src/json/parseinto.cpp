@@ -10,6 +10,7 @@
 #include <pv/pvdVersion.h>
 #include <pv/pvData.h>
 #include <pv/valueBuilder.h>
+#include <pv/bitSet.h>
 
 #if EPICS_VERSION_INT>=VERSION_INT(3,15,0,1)
 
@@ -22,18 +23,26 @@ struct context {
 
     std::string msg;
 
-    typedef std::vector<pvd::PVFieldPtr> stack_t;
+    struct frame {
+        pvd::PVFieldPtr fld;
+        pvd::BitSet *assigned;
+        frame(const pvd::PVFieldPtr& fld, pvd::BitSet *assigned)
+            :fld(fld), assigned(assigned)
+        {}
+    };
+
+    typedef std::vector<frame> stack_t;
     stack_t stack;
 
-    context(const pvd::PVFieldPtr& root)
+    context(const pvd::PVFieldPtr& root, pvd::BitSet *assigned)
     {
-        stack.push_back(root);
+        stack.push_back(frame(root, assigned));
     }
 };
 
 #define TRY context *self = (context*)ctx; assert(!self->stack.empty()); try
 
-#define CATCH() catch(std::exception& e) { self->msg = e.what(); return 0; }
+#define CATCH() catch(std::exception& e) { if(self->msg.empty()) self->msg = e.what(); return 0; }
 
 int jtree_null(void * ctx)
 {
@@ -46,18 +55,20 @@ int jtree_null(void * ctx)
 template<typename PVScalarT, typename PVArrayT>
 void valueAssign(context *self, typename PVScalarT::value_type val)
 {
-    pvd::Type type(self->stack.back()->getField()->getType());
+    assert(!self->stack.empty());
+    context::frame& back = self->stack.back();
+    pvd::Type type(back.fld->getField()->getType());
     if(type==pvd::scalar) {
-        pvd::PVScalar* fld(static_cast<pvd::PVScalar*>(self->stack.back().get()));
+        pvd::PVScalar* fld(static_cast<pvd::PVScalar*>(back.fld.get()));
 
         fld->putFrom(val);
+        if(back.assigned)
+            back.assigned->set(fld->getFieldOffset());
         self->stack.pop_back();
-        // structure back at the top of the stack
+        // structure at the top of the stack
 
     } else if(type==pvd::scalarArray) {
-        pvd::PVScalarArray* fld(static_cast<pvd::PVScalarArray*>(self->stack.back().get()));
-
-        PVArrayT* arrfld(dynamic_cast<PVArrayT*>(fld));
+        PVArrayT* arrfld(dynamic_cast<PVArrayT*>(back.fld.get()));
         if(!arrfld)
             throw std::invalid_argument("wrong type for scalar array");
 
@@ -73,7 +84,7 @@ void valueAssign(context *self, typename PVScalarT::value_type val)
         // leave array field at top of stack
 
     } else if(type==pvd::union_) {
-        pvd::PVUnion* fld(static_cast<pvd::PVUnion*>(self->stack.back().get()));
+        pvd::PVUnion* fld(static_cast<pvd::PVUnion*>(back.fld.get()));
         pvd::UnionConstPtr utype(fld->getUnion());
 
         if(utype->isVariant()) {
@@ -109,6 +120,8 @@ void valueAssign(context *self, typename PVScalarT::value_type val)
             if(!assigned)
                 throw std::runtime_error("Unable to select union member");
         }
+        if(back.assigned)
+            back.assigned->set(fld->getFieldOffset());
         self->stack.pop_back();
         // structure back at the top of the stack
 
@@ -154,22 +167,24 @@ int jtree_string(void * ctx, const unsigned char * stringVal,
 int jtree_start_map(void * ctx)
 {
     TRY {
-        pvd::PVFieldPtr& back(self->stack.back());
-        pvd::Type type = back->getField()->getType();
+        assert(!self->stack.empty());
+
+        context::frame& back = self->stack.back();
+        pvd::Type type = back.fld->getField()->getType();
         if(type==pvd::structure) {
             // will fill in
         } else if(type==pvd::structureArray) {
             // starting new element in structure array
-            pvd::PVStructureArrayPtr sarr(std::tr1::static_pointer_cast<pvd::PVStructureArray>(back));
+            pvd::PVStructureArray* sarr(static_cast<pvd::PVStructureArray*>(back.fld.get()));
 
             pvd::PVStructurePtr elem(pvd::getPVDataCreate()->createPVStructure(sarr->getStructureArray()->getStructure()));
 
-            self->stack.push_back(elem);
+            self->stack.push_back(context::frame(elem, 0));
         } else {
             throw std::runtime_error("Can't map (sub)structure");
         }
 
-        assert(self->stack.back()->getField()->getType()==pvd::structure);
+        assert(self->stack.back().fld->getField()->getType()==pvd::structure);
         return 1;
     }CATCH()
 }
@@ -178,13 +193,14 @@ int jtree_map_key(void * ctx, const unsigned char * key,
                      unsigned int stringLen)
 {
     TRY {
+        assert(!self->stack.empty());
         std::string name((const char*)key, stringLen);
 
         // start_map() ensures we have a structure at the top of the stack
-        pvd::PVStructure *fld = static_cast<pvd::PVStructure*>(self->stack.back().get());
+        pvd::PVStructure *fld = static_cast<pvd::PVStructure*>(self->stack.back().fld.get());
 
         try {
-            self->stack.push_back(fld->getSubFieldT(name));
+            self->stack.push_back(context::frame(fld->getSubFieldT(name), self->stack.back().assigned));
         }catch(std::runtime_error& e){
             std::ostringstream strm;
             strm<<"At "<<fld->getFullName()<<" : "<<e.what()<<"\n";
@@ -198,21 +214,22 @@ int jtree_map_key(void * ctx, const unsigned char * key,
 int jtree_end_map(void * ctx)
 {
     TRY {
-        assert(self->stack.back()->getField()->getType()==pvd::structure);
+        assert(!self->stack.empty());
+        assert(self->stack.back().fld->getField()->getType()==pvd::structure);
 
-        pvd::PVStructurePtr elem(std::tr1::static_pointer_cast<pvd::PVStructure>(self->stack.back()));
+        context::frame elem(self->stack.back());
         self->stack.pop_back();
 
-        if(!self->stack.empty() && self->stack.back()->getField()->getType()==pvd::structureArray) {
+        if(!self->stack.empty() && self->stack.back().fld->getField()->getType()==pvd::structureArray) {
             // append element to struct array
-            pvd::PVStructureArray *sarr = static_cast<pvd::PVStructureArray*>(self->stack.back().get());
+            pvd::PVStructureArray *sarr = static_cast<pvd::PVStructureArray*>(self->stack.back().fld.get());
 
             pvd::PVStructureArray::const_svector cval;
             sarr->swap(cval);
 
             pvd::PVStructureArray::svector val(pvd::thaw(cval));
 
-            val.push_back(elem);
+            val.push_back(std::tr1::static_pointer_cast<pvd::PVStructure>(elem.fld));
 
             sarr->replace(pvd::freeze(val));
         }
@@ -224,7 +241,8 @@ int jtree_end_map(void * ctx)
 int jtree_start_array(void * ctx)
 {
     TRY {
-        pvd::PVFieldPtr& back(self->stack.back());
+        assert(!self->stack.empty());
+        pvd::PVFieldPtr& back(self->stack.back().fld);
         pvd::Type type = back->getField()->getType();
         if(type!=pvd::structureArray && type!=pvd::scalarArray)
             throw std::runtime_error("Can't assign array");
@@ -235,6 +253,10 @@ int jtree_start_array(void * ctx)
 int jtree_end_array(void * ctx)
 {
     TRY {
+        assert(!self->stack.empty());
+
+        if(self->stack.back().assigned)
+            self->stack.back().assigned->set(self->stack.back().fld->getFieldOffset());
         self->stack.pop_back();
         return 1;
     }CATCH()
@@ -274,14 +296,15 @@ namespace epics{namespace pvData{
 
 epicsShareFunc
 void parseJSON(std::istream& strm,
-               const PVField::shared_pointer& dest)
+               const PVField::shared_pointer& dest,
+               BitSet *assigned)
 {
     yajl_parser_config conf;
     memset(&conf, 0, sizeof(conf));
     conf.allowComments = 1;
     conf.checkUTF8 = 1;
 
-    context ctxt(dest);
+    context ctxt(dest, assigned);
 
     handler handle(yajl_alloc(&jtree_cbs, &conf, NULL, &ctxt));
 
