@@ -68,18 +68,28 @@ void valueAssign(context *self, typename PVScalarT::value_type val)
         // structure at the top of the stack
 
     } else if(type==pvd::scalarArray) {
-        PVArrayT* arrfld(dynamic_cast<PVArrayT*>(back.fld.get()));
-        if(!arrfld)
-            throw std::invalid_argument("wrong type for scalar array");
+        pvd::PVScalarArray *fld(static_cast<pvd::PVScalarArray*>(back.fld.get()));
 
-        typename PVArrayT::const_svector carr;
-        arrfld->swap(carr);
+        pvd::shared_vector<const void> carr;
+        fld->getAs(carr);
 
-        typename PVArrayT::svector arr(pvd::thaw(carr));
+        switch(carr.original_type())
+        {
+#define CASE_STRING
+#define CASE_REAL_INT64
+#define CASE(BASETYPE, PVATYPE, DBFTYPE, PVACODE) case epics::pvData::pv##PVACODE: { \
+            pvd::shared_vector<const PVATYPE> arr(pvd::static_shared_vector_cast<const PVATYPE>(carr)); \
+            pvd::shared_vector<PVATYPE> tarr(pvd::thaw(arr)); \
+            tarr.push_back(pvd::castUnsafe<PVATYPE>(val)); \
+            carr = pvd::static_shared_vector_cast<const void>(pvd::freeze(tarr)); \
+            } break;
+#include <pv/typemap.h>
+#undef CASE
+#undef CASE_REAL_INT64
+#undef CASE_STRING
+        }
 
-        arr.push_back(val);
-
-        arrfld->replace(pvd::freeze(arr));
+        fld->putFrom(carr);
 
         // leave array field at top of stack
 
