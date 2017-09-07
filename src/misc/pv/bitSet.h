@@ -9,6 +9,10 @@
 #ifndef BITSET_H
 #define BITSET_H
 
+#if __cplusplus>=201103L
+#  include <initializer_list>
+#endif
+
 #include <vector>
 
 #include <pv/pvType.h>
@@ -65,6 +69,16 @@ namespace epics { namespace pvData {
          */
         BitSet(uint32 nbits);
 
+#if __cplusplus>=201103L
+        /** Initialize from a list of indicies
+         @code
+         BitSet X({1, 5});
+         assert(X.get(1) && X.get(5));
+         @endcode
+         */
+        BitSet(std::initializer_list<uint32> I);
+#endif
+
         /**
          * Destructor.
          */
@@ -76,21 +90,21 @@ namespace epics { namespace pvData {
          *
          * @param  bitIndex the index of the bit to flip
          */
-        void flip(uint32 bitIndex);
+        BitSet& flip(uint32 bitIndex);
 
         /**
          * Sets the bit at the specified index to @c true.
          *
          * @param  bitIndex a bit index
          */
-        void set(uint32 bitIndex);
+        BitSet& set(uint32 bitIndex);
 
         /**
          * Sets the bit specified by the index to @c false.
          *
          * @param  bitIndex the index of the bit to be cleared
          */
-        void clear(uint32 bitIndex);
+        BitSet& clear(uint32 bitIndex);
 
         /**
          * Sets the bit at the specified index to the specified value.

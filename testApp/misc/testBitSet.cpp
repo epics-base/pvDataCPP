@@ -23,9 +23,12 @@
 
 #include <pv/bitSet.h>
 #include <pv/serializeHelper.h>
+#include <pv/pvUnitTest.h>
 
 #include <epicsUnitTest.h>
 #include <testMain.h>
+
+namespace {
 
 using namespace epics::pvData;
 using std::string;
@@ -35,6 +38,18 @@ static string toString(BitSet& bitSet)
     std::ostringstream oss;
     oss << bitSet;
     return oss.str();
+}
+
+void testInitialize()
+{
+    testDiag("testInitialize()");
+#if __cplusplus>=201103L
+    testOk1(BitSet().size()==0);
+    testOk1(BitSet({}).size()==0);
+    testEqual(BitSet().set(1).set(5).set(500), BitSet({1, 5, 500}));
+#else
+    testSkip(3, "Not c++11");
+#endif
 }
 
 static void testGetSetClearFlip()
@@ -292,9 +307,12 @@ static void testSerialize()
 #undef TOFRO
 }
 
+} // namespace
+
 MAIN(testBitSet)
 {
-    testPlan(87);
+    testPlan(90);
+    testInitialize();
     testGetSetClearFlip();
     testOperators();
     testLogical();

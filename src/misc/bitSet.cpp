@@ -55,6 +55,19 @@ namespace epics { namespace pvData {
         words.reserve((nbits == 0) ? 1 : WORD_INDEX(nbits-1) + 1);
     }
 
+#if __cplusplus>=201103L
+    BitSet::BitSet(std::initializer_list<uint32> I)
+    {
+        // optimistically guess that highest bit is last (not required)
+        words.reserve((I.size() == 0) ? 1 : WORD_INDEX(*(I.end()-1)) + 1);
+
+        for(uint32 idx : I)
+        {
+            set(idx);
+        }
+    }
+#endif
+
     BitSet::~BitSet() {}
 
     void BitSet::recalculateWordsInUse() {
@@ -76,7 +89,7 @@ namespace epics { namespace pvData {
         ensureCapacity(wordIndex+1);
     }
 
-    void BitSet::flip(uint32 bitIndex) {
+    BitSet& BitSet::flip(uint32 bitIndex) {
 
         uint32 wordIdx = WORD_INDEX(bitIndex);
         expandTo(wordIdx);
@@ -84,25 +97,27 @@ namespace epics { namespace pvData {
         words[wordIdx] ^= (((uint64)1) << WORD_OFFSET(bitIndex));
 
         recalculateWordsInUse();
+        return *this;
     }
 
-    void BitSet::set(uint32 bitIndex) {
+    BitSet& BitSet::set(uint32 bitIndex) {
 
         uint32 wordIdx = WORD_INDEX(bitIndex);
         expandTo(wordIdx);
 
         words[wordIdx] |= (((uint64)1) << WORD_OFFSET(bitIndex));
+        return *this;
     }
 
-    void BitSet::clear(uint32 bitIndex) {
+    BitSet& BitSet::clear(uint32 bitIndex) {
 
         uint32 wordIdx = WORD_INDEX(bitIndex);
-        if (wordIdx >= words.size())
-            return;
+        if (wordIdx < words.size()) {
+            words[wordIdx] &= ~(((uint64)1) << WORD_OFFSET(bitIndex));
 
-        words[wordIdx] &= ~(((uint64)1) << WORD_OFFSET(bitIndex));
-
-        recalculateWordsInUse();
+            recalculateWordsInUse();
+        }
+        return *this;
     }
 
     void BitSet::set(uint32 bitIndex, bool value) {
