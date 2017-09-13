@@ -62,4 +62,4 @@ USR_CFLAGS += $USR_CFLAGS
 USR_CXXFLAGS += $USR_CXXFLAGS
 EOF
 
-make -j2 -C epics-base
+make -j2 -C epics-base $EXTRA
