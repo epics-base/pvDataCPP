@@ -930,7 +930,7 @@ FieldBuilderPtr FieldBuilder::addNestedUnionArray(string const & name)
 FieldBuilderPtr FieldBuilder::endNested()
 {
     if (!parentBuilder.get())
-        THROW_EXCEPTION2(std::runtime_error, "this method can only be called to create nested fields");
+        THROW_EXCEPTION2(std::runtime_error, "FieldBuilder::endNested() can only be called to create nested fields");
         
     FieldConstPtr nestedField = createFieldInternal(nestedClassToBuild);
 
