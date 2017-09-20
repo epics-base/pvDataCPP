@@ -7,6 +7,7 @@
 #include <epicsUnitTest.h>
 #include <testMain.h>
 
+#include <pv/pvUnitTest.h>
 #include <pv/pvData.h>
 #include <pv/epicsException.h>
 
@@ -245,31 +246,89 @@ void test_nestedStructureArray()
 void test_extendStructure()
 {
     testDiag("test_extendStructure()");
-    Structure::const_shared_pointer X(getFieldCreate()->createFieldBuilder()
+    Structure::const_shared_pointer base(getFieldCreate()->createFieldBuilder()
                                       ->add("A", pvInt)
                                       ->addNestedStructure("nest")
                                         ->add("B", pvInt)
+                                         ->addNestedStructure("one")
+                                            ->add("XX", pvInt)
+                                         ->endNested()
+                                      ->endNested()
+                                      ->addNestedUnion("U")
+                                        ->add("B", pvInt)
+                                         ->addNestedStructure("one")
+                                            ->add("XX", pvInt)
+                                         ->endNested()
+                                      ->endNested()
+                                      ->addNestedStructureArray("sarr")
+                                        ->add("X", pvInt)
+                                         ->addNestedStructure("one")
+                                            ->add("XX", pvInt)
+                                         ->endNested()
                                       ->endNested()
                                       ->createStructure());
 
-    Structure::const_shared_pointer Y(getFieldCreate()->createFieldBuilder(X)
+    Structure::const_shared_pointer amended(getFieldCreate()->createFieldBuilder(base)
                                       ->add("A2", pvInt)
                                       ->addNestedStructure("nest")
                                         ->add("B2", pvInt)
+                                        ->addNestedStructure("one")
+                                           ->add("YY", pvInt)
+                                        ->endNested()
+                                      ->endNested()
+                                      ->addNestedUnion("U")
+                                        ->add("B2", pvInt)
+                                         ->addNestedStructure("one")
+                                            ->add("YY", pvInt)
+                                         ->endNested()
+                                      ->endNested()
+                                      ->addNestedStructureArray("sarr")
+                                        ->add("Y", pvInt)
+                                        ->addNestedStructure("one")
+                                           ->add("YY", pvInt)
+                                        ->endNested()
                                       ->endNested()
                                       ->createStructure());
 
-    testOk1(X.get()!=Y.get());
-    testOk1(X->getField("A")==Y->getField("A"));
-    testOk1(!X->getField("A2"));
-    testOk1(!!Y->getField("A2"));
-    testOk1(X->getField("nest")!=Y->getField("nest"));
-    testOk1(X->getField<Structure>("nest")->getField("B")==Y->getField<Structure>("nest")->getField("B"));
-    testOk1(!X->getField<Structure>("nest")->getField("B2"));
-    testOk1(!!Y->getField<Structure>("nest")->getField("B2"));
+    Structure::const_shared_pointer expected(getFieldCreate()->createFieldBuilder()
+                                             ->add("A", pvInt)
+                                             ->addNestedStructure("nest")
+                                                 ->add("B", pvInt)
+                                                 ->addNestedStructure("one")
+                                                    ->add("XX", pvInt)
+                                                    ->add("YY", pvInt)
+                                                 ->endNested()
+                                                ->add("B2", pvInt)
+                                             ->endNested()
+                                             ->addNestedUnion("U")
+                                                ->add("B", pvInt)
+                                                ->addNestedStructure("one")
+                                                   ->add("XX", pvInt)
+                                                   ->add("YY", pvInt)
+                                                ->endNested()
+                                                ->add("B2", pvInt)
+                                             ->endNested()
+                                             ->addNestedStructureArray("sarr")
+                                                 ->add("X", pvInt)
+                                                 ->addNestedStructure("one")
+                                                    ->add("XX", pvInt)
+                                                    ->add("YY", pvInt)
+                                                 ->endNested()
+                                                 ->add("Y", pvInt)
+                                             ->endNested()
+                                             ->add("A2", pvInt)
+                                             ->createStructure());
+
+    testShow()<<"base: "<<base
+              <<"amended: "<<amended
+              <<"expected: "<<expected;
+
+    testNotEqual(static_cast<const void*>(amended.get()),
+                 static_cast<const void*>(expected.get()));
+    testEqual(*amended, *expected);
 
     try {
-        Structure::const_shared_pointer Z(getFieldCreate()->createFieldBuilder(Y)
+        Structure::const_shared_pointer Z(getFieldCreate()->createFieldBuilder(amended)
                                           ->add("A2", pvDouble)
                                           ->createStructure());
         testFail("Unexpected success in adding duplicate field");
@@ -278,7 +337,7 @@ void test_extendStructure()
     }
 
     try {
-        Structure::const_shared_pointer Z(getFieldCreate()->createFieldBuilder(Y)
+        Structure::const_shared_pointer Z(getFieldCreate()->createFieldBuilder(amended)
                                           ->addNestedStructure("nest")
                                             ->add("B2", pvDouble)
                                           ->endNested()
@@ -293,7 +352,7 @@ void test_extendStructure()
 
 MAIN(testFieldBuilder)
 {
-    testPlan(78);
+    testPlan(72);
     try {
         testDiag("Tests for FieldBuilder");
 

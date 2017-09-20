@@ -1023,9 +1023,14 @@ private:
     FieldBuilder();
     FieldBuilder(const Structure*);
     FieldBuilder(const FieldBuilderPtr & _parentBuilder, const std::string& name, const Structure*);
+    FieldBuilder(const FieldBuilderPtr & _parentBuilder, const std::string& name, const StructureArray*);
+    FieldBuilder(const FieldBuilderPtr & _parentBuilder, const std::string& name, const Union*);
+    FieldBuilder(const FieldBuilderPtr & _parentBuilder, const std::string& name, const UnionArray*);
     FieldBuilder(FieldBuilderPtr const & parentBuilder,
 			std::string const & nestedName,
 			Type nestedClassToBuild, bool nestedArray);
+
+    const Field *findField(const std::string& name, Type ftype);
 			
 	void reset();
 	FieldConstPtr createFieldInternal(Type type);

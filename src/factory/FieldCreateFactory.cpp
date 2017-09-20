@@ -737,6 +737,51 @@ FieldBuilder::FieldBuilder(const FieldBuilderPtr & _parentBuilder,
     ,createNested(false)
 {}
 
+FieldBuilder::FieldBuilder(const FieldBuilderPtr & _parentBuilder,
+                           const std::string& name,
+                           const StructureArray* S)
+    :fieldCreate(getFieldCreate())
+    ,id(S->getStructure()->getID())
+    ,idSet(!id.empty())
+    ,fieldNames(S->getStructure()->getFieldNames())
+    ,fields(S->getStructure()->getFields())
+    ,parentBuilder(_parentBuilder)
+    ,nestedClassToBuild(structure)
+    ,nestedName(name)
+    ,nestedArray(true)
+    ,createNested(false)
+{}
+
+FieldBuilder::FieldBuilder(const FieldBuilderPtr & _parentBuilder,
+                           const std::string& name,
+                           const Union* S)
+    :fieldCreate(getFieldCreate())
+    ,id(S->getID())
+    ,idSet(!id.empty())
+    ,fieldNames(S->getFieldNames())
+    ,fields(S->getFields())
+    ,parentBuilder(_parentBuilder)
+    ,nestedClassToBuild(union_)
+    ,nestedName(name)
+    ,nestedArray(false)
+    ,createNested(false)
+{}
+
+FieldBuilder::FieldBuilder(const FieldBuilderPtr & _parentBuilder,
+                           const std::string& name,
+                           const UnionArray* S)
+    :fieldCreate(getFieldCreate())
+    ,id(S->getUnion()->getID())
+    ,idSet(!id.empty())
+    ,fieldNames(S->getUnion()->getFieldNames())
+    ,fields(S->getUnion()->getFields())
+    ,parentBuilder(_parentBuilder)
+    ,nestedClassToBuild(union_)
+    ,nestedName(name)
+    ,nestedArray(true)
+    ,createNested(false)
+{}
+
 FieldBuilder::FieldBuilder(FieldBuilderPtr const & _parentBuilder,
 			string const & _nestedName,
             Type _nestedClassToBuild, bool _nestedArray)
@@ -893,7 +938,7 @@ UnionConstPtr FieldBuilder::createUnion()
     return field;
 }
 
-FieldBuilderPtr FieldBuilder::addNestedStructure(string const & name)
+const Field* FieldBuilder::findField(const std::string& name, Type ftype)
 {
     // linear search on the theory that the number of fields is small
     for(size_t i=0; i<fieldNames.size(); i++)
@@ -901,11 +946,20 @@ FieldBuilderPtr FieldBuilder::addNestedStructure(string const & name)
         if(name!=fieldNames[i])
             continue;
 
-        if(fields[i]->getType()!=structure)
-            THROW_EXCEPTION2(std::invalid_argument, "nested field not structure: "+name);
+        if(fields[i]->getType()!=ftype)
+            THROW_EXCEPTION2(std::invalid_argument, "nested field not required type: "+name);
 
+        return fields[i].get();
+    }
+    return 0;
+}
+
+FieldBuilderPtr FieldBuilder::addNestedStructure(string const & name)
+{
+    const Field *cur = findField(name, structure);
+    if(cur) {
         return FieldBuilderPtr(new FieldBuilder(shared_from_this(), name,
-                                                static_cast<const Structure*>(fields[i].get())));
+                                                static_cast<const Structure*>(cur)));
     }
     return FieldBuilderPtr(new FieldBuilder(shared_from_this(), name, structure, false));
 }
@@ -913,23 +967,38 @@ FieldBuilderPtr FieldBuilder::addNestedStructure(string const & name)
 
 FieldBuilderPtr FieldBuilder::addNestedUnion(string const & name)
 {
+    const Field *cur = findField(name, union_);
+    if(cur) {
+        return FieldBuilderPtr(new FieldBuilder(shared_from_this(), name,
+                                                static_cast<const Union*>(cur)));
+    }
     return FieldBuilderPtr(new FieldBuilder(shared_from_this(), name, union_, false));
 }
 
 
 FieldBuilderPtr FieldBuilder::addNestedStructureArray(string const & name)
 {
+    const Field *cur = findField(name, structureArray);
+    if(cur) {
+        return FieldBuilderPtr(new FieldBuilder(shared_from_this(), name,
+                                                static_cast<const StructureArray*>(cur)));
+    }
     return FieldBuilderPtr(new FieldBuilder(shared_from_this(), name, structure, true));
 }
 
 FieldBuilderPtr FieldBuilder::addNestedUnionArray(string const & name)
 {
+    const Field *cur = findField(name, unionArray);
+    if(cur) {
+        return FieldBuilderPtr(new FieldBuilder(shared_from_this(), name,
+                                                static_cast<const UnionArray*>(cur)));
+    }
     return FieldBuilderPtr(new FieldBuilder(shared_from_this(), name, union_, true));
 }
 
 FieldBuilderPtr FieldBuilder::endNested()
 {
-    if (!parentBuilder.get())
+    if (!parentBuilder)
         THROW_EXCEPTION2(std::runtime_error, "FieldBuilder::endNested() can only be called to create nested fields");
         
     FieldConstPtr nestedField = createFieldInternal(nestedClassToBuild);
@@ -945,9 +1014,17 @@ FieldBuilderPtr FieldBuilder::endNested()
         {
             if(nestedName!=parentBuilder->fieldNames[i])
                 continue;
-            assert(parentBuilder->fields[i]->getType()==structure);
 
-            parentBuilder->fields[i] = nestedField;
+            if(nestedArray) {
+                if(nestedClassToBuild==structure)
+                    parentBuilder->fields[i] = fieldCreate->createStructureArray(std::tr1::static_pointer_cast<const Structure>(nestedField));
+                else if(nestedClassToBuild==union_)
+                    parentBuilder->fields[i] = fieldCreate->createUnionArray(std::tr1::static_pointer_cast<const Union>(nestedField));
+                else
+                    throw std::logic_error("bad nested class");
+            } else {
+                parentBuilder->fields[i] = nestedField;
+            }
             return parentBuilder;
         }
         // this only reached if bug in ctor
