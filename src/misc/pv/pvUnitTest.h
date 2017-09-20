@@ -29,24 +29,24 @@ void test_method(const char *kname, const char *mname)
     }
 }
 
-class testPassx
+class epicsShareClass testPassx
 {
     std::ostringstream strm;
-    bool pass, alive;
+    const bool dotest, pass;
+    bool alive;
 public:
-    explicit testPassx(bool r) :pass(r), alive(true) {}
-    ~testPassx() {
-        if(alive)
-            testOk(pass, "%s", strm.str().c_str());
-    }
+    testPassx() :dotest(false), pass(false), alive(true) {}
+    explicit testPassx(bool r) :dotest(true), pass(r), alive(true) {}
+    ~testPassx();
     template<typename T>
     inline testPassx& operator<<(T v) {
         strm<<v;
         return *this;
     }
 
+    // allow testPassx to be returned
     // move ctor masquerading as copy ctor
-    testPassx(testPassx& o) :strm(o.strm.str()), pass(o.pass), alive(o.alive) { strm.seekp(0, std::ios_base::end); o.alive = false; }
+    testPassx(testPassx& o);
 private:
     testPassx& operator=(const testPassx&);
 };
@@ -55,6 +55,12 @@ template<typename LHS, typename RHS>
 inline testPassx testEqualx(const char *nLHS, const char *nRHS, LHS l, RHS r)
 {
     return testPassx(l==r)<<nLHS<<" ("<<l<<") == "<<nRHS<<" ("<<r<<")";
+}
+
+template<typename LHS, typename RHS>
+inline testPassx testNotEqualx(const char *nLHS, const char *nRHS, LHS l, RHS r)
+{
+    return testPassx(l!=r)<<nLHS<<" ("<<l<<") != "<<nRHS<<" ("<<r<<")";
 }
 
 }//namespace detail
@@ -73,17 +79,19 @@ inline testPassx testEqualx(const char *nLHS, const char *nRHS, LHS l, RHS r)
  * Each invocation of TEST_METHOD() constructs a new instance of 'klass' on the stack.
  * Thus constructor and destructor can be used for common test setup and tear down.
  @code
- struct MyTest {
-   MyTest() { } // setup
-   ~MyTest() { } // tear down
-   void test1() {}
-   void test2() {}
- };
+ namespace { // anon
+     struct MyTest {
+           MyTest() { } // setup
+           ~MyTest() { } // tear down
+           void test1() {}
+           void test2() {}
+     };
+ } // namespace anon
  MAIN(somename) {
-   testPlan(0);
-   TEST_METHOD(MyTest, test1)
-   TEST_METHOD(MyTest, test2)
-   return testDone();
+       testPlan(0);
+       TEST_METHOD(MyTest, test1)
+       TEST_METHOD(MyTest, test2)
+       return testDone();
  }
  @endcode
  */
@@ -101,6 +109,8 @@ inline testPassx testEqualx(const char *nLHS, const char *nRHS, LHS l, RHS r)
  */
 #define testEqual(LHS, RHS) ::detail::testEqualx(#LHS, #RHS, LHS, RHS)
 
+#define testNotEqual(LHS, RHS) ::detail::testNotEqualx(#LHS, #RHS, LHS, RHS)
+
 /** Pass/fail from boolean
  *
  @code
@@ -113,7 +123,21 @@ inline testPassx testEqualx(const char *nLHS, const char *nRHS, LHS l, RHS r)
  */
 #define testTrue(B) ::detail::testPassx(!!(B))<<#B
 
+/** Test that a given block throws an exception
+ *
+ @code
+ testThrows(std::runtime_error, somefunc(5))
+ @endcode
+ */
 #define testThrows(EXC, CODE) try{ CODE; testFail("unexpected success of " #CODE); }catch(EXC& e){testPass("catch expected exception: %s", e.what());}
+
+/** Print test output w/o testing
+ *
+ @code
+ testShow()<<"Foo";
+ @endcode
+ */
+#define testShow() ::detail::testPassx()
 
 /** Compare value of PVStructure field
  *

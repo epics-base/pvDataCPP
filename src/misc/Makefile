@@ -38,5 +38,6 @@ LIBSRCS += status.cpp
 LIBSRCS += localStaticLock.cpp
 LIBSRCS += typeCast.cpp
 LIBSRCS += parseToPOD.cpp
+LIBSRCS += pvUnitTest.cpp
 LIBSRCS += debugPtr.cpp
 LIBSRCS += reftrack.cpp
