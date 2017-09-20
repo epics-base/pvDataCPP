@@ -273,6 +273,7 @@ void test_extendStructure()
                                       ->addNestedStructure("nest")
                                         ->add("B2", pvInt)
                                         ->addNestedStructure("one")
+                                           ->add("XX", pvInt) // exact duplicate silently ignored
                                            ->add("YY", pvInt)
                                         ->endNested()
                                       ->endNested()
@@ -327,25 +328,17 @@ void test_extendStructure()
                  static_cast<const void*>(expected.get()));
     testEqual(*amended, *expected);
 
-    try {
-        Structure::const_shared_pointer Z(getFieldCreate()->createFieldBuilder(amended)
-                                          ->add("A2", pvDouble)
-                                          ->createStructure());
-        testFail("Unexpected success in adding duplicate field");
-    }catch(std::exception& e){
-        testPass("catch expected exception: %s", e.what());
-    }
+    testThrows(std::runtime_error,
+               getFieldCreate()->createFieldBuilder(amended)
+                                   ->add("A2", pvDouble)
+                                   ->createStructure());
 
-    try {
-        Structure::const_shared_pointer Z(getFieldCreate()->createFieldBuilder(amended)
-                                          ->addNestedStructure("nest")
-                                            ->add("B2", pvDouble)
-                                          ->endNested()
-                                          ->createStructure());
-        testFail("Unexpected success in adding duplicate nested field");
-    }catch(std::exception& e){
-        testPass("catch expected exception: %s", e.what());
-    }
+    testThrows(std::runtime_error,
+               getFieldCreate()->createFieldBuilder(amended)
+                                  ->addNestedStructure("nest")
+                                    ->add("B2", pvDouble)
+                                  ->endNested()
+                                  ->createStructure());
 }
 
 } // namespace

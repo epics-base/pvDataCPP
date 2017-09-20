@@ -809,76 +809,59 @@ FieldBuilderPtr FieldBuilder::setId(string const & id)
     return shared_from_this();
 }
 
-void FieldBuilder::checkFieldName(const std::string& name)
-{
-    // linear search on the theory that the number of fields is small
-    for(StringArray::const_iterator it = fieldNames.begin(), end = fieldNames.end();
-        it != end; ++it)
-    {
-        if(name==*it)
-            THROW_EXCEPTION2(std::invalid_argument, std::string("duplicate fieldName ")+name);
-    }
-}
-
 FieldBuilderPtr FieldBuilder::add(string const & name, ScalarType scalarType)
 {
-    checkFieldName(name);
-    fields.push_back(fieldCreate->createScalar(scalarType)); fieldNames.push_back(name); 
-	return shared_from_this();
+    return add(name, fieldCreate->createScalar(scalarType));
 }
 
 FieldBuilderPtr FieldBuilder::addBoundedString(std::string const & name, std::size_t maxLength)
 {
-    checkFieldName(name);
-    fields.push_back(fieldCreate->createBoundedString(maxLength)); fieldNames.push_back(name);
-    return shared_from_this();
+    return add(name, fieldCreate->createBoundedString(maxLength));
 }
 
 FieldBuilderPtr FieldBuilder::add(string const & name, FieldConstPtr const & field)
 {
-    checkFieldName(name);
-    fields.push_back(field); fieldNames.push_back(name);
+    const Field* cur = findField(name, field->getType());
+    if(!cur) {
+        fields.push_back(field); fieldNames.push_back(name);
+    } else if(*cur!=*field) {
+        THROW_EXCEPTION2(std::runtime_error, "duplicate field name w/ different type : "+name);
+    } // else exact duplicate is silently ignored
 	return shared_from_this();
 }
 
 FieldBuilderPtr FieldBuilder::addArray(string const & name, ScalarType scalarType)
 {
-    checkFieldName(name);
-    fields.push_back(fieldCreate->createScalarArray(scalarType)); fieldNames.push_back(name);
-	return shared_from_this();
+    return add(name, fieldCreate->createScalarArray(scalarType));
 }
 
 FieldBuilderPtr FieldBuilder::addFixedArray(string const & name, ScalarType scalarType, size_t size)
 {
-    checkFieldName(name);
-    fields.push_back(fieldCreate->createFixedScalarArray(scalarType, size)); fieldNames.push_back(name);
-    return shared_from_this();
+    return add(name, fieldCreate->createFixedScalarArray(scalarType, size));
 }
 
 FieldBuilderPtr FieldBuilder::addBoundedArray(string const & name, ScalarType scalarType, size_t size)
 {
-    checkFieldName(name);
-    fields.push_back(fieldCreate->createBoundedScalarArray(scalarType, size)); fieldNames.push_back(name);
-    return shared_from_this();
+    return add(name, fieldCreate->createBoundedScalarArray(scalarType, size));
 }
 
 FieldBuilderPtr FieldBuilder::addArray(string const & name, FieldConstPtr const & element)
 {
-    checkFieldName(name);
+    FieldConstPtr fld;
     switch (element->getType())
     {
         case structure:
-            fields.push_back(fieldCreate->createStructureArray(static_pointer_cast<const Structure>(element)));
+            fld = fieldCreate->createStructureArray(static_pointer_cast<const Structure>(element));
             break;
         case union_:
-            fields.push_back(fieldCreate->createUnionArray(static_pointer_cast<const Union>(element)));
+            fld = fieldCreate->createUnionArray(static_pointer_cast<const Union>(element));
             break;
         case scalar:
 
             if (std::tr1::dynamic_pointer_cast<const BoundedString>(element).get())
                 THROW_EXCEPTION2(std::invalid_argument, "bounded string arrays are not supported");
 
-            fields.push_back(fieldCreate->createScalarArray(static_pointer_cast<const Scalar>(element)->getScalarType()));
+            fld = fieldCreate->createScalarArray(static_pointer_cast<const Scalar>(element)->getScalarType());
             break;
         // scalarArray?
         default:
@@ -887,8 +870,7 @@ FieldBuilderPtr FieldBuilder::addArray(string const & name, FieldConstPtr const 
             THROW_EXCEPTION2(std::invalid_argument, msg.str());
     }
     
-    fieldNames.push_back(name);
-	return shared_from_this();
+    return add(name, fld);
 }
 
 FieldConstPtr FieldBuilder::createFieldInternal(Type type)

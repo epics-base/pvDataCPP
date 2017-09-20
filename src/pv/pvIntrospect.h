@@ -1035,8 +1035,6 @@ private:
 	void reset();
 	FieldConstPtr createFieldInternal(Type type);
 
-    void checkFieldName(const std::string &name);
-
     friend class FieldCreate;
     
     const FieldCreatePtr fieldCreate;
