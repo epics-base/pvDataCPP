@@ -8,8 +8,25 @@ EOF
 install -d "$HOME/.source"
 cd "$HOME/.source"
 
-git clone --quiet --depth 5 --branch "$BRBASE" https://github.com/${REPOBASE:-epics-base}/epics-base.git epics-base
-(cd epics-base && git log -n1 )
+add_base_module()
+{
+MODULE=$1
+BRANCH=$2
+( cd epics-base/modules && \
+git clone --quiet --depth 5 --branch "$MODULE"/"$BRANCH" https://github.com/${REPOBASE:-epics-base}/epics-base.git "$MODULE" && \
+cd "$MODULE" && \
+git log -n1 )
+}
+
+if [ "$BRBASE" ]
+then
+  git clone --quiet --depth 5 --branch "$BRBASE" https://github.com/${REPOBASE:-epics-base}/epics-base.git epics-base
+  (cd epics-base && git log -n1 )
+else
+  git clone --quiet --depth 5 --branch core/"${BRCORE:-master}" https://github.com/${REPOBASE:-epics-base}/epics-base.git epics-base
+  ( cd epics-base && git log -n1 )
+  add_base_module libcom "${BRLIBCOM:-master}"
+fi
 
 EPICS_HOST_ARCH=`sh epics-base/startup/EpicsHostArch`
 
