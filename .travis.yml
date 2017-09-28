@@ -1,6 +1,6 @@
 sudo: false
 dist: trusty
-language: c
+language: c++
 compiler:
   - gcc
 addons:
@@ -18,8 +18,8 @@ script:
 env:
  - BRCORE=master BRLIBCOM=master
  - CMPLR=clang
- - EXTRA="CMD_CXXFLAGS=-std=c++11"
- - CMPLR=clang EXTRA="CMD_CXXFLAGS=-std=c++11"
+ - USR_CXXFLAGS=-std=c++11
+ - CMPLR=clang USR_CXXFLAGS=-std=c++11
  - WINE=32 TEST=NO STATIC=YES
  - WINE=32 TEST=NO STATIC=NO
  - RTEMS=4.10 TEST=NO
