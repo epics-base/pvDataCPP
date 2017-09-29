@@ -292,6 +292,8 @@ class epicsShareClass Field :
     virtual public Serializable,
     public std::tr1::enable_shared_from_this<Field> {
 public:
+   static size_t num_instances;
+
    POINTER_DEFINITIONS(Field);
     /**
      * Destructor.
@@ -322,7 +324,7 @@ protected:
      */
    Field(Type type);
 private:
-   Type m_fieldType;
+   const Type m_fieldType;
 
    friend class StructureArray;
    friend class Structure;

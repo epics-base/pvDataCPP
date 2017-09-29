@@ -21,6 +21,7 @@
 #include <epicsMutex.h>
 
 #define epicsExportSharedSymbols
+#include <pv/reftrack.h>
 #include <pv/lock.h>
 #include <pv/pvIntrospect.h>
 #include <pv/factory.h>
@@ -34,12 +35,17 @@ namespace epics { namespace pvData {
 
 static DebugLevel debugLevel = lowDebug;
 
+size_t Field::num_instances;
+
+
 Field::Field(Type type)
     : m_fieldType(type)
 {
+    REFTRACE_INCREMENT(num_instances);
 }
 
 Field::~Field() {
+    REFTRACE_DECREMENT(num_instances);
 }
 
 
@@ -1419,7 +1425,10 @@ FieldCreatePtr FieldCreate::getFieldCreate()
 	static Mutex mutex;
 
 	Lock xx(mutex);
-    if(fieldCreate.get()==0) fieldCreate = FieldCreatePtr(new FieldCreate());
+    if(fieldCreate.get()==0) {
+        fieldCreate = FieldCreatePtr(new FieldCreate());
+        registerRefCounter("Field", &Field::num_instances);
+    }
     return fieldCreate;
 }
 
