@@ -19,20 +19,11 @@ const char* Status::StatusTypeName[] = { "OK", "WARNING", "ERROR", "FATAL" };
 
 Status Status::Ok;
 
-//PVDATA_REFCOUNT_MONITOR_DEFINE(status);
-
-Status::Status() :
-    m_statusType(STATUSTYPE_OK)
-{
-}
-
 Status::Status(StatusType type, string const & message) :
     m_statusType(type), m_message(message)
 {
     if (type == STATUSTYPE_OK)
         throw std::invalid_argument("type == STATUSTYPE_OK");
-         
-    //PVDATA_REFCOUNT_MONITOR_CONSTRUCT(status);
 }
 
 Status::Status(StatusType type, string const & message, string const & stackDump) :
@@ -40,38 +31,15 @@ Status::Status(StatusType type, string const & message, string const & stackDump
 {
     if (type == STATUSTYPE_OK)
         throw std::invalid_argument("type == STATUSTYPE_OK");
-
-    //PVDATA_REFCOUNT_MONITOR_CONSTRUCT(status);
 }
     
-Status::~Status() {
-    //PVDATA_REFCOUNT_MONITOR_DESTRUCT(status);
-}
-    
-Status::StatusType Status::getType() const
+void Status::maximize(const Status& o)
 {
-    return m_statusType;    
-}
-    
-
-string Status::getMessage() const
-{
-    return m_message;
-}
-    
-string Status::getStackDump() const
-{
-    return m_stackDump;
-}
-    
-bool Status::isOK() const
-{
-    return (m_statusType == STATUSTYPE_OK);
-}
-    
-bool Status::isSuccess() const
-{
-    return (m_statusType == STATUSTYPE_OK || m_statusType == STATUSTYPE_WARNING);
+    if(m_statusType < o.m_statusType) {
+        m_statusType = o.m_statusType;
+        m_message = o.m_message;
+        m_stackDump = o.m_stackDump;
+    }
 }
 
 void Status::serialize(ByteBuffer *buffer, SerializableControl *flusher) const
@@ -120,18 +88,6 @@ void Status::dump(std::ostream& o) const
     if (!m_stackDump.empty())
         o << ", stackDump=" << std::endl << m_stackDump;
     o << ']';
-}    
-
-std::ostream& operator<<(std::ostream& o, const Status& status)
-{
-    status.dump(o);
-    return o;
-}
-
-std::ostream& operator<<(std::ostream& o, const Status::StatusType& statusType)
-{
-    o << Status::StatusTypeName[statusType];
-    return o;
 }
 
 }}

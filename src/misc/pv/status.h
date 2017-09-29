@@ -53,7 +53,7 @@ namespace epics { namespace pvData {
             /**
              * Creates OK status; STATUSTYPE_OK, empty message and stackDump.
              */
-            Status();
+            Status() :m_statusType(STATUSTYPE_OK) {}
         	
         	/**
         	 * Create non-OK status.
@@ -65,25 +65,25 @@ namespace epics { namespace pvData {
              */
             Status(StatusType type, std::string const & message, std::string const & stackDump);
         
-            ~Status();
+            virtual ~Status() {}
             
             /**
              * Get status type.
              * @return status type, non-<code>null</code>.
              */
-            StatusType getType() const;
+            inline StatusType getType() const { return m_statusType; }
 
             /**
              * Get error message describing an error. Required if error status.
              * @return error message.
              */
-            std::string getMessage() const;
+            inline std::string getMessage() const { return m_message; }
 
             /**
              * Get stack dump where error (exception) happened. Optional.
              * @return stack dump.
              */
-            std::string getStackDump() const;
+            inline std::string getStackDump() const { return m_stackDump; }
 
             /**
              * Convenient OK test. Same as <code>(getType() == StatusType.OK)</code>.
@@ -92,13 +92,47 @@ namespace epics { namespace pvData {
              * @return OK status.
              * @see #isSuccess()
              */
-            bool isOK() const;
+            inline bool isOK() const {
+                return (m_statusType == STATUSTYPE_OK);
+            }
 
             /**
-             * Check if operation succeeded.
+             * Check if operation succeeded (OK or WARNING).
              * @return operation success status.
              */
-            bool isSuccess() const;
+            inline bool isSuccess() const {
+                return (m_statusType == STATUSTYPE_OK || m_statusType == STATUSTYPE_WARNING);
+            }
+
+#if __cplusplus>=201103L
+            FORCE_INLINE explicit operator bool() const {
+                return isSuccess();
+            }
+#else
+        private:
+            typedef bool (Status::*truth_type)() const;
+        public:
+            FORCE_INLINE operator truth_type() const {
+                return isSuccess() ? &Status::isSuccess : 0;
+            }
+#endif
+
+            /** override this Status if the other has higher StatusType
+             @code
+             Status ret;
+             ret |= call1();
+             if(ret)
+                ret |= call2();
+             return ret;
+             @endcode
+             */
+            void maximize(const Status& o);
+
+            //! short hand for "this->maximize(o)"
+            FORCE_INLINE Status& operator|=(const Status& o) {
+                maximize(o);
+                return *this;
+            }
 
             void serialize(ByteBuffer *buffer, SerializableControl *flusher) const;
             void deserialize(ByteBuffer *buffer, DeserializableControl *flusher);
@@ -113,8 +147,15 @@ namespace epics { namespace pvData {
 
         };
 
-        epicsShareExtern std::ostream& operator<<(std::ostream& o, const Status& status);
-        epicsShareExtern std::ostream& operator<<(std::ostream& o, const Status::StatusType& statusType);
+        FORCE_INLINE std::ostream& operator<<(std::ostream& o, const Status& status) {
+            status.dump(o);
+            return o;
+        }
+
+        FORCE_INLINE std::ostream& operator<<(std::ostream& o, const Status::StatusType& statusType) {
+            o << Status::StatusTypeName[statusType];
+            return o;
+        }
 
 }}
 #endif  /* STATUS_H */
