@@ -148,14 +148,14 @@ inline testPassx testNotEqualx(const char *nLHS, const char *nRHS, LHS l, RHS r)
  */
 template<typename PVD>
 ::detail::testPassx
-testFieldEqual(const std::tr1::shared_ptr<epics::pvData::PVStructure>& val, const char *name, typename PVD::value_type expect)
+testFieldEqual(const std::tr1::shared_ptr<const epics::pvData::PVStructure>& val, const char *name, typename PVD::value_type expect)
 {
     if(!val) {
         return ::detail::testPassx(false)<<" null structure pointer";
     }
-    typename PVD::shared_pointer fval(val->getSubField<PVD>(name));
+    typename PVD::const_shared_pointer fval(val->getSubField<PVD>(name));
     if(!fval) {
-        epics::pvData::PVUnionPtr uval(val->getSubField<epics::pvData::PVUnion>(name));
+        epics::pvData::PVUnion::const_shared_pointer uval(val->getSubField<epics::pvData::PVUnion>(name));
         if(uval)
             fval = uval->get<PVD>();
     }
@@ -169,12 +169,12 @@ testFieldEqual(const std::tr1::shared_ptr<epics::pvData::PVStructure>& val, cons
 
 template<typename PVD>
 ::detail::testPassx
-testFieldEqual(const std::tr1::shared_ptr<epics::pvData::PVStructure>& val, const char *name, typename PVD::const_svector expect)
+testFieldEqual(const std::tr1::shared_ptr<const epics::pvData::PVStructure>& val, const char *name, typename PVD::const_svector expect)
 {
     if(!val) {
         return ::detail::testPassx(false)<<" null structure pointer";
     }
-    typename PVD::shared_pointer fval(val->getSubField<PVD>(name));
+    typename PVD::const_shared_pointer fval(val->getSubField<PVD>(name));
     if(!fval) {
         return ::detail::testPassx(false)<<" field '"<<name<<"' with type "<<typeid(PVD).name()<<" does not exist";
     } else {
