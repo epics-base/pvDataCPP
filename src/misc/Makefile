@@ -25,6 +25,7 @@ INC += pv/templateMeta.h
 INC += pv/current_function.h
 INC += pv/pvUnitTest.h
 INC += pv/reftrack.h
+INC += pv/anyscalar.h
 
 LIBSRCS += byteBuffer.cpp
 LIBSRCS += bitSet.cpp

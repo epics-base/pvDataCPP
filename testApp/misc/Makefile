@@ -80,3 +80,7 @@ TESTS += testjson
 TESTPROD_HOST += test_reftrack
 test_reftrack_SRCS += test_reftrack.cpp
 TESTS += test_reftrack
+
+TESTPROD_HOST += testanyscalar
+testanyscalar_SRCS += testanyscalar.cpp
+TESTS += testanyscalar
