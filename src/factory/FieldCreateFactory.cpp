@@ -611,6 +611,44 @@ Union::Union (
 
 Union::~Union() { }
 
+int32 Union::guess(Type t, ScalarType s) const
+{
+    if(t!=scalar && t!=scalarArray)
+        THROW_EXCEPTION2(std::logic_error, "PVUnion::guess() only support scalar and scalarArray");
+
+    int32 ret = -1;
+    for(size_t i=0, N=fields.size(); i<N; i++)
+    {
+        if(fields[i]->getType()!=t)
+            continue;
+
+        ScalarType type;
+        switch(fields[i]->getType()) {
+        case scalar:
+            type = static_cast<const Scalar*>(fields[i].get())->getScalarType();
+            break;
+        case scalarArray:
+            type = static_cast<const ScalarArray*>(fields[i].get())->getElementType();
+            break;
+        case structure:
+        case structureArray:
+        case union_:
+        case unionArray:
+            continue;
+        }
+
+        if(type==s) {
+            // exact match
+            ret = i;
+            break; // we're done
+
+        } else if(ret==-1) {
+            // first partial match
+            ret = i;
+        }
+    }
+    return ret;
+}
 
 string Union::getID() const
 {

@@ -856,6 +856,17 @@ public:
      */
     bool isVariant() const {return (fieldNames.size() == 0);}
 
+    /** Attempt to find an suitable member to stored the specified type.
+     *
+     * Returned index is guerenteed to by of specified Type (either scalar or scalarArray).
+     * Provided ScalarType is taken as a hint.
+     *
+     @param t Must be either scalar or scalarArray
+     @param s The preferred ScalarType
+     @returns A valid index or -1
+     */
+    int32 guess(Type t, ScalarType s) const;
+
     virtual std::string getID() const;
 
     virtual std::ostream& dump(std::ostream& o) const;

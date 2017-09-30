@@ -271,7 +271,7 @@ bool compareField(const PVUnion* left, const PVUnion* right)
         
     if (ls->isVariant())
     {
-        PVFieldPtr lval = left->get();
+        const PVField::const_shared_pointer& lval = left->get();
         if (lval.get() == 0)
             return right->get().get() == 0;
         else

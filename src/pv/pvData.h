@@ -959,19 +959,25 @@ public:
      * Get the introspection interface
      * @return The interface.
      */
-    UnionConstPtr getUnion() const;
+    inline const UnionConstPtr& getUnion() const { return unionPtr; }
 
     /**
      * Get the @c PVField value stored in the field.
      * @return @c PVField value of field, @c null if {@code getSelectedIndex() == UNDEFINED_INDEX}.
      */
-    PVFieldPtr get() const;
+    inline const PVFieldPtr& get() { return value; }
+    inline PVField::const_shared_pointer get() const { return value; }
    
     template<typename PVT>
-    std::tr1::shared_ptr<PVT> get() const {
+    inline std::tr1::shared_ptr<PVT> get() {
         return std::tr1::dynamic_pointer_cast<PVT>(get());
     }
-        
+
+    template<typename PVT>
+    inline std::tr1::shared_ptr<const PVT> get() const {
+        return std::tr1::dynamic_pointer_cast<const PVT>(get());
+    }
+
     /**
      * Select field (set index) and get the field at the index.
      * @param index index of the field to select.
@@ -981,7 +987,7 @@ public:
     PVFieldPtr select(int32 index);
 
     template<typename PVT>
-    std::tr1::shared_ptr<PVT> select(int32 index) {
+    inline std::tr1::shared_ptr<PVT> select(int32 index) {
         return std::tr1::dynamic_pointer_cast<PVT>(select(index));
     }
 
@@ -994,7 +1000,7 @@ public:
     PVFieldPtr select(std::string const & fieldName);
 
     template<typename PVT>
-    std::tr1::shared_ptr<PVT> select(std::string const & fieldName) {
+    inline std::tr1::shared_ptr<PVT> select(std::string const & fieldName) {
         return std::tr1::dynamic_pointer_cast<PVT>(select(fieldName));
     }
 
@@ -1002,21 +1008,23 @@ public:
      * Get selected field index.
      * @return selected field index.
      */
-    int32 getSelectedIndex() const;
+    inline int32 getSelectedIndex() const { return selector; }
     
     /**
      * Get selected field name.
      * @return selected field name, empty string if field does not exist.
      */
     std::string getSelectedFieldName() const;
-    
+
     /**
      * Set the @c PVField (by reference!) as selected field.
      * If a value is not a valid union field an @c std::invalid_argument
      * exception is thrown.
      * @param value the field to set.
      */
-    void set(PVFieldPtr const & value);
+    inline void set(PVFieldPtr const & value) {
+        set(selector, value);
+    }
     /**
      * Set the @c PVField (by reference!) as field at given index.
      * If a value is not a valid union field an @c std::invalid_argument
@@ -1027,6 +1035,7 @@ public:
      * @see #select(int32)
      */
     void set(int32 index, PVFieldPtr const & value);
+
     /**
      * Set the @c PVField (by reference!) as field by given name.
      * If a value is not a valid union field an @c std::invalid_argument
@@ -1067,7 +1076,7 @@ private:
     static PVDataCreatePtr pvDataCreate;
 
     friend class PVDataCreate;
-    UnionConstPtr unionPtr;
+    UnionConstPtr unionPtr; // same as PVField::getField()
 
 	int32 selector;
 	PVFieldPtr value;

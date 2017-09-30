@@ -130,7 +130,7 @@ void show_field(args& A, const pvd::PVField* fld)
     case pvd::union_:
     {
         const pvd::PVUnion *U=static_cast<const pvd::PVUnion*>(fld);
-        pvd::PVFieldPtr C(U->get());
+        const pvd::PVField::const_shared_pointer& C(U->get());
 
         if(!C) {
             A.strm<<"null";

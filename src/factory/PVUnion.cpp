@@ -40,24 +40,7 @@ PVUnion::PVUnion(UnionConstPtr const & unionPtr)
 
 #undef PVUNION_UNDEFINED_INDEX
 
-PVUnion::~PVUnion()
-{
-}
-
-UnionConstPtr PVUnion::getUnion() const
-{
-    return unionPtr;
-}
-
-PVFieldPtr PVUnion::get() const
-{
-    return value;
-}
-
-int32 PVUnion::getSelectedIndex() const
-{
-    return selector;
-}
+PVUnion::~PVUnion() {}
 
 string PVUnion::getSelectedFieldName() const
 {
@@ -99,11 +82,6 @@ PVFieldPtr PVUnion::select(string const & fieldName)
 	if (index == -1)
         throw std::invalid_argument("no such fieldName");
 	return select(index);
-}
-	
-void PVUnion::set(PVFieldPtr const & value)
-{
-    set(selector, value);
 }
 
 void PVUnion::set(int32 index, PVFieldPtr const & value)
@@ -203,7 +181,7 @@ std::ostream& PVUnion::dumpValue(std::ostream& o) const
     o << format::indent() << getUnion()->getID() << ' ' << getFieldName() << std::endl;
     {
     	format::indent_scope s(o);
-		PVFieldPtr fieldField = get();
+        const PVField::const_shared_pointer& fieldField = get();
 		if (fieldField.get() == NULL)
 		  o << format::indent() << "(none)" << std::endl;
 		else
@@ -232,7 +210,7 @@ void PVUnion::copy(const PVUnion& from)
 void PVUnion::copyUnchecked(const PVUnion& from)
 {
 
-    PVFieldPtr fromValue = from.get();
+    const PVField::const_shared_pointer& fromValue = from.get();
     if (from.getUnion()->isVariant())
     {
         if (fromValue.get() == 0)
