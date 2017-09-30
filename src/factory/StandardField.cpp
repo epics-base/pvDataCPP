@@ -644,7 +644,7 @@ StructureConstPtr StandardField::enumeratedAlarm()
     return enumeratedAlarmField;
 }
 
-StandardFieldPtr StandardField::getStandardField()
+const StandardFieldPtr &StandardField::getStandardField()
 {
     static StandardFieldPtr standardFieldCreate;
     static Mutex mutex;
@@ -656,12 +656,6 @@ StandardFieldPtr StandardField::getStandardField()
         standardFieldCreate->init();
     }
     return standardFieldCreate;
-}
-
-
-
-StandardFieldPtr getStandardField() {
-    return StandardField::getStandardField();
 }
 
 }}

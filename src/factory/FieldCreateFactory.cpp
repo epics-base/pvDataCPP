@@ -1418,7 +1418,7 @@ FieldConstPtr FieldCreate::deserialize(ByteBuffer* buffer, DeserializableControl
 }
 
 // TODO replace with non-locking singleton pattern
-FieldCreatePtr FieldCreate::getFieldCreate()
+const FieldCreatePtr& FieldCreate::getFieldCreate()
 {
 	LOCAL_STATIC_LOCK;
 	static FieldCreatePtr fieldCreate;
@@ -1454,10 +1454,6 @@ FieldCreate::FieldCreate()
     // TODO use std::make_shared
     std::tr1::shared_ptr<UnionArray> sua(new UnionArray(variantUnion), Field::Deleter());
     variantUnionArray = sua;
-}
-
-FieldCreatePtr getFieldCreate() {
-    return FieldCreate::getFieldCreate();
 }
 
 }}

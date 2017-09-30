@@ -1484,7 +1484,7 @@ public:
      * get the singleton
      * @return The PVDataCreate implementation
      */
-    static PVDataCreatePtr getPVDataCreate();
+    static const PVDataCreatePtr &getPVDataCreate();
 
     /**
      * Create a PVField using given Field introspection data.
@@ -1650,7 +1650,9 @@ private:
  *
  * @ingroup pvcontainer
  */
-epicsShareExtern PVDataCreatePtr getPVDataCreate();
+FORCE_INLINE const PVDataCreatePtr& getPVDataCreate() {
+    return PVDataCreate::getPVDataCreate();
+}
 
 bool epicsShareExtern operator==(const PVField&, const PVField&);
 

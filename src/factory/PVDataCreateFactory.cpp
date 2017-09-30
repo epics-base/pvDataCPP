@@ -602,7 +602,7 @@ PVUnionPtr PVDataCreate::createPVUnion(PVUnionPtr const & unionToClone)
 
 // TODO not thread-safe (local static initializers)
 // TODO replace with non-locking singleton pattern
-PVDataCreatePtr PVDataCreate::getPVDataCreate()
+const PVDataCreatePtr& PVDataCreate::getPVDataCreate()
 {
     static PVDataCreatePtr pvDataCreate;
     static Mutex mutex;
@@ -613,10 +613,6 @@ PVDataCreatePtr PVDataCreate::getPVDataCreate()
         pvDataCreate = PVDataCreatePtr(new PVDataCreate());
     }
     return pvDataCreate;
-}
-
-PVDataCreatePtr getPVDataCreate() {
-     return PVDataCreate::getPVDataCreate();
 }
 
 }}

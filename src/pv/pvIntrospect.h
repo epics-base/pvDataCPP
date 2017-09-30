@@ -1060,7 +1060,7 @@ private:
  */
 class epicsShareClass FieldCreate {
 public:
-    static FieldCreatePtr getFieldCreate();
+    static const FieldCreatePtr &getFieldCreate();
 	/**
 	 * Create a new instance of in-line @c Field builder.
 	 * @return a new instance of a @c FieldBuilder.
@@ -1214,7 +1214,9 @@ private:
  * Get the single class that implements FieldCreate,
  * @return The fieldCreate factory.
  */
-epicsShareExtern FieldCreatePtr getFieldCreate();
+FORCE_INLINE const FieldCreatePtr& getFieldCreate() {
+    return FieldCreate::getFieldCreate();
+}
 
 /** Define a compile time mapping from
  * type to enum value.

@@ -66,7 +66,7 @@ public:
      * getStandardField returns the singleton.
      * @return Shared pointer to StandardField.
      */
-    static StandardFieldPtr getStandardField();
+    static const StandardFieldPtr& getStandardField();
     ~StandardField();
     /** Create a structure that has a scalar value field.
      * @param type The type.
@@ -250,7 +250,9 @@ private:
     //friend StandardFieldPtr getStandardField();
 };
 
-epicsShareExtern StandardFieldPtr getStandardField();
+FORCE_INLINE const StandardFieldPtr& getStandardField() {
+    return StandardField::getStandardField();
+}
     
 }}
 #endif  /* STANDARDFIELD_H */
