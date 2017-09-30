@@ -230,7 +230,7 @@ public:
      * Is the field immutable, i.e. does it not allow changes.
      * @return (false,true) if it (is not, is) immutable.
      */
-    bool isImmutable() const;
+    inline bool isImmutable() const {return immutable;}
     /**
      * Set the field to be immutable, i.e. it can no longer be modified.
      * This is permanent, i.e. once done the field cannot be made mutable.
@@ -240,12 +240,13 @@ public:
      * Get the <i>Field</i> that describes the field.
      * @return Field, which is the reflection interface.
      */
-    const FieldConstPtr & getField() const ;
+    inline const FieldConstPtr & getField() const {return field;}
     /**
      * Get the parent of this field.
      * @return The parent interface or null if this is PVRecord
      */
-    PVStructure * getParent() const ;
+    inline PVStructure * getParent() {return parent;}
+    inline const PVStructure * getParent() const {return parent;}
     /**
      * postPut. Called when the field is updated by the implementation.
      */
@@ -285,7 +286,7 @@ private:
     static void computeOffset(const PVField *pvField,std::size_t offset);
     std::string fieldName;
     PVStructure *parent;
-    FieldConstPtr field;
+    const FieldConstPtr field;
     size_t fieldOffset;
     size_t nextFieldOffset;
     bool immutable;

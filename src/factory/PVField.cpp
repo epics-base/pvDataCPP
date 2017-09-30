@@ -60,13 +60,7 @@ size_t PVField::getNumberFields() const
 }
 
 
-bool PVField::isImmutable() const {return immutable;}
-
 void PVField::setImmutable() {immutable = true;}
-
-const FieldConstPtr & PVField::getField() const {return field;}
-
-PVStructure *PVField::getParent() const {return parent;}
 
 void PVField::postPut() 
 {
@@ -103,7 +97,7 @@ std::ostream& operator<<(std::ostream& o, const PVField& f)
 string PVField::getFullName() const
 {
     string ret(fieldName);
-    for(PVField *fld=getParent(); fld; fld=fld->getParent())
+    for(const PVField *fld=getParent(); fld; fld=fld->getParent())
     {
         if(fld->getFieldName().size()==0) break;
         ret = fld->getFieldName() + '.' + ret;
