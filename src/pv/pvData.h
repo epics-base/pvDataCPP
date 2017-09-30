@@ -23,6 +23,7 @@
 
 #include <pv/pvIntrospect.h>
 #include <pv/typeCast.h>
+#include <pv/anyscalar.h>
 #include <pv/sharedVector.h>
 
 #include <shareLib.h>
@@ -339,6 +340,8 @@ protected:
     virtual void getAs(void *, ScalarType) const = 0;
 public:
 
+    virtual void getAs(AnyScalar& v) const =0;
+
     /**
      * Convert and assign the provided value.
      * The value type is determined from the function template argument
@@ -357,6 +360,10 @@ public:
     //! Convert and assign
     virtual void putFrom(const void *, ScalarType) = 0;
 
+    inline void putFrom(const AnyScalar& v) {
+        if(v)
+            putFrom(v.unsafe(), v.type());
+    }
 
     virtual void assign(const PVScalar&) = 0;
 
@@ -459,6 +466,11 @@ public:
         put(castUnsafe<T,T1>(val));
     }
 
+    FORCE_INLINE void putFrom(const AnyScalar& v) {
+        // the template form of putFrom() hides the base class AnyScalar overload
+        PVScalar::putFrom(v);
+    }
+
     virtual void assign(const PVScalar& scalar) OVERRIDE
     {
         if(isImmutable())
@@ -492,6 +504,10 @@ protected:
         castUnsafeV(1, rtype, result, typeCode, (const void*)&src);
     }
 public:
+    virtual void getAs(AnyScalar& v) const
+    {
+        v = get();
+    }
     virtual void putFrom(const void *src, ScalarType stype) OVERRIDE
     {
         T result;

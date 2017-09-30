@@ -11,7 +11,7 @@
 #include <string>
 #include <cstdio>
 
-#include <epicsUnitTest.h>
+#include <pv/pvUnitTest.h>
 #include <testMain.h>
 
 #include <pv/pvIntrospect.h>
@@ -626,6 +626,42 @@ static void testFieldAccess()
     }
 }
 
+static void testAnyScalar()
+{
+    PVStructurePtr value(getPVDataCreate()->createPVStructure(getFieldCreate()->createFieldBuilder()
+                                                              ->add("a", pvInt)
+                                                              ->add("b", pvDouble)
+                                                              ->add("c", pvString)
+                                                              ->createStructure()));
+
+    PVIntPtr a(value->getSubFieldT<PVInt>("a"));
+    PVDoublePtr b(value->getSubFieldT<PVDouble>("b"));
+    PVStringPtr c(value->getSubFieldT<PVString>("c"));
+
+    a->put(42);
+    testEqual(a->get(), 42);
+    testEqual(b->get(), 0.0);
+
+    {
+        AnyScalar temp;
+        a->getAs(temp);
+        b->putFrom(temp);
+    }
+
+    testEqual(a->get(), 42);
+    testEqual(b->get(), 42.0);
+    testEqual(c->get(), "");
+
+    {
+        AnyScalar temp;
+        a->getAs(temp);
+        c->putFrom(temp);
+    }
+
+    testEqual(a->get(), 42);
+    testEqual(c->get(), "42");
+}
+
 static void testSubField()
 {
     PVStructurePtr value(ValueBuilder()
@@ -678,7 +714,7 @@ static void testSubField()
 
 MAIN(testPVData)
 {
-    testPlan(251);
+    testPlan(258);
     try{
         fieldCreate = getFieldCreate();
         pvDataCreate = getPVDataCreate();
@@ -692,6 +728,7 @@ MAIN(testPVData)
         testRequest();
         testCopy();
         testFieldAccess();
+        testAnyScalar();
         testSubField();
     }catch(std::exception& e){
         PRINT_EXCEPTION(e);
