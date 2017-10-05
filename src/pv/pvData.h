@@ -399,6 +399,7 @@ struct ScalarStorageOps<std::string> {
 
     ScalarStorageOps(): value(), maxLength(0) {} // initialized in PVString::PVString
 };
+template<> struct ScalarStorageOps<AnyScalar> {};
 } // namespace detail
 
 /**
