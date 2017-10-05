@@ -399,7 +399,6 @@ struct ScalarStorageOps<std::string> {
 
     ScalarStorageOps(): value(), maxLength(0) {} // initialized in PVString::PVString
 };
-template<> struct ScalarStorageOps<AnyScalar> {};
 } // namespace detail
 
 /**
@@ -468,7 +467,7 @@ public:
         put(castUnsafe<T,T1>(val));
     }
 
-    FORCE_INLINE void putFrom(const AnyScalar& v) {
+    inline void putFrom(const AnyScalar& v) {
         // the template form of putFrom() hides the base class AnyScalar overload
         PVScalar::putFrom(v);
     }
