@@ -64,6 +64,21 @@ template<> const ScalarType PVStringArray::typeCode = pvString;
 template<typename T>
 PVScalarValue<T>::~PVScalarValue() {}
 
+// explicitly instanciate to ensure that windows
+// builds emit exported symbols for inline'd methods
+template class PVScalarValue<boolean>;
+template class PVScalarValue<int8>;
+template class PVScalarValue<uint8>;
+template class PVScalarValue<int16>;
+template class PVScalarValue<uint16>;
+template class PVScalarValue<int32>;
+template class PVScalarValue<uint32>;
+template class PVScalarValue<int64>;
+template class PVScalarValue<uint64>;
+template class PVScalarValue<float>;
+template class PVScalarValue<double>;
+template class PVScalarValue<std::string>;
+
 template<typename T>
 void PVScalarValue<T>::serialize(ByteBuffer *pbuffer,
     SerializableControl *pflusher) const {
