@@ -60,6 +60,10 @@ template<> const ScalarType PVFloatArray::typeCode = pvFloat;
 template<> const ScalarType PVDoubleArray::typeCode = pvDouble;
 template<> const ScalarType PVStringArray::typeCode = pvString;
 
+
+template<typename T>
+PVScalarValue<T>::~PVScalarValue() {}
+
 template<typename T>
 void PVScalarValue<T>::serialize(ByteBuffer *pbuffer,
     SerializableControl *pflusher) const {

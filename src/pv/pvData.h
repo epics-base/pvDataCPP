@@ -420,7 +420,7 @@ public:
     /**
      * Destructor
      */
-    virtual ~PVScalarValue() {}
+    virtual ~PVScalarValue();
     /**
      * Get the value.
      * @return The value.
