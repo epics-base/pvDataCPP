@@ -72,10 +72,25 @@ bool PVAlarm::set(Alarm const & alarm)
         throw std::logic_error(notAttached);
     }
     if(pvSeverity->isImmutable() || pvMessage->isImmutable()) return false;
-    pvSeverity->put(alarm.getSeverity());
-    pvStatus->put(alarm.getStatus());
-    pvMessage->put(alarm.getMessage());
-    return true;
+    Alarm current;
+    get(current);
+    bool returnValue = false;
+    if(current.getSeverity()!=alarm.getSeverity())
+    {
+        pvSeverity->put(alarm.getSeverity());
+        returnValue = true;
+    }
+    if(current.getStatus()!=alarm.getStatus())
+    {
+        pvStatus->put(alarm.getStatus());
+        returnValue = true;
+    }
+    if(current.getMessage()!=alarm.getMessage())
+    {
+        pvMessage->put(alarm.getMessage());
+        returnValue = true;
+    }
+    return returnValue;
 }
 
 }}

@@ -70,10 +70,25 @@ bool PVControl::set(Control const & control)
         throw std::logic_error(notAttached);
     }
     if(pvLow->isImmutable() || pvHigh->isImmutable() || pvMinStep->isImmutable()) return false;
-    pvLow->put(control.getLow());
-    pvHigh->put(control.getHigh());
-    pvMinStep->put(control.getMinStep());
-    return true;
+    Control current;
+    get(current);
+    bool returnValue = false;
+    if(current.getLow()!=control.getLow())
+    {
+         pvLow->put(control.getLow());
+         returnValue = true;
+    }
+    if(current.getHigh()!=control.getHigh())
+    {
+         pvHigh->put(control.getHigh());
+         returnValue = true;
+    }
+    if(current.getMinStep()!=control.getMinStep())
+    {
+         pvMinStep->put(control.getMinStep());
+         returnValue = true;
+    }
+    return returnValue;
 }
 
 }}
