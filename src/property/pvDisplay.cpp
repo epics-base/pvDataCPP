@@ -85,13 +85,38 @@ bool PVDisplay::set(Display const & display)
     }
     if(pvDescription->isImmutable() || pvFormat->isImmutable()) return false;
     if(pvUnits->isImmutable() || pvLow->isImmutable() || pvHigh->isImmutable())
+    {
          return false;
-    pvDescription->put(display.getDescription());
-    pvFormat->put(display.getFormat());
-    pvUnits->put(display.getUnits());
-    pvLow->put(display.getLow());
-    pvHigh->put(display.getHigh());
-    return true;
+    }
+    Display current;
+    get(current);
+    bool returnValue = false;
+    if(current.getDescription()!=display.getDescription())
+    {
+        pvDescription->put(display.getDescription());
+        returnValue = true;
+    }
+    if(current.getFormat()!=display.getFormat())
+    {
+        pvFormat->put(display.getFormat());
+        returnValue = true;
+    }
+    if(current.getUnits()!=display.getUnits())
+    {
+        pvUnits->put(display.getUnits());
+        returnValue = true;
+    }
+    if(current.getLow()!=display.getLow())
+    {
+        pvLow->put(display.getLow());
+        returnValue = true;
+    }
+    if(current.getHigh()!=display.getHigh())
+    {
+        pvHigh->put(display.getHigh());
+        returnValue = true;
+    }
+    return returnValue;
 }
 
 }}

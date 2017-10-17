@@ -98,7 +98,7 @@ public:
      * Set userTag.
      * @param userTag application specific.
      */
-    void setUserTag(int userTag) {this->userTag = userTag;}
+    void setUserTag(int32 userTag) {this->userTag = userTag;}
     /**
      * Set time fields in timeStamp.
      * Result will be normalized.
