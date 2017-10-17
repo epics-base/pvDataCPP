@@ -70,7 +70,7 @@ struct CreateRequestImpl {
         size_t openBrace = request.find('{', index+1);
         size_t closeBrace = request.find('}', index+1);
         if(openBrace == string::npos && closeBrace == string::npos){
-             throw std::logic_error(request + " mismatched {}");
+             throw std::runtime_error(request + " mismatched {}");
         }
         if (openBrace != string::npos && openBrace!=0) {
             if(openBrace<closeBrace) return findMatchingBrace(request,openBrace,numOpen+1);
@@ -85,12 +85,12 @@ struct CreateRequestImpl {
         for(size_t i=index+1; i< request.size(); ++i) {
             if(request[i] == ']') {
                 if(i==index+1) {
-                     throw std::logic_error(request + " mismatched []");
+                     throw std::runtime_error(request + " mismatched []");
                 }
                 return i;
             }
         }
-        throw std::logic_error(request + " missing ]");
+        throw std::runtime_error(request + " missing ]");
     }
 
     size_t findEndField(string& request) {
@@ -145,7 +145,7 @@ struct CreateRequestImpl {
         string const & request)
     {
         if(request.length()<=1) {
-            throw std::logic_error("logic error empty options");
+            throw std::runtime_error("logic error empty options");
         }
         vector<Node> top;
         vector<string> items = split(request);
@@ -155,7 +155,7 @@ struct CreateRequestImpl {
             string item = items[j];
             size_t equals = item.find('=');
             if(equals==string::npos || equals==0) {
-                throw std::logic_error(item + " illegal option " + request);
+                throw std::runtime_error(item + " illegal option " + request);
             }
             top.push_back(Node(item.substr(0,equals)));
             string name = fullFieldName + "._options." + item.substr(0,equals);
@@ -204,7 +204,7 @@ struct CreateRequestImpl {
         if(end==0) end = request.size();
         string name = request.substr(0,end);
         if(name.size()<1) {
-            throw std::logic_error("null field name " + request);
+            throw std::runtime_error("null field name " + request);
         }
         string saveFullName = fullFieldName;
         fullFieldName += "." + name;
@@ -227,7 +227,7 @@ struct CreateRequestImpl {
         if(chr=='.') {
             request = request.substr(end+1);
             if(request.size()==string::npos || request.size()<1) {
-                throw std::logic_error("null field name " + request);
+                throw std::runtime_error("null field name " + request);
             }
             Node subNode(name);
             if(optionNode.name.size()>0) subNode.nodes.push_back(optionNode);
@@ -248,11 +248,11 @@ struct CreateRequestImpl {
         if(chr=='{') {
             size_t endBrace = findEndField(request);
             if((end+1)>=(endBrace-1)) {
-                throw std::logic_error("illegal syntax " + request);
+                throw std::runtime_error("illegal syntax " + request);
             }
             string subRequest = request.substr(end+1,endBrace-1 -end -1);
             if(subRequest.size()<1) {
-                throw std::logic_error("empty {} " + request);
+                throw std::runtime_error("empty {} " + request);
             }
             Node subNode(name);
             if(optionNode.name.size()>0) subNode.nodes.push_back(optionNode);
@@ -268,7 +268,7 @@ struct CreateRequestImpl {
             createSubNode(node,request);
             return;
         }
-        throw std::logic_error("logic error");
+        throw std::runtime_error("logic error");
     }
 
     FieldConstPtr createSubStructure(vector<Node> & nodes)
@@ -347,17 +347,17 @@ struct CreateRequestImpl {
             if(numParan!=0) {
                 ostringstream oss;
                 oss << "mismatched () " << numParan;
-                throw std::logic_error(oss.str());
+                throw std::runtime_error(oss.str());
             }
             if(numBrace!=0) {
                 ostringstream oss;
                 oss << "mismatched {} " << numBrace;
-                throw std::logic_error(oss.str());
+                throw std::runtime_error(oss.str());
             }
             if(numBracket!=0) {
                 ostringstream oss;
                 oss << "mismatched [] " << numBracket;
-                throw std::logic_error(oss.str());
+                throw std::runtime_error(oss.str());
             }
             vector<Node> top;
             try {
@@ -366,7 +366,7 @@ struct CreateRequestImpl {
                     size_t openBracket = request.find('[', offsetRecord);
                     size_t closeBracket = request.find(']', openBracket);
                     if(closeBracket==string::npos) {
-                        throw std::logic_error(request.substr(offsetRecord) +
+                        throw std::runtime_error(request.substr(offsetRecord) +
                             "record[ does not have matching ]");
                     }
                     if(closeBracket-openBracket > 3) {
@@ -383,7 +383,7 @@ struct CreateRequestImpl {
                     size_t openParan = request.find('(', offsetField);
                     size_t closeParan = request.find(')', openParan);
                     if(closeParan==string::npos) {
-                        throw std::logic_error(request.substr(offsetField)
+                        throw std::runtime_error(request.substr(offsetField)
                                 + " field( does not have matching )");
                     }
                     if(closeParan>openParan+1) {
@@ -397,7 +397,7 @@ struct CreateRequestImpl {
                     size_t openParan = request.find('(', offsetGetField);
                     size_t closeParan = request.find(')', openParan);
                     if(closeParan==string::npos) {
-                        throw std::logic_error(request.substr(offsetField)
+                        throw std::runtime_error(request.substr(offsetField)
                                 + " getField( does not have matching )");
                     }
                     if(closeParan>openParan+1) {
@@ -411,7 +411,7 @@ struct CreateRequestImpl {
                     size_t openParan = request.find('(', offsetPutField);
                     size_t closeParan = request.find(')', openParan);
                     if(closeParan==string::npos) {
-                        throw std::logic_error(request.substr(offsetField)
+                        throw std::runtime_error(request.substr(offsetField)
                                 + " putField( does not have matching )");
                     }
                     if(closeParan>openParan+1) {
@@ -420,7 +420,7 @@ struct CreateRequestImpl {
                     top.push_back(node);
                 }
             } catch (std::exception &e) {
-                throw std::logic_error(std::string("while creating Structure exception ")+e.what());
+                throw std::runtime_error(std::string("while creating Structure exception ")+e.what());
             }
             size_t num = top.size();
             StringArray names(num);

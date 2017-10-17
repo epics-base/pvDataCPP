@@ -12,10 +12,12 @@
 #include <stdio.h>
 #include <iostream>
 
-#include <epicsUnitTest.h>
+#include <pv/pvUnitTest.h>
 #include <testMain.h>
 
 #include <pv/createRequest.h>
+
+namespace {
 
 using namespace epics::pvData;
 using std::string;
@@ -322,10 +324,26 @@ static void testCreateRequestInternal() {
     testPass("request %s",request.c_str());
 }
 
+static void testBadRequest()
+{
+    testThrows(std::runtime_error, createRequest("field("));
+    testThrows(std::runtime_error, createRequest("record[field()"));
+
+    CreateRequest::shared_pointer C(CreateRequest::create());
+    testOk1(!C->createRequest("field("));
+    testDiag("message %s", C->getMessage().c_str());
+
+    testOk1(!!C->createRequest("field(value)"));
+    testOk1(C->getMessage().empty());
+}
+
+} // namespace
+
 MAIN(testCreateRequest)
 {
-    testPlan(121);
+    testPlan(126);
     testCreateRequestInternal();
+    testBadRequest();
     return testDone();
 }
 
