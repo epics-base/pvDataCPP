@@ -15,6 +15,8 @@
 #include "pv/json.h"
 
 namespace pvd = epics::pvData;
+using pvd::yajl::integer_arg;
+using pvd::yajl::size_arg;
 
 namespace {
 
@@ -77,7 +79,7 @@ int jtree_boolean(void * ctx, int boolVal)
     }CATCH()
 }
 
-int jtree_integer(void * ctx, long integerVal)
+int jtree_integer(void * ctx, integer_arg integerVal)
 {
     TRY {
         if(self->depth==0) throw std::runtime_error("Bare value not supported");
@@ -130,7 +132,7 @@ int jtree_double(void * ctx, double doubleVal)
 }
 
 int jtree_string(void * ctx, const unsigned char * stringVal,
-                    unsigned int stringLen)
+                    size_arg stringLen)
 {
     TRY {
         if(self->depth==0) throw std::runtime_error("Bare value not supported");
@@ -172,7 +174,7 @@ int jtree_start_map(void * ctx)
 }
 
 int jtree_map_key(void * ctx, const unsigned char * key,
-                     unsigned int stringLen)
+                     size_arg stringLen)
 {
     TRY {
         if(!self->key.empty())
@@ -254,16 +256,24 @@ namespace epics{namespace pvData{
 epics::pvData::PVStructure::shared_pointer
 parseJSON(std::istream& strm)
 {
+#ifndef EPICS_YAJL_VERSION
     yajl_parser_config conf;
     memset(&conf, 0, sizeof(conf));
     conf.allowComments = 1;
     conf.checkUTF8 = 1;
+#endif
 
     context ctxt;
 
+#ifndef EPICS_YAJL_VERSION
     handler handle(yajl_alloc(&jtree_cbs, &conf, NULL, &ctxt));
+#else
+    handler handle(yajl_alloc(&jtree_cbs, NULL, &ctxt));
 
-    if(!yajl_parse_helper(strm, handle, conf))
+    yajl_config(handle, yajl_allow_comments, 1);
+#endif
+
+    if(!yajl_parse_helper(strm, handle))
         throw std::runtime_error(ctxt.msg);
 
     return ctxt.cur->buildPVStructure();

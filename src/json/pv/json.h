@@ -96,14 +96,25 @@ void parseJSON(std::istream& strm,
  *
  * @param src The stream from which input charactors are read
  * @param handle A parser handle previously allocated with yajl_alloc().  Not free'd on success or failure.
- * @param config The same configuration passed to yajl_alloc().  Used to decide if trailing comments are allowed
  *
  * @returns true if parsing completes successfully.  false if parsing cancelled by callback.  throws other errors
+ *
+ * @note The form of this call depends on EPICS_YAJL_VERSION
  */
 epicsShareFunc
 bool yajl_parse_helper(std::istream& src,
-                       yajl_handle handle,
-                       const yajl_parser_config& config);
+                       yajl_handle handle);
+
+namespace yajl {
+// undef implies API version 0
+#ifndef EPICS_YAJL_VERSION
+typedef long integer_arg;
+typedef unsigned size_arg;
+#else
+typedef long long integer_arg;
+typedef size_t size_arg;
+#endif
+} // namespace epics::pvData::yajl
 
 /** @} */
 

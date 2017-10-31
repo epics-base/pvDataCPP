@@ -97,12 +97,16 @@ void testparseanyjunk()
     {
         testThrows(std::runtime_error, std::istringstream strm("{} x"); std::cout<<pvd::parseJSON(strm) );
     }
+#ifndef EPICS_YAJL_VERSION
     {
         testThrows(std::runtime_error, std::istringstream strm("{} /* y */"); std::cout<<pvd::parseJSON(strm) );
     }
     {
         testThrows(std::runtime_error, std::istringstream strm("{} /* y *"); std::cout<<pvd::parseJSON(strm) );
     }
+#else
+    testSkip(2, "yajl >= 2.1.0 handles trailing comments for us");
+#endif
     {
         testThrows(std::runtime_error, std::istringstream strm("{}\n\n{}"); std::cout<<pvd::parseJSON(strm) );
     }
