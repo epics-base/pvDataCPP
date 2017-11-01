@@ -1,9 +1,10 @@
-bin/
-lib/
-doc/
-include/
-db/
-dbd/
+/bin/
+/lib/
+/doc/
+/include/
+/db/
+/dbd/
+/cfg/
 envPaths
 configure/*.local
 configure/RELEASE.*
