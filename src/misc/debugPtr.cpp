@@ -5,21 +5,28 @@
 
 #if __cplusplus>=201103L
 
+#include <epicsMutex.h>
+#include <epicsGuard.h>
+
 #define epicsExportSharedSymbols
 #include <pv/debugPtr.h>
+
+namespace {
+typedef epicsGuard<epicsMutex> Guard;
+}
 
 namespace epics {
 namespace debug {
 
 struct tracker {
-    std::mutex mutex;
+    epicsMutex mutex;
     ptr_base::ref_set_t refs;
 };
 
 void shared_ptr_base::track_new()
 {
     if(track) {
-        std::lock_guard<std::mutex> G(track->mutex);
+        Guard G(track->mutex);
         track->refs.insert(this);
     }
     snap_stack();
@@ -31,7 +38,7 @@ void shared_ptr_base::track_new(void* ptr)
     track_clear();
     if(ptr){
         track.reset(new tracker);
-        std::lock_guard<std::mutex> G(track->mutex);
+        Guard G(track->mutex);
         track->refs.insert(this);
     }
     snap_stack();
@@ -43,7 +50,7 @@ void shared_ptr_base::track_assign(const shared_ptr_base &o)
         track_clear();
         track = o.track;
         if(track) {
-            std::lock_guard<std::mutex> G(track->mutex);
+            Guard G(track->mutex);
             track->refs.insert(this);
         }
         snap_stack();
@@ -53,7 +60,7 @@ void shared_ptr_base::track_assign(const shared_ptr_base &o)
 void shared_ptr_base::track_clear()
 {
     if(track) {
-        std::lock_guard<std::mutex> G(track->mutex);
+        Guard G(track->mutex);
         track->refs.erase(this);
     }
     track.reset();
@@ -66,13 +73,13 @@ void shared_ptr_base::swap(shared_ptr_base &o)
 {
     // we cheat a bit here to avoid lock order, and to lock only twice
     if(track) {
-        std::lock_guard<std::mutex> G(track->mutex);
+        Guard G(track->mutex);
         track->refs.insert(&o);
         track->refs.erase(this);
     }
     track.swap(o.track);
     if(track) {
-        std::lock_guard<std::mutex> G(track->mutex);
+        Guard G(track->mutex);
         track->refs.insert(this);
         track->refs.erase(&o);
     }
@@ -133,7 +140,7 @@ void ptr_base::show_refs(std::ostream& strm, bool self, bool weak) const
     if(!track) {
         strm<<"# No refs\n";
     } else {
-        std::lock_guard<std::mutex> G(track->mutex);
+        Guard G(track->mutex);
         for(auto ref : track->refs) {
             if(!self && ref==this) continue;
             strm<<'#';
@@ -146,7 +153,7 @@ void ptr_base::show_refs(std::ostream& strm, bool self, bool weak) const
 void ptr_base::spy_refs(ref_set_t &refs) const
 {
     if(track) {
-        std::lock_guard<std::mutex> G(track->mutex);
+        Guard G(track->mutex);
         refs.insert(track->refs.begin(), track->refs.end());
     }
 }

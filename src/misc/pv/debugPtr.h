@@ -16,8 +16,6 @@
 
 #include <ostream>
 #include <memory>
-#include <thread>
-#include <mutex>
 #include <set>
 
 #include <pv/epicsException.h>
