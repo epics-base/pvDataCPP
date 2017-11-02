@@ -94,7 +94,14 @@ size_t readRefCounter(const char *name)
 #endif
 }
 
-const RefSnapshot::Count RefSnapshot::zero;
+const RefSnapshot::Count&
+RefSnapshot::operator[](const std::string& name) const
+{
+    static const Count zero;
+
+    cnt_map_t::const_iterator it(counts.find(name));
+    return it==counts.end() ? zero : it->second;
+}
 
 void RefSnapshot::update()
 {

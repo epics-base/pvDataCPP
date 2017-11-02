@@ -67,7 +67,6 @@ public:
     };
 
 private:
-    static const Count zero;
     typedef std::map<std::string, Count> cnt_map_t;
     cnt_map_t counts;
 public:
@@ -80,11 +79,7 @@ public:
      */
     void update();
 
-    const Count& operator[](const std::string& name) const
-    {
-        cnt_map_t::const_iterator it(counts.find(name));
-        return it==counts.end() ? zero : it->second;
-    }
+    const Count& operator[](const std::string& name) const;
 
     iterator begin() const { return counts.begin(); }
     iterator end() const { return counts.end(); }
