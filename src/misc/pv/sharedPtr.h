@@ -9,7 +9,9 @@
 #ifndef SHAREDPTR_H
 #define SHAREDPTR_H
 
-/*
+#include <memory> /* for auto_ptr */
+
+/** @file sharedPtr.h
  * Pulls in the std::tr1 namespace with the following names
  *
  * class shared_ptr
@@ -189,5 +191,37 @@ inline std::ostream& operator<<(std::ostream& strm, const ::detail::ref_shower<T
     typedef std::tr1::shared_ptr<const clazz> const_shared_pointer; \
     typedef std::tr1::weak_ptr<clazz> weak_pointer; \
     typedef std::tr1::weak_ptr<const clazz> const_weak_pointer
+
+/* A semi-hack to help with migration from std::auto_ptr to std::unique_ptr,
+ * and avoid copious deprecation warning spam
+ * which may be hiding legitimate issues.
+ *
+ * Provides epics::auto_ptr<T> and epics::swap()
+ *
+ * epics::auto_ptr<T> is std::auto_ptr<T> for c++98
+ * and std::unique_ptr<T> for >= c++11.
+ *
+ * epics::swap() is the only supported operation.
+ * copy/assignment/return are not supported
+ * (use auto_ptr or unique_ptr explicitly).
+ */
+namespace epics{
+#if __cplusplus>=201103L
+template<typename T>
+using auto_ptr = std::unique_ptr<T>;
+template<typename T>
+static inline void swap(auto_ptr<T>& lhs, auto_ptr<T>& rhs) {
+    lhs.swap(rhs);
+}
+#else
+using std::auto_ptr;
+template<typename T>
+static inline void swap(auto_ptr<T>& lhs, auto_ptr<T>& rhs) {
+    auto_ptr<T> temp(lhs);
+    lhs = rhs;
+    rhs = temp;
+}
+#endif
+}
 
 #endif // SHAREDPTR_H

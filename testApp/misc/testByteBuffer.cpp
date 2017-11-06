@@ -26,7 +26,7 @@ using std::cout;
 
 static
 void testBasicOperations() {
-    std::auto_ptr<ByteBuffer> buff(new ByteBuffer(32));
+    epics::auto_ptr<ByteBuffer> buff(new ByteBuffer(32));
 
     testOk1(buff->getSize()==32);
 
@@ -185,7 +185,7 @@ static
 void testInverseEndianness(int order, const char *expect) {
     testDiag("check byte swapping features order=%d", order);
 
-    std::auto_ptr<ByteBuffer> buf(new ByteBuffer(32,order));
+    epics::auto_ptr<ByteBuffer> buf(new ByteBuffer(32,order));
 
     buf->putShort(0x6162);
     buf->putInt(0x63646566);

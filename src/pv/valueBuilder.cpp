@@ -180,7 +180,7 @@ void ValueBuilder::_add(const std::string& name, ScalarType stype, const void *V
             THROW_EXCEPTION2(std::logic_error, "Not allowed to replace field.  wrong type");
     }
 
-    std::auto_ptr<child> store;
+    epics::auto_ptr<child> store;
     switch(stype) {
 #define STYPE(stype) case stype: store.reset(new child_scalar<ScalarTypeTraits<stype>::type>(V)); break
     STYPE(pvBoolean);
@@ -216,7 +216,7 @@ void ValueBuilder::_add(const std::string& name, const shared_vector<const void>
             THROW_EXCEPTION2(std::logic_error, "Not allowed to replace field.  wrong type");
     }
 
-    std::auto_ptr<child> store(new child_scalar_array(V));
+    epics::auto_ptr<child> store(new child_scalar_array(V));
 
     children[name] = store.get();
     store.release();
@@ -229,7 +229,7 @@ ValueBuilder& ValueBuilder::addNested(const std::string& name, Type type, const 
     child_struct *sub;
     children_t::const_iterator it(children.find(name));
     if(it==children.end()) {
-        std::auto_ptr<child_struct> store(new child_struct(this, id));
+        epics::auto_ptr<child_struct> store(new child_struct(this, id));
         sub = store.get();
         children[name] = store.get();
         store.release();

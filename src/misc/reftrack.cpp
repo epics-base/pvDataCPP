@@ -20,6 +20,7 @@
 
 #define epicsExportSharedSymbols
 #include <pv/pvdVersion.h>
+#include <pv/sharedPtr.h>
 #include "pv/reftrack.h"
 
 namespace {
@@ -171,7 +172,7 @@ std::ostream& operator<<(std::ostream& strm, const RefSnapshot& snap)
 struct RefMonitor::Impl : public epicsThreadRunable
 {
     RefMonitor& owner;
-    std::auto_ptr<epicsThread> worker;
+    epics::auto_ptr<epicsThread> worker;
     epicsMutex lock;
     epicsEvent wakeup;
     RefSnapshot prev;
@@ -229,11 +230,11 @@ void RefMonitor::start(double period)
 
 void RefMonitor::stop()
 {
-    std::auto_ptr<epicsThread> W;
+    epics::auto_ptr<epicsThread> W;
     {
         Guard G(impl->lock);
         if(!impl->worker.get()) return;
-        W = impl->worker;
+        epics::swap(W, impl->worker);
         impl->done = true;
     }
 

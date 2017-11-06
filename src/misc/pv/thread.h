@@ -141,11 +141,7 @@ public:
         std::ostringstream p_strm;
         bool p_autostart;
         Runnable *p_runner;
-#if __cplusplus>=201103L
-        typedef std::unique_ptr<Runnable> p_owned_runner_t;
-#else
-        typedef std::auto_ptr<Runnable> p_owned_runner_t;
-#endif
+        typedef epics::auto_ptr<Runnable> p_owned_runner_t;
         p_owned_runner_t p_owned_runner;
         friend class Thread;
         Runnable& x_getrunner()

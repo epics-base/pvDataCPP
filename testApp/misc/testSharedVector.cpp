@@ -620,9 +620,20 @@ void testBad()
     //I = epics::pvData::that(CF);
 }
 
+static
+void testAutoSwap()
+{
+    epics::auto_ptr<int> A(new int(42)), B(new int(43));
+
+    epics::swap(A, B);
+
+    testOk1(43==*A);
+    testOk1(42==*B);
+}
+
 MAIN(testSharedVector)
 {
-    testPlan(167);
+    testPlan(169);
     testDiag("Tests for shared_vector");
 
     testDiag("sizeof(shared_vector<int32>)=%lu",
@@ -643,5 +654,6 @@ MAIN(testSharedVector)
     testWeak();
     testICE();
     testBad();
+    testAutoSwap();
     return testDone();
 }
