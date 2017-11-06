@@ -26,7 +26,8 @@ namespace epics {
          * @brief Serialization helper.
          *
          */
-        class epicsShareClass SerializeHelper : public NoDefaultMethods {
+        class epicsShareClass SerializeHelper {
+            EPICS_NOT_COPYABLE(SerializeHelper)
         public:
 
             /**

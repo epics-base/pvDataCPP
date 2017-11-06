@@ -43,8 +43,9 @@ typedef epicsThreadRunable Runnable;
 
 //! Helper for those cases where a class should have more than one runnable
 template<typename C>
-class RunnableMethod : public Runnable, private NoDefaultMethods
+class RunnableMethod : public Runnable
 {
+    EPICS_NOT_COPYABLE(RunnableMethod)
     typedef void (C::*meth_t)();
     C *inst;
     meth_t meth;
@@ -104,7 +105,8 @@ struct BindRunner : public epicsThreadRunable
  * @brief C++ wrapper for epicsThread from EPICS base.
  *
  */
-class Thread : public epicsThread, private NoDefaultMethods {
+class Thread : public epicsThread {
+    EPICS_NOT_COPYABLE(Thread)
 public:
     /** @brief Holds all the configuration necessary to launch a @class Thread
      *

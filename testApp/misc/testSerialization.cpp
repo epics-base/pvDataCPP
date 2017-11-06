@@ -60,8 +60,8 @@ static DeserializableControl* control;
 static ByteBuffer* buffer;
 
 
-class SerializableControlImpl : public SerializableControl,
-        public NoDefaultMethods {
+class SerializableControlImpl : public SerializableControl {
+    EPICS_NOT_COPYABLE(SerializableControlImpl)
 public:
     virtual void flushSerializeBuffer() {
     }
@@ -91,8 +91,8 @@ public:
     }
 };
 
-class DeserializableControlImpl : public DeserializableControl,
-        public NoDefaultMethods {
+class DeserializableControlImpl : public DeserializableControl {
+    EPICS_NOT_COPYABLE(DeserializableControlImpl)
 public:
     virtual void ensureData(size_t /*size*/) {
     }

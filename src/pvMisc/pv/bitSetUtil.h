@@ -9,7 +9,6 @@
 #ifndef BITSETUTIL_H
 #define BITSETUTIL_H
 
-#include <pv/noDefaultMethods.h>
 #include <pv/pvData.h>
 #include <pv/bitSet.h>
 
@@ -21,7 +20,7 @@ namespace epics { namespace pvData {
  * @brief Compress a bitSet.
  *
  */
-class epicsShareClass BitSetUtil : private NoDefaultMethods {
+class epicsShareClass BitSetUtil {
 public:
     /**
      *  compress the bitSet for a pvStructure.

@@ -35,7 +35,8 @@ typedef std::tr1::shared_ptr<StandardPVField> StandardPVFieldPtr;
     StandardPVField *standardPVField = getStandardPVField();
  * }
  */
-class epicsShareClass StandardPVField : private NoDefaultMethods {
+class epicsShareClass StandardPVField {
+    EPICS_NOT_COPYABLE(StandardPVField)
 public:
     /**
      * getStandardPVField returns the singleton.
