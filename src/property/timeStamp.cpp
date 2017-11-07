@@ -21,10 +21,10 @@
 
 namespace epics { namespace pvData { 
 
-int32 milliSecPerSec = 1000;
-int32 microSecPerSec = milliSecPerSec*milliSecPerSec;
-int32 nanoSecPerSec = milliSecPerSec*microSecPerSec;
-int64 posixEpochAtEpicsEpoch = POSIX_TIME_AT_EPICS_EPOCH;
+const int32 milliSecPerSec = 1000;
+const int32 microSecPerSec = 1000000;
+const int32 nanoSecPerSec = 1000000000;
+const int64 posixEpochAtEpicsEpoch = POSIX_TIME_AT_EPICS_EPOCH;
 
 TimeStamp::TimeStamp(int64 secondsPastEpoch,int32 nanoseconds,int32 userTag)
 : secondsPastEpoch(secondsPastEpoch),nanoseconds(nanoseconds),userTag(userTag)

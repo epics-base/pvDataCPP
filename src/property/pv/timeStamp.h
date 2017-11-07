@@ -19,10 +19,10 @@
 
 namespace epics { namespace pvData { 
 
-epicsShareExtern int32 milliSecPerSec;
-epicsShareExtern int32 microSecPerSec;
-epicsShareExtern int32 nanoSecPerSec;
-epicsShareExtern int64 posixEpochAtEpicsEpoch;
+epicsShareExtern const int32 milliSecPerSec;
+epicsShareExtern const int32 microSecPerSec;
+epicsShareExtern const int32 nanoSecPerSec;
+epicsShareExtern const int64 posixEpochAtEpicsEpoch;
 
 /** @brief Methods for manipulating timeStamp.
  * 
