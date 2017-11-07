@@ -664,6 +664,8 @@ static void testAnyScalar()
 
 static void testSubField()
 {
+    testDiag("testSubField()");
+
     PVStructurePtr value(ValueBuilder()
                          .add<pvInt>("a", 0)
                          .addNested("B")
@@ -699,6 +701,7 @@ static void testSubField()
     SHOW(8);
 #undef SHOW
 
+    testEqual(value->getFieldOffset(), 0u);
 #define CHECK(FLD) testOk1(value->getSubFieldT(FLD)==value->getSubFieldT(value->getSubFieldT(FLD)->getFieldOffset()))
     CHECK("a");
     CHECK("B");
@@ -709,12 +712,35 @@ static void testSubField()
     CHECK("B.e");
     CHECK("z");
 #undef CHECK
+    testEqual(value->getSubField(9), PVFieldPtr());
 
+    testDiag("Down to sub-struct 'B'");
+    value = value->getSubFieldT<PVStructure>("B");
+
+#define SHOW(FLD) testDiag("index '" FLD "' -> %u", unsigned(value->getSubFieldT(FLD)->getFieldOffset()))
+    SHOW("b");
+    SHOW("C");
+    SHOW("C.c");
+    SHOW("C.d");
+    SHOW("e");
+#undef SHOW
+
+    testEqual(value->getFieldOffset(), 1u);
+    testEqual(value->getSubField(0), PVFieldPtr());
+    testEqual(value->getSubField(1), PVFieldPtr());
+    testEqual(value->getSubFieldT(2)->getFieldOffset(), 2u);
+    testEqual(value->getSubFieldT(3)->getFieldOffset(), 3u);
+    testEqual(value->getSubFieldT(4)->getFieldOffset(), 4u);
+    testEqual(value->getSubFieldT(5)->getFieldOffset(), 5u);
+    testEqual(value->getSubFieldT(6)->getFieldOffset(), 6u);
+    testEqual(value->getSubField(7), PVFieldPtr());
+    testEqual(value->getSubField(8), PVFieldPtr());
+    testEqual(value->getSubField(9), PVFieldPtr());
 }
 
 MAIN(testPVData)
 {
-    testPlan(258);
+    testPlan(271);
     try{
         fieldCreate = getFieldCreate();
         pvDataCreate = getPVDataCreate();
