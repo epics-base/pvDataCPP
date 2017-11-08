@@ -16,6 +16,11 @@
 #include <epicsMutex.h>
 #include <epicsThread.h>
 
+// Suppress deprecation warnings for the implementation
+#include <compilerDependencies.h>
+#undef EPICS_DEPRECATED
+#define EPICS_DEPRECATED
+
 #define epicsExportSharedSymbols
 #include <pv/executor.h>
 

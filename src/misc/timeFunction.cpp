@@ -14,12 +14,17 @@
 
 #include <epicsTime.h>
 
+// Suppress deprecation warnings for the implementation
+#include <compilerDependencies.h>
+#undef EPICS_DEPRECATED
+#define EPICS_DEPRECATED
+
 #define epicsExportSharedSymbols
 #include <pv/pvType.h>
 #include <pv/timeStamp.h>
 #include <pv/timeFunction.h>
 
-namespace epics { namespace pvData { 
+namespace epics { namespace pvData {
 
 TimeFunction::TimeFunction(TimeFunctionRequesterPtr const &requester)
 : requester(requester) {}

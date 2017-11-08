@@ -33,14 +33,6 @@
 typedef class std::ios std::ios_base;
 #endif
 
-#define USAGE_DEPRECATED EPICS_DEPRECATED
-
-#if defined(__GNUC__) && !(defined(vxWorks) && !defined(_WRS_VXWORKS_MAJOR))
-#define USAGE_ERROR(MSG) __attribute__((error(MSG)))
-#else
-#define USAGE_ERROR(MSG) { throw std::runtime_error(MSG); }
-#endif
-
 /* C++11 keywords
  @code
  struct Base {
@@ -1676,9 +1668,6 @@ static inline bool operator!=(const PVField& a, const PVField& b)
 namespace std{
     epicsShareExtern std::ostream& operator<<(std::ostream& o, const epics::pvData::PVField *ptr);
 }
-
-#undef USAGE_DEPRECATED
-#undef USAGE_ERROR
 
 #endif  /* PVDATA_H */
 
