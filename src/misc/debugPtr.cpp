@@ -18,6 +18,8 @@ typedef epicsGuard<epicsMutex> Guard;
 namespace epics {
 namespace debug {
 
+// joins together a group of ptr_base instances
+// which all have the same dtor
 struct tracker {
     epicsMutex mutex;
     ptr_base::ref_set_t refs;

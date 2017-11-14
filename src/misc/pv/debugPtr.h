@@ -54,11 +54,13 @@ public:
     void show_refs(std::ostream&, bool self=true, bool weak=false) const;
     void spy_refs(ref_set_t&) const;
 };
+
 class epicsShareClass weak_ptr_base : public ptr_base {
 protected:
     weak_ptr_base() {}
     weak_ptr_base(const track_t& track) :ptr_base(track) {}
 };
+
 class epicsShareClass shared_ptr_base : public ptr_base {
 protected:
     shared_ptr_base() noexcept
@@ -148,6 +150,10 @@ public:
     // make strong ref from weak
     template<typename A>
     shared_ptr(const weak_ptr<A>& o) :shared_ptr_base(o.track), real(o.real) {track_new();}
+
+    // takeover from unique_ptr
+    template<typename A>
+    shared_ptr(std::unique_ptr<A>&& a) : shared_ptr_base(), real(a.release()) {track_new();}
 
     ~shared_ptr() {}
 
