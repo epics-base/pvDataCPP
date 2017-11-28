@@ -11,6 +11,7 @@
 
 #include <memory>
 #include <sstream>
+#include <stdexcept>
 
 #if __cplusplus>=201103L
 #include <functional>

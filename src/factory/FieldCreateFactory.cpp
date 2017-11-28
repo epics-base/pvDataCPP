@@ -26,6 +26,7 @@
 #include <pv/pvIntrospect.h>
 #include <pv/factory.h>
 #include <pv/serializeHelper.h>
+#include <pv/localStaticLock.h>
 
 using std::tr1::static_pointer_cast;
 using std::size_t;

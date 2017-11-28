@@ -39,7 +39,6 @@ typedef unsigned int uintptr_t;
 #endif
 
 #include <pv/sharedPtr.h>
-#include <pv/localStaticLock.h>
 
 //! epics
 namespace epics {
