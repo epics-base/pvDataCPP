@@ -10,9 +10,9 @@
 // gently nudge the compiler to inline our wrappers
 // Warning: Only use this when the template body is *small*.
 //          You have been warned!
-#if defined(__MINGW32__) 
+#if defined(__MINGW32__)
 # define FORCE_INLINE inline
-#elif defined(__GNUC__) && __GNUC__>=3
+#elif defined(__GNUC__) && (__GNUC__ * 100 + __GNUC_MINOR__ >= 402)
 # define FORCE_INLINE __attribute__((always_inline)) inline
 #elif defined(_MSC_VER)
 # define FORCE_INLINE __forceinline

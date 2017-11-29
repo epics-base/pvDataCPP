@@ -181,7 +181,7 @@ do { \
 
 #define PRINT_EXCEPTION(EI) PRINT_EXCEPTION2(EI,stderr)
 
-#ifndef __GNUC__
+#if !defined(__GNUC__) || __GNUC__ < 4
 #  define SHOW_EXCEPTION(EI) ::epics::pvData::detail::showException(EI)
 #else
 #  define SHOW_EXCEPTION(EI) \

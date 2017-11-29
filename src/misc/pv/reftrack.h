@@ -110,7 +110,7 @@ class epicsShareClass RefMonitor
     Impl *impl;
 public:
     RefMonitor();
-    ~RefMonitor();
+    virtual ~RefMonitor();
 
     void start(double period=10.0);
     void stop();
