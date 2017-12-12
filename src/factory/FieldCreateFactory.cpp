@@ -631,10 +631,7 @@ int32 Union::guess(Type t, ScalarType s) const
         case scalarArray:
             type = static_cast<const ScalarArray*>(fields[i].get())->getElementType();
             break;
-        case structure:
-        case structureArray:
-        case union_:
-        case unionArray:
+        default:
             continue;
         }
 
