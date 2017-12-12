@@ -55,7 +55,7 @@ template<typename T>
 static void copyV(size_t count, void *draw, const void *sraw)
 {
     T *dest=(T*)draw;
-    const T *src=(T*)sraw;
+    const T *src=(const T*)sraw;
     std::copy(src, src+count, dest);
 }
 
