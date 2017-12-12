@@ -27,6 +27,13 @@ template<> struct any_storage_type<unsigned> { typedef uint32 type; };
 template<> struct any_storage_type<char*> { typedef std::string type; };
 template<> struct any_storage_type<const char*> { typedef std::string type; };
 
+#if __cplusplus>=201103L
+// std::max() isn't constexpr until c++14 :(
+constexpr size_t cmax(size_t A, size_t B) {
+    return A>B ? A : B;
+}
+#endif
+
 }// namespace detail
 
 /** A type-safe variant union capable of holding
@@ -59,10 +66,13 @@ public:
 private:
     ScalarType _stype;
 
-    // always reserve enough storage for std::string (assumed worst case)
+    // always reserve enough storage for std::string or double (assumed worst case)
 #if __cplusplus>=201103L
+
     struct wrap_t {
-        typename std::aligned_storage<sizeof(std::string), alignof(std::string)>::type blob[1];
+        typename std::aligned_storage<detail::cmax(sizeof(std::string), sizeof(double)),
+                                      detail::cmax(alignof(std::string), alignof(double))
+        >::type blob[1];
     } _wrap;
 #else
     struct wrap_t {
