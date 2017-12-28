@@ -26,7 +26,6 @@
 #include <pv/pvIntrospect.h>
 #include <pv/factory.h>
 #include <pv/serializeHelper.h>
-#include <pv/localStaticLock.h>
 
 using std::tr1::static_pointer_cast;
 using std::size_t;
@@ -1456,7 +1455,6 @@ FieldConstPtr FieldCreate::deserialize(ByteBuffer* buffer, DeserializableControl
 // TODO replace with non-locking singleton pattern
 const FieldCreatePtr& FieldCreate::getFieldCreate()
 {
-	LOCAL_STATIC_LOCK;
 	static FieldCreatePtr fieldCreate;
 	static Mutex mutex;
 

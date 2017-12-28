@@ -9,11 +9,13 @@
 #ifndef LOCALSTATICLOCK_H
 #define LOCALSTATICLOCK_H
 
+#include <compilerDependencies.h>
+
 #include <pv/lock.h>
 
 #include <shareLib.h>
 
-epicsShareExtern epics::pvData::Mutex& getLocalStaticInitMutex();
+epicsShareExtern epics::pvData::Mutex& getLocalStaticInitMutex() EPICS_DEPRECATED;
 
 #if defined(__GNUC__) && __GNUC__ >= 4
 // noop
