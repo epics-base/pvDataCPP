@@ -19,6 +19,7 @@
 #include <sstream>
 
 #include <epicsMutex.h>
+#include <epicsThread.h>
 
 #define epicsExportSharedSymbols
 #include <pv/reftrack.h>
@@ -1452,18 +1453,33 @@ FieldConstPtr FieldCreate::deserialize(ByteBuffer* buffer, DeserializableControl
     }
 }
 
-// TODO replace with non-locking singleton pattern
-const FieldCreatePtr& FieldCreate::getFieldCreate()
-{
-	static FieldCreatePtr fieldCreate;
-	static Mutex mutex;
-
-	Lock xx(mutex);
-    if(fieldCreate.get()==0) {
-        fieldCreate = FieldCreatePtr(new FieldCreate());
+namespace detail {
+struct field_factory {
+    FieldCreatePtr fieldCreate;
+    field_factory() :fieldCreate(new FieldCreate()) {
         registerRefCounter("Field", &Field::num_instances);
     }
-    return fieldCreate;
+};
+}
+
+static detail::field_factory* field_factory_s;
+static epicsThreadOnceId field_factory_once = EPICS_THREAD_ONCE_INIT;
+
+static void field_factory_init(void*)
+{
+    try {
+        field_factory_s = new detail::field_factory;
+    }catch(std::exception& e){
+        std::cerr<<"Error initializing getFieldCreate() : "<<e.what()<<"\n";
+    }
+}
+
+const FieldCreatePtr& FieldCreate::getFieldCreate()
+{
+    epicsThreadOnce(&field_factory_once, &field_factory_init, 0);
+    if(!field_factory_s->fieldCreate)
+        throw std::logic_error("getFieldCreate() not initialized");
+    return field_factory_s->fieldCreate;
 }
 
 FieldCreate::FieldCreate()

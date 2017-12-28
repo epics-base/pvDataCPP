@@ -1065,11 +1065,16 @@ private:
     const bool createNested; // true - endNested() creates in parent, false - endNested() appends to parent
 };
 
+namespace detail {
+struct field_factory;
+}
+
 /**
  * @brief This is a singleton class for creating introspection interfaces.
  *
  */
 class epicsShareClass FieldCreate {
+    friend struct detail::field_factory;
 public:
     static const FieldCreatePtr &getFieldCreate();
 	/**

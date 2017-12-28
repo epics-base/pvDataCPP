@@ -1475,11 +1475,16 @@ typedef std::tr1::shared_ptr<PVDoubleArray> PVDoubleArrayPtr;
 typedef PVValueArray<std::string> PVStringArray;
 typedef std::tr1::shared_ptr<PVStringArray> PVStringArrayPtr;
 
+namespace detail {
+struct pvfield_factory;
+}
+
 /**
  * @brief This is a singleton class for creating data instances.
  *
  */
 class epicsShareClass PVDataCreate {
+    friend struct detail::pvfield_factory;
 public:
     /**
      * get the singleton

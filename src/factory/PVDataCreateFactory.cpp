@@ -17,6 +17,7 @@
 #include <cstdio>
 
 #include <epicsMutex.h>
+#include <epicsThread.h>
 
 #define epicsExportSharedSymbols
 #include <pv/lock.h>
@@ -604,19 +605,33 @@ PVUnionPtr PVDataCreate::createPVUnion(PVUnionPtr const & unionToClone)
     return punion;
 }
 
-// TODO not thread-safe (local static initializers)
-// TODO replace with non-locking singleton pattern
+namespace detail {
+struct pvfield_factory {
+    PVDataCreatePtr pvDataCreate;
+    pvfield_factory() :pvDataCreate(new PVDataCreate()) {
+        registerRefCounter("PVField", &PVField::num_instances);
+    }
+};
+}
+
+static detail::pvfield_factory* pvfield_factory_s;
+static epicsThreadOnceId pvfield_factory_once = EPICS_THREAD_ONCE_INIT;
+
+static void pvfield_factory_init(void*)
+{
+    try {
+        pvfield_factory_s = new detail::pvfield_factory;
+    }catch(std::exception& e){
+        std::cerr<<"Error initializing getFieldCreate() : "<<e.what()<<"\n";
+    }
+}
+
 const PVDataCreatePtr& PVDataCreate::getPVDataCreate()
 {
-    static PVDataCreatePtr pvDataCreate;
-    static Mutex mutex;
-    Lock xx(mutex);
-
-    if(pvDataCreate.get()==0) {
-        registerRefCounter("PVField", &PVField::num_instances);
-        pvDataCreate = PVDataCreatePtr(new PVDataCreate());
-    }
-    return pvDataCreate;
+    epicsThreadOnce(&pvfield_factory_once, &pvfield_factory_init, 0);
+    if(!pvfield_factory_s->pvDataCreate)
+        throw std::logic_error("getPVDataCreate() not initialized");
+    return pvfield_factory_s->pvDataCreate;
 }
 
 // explicitly instanciate to ensure that windows
