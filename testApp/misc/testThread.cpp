@@ -23,8 +23,6 @@
 
 #include <pv/event.h>
 #include <pv/thread.h>
-#include <pv/executor.h>
-#include <pv/timeFunction.h>
 
 using namespace epics::pvData;
 using std::string;
@@ -63,49 +61,6 @@ static void testThreadRun() {
     testOk1(ax->actuallyRan==true);
     testDiag( "Action is %s", ax->actuallyRan?"true":"false");
     testDiag("testThreadRun PASSED");
-}
-
-class Basic;
-typedef std::tr1::shared_ptr<Basic> BasicPtr;
-
-class Basic :
-     public Command,
-     public std::tr1::enable_shared_from_this<Basic>
-{
-public:
-    POINTER_DEFINITIONS(Basic);
-    Basic(ExecutorPtr const &executor)
-    : executor(executor) {}
-    ~Basic()
-    {
-    }
-    void run()
-    {
-        executor->execute(getPtrSelf());
-        bool result = wait.wait();
-        testOk1(result==true);
-        if(result==false) testDiag("basic::run wait returned false");
-    }
-    virtual void command()
-    {
-        wait.signal();
-    }
-private:
-    Basic::shared_pointer getPtrSelf()
-    {
-        return shared_from_this();
-    }
-    ExecutorPtr executor;
-    Event wait;
-};
-
-typedef std::tr1::shared_ptr<Basic> BasicPtr;
-
-static void testBasic() {
-    ExecutorPtr executor(new Executor(string("basic"),middlePriority));
-    BasicPtr basic( new Basic(executor));
-    basic->run();
-    testDiag("testBasic PASSED");
 }
 
 namespace {
@@ -197,26 +152,6 @@ static void testBinders()
 #endif
 }
 
-class MyFunc : public TimeFunctionRequester {
-public:
-    POINTER_DEFINITIONS(MyFunc);
-    MyFunc(BasicPtr const &basic);
-    virtual void function();
-private:
-    BasicPtr basic;
-};
-
-MyFunc::MyFunc(BasicPtr const &basic)
-    : basic(basic)
-    {}
-void MyFunc::function()
-{
-    basic->run();
-}
-
-
-typedef std::tr1::shared_ptr<MyFunc> MyFuncPtr;
-
 #ifdef TESTTHREADCONTEXT
 
 static void testThreadContext() {
@@ -233,10 +168,9 @@ static void testThreadContext() {
 
 MAIN(testThread)
 {
-    testPlan(7);
+    testPlan(6);
     testDiag("Tests thread");
     testThreadRun();
-    testBasic();
     testBinders();
 #ifdef TESTTHREADCONTEXT
     testThreadContext();

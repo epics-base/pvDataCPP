@@ -22,7 +22,6 @@ int testBaseException(void);
 int testBitSet(void);
 int testByteBuffer(void);
 int testOverrunBitSet(void);
-int testQueue(void);
 int testSerialization(void);
 int testSharedVector(void);
 int testThread(void);
@@ -71,7 +70,6 @@ void pvDataAllTests(void)
     runTest(testBitSet);
     runTest(testByteBuffer);
     runTest(testOverrunBitSet);
-    runTest(testQueue);
     runTest(testSerialization);
     runTest(testSharedVector);
     runTest(testThread);

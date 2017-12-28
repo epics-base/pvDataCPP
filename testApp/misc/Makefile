@@ -59,11 +59,6 @@ testTimeStamp_SRCS += testTimeStamp.cpp
 testHarness_SRCS += testTimeStamp.cpp
 TESTS += testTimeStamp
 
-TESTPROD_HOST += testQueue
-testQueue_SRCS += testQueue.cpp
-testHarness_SRCS += testQueue.cpp
-TESTS += testQueue
-
 TESTPROD_HOST += testTypeCast
 testTypeCast_SRCS += testTypeCast.cpp
 testHarness_SRCS += testTypeCast.cpp
