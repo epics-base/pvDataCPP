@@ -152,28 +152,11 @@ static void testBinders()
 #endif
 }
 
-#ifdef TESTTHREADCONTEXT
-
-static void testThreadContext() {
-    ExecutorPtr executor(new Executor(string("basic"),middlePriority));
-    BasicPtr basic(new Basic(executor));
-    MyFuncPtr myFunc(new MyFunc(basic));
-    TimeFunctionPtr timeFunction(new TimeFunction(myFunc));
-    double perCall = timeFunction->timeCall();
-    perCall *= 1e6;
-    testDiag("time per call %f microseconds",perCall);
-    testDiag("testThreadContext PASSED");
-}
-#endif
-
 MAIN(testThread)
 {
     testPlan(6);
     testDiag("Tests thread");
     testThreadRun();
     testBinders();
-#ifdef TESTTHREADCONTEXT
-    testThreadContext();
-#endif
     return testDone();
 }
