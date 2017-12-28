@@ -41,7 +41,6 @@ static void testPVScalar(
     PVScalarPtr pvValueMaster;
     PVScalarPtr pvValueCopy;
     BitSetPtr bitSet;
-    size_t offset;
     ConvertPtr convert = getConvert();
 
     pvValueMaster = pvMaster->getSubField<PVScalar>(valueNameMaster);
@@ -58,7 +57,7 @@ static void testPVScalar(
     testOk1(convert->toDouble(pvValueCopy)==.06);
     testOk1(bitSet->get(pvValueCopy->getFieldOffset()));
 
-    offset = pvCopy->getCopyOffset(pvValueMaster);
+    pvCopy->getCopyOffset(pvValueMaster);
 
     bitSet->clear();
     convert->fromDouble(pvValueMaster,1.0);
@@ -87,7 +86,6 @@ static void testPVScalarArray(
     PVScalarArrayPtr pvValueMaster;
     PVScalarArrayPtr pvValueCopy;
     BitSetPtr bitSet;
-    size_t offset;
     size_t n = 5;
     shared_vector<double> values(n);
     shared_vector<const double> cvalues;
@@ -113,7 +111,7 @@ static void testPVScalarArray(
     pvValueCopy->getAs(cvalues);
     testOk1(cvalues[0]==0.06);
 
-    offset = pvCopy->getCopyOffset(pvValueMaster);
+    pvCopy->getCopyOffset(pvValueMaster);
 
     bitSet->clear();
     values.resize(n);

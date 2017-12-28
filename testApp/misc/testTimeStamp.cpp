@@ -30,7 +30,7 @@ void testTimeStampInternal()
     testOk1(nanoSecPerSec==1000000000);
     TimeStamp current;
     current.getCurrent();
-    testDiag("current %lli %i milliSec %lli\n",
+    testDiag("current %lld %d milliSec %lld\n",
         (long long)current.getSecondsPastEpoch(),
         (int)current.getNanoseconds(),
         (long long)current.getMilliseconds());
@@ -46,7 +46,7 @@ void testTimeStampInternal()
         (ctm.tm_isdst==0) ? "false" : "true");
     tt = time(&tt);
     current.fromTime_t(tt);
-    testDiag("fromTime_t\ncurrent %lli %i milliSec %lli\n",
+    testDiag("fromTime_t\ncurrent %lld %d milliSec %lld\n",
         (long long)current.getSecondsPastEpoch(),
         (int)current.getNanoseconds(),
         (long long)current.getMilliseconds());
