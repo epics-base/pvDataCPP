@@ -98,8 +98,6 @@ namespace epics {
                     break;
             }
         }
-        
-        static string emptyStringtring;
 
         string SerializeHelper::deserializeString(ByteBuffer* buffer,
                 DeserializableControl* control) {
@@ -139,7 +137,7 @@ namespace epics {
                 }
             }
             else
-                return emptyStringtring;
+                return std::string();
         }
     }
 }
