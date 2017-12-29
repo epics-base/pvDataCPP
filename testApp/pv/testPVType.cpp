@@ -56,10 +56,10 @@ MAIN(testPVType)
     int64 longInt = 0x7fffffff;
     longInt <<= 32;
     longInt |= 0xffffffff;
-    printf("int8 max %lli",(long long)longInt);
+    printf("int8 max %lld",(long long)longInt);
     longInt = intValue = 0x80000000;;
     longInt <<= 32;
-    printf(" min %lli\n",(long long)longInt);
+    printf(" min %lld\n",(long long)longInt);
 
     printf("PASSED\n");
     return testDone();
