@@ -455,13 +455,27 @@ public:
         this->m_offset=0;
     }
 
-
+private:
+    /* Hack alert.
+     * For reasons of simplicity and efficiency, we want to use raw pointers for iteration.
+     * However, shared_ptr::get() isn't defined when !m_sdata, although practically it gives NULL.
+     * Unfortunately, many of the MSVC STL methods assert() that iterators are never NULL.
+     * So we fudge here by abusing 'this' so that our iterators are always !NULL.
+     */
+    inline E* base_ptr() const {
+#ifdef _MSC_VER
+        return this->m_count ? this->m_sdata.get() : (E*)(this-1);
+#else
+        return this->m_sdata.get();
+#endif
+    }
+public:
     // STL iterators
 
-    iterator begin() const{return this->m_sdata.get()+this->m_offset;}
+    iterator begin() const{return this->base_ptr()+this->m_offset;}
     const_iterator cbegin() const{return begin();}
 
-    iterator end() const{return this->m_sdata.get()+this->m_offset+this->m_count;}
+    iterator end() const{return this->base_ptr()+this->m_offset+this->m_count;}
     const_iterator cend() const{return end();}
 
     reverse_iterator rbegin() const{return reverse_iterator(end());}
