@@ -265,7 +265,6 @@ void RefMonitor::current()
 
 void RefMonitor::show(const RefSnapshot &snap, bool complete)
 {
-    epicsTime now(epicsTime::getCurrent());
     char buf[80];
     epicsTime::getCurrent().strftime(buf, sizeof(buf), "%a %b %d %Y %H:%M:%S.%f");
     buf[sizeof(buf)-1] = '\0';
