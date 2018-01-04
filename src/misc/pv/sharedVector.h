@@ -15,6 +15,10 @@
 #include <stdexcept>
 #include <iterator>
 
+#if __cplusplus>=201103L
+#  include <initializer_list>
+#endif
+
 #include <cassert>
 
 #include "pv/sharedPtr.h"
@@ -70,18 +74,24 @@ namespace detail {
          */
 
     public:
-
+#if __cplusplus>=201103L
+        //! @brief Empty vector (not very interesting)
+        constexpr shared_vector_base() noexcept
+            :m_sdata(), m_offset(0), m_count(0), m_total(0)
+        {}
+#else
         //! @brief Empty vector (not very interesting)
         shared_vector_base()
             :m_sdata(), m_offset(0), m_count(0), m_total(0)
         {}
+#endif
 
     protected:
         // helper for constructors
         // Ensure that offset and size are zero when we are constructed with NULL
         void _null_input()
         {
-            if(!m_sdata.get()) {
+            if(!m_sdata) {
                 m_offset = m_total = m_count = 0;
             } else {
                 // ensure we won't have integer overflows later
@@ -90,19 +100,12 @@ namespace detail {
         }
     public:
 
-#ifdef _WIN32
         template<typename A>
         shared_vector_base(A* v, size_t o, size_t c)
             :m_sdata(v, detail::default_array_deleter<A*>())
             ,m_offset(o), m_count(c), m_total(c)
         {_null_input();}
-#else
-        template<typename A>
-        shared_vector_base(A v, size_t o, size_t c)
-            :m_sdata(v, detail::default_array_deleter<A>())
-            ,m_offset(o), m_count(c), m_total(c)
-        {_null_input();}
-#endif
+
         shared_vector_base(const std::tr1::shared_ptr<E>& d, size_t o, size_t c)
             :m_sdata(d), m_offset(o), m_count(c), m_total(c)
         {_null_input();}
@@ -118,6 +121,17 @@ namespace detail {
             ,m_count(O.m_count), m_total(O.m_total)
         {}
 
+#if __cplusplus >= 201103L
+        shared_vector_base(shared_vector_base &&O)
+            :m_sdata(std::move(O.m_sdata))
+            ,m_offset(O.m_offset)
+            ,m_count(O.m_count)
+            ,m_total(O.m_total)
+        {
+            O.clear();
+        }
+#endif
+
     protected:
         typedef typename meta::strip_const<E>::type _E_non_const;
     public:
@@ -132,7 +146,11 @@ namespace detail {
         {
             if(!O.unique())
                 throw std::runtime_error("Can't freeze non-unique vector");
+#if __cplusplus >= 201103L
+            m_sdata = std::move(O.m_sdata);
+#else
             m_sdata = O.m_sdata;
+#endif
             O.clear();
         }
 
@@ -146,7 +164,11 @@ namespace detail {
             ,m_total(O.m_total)
         {
             O.make_unique();
+#if __cplusplus >= 201103L
+            m_sdata = std::move(std::tr1::const_pointer_cast<E>(O.m_sdata));
+#else
             m_sdata = std::tr1::const_pointer_cast<E>(O.m_sdata);
+#endif
             O.clear();
         }
 
@@ -161,6 +183,21 @@ namespace detail {
             }
             return *this;
         }
+
+#if __cplusplus >= 201103L
+        //! @brief Move an existing vector
+        shared_vector_base& operator=(shared_vector_base&& o)
+        {
+            if(&o!=this) {
+                m_sdata=std::move(o.m_sdata);
+                m_offset=o.m_offset;
+                m_count=o.m_count;
+                m_total=o.m_total;
+                o.clear();
+            }
+            return *this;
+        }
+#endif
 
         //! @brief Swap the contents of this vector with another
         void swap(shared_vector_base& o) {
@@ -180,11 +217,12 @@ namespace detail {
         }
 
         //! @brief Data is not shared?
-        bool unique() const {return !m_sdata || m_sdata.unique();}
+        bool unique() const {return !m_sdata || m_sdata.use_count()<=1;}
 
 
         //! @brief Number of elements visible through this vector
         size_t size() const{return m_count;}
+        //! @brief shorthand for size()==0
         bool empty() const{return !m_count;}
 
 
@@ -272,9 +310,22 @@ public:
     // allow specialization for all E to be friends
     template<typename E1, class Enable1> friend class shared_vector;
 
-
     //! @brief Empty vector (not very interesting)
+#if __cplusplus>=201103L
+    constexpr shared_vector() noexcept :base_t() {}
+#else
     shared_vector() :base_t() {}
+#endif
+
+#if __cplusplus>=201103L
+    template<typename A>
+    shared_vector(std::initializer_list<A> L)
+        :base_t(new _E_non_const[L.size()], 0, L.size())
+    {
+        _E_non_const *raw = const_cast<_E_non_const*>(data());
+        std::copy(L.begin(), L.end(), raw);
+    }
+#endif
 
     //! @brief Allocate (with new[]) a new vector of size c
     explicit shared_vector(size_t c)
@@ -321,6 +372,11 @@ public:
     //! @brief Copy an existing vector of same type
     shared_vector(const shared_vector& o) :base_t(o) {}
 
+#if __cplusplus>=201103L
+    //! @brief Move an existing vector of same type
+    shared_vector(shared_vector&& o) :base_t(std::move(o)) {}
+#endif
+
     //! @internal
     //! Internal for static_shared_vector_cast
     template<typename FROM>
@@ -342,6 +398,20 @@ public:
         :base_t(O,t)
     {}
 
+    inline shared_vector& operator=(const shared_vector& o)
+    {
+        this->base_t::operator=(o);
+        return *this;
+    }
+
+#if __cplusplus>=201103L
+    inline shared_vector& operator=(shared_vector&& o)
+    {
+        this->base_t::operator=(std::move(o));
+        return *this;
+    }
+#endif
+
     size_t max_size() const{return ((size_t)-1)/sizeof(E);}
 
     size_t capacity() const { return this->m_total; }
@@ -353,6 +423,9 @@ public:
      * does not increase.
      *
      * For notes on copying see docs for make_unique().
+     *
+     * @throws std::bad_alloc if requested allocation can not be made
+     * @throws other exceptions from element copy ctor
      */
     void reserve(size_t i) {
         if(this->unique() && i<=this->m_total)
@@ -377,13 +450,16 @@ public:
      * as if make_unique() were called.  This holds even if the size does not change.
      *
      * For notes on copying see docs for make_unique().
+     *
+     * @throws std::bad_alloc if requested allocation can not be made
+     * @throws other exceptions from element copy ctor
      */
     void resize(size_t i) {
         if(i==this->m_count) {
             make_unique();
             return;
         }
-        if(this->m_sdata && this->m_sdata.unique()) {
+        if(this->m_sdata && this->m_sdata.use_count()==1) {
             // we have data and exclusive ownership of it
             if(i<=this->m_total) {
                 // We have room to grow (or shrink)!
@@ -438,10 +514,14 @@ public:
        }
        assert(original.unique());
      @endcode
+     *
+     * @throws std::bad_alloc if requested allocation can not be made
+     * @throws other exceptions from element copy ctor
      */
     void make_unique() {
         if(this->unique())
             return;
+        // at this point we know that !!m_sdata, so get()!=NULL
         _E_non_const *d = new _E_non_const[this->m_total];
         try {
             std::copy(this->m_sdata.get()+this->m_offset,
@@ -527,10 +607,15 @@ public:
 
     // data access
 
+    //! @brief Return Base pointer
     pointer data() const{return this->m_sdata.get()+this->m_offset;}
 
+    //! @brief Member access
+    //! Undefined if empty()==true.
     reference operator[](size_t i) const {return this->m_sdata.get()[this->m_offset+i];}
 
+    //! @brief Member access
+    //! @throws std::out_of_range if i>=size().
     reference at(size_t i) const
     {
         if(i>this->m_count)
@@ -577,7 +662,11 @@ public:
 
     typedef std::tr1::shared_ptr<E> shared_pointer_type;
 
+#if __cplusplus>=201103L
+    constexpr shared_vector() noexcept :base_t(), m_vtype((ScalarType)-1) {}
+#else
     shared_vector() :base_t(), m_vtype((ScalarType)-1) {}
+#endif
 
     shared_vector(pointer v, size_t o, size_t c)
         :base_t(v,o,c), m_vtype((ScalarType)-1) {}
@@ -592,6 +681,11 @@ public:
 
     shared_vector(const shared_vector& o)
         :base_t(o), m_vtype(o.m_vtype) {}
+
+#if __cplusplus>=201103L
+    shared_vector(shared_vector&& o)
+        :base_t(std::move(o)), m_vtype(o.m_vtype) {}
+#endif
 
     //! @internal
     //! Internal for static_shared_vector_cast
@@ -622,6 +716,17 @@ public:
         }
         return *this;
     }
+
+#if __cplusplus>=201103L
+    shared_vector& operator=(shared_vector&& o)
+    {
+        if(&o!=this) {
+            this->base_t::operator=(std::move(o));
+            m_vtype = o.m_vtype;
+        }
+        return *this;
+    }
+#endif
 
     size_t max_size() const{return (size_t)-1;}
 

@@ -12,7 +12,7 @@
 
 #include <vector>
 
-#include <epicsUnitTest.h>
+#include <pv/pvUnitTest.h>
 #include <testMain.h>
 
 #include "pv/sharedVector.h"
@@ -20,15 +20,20 @@
 using std::string;
 using namespace epics::pvData;
 
-static void testEmpty()
+namespace {
+
+void testEmpty()
 {
     testDiag("Test empty vector");
-    epics::pvData::shared_vector<int32> empty, empty2;
+    epics::pvData::shared_vector<int32> empty, empty2, empty3(0u);
 
     testOk1(empty.size()==0);
     testOk1(empty.empty());
     testOk1(empty.begin()==empty.end());
     testOk1(empty.unique());
+
+    testOk1(empty3.empty());
+    testOk1(empty3.unique());
 
     testOk1(empty.data()==NULL);
 
@@ -38,7 +43,7 @@ static void testEmpty()
     testOk1(!(empty!=empty2));
 }
 
-static void testInternalAlloc()
+void testInternalAlloc()
 {
     testDiag("Test vector alloc w/ new[]");
 
@@ -75,19 +80,17 @@ static void testInternalAlloc()
     testOk1(internal.data()==NULL);
 }
 
-namespace {
-    //Note: STL shared_ptr requires that deletors be copy constructable
-    template<typename E>
-    struct callCounter {
-        std::tr1::shared_ptr<int32> count;
-        callCounter():count(new int32){*count=0;}
-        callCounter(const callCounter& o):count(o.count) {};
-        callCounter& operator=(const callCounter& o){count=o.count;}
-        void operator()(E){*count=1;}
-    };
-}
+//Note: STL shared_ptr requires that deletors be copy constructable
+template<typename E>
+struct callCounter {
+    std::tr1::shared_ptr<int32> count;
+    callCounter():count(new int32){*count=0;}
+    callCounter(const callCounter& o):count(o.count) {}
+    callCounter& operator=(const callCounter& o){count=o.count;}
+    void operator()(E){(*count)++;}
+};
 
-static void testExternalAlloc()
+void testExternalAlloc()
 {
     testDiag("Test vector external alloc");
 
@@ -133,7 +136,7 @@ static void testExternalAlloc()
     testOk1(*tracker.count==1);
 }
 
-static void testShare()
+void testShare()
 {
     testDiag("Test vector Sharing");
 
@@ -195,7 +198,7 @@ static void testShare()
     testOk1(two[19]==5000);
 }
 
-static void testConst()
+void testConst()
 {
     testDiag("Test constant vector");
 
@@ -236,7 +239,7 @@ static void testConst()
     testOk1(rodata.data()!=rodata2.data());
 }
 
-static void testSlice()
+void testSlice()
 {
     testDiag("Test vector slicing");
 
@@ -286,7 +289,7 @@ static void testSlice()
     testOk1(half2.data()==NULL);
 }
 
-static void testCapacity()
+void testCapacity()
 {
     testDiag("Test vector capacity");
 
@@ -328,7 +331,7 @@ static void testCapacity()
     testOk1(vect[1]==124);
 }
 
-static void testPush()
+void testPush()
 {
     epics::pvData::shared_vector<int32> vect;
 
@@ -353,7 +356,7 @@ static void testPush()
     testOk1(nallocs==26);
 }
 
-static void testVoid()
+void testVoid()
 {
     testDiag("Test vector cast to/from void");
 
@@ -373,7 +376,7 @@ static void testVoid()
     VV.clear();
 }
 
-static void testConstVoid()
+void testConstVoid()
 {
     testDiag("Test vector cast to/from const void");
 
@@ -401,7 +404,7 @@ static void testConstVoid()
 
 struct dummyStruct {};
 
-static void testNonPOD()
+void testNonPOD()
 {
     testDiag("Test vector of non-POD types");
 
@@ -429,7 +432,7 @@ static void testNonPOD()
     testOk1(structs2[1].get()==temp);
 }
 
-static void testVectorConvert()
+void testVectorConvert()
 {
     testDiag("Test shared_vector_convert");
 
@@ -474,7 +477,7 @@ static void testVectorConvert()
     testOk1(strings.at(0)=="42");
 }
 
-static void testWeak()
+void testWeak()
 {
     testDiag("Test weak_ptr counting");
 
@@ -499,7 +502,7 @@ static void testWeak()
     testOk1(!data.unique());
 }
 
-static void testICE()
+void testICE()
 {
     testDiag("Test freeze and thaw");
 
@@ -563,7 +566,6 @@ static void testICE()
     }
 }
 
-static
 void testBad()
 {
     epics::pvData::shared_vector<int> I;
@@ -620,7 +622,6 @@ void testBad()
     //I = epics::pvData::that(CF);
 }
 
-static
 void testAutoSwap()
 {
     epics::auto_ptr<int> A(new int(42)), B(new int(43));
@@ -631,9 +632,71 @@ void testAutoSwap()
     testOk1(42==*B);
 }
 
+void testCXX11Move()
+{
+#if __cplusplus>=201103L
+    testDiag("Check std::move()");
+    shared_vector<int32> A(4, 42),
+                         B(std::move(A));
+
+    testOk1(A.unique());
+    testOk1(B.unique());
+    testOk1(A.empty());
+    testOk1(B.size()==4);
+    testOk1(!B.empty() && B[0]==42);
+
+    A = std::move(B);
+
+    testOk1(A.unique());
+    testOk1(B.unique());
+    testOk1(B.empty());
+    testOk1(A.size()==4);
+    testOk1(!A.empty() && A[0]==42);
+
+    shared_vector<void> C(shared_vector_convert<void>(A)),
+                        D(std::move(C));
+    A.clear();
+
+    testOk1(C.unique());
+    testOk1(D.unique());
+    testOk1(C.empty());
+    testOk1(D.size()==4*4);
+
+    C = std::move(D);
+
+    testOk1(C.unique());
+    testOk1(D.unique());
+    testOk1(C.size()==4*4);
+    testOk1(D.empty());
+#else
+    testSkip(18, "Not -std=c++11");
+#endif
+}
+
+void testCXX11Init()
+{
+#if __cplusplus>=201103L
+    testDiag("Check c++11 style array initialization");
+
+    shared_vector<const int32> A = {1.0, 2.0, 3.0};
+
+    testOk1(A.size()==3);
+
+    int32 sum = 0;
+    for (auto V: A) {
+        sum += V;
+    }
+    testOk1(sum==6);
+#else
+    testSkip(2, "Not -std=c++11");
+#endif
+}
+
+} // namespace
+
 MAIN(testSharedVector)
 {
-    testPlan(169);
+    testPlan(191);
     testDiag("Tests for shared_vector");
 
     testDiag("sizeof(shared_vector<int32>)=%lu",
@@ -655,5 +718,7 @@ MAIN(testSharedVector)
     testICE();
     testBad();
     testAutoSwap();
+    testCXX11Move();
+    testCXX11Init();
     return testDone();
 }
