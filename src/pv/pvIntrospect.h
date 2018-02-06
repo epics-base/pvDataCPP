@@ -320,9 +320,6 @@ public:
    static size_t num_instances;
 
    POINTER_DEFINITIONS(Field);
-    /**
-     * Destructor.
-     */
    virtual ~Field();
     /**
      * Get the field type.
@@ -371,9 +368,6 @@ epicsShareExtern std::ostream& operator<<(std::ostream& o, const Field& field);
 class epicsShareClass Scalar : public Field{
 public:
     POINTER_DEFINITIONS(Scalar);
-    /**
-     * Destructor.
-     */
     virtual ~Scalar();
     typedef Scalar& reference;
     typedef const Scalar& const_reference;
@@ -409,9 +403,6 @@ private:
 class epicsShareClass BoundedString : public Scalar{
 public:
     POINTER_DEFINITIONS(BoundedString);
-    /**
-     * Destructor.
-     */
     virtual ~BoundedString();
     typedef BoundedString& reference;
     typedef const BoundedString& const_reference;
@@ -436,9 +427,6 @@ private:
 class epicsShareClass Array : public Field{
 public:
     POINTER_DEFINITIONS(Array);
-    /**
-     * Destructor.
-     */
     virtual ~Array();
     typedef Array& reference;
     typedef const Array& const_reference;
@@ -499,9 +487,6 @@ public:
     virtual void deserialize(ByteBuffer *buffer, DeserializableControl *control) OVERRIDE FINAL;
     
 protected:
-    /**
-     * Destructor.
-     */
     virtual ~ScalarArray();
 private:
     const std::string getIDScalarArrayLUT() const;
@@ -537,9 +522,6 @@ public:
     virtual void serialize(ByteBuffer *buffer, SerializableControl *control) const OVERRIDE FINAL;
 
 protected:
-    /**
-     * Destructor.
-     */
     virtual ~BoundedScalarArray();
 private:
     std::size_t size;
@@ -572,9 +554,6 @@ public:
     virtual void serialize(ByteBuffer *buffer, SerializableControl *control) const OVERRIDE FINAL;
 
 protected:
-    /**
-     * Destructor.
-     */
     virtual ~FixedScalarArray();
 private:
     std::size_t size;
@@ -614,9 +593,6 @@ protected:
      * @param structure The introspection interface for the elements.
      */
     StructureArray(StructureConstPtr const & structure);
-    /**
-     * Destructor.
-     */
     virtual ~StructureArray();
 private:
     StructureConstPtr pstructure;
@@ -656,9 +632,6 @@ protected:
      * @param _punion The introspection interface for the elements.
      */
     UnionArray(UnionConstPtr const & _punion);
-    /**
-     * Destructor.
-     */
     virtual ~UnionArray();
 private:
     UnionConstPtr punion;
@@ -684,9 +657,6 @@ public:
      */
     static const std::string & defaultId();
 
-    /**
-     * Destructor.
-     */
     virtual ~Structure();
     typedef Structure& reference;
     typedef const Structure& const_reference;
@@ -805,9 +775,6 @@ public:
      */
     static const std::string & anyId();
 
-    /**
-     * Destructor.
-     */
     virtual ~Union();
     typedef Union& reference;
     typedef const Union& const_reference;
