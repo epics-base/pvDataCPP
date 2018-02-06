@@ -324,8 +324,8 @@ void test_extendStructure()
               <<"amended: "<<amended
               <<"expected: "<<expected;
 
-    testNotEqual(static_cast<const void*>(amended.get()),
-                 static_cast<const void*>(expected.get()));
+    testEqual(static_cast<const void*>(amended.get()),
+              static_cast<const void*>(expected.get()));
     testEqual(*amended, *expected);
 
     testThrows(std::runtime_error,

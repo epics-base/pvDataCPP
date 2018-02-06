@@ -14,6 +14,7 @@
 #include <stdexcept>
 #include <sstream>
 
+#include <epicsString.h>
 #include <epicsMutex.h>
 #include <epicsThread.h>
 
@@ -35,6 +36,46 @@ static DebugLevel debugLevel = lowDebug;
 size_t Field::num_instances;
 
 
+struct Field::Helper {
+    static void hash(Field *fld) {
+        std::ostringstream key;
+        // hash the output of operator<<()
+        // not efficient, but stable within this process.
+        key<<(*fld);
+        fld->m_hash = epicsStrHash(key.str().c_str(), 0xbadc0de1);
+    }
+};
+
+struct FieldCreate::Helper {
+    template<typename FLD>
+    static void cache(const FieldCreate *create, std::tr1::shared_ptr<FLD>& ent) {
+        Field::Helper::hash(ent.get());
+
+        Lock G(create->mutex);
+        // we examine raw pointers stored in create->cache, which is safe under create->mutex
+
+        std::pair<cache_t::iterator, cache_t::iterator> itp(create->cache.equal_range(ent->m_hash));
+        for(; itp.first!=itp.second; ++itp.first) {
+            Field* cent(itp.first->second);
+            FLD* centx(dynamic_cast<FLD*>(cent));
+            if(centx && compare(*centx, *ent)) {
+                try{
+                    ent = std::tr1::static_pointer_cast<FLD>(cent->shared_from_this());
+                    return;
+                }catch(std::tr1::bad_weak_ptr&){
+                    // we're racing destruction.
+                    // add a new entry.
+                    // Field::~Field is in the process of removing this old one.
+                    continue;
+                }
+            }
+        }
+
+        create->cache.insert(std::make_pair(ent->m_hash, ent.get()));
+        // cache cleaned from Field::~Field
+    }
+};
+
 Field::Field(Type type)
     : m_fieldType(type)
 {
@@ -43,6 +84,18 @@ Field::Field(Type type)
 
 Field::~Field() {
     REFTRACE_DECREMENT(num_instances);
+    FieldCreatePtr create(getFieldCreate());
+
+    Lock G(create->mutex);
+
+    std::pair<FieldCreate::cache_t::iterator, FieldCreate::cache_t::iterator> itp(create->cache.equal_range(m_hash));
+    for(; itp.first!=itp.second; ++itp.first) {
+        Field* cent(itp.first->second);
+        if(cent==this) {
+            create->cache.erase(itp.first);
+            return;
+        }
+    }
 }
 
 
@@ -1075,10 +1128,9 @@ ScalarConstPtr FieldCreate::createScalar(ScalarType scalarType) const
 
 BoundedStringConstPtr FieldCreate::createBoundedString(std::size_t maxLength) const
 {
-    // TODO use std::make_shared
-    std::tr1::shared_ptr<BoundedString> s(new BoundedString(maxLength), Field::Deleter());
-    BoundedStringConstPtr sa = s;
-    return sa;
+    std::tr1::shared_ptr<BoundedString> s(new BoundedString(maxLength));
+    Helper::cache(this, s);
+    return s;
 }
 
 ScalarArrayConstPtr FieldCreate::createScalarArray(ScalarType elementType) const
@@ -1100,10 +1152,9 @@ ScalarArrayConstPtr FieldCreate::createFixedScalarArray(ScalarType elementType, 
         THROW_EXCEPTION2(std::invalid_argument, strm.str());
     }
 
-    // TODO use std::make_shared
-    std::tr1::shared_ptr<ScalarArray> s(new FixedScalarArray(elementType, size), Field::Deleter());
-    ScalarArrayConstPtr sa = s;
-    return sa;
+    std::tr1::shared_ptr<ScalarArray> s(new FixedScalarArray(elementType, size));
+    Helper::cache(this, s);
+    return s;
 }
 
 ScalarArrayConstPtr FieldCreate::createBoundedScalarArray(ScalarType elementType, size_t size) const
@@ -1114,10 +1165,9 @@ ScalarArrayConstPtr FieldCreate::createBoundedScalarArray(ScalarType elementType
         THROW_EXCEPTION2(std::invalid_argument, strm.str());
     }
 
-    // TODO use std::make_shared
-    std::tr1::shared_ptr<ScalarArray> s(new BoundedScalarArray(elementType, size), Field::Deleter());
-    ScalarArrayConstPtr sa = s;
-    return sa;
+    std::tr1::shared_ptr<ScalarArray> s(new BoundedScalarArray(elementType, size));
+    Helper::cache(this, s);
+    return s;
 }
 
 StructureConstPtr FieldCreate::createStructure () const
@@ -1174,10 +1224,9 @@ StructureConstPtr FieldCreate::createStructure (
     StringArray const & fieldNames,FieldConstPtrArray const & fields) const
 {
       validateFieldNames(fieldNames);
-      // TODO use std::make_shared
-      std::tr1::shared_ptr<Structure> sp(new Structure(fieldNames,fields), Field::Deleter());
-      StructureConstPtr structure = sp;
-      return structure;
+      std::tr1::shared_ptr<Structure> sp(new Structure(fieldNames,fields));
+      Helper::cache(this, sp);
+      return sp;
 }
 
 StructureConstPtr FieldCreate::createStructure (
@@ -1186,29 +1235,26 @@ StructureConstPtr FieldCreate::createStructure (
     FieldConstPtrArray const & fields) const
 {
       validateFieldNames(fieldNames);
-      // TODO use std::make_shared
-      std::tr1::shared_ptr<Structure> sp(new Structure(fieldNames,fields,id), Field::Deleter());
-      StructureConstPtr structure = sp;
-      return structure;
+      std::tr1::shared_ptr<Structure> sp(new Structure(fieldNames,fields,id));
+      Helper::cache(this, sp);
+      return sp;
 }
 
 StructureArrayConstPtr FieldCreate::createStructureArray(
     StructureConstPtr const & structure) const
 {
-     // TODO use std::make_shared
-     std::tr1::shared_ptr<StructureArray> sp(new StructureArray(structure), Field::Deleter());
-     StructureArrayConstPtr structureArray = sp;
-     return structureArray;
+     std::tr1::shared_ptr<StructureArray> sp(new StructureArray(structure));
+     Helper::cache(this, sp);
+     return sp;
 }
 
 UnionConstPtr FieldCreate::createUnion (
     StringArray const & fieldNames,FieldConstPtrArray const & fields) const
 {
       validateFieldNames(fieldNames);
-      // TODO use std::make_shared
-      std::tr1::shared_ptr<Union> sp(new Union(fieldNames,fields), Field::Deleter());
-      UnionConstPtr punion = sp;
-      return punion;
+      std::tr1::shared_ptr<Union> sp(new Union(fieldNames,fields));
+      Helper::cache(this, sp);
+      return sp;
 }
 
 UnionConstPtr FieldCreate::createUnion (
@@ -1217,10 +1263,9 @@ UnionConstPtr FieldCreate::createUnion (
     FieldConstPtrArray const & fields) const
 {
       validateFieldNames(fieldNames);
-      // TODO use std::make_shared
-      std::tr1::shared_ptr<Union> sp(new Union(fieldNames,fields,id), Field::Deleter());
-      UnionConstPtr punion = sp;
-      return punion;
+      std::tr1::shared_ptr<Union> sp(new Union(fieldNames,fields,id));
+      Helper::cache(this, sp);
+      return sp;
 }
 
 UnionConstPtr FieldCreate::createVariantUnion () const
@@ -1231,10 +1276,9 @@ UnionConstPtr FieldCreate::createVariantUnion () const
 UnionArrayConstPtr FieldCreate::createUnionArray(
     UnionConstPtr const & punion) const
 {
-     // TODO use std::make_shared 
-     std::tr1::shared_ptr<UnionArray> sp(new UnionArray(punion), Field::Deleter());
-     UnionArrayConstPtr unionArray = sp;
-     return unionArray;
+     std::tr1::shared_ptr<UnionArray> sp(new UnionArray(punion));
+     Helper::cache(this, sp);
+     return sp;
 }
 
 UnionArrayConstPtr FieldCreate::createVariantUnionArray () const
@@ -1363,12 +1407,10 @@ FieldConstPtr FieldCreate::deserialize(ByteBuffer* buffer, DeserializableControl
 
             size_t size = SerializeHelper::readSize(buffer, control);
 
-            // TODO use std::make_shared
             std::tr1::shared_ptr<Field> sp(
-                        new BoundedString(size),
-                        Field::Deleter());
-            FieldConstPtr p = sp;
-            return p;
+                        new BoundedString(size));
+            Helper::cache(this, sp);
+            return sp;
         }
         else
             throw std::invalid_argument("invalid type encoding");
@@ -1393,19 +1435,17 @@ FieldConstPtr FieldCreate::deserialize(ByteBuffer* buffer, DeserializableControl
             {
                 // TODO use std::make_shared
                 std::tr1::shared_ptr<Field> sp(
-                            new FixedScalarArray(static_cast<epics::pvData::ScalarType>(scalarType), size),
-                            Field::Deleter());
-                FieldConstPtr p = sp;
-                return p;
+                            new FixedScalarArray(static_cast<epics::pvData::ScalarType>(scalarType), size));
+                Helper::cache(this, sp);
+                return sp;
             }
             else
             {
                 // TODO use std::make_shared
                 std::tr1::shared_ptr<Field> sp(
-                            new BoundedScalarArray(static_cast<epics::pvData::ScalarType>(scalarType), size),
-                            Field::Deleter());
-                FieldConstPtr p = sp;
-                return p;
+                            new BoundedScalarArray(static_cast<epics::pvData::ScalarType>(scalarType), size));
+                Helper::cache(this, sp);
+                return sp;
             }
         }
         else if (typeCode == 0x80)
@@ -1417,9 +1457,9 @@ FieldConstPtr FieldCreate::deserialize(ByteBuffer* buffer, DeserializableControl
             // Type type = Type.structureArray;
             StructureConstPtr elementStructure = std::tr1::static_pointer_cast<const Structure>(control->cachedDeserialize(buffer));
             // TODO use std::make_shared
-            std::tr1::shared_ptr<Field> sp(new StructureArray(elementStructure), Field::Deleter());
-            FieldConstPtr p = sp;
-            return p;
+            std::tr1::shared_ptr<Field> sp(new StructureArray(elementStructure));
+            Helper::cache(this, sp);
+            return sp;
         }
         else if (typeCode == 0x81)
         {
@@ -1430,9 +1470,9 @@ FieldConstPtr FieldCreate::deserialize(ByteBuffer* buffer, DeserializableControl
             // Type type = Type.unionArray;
             UnionConstPtr elementUnion = std::tr1::static_pointer_cast<const Union>(control->cachedDeserialize(buffer));
             // TODO use std::make_shared
-            std::tr1::shared_ptr<Field> sp(new UnionArray(elementUnion), Field::Deleter());
-            FieldConstPtr p = sp;
-            return p;
+            std::tr1::shared_ptr<Field> sp(new UnionArray(elementUnion));
+            Helper::cache(this, sp);
+            return sp;
         }
         else if (typeCode == 0x82)
         {
@@ -1481,23 +1521,21 @@ FieldCreate::FieldCreate()
 {
     for (int i = 0; i <= MAX_SCALAR_TYPE; i++)
     {
-        // TODO use std::make_shared
-        std::tr1::shared_ptr<Scalar> sp(new Scalar(static_cast<ScalarType>(i)), Field::Deleter());
-        ScalarConstPtr p = sp;
-        scalars.push_back(p);
+        std::tr1::shared_ptr<Scalar> sp(new Scalar(static_cast<ScalarType>(i)));
+        Helper::cache(this, sp);
+        scalars.push_back(sp);
 
-        // TODO use std::make_shared
-        std::tr1::shared_ptr<ScalarArray> spa(new ScalarArray(static_cast<ScalarType>(i)), Field::Deleter());
-        ScalarArrayConstPtr pa = spa;
+        std::tr1::shared_ptr<ScalarArray> spa(new ScalarArray(static_cast<ScalarType>(i)));
+        Helper::cache(this, spa);
         scalarArrays.push_back(spa);
     }
 
-    // TODO use std::make_shared
-    std::tr1::shared_ptr<Union> su(new Union(), Field::Deleter());
+    std::tr1::shared_ptr<Union> su(new Union());
+    Helper::cache(this, su);
     variantUnion = su;
 
-    // TODO use std::make_shared
-    std::tr1::shared_ptr<UnionArray> sua(new UnionArray(variantUnion), Field::Deleter());
+    std::tr1::shared_ptr<UnionArray> sua(new UnionArray(variantUnion));
+    Helper::cache(this, sua);
     variantUnionArray = sua;
 }
 

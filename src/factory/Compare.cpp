@@ -23,7 +23,7 @@ namespace epics { namespace pvData {
  * 1) same instance
  * 2) same type (field and scalar/element), same name, same subfields (if any)
  */
-bool operator==(const Field& a, const Field& b)
+bool compare(const Field& a, const Field& b)
 {
     if(&a==&b)
         return true;
@@ -33,53 +33,53 @@ bool operator==(const Field& a, const Field& b)
     case scalar: {
         const Scalar &A=static_cast<const Scalar&>(a);
         const Scalar &B=static_cast<const Scalar&>(b);
-        return A==B;
+        return compare(A, B);
     }
     case scalarArray: {
             const ScalarArray &A=static_cast<const ScalarArray&>(a);
             const ScalarArray &B=static_cast<const ScalarArray&>(b);
-            return A==B;
+            return compare(A, B);
         }
     case structure: {
             const Structure &A=static_cast<const Structure&>(a);
             const Structure &B=static_cast<const Structure&>(b);
-            return A==B;
+            return compare(A, B);
         }
     case structureArray: {
             const StructureArray &A=static_cast<const StructureArray&>(a);
             const StructureArray &B=static_cast<const StructureArray&>(b);
-            return A==B;
+            return compare(A, B);
         }
     case union_: {
             const Union &A=static_cast<const Union&>(a);
             const Union &B=static_cast<const Union&>(b);
-            return A==B;
+            return compare(A, B);
         }
     case unionArray: {
             const UnionArray &A=static_cast<const UnionArray&>(a);
             const UnionArray &B=static_cast<const UnionArray&>(b);
-            return A==B;
+            return compare(A, B);
         }
     default:
         throw std::logic_error("Invalid Field type in comparison");
     }
 }
 
-bool operator==(const Scalar& a, const Scalar& b)
+bool compare(const Scalar& a, const Scalar& b)
 {
     if(&a==&b)
         return true;
     return a.getScalarType()==b.getScalarType();
 }
 
-bool operator==(const ScalarArray& a, const ScalarArray& b)
+bool compare(const ScalarArray& a, const ScalarArray& b)
 {
     if(&a==&b)
         return true;
     return a.getElementType()==b.getElementType();
 }
 
-bool operator==(const Structure& a, const Structure& b)
+bool compare(const Structure& a, const Structure& b)
 {
     if(&a==&b)
         return true;
@@ -101,12 +101,12 @@ bool operator==(const Structure& a, const Structure& b)
     return std::equal( an.begin(), an.end(), bn.begin() );
 }
 
-bool operator==(const StructureArray& a, const StructureArray& b)
+bool compare(const StructureArray& a, const StructureArray& b)
 {
     return *(a.getStructure().get())==*(b.getStructure().get());
 }
 
-bool operator==(const Union& a, const Union& b)
+bool compare(const Union& a, const Union& b)
 {
     if(&a==&b)
         return true;
@@ -128,12 +128,12 @@ bool operator==(const Union& a, const Union& b)
     return std::equal( an.begin(), an.end(), bn.begin() );
 }
 
-bool operator==(const UnionArray& a, const UnionArray& b)
+bool compare(const UnionArray& a, const UnionArray& b)
 {
     return *(a.getUnion().get())==*(b.getUnion().get());
 }
 
-bool operator==(const BoundedString& a, const BoundedString& b)
+bool compare(const BoundedString& a, const BoundedString& b)
 {
     if(&a==&b)
         return true;

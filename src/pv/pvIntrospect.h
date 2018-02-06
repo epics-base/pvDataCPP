@@ -12,7 +12,9 @@
 #include <string>
 #include <stdexcept>
 #include <iostream>
+#include <map>
 
+#include <pv/lock.h>
 #include <pv/noDefaultMethods.h>
 #include <pv/pvType.h>
 #include <pv/byteBuffer.h>
@@ -347,6 +349,8 @@ protected:
    Field(Type type);
 private:
    const Type m_fieldType;
+   unsigned int m_hash;
+   struct Helper;
 
    friend class StructureArray;
    friend class Structure;
@@ -354,7 +358,6 @@ private:
    friend class StandardField;
    friend class BasePVStructureArray;
    friend class FieldCreate;
-   struct Deleter{void operator()(Field *p){delete p;}};
    EPICS_NOT_COPYABLE(Field)
 };
 
@@ -489,7 +492,6 @@ public:
     virtual void serialize(ByteBuffer *buffer, SerializableControl *control) const OVERRIDE;
     virtual void deserialize(ByteBuffer *buffer, DeserializableControl *control) OVERRIDE FINAL;
     
-protected:
     virtual ~ScalarArray();
 private:
     const std::string getIDScalarArrayLUT() const;
@@ -525,7 +527,6 @@ public:
 
     virtual void serialize(ByteBuffer *buffer, SerializableControl *control) const OVERRIDE FINAL;
 
-protected:
     virtual ~BoundedScalarArray();
 private:
     std::size_t size;
@@ -558,7 +559,6 @@ public:
 
     virtual void serialize(ByteBuffer *buffer, SerializableControl *control) const OVERRIDE FINAL;
 
-protected:
     virtual ~FixedScalarArray();
 private:
     std::size_t size;
@@ -599,6 +599,7 @@ protected:
      * @param structure The introspection interface for the elements.
      */
     StructureArray(StructureConstPtr const & structure);
+public:
     virtual ~StructureArray();
 private:
     StructureConstPtr pstructure;
@@ -639,6 +640,7 @@ protected:
      * @param _punion The introspection interface for the elements.
      */
     UnionArray(UnionConstPtr const & _punion);
+public:
     virtual ~UnionArray();
 private:
     UnionConstPtr punion;
@@ -1221,11 +1223,19 @@ public:
         
 private:
     FieldCreate();
-    
+
+    // const after ctor
     std::vector<ScalarConstPtr> scalars;
     std::vector<ScalarArrayConstPtr> scalarArrays;
     UnionConstPtr variantUnion;
     UnionArrayConstPtr variantUnionArray;
+
+    mutable Mutex mutex;
+    typedef std::multimap<unsigned int, Field*> cache_t;
+    mutable cache_t cache;
+
+    struct Helper;
+    friend class Field;
     EPICS_NOT_COPYABLE(FieldCreate)
 };
 
@@ -1278,32 +1288,35 @@ OP(pvDouble, double)
 OP(pvString, std::string)
 #undef OP
 
-bool epicsShareExtern operator==(const Field&, const Field&);
-bool epicsShareExtern operator==(const Scalar&, const Scalar&);
-bool epicsShareExtern operator==(const ScalarArray&, const ScalarArray&);
-bool epicsShareExtern operator==(const Structure&, const Structure&);
-bool epicsShareExtern operator==(const StructureArray&, const StructureArray&);
-bool epicsShareExtern operator==(const Union&, const Union&);
-bool epicsShareExtern operator==(const UnionArray&, const UnionArray&);
-bool epicsShareExtern operator==(const BoundedString&, const BoundedString&);
+bool epicsShareExtern compare(const Field&, const Field&);
+bool epicsShareExtern compare(const Scalar&, const Scalar&);
+bool epicsShareExtern compare(const ScalarArray&, const ScalarArray&);
+bool epicsShareExtern compare(const Structure&, const Structure&);
+bool epicsShareExtern compare(const StructureArray&, const StructureArray&);
+bool epicsShareExtern compare(const Union&, const Union&);
+bool epicsShareExtern compare(const UnionArray&, const UnionArray&);
+bool epicsShareExtern compare(const BoundedString&, const BoundedString&);
 
-static inline bool operator!=(const Field& a, const Field& b)
-{return !(a==b);}
-static inline bool operator!=(const Scalar& a, const Scalar& b)
-{return !(a==b);}
-static inline bool operator!=(const ScalarArray& a, const ScalarArray& b)
-{return !(a==b);}
-static inline bool operator!=(const Structure& a, const Structure& b)
-{return !(a==b);}
-static inline bool operator!=(const StructureArray& a, const StructureArray& b)
-{return !(a==b);}
-static inline bool operator!=(const Union& a, const Union& b)
-{return !(a==b);}
-static inline bool operator!=(const UnionArray& a, const UnionArray& b)
-{return !(a==b);}
-static inline bool operator!=(const BoundedString& a, const BoundedString& b)
-{return !(a==b);}
+/** Equality with other Field
+ *
+ * The creation process of class FieldCreate ensures that identical field definitions
+ * will share the same instance.  So pointer equality is sufficient to show defintion
+ * equality.  If in doubt, compare() will do an full test.
+ */
+#define MAKE_COMPARE(CLASS) \
+static FORCE_INLINE bool operator==(const CLASS& a, const CLASS& b) {return (void*)&a==(void*)&b;} \
+static FORCE_INLINE bool operator!=(const CLASS& a, const CLASS& b) {return !(a==b);}
 
+MAKE_COMPARE(Field)
+MAKE_COMPARE(Scalar)
+MAKE_COMPARE(ScalarArray)
+MAKE_COMPARE(Structure)
+MAKE_COMPARE(StructureArray)
+MAKE_COMPARE(Union)
+MAKE_COMPARE(UnionArray)
+MAKE_COMPARE(BoundedString)
+
+#undef MAKE_COMPARE
 }}
 
 /**

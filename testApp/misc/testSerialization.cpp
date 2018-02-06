@@ -24,6 +24,8 @@
 #include <pv/noDefaultMethods.h>
 #include <pv/byteBuffer.h>
 #include <pv/convert.h>
+#include <pv/pvUnitTest.h>
+#include <pv/current_function.h>
 
 #include <pv/standardField.h>
 
@@ -629,6 +631,8 @@ void testStructureId() {
 
 void serializationFieldTest(FieldConstPtr const & field)
 {
+    testShow()<<CURRENT_FUNCTION<<"\n"<<field;
+
 	buffer->clear();
 
 	// serialize
@@ -639,7 +643,7 @@ void serializationFieldTest(FieldConstPtr const & field)
 
 	FieldConstPtr deserializedField = getFieldCreate()->deserialize(buffer, control);
 
-	// must equal
+    testShow()<<" after "<<(void*)field.get()<<" == "<<(void*)deserializedField.get();
 	testOk1(*field == *deserializedField);
 }
 
