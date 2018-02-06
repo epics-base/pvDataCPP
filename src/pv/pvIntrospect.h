@@ -1275,41 +1275,6 @@ OP(pvDouble, double)
 OP(pvString, std::string)
 #undef OP
 
-/**
- * @brief Hash a Scalar
- *
- */
-struct ScalarHashFunction {
-    size_t operator() (const Scalar& scalar) const { return scalar.getScalarType(); }
-};
-
-/**
- * @brief Hash a ScalarArray
- *
- */
-struct ScalarArrayHashFunction {
-    size_t operator() (const ScalarArray& scalarArray) const { return 0x10 | scalarArray.getElementType(); }
-};
-
-/**
- * @brief Hash a Structure
- *
- */
-struct StructureHashFunction {
-    size_t operator() (const Structure& /*structure*/) const { return 0; }
-    // TODO hash
-//        final int PRIME = 31;
-//        return PRIME * Arrays.hashCode(fieldNames) + Arrays.hashCode(fields);
-};
-
-/**
- * @brief Hash a StructureArray
- *
- */
-struct StructureArrayHashFunction {
-    size_t operator() (const StructureArray& structureArray) const { StructureHashFunction shf; return (0x10 | shf(*(structureArray.getStructure()))); }
-};
-
 bool epicsShareExtern operator==(const Field&, const Field&);
 bool epicsShareExtern operator==(const Scalar&, const Scalar&);
 bool epicsShareExtern operator==(const ScalarArray&, const ScalarArray&);
