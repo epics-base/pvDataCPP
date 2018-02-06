@@ -570,7 +570,7 @@ public:
      * Get the introspection interface for the array elements.
      * @return The introspection interface.
      */
-    StructureConstPtr getStructure() const {return pstructure;}
+    const StructureConstPtr& getStructure() const {return pstructure;}
 
     virtual ArraySizeType getArraySizeType() const {return Array::variable;}
 
@@ -682,8 +682,8 @@ public:
     template<typename FT>
     std::tr1::shared_ptr<const FT> getField(std::string const &fieldName) const
     {
-        FieldConstPtr field = getField(fieldName);
-        if (field.get())
+        FieldConstPtr field(getField(fieldName));
+        if (field)
             return std::tr1::dynamic_pointer_cast<const FT>(field);
         else
             return std::tr1::shared_ptr<const FT>();
@@ -695,13 +695,13 @@ public:
      * @return The introspection interface.
      * This will hold a null pointer if the field is not in the structure.
      */
-    FieldConstPtr getField(std::size_t index) const {return fields.at(index);}
+    const FieldConstPtr& getField(std::size_t index) const {return fields.at(index);}
 
     template<typename FT>
     std::tr1::shared_ptr<const FT> getField(std::size_t index) const
     {
-        FieldConstPtr field = getField(index);
-        if (field.get())
+        const FieldConstPtr& field(getField(index));
+        if (field)
             return std::tr1::dynamic_pointer_cast<const FT>(field);
         else
             return std::tr1::shared_ptr<const FT>();
@@ -728,7 +728,7 @@ public:
      * @param fieldIndex The index of the desired field.
      * @return The fieldName.
      */
-    std::string getFieldName(std::size_t fieldIndex) const {return fieldNames.at(fieldIndex);}
+    const std::string& getFieldName(std::size_t fieldIndex) const {return fieldNames.at(fieldIndex);}
 
     virtual std::string getID() const;
 
@@ -804,7 +804,7 @@ public:
     std::tr1::shared_ptr<const FT> getField(std::string const &fieldName) const
     {
         FieldConstPtr field = getField(fieldName);
-        if (field.get())
+        if (field)
             return std::tr1::dynamic_pointer_cast<const FT>(field);
         else
             return std::tr1::shared_ptr<const FT>();
@@ -822,7 +822,7 @@ public:
     std::tr1::shared_ptr<const FT> getField(std::size_t index) const
     {
         FieldConstPtr field = getField(index);
-        if (field.get())
+        if (field)
             return std::tr1::dynamic_pointer_cast<const FT>(field);
         else
             return std::tr1::shared_ptr<const FT>();

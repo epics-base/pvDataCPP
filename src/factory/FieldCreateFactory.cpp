@@ -460,11 +460,10 @@ string Structure::getID() const
 }
 
 FieldConstPtr  Structure::getField(string const & fieldName) const {
-    size_t numberFields = fields.size();
-    for(size_t i=0; i<numberFields; i++) {
-        FieldConstPtr pfield = fields[i];
-        int result = fieldName.compare(fieldNames[i]);
-        if(result==0) return pfield;
+    for(size_t i=0, N=fields.size(); i<N; i++) {
+        if(fieldName==fieldNames[i]) {
+            return fields[i];
+        }
     }
     return FieldConstPtr();
 }
