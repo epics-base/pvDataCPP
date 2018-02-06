@@ -383,12 +383,12 @@ public:
      */
     ScalarType getScalarType() const {return scalarType;}
     
-    virtual std::string getID() const;
+    virtual std::string getID() const OVERRIDE;
 
-    virtual std::ostream& dump(std::ostream& o) const;
+    virtual std::ostream& dump(std::ostream& o) const OVERRIDE FINAL;
 
-    virtual void serialize(ByteBuffer *buffer, SerializableControl *control) const;
-    virtual void deserialize(ByteBuffer *buffer, DeserializableControl *control);
+    virtual void serialize(ByteBuffer *buffer, SerializableControl *control) const OVERRIDE;
+    virtual void deserialize(ByteBuffer *buffer, DeserializableControl *control) OVERRIDE FINAL;
     
 protected:
     Scalar(ScalarType scalarType);
@@ -416,9 +416,9 @@ public:
     typedef BoundedString& reference;
     typedef const BoundedString& const_reference;
 
-    virtual std::string getID() const;
+    virtual std::string getID() const OVERRIDE FINAL;
 
-    virtual void serialize(ByteBuffer *buffer, SerializableControl *control) const;
+    virtual void serialize(ByteBuffer *buffer, SerializableControl *control) const OVERRIDE FINAL;
 
     std::size_t getMaximumLength() const;
 
@@ -487,16 +487,16 @@ public:
      */
     ScalarType getElementType() const {return elementType;}
     
-    virtual ArraySizeType getArraySizeType() const {return Array::variable;}
+    virtual ArraySizeType getArraySizeType() const OVERRIDE {return Array::variable;}
 
-    virtual std::size_t getMaximumCapacity() const {return 0;}
+    virtual std::size_t getMaximumCapacity() const OVERRIDE {return 0;}
 
-    virtual std::string getID() const;
+    virtual std::string getID() const OVERRIDE;
 
-    virtual std::ostream& dump(std::ostream& o) const;
+    virtual std::ostream& dump(std::ostream& o) const OVERRIDE FINAL;
 
-    virtual void serialize(ByteBuffer *buffer, SerializableControl *control) const;
-    virtual void deserialize(ByteBuffer *buffer, DeserializableControl *control);
+    virtual void serialize(ByteBuffer *buffer, SerializableControl *control) const OVERRIDE;
+    virtual void deserialize(ByteBuffer *buffer, DeserializableControl *control) OVERRIDE FINAL;
     
 protected:
     /**
@@ -528,13 +528,13 @@ public:
      */
     BoundedScalarArray(ScalarType scalarType, std::size_t size);
 
-    virtual ArraySizeType getArraySizeType() const {return Array::bounded;}
+    virtual ArraySizeType getArraySizeType() const OVERRIDE FINAL {return Array::bounded;}
 
-    virtual std::size_t getMaximumCapacity() const {return size;}
+    virtual std::size_t getMaximumCapacity() const OVERRIDE FINAL {return size;}
 
-    virtual std::string getID() const;
+    virtual std::string getID() const OVERRIDE FINAL;
 
-    virtual void serialize(ByteBuffer *buffer, SerializableControl *control) const;
+    virtual void serialize(ByteBuffer *buffer, SerializableControl *control) const OVERRIDE FINAL;
 
 protected:
     /**
@@ -563,13 +563,13 @@ public:
      */
     FixedScalarArray(ScalarType scalarType, std::size_t size);
 
-    virtual ArraySizeType getArraySizeType() const {return Array::fixed;}
+    virtual ArraySizeType getArraySizeType() const OVERRIDE FINAL {return Array::fixed;}
 
-    virtual std::size_t getMaximumCapacity() const {return size;}
+    virtual std::size_t getMaximumCapacity() const OVERRIDE FINAL {return size;}
 
-    virtual std::string getID() const;
+    virtual std::string getID() const OVERRIDE FINAL;
 
-    virtual void serialize(ByteBuffer *buffer, SerializableControl *control) const;
+    virtual void serialize(ByteBuffer *buffer, SerializableControl *control) const OVERRIDE FINAL;
 
 protected:
     /**
@@ -597,16 +597,16 @@ public:
      */
     const StructureConstPtr& getStructure() const {return pstructure;}
 
-    virtual ArraySizeType getArraySizeType() const {return Array::variable;}
+    virtual ArraySizeType getArraySizeType() const OVERRIDE FINAL {return Array::variable;}
 
-    virtual std::size_t getMaximumCapacity() const {return 0;}
+    virtual std::size_t getMaximumCapacity() const OVERRIDE FINAL {return 0;}
 
-    virtual std::string getID() const;
+    virtual std::string getID() const OVERRIDE FINAL;
 
-    virtual std::ostream& dump(std::ostream& o) const;
+    virtual std::ostream& dump(std::ostream& o) const OVERRIDE FINAL;
 
-    virtual void serialize(ByteBuffer *buffer, SerializableControl *control) const;
-    virtual void deserialize(ByteBuffer *buffer, DeserializableControl *control);
+    virtual void serialize(ByteBuffer *buffer, SerializableControl *control) const OVERRIDE FINAL;
+    virtual void deserialize(ByteBuffer *buffer, DeserializableControl *control) OVERRIDE FINAL;
 
 protected:
     /**
@@ -639,16 +639,16 @@ public:
      */
     UnionConstPtr getUnion() const {return punion;}
 
-    virtual ArraySizeType getArraySizeType() const {return Array::variable;}
+    virtual ArraySizeType getArraySizeType() const OVERRIDE FINAL {return Array::variable;}
 
-    virtual std::size_t getMaximumCapacity() const {return 0;}
+    virtual std::size_t getMaximumCapacity() const OVERRIDE FINAL {return 0;}
 
-    virtual std::string getID() const;
+    virtual std::string getID() const OVERRIDE FINAL;
 
-    virtual std::ostream& dump(std::ostream& o) const;
+    virtual std::ostream& dump(std::ostream& o) const OVERRIDE FINAL;
 
-    virtual void serialize(ByteBuffer *buffer, SerializableControl *control) const;
-    virtual void deserialize(ByteBuffer *buffer, DeserializableControl *control);
+    virtual void serialize(ByteBuffer *buffer, SerializableControl *control) const OVERRIDE FINAL;
+    virtual void deserialize(ByteBuffer *buffer, DeserializableControl *control) OVERRIDE FINAL;
 
 protected:
     /**
@@ -755,12 +755,12 @@ public:
      */
     const std::string& getFieldName(std::size_t fieldIndex) const {return fieldNames.at(fieldIndex);}
 
-    virtual std::string getID() const;
+    virtual std::string getID() const OVERRIDE FINAL;
 
-    virtual std::ostream& dump(std::ostream& o) const;
+    virtual std::ostream& dump(std::ostream& o) const OVERRIDE FINAL;
 
-    virtual void serialize(ByteBuffer *buffer, SerializableControl *control) const;
-    virtual void deserialize(ByteBuffer *buffer, DeserializableControl *control);
+    virtual void serialize(ByteBuffer *buffer, SerializableControl *control) const OVERRIDE FINAL;
+    virtual void deserialize(ByteBuffer *buffer, DeserializableControl *control) OVERRIDE FINAL;
     
 protected:
     Structure(StringArray const & fieldNames, FieldConstPtrArray const & fields, std::string const & id = defaultId());
@@ -769,7 +769,7 @@ private:
     FieldConstPtrArray fields;
     std::string id;
 
-    virtual void dumpFields(std::ostream& o) const;
+    void dumpFields(std::ostream& o) const;
     
     friend class FieldCreate;
     friend class Union;
@@ -892,12 +892,12 @@ public:
      */
     int32 guess(Type t, ScalarType s) const;
 
-    virtual std::string getID() const;
+    virtual std::string getID() const OVERRIDE FINAL;
 
-    virtual std::ostream& dump(std::ostream& o) const;
+    virtual std::ostream& dump(std::ostream& o) const OVERRIDE FINAL;
 
-    virtual void serialize(ByteBuffer *buffer, SerializableControl *control) const;
-    virtual void deserialize(ByteBuffer *buffer, DeserializableControl *control);
+    virtual void serialize(ByteBuffer *buffer, SerializableControl *control) const OVERRIDE FINAL;
+    virtual void deserialize(ByteBuffer *buffer, DeserializableControl *control) OVERRIDE FINAL;
     
 protected:
    Union();
@@ -907,7 +907,7 @@ private:
    FieldConstPtrArray fields;
    std::string id;
    
-   virtual void dumpFields(std::ostream& o) const;
+   void dumpFields(std::ostream& o) const;
 
    friend class FieldCreate;
    friend class Structure;
