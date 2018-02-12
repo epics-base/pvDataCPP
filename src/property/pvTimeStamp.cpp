@@ -30,14 +30,14 @@ bool PVTimeStamp::attach(PVFieldPtr const & pvField)
     PVStructure* pvStructure = xxx.get();
     while(true) {
         PVLongPtr pvLong = pvStructure->getSubField<PVLong>("secondsPastEpoch");
-        if(pvLong.get()!=NULL) {
+        if(pvLong) {
             pvSecs = pvLong;
             pvNano = pvStructure->getSubField<PVInt>("nanoseconds");
             pvUserTag = pvStructure->getSubField<PVInt>("userTag");
         }
-        if(pvSecs.get()!=NULL
-        && pvNano.get()!=NULL
-        && pvUserTag.get()!=NULL) return true;
+        if(pvSecs
+        && pvNano
+        && pvUserTag) return true;
         detach();
         // look up the tree for a timeSyamp
         pvStructure = pvStructure->getParent();

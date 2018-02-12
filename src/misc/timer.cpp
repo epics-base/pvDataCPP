@@ -48,7 +48,7 @@ void Timer::addElement(TimerCallbackPtr const & timerCallback)
     TimerCallbackPtr prevNode;
     while(true) {
         if(timerCallback->timeToRun < nextNode->timeToRun) {
-            if(prevNode.get()!=NULL) {
+            if(prevNode) {
                 prevNode->next = timerCallback;
             } else {
                 head = timerCallback;
@@ -75,7 +75,7 @@ void Timer::cancel(TimerCallbackPtr const &timerCallback)
     TimerCallbackPtr prevNode;
     while(true) {
         if(nextNode.get()==timerCallback.get()) {
-            if(prevNode.get()!=NULL) {
+            if(prevNode) {
                 prevNode->next = timerCallback->next;
             } else {
                 head = timerCallback->next;
@@ -108,7 +108,7 @@ void Timer::run()
              currentTime.getCurrent();
              if (!alive) break;
              TimerCallbackPtr timerCallback = head;
-             if(timerCallback.get()!=NULL) {
+             if(timerCallback) {
                  double diff = TimeStamp::diff(
                      timerCallback->timeToRun,currentTime);
                  if(diff<=0.0) {
@@ -124,7 +124,7 @@ void Timer::run()
                  }
              }
          }
-         if(nodeToCall.get()!=NULL) {
+         if(nodeToCall) {
              nodeToCall->callback();
          }
          {
