@@ -157,6 +157,15 @@ public:
         PVStructurePtr const  &copyPVStructure,
         BitSetPtr const  &bitSet);
     /**
+     * Set each field in pvMaster to the value of the corresponding field in copyPVStructure.
+     * For each field that changes value set the corresponding bit in bitSet.
+     * @param copyPVStructure A copy top-level structure.
+     * @param bitSet A bitSet for copyPVStructure.
+     */
+    void updateMasterSetBitSet(
+        PVStructurePtr const  &copyPVStructure,
+        BitSetPtr const  &bitSet);
+    /**
      * Get the options for the field at the specified offset.
      * @param fieldOffset the offset in copy.
      * @returns A NULL is returned if no options were specified for the field.
@@ -218,6 +227,14 @@ private:
         BitSetPtr const &bitSet,
         bool toCopy,
         bool doAll);
+    void updateMasterSetBitSet(
+        PVStructurePtr const &pvCopy,
+        CopyStructureNodePtr const &structureNode,
+        BitSetPtr const &bitSet);
+    void updateMasterSubFieldSetBitSet(
+        PVFieldPtr const &pvCopy,
+        PVFieldPtr const &pvMaster,
+        BitSetPtr const &bitSet);
     CopyMasterNodePtr getCopyOffset(
         CopyStructureNodePtr const &structureNode,
         PVFieldPtr const &masterPVField);
