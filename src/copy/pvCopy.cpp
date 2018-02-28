@@ -92,7 +92,6 @@ PVCopy::PVCopy(
 
 void PVCopy::destroy()
 {
-    headNode.reset();
 }
 
 PVStructurePtr PVCopy::getPVMaster()

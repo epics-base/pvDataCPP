@@ -14,6 +14,7 @@
 #include <memory>
 
 #include <shareLib.h>
+#include <compilerDependencies.h>
 
 #include <pv/pvData.h>
 #include <pv/bitSet.h>
@@ -75,7 +76,7 @@ public:
         PVStructurePtr const &pvRequest,
         std::string const & structureName);
     virtual ~PVCopy(){}
-    void destroy();
+    void destroy() EPICS_DEPRECATED;
     /**
      * Get the top-level structure of master
      * @returns The master top-level structure.
@@ -170,7 +171,7 @@ public:
      * @param fieldOffset the offset in copy.
      * @returns A NULL is returned if no options were specified for the field.
      * If options were specified,PVStructurePtr is a structures
-     *  with a set of PVString subfields that specify name,value pairs.s
+     *  with a set of PVString subfields that specify name,value pairs.
      *  name is the subField name and value is the subField value.
      */
     PVStructurePtr getOptions(std::size_t fieldOffset);
