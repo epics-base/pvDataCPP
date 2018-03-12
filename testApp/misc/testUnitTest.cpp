@@ -23,7 +23,7 @@ struct MyTest {
 
 MAIN(testUnitTest)
 {
-    testPlan(0);
+    testPlan(10);
     try {
         TEST_METHOD(MyTest, test1);
         TEST_METHOD(MyTest, test2);
