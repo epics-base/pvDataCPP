@@ -138,13 +138,7 @@ public:
     }
 #endif
 
-    ~AnyScalar() {
-        if(_stype==pvString) {
-            typedef std::string string;
-            _as<string>().~string();
-        }
-        // other types need no cleanup
-    }
+    ~AnyScalar() {clear();}
 
     AnyScalar& operator=(const AnyScalar& o) {
         AnyScalar(o).swap(*this);
@@ -159,15 +153,23 @@ public:
 
 #if __cplusplus>=201103L
     AnyScalar& operator=(AnyScalar&& o) {
-        if(_stype==pvString) {
-            typedef std::string string;
-            _as<string>().~string();
-        }
-        _stype = (ScalarType)-1;
+        clear();
         swap(o);
         return *this;
     }
 #endif
+
+    //! Reset internal state.
+    //! Added after 7.0.0
+    //! @post empty()==true
+    void clear() {
+        if(_stype==pvString) {
+            typedef std::string string;
+            _as<string>().~string();
+        }
+        // other types need no cleanup
+        _stype = (ScalarType)-1;
+    }
 
     void swap(AnyScalar& o) {
         typedef std::string string;

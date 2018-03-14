@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <epicsThread.h>
 #include <epicsUnitTest.h>
+#include <epicsExit.h>
 
 /* copy */
 int testCreateRequest(void);
@@ -84,5 +85,6 @@ void pvDataAllTests(void)
 
     /* property */
     runTest(testCreateRequest);
-}
 
+    epicsExit(0);   /* Trigger test harness */
+}

@@ -64,12 +64,12 @@ void PVField::setImmutable() {immutable = true;}
 
 void PVField::postPut() 
 {
-   if(postHandler.get()!=NULL) postHandler->postPut();
+   if(postHandler) postHandler->postPut();
 }
 
 void PVField::setPostHandler(PostHandlerPtr const &handler)
 {
-    if(postHandler.get()!=NULL) {
+    if(postHandler) {
         if(postHandler.get()==handler.get()) return;
         throw std::logic_error(
             "PVField::setPostHandler a postHandler is already registered");

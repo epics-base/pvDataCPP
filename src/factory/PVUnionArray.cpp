@@ -76,14 +76,14 @@ void PVUnionArray::compress() {
     size_t newLength = 0;
 
     for(size_t i=0; i<length; i++) {
-        if(vec[i].get()!=NULL) {
+        if(vec[i]) {
             newLength++;
             continue;
         }
         // find first non 0
         size_t notNull = 0;
         for(size_t j=i+1;j<length;j++) {
-            if(vec[j].get()!=NULL) {
+            if(vec[j]) {
                 notNull = j;
                 break;
             }
