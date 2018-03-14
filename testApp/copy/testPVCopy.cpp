@@ -238,8 +238,6 @@ static PVStructurePtr createPowerSupply()
             fieldCreate->createStructure(names,powerSupply));
 }
 
-
-
 static void powerSupplyTest()
 {
     testDiag("powerSupplyTest");
@@ -284,12 +282,42 @@ static void powerSupplyTest()
     testPVScalar(valueNameMaster,valueNameCopy,pvMaster,pvCopy);
 }
 
+
+static void testUpdateMaster()
+{
+    testDiag("testUpdateMaster");
+    PVStructurePtr pvMaster;
+    string request;
+    PVStructurePtr pvRequest;
+    PVFieldPtr pvMasterField;
+    PVCopyPtr pvCopy;
+
+    StandardPVFieldPtr standardPVField = getStandardPVField();
+    pvMaster = standardPVField->scalar(pvDouble,"alarm,timeStamp,display");
+    CreateRequest::shared_pointer createRequest = CreateRequest::create();
+    pvRequest = createRequest->createRequest("value,timeStamp");
+    pvCopy = PVCopy::create(pvMaster,pvRequest,"");
+    PVStructurePtr pvClient(pvCopy->createPVStructure());
+    PVDoublePtr pvValue = pvClient->getSubField<PVDouble>("value");
+    pvValue->put(1.0);
+    BitSetPtr bitSet(new BitSet(pvClient->getNumberFields()));
+    pvCopy->updateMasterSetBitSet(pvClient,bitSet);
+    testOk1(bitSet->cardinality()==1);
+    testOk1(bitSet->get(pvValue->getFieldOffset())==true);
+    PVIntPtr pvUserTag = pvClient->getSubField<PVInt>("timeStamp.userTag");
+    pvUserTag->put(1);
+    pvCopy->updateMasterSetBitSet(pvClient,bitSet);
+    testOk1(bitSet->cardinality()==2);
+    testOk1(bitSet->get(pvUserTag->getFieldOffset())==true);
+}
+
 MAIN(testPVCopy)
 {
-    testPlan(67);
+    testPlan(71);
     scalarTest();
     arrayTest();
     powerSupplyTest();
+    testUpdateMaster();
     return testDone();
 }
 

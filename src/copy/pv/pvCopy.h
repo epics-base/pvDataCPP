@@ -14,6 +14,7 @@
 #include <memory>
 
 #include <shareLib.h>
+#include <compilerDependencies.h>
 
 #include <pv/pvData.h>
 #include <pv/bitSet.h>
@@ -75,7 +76,7 @@ public:
         PVStructurePtr const &pvRequest,
         std::string const & structureName);
     virtual ~PVCopy(){}
-    void destroy();
+    void destroy() EPICS_DEPRECATED;
     /**
      * Get the top-level structure of master
      * @returns The master top-level structure.
@@ -157,11 +158,20 @@ public:
         PVStructurePtr const  &copyPVStructure,
         BitSetPtr const  &bitSet);
     /**
+     * Set each field in pvMaster to the value of the corresponding field in copyPVStructure.
+     * For each field that changes value set the corresponding bit in bitSet.
+     * @param copyPVStructure A copy top-level structure.
+     * @param bitSet A bitSet for copyPVStructure.
+     */
+    void updateMasterSetBitSet(
+        PVStructurePtr const  &copyPVStructure,
+        BitSetPtr const  &bitSet);
+    /**
      * Get the options for the field at the specified offset.
      * @param fieldOffset the offset in copy.
      * @returns A NULL is returned if no options were specified for the field.
      * If options were specified,PVStructurePtr is a structures
-     *  with a set of PVString subfields that specify name,value pairs.s
+     *  with a set of PVString subfields that specify name,value pairs.
      *  name is the subField name and value is the subField value.
      */
     PVStructurePtr getOptions(std::size_t fieldOffset);
@@ -218,6 +228,14 @@ private:
         BitSetPtr const &bitSet,
         bool toCopy,
         bool doAll);
+    void updateMasterSetBitSet(
+        PVStructurePtr const &pvCopy,
+        CopyStructureNodePtr const &structureNode,
+        BitSetPtr const &bitSet);
+    void updateMasterSubFieldSetBitSet(
+        PVFieldPtr const &pvCopy,
+        PVFieldPtr const &pvMaster,
+        BitSetPtr const &bitSet);
     CopyMasterNodePtr getCopyOffset(
         CopyStructureNodePtr const &structureNode,
         PVFieldPtr const &masterPVField);
