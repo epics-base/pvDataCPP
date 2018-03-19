@@ -24,7 +24,7 @@ TESTSPEC_vxWorks = pvdTestHarness.$(MUNCH_SUFFIX); pvDataAllTests
 
 # Build for RTEMS, with harness code & OS configuration
 PROD_RTEMS += pvdTestHarness
-pvdTestHarness_SRCS_RTEMS = rtemsTestHarness.c rtemsConfig.c
+pvdTestHarness_SRCS_RTEMS = rtemsTestHarness.c
 TESTSPEC_RTEMS = pvdTestHarness.$(MUNCH_SUFFIX); pvDataAllTests
 
 # Build test scripts for hosts
