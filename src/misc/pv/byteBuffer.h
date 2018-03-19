@@ -29,16 +29,7 @@
 /* various compilers provide builtins for byte order swaps.
  * conditions based on boost endian library
  */
-#if defined(__GNUC__) && ((__GNUC__>4) || (__GNUC__==4 && __GNUC_MINOR__>=3))
-
-#if (__GNUC__>4) || (__GNUC__==4 && __GNUC_MINOR__>=8)
-#define _PVA_swap16(X) __builtin_bswap16(X)
-#endif
-
-#define _PVA_swap32(X) __builtin_bswap32(X)
-#define _PVA_swap64(X) __builtin_bswap64(X)
-
-#elif defined(__clang__)
+#if defined(__clang__)
 
 #if __has_builtin(__builtin_bswap16)
 #define _PVA_swap16(X) __builtin_bswap16(X)
@@ -49,6 +40,15 @@
 #if __has_builtin(__builtin_bswap64)
 #define _PVA_swap64(X) __builtin_bswap64(X)
 #endif
+
+#elif defined(__GNUC__) && ((__GNUC__>4) || (__GNUC__==4 && __GNUC_MINOR__>=3))
+
+#if (__GNUC__>4) || (__GNUC__==4 && __GNUC_MINOR__>=8)
+#define _PVA_swap16(X) __builtin_bswap16(X)
+#endif
+
+#define _PVA_swap32(X) __builtin_bswap32(X)
+#define _PVA_swap64(X) __builtin_bswap64(X)
 
 #elif defined(_MSC_VER)
 
