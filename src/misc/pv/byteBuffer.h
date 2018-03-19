@@ -344,7 +344,7 @@ public:
      *
      * @return The size of the raw data buffer.
      */
-    inline std::size_t getSize() const
+    EPICS_ALWAYS_INLINE std::size_t getSize() const
     {
         return _size;
     }
@@ -463,43 +463,43 @@ public:
      *
      * @param  value The value.
      */
-    inline void putBoolean(  bool value) { put<  int8>(value ? 1 : 0); }
+    EPICS_ALWAYS_INLINE void putBoolean(  bool value) { put<  int8>(value ? 1 : 0); }
     /**
      * Put a byte value into the byte buffer.
      *
      * @param  value The value.
      */
-    inline void putByte   (  int8 value) { put<  int8>(value); }
+    EPICS_ALWAYS_INLINE void putByte   (  int8 value) { put<  int8>(value); }
     /**
      * Put a short value into the byte buffer.
      *
      * @param  value The value.
      */
-    inline void putShort  ( int16 value) { put< int16>(value); }
+    EPICS_ALWAYS_INLINE void putShort  ( int16 value) { put< int16>(value); }
     /**
      * Put an int value into the byte buffer.
      *
      * @param  value The value.
      */
-    inline void putInt    ( int32 value) { put< int32>(value); }
+    EPICS_ALWAYS_INLINE void putInt    ( int32 value) { put< int32>(value); }
     /**
      * Put a long value into the byte buffer.
      *
      * @param  value The value.
      */
-    inline void putLong   ( int64 value) { put< int64>(value); }
+    EPICS_ALWAYS_INLINE void putLong   ( int64 value) { put< int64>(value); }
     /**
      * Put a float value into the byte buffer.
      *
      * @param  value The value.
      */
-    inline void putFloat  ( float value) { put< float>(value); }
+    EPICS_ALWAYS_INLINE void putFloat  ( float value) { put< float>(value); }
     /**
      * Put a double value into the byte buffer.
      *
      * @param  value The value.
      */
-    inline void putDouble (double value) { put<double>(value); }
+    EPICS_ALWAYS_INLINE void putDouble (double value) { put<double>(value); }
 
     /**
      * Put a boolean value into the byte buffer at the specified index.
@@ -507,143 +507,143 @@ public:
      * @param  index The offset in the byte buffer,
      * @param  value The value.
      */
-    inline void putBoolean(std::size_t  index,  bool value) { put<  int8>(index, value); }
+    EPICS_ALWAYS_INLINE void putBoolean(std::size_t  index,  bool value) { put<  int8>(index, value); }
     /**
      * Put a byte value into the byte buffer at the specified index.
      *
      * @param  index The offset in the byte buffer,
      * @param  value The value.
      */
-    inline void putByte   (std::size_t  index,  int8 value) { put<  int8>(index, value); }
+    EPICS_ALWAYS_INLINE void putByte   (std::size_t  index,  int8 value) { put<  int8>(index, value); }
     /**
      * Put a short value into the byte buffer at the specified index.
      *
      * @param  index The offset in the byte buffer,
      * @param  value The value.
      */
-    inline void putShort  (std::size_t  index, int16 value) { put< int16>(index, value); }
+    EPICS_ALWAYS_INLINE void putShort  (std::size_t  index, int16 value) { put< int16>(index, value); }
     /**
      * Put an int value into the byte buffer at the specified index.
      *
      * @param  index The offset in the byte buffer,
      * @param  value The value.
      */
-    inline void putInt    (std::size_t  index, int32 value) { put< int32>(index, value); }
+    EPICS_ALWAYS_INLINE void putInt    (std::size_t  index, int32 value) { put< int32>(index, value); }
     /**
      * Put a long value into the byte buffer at the specified index.
      *
      * @param  index The offset in the byte buffer,
      * @param  value The value.
      */
-    inline void putLong   (std::size_t  index, int64 value) { put< int64>(index, value); }
+    EPICS_ALWAYS_INLINE void putLong   (std::size_t  index, int64 value) { put< int64>(index, value); }
     /**
      * Put a float value into the byte buffer at the specified index.
      *
      * @param  index The offset in the byte buffer,
      * @param  value The value.
      */
-    inline void putFloat  (std::size_t  index, float value) { put< float>(index, value); }
+    EPICS_ALWAYS_INLINE void putFloat  (std::size_t  index, float value) { put< float>(index, value); }
     /**
      * Put a double value into the byte buffer at the specified index.
      *
      * @param  index The offset in the byte buffer,
      * @param  value The value.
      */
-    inline void putDouble (std::size_t  index, double value) { put<double>(index, value); }
+    EPICS_ALWAYS_INLINE void putDouble (std::size_t  index, double value) { put<double>(index, value); }
     /**
      * Get a boolean value from the byte buffer.
      *
      * @return The value.
      */
-    inline   bool getBoolean() { return GET(  int8) != 0; }
+    EPICS_ALWAYS_INLINE   bool getBoolean() { return GET(  int8) != 0; }
     /**
      * Get a byte value from the byte buffer.
      *
      * @return The value.
      */
-    inline   int8 getByte   () { return GET(  int8); }
+    EPICS_ALWAYS_INLINE   int8 getByte   () { return GET(  int8); }
     /**
      * Get a short value from the byte buffer.
      *
      * @return The value.
      */
-    inline  int16 getShort  () { return GET( int16); }
+    EPICS_ALWAYS_INLINE  int16 getShort  () { return GET( int16); }
     /**
      * Get a int value from the byte buffer.
      *
      * @return The value.
      */
-    inline  int32 getInt    () { return GET( int32); }
+    EPICS_ALWAYS_INLINE  int32 getInt    () { return GET( int32); }
     /**
      * Get a long value from the byte buffer.
      *
      * @return The value.
      */
-    inline  int64 getLong   () { return GET( int64); }
+    EPICS_ALWAYS_INLINE  int64 getLong   () { return GET( int64); }
     /**
      * Get a float value from the byte buffer.
      *
      * @return The value.
      */
-    inline  float getFloat  () { return GET( float); }
+    EPICS_ALWAYS_INLINE  float getFloat  () { return GET( float); }
     /**
      * Get a double value from the byte buffer.
      *
      * @return The value.
      */
-    inline double getDouble () { return GET(double); }
+    EPICS_ALWAYS_INLINE double getDouble () { return GET(double); }
     /**
      * Get a boolean value from the byte buffer at the specified index.
      *
      * @param  index The offset in the byte buffer.
      * @return The value.
      */
-    inline   bool getBoolean(std::size_t  index) { return get<  int8>(index) != 0; }
+    EPICS_ALWAYS_INLINE   bool getBoolean(std::size_t  index) { return get<  int8>(index) != 0; }
     /**
      * Get a byte value from the byte buffer at the specified index.
      *
      * @param  index The offset in the byte buffer.
      * @return The value.
      */
-    inline   int8 getByte   (std::size_t  index) { return get<  int8>(index); }
+    EPICS_ALWAYS_INLINE   int8 getByte   (std::size_t  index) { return get<  int8>(index); }
     /**
      * Get a short value from the byte buffer at the specified index.
      *
      * @param  index The offset in the byte buffer.
      * @return The value.
      */
-    inline  int16 getShort  (std::size_t  index) { return get< int16>(index); }
+    EPICS_ALWAYS_INLINE  int16 getShort  (std::size_t  index) { return get< int16>(index); }
     /**
      * Get an int value from the byte buffer at the specified index.
      *
      * @param  index The offset in the byte buffer.
      * @return The value.
      */
-    inline  int32 getInt    (std::size_t  index) { return get< int32>(index); }
+    EPICS_ALWAYS_INLINE  int32 getInt    (std::size_t  index) { return get< int32>(index); }
     /**
      * Get a long value from the byte buffer at the specified index.
      *
      * @param  index The offset in the byte buffer.
      * @return The value.
      */
-    inline  int64 getLong   (std::size_t  index) { return get< int64>(index); }
+    EPICS_ALWAYS_INLINE  int64 getLong   (std::size_t  index) { return get< int64>(index); }
     /**
      * Get a float value from the byte buffer at the specified index.
      *
      * @param  index The offset in the byte buffer.
      * @return The value.
      */
-    inline  float getFloat  (std::size_t  index) { return get< float>(index); }
+    EPICS_ALWAYS_INLINE  float getFloat  (std::size_t  index) { return get< float>(index); }
     /**
      * Get a boolean value from the byte buffer at the specified index.
      *
      * @param  index The offset in the byte buffer.
      * @return The value.
      */
-    inline double getDouble (std::size_t  index) { return get<double>(index); }
+    EPICS_ALWAYS_INLINE double getDouble (std::size_t  index) { return get<double>(index); }
 
     // TODO remove
-    inline const char* getArray() const
+    EPICS_ALWAYS_INLINE const char* getArray() const
     {
         return _buffer;
     }
@@ -660,31 +660,31 @@ private:
 };
 
     template<>
-    inline bool ByteBuffer::reverse<bool>() const
+    EPICS_ALWAYS_INLINE bool ByteBuffer::reverse<bool>() const
     {
         return false;
     }
 
     template<>
-    inline bool ByteBuffer::reverse<int8>() const
+    EPICS_ALWAYS_INLINE bool ByteBuffer::reverse<int8>() const
     {
         return false;
     }
 
     template<>
-    inline bool ByteBuffer::reverse<uint8>() const
+    EPICS_ALWAYS_INLINE bool ByteBuffer::reverse<uint8>() const
     {
         return false;
     }
 
     template<>
-    inline bool ByteBuffer::reverse<float>() const
+    EPICS_ALWAYS_INLINE bool ByteBuffer::reverse<float>() const
     {
         return _reverseFloatEndianess;
     }
 
     template<>
-    inline bool ByteBuffer::reverse<double>() const
+    EPICS_ALWAYS_INLINE bool ByteBuffer::reverse<double>() const
     {
         return _reverseFloatEndianess;
     }
