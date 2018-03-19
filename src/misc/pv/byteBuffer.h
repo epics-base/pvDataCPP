@@ -148,6 +148,58 @@ struct swap<8> {
 #undef _PVA_swap32
 #undef _PVA_swap64
 
+/* PVD serialization doesn't pay attention to alignement,
+ * which some targets really care about and treat unaligned
+ * access as a fault, or with a heavy penalty (~= to a syscall).
+ *
+ * For those targets,, we will have to live with the increase
+ * in execution time and/or object code size of byte-wise copy.
+ */
+
+#ifdef _ARCH_PPC
+
+template<typename T>
+union alignu {
+    T val;
+    char bytes[sizeof(T)];
+};
+
+template<typename T>
+EPICS_ALWAYS_INLINE void store_unaligned(char *buf, T val)
+{
+    alignu<T> A;
+    A.val = val;
+    for(unsigned i=0, N=sizeof(T); i<N; i++) {
+        buf[i] = A.bytes[i];
+    }
+}
+
+template<typename T>
+EPICS_ALWAYS_INLINE T load_unaligned(const char *buf)
+{
+    alignu<T> A;
+    for(unsigned i=0, N=sizeof(T); i<N; i++) {
+        A.bytes[i] = buf[i];
+    }
+    return A.val;
+}
+
+#else /* alignement */
+
+template<typename T>
+EPICS_ALWAYS_INLINE void store_unaligned(char *buf, T val)
+{
+    *reinterpret_cast<T*>(buf) = val;
+}
+
+template<typename T>
+EPICS_ALWAYS_INLINE T load_unaligned(const char *buf)
+{
+    return *reinterpret_cast<const T*>(buf);
+}
+
+#endif /* alignement */
+
 } // namespace detail
 
 //! Unconditional byte order swap.
@@ -699,8 +751,7 @@ private:
         if(reverse<T>())
             value = swap<T>(value);
 
-        //assert(is_aligned(_position, sizeof(T)));
-        *((T*)_position) = value;
+        detail::store_unaligned(_position, value);
         _position += sizeof(T);
     }
 
@@ -713,7 +764,7 @@ private:
             value = swap<T>(value);
 
         //assert(is_aligned(_buffer+index, sizeof(T))); //TODO: special case for targets which support unaligned access
-        *((T*)(_buffer+index)) = value;
+        detail::store_unaligned(_buffer+index, value);
     }
 
 #if defined (__GNUC__) && (__GNUC__ < 3)
@@ -727,7 +778,7 @@ private:
         assert(sizeof(T)<=getRemaining());
 
         //assert(is_aligned(_position, sizeof(T)));
-        T value = *((T*)_position);
+        T value = detail::load_unaligned<T>(_position);
         _position += sizeof(T);
 
         if(reverse<T>())
@@ -741,7 +792,7 @@ private:
         assert(_buffer+index<=_limit);
 
         //assert(is_aligned(_position, sizeof(T)));
-        T value = *((T*)(_buffer + index));
+        T value = detail::load_unaligned<T>(_buffer + index);
 
         if(reverse<T>())
             value = swap<T>(value);
@@ -753,15 +804,15 @@ private:
     {
         // we require aligned arrays...
         //assert(is_aligned(_position, sizeof(T)));
-        T* start = (T*)_position;
         size_t n = sizeof(T)*count; // bytes
         assert(n<=getRemaining());
 
         if (reverse<T>()) {
-            for(std::size_t i=0; i<count; i++)
-                start[i] = swap<T>(values[i]);
+            for(std::size_t i=0; i<n; i+=sizeof(T)) {
+                detail::store_unaligned(_position+i, swap<T>(values[i]));
+            }
         } else {
-            memcpy(start, values, n);
+            memcpy(_position, values, n);
         }
         _position += n;
     }
@@ -776,10 +827,11 @@ private:
         assert(n<=getRemaining());
 
         if (reverse<T>()) {
-            for(std::size_t i=0; i<count; i++)
-                values[i] = swap<T>(start[i]);
+            for(std::size_t i=0; i<n; i+=sizeof(T)) {
+                values[i] = swap<T>(detail::load_unaligned<T>(_position+i));
+            }
         } else {
-            memcpy(values, start, n);
+            memcpy(values, _position, n);
         }
         _position += n;
     }
