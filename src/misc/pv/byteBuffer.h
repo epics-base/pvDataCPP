@@ -763,7 +763,6 @@ private:
         if(reverse<T>())
             value = swap<T>(value);
 
-        //assert(is_aligned(_buffer+index, sizeof(T))); //TODO: special case for targets which support unaligned access
         detail::store_unaligned(_buffer+index, value);
     }
 
@@ -777,7 +776,6 @@ private:
     {
         assert(sizeof(T)<=getRemaining());
 
-        //assert(is_aligned(_position, sizeof(T)));
         T value = detail::load_unaligned<T>(_position);
         _position += sizeof(T);
 
@@ -791,7 +789,6 @@ private:
     {
         assert(_buffer+index<=_limit);
 
-        //assert(is_aligned(_position, sizeof(T)));
         T value = detail::load_unaligned<T>(_buffer + index);
 
         if(reverse<T>())
@@ -802,8 +799,6 @@ private:
     template<typename T>
     inline void ByteBuffer::putArray(const T* values, std::size_t count)
     {
-        // we require aligned arrays...
-        //assert(is_aligned(_position, sizeof(T)));
         size_t n = sizeof(T)*count; // bytes
         assert(n<=getRemaining());
 
@@ -820,9 +815,6 @@ private:
     template<typename T>
     inline void ByteBuffer::getArray(T* values, std::size_t count)
     {
-        // we require aligned arrays...
-        //assert(is_aligned(_position, sizeof(T)));
-        const T* start = (T*)_position;
         size_t n = sizeof(T)*count; // bytes
         assert(n<=getRemaining());
 
