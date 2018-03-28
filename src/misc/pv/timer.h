@@ -56,7 +56,7 @@ public:
     virtual void timerStopped() = 0;
 private:
     TimerCallbackPtr next;
-    TimeStamp timeToRun;
+    epicsTime timeToRun;
     double period;
     bool onList;
     friend class Timer;
@@ -111,23 +111,24 @@ public:
      * @param timerCallback the timerCallback.
      * @return (false,true) if (not, is) scheduled.
      */
-    bool isScheduled(TimerCallbackPtr const &timerCallback);
+    bool isScheduled(TimerCallbackPtr const &timerCallback) const;
     /**
      * show the elements in the timer queue.
      * @param o The output stream for the output
      */
-    void dump(std::ostream& o);
+    void dump(std::ostream& o) const;
 
 private:
+    // call with mutex held
     void addElement(TimerCallbackPtr const &timerCallback);
     TimerCallbackPtr head;
-    Mutex mutex;
+    mutable Mutex mutex;
     Event waitForWork;
     bool alive;
     Thread thread;
 };
 
-epicsShareExtern std::ostream& operator<<(std::ostream& o, Timer& timer);
+epicsShareExtern std::ostream& operator<<(std::ostream& o, const Timer& timer);
 
 }}
 #endif  /* TIMER_H */
