@@ -75,6 +75,8 @@ public:
      */
     Timer(std::string threadName, ThreadPriority priority);
     virtual ~Timer();
+    //! Prevent new callbacks from being scheduled, and cancel pending callbacks
+    void close();
     /**
      * schedule a callback after a delay.
      * @param timerCallback the timerCallback instance.

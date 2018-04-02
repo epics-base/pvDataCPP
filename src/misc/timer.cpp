@@ -160,8 +160,14 @@ void Timer::run()
 }
 
 Timer::~Timer() {
+    close();
+}
+
+void Timer::close() {
     {
          Lock xx(mutex);
+         if(!alive)
+             return; // already closed
          alive = false;
     }
     waitForWork.signal();
