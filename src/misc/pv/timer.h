@@ -66,23 +66,15 @@ private:
  * @brief Support for delayed or periodic callback execution.
  *
  */
-class epicsShareClass Timer : public Runnable {
+class epicsShareClass Timer : private Runnable {
 public:
     POINTER_DEFINITIONS(Timer);
-    /**
-     * Constructor
+    /** Create a new timer queue
      * @param threadName name for the timer thread.
      * @param priority thread priority
      */
     Timer(std::string threadName, ThreadPriority priority);
-    /**
-     * Destructor
-     */
     virtual ~Timer();
-    /**
-     * The thread run method. This is called automatically.
-     */
-    virtual void run();
     /**
      * schedule a callback after a delay.
      * @param timerCallback the timerCallback instance.
@@ -119,6 +111,8 @@ public:
     void dump(std::ostream& o) const;
 
 private:
+    virtual void run();
+
     // call with mutex held
     void addElement(TimerCallbackPtr const &timerCallback);
     TimerCallbackPtr head;
