@@ -177,6 +177,7 @@ void Timer::schedulePeriodic(
         }
 
         if(!alive) {
+            xx.unlock();
             timerCallback->timerStopped();
             return;
         }
