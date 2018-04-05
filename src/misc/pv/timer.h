@@ -9,6 +9,8 @@
 #ifndef TIMER_H
 #define TIMER_H
 #include <memory>
+#include <list>
+
 #include <stddef.h>
 #include <stdlib.h>
 #include <stddef.h>
@@ -55,11 +57,11 @@ public:
      */
     virtual void timerStopped() = 0;
 private:
-    TimerCallbackPtr next;
     epicsTime timeToRun;
     double period;
     bool onList;
     friend class Timer;
+    struct IncreasingTime;
 };
 
 /**
@@ -98,8 +100,9 @@ public:
     /**
      * cancel a callback.
      * @param timerCallback the timerCallback to cancel.
+     * @returns true if the timer was queued, and now is cancelled
      */
-    void cancel(TimerCallbackPtr const &timerCallback);
+    bool cancel(TimerCallbackPtr const &timerCallback);
     /**
      * Is the callback scheduled to be called?
      * @param timerCallback the timerCallback.
@@ -117,8 +120,11 @@ private:
 
     // call with mutex held
     void addElement(TimerCallbackPtr const &timerCallback);
-    TimerCallbackPtr head;
+
+    typedef std::list<TimerCallbackPtr> queue_t;
+
     mutable Mutex mutex;
+    queue_t queue;
     Event waitForWork;
     bool alive;
     Thread thread;
