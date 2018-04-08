@@ -73,6 +73,14 @@ void test_basic()
     testEqual(I.as<double>(), 42.0);
     testEqual(I.as<std::string>(), "42");
 
+    const pvd::AnyScalar I2(I);
+
+    testEqual(I2.type(), pvd::pvInt);
+    testEqual(I2.ref<pvd::int32>(), 42);
+    testEqual(I2.as<pvd::int32>(), 42);
+    testEqual(I2.as<double>(), 42.0);
+    testEqual(I2.as<std::string>(), "42");
+
     testThrows(pvd::AnyScalar::bad_cast, I.ref<double>());
 
     {
@@ -230,7 +238,7 @@ void test_move()
 
 MAIN(testanyscalar)
 {
-    testPlan(70);
+    testPlan(75);
     try {
         test_empty();
         test_ctor();

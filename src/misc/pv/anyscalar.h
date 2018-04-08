@@ -301,7 +301,7 @@ public:
 
         if(_stype!=(ScalarType)ScalarTypeID<TT>::value)
             throw bad_cast();
-        return _as<TT>();
+        return reinterpret_cast<TT&>(_wrap.blob);
     }
 
     template<typename T>
@@ -313,7 +313,7 @@ public:
 
         if(_stype!=(ScalarType)ScalarTypeID<TT>::value)
             throw bad_cast();
-        return _as<TT>();
+        return reinterpret_cast<typename meta::decorate_const<TT>::type&>(_wrap.blob);
     }
 
     /** copy out wrapped value, with a value conversion. */
