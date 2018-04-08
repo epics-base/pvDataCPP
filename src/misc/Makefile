@@ -37,3 +37,4 @@ LIBSRCS += parseToPOD.cpp
 LIBSRCS += pvUnitTest.cpp
 LIBSRCS += debugPtr.cpp
 LIBSRCS += reftrack.cpp
+LIBSRCS += anyscalar.cpp
