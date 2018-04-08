@@ -112,6 +112,18 @@ public:
         _stype = (ScalarType)ScalarTypeID<TT>::value;
     }
 
+    AnyScalar(ScalarType type, const void *buf)
+    {
+        if(type==pvString) {
+            new (_wrap.blob) std::string(*static_cast<const std::string*>(buf));
+
+        } else {
+            memcpy(_wrap.blob, buf, ScalarTypeFunc::elementSize(type));
+        }
+
+        _stype = type;
+    }
+
     AnyScalar(const AnyScalar& o)
         :_stype(o._stype)
     {
@@ -268,6 +280,16 @@ private:
 public:
     operator bool_type() const { return !empty() ? &AnyScalar::swap : 0; }
 #endif
+
+    //! Provide read-only access to underlying buffer.
+    //! For a string this is std::string::c_str().
+    const void* bufferUnsafe() const {
+        if(_stype==pvString) {
+            return as<std::string>().c_str();
+        } else {
+            return _wrap.blob;
+        }
+    }
 
     /** Return reference to wrapped value */
     template<typename T>

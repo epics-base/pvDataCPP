@@ -42,6 +42,23 @@ void test_ctor()
     testEqual(D.ref<std::string>(), "bar");
 }
 
+void test_ctor_void()
+{
+    testDiag("test_ctor_void()");
+
+    pvd::int32 i = 42;
+    pvd::AnyScalar A(pvd::pvInt, (void*)&i);
+
+    testEqual(A.type(), pvd::pvInt);
+    testEqual(A.ref<pvd::int32>(), 42);
+
+    std::string s("hello");
+    pvd::AnyScalar B(pvd::pvString, (void*)&s);
+
+    testEqual(B.type(), pvd::pvString);
+    testEqual(B.ref<std::string>(), "hello");
+}
+
 void test_basic()
 {
     testDiag("test_basic()");
@@ -213,10 +230,11 @@ void test_move()
 
 MAIN(testanyscalar)
 {
-    testPlan(66);
+    testPlan(70);
     try {
         test_empty();
         test_ctor();
+        test_ctor_void();
         test_basic();
         test_swap();
         test_move();
