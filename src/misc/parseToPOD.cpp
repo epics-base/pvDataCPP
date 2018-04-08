@@ -507,20 +507,20 @@ void handleParseError(int err)
 
 namespace epics { namespace pvData { namespace detail {
 
-void parseToPOD(const string & in, boolean *out)
+void parseToPOD(const char* in, boolean *out)
 {
-    if(epicsStrCaseCmp(in.c_str(),"true")==0)
+    if(epicsStrCaseCmp(in,"true")==0)
         *out = 1;
-    else if(epicsStrCaseCmp(in.c_str(),"false")==0)
+    else if(epicsStrCaseCmp(in,"false")==0)
         *out = 0;
     else
         throw std::runtime_error("parseToPOD: string no match true/false");
 }
 
 #define INTFN(T, S) \
-void parseToPOD(const string& in, T *out) { \
+void parseToPOD(const char* in, T *out) { \
     epics ## S temp; \
-    int err = epicsParse ## S (in.c_str(), &temp, 0, NULL); \
+    int err = epicsParse ## S (in, &temp, 0, NULL); \
     if(err)   handleParseError(err); \
     else      *out = temp; \
 }
@@ -532,31 +532,31 @@ INTFN(uint16_t, UInt16);
 INTFN(int32_t, Int32);
 INTFN(uint32_t, UInt32);
 
-void parseToPOD(const string& in, int64_t *out) {
+void parseToPOD(const char* in, int64_t *out) {
 #ifdef NEED_LONGLONG
-    int err = epicsParseLongLong(in.c_str(), out, 0, NULL);
+    int err = epicsParseLongLong(in, out, 0, NULL);
 #else
-    int err = epicsParseLong(in.c_str(), out, 0, NULL);
+    int err = epicsParseLong(in, out, 0, NULL);
 #endif
     if(err)   handleParseError(err);
 }
 
-void parseToPOD(const string& in, uint64_t *out) {
+void parseToPOD(const char* in, uint64_t *out) {
 #ifdef NEED_LONGLONG
-    int err = epicsParseULongLong(in.c_str(), out, 0, NULL);
+    int err = epicsParseULongLong(in, out, 0, NULL);
 #else
-    int err = epicsParseULong(in.c_str(), out, 0, NULL);
+    int err = epicsParseULong(in, out, 0, NULL);
 #endif
     if(err)   handleParseError(err);
 }
 
-void parseToPOD(const string& in, float *out) {
-    int err = epicsParseFloat(in.c_str(), out, NULL);
+void parseToPOD(const char* in, float *out) {
+    int err = epicsParseFloat(in, out, NULL);
     if(err)   handleParseError(err);
 }
 
-void parseToPOD(const string& in, double *out) {
-    int err = epicsParseDouble(in.c_str(), out, NULL);
+void parseToPOD(const char* in, double *out) {
+    int err = epicsParseDouble(in, out, NULL);
     if(err)   handleParseError(err);
 #if defined(vxWorks)
     /* vxWorks strtod returns [-]epicsINF when it should return ERANGE error.
@@ -564,7 +564,7 @@ void parseToPOD(const string& in, double *out) {
      * this into an ERANGE error
      */
     else if (*out == epicsINF || *out == -epicsINF) {
-        const char* s = in.c_str();
+        const char* s = in;
         int c;
 
         /* skip spaces and the sign */

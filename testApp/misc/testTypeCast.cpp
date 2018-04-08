@@ -123,7 +123,7 @@ namespace {
 
 MAIN(testTypeCast)
 {
-    testPlan(123);
+    testPlan(124);
 
 try {
 
@@ -138,10 +138,12 @@ try {
     float xfloat=0.0;
     double xdouble=0.0;
     string xstring("0");
+    const char* xcstring = "0";
 
     typedef float float_t;
     typedef double double_t;
     typedef string string_t;
+    typedef const char* cstring_t;
 
     // force all possibilities to be compiled
 #define CHECK(M, N) x## M = ::epics::pvData::castUnsafe<M ##_t>(x## N); \
@@ -158,6 +160,7 @@ try {
     CHECK(int8, float);
     CHECK(int8, double);
     CHECK(int8, string);
+    CHECK(int8, cstring);
 
     CHECK(uint8, int8);
     CHECK(uint8, uint8);
@@ -170,6 +173,7 @@ try {
     CHECK(uint8, float);
     CHECK(uint8, double);
     CHECK(uint8, string);
+    CHECK(uint8, cstring);
 
     CHECK(int16, int8);
     CHECK(int16, uint8);
@@ -182,6 +186,7 @@ try {
     CHECK(int16, float);
     CHECK(int16, double);
     CHECK(int16, string);
+    CHECK(int16, cstring);
 
     CHECK(uint16, int8);
     CHECK(uint16, uint8);
@@ -194,6 +199,7 @@ try {
     CHECK(uint16, float);
     CHECK(uint16, double);
     CHECK(uint16, string);
+    CHECK(uint16, cstring);
 
     CHECK(int32, int8);
     CHECK(int32, uint8);
@@ -206,6 +212,7 @@ try {
     CHECK(int32, float);
     CHECK(int32, double);
     CHECK(int32, string);
+    CHECK(int32, cstring);
 
     CHECK(uint32, int8);
     CHECK(uint32, uint8);
@@ -218,6 +225,7 @@ try {
     CHECK(uint32, float);
     CHECK(uint32, double);
     CHECK(uint32, string);
+    CHECK(uint32, cstring);
 
     CHECK(int64, int8);
     CHECK(int64, uint8);
@@ -229,7 +237,8 @@ try {
     CHECK(int64, uint64);
     CHECK(int64, float);
     CHECK(int64, double);
-    //CHECK(int64, string);
+    CHECK(int64, string);
+    CHECK(int64, cstring);
 
     CHECK(uint64, int8);
     CHECK(uint64, uint8);
@@ -241,7 +250,8 @@ try {
     CHECK(uint64, uint64);
     CHECK(uint64, float);
     CHECK(uint64, double);
-    //CHECK(uint64, string);
+    CHECK(uint64, string);
+    CHECK(uint64, cstring);
 
     CHECK(float, int8);
     CHECK(float, uint8);
@@ -254,6 +264,7 @@ try {
     CHECK(float, float);
     CHECK(float, double);
     CHECK(float, string);
+    CHECK(float, cstring);
 
     CHECK(double, int8);
     CHECK(double, uint8);
@@ -266,6 +277,7 @@ try {
     CHECK(double, float);
     CHECK(double, double);
     CHECK(double, string);
+    CHECK(double, cstring);
 
     CHECK(string, int8);
     CHECK(string, uint8);
@@ -278,6 +290,9 @@ try {
     CHECK(string, float);
     CHECK(string, double);
     CHECK(string, string);
+    CHECK(string, cstring);
+
+    // cast to const char* not supported
 #undef CHECK
 
     testDiag("Integer signed <=> unsigned");
@@ -344,6 +359,7 @@ try {
     TEST2(string, "1.1e-100", double, 1.1e-100);
 
     TEST(double, 1.1e100, string, "1.1E+100");
+    TEST(double, 1.1e100, const char*, "1.1E+100");
 
     // any non-zero value is true
     TEST(string, "true", epics::pvData::boolean, 100);

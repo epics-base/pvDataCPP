@@ -22,17 +22,29 @@ namespace epics { namespace pvData {
 namespace detail {
     // parseToPOD wraps the epicsParse*() functions in one name
     // and throws exceptions
-    epicsShareExtern void parseToPOD(const std::string&, boolean *out);
-    epicsShareExtern void parseToPOD(const std::string&, int8 *out);
-    epicsShareExtern void parseToPOD(const std::string&, uint8 *out);
-    epicsShareExtern void parseToPOD(const std::string&, int16_t *out);
-    epicsShareExtern void parseToPOD(const std::string&, uint16_t *out);
-    epicsShareExtern void parseToPOD(const std::string&, int32_t *out);
-    epicsShareExtern void parseToPOD(const std::string&, uint32_t *out);
-    epicsShareExtern void parseToPOD(const std::string&, int64_t *out);
-    epicsShareExtern void parseToPOD(const std::string&, uint64_t *out);
-    epicsShareExtern void parseToPOD(const std::string&, float *out);
-    epicsShareExtern void parseToPOD(const std::string&, double *out);
+    epicsShareExtern void parseToPOD(const char*, boolean *out);
+    epicsShareExtern void parseToPOD(const char*, int8 *out);
+    epicsShareExtern void parseToPOD(const char*, uint8 *out);
+    epicsShareExtern void parseToPOD(const char*, int16_t *out);
+    epicsShareExtern void parseToPOD(const char*, uint16_t *out);
+    epicsShareExtern void parseToPOD(const char*, int32_t *out);
+    epicsShareExtern void parseToPOD(const char*, uint32_t *out);
+    epicsShareExtern void parseToPOD(const char*, int64_t *out);
+    epicsShareExtern void parseToPOD(const char*, uint64_t *out);
+    epicsShareExtern void parseToPOD(const char*, float *out);
+    epicsShareExtern void parseToPOD(const char*, double *out);
+
+    static inline void parseToPOD(const std::string& str, boolean *out) { return parseToPOD(str.c_str(), out); }
+    static inline void parseToPOD(const std::string& str, int8 *out) { return parseToPOD(str.c_str(), out); }
+    static inline void parseToPOD(const std::string& str, uint8 *out) { return parseToPOD(str.c_str(), out); }
+    static inline void parseToPOD(const std::string& str, int16_t *out) { return parseToPOD(str.c_str(), out); }
+    static inline void parseToPOD(const std::string& str, uint16_t *out) { return parseToPOD(str.c_str(), out); }
+    static inline void parseToPOD(const std::string& str, int32_t *out) { return parseToPOD(str.c_str(), out); }
+    static inline void parseToPOD(const std::string& str, uint32_t *out) { return parseToPOD(str.c_str(), out); }
+    static inline void parseToPOD(const std::string& str, int64_t *out) { return parseToPOD(str.c_str(), out); }
+    static inline void parseToPOD(const std::string& str, uint64_t *out) { return parseToPOD(str.c_str(), out); }
+    static inline void parseToPOD(const std::string& str, float *out) { return parseToPOD(str.c_str(), out); }
+    static inline void parseToPOD(const std::string& str, double *out) { return parseToPOD(str.c_str(), out); }
 
     /* want to pass POD types by value,
      * and std::string by const reference
@@ -108,13 +120,28 @@ namespace detail {
         }
     };
 
+    // parse POD from C string
+    // TO!=const char*
+    template<typename TO>
+    struct cast_helper<TO, const char*,
+            typename meta::_and<
+                typename meta::not_same_type<TO,const char*>,
+                typename meta::not_same_type<TO,std::string>
+            >::type> {
+        static FORCE_INLINE TO op(const char* from) {
+            TO ret;
+            parseToPOD(from, &ret);
+            return ret;
+        }
+    };
+
 } // end detail
 
 /** @brief Casting/converting between supported scalar types.
  *
  * Supported types: uint8_t, int8_t, uint16_t, int16_t,
  *                  uint32_t, int32_t, uint64_t, int64_t,
- *                  float, double, std::string
+ *                  float, double, std::string, const char* (only FROM)
  *
  * As defined in pvType.h
  *
