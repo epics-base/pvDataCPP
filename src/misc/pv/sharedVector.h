@@ -728,6 +728,11 @@ public:
     }
 #endif
 
+    void swap(shared_vector& o) {
+        base_t::swap(o);
+        std::swap(m_vtype, o.m_vtype);
+    }
+
     size_t max_size() const{return (size_t)-1;}
 
     pointer data() const{
