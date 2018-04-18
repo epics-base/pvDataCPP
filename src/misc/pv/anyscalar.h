@@ -233,7 +233,7 @@ public:
     }
 
 private:
-    friend std::ostream& operator<<(std::ostream& strm, const AnyScalar& v);
+    friend epicsShareFunc std::ostream& operator<<(std::ostream& strm, const AnyScalar& v);
 };
 
 epicsShareExtern
