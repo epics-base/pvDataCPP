@@ -2,8 +2,29 @@
 
 @page release_notes Release Notes
 
-Release 7.0 (XYZ 2017)
-======================
+Release 7.1.0 (UNRELEASED)
+==========================
+
+- Deprecations
+ - pv/localStaticLock.h
+- Removals
+ - Remove previously deprecated executor.h, queue.h and timerFunction.h
+ - Remove *HashFunction functors to "hash" Field sub-classes which were never fully implemented.
+- Fixes
+ - Make thread safe getFieldCreate() and getPVDataCreate()
+ - Workaround for MSVC pickyness that iterators be non-NULL, even when not de-referenced.
+ - Fix alignment fault during (de)serialization on RTEMS/vxWorks.
+ - Fix shared_vector::swap() for void specialization.
+ - Changes in several Field sub-classes to return const ref. instead of a copy.
+- Additions
+ - shared_vector add c++11 move and construct for initializer list.
+ - Add AnyScalar::clear()
+ - Add ctor AnyScalar(ScalarType, const void*) to allow construction from an untyped buffer.
+ - Add Timer::close()
+ - Allow castUnsafe() from const char* without first allocating a std::string.
+
+Release 7.0.0 (Dec 2017)
+========================
 
 - Removals
  - Remove requester.h, monitor.h, and destroyable.h..  Migrated to the pvAccessCPP module.
