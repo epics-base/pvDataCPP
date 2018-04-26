@@ -31,8 +31,9 @@ std::ostream& operator<<(std::ostream& os, indent_level const& indent)
 std::ostream& operator<<(std::ostream& os, indent const&)
 {
     long il = indent_value(os);
-    std::size_t spaces = static_cast<std::size_t>(il) * 4;
-    return os << string(spaces, ' ');
+    for(long i=0, spaces = il * 4; i<spaces; i++)
+        os.put(' ');
+    return os;
 }
 
 array_at_internal operator<<(std::ostream& str, array_at const& manip)
