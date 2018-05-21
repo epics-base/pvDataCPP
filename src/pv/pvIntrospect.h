@@ -354,8 +354,8 @@ private:
    friend class StandardField;
    friend class BasePVStructureArray;
    friend class FieldCreate;
-
    struct Deleter{void operator()(Field *p){delete p;}};
+   EPICS_NOT_COPYABLE(Field)
 };
 
 epicsShareExtern std::ostream& operator<<(std::ostream& o, const Field& field);
@@ -743,6 +743,7 @@ private:
     
     friend class FieldCreate;
     friend class Union;
+    EPICS_NOT_COPYABLE(Structure)
 };
 
 /**

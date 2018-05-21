@@ -260,6 +260,7 @@ private:
     PostHandlerPtr postHandler;
     friend class PVDataCreate;
     friend class PVStructure;
+    EPICS_NOT_COPYABLE(PVField)
 };
 
 epicsShareExtern std::ostream& operator<<(std::ostream& o, const PVField& f);
