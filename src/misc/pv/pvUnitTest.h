@@ -39,7 +39,7 @@ public:
     explicit testPassx(bool r) :dotest(true), pass(r), alive(true) {}
     ~testPassx();
     template<typename T>
-    inline testPassx& operator<<(T v) {
+    inline testPassx& operator<<(const T& v) {
         strm<<v;
         return *this;
     }
@@ -52,13 +52,13 @@ private:
 };
 
 template<typename LHS, typename RHS>
-inline testPassx testEqualx(const char *nLHS, const char *nRHS, LHS l, RHS r)
+inline testPassx testEqualx(const char *nLHS, const char *nRHS, const LHS& l, const RHS& r)
 {
     return testPassx(l==r)<<nLHS<<" ("<<l<<") == "<<nRHS<<" ("<<r<<")";
 }
 
 template<typename LHS, typename RHS>
-inline testPassx testNotEqualx(const char *nLHS, const char *nRHS, LHS l, RHS r)
+inline testPassx testNotEqualx(const char *nLHS, const char *nRHS, const LHS& l, const RHS& r)
 {
     return testPassx(l!=r)<<nLHS<<" ("<<l<<") != "<<nRHS<<" ("<<r<<")";
 }
