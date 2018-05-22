@@ -394,6 +394,7 @@ private:
     friend class BoundedScalarArray;
     friend class FixedScalarArray;
     friend class BoundedString;
+    EPICS_NOT_COPYABLE(Scalar)
 };
 
 /**
@@ -418,6 +419,7 @@ protected:
 private:
     std::size_t maxLength;
     friend class FieldCreate;
+    EPICS_NOT_COPYABLE(BoundedString)
 };
 
 /**
@@ -452,6 +454,7 @@ protected:
      */
    Array(Type type);
 
+   EPICS_NOT_COPYABLE(Array)
 };
 
 /**
@@ -492,6 +495,7 @@ private:
     const std::string getIDScalarArrayLUT() const;
     ScalarType elementType;
     friend class FieldCreate;
+    EPICS_NOT_COPYABLE(ScalarArray)
 };
 
 
@@ -526,6 +530,7 @@ protected:
 private:
     std::size_t size;
     friend class FieldCreate;
+    EPICS_NOT_COPYABLE(BoundedScalarArray)
 };
 
 /**
@@ -558,6 +563,7 @@ protected:
 private:
     std::size_t size;
     friend class FieldCreate;
+    EPICS_NOT_COPYABLE(FixedScalarArray)
 };
 
 /**
@@ -597,6 +603,7 @@ protected:
 private:
     StructureConstPtr pstructure;
     friend class FieldCreate;
+    EPICS_NOT_COPYABLE(StructureArray)
 };
 
 /**
@@ -636,6 +643,7 @@ protected:
 private:
     UnionConstPtr punion;
     friend class FieldCreate;
+    EPICS_NOT_COPYABLE(UnionArray)
 };
 
 /**
@@ -879,6 +887,7 @@ private:
 
    friend class FieldCreate;
    friend class Structure;
+   EPICS_NOT_COPYABLE(Union)
 };
 
 class FieldCreate;
@@ -1217,6 +1226,7 @@ private:
     std::vector<ScalarArrayConstPtr> scalarArrays;
     UnionConstPtr variantUnion;
     UnionArrayConstPtr variantUnionArray;
+    EPICS_NOT_COPYABLE(FieldCreate)
 };
 
 /**

@@ -341,6 +341,7 @@ public:
 
 protected:
     explicit PVScalar(ScalarConstPtr const & scalar);
+    EPICS_NOT_COPYABLE(PVScalar)
 };
 
 namespace detail {
@@ -487,6 +488,7 @@ protected:
 
     friend class PVDataCreate;
     storage_t storage;
+    EPICS_NOT_COPYABLE(PVScalarValue)
 };
 
 /**
@@ -556,6 +558,7 @@ protected:
     explicit PVString(ScalarConstPtr const & scalar);
 
     friend class PVDataCreate;
+    EPICS_NOT_COPYABLE(PVString)
 };
 typedef std::tr1::shared_ptr<PVString> PVStringPtr;
 
@@ -625,6 +628,7 @@ protected:
 private:
     bool capacityMutable;
     friend class PVDataCreate;
+    EPICS_NOT_COPYABLE(PVArray)
 };
 
 epicsShareExtern std::ostream& operator<<(format::array_at_internal const& manip, const PVArray& array);
@@ -719,6 +723,7 @@ protected:
     explicit PVScalarArray(ScalarArrayConstPtr const & scalarArray);
 private:
     friend class PVDataCreate;
+    EPICS_NOT_COPYABLE(PVScalarArray)
 };
 
 
@@ -896,6 +901,7 @@ private:
     StructureConstPtr structurePtr;
     std::string extendsStructureName;
     friend class PVDataCreate;
+    EPICS_NOT_COPYABLE(PVStructure)
 };
 
 /**
@@ -1049,6 +1055,7 @@ private:
 	int32 selector;
 	PVFieldPtr value;
 	bool variant;  
+    EPICS_NOT_COPYABLE(PVUnion)
 };
 
 
@@ -1123,6 +1130,7 @@ namespace detail {
             return thaw(result);
         }
 
+        EPICS_NOT_COPYABLE(PVVectorStorage)
     };
 } // namespace detail
 
@@ -1214,6 +1222,7 @@ protected:
     explicit PVValueArray(ScalarArrayConstPtr const & scalar);
     const_svector value;
     friend class PVDataCreate;
+    EPICS_NOT_COPYABLE(PVValueArray)
 };
 
 
@@ -1311,6 +1320,7 @@ private:
     StructureArrayConstPtr structureArray;
     const_svector value;
     friend class PVDataCreate;
+    EPICS_NOT_COPYABLE(PVValueArray)
 };
 
 
@@ -1409,6 +1419,7 @@ private:
     UnionArrayConstPtr unionArray;
     const_svector value;
     friend class PVDataCreate;
+    EPICS_NOT_COPYABLE(PVValueArray)
 };
 
 
@@ -1624,6 +1635,7 @@ public:
 private:
    PVDataCreate();
    FieldCreatePtr fieldCreate;
+   EPICS_NOT_COPYABLE(PVDataCreate)
 };
 
 /**
