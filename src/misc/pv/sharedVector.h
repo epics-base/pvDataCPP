@@ -256,7 +256,9 @@ namespace detail {
 
             m_total -= offset;
 
-            m_count = std::min(length, max_count);
+            if(length > max_count)
+                length = max_count;
+            m_count = length;
         }
 
         // Access to members.
@@ -430,7 +432,9 @@ public:
     void reserve(size_t i) {
         if(this->unique() && i<=this->m_total)
             return;
-        size_t new_count = std::min(this->m_count, i);
+        size_t new_count = this->m_count;
+        if(new_count > i)
+            new_count = i;
         _E_non_const* temp=new _E_non_const[i];
         try{
             std::copy(begin(), begin()+new_count, temp);
@@ -468,13 +472,18 @@ public:
             }
         }
         // must re-allocate :(
-        size_t new_total = std::max(this->m_total, i);
+        size_t new_total = this->m_total;
+        if(new_total < i)
+            new_total = i;
         _E_non_const* temp=new _E_non_const[new_total];
         try{
+            size_t n = this->size();
+            if(n > i)
+                n = i;
             // Copy as much as possible from old,
             // remaining elements are uninitialized.
             std::copy(begin(),
-                      begin()+std::min(i,this->size()),
+                      begin()+n,
                       temp);
             this->m_sdata.reset(temp, detail::default_array_deleter<pointer>());
         }catch(...){
