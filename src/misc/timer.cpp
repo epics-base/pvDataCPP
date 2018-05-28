@@ -6,10 +6,6 @@
 /**
  *  @author mrk
  */
- 
-#if defined(_WIN32) && !defined(NOMINMAX)
-#define NOMINMAX
-#endif
 
 #include <stdexcept>
 #include <string>

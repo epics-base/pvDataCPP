@@ -4,10 +4,6 @@
  */
 /* Author:  Michael Davidsaver */
 
-#if defined(_WIN32) && !defined(NOMINMAX)
-#define NOMINMAX
-#endif
-
 #include <fstream>
 #include <iostream>
 #include <algorithm>

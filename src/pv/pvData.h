@@ -9,10 +9,6 @@
 #ifndef PVDATA_H
 #define PVDATA_H
 
-#if defined(_WIN32) && !defined(NOMINMAX)
-#define NOMINMAX
-#endif
-
 #include <string>
 #include <map>
 #include <stdexcept>

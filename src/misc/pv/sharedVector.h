@@ -6,10 +6,6 @@
 #ifndef SHAREDVECTOR_H
 #define SHAREDVECTOR_H
 
-#if defined(_WIN32) && !defined(NOMINMAX)
-#define NOMINMAX
-#endif
-
 #include <ostream>
 #include <algorithm>
 #include <stdexcept>

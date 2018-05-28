@@ -9,10 +9,6 @@
  *      Author: Miha Vitorovic
  */
 
-#if defined(_WIN32) && !defined(NOMINMAX)
-#define NOMINMAX
-#endif
-
 #include <iostream>
 #include <fstream>
 

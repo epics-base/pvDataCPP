@@ -33,10 +33,6 @@
 #ifndef EPICSEXCEPTION_H_
 #define EPICSEXCEPTION_H_
 
-#if defined(_WIN32) && !defined(NOMINMAX)
-#define NOMINMAX
-#endif
-
 #include <stdexcept>
 #include <string>
 #include <cstdio>
