@@ -1276,18 +1276,18 @@ public:
      * @param number The number of elements to add.
      * @return the new length of the array.
      */
-    virtual std::size_t append(std::size_t number) FINAL;
+    std::size_t append(std::size_t number);
     /**
      * Remove elements from the array.
      * @param offset The offset of the first element to remove.
      * @param number The number of elements to remove.
      * @return (false,true) if the elements were removed.
      */
-    virtual bool remove(std::size_t offset,std::size_t number) FINAL;
+    bool remove(std::size_t offset,std::size_t number);
     /**
      * Compress. This removes all null elements from the array.
      */
-    virtual void compress() FINAL;
+    void compress();
 
     virtual const_svector view() const OVERRIDE FINAL { return value; }
     virtual void swap(const_svector &other) OVERRIDE FINAL;
@@ -1375,18 +1375,18 @@ public:
      * @param number The number of elements to add.
      * @return the new length of the array.
      */
-    virtual std::size_t append(std::size_t number) FINAL;
+    std::size_t append(std::size_t number);
     /**
      * Remove elements from the array.
      * @param offset The offset of the first element to remove.
      * @param number The number of elements to remove.
      * @return (false,true) if the elements were removed.
      */
-    virtual bool remove(std::size_t offset,std::size_t number) FINAL;
+    bool remove(std::size_t offset,std::size_t number);
     /**
      * Compress. This removes all null elements from the array.
      */
-    virtual void compress() FINAL;
+    void compress();
 
     virtual const_svector view() const OVERRIDE { return value; }
     virtual void swap(const_svector &other) OVERRIDE;
