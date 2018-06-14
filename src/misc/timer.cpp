@@ -64,9 +64,8 @@ bool Timer::cancel(TimerCallbackPtr const &timerCallback)
     {
         TimerCallbackPtr& cur = *it;
         if(cur.get() == timerCallback.get()) {
-            queue.erase(it);
             cur->onList = false;
-            // iteration now invalid
+            queue.erase(it); // invalidates cur and it
             return true;
         }
     }
