@@ -24,6 +24,7 @@
 #include <pv/pvIntrospect.h>
 #include <pv/factory.h>
 #include <pv/serializeHelper.h>
+#include <pv/thread.h>
 
 using std::tr1::static_pointer_cast;
 using std::size_t;
@@ -1493,6 +1494,7 @@ struct field_factory {
     FieldCreatePtr fieldCreate;
     field_factory() :fieldCreate(new FieldCreate()) {
         registerRefCounter("Field", &Field::num_instances);
+        registerRefCounter("Thread", &Thread::num_instances);
     }
 };
 }

@@ -7,6 +7,7 @@
 #include <epicsThread.h>
 #define epicsExportSharedSymbols
 #include <pv/thread.h>
+#include <pv/reftrack.h>
 
 namespace epics { namespace pvData {
 
@@ -54,6 +55,7 @@ void Thread::Config::x_setdefault()
     (*this).stack(epicsThreadStackSmall);
 }
 
+size_t Thread::num_instances;
 
 Thread::Config::Config() {this->x_setdefault();}
 
@@ -105,6 +107,7 @@ Thread::Thread(std::string name,
                  epicsThreadGetStackSize(stkcls),
                  priority)
 {
+    REFTRACE_INCREMENT(num_instances);
     this->start();
 }
 
@@ -117,6 +120,7 @@ Thread::Thread(Runnable &runnable,
                  stksize,
                  priority)
 {
+    REFTRACE_INCREMENT(num_instances);
     this->start();
 }
 
@@ -124,6 +128,7 @@ Thread::Thread(Config& c)
     :epicsThread(c.x_getrunner(), c.p_strm.str().c_str(),
                  c.p_stack, c.p_prio)
 {
+    REFTRACE_INCREMENT(num_instances);
 #if __cplusplus>=201103L
     p_owned = std::move(c.p_owned_runner);
 #else
@@ -136,6 +141,7 @@ Thread::Thread(Config& c)
 Thread::~Thread()
 {
     this->exitWait();
+    REFTRACE_DECREMENT(num_instances);
 }
 
 }} // epics::pvData

@@ -189,6 +189,8 @@ public:
      */
     ~Thread();
 
+    static size_t num_instances;
+private:
     Config::p_owned_runner_t p_owned;
 };
 
