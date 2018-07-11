@@ -111,7 +111,7 @@ public:
         template<typename C>
         Config(C* inst, void(C::*meth)()) {this->x_setdefault();this->run(inst, meth);}
 #if __cplusplus>=201103L
-        Config(const std::function<void()>& fn);
+        Config(std::function<void()>&& fn);
 #endif
 
         Config& name(const std::string& n);
@@ -132,7 +132,7 @@ public:
             return *this;
         }
 #if __cplusplus>=201103L
-        Config& run(const std::function<void()>& fn);
+        Config& run(std::function<void()>&& fn);
 #endif
 
         //! Append to thread name string.  Argument must be understood by std::ostream::operator<<

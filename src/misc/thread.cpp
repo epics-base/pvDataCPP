@@ -29,7 +29,7 @@ struct BindRunner : public epicsThreadRunable
 {
     typedef std::function<void()> fn_t;
     fn_t fn;
-    BindRunner(const fn_t f) : fn(f) {}
+    BindRunner(fn_t&& f) : fn(std::move(f)) {}
     virtual ~BindRunner() {}
     virtual void run()
     {
@@ -64,7 +64,7 @@ Thread::Config::Config(Runnable *r) {this->x_setdefault();this->run(r);}
 Thread::Config::Config(void(*fn)(void*), void *ptr) {this->x_setdefault();this->run(fn, ptr);}
 
 #if __cplusplus>=201103L
-Thread::Config::Config(const std::function<void()>& fn) {this->x_setdefault();this->run(fn);}
+Thread::Config::Config(std::function<void()>&& fn) {this->x_setdefault();this->run(std::move(fn));}
 #endif
 
 Thread::Config& Thread::Config::name(const std::string& n)
@@ -90,9 +90,9 @@ Thread::Config& Thread::Config::run(void(*fn)(void*), void *ptr)
 }
 
 #if __cplusplus>=201103L
-Thread::Config& Thread::Config::run(const std::function<void()>& fn)
+Thread::Config& Thread::Config::run(std::function<void()> &&fn)
 {
-    this->p_owned_runner.reset(new detail::BindRunner(fn));
+    this->p_owned_runner.reset(new detail::BindRunner(std::move(fn)));
     this->p_runner = this->p_owned_runner.get();
     return *this;
 }
