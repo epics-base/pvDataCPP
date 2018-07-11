@@ -42,38 +42,7 @@ typedef std::tr1::shared_ptr<epicsThread> EpicsThreadPtr;
 
 typedef epicsThreadRunable Runnable;
 
-//! Helper for those cases where a class should have more than one runnable
-template<typename C>
-class RunnableMethod : public Runnable
-{
-    EPICS_NOT_COPYABLE(RunnableMethod)
-    typedef void (C::*meth_t)();
-    C *inst;
-    meth_t meth;
-
-    virtual void run()
-    {
-        (inst->*meth)();
-    }
-public:
-    RunnableMethod(C* inst, void (C::*meth)())
-        :inst(inst), meth(meth)
-    {}
-};
-
 namespace detail {
-struct FuncRunner : public epicsThreadRunable
-{
-    typedef void (*fn_t)(void*);
-    fn_t fn;
-    void *arg;
-    FuncRunner(fn_t f, void *a) :fn(f), arg(a) {}
-    virtual ~FuncRunner(){}
-    virtual void run()
-    {
-        (*fn)(arg);
-    }
-};
 template<typename C>
 struct MethRunner : public epicsThreadRunable
 {
@@ -87,26 +56,13 @@ struct MethRunner : public epicsThreadRunable
         (inst->*fn)();
     }
 };
-#if __cplusplus>=201103L
-struct BindRunner : public epicsThreadRunable
-{
-    typedef std::function<void()> fn_t;
-    fn_t fn;
-    BindRunner(const fn_t f) : fn(f) {}
-    virtual ~BindRunner() {}
-    virtual void run()
-    {
-        fn();
-    }
-};
-#endif
 } // namespace detail
 
 /**
  * @brief C++ wrapper for epicsThread from EPICS base.
  *
  */
-class Thread : public epicsThread {
+class epicsShareClass Thread : public epicsThread {
     EPICS_NOT_COPYABLE(Thread)
 public:
     /** @brief Holds all the configuration necessary to launch a @class Thread
@@ -136,7 +92,7 @@ public:
                     <<"example"<<1);
      @endcode
      */
-    class Config
+    class epicsShareClass Config
     {
         unsigned int p_prio, p_stack;
         std::ostringstream p_strm;
@@ -145,49 +101,28 @@ public:
         typedef epics::auto_ptr<Runnable> p_owned_runner_t;
         p_owned_runner_t p_owned_runner;
         friend class Thread;
-        Runnable& x_getrunner()
-        {
-            if(!this->p_runner)
-                throw std::logic_error("Thread::Config missing run()");
-            return *this->p_runner;
-        }
-        void x_setdefault()
-        {
-            this->p_prio = epicsThreadPriorityLow;
-            this->p_autostart = true;
-            this->p_runner = NULL;
-            (*this).stack(epicsThreadStackSmall);
-        }
+        Runnable& x_getrunner();
+        void x_setdefault();
 
     public:
-        Config() {this->x_setdefault();}
-        Config(Runnable *r) {this->x_setdefault();this->run(r);}
-        Config(void(*fn)(void*), void *ptr) {this->x_setdefault();this->run(fn, ptr);}
+        Config();
+        Config(Runnable *r);
+        Config(void(*fn)(void*), void *ptr);
         template<typename C>
         Config(C* inst, void(C::*meth)()) {this->x_setdefault();this->run(inst, meth);}
 #if __cplusplus>=201103L
-        Config(const std::function<void()>& fn) {this->x_setdefault();this->run(fn);}
+        Config(const std::function<void()>& fn);
 #endif
 
-        inline Config& name(const std::string& n)
-        { this->p_strm.str(n); return *this; }
-        inline Config& prio(unsigned int p)
-        { this->p_prio = p; return *this; }
-        inline Config& stack(epicsThreadStackSizeClass s)
-        { this->p_stack = epicsThreadGetStackSize(s); return *this; }
-        inline Config& autostart(bool a)
-        { this->p_autostart = a; return *this; }
+        Config& name(const std::string& n);
+        Config& prio(unsigned int p);
+        Config& stack(epicsThreadStackSizeClass s);
+        Config& autostart(bool a);
 
         //! Thread will execute Runnable::run()
-        Config& run(Runnable* r)
-        { this->p_runner = r; return *this; }
+        Config& run(Runnable* r);
         //! Thread will execute (*fn)(ptr)
-        Config& run(void(*fn)(void*), void *ptr)
-        {
-            this->p_owned_runner.reset(new detail::FuncRunner(fn, ptr));
-            this->p_runner = this->p_owned_runner.get();
-            return *this;
-        }
+        Config& run(void(*fn)(void*), void *ptr);
         //! Thread will execute (inst->*meth)()
         template<typename C>
         Config& run(C* inst, void(C::*meth)())
@@ -197,12 +132,7 @@ public:
             return *this;
         }
 #if __cplusplus>=201103L
-        Config& run(const std::function<void()>& fn)
-        {
-            this->p_owned_runner.reset(new detail::BindRunner(fn));
-            this->p_runner = this->p_owned_runner.get();
-            return *this;
-        }
+        Config& run(const std::function<void()>& fn);
 #endif
 
         //! Append to thread name string.  Argument must be understood by std::ostream::operator<<
@@ -228,14 +158,7 @@ public:
     Thread(std::string name,
            ThreadPriority priority,
            Runnable *runnable,
-           epicsThreadStackSizeClass stkcls=epicsThreadStackSmall)
-        :epicsThread(*runnable,
-                     name.c_str(),
-                     epicsThreadGetStackSize(stkcls),
-                     priority)
-    {
-        this->start();
-    }
+           epicsThreadStackSizeClass stkcls=epicsThreadStackSmall);
 
     /**
      * 
@@ -255,37 +178,16 @@ public:
     Thread(Runnable &runnable,
            std::string name,
            unsigned int stksize,
-           unsigned int priority=lowestPriority)
-        :epicsThread(runnable,
-                     name.c_str(),
-                     stksize,
-                     priority)
-    {
-        this->start();
-    }
+           unsigned int priority=lowestPriority);
 
     //! @brief Create a new thread using the given @class Config
     //! @throws std::logic_error for improper @class Config (ie. missing runner)
-    Thread(Config& c)
-        :epicsThread(c.x_getrunner(), c.p_strm.str().c_str(),
-                     c.p_stack, c.p_prio)
-    {
-#if __cplusplus>=201103L
-        p_owned = std::move(c.p_owned_runner);
-#else
-        p_owned = c.p_owned_runner;
-#endif
-        if(c.p_autostart)
-            this->start();
-    }
+    Thread(Config& c);
 
     /**
      * Destructor
      */
-    ~Thread()
-    {
-        this->exitWait();
-    }
+    ~Thread();
 
     Config::p_owned_runner_t p_owned;
 };

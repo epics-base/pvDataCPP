@@ -33,6 +33,7 @@ LIBSRCS += timer.cpp
 LIBSRCS += status.cpp
 LIBSRCS += localStaticLock.cpp
 LIBSRCS += typeCast.cpp
+LIBSRCS += thread.cpp
 LIBSRCS += parseToPOD.cpp
 LIBSRCS += pvUnitTest.cpp
 LIBSRCS += debugPtr.cpp
