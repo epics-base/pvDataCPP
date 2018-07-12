@@ -157,6 +157,9 @@ PVValueArray<PVUnionPtr>::PVValueArray(UnionArrayConstPtr const & unionArray)
 {}
 
 template<typename T>
+PVValueArray<T>::~PVValueArray() {}
+
+template<typename T>
 void PVValueArray<T>::setCapacity(size_t capacity)
 {
     if(this->isCapacityMutable()) {

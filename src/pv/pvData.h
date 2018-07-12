@@ -1157,7 +1157,7 @@ public:
     /**
      * Destructor
      */
-    virtual ~PVValueArray() {}
+    virtual ~PVValueArray();
 
     /**
      * Get introspection interface.
