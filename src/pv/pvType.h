@@ -30,6 +30,16 @@ typedef unsigned int uintptr_t;
 #define INT64_MAX (0x7fffffffffffffffLL)
 #define UINT64_MAX (0xffffffffffffffffULL)
 #endif
+#elif _MSC_VER==1500
+#include <epicsTypes.h>
+typedef epicsUInt8 uint8_t;
+typedef epicsInt8 int8_t;
+typedef epicsUInt16 uint16_t;
+typedef epicsInt16 int16_t;
+typedef epicsUInt32 uint32_t;
+typedef epicsInt32 int32_t;
+typedef epicsUInt64 uint64_t;
+typedef epicsInt64 int64_t;
 #else
 #include <stdint.h>
 #endif

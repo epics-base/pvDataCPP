@@ -71,6 +71,12 @@
    // GCC >=4.0.0
 #  define SHARED_FROM_TR1
 
+#elif defined(_MSC_VER) && _MSC_VER==1500
+// MSVC 2009  (eg. Visual C++ for Python 2.7)
+// Dinkumware _CPPLIB_VER=505
+// Has std::tr1::shared_ptr in <memory>
+#  define SHARED_TR1_FROM_STD
+
 #elif defined(_MSC_VER) && (_MSC_VER>1500 || defined(_HAS_TR1))
    // MSVC > 2008, or 2008 w/ SP1
 #  define SHARED_FROM_TR1
@@ -119,6 +125,9 @@ namespace std {
 
 
 #endif // DEBUG_SHARED_PTR
+
+#elif defined(SHARED_TR1_FROM_STD)
+#  include <memory>
 
 #elif defined(SHARED_FROM_TR1)
 #  include <tr1/memory>
