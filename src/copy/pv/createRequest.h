@@ -16,6 +16,8 @@
 
 namespace epics { namespace pvData {
 
+class BitSet;
+
 /**
  * @brief Create pvRequest structure for Channel methods.
  *
@@ -60,6 +62,25 @@ protected:
  */
 epicsShareExtern
 PVStructure::shared_pointer createRequest(std::string const & request);
+
+/** Extract a bit mask of fields from a field selection mask.
+ *
+ @param type The Structure to which the mask will be applied
+ @param pvRequestMask The 'field' sub-structure of a pvRequest.  May be NULL
+ @param expand If true, expand any "compressed" sub-structure bits
+ @returns A bit mask, where the bits are field offset in 'type'.
+ *
+ @code
+    PVStructure::const_shared_pointer value(...), // some Structure with .value
+                                      pvRequest(createRequest("field(value)"));
+    BitSet fieldMask(extractRequestMask(value, pvRequest->getSubField<PVStructure>("field"));
+    assert(fieldMask == BitSet().set(value->getSubFieldT("value")->getFieldOffset());
+ @endcode
+ */
+epicsShareExtern
+BitSet extractRequestMask(const PVStructure::const_shared_pointer& type,
+                          const PVStructure::const_shared_pointer& pvRequestMask,
+                          bool expand = true);
 
 }}
 

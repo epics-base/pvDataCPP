@@ -15,7 +15,9 @@
 #include <pv/pvUnitTest.h>
 #include <testMain.h>
 
+#include <pv/current_function.h>
 #include <pv/createRequest.h>
+#include <pv/bitSet.h>
 
 namespace {
 
@@ -335,15 +337,111 @@ static void testBadRequest()
 
     testOk1(!!C->createRequest("field(value)"));
     testOk1(C->getMessage().empty());
+
+    // duplicate fieldName C
+    // correct is: "field(A,C{D,E.F})"
+    testThrows(std::invalid_argument, createRequest("field(A,C.D,C.E.F)"));
+}
+
+static
+StructureConstPtr maskingType = getFieldCreate()->createFieldBuilder()
+        ->add("A", pvInt)
+        ->add("B", pvInt)
+        ->addNestedStructure("C")
+            ->add("D", pvInt)
+            ->addNestedStructure("E")
+                ->add("F", pvInt)
+            ->endNested()
+        ->endNested()
+        ->createStructure();
+
+static
+void checkMask(bool expand,
+               const std::string& request,
+               const BitSet& expected)
+{
+    PVStructurePtr pvRequest(createRequest(request));
+    PVStructurePtr value(getPVDataCreate()->createPVStructure(maskingType));
+
+    BitSet actual(extractRequestMask(value, pvRequest->getSubField<PVStructure>("field"), expand));
+
+    testEqual(actual, expected)<<" request=\""<<request<<"\"";
+}
+
+static void testMask()
+{
+    testDiag("===== %s =====", CURRENT_FUNCTION);
+
+    PVStructurePtr V(getPVDataCreate()->createPVStructure(maskingType));
+    testShow()<<V;
+
+    checkMask(false, "", BitSet().set(0));
+    checkMask(true, "", BitSet().set(0)
+              .set(V->getSubField("A")->getFieldOffset())
+              .set(V->getSubField("B")->getFieldOffset())
+              .set(V->getSubField("C")->getFieldOffset())
+              .set(V->getSubField("C.D")->getFieldOffset())
+              .set(V->getSubField("C.E")->getFieldOffset())
+              .set(V->getSubField("C.E.F")->getFieldOffset()));
+
+    checkMask(false, "field()", BitSet().set(0));
+    checkMask(true, "field()", BitSet().set(0)
+              .set(V->getSubField("A")->getFieldOffset())
+              .set(V->getSubField("B")->getFieldOffset())
+              .set(V->getSubField("C")->getFieldOffset())
+              .set(V->getSubField("C.D")->getFieldOffset())
+              .set(V->getSubField("C.E")->getFieldOffset())
+              .set(V->getSubField("C.E.F")->getFieldOffset()));
+
+    checkMask(false, "field(A)", BitSet()
+              .set(V->getSubField("A")->getFieldOffset()));
+    checkMask(true, "field(A)", BitSet()
+              .set(V->getSubField("A")->getFieldOffset()));
+
+    checkMask(false, "field(A,B)", BitSet()
+              .set(V->getSubField("A")->getFieldOffset())
+              .set(V->getSubField("B")->getFieldOffset()));
+
+    checkMask(false, "field(A,C)", BitSet()
+              .set(V->getSubField("A")->getFieldOffset())
+              .set(V->getSubField("C")->getFieldOffset()));
+
+    checkMask(true, "field(A,C)", BitSet()
+              .set(V->getSubField("A")->getFieldOffset())
+              .set(V->getSubField("C")->getFieldOffset())
+              .set(V->getSubField("C.D")->getFieldOffset())
+              .set(V->getSubField("C.E")->getFieldOffset())
+              .set(V->getSubField("C.E.F")->getFieldOffset()));
+
+    checkMask(false, "field(C.D)", BitSet()
+              .set(V->getSubField("C.D")->getFieldOffset()));
+
+    checkMask(true, "field(C.D)", BitSet()
+              .set(V->getSubField("C.D")->getFieldOffset()));
+
+    checkMask(false, "field(A,C{D,E.F})", BitSet()
+              .set(V->getSubField("A")->getFieldOffset())
+              .set(V->getSubField("C.D")->getFieldOffset())
+              .set(V->getSubField("C.E.F")->getFieldOffset()));
+
+    checkMask(true, "field(A,C{D,E.F})", BitSet()
+              .set(V->getSubField("A")->getFieldOffset())
+              .set(V->getSubField("C.D")->getFieldOffset())
+              .set(V->getSubField("C.E.F")->getFieldOffset()));
+
+    // request for non-existant field is silently ignored
+    checkMask(false, "field(A,foo)", BitSet()
+              .set(V->getSubField("A")->getFieldOffset()));
 }
 
 } // namespace
 
 MAIN(testCreateRequest)
 {
-    testPlan(126);
+    testPlan(141);
     testCreateRequestInternal();
     testBadRequest();
+    testMask();
     return testDone();
 }
 
