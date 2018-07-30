@@ -7,4 +7,5 @@ INC += pv/pvCopy.h
 
 LIBSRCS += createRequest.cpp
 LIBSRCS += requestmask.cpp
+LIBSRCS += requestmapper.cpp
 LIBSRCS += pvCopy.cpp
