@@ -79,6 +79,7 @@ struct FieldCreate::Helper {
 
 Field::Field(Type type)
     : m_fieldType(type)
+    , m_hash(0)
 {
     REFTRACE_INCREMENT(num_instances);
 }
