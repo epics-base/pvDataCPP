@@ -60,9 +60,7 @@ PVStructure::PVStructure(StructureConstPtr const & structurePtr,
     }
 }
 
-PVStructure::~PVStructure()
-{
-}
+PVStructure::~PVStructure() {}
 
 void PVStructure::setImmutable()
 {
@@ -72,16 +70,6 @@ void PVStructure::setImmutable()
         pvField->setImmutable();
     }
     PVField::setImmutable();
-}
-
-const StructureConstPtr& PVStructure::getStructure() const
-{
-    return structurePtr;
-}
-
-const PVFieldPtrArray & PVStructure::getPVFields() const
-{
-    return pvFields;
 }
 
 PVFieldPtr  PVStructure::getSubFieldImpl(size_t fieldOffset, bool throws) const

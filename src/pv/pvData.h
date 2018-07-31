@@ -747,12 +747,12 @@ public:
      * Get the introspection interface
      * @return The interface.
      */
-    const StructureConstPtr &getStructure() const;
+    inline const StructureConstPtr &getStructure() const { return structurePtr; }
     /**
      * Get the array of pointers to the subfields in the structure.
      * @return The array.
      */
-    const PVFieldPtrArray & getPVFields() const;
+    inline const PVFieldPtrArray & getPVFields() const { return pvFields; }
 
     /**
      * Get the subfield with the specified offset.
