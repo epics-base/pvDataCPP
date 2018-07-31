@@ -184,7 +184,7 @@ void PVField::copy(const PVField& from)
     if(isImmutable())
         throw std::invalid_argument("destination is immutable");
 
-    if (getField()->getType() != from.getField()->getType())
+    if (getField() != from.getField())
         throw std::invalid_argument("field types do not match");
 
     copyUnchecked(from);
@@ -192,6 +192,8 @@ void PVField::copy(const PVField& from)
 
 void PVField::copyUnchecked(const PVField& from)
 {
+    assert(getField()==from.getField());
+
     switch(getField()->getType())
     {
     case scalar:
