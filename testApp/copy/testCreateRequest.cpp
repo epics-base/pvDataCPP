@@ -356,85 +356,6 @@ StructureConstPtr maskingType = getFieldCreate()->createFieldBuilder()
         ->createStructure();
 
 static
-void checkMask(bool expand,
-               const std::string& request,
-               const BitSet& expected)
-{
-    PVStructurePtr pvRequest(createRequest(request));
-    PVStructurePtr value(getPVDataCreate()->createPVStructure(maskingType));
-
-    BitSet actual(extractRequestMask(value, pvRequest->getSubField<PVStructure>("field"), expand));
-
-    testEqual(actual, expected)<<" request=\""<<request<<"\"";
-}
-
-static void testMask()
-{
-    testDiag("===== %s =====", CURRENT_FUNCTION);
-
-    PVStructurePtr V(getPVDataCreate()->createPVStructure(maskingType));
-    testShow()<<V;
-
-    checkMask(false, "", BitSet().set(0));
-    checkMask(true, "", BitSet().set(0)
-              .set(V->getSubField("A")->getFieldOffset())
-              .set(V->getSubField("B")->getFieldOffset())
-              .set(V->getSubField("C")->getFieldOffset())
-              .set(V->getSubField("C.D")->getFieldOffset())
-              .set(V->getSubField("C.E")->getFieldOffset())
-              .set(V->getSubField("C.E.F")->getFieldOffset()));
-
-    checkMask(false, "field()", BitSet().set(0));
-    checkMask(true, "field()", BitSet().set(0)
-              .set(V->getSubField("A")->getFieldOffset())
-              .set(V->getSubField("B")->getFieldOffset())
-              .set(V->getSubField("C")->getFieldOffset())
-              .set(V->getSubField("C.D")->getFieldOffset())
-              .set(V->getSubField("C.E")->getFieldOffset())
-              .set(V->getSubField("C.E.F")->getFieldOffset()));
-
-    checkMask(false, "field(A)", BitSet()
-              .set(V->getSubField("A")->getFieldOffset()));
-    checkMask(true, "field(A)", BitSet()
-              .set(V->getSubField("A")->getFieldOffset()));
-
-    checkMask(false, "field(A,B)", BitSet()
-              .set(V->getSubField("A")->getFieldOffset())
-              .set(V->getSubField("B")->getFieldOffset()));
-
-    checkMask(false, "field(A,C)", BitSet()
-              .set(V->getSubField("A")->getFieldOffset())
-              .set(V->getSubField("C")->getFieldOffset()));
-
-    checkMask(true, "field(A,C)", BitSet()
-              .set(V->getSubField("A")->getFieldOffset())
-              .set(V->getSubField("C")->getFieldOffset())
-              .set(V->getSubField("C.D")->getFieldOffset())
-              .set(V->getSubField("C.E")->getFieldOffset())
-              .set(V->getSubField("C.E.F")->getFieldOffset()));
-
-    checkMask(false, "field(C.D)", BitSet()
-              .set(V->getSubField("C.D")->getFieldOffset()));
-
-    checkMask(true, "field(C.D)", BitSet()
-              .set(V->getSubField("C.D")->getFieldOffset()));
-
-    checkMask(false, "field(A,C{D,E.F})", BitSet()
-              .set(V->getSubField("A")->getFieldOffset())
-              .set(V->getSubField("C.D")->getFieldOffset())
-              .set(V->getSubField("C.E.F")->getFieldOffset()));
-
-    checkMask(true, "field(A,C{D,E.F})", BitSet()
-              .set(V->getSubField("A")->getFieldOffset())
-              .set(V->getSubField("C.D")->getFieldOffset())
-              .set(V->getSubField("C.E.F")->getFieldOffset()));
-
-    // request for non-existant field is silently ignored
-    checkMask(false, "field(A,foo)", BitSet()
-              .set(V->getSubField("A")->getFieldOffset()));
-}
-
-static
 void testMapper(PVRequestMapper::mode_t mode)
 {
     testDiag("=== %s mode==%d", CURRENT_FUNCTION, (int)mode);
@@ -780,10 +701,9 @@ void testMaskErr()
 
 MAIN(testCreateRequest)
 {
-    testPlan(329);
+    testPlan(315);
     testCreateRequestInternal();
     testBadRequest();
-    testMask();
     testMapper(PVRequestMapper::Slice);
     testMapper(PVRequestMapper::Mask);
 #undef TEST_METHOD
