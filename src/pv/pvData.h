@@ -886,7 +886,49 @@ public:
     void copyUnchecked(const PVStructure& from);
     void copyUnchecked(const PVStructure& from, const BitSet& maskBitSet, bool inverse = false);
 
+    struct Formatter {
+        enum mode_t {
+            Auto,
+            Plain,
+            ANSI,
+        };
+        enum format_t {
+            Raw,
+            NT,
+            JSON,
+        };
+    private:
+        const PVStructure& xtop;
+        const BitSet* xshow;
+        const BitSet* xhighlight;
+        mode_t xmode;
+        format_t xfmt;
+    public:
+        explicit Formatter(const PVStructure& top)
+            :xtop(top)
+            ,xshow(0)
+            ,xhighlight(0)
+            ,xmode(Auto)
+            ,xfmt(NT)
+        {}
+
+        // those fields (and their parents) to be printed.  non-NT mode.
+        FORCE_INLINE Formatter& show(const BitSet& set) { xshow = &set; return *this; }
+        // those fields (and not their parents) to be specially highlighted.  non-NT mode.
+        FORCE_INLINE Formatter& highlight(const BitSet& set) { xhighlight = &set; return *this; }
+
+        FORCE_INLINE Formatter& mode(mode_t m) { xmode = m; return *this; }
+
+        FORCE_INLINE Formatter& format(format_t f) { xfmt = f; return *this; }
+
+        friend epicsShareFunc std::ostream& operator<<(std::ostream& strm, const Formatter& format);
+        friend void printRaw(std::ostream& strm, const PVStructure::Formatter& format, const PVStructure& cur);
+    };
+
+    FORCE_INLINE Formatter stream() const { return Formatter(*this); }
+
 private:
+
     inline PVFieldPtr getSubFieldImpl(const std::string& name, bool throws) const {
         return getSubFieldImpl(name.c_str(), throws);
     }
@@ -899,6 +941,9 @@ private:
     friend class PVDataCreate;
     EPICS_NOT_COPYABLE(PVStructure)
 };
+
+epicsShareFunc
+std::ostream& operator<<(std::ostream& strm, const PVStructure::Formatter& format);
 
 /**
  * @brief PVUnion has a single subfield.

@@ -79,3 +79,7 @@ TESTS += test_reftrack
 TESTPROD_HOST += testanyscalar
 testanyscalar_SRCS += testanyscalar.cpp
 TESTS += testanyscalar
+
+TESTPROD_HOST += testprinter
+testprinter_SRCS += testprinter.cpp
+TESTS += testprinter
