@@ -302,13 +302,17 @@ struct handler {
     operator yajl_handle() { return handle; }
 };
 
+struct noop {
+    void operator()(pvd::PVField*) {}
+};
+
 } // namespace
 
 namespace epics{namespace pvData{
 
 epicsShareFunc
 void parseJSON(std::istream& strm,
-               const PVField::shared_pointer& dest,
+               PVField& dest,
                BitSet *assigned)
 {
 #ifndef EPICS_YAJL_VERSION
@@ -318,7 +322,12 @@ void parseJSON(std::istream& strm,
     conf.checkUTF8 = 1;
 #endif
 
-    context ctxt(dest, assigned);
+    // we won't create refs to 'dest' which presist beyond this call.
+    // however, it is convienent to treat 'dest' in the same manner as
+    // any union/structureArray memebers it may contain.
+    PVFieldPtr fakedest(&dest, noop());
+
+    context ctxt(fakedest, assigned);
 
 #ifndef EPICS_YAJL_VERSION
     handler handle(yajl_alloc(&jtree_cbs, &conf, NULL, &ctxt));
@@ -334,6 +343,7 @@ void parseJSON(std::istream& strm,
 
     if(!ctxt.stack.empty())
         throw std::logic_error("field stack not empty");
+    assert(fakedest.use_count()==1);
 }
 
 }} // namespace epics::pvData
