@@ -351,6 +351,7 @@ private:
    const Type m_fieldType;
    unsigned int m_hash;
    struct Helper;
+   friend struct Helper;
 
    friend class StructureArray;
    friend class Structure;

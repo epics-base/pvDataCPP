@@ -38,24 +38,26 @@ size_t Field::num_instances;
 
 
 struct Field::Helper {
-    static void hash(Field *fld) {
+    static unsigned hash(Field *fld) {
         std::ostringstream key;
         // hash the output of operator<<()
         // not efficient, but stable within this process.
         key<<(*fld);
-        fld->m_hash = epicsStrHash(key.str().c_str(), 0xbadc0de1);
+        unsigned H = epicsStrHash(key.str().c_str(), 0xbadc0de1);
+        fld->m_hash = H;
+        return H;
     }
 };
 
 struct FieldCreate::Helper {
     template<typename FLD>
     static void cache(const FieldCreate *create, std::tr1::shared_ptr<FLD>& ent) {
-        Field::Helper::hash(ent.get());
+        unsigned hash = Field::Helper::hash(ent.get());
 
         Lock G(create->mutex);
         // we examine raw pointers stored in create->cache, which is safe under create->mutex
 
-        std::pair<cache_t::iterator, cache_t::iterator> itp(create->cache.equal_range(ent->m_hash));
+        std::pair<cache_t::iterator, cache_t::iterator> itp(create->cache.equal_range(hash));
         for(; itp.first!=itp.second; ++itp.first) {
             Field* cent(itp.first->second);
             FLD* centx(dynamic_cast<FLD*>(cent));
@@ -72,7 +74,7 @@ struct FieldCreate::Helper {
             }
         }
 
-        create->cache.insert(std::make_pair(ent->m_hash, ent.get()));
+        create->cache.insert(std::make_pair(hash, ent.get()));
         // cache cleaned from Field::~Field
     }
 };
