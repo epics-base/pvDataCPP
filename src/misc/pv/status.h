@@ -77,13 +77,13 @@ namespace epics { namespace pvData {
              * Get error message describing an error. Required if error status.
              * @return error message.
              */
-            inline std::string getMessage() const { return m_message; }
+            inline const std::string& getMessage() const { return m_message; }
 
             /**
              * Get stack dump where error (exception) happened. Optional.
              * @return stack dump.
              */
-            inline std::string getStackDump() const { return m_stackDump; }
+            inline const std::string& getStackDump() const { return m_stackDump; }
 
             /**
              * Convenient OK test. Same as <code>(getType() == StatusType.OK)</code>.
