@@ -36,14 +36,14 @@ PVStructurePtr PVRequestMapper::buildRequested() const
 {
     if(!typeRequested)
         THROW_EXCEPTION2(std::logic_error, "No mapping compute()d");
-    return getPVDataCreate()->createPVStructure(typeRequested);
+    return typeRequested->build();
 }
 
 PVStructurePtr PVRequestMapper::buildBase() const
 {
     if(!typeBase)
         THROW_EXCEPTION2(std::logic_error, "No mapping compute()d");
-    return getPVDataCreate()->createPVStructure(typeBase);
+    return typeBase->build();
 }
 
 void PVRequestMapper::compute(const PVStructure &base,
@@ -96,7 +96,7 @@ void PVRequestMapper::compute(const PVStructure &base,
     }
 
     {
-        PVStructurePtr proto(getPVDataCreate()->createPVStructure(temp.typeRequested));
+        PVStructurePtr proto(temp.typeRequested->build());
 
         // base -> request may be sparce mapping
         temp.base2req.resize(base.getNextFieldOffset());

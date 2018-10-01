@@ -318,7 +318,7 @@ struct CreateRequestImpl {
             if (!request.empty()) removeBlanks(request);
             if (request.empty())
             {
-                return pvDataCreate->createPVStructure(fieldCreate->createStructure());
+                return fieldCreate->createStructure()->build();
             }
             size_t offsetRecord = request.find("record[");
             size_t offsetField = request.find("field(");
@@ -437,7 +437,7 @@ struct CreateRequestImpl {
             }
             StructureConstPtr structure = fieldCreate->createStructure(names, fields);
             if(!structure) throw std::invalid_argument("bad request " + crequest);
-            PVStructurePtr pvStructure = pvDataCreate->createPVStructure(structure);
+            PVStructurePtr pvStructure = structure->build();
             for(size_t i=0; i<optionList.size(); ++i) {
                 OptionPair pair = optionList[i];
                 string name = pair.name;

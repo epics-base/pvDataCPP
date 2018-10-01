@@ -285,7 +285,7 @@ PVStructure::shared_pointer ValueBuilder::buildPVStructure() const
         type = tbuild->createStructure();
     }
 
-    PVStructure::shared_pointer root(getPVDataCreate()->createPVStructure(type));
+    PVStructure::shared_pointer root(type->build());
 
     child_struct::storeStruct(*this, root);
 

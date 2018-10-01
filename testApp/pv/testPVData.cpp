@@ -384,7 +384,7 @@ static void testRequest()
     StructureConstPtr topStructure = fieldCreate->createStructure(
         topNames,topFields);
 cout << *topStructure << endl;
-    PVStructurePtr pvTop = pvDataCreate->createPVStructure(topStructure);
+    PVStructurePtr pvTop = topStructure->build();
 cout << *pvTop << endl;
 cout << *pvTop->getStructure() << endl;
 PVStructurePtr xxx = pvTop->getSubField<PVStructure>("record");
@@ -522,7 +522,7 @@ static void testFieldAccess()
             endNested()->
             createStructure();
 
-    PVStructurePtr fld = pvDataCreate->createPVStructure(tdef);
+    PVStructurePtr fld = tdef->build();
 
     PVIntPtr a = fld->getSubField<PVInt>("test");
     testOk1(a.get() != NULL);
@@ -628,11 +628,11 @@ static void testFieldAccess()
 
 static void testAnyScalar()
 {
-    PVStructurePtr value(getPVDataCreate()->createPVStructure(getFieldCreate()->createFieldBuilder()
-                                                              ->add("a", pvInt)
-                                                              ->add("b", pvDouble)
-                                                              ->add("c", pvString)
-                                                              ->createStructure()));
+    PVStructurePtr value(FieldBuilder::begin()
+                         ->add("a", pvInt)
+                         ->add("b", pvDouble)
+                         ->add("c", pvString)
+                         ->createStructure()->build());
 
     PVIntPtr a(value->getSubFieldT<PVInt>("a"));
     PVDoublePtr b(value->getSubFieldT<PVDouble>("b"));

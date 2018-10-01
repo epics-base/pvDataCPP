@@ -38,7 +38,7 @@ static void testBasic()
     StructureArrayConstPtr alarmtype(
         fieldCreate->createStructureArray(standardField->alarm()));
 
-    PVStructureArrayPtr alarmarr(pvDataCreate->createPVStructureArray(alarmtype));
+    PVStructureArrayPtr alarmarr(alarmtype->build());
 
     testOk1(alarmarr->getLength()==0);
 
@@ -69,7 +69,7 @@ static void testCompress()
     StructureArrayConstPtr alarmtype(
         fieldCreate->createStructureArray(standardField->alarm()));
 
-    PVStructureArrayPtr alarmarr(pvDataCreate->createPVStructureArray(alarmtype));
+    PVStructureArrayPtr alarmarr(alarmtype->build());
 
     alarmarr->setLength(5);
 
@@ -85,10 +85,10 @@ static void testCompress()
 
     PVStructureArray::svector contents(10);
 
-    contents[2] = pvDataCreate->createPVStructure(standardField->alarm());
-    contents[4] = pvDataCreate->createPVStructure(standardField->alarm());
-    contents[5] = pvDataCreate->createPVStructure(standardField->alarm());
-    contents[8] = pvDataCreate->createPVStructure(standardField->alarm());
+    contents[2] = standardField->alarm()->build();
+    contents[4] = standardField->alarm()->build();
+    contents[5] = standardField->alarm()->build();
+    contents[8] = standardField->alarm()->build();
 
     PVStructureArray::const_svector scont(freeze(contents));
 
@@ -117,11 +117,11 @@ static void testRemove()
     PVStructureArray::svector contents(10);
     
     for(size_t i=0; i<contents.size(); i++)
-        contents[i] = pvDataCreate->createPVStructure(standardField->alarm());
+        contents[i] = standardField->alarm()->build();
 
     StructureArrayConstPtr alarmtype(
         fieldCreate->createStructureArray(standardField->alarm()));
-    PVStructureArrayPtr alarmarr(pvDataCreate->createPVStructureArray(alarmtype));
+    PVStructureArrayPtr alarmarr(alarmtype->build());
 
     PVStructureArray::const_svector scont(freeze(contents));
 
@@ -147,10 +147,10 @@ static void testFromRaw()
     testDiag("Test structure array external allocation for shared_vector");
 
     PVStructurePtr* raw = new PVStructurePtr[4];
-    raw[0] = pvDataCreate->createPVStructure(standardField->alarm());
-    raw[1] = pvDataCreate->createPVStructure(standardField->alarm());
-    raw[2] = pvDataCreate->createPVStructure(standardField->alarm());
-    raw[3] = pvDataCreate->createPVStructure(standardField->alarm());
+    raw[0] = standardField->alarm()->build();
+    raw[1] = standardField->alarm()->build();
+    raw[2] = standardField->alarm()->build();
+    raw[3] = standardField->alarm()->build();
 
     PVStructureArray::svector cont(raw, 1, 2);
 }
