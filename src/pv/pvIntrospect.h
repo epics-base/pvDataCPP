@@ -118,6 +118,13 @@ class UnionArray;
 
 class BoundedString;
 
+class PVField;
+class PVScalar;
+class PVScalarArray;
+class PVStructure;
+class PVUnion;
+template<typename T> class PVValueArray;
+
 /**
  * typedef for a shared pointer to an immutable Field.
  */
@@ -341,6 +348,9 @@ public:
      */
     virtual std::ostream& dump(std::ostream& o) const = 0;
 
+   //! Allocate a new instance
+    std::tr1::shared_ptr<PVField> build() const;
+
 protected:
     /**
      * Constructor
@@ -387,6 +397,9 @@ public:
 
     virtual void serialize(ByteBuffer *buffer, SerializableControl *control) const OVERRIDE;
     virtual void deserialize(ByteBuffer *buffer, DeserializableControl *control) OVERRIDE FINAL;
+
+    //! Allocate a new instance
+    std::tr1::shared_ptr<PVScalar> build() const;
     
 protected:
     Scalar(ScalarType scalarType);
@@ -492,6 +505,9 @@ public:
 
     virtual void serialize(ByteBuffer *buffer, SerializableControl *control) const OVERRIDE;
     virtual void deserialize(ByteBuffer *buffer, DeserializableControl *control) OVERRIDE FINAL;
+
+    //! Allocate a new instance
+     std::tr1::shared_ptr<PVScalarArray> build() const;
     
     virtual ~ScalarArray();
 private:
@@ -594,6 +610,9 @@ public:
     virtual void serialize(ByteBuffer *buffer, SerializableControl *control) const OVERRIDE FINAL;
     virtual void deserialize(ByteBuffer *buffer, DeserializableControl *control) OVERRIDE FINAL;
 
+    //! Allocate a new instance
+     std::tr1::shared_ptr<PVValueArray<std::tr1::shared_ptr<PVStructure> > > build() const;
+
 protected:
     /**
      * Constructor.
@@ -634,6 +653,9 @@ public:
 
     virtual void serialize(ByteBuffer *buffer, SerializableControl *control) const OVERRIDE FINAL;
     virtual void deserialize(ByteBuffer *buffer, DeserializableControl *control) OVERRIDE FINAL;
+
+    //! Allocate a new instance
+     std::tr1::shared_ptr<PVValueArray<std::tr1::shared_ptr<PVUnion> > > build() const;
 
 protected:
     /**
@@ -742,7 +764,10 @@ public:
 
     virtual void serialize(ByteBuffer *buffer, SerializableControl *control) const OVERRIDE FINAL;
     virtual void deserialize(ByteBuffer *buffer, DeserializableControl *control) OVERRIDE FINAL;
-    
+
+    //! Allocate a new instance
+    std::tr1::shared_ptr<PVStructure> build() const;
+
 protected:
     Structure(StringArray const & fieldNames, FieldConstPtrArray const & fields, std::string const & id = defaultId());
 private:
@@ -877,6 +902,9 @@ public:
 
     virtual void serialize(ByteBuffer *buffer, SerializableControl *control) const OVERRIDE FINAL;
     virtual void deserialize(ByteBuffer *buffer, DeserializableControl *control) OVERRIDE FINAL;
+
+    //! Allocate a new instance
+    std::tr1::shared_ptr<PVUnion> build() const;
     
 protected:
    Union();
@@ -910,6 +938,11 @@ class epicsShareClass FieldBuilder :
     public std::tr1::enable_shared_from_this<FieldBuilder>
 {
 public:
+    //! Create a new instance of in-line @c Field builder.
+    static FieldBuilderPtr begin();
+    //! Create a new instance of in-line @c Field builder pre-initialized with and existing Structure
+    static FieldBuilderPtr begin(StructureConstPtr S);
+
 	/**
 	 * Set ID of an object to be created.
 	 * @param id id to be set.

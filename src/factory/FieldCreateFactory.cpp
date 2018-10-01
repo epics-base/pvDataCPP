@@ -25,6 +25,7 @@
 #include <pv/factory.h>
 #include <pv/serializeHelper.h>
 #include <pv/thread.h>
+#include <pv/pvData.h>
 
 using std::tr1::static_pointer_cast;
 using std::size_t;
@@ -102,6 +103,11 @@ Field::~Field() {
     }
 }
 
+std::tr1::shared_ptr<PVField> Field::build() const
+{
+    FieldConstPtr self(shared_from_this());
+    return getPVDataCreate()->createPVField(self);
+}
 
 std::ostream& operator<<(std::ostream& o, const Field& f)
 {
@@ -171,6 +177,11 @@ void Scalar::deserialize(ByteBuffer* /*buffer*/, DeserializableControl* /*contro
     throw std::runtime_error("not valid operation, use FieldCreate::deserialize instead");
 }
 
+
+std::tr1::shared_ptr<PVScalar> Scalar::build() const
+{
+    return getPVDataCreate()->createPVScalar(std::tr1::static_pointer_cast<const Scalar>(shared_from_this()));
+}
 
 
 
@@ -338,6 +349,11 @@ void ScalarArray::deserialize(ByteBuffer* /*buffer*/, DeserializableControl* /*c
     throw std::runtime_error("not valid operation, use FieldCreate::deserialize instead");
 }
 
+std::tr1::shared_ptr<PVScalarArray> ScalarArray::build() const
+{
+    return getPVDataCreate()->createPVScalarArray(std::tr1::static_pointer_cast<const ScalarArray>(shared_from_this()));
+}
+
 
 BoundedScalarArray::~BoundedScalarArray() {}
 
@@ -418,6 +434,11 @@ void StructureArray::deserialize(ByteBuffer* /*buffer*/, DeserializableControl* 
     throw std::runtime_error("not valid operation, use FieldCreate::deserialize instead");
 }
 
+std::tr1::shared_ptr<PVValueArray<std::tr1::shared_ptr<PVStructure> > > StructureArray::build() const
+{
+    return getPVDataCreate()->createPVStructureArray(std::tr1::static_pointer_cast<const StructureArray>(shared_from_this()));
+}
+
 UnionArray::UnionArray(UnionConstPtr const & _punion)
 : Array(unionArray),punion(_punion)
 {
@@ -458,6 +479,11 @@ void UnionArray::serialize(ByteBuffer *buffer, SerializableControl *control) con
 
 void UnionArray::deserialize(ByteBuffer* /*buffer*/, DeserializableControl* /*control*/) {
     throw std::runtime_error("not valid operation, use FieldCreate::deserialize instead");
+}
+
+std::tr1::shared_ptr<PVValueArray<std::tr1::shared_ptr<PVUnion> > > UnionArray::build() const
+{
+    return getPVDataCreate()->createPVUnionArray(std::tr1::static_pointer_cast<const UnionArray>(shared_from_this()));
 }
 
 const string Structure::DEFAULT_ID = Structure::defaultId();
@@ -595,6 +621,11 @@ void Structure::serialize(ByteBuffer *buffer, SerializableControl *control) cons
 
 void Structure::deserialize(ByteBuffer* /*buffer*/, DeserializableControl* /*control*/) {
     throw std::runtime_error("not valid operation, use FieldCreate::deserialize instead");
+}
+
+std::tr1::shared_ptr<PVStructure> Structure::build() const
+{
+    return getPVDataCreate()->createPVStructure(std::tr1::static_pointer_cast<const Structure>(shared_from_this()));
 }
 
 const string Union::DEFAULT_ID = Union::defaultId();
@@ -795,6 +826,11 @@ void Union::deserialize(ByteBuffer* /*buffer*/, DeserializableControl* /*control
     throw std::runtime_error("not valid operation, use FieldCreate::deserialize instead");
 }
 
+std::tr1::shared_ptr<PVUnion> Union::build() const
+{
+    return getPVDataCreate()->createPVUnion(std::tr1::static_pointer_cast<const Union>(shared_from_this()));
+}
+
 FieldBuilder::FieldBuilder()
     :fieldCreate(getFieldCreate())
     ,idSet(false)
@@ -895,6 +931,19 @@ void FieldBuilder::reset()
 	fieldNames.clear();
 	fields.clear();
 }
+
+FieldBuilderPtr FieldBuilder::begin()
+{
+    FieldBuilderPtr ret(new FieldBuilder);
+    return ret;
+}
+
+FieldBuilderPtr FieldBuilder::begin(StructureConstPtr S)
+{
+    FieldBuilderPtr ret(new FieldBuilder(S.get()));
+    return ret;
+}
+
 
 FieldBuilderPtr FieldBuilder::setId(string const & id)
 {
