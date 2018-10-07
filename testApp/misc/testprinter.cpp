@@ -173,6 +173,51 @@ void showNTScalarString()
     testDiff("<undefined> bar MINOR DEVICE FOO \n", print(input->stream()));
 }
 
+static const pvd::StructureConstPtr ntenum(pvd::getFieldCreate()->createFieldBuilder()
+                                                  ->setId("epics:nt/NTEnum:1.0")
+                                                  ->addNestedStructure("value")
+                                                     ->setId("enum_t")
+                                                     ->add("index", pvd::pvInt)
+                                                     ->addArray("choices", pvd::pvString)
+                                                  ->endNested()
+                                                  ->add("alarm", pvd::getStandardField()->alarm())
+                                                  ->add("timeStamp", pvd::getStandardField()->timeStamp())
+                                                  ->createStructure());
+
+void showNTEnum()
+{
+    testDiag("%s", CURRENT_FUNCTION);
+    pvd::PVStructurePtr input(pvd::getPVDataCreate()->createPVStructure(ntenum));
+    testDiff("<undefined> (0) <undefined>\n", print(input->stream()), "empty");
+
+    pvd::PVStringArray::svector sarr;
+    sarr.push_back("one");
+    sarr.push_back("a two");
+    input->getSubFieldT<pvd::PVStringArray>("value.choices")->replace(pvd::freeze(sarr));
+
+    input->getSubFieldT<pvd::PVInt>("value.index")->put(0);
+
+    testDiff("<undefined> (0) one\n", print(input->stream()), "one");
+
+    input->getSubFieldT<pvd::PVInt>("value.index")->put(1);
+
+    testDiff("<undefined> (1) a two\n", print(input->stream()), "two");
+
+    testDiff("epics:nt/NTEnum:1.0 \n"
+             "    enum_t value (1) a two\n"
+             "        int index 1\n"
+             "        string[] choices [\"one\", \"a two\"]\n"
+             "    alarm_t alarm \n"
+             "        int severity 0\n"
+             "        int status 0\n"
+             "        string message \n"
+             "    time_t timeStamp <undefined> \n"
+             "        long secondsPastEpoch 0\n"
+             "        int nanoseconds 0\n"
+             "        int userTag 0\n",
+             print(input->stream().format(pvd::PVStructure::Formatter::Raw)), "two raw");
+}
+
 static const pvd::StructureConstPtr table(pvd::getFieldCreate()->createFieldBuilder()
                                                   ->setId("epics:nt/NTTable:1.0")
                                                   ->addArray("labels", pvd::pvString)
@@ -315,6 +360,7 @@ MAIN(testprinter)
     testPlan(16);
     showNTScalarNumeric();
     showNTScalarString();
+    showNTEnum();
     showNTTable();
     testRaw();
     testEscape();

@@ -149,24 +149,32 @@ void printTimeT(std::ostream& strm, const PVStructure& top)
         printTimeTx(strm, *sub);
 }
 
-bool printEnumT(std::ostream& strm, const PVStructure& top)
+bool printEnumT(std::ostream& strm, const PVStructure& top, bool fromtop)
 {
-    PVScalar::const_shared_pointer idx(top.getSubField<PVScalar>("value.index"));
-    PVStringArray::const_shared_pointer choices(top.getSubFieldT<PVStringArray>("value.choices"));
+    PVStructure::const_shared_pointer value;
+    if(fromtop) {
+        value = top.getSubField<PVStructure>("value");
+    } else {
+        value = std::tr1::static_pointer_cast<const PVStructure>(top.shared_from_this());
+    }
+    PVScalar::const_shared_pointer idx(value->getSubField<PVScalar>("index"));
+    PVStringArray::const_shared_pointer choices(value->getSubField<PVStringArray>("choices"));
     if(!idx || !choices) return false;
 
-    strm<<format::indent();
-    printTimeT(strm, top);
-    printAlarmT(strm, top);
+    if(fromtop) {
+        strm<<format::indent();
+        printTimeT(strm, top);
+        printAlarmT(strm, top);
+    }
 
     PVStringArray::const_svector ch(choices->view());
     uint32 I = idx->getAs<uint32>();
+    strm<<'('<<I<<')';
     if(I>=ch.size()) {
-        strm<<'('<<I<<')';
+        strm<<" <undefined>";
     } else {
-        strm<<'"'<<ch[I]<<"\" ("<<I<<")";
+        strm<<' '<<escape(ch[I]);
     }
-    strm<<'\n';
     return true;
 }
 
@@ -366,6 +374,9 @@ void printRaw(std::ostream& strm, const PVStructure::Formatter& format, const PV
             } else if(id=="time_t") {
                 strm.put(' ');
                 printTimeTx(strm, *str);
+            } else if(id=="enum_t") {
+                strm.put(' ');
+                printEnumT(strm, *str, false);
             }
             strm.put('\n');
         }
@@ -433,8 +444,10 @@ std::ostream& operator<<(std::ostream& strm, const PVStructure::Formatter& forma
                     return strm;
 
                 case structure:
-                    if(printEnumT(strm, format.xtop))
+                    if(printEnumT(strm, format.xtop, true)) {
+                        strm<<'\n';
                         return strm;
+                    }
                     break;
                 default:
                     break;
