@@ -62,6 +62,48 @@ template<typename T>
 PVScalarValue<T>::~PVScalarValue() {}
 
 template<typename T>
+std::ostream& PVScalarValue<T>::dumpValue(std::ostream& o) const
+{
+    return o << get();
+}
+
+template<typename T>
+void PVScalarValue<T>::operator>>=(T& value) const
+{
+    value = get();
+}
+
+template<typename T>
+void PVScalarValue<T>::operator<<=(typename storage_t::arg_type value)
+{
+    put(value);
+}
+
+template<typename T>
+void PVScalarValue<T>::assign(const PVScalar& scalar)
+{
+    if(isImmutable())
+        throw std::invalid_argument("destination is immutable");
+    copyUnchecked(scalar);
+}
+
+template<typename T>
+void PVScalarValue<T>::copy(const PVScalar& from)
+{
+    assign(from);
+}
+
+template<typename T>
+void PVScalarValue<T>::copyUnchecked(const PVScalar& from)
+{
+    if(this==&from)
+        return;
+    T result;
+    from.getAs((void*)&result, typeCode);
+    put(result);
+}
+
+template<typename T>
 void PVScalarValue<T>::serialize(ByteBuffer *pbuffer,
     SerializableControl *pflusher) const {
     pflusher->ensureBuffer(sizeof(T));
@@ -98,6 +140,13 @@ PVString::PVString(ScalarConstPtr const & scalar)
         storage.maxLength = boundedString->getMaximumLength();
     else
         storage.maxLength = 0;
+}
+
+std::ostream& PVString::dumpValue(std::ostream& o) const
+{
+    // we escape, but do not quote, for scalar string
+    o<<escape(get());
+    return o;
 }
 
 /* mixing overrides (virtual functions) and overloads (different argument lists) is fun...
@@ -158,6 +207,56 @@ PVValueArray<PVUnionPtr>::PVValueArray(UnionArrayConstPtr const & unionArray)
 
 template<typename T>
 PVValueArray<T>::~PVValueArray() {}
+
+template<typename T>
+ArrayConstPtr PVValueArray<T>::getArray() const
+{
+    return std::tr1::static_pointer_cast<const Array>(this->getField());
+}
+
+template<typename T>
+std::ostream& PVValueArray<T>::dumpValue(std::ostream& o) const
+{
+    const_svector v(this->view());
+    typename const_svector::const_iterator it(v.begin()),
+                                  end(v.end());
+    o << '[';
+    if(it!=end) {
+        o << print_cast(*it++);
+        for(; it!=end; ++it)
+            o << ',' << print_cast(*it);
+
+    }
+    return o << ']';
+}
+
+template<>
+std::ostream& PVValueArray<std::string>::dumpValue(std::ostream& o, size_t index) const
+{
+    return o << '"' << escape(this->view().at(index)) << '"';
+}
+
+template<>
+std::ostream& PVValueArray<std::string>::dumpValue(std::ostream& o) const
+{
+    const_svector v(this->view());
+    const_svector::const_iterator it(v.begin()),
+                                  end(v.end());
+    o << '[';
+    if(it!=end) {
+        o << '"' << escape(*it++) << '"';
+        for(; it!=end; ++it)
+            o << ", \"" << escape(*it) << '"';
+
+    }
+    return o << ']';
+}
+
+template<typename T>
+std::ostream& PVValueArray<T>::dumpValue(std::ostream& o, size_t index) const
+{
+    return o << print_cast(this->view().at(index));
+}
 
 template<typename T>
 void PVValueArray<T>::setCapacity(size_t capacity)
@@ -349,6 +448,18 @@ void PVValueArray<string>::serialize(ByteBuffer *pbuffer,
     for(size_t i = 0; i<temp.size(); i++) {
         SerializeHelper::serializeString(pvalue[i], pbuffer, pflusher);
     }
+}
+
+template<typename T>
+void PVValueArray<T>::_getAsVoid(epics::pvData::shared_vector<const void>& out) const
+{
+    out = static_shared_vector_cast<const void>(this->view());
+}
+
+template<typename T>
+void PVValueArray<T>::_putFromVoid(const epics::pvData::shared_vector<const void>& in)
+{
+    this->replace(shared_vector_convert<const T>(in));
 }
 
 // Factory

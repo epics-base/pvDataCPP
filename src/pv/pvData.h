@@ -395,31 +395,22 @@ public:
      * Put a new value into the PVScalar.
      * @param value The value.
      */
-    void put(typename storage_t::arg_type v) {
+    inline void put(typename storage_t::arg_type v) {
         storage.store(v);
         PVField::postPut();
     }
 
-    std::ostream& dumpValue(std::ostream& o) const OVERRIDE FINAL
-    {
-    	return o << get();
-    }
+    virtual std::ostream& dumpValue(std::ostream& o) const OVERRIDE;
 
     // get operator
     // double value; doubleField >>= value;
     // NOTE: virtual is needed for MS C++ compiler to get this operator exported
-    virtual void operator>>=(T& value) const
-	{
-    	value = get();
-	}
+    virtual void operator>>=(T& value) const;
 
     // put operator
     // double value = 12.8; doubleField <<= value;
     // NOTE: virtual is needed for MS C++ compiler to get this operator exported
-    virtual void operator<<=(typename storage_t::arg_type value)
-	{
-    	put(value);
-	}
+    virtual void operator<<=(typename storage_t::arg_type value);
 
     template<typename T1>
     inline T1 getAs() const {
@@ -437,24 +428,9 @@ public:
         PVScalar::putFrom(v);
     }
 
-    virtual void assign(const PVScalar& scalar) OVERRIDE FINAL
-    {
-        if(isImmutable())
-            throw std::invalid_argument("destination is immutable");
-        copyUnchecked(scalar);
-    }
-    virtual void copy(const PVScalar& from) OVERRIDE FINAL
-    {
-        assign(from);
-    }
-    virtual void copyUnchecked(const PVScalar& from) OVERRIDE FINAL
-    {
-        if(this==&from)
-            return;
-        T result;
-        from.getAs((void*)&result, typeCode);
-        put(result);
-    }
+    virtual void assign(const PVScalar& scalar) OVERRIDE FINAL;
+    virtual void copy(const PVScalar& from) OVERRIDE FINAL;
+    virtual void copyUnchecked(const PVScalar& from) OVERRIDE FINAL;
 
     virtual void serialize(ByteBuffer *pbuffer,
         SerializableControl *pflusher) const OVERRIDE;
@@ -545,6 +521,8 @@ public:
      * Destructor
      */
     virtual ~PVString() {}
+
+    virtual std::ostream& dumpValue(std::ostream& o) const OVERRIDE FINAL;
 
     virtual void serialize(ByteBuffer *pbuffer,
         SerializableControl *pflusher) const OVERRIDE FINAL;
@@ -1207,25 +1185,10 @@ public:
     /**
      * Get introspection interface.
      */
-    virtual ArrayConstPtr getArray() const OVERRIDE FINAL
-    {
-        return std::tr1::static_pointer_cast<const Array>(this->getField());
-    }
+    virtual ArrayConstPtr getArray() const OVERRIDE FINAL;
 
-    std::ostream& dumpValue(std::ostream& o) const OVERRIDE FINAL
-    {
-        const_svector v(this->view());
-        typename const_svector::const_iterator it(v.begin()),
-                                      end(v.end());
-    	o << '[';
-        if(it!=end) {
-            o << print_cast(*it++);
-            for(; it!=end; ++it)
-                o << ',' << print_cast(*it);
-
-        }
-    	return o << ']';
-    }
+    virtual std::ostream& dumpValue(std::ostream& o) const OVERRIDE FINAL;
+    virtual std::ostream& dumpValue(std::ostream& o, size_t index) const OVERRIDE FINAL;
 
     virtual size_t getLength() const OVERRIDE FINAL {return value.size();}
     virtual size_t getCapacity() const OVERRIDE FINAL {return value.capacity();}
@@ -1243,22 +1206,9 @@ public:
     virtual void serialize(ByteBuffer *pbuffer,
                            SerializableControl *pflusher, size_t offset, size_t count) const OVERRIDE FINAL;
 
-    std::ostream& dumpValue(std::ostream& o, size_t index) const OVERRIDE FINAL
-    {
-        return o << print_cast(this->view().at(index));
-    }
-
 protected:
-    virtual void _getAsVoid(epics::pvData::shared_vector<const void>& out) const OVERRIDE FINAL
-    {
-        out = static_shared_vector_cast<const void>(this->view());
-    }
-
-    virtual void _putFromVoid(const epics::pvData::shared_vector<const void>& in) OVERRIDE FINAL
-    {
-        // TODO: try to re-use storage
-        this->replace(shared_vector_convert<const T>(in));
-    }
+    virtual void _getAsVoid(epics::pvData::shared_vector<const void>& out) const OVERRIDE FINAL;
+    virtual void _putFromVoid(const epics::pvData::shared_vector<const void>& in) OVERRIDE FINAL;
 
     explicit PVValueArray(ScalarArrayConstPtr const & scalar);
     const_svector value;
