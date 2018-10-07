@@ -26,6 +26,16 @@ typedef std::vector<std::string> lines_t;
 
 namespace {
 
+struct SB {
+    std::ostringstream strm;
+    operator std::string() { return strm.str(); }
+    template<typename T>
+    SB& operator<<(const T& v) {
+        strm<<v;
+        return *this;
+    }
+};
+
 lines_t lines(const std::string& str)
 {
     lines_t ret;
@@ -39,13 +49,6 @@ lines_t lines(const std::string& str)
             p = next+1;
     }
     return ret;
-}
-
-std::string escape(const std::string& inp) {
-    size_t N = epicsStrnEscapedFromRawSize(inp.c_str(), inp.size());
-    std::vector<char> esc(N+1, '\0'); // include space for trailing nil
-    epicsStrnEscapedFromRaw(&esc[0], esc.size(), inp.c_str(), inp.size());
-    return std::string(&esc[0]);
 }
 
 std::string print(const pvd::PVStructure::Formatter& fmt)
@@ -74,7 +77,7 @@ testDiff(const std::string& expect, const std::string& actual, const std::string
 
     while(L<lhs.size() && R<rhs.size()) {
         if(lhs[L]==rhs[R]) {
-            ret<<"  "<<escape(lhs[L])<<'\n';
+            ret<<"  "<<pvd::escape(lhs[L])<<'\n';
             L++;
             R++;
 
@@ -100,9 +103,9 @@ testDiff(const std::string& expect, const std::string& actual, const std::string
             }
 
             for(size_t l=L; l<Lp; l++)
-                ret<<"- "<<escape(lhs[l])<<'\n';
+                ret<<"- "<<pvd::escape(lhs[l])<<'\n';
             for(size_t r=R; r<Rp; r++)
-                ret<<"+ "<<escape(rhs[r])<<'\n';
+                ret<<"+ "<<pvd::escape(rhs[r])<<'\n';
             L = Lp;
             R = Rp;
             // loop around and print matching line
@@ -110,9 +113,9 @@ testDiff(const std::string& expect, const std::string& actual, const std::string
     }
 
     for(; L<lhs.size(); L++)
-        ret<<"- "<<escape(lhs[L])<<'\n';
+        ret<<"- "<<pvd::escape(lhs[L])<<'\n';
     for(; R<rhs.size(); R++)
-        ret<<"+ "<<escape(rhs[R])<<'\n';
+        ret<<"+ "<<pvd::escape(rhs[R])<<'\n';
 
     return ret;
 }
@@ -229,13 +232,28 @@ void testRaw()
                      ));
 }
 
+void testEscape()
+{
+    testDiag("%s", CURRENT_FUNCTION);
+
+    testEqual("hello world", std::string(SB()<<pvd::escape("hello world")));
+    testEqual("hello\\nworld", std::string(SB()<<pvd::escape("hello\nworld")));
+    testEqual("hello\\\"world", std::string(SB()<<pvd::escape("hello\"world")));
+    testEqual("hello\\x7Fworld", std::string(SB()<<pvd::escape("hello\x7Fworld")));
+
+    testEqual("hello\"\"world", std::string(SB()<<pvd::escape("hello\"world").style(pvd::escape::CSV)));
+
+    testEqual("hello\"\"world", pvd::escape("hello\"world").style(pvd::escape::CSV).str());
+}
+
 } // namespace
 
 MAIN(testprinter)
 {
-    testPlan(0);
+    testPlan(14);
     showNTScalarNumeric();
     showNTScalarString();
     testRaw();
+    testEscape();
     return testDone();
 }

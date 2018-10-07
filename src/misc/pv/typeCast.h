@@ -208,6 +208,35 @@ static FORCE_INLINE
 typename detail::print_convolute<T>::return_t
 print_cast(const T& v) { return detail::print_convolute<T>::op(v); }
 
+class escape;
+
+epicsShareFunc
+std::ostream& operator<<(std::ostream& strm, const escape& Q);
+
+//! Helper to print a string with escaping
+//! @code strm<<'"'<<escape(astring)<<'"' @endcode
+struct epicsShareClass escape
+{
+    enum style_t {
+        C,   // default
+        CSV, // a la RFC4180
+    };
+private:
+    const std::string& orig;
+    style_t S;
+public:
+    escape(const std::string& orig) :orig(orig), S(C) {}
+    ~escape();
+    //! Change escaping style
+    inline escape& style(style_t s) { S = s; return *this; }
+    //! print to string and return.  (alloc and copy)
+    std::string str() const;
+
+    friend
+    epicsShareFunc
+    std::ostream& operator<<(std::ostream& strm, const escape& Q);
+};
+
 }} // end namespace
 
 #endif // PVTYPECAST_H

@@ -5,6 +5,7 @@
  */
 
 #include <stdio.h>
+#include <ctype.h>
 #if defined(__linux__) || defined(__APPLE__)
 #include <unistd.h>
 #define HAVE_ISATTY
@@ -13,6 +14,7 @@
 #include <deque>
 
 #include <epicsTime.h>
+#include <epicsString.h>
 
 #define epicsExportSharedSymbols
 #include <pv/bitSet.h>
@@ -432,6 +434,59 @@ std::ostream& operator<<(std::ostream& strm, const PVStructure::Formatter& forma
         format2.xmode = useEscapes(strm) ? PVStructure::Formatter::ANSI : PVStructure::Formatter::Plain;
 
     printRaw(strm, format2, format.xtop);
+
+    return strm;
+}
+
+static char hexdigit(char c) {
+    c &= 0xf;
+    if(c<9)
+        return '0'+c;
+    else
+        return 'A'+c-10;
+}
+
+escape::~escape() {}
+
+std::string escape::str() const
+{
+    std::ostringstream strm;
+    strm<<(*this);
+    return strm.str();
+}
+
+epicsShareFunc
+std::ostream& operator<<(std::ostream& strm, const escape& Q)
+{
+    for(size_t pos = 0, len = Q.orig.size(); pos < len; pos++) {
+        const char C = Q.orig[pos];
+        char quote = '\\', next;
+        // compare me with epicsStrnEscapedFromRaw()
+        switch(C) {
+        case '\a': next = 'a'; break;
+        case '\b': next = 'b'; break;
+        case '\f': next = 'f'; break;
+        case '\n': next = 'n'; break;
+        case '\r': next = 'r'; break;
+        case '\t': next = 't'; break;
+        case '\v': next = 'v'; break;
+        case '\\': next = '\\'; break;
+        case '\'': next = '\''; break;
+        case '\"': next = '\"'; if(Q.S==escape::CSV) quote = '"'; break;
+        default:
+            if(!isprint(C)) {
+                // print three charator escape
+                strm<<"\\x"<<hexdigit(C>>4)<<hexdigit(C);
+            } else {
+                // literal
+                strm.put(C);
+            }
+            continue;
+        }
+        // print two charactor escape
+        strm.put(quote);
+        strm.put(next);
+    }
 
     return strm;
 }
