@@ -95,17 +95,24 @@ testDiff(const std::string& expect, const std::string& actual, const std::string
 
             size_t Lp, Rp;
             for(size_t n=0, N=sizeof(search)/sizeof(search[0]); n<N; n++) {
-                Lp = std::min(L+search[n].L, lhs.size()-1u);
-                Rp = std::min(R+search[n].R, rhs.size()-1u);
+                Lp = L+search[n].L;
+                Rp = R+search[n].R;
 
-                if(lhs[Lp]==rhs[Rp])
+                if(Lp<lhs.size() && Rp<rhs.size() && lhs[Lp]==rhs[Rp])
                     break;
+            }
+            if(Lp>=lhs.size() || Rp>=rhs.size()) {
+                // reached end without match
+                Lp = lhs.size();
+                Rp = rhs.size();
             }
 
             for(size_t l=L; l<Lp; l++)
                 ret<<"- "<<pvd::escape(lhs[l])<<'\n';
             for(size_t r=R; r<Rp; r++)
                 ret<<"+ "<<pvd::escape(rhs[r])<<'\n';
+            assert(Lp>L); // must make progress
+            assert(Rp>R);
             L = Lp;
             R = Rp;
             // loop around and print matching line
@@ -166,6 +173,54 @@ void showNTScalarString()
     testDiff("<undefined> bar MINOR DEVICE FOO \n", print(input->stream()));
 }
 
+static const pvd::StructureConstPtr table(pvd::getFieldCreate()->createFieldBuilder()
+                                                  ->setId("epics:nt/NTTable:1.0")
+                                                  ->addArray("labels", pvd::pvString)
+                                                  ->addNestedStructure("value")
+                                                    ->addArray("colA", pvd::pvInt)
+                                                    ->addArray("colB", pvd::pvString)
+                                                  ->endNested()
+                                                  ->add("alarm", pvd::getStandardField()->alarm())
+                                                  ->add("timeStamp", pvd::getStandardField()->timeStamp())
+                                                  ->createStructure());
+void showNTTable()
+{
+    testDiag("%s", CURRENT_FUNCTION);
+    pvd::PVStructurePtr input(pvd::getPVDataCreate()->createPVStructure(table));
+
+    testDiff("<undefined>   \n"
+             "colA, colB\n"
+             , print(input->stream()),
+             "empty table");
+
+
+    pvd::PVStringArray::svector sarr;
+    sarr.push_back("labelA");
+    sarr.push_back("label B");
+    input->getSubFieldT<pvd::PVStringArray>("labels")->replace(pvd::freeze(sarr));
+
+    pvd::PVIntArray::svector iarr;
+    iarr.push_back(1);
+    iarr.push_back(2);
+    iarr.push_back(3);
+    iarr.push_back(42); // will not be shown
+    input->getSubFieldT<pvd::PVIntArray>("value.colA")->replace(pvd::freeze(iarr));
+
+    sarr.push_back("one\x7f");
+    sarr.push_back("two words");
+    sarr.push_back("A '\"'");
+    input->getSubFieldT<pvd::PVStringArray>("value.colB")->replace(pvd::freeze(sarr));
+
+
+    testDiff("<undefined>   \n"
+             "labelA,   \"label B\"\n"
+             "     1,     one\\x7F\n"
+             "     2, \"two words\"\n"
+             "     3,  \"A \\'\"\"\\'\"\n"
+             , print(input->stream()),
+             "with data");
+}
+
 static const pvd::StructureConstPtr everything(pvd::getFieldCreate()->createFieldBuilder()
                                                ->setId("omg")
                                                ->add("scalar", pvd::pvString)
@@ -194,11 +249,18 @@ void testRaw()
     testDiag("%s", CURRENT_FUNCTION);
     pvd::PVStructurePtr input(pvd::getPVDataCreate()->createPVStructure(everything));
 
+    {
+        pvd::PVStringArray::svector temp;
+        temp.push_back("hello");
+        temp.push_back("world\x7f");
+        input->getSubFieldT<pvd::PVStringArray>("scalarArray")->replace(pvd::freeze(temp));
+    }
+
     testDiff("omg \n"
-             "    string scalar \n"
-             "    string[] scalarArray []\n"
+             "    string scalar \n"          // bit 1
+             "    string[] scalarArray [\"hello\", \"world\\x7F\"]\n"
              "    structure below\n"
-             "        int A 0\n"
+             "        int A 0\n"             // bit 4
              "        union select\n"
              "            (none)\n"
              "        union[] arrselect\n"
@@ -216,7 +278,7 @@ void testRaw()
 
     testDiff("omg \n"
              "\033[1m    string scalar \n"
-             "\033[0m\033[1m    string[] scalarArray []\n"
+             "\033[0m\033[1m    string[] scalarArray [\"hello\", \"world\\x7F\"]\n"
              "\033[0m    structure below\n"
              "\033[1m        int A 0\n"
              "\033[0m        union select\n"
@@ -250,9 +312,10 @@ void testEscape()
 
 MAIN(testprinter)
 {
-    testPlan(14);
+    testPlan(16);
     showNTScalarNumeric();
     showNTScalarString();
+    showNTTable();
     testRaw();
     testEscape();
     return testDone();

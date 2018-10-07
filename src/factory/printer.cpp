@@ -170,6 +170,21 @@ bool printEnumT(std::ostream& strm, const PVStructure& top)
     return true;
 }
 
+void csvEscape(std::string& S)
+{
+    // concise, not particularly efficient...
+    std::string temp(escape(S).style(escape::CSV).str());
+    if(S.find_first_of(" ,\\")!=S.npos) {// only quote if necessary (stupid Excel)
+        std::string temp2;
+        temp2.reserve(temp.size()+2);
+        temp2.push_back('\"');
+        temp2 += temp;
+        temp2.push_back('\"');
+        temp2.swap(temp);
+    }
+    S = temp;
+}
+
 bool printTable(std::ostream& strm, const PVStructure& top)
 {
     PVStructure::const_shared_pointer cf(top.getSubField<PVStructure>("value"));
@@ -184,6 +199,7 @@ bool printTable(std::ostream& strm, const PVStructure& top)
         }
     }
 
+    // maybe output a line with meta-data
     {
         bool havets = !!top.getSubField("timeStamp");
         bool haveal = !!top.getSubField("alarm");
@@ -210,7 +226,7 @@ bool printTable(std::ostream& strm, const PVStructure& top)
     }
 
     const PVFieldPtrArray& columns = cf->getPVFields();
-    std::vector<shared_vector<const std::string> > coldat(columns.size());
+    std::vector<shared_vector<std::string> > coldat(columns.size());
 
     std::vector<size_t> widths(columns.size());
     labels.reserve(columns.size());
@@ -220,34 +236,34 @@ bool printTable(std::ostream& strm, const PVStructure& top)
     for(size_t i=0, N=columns.size(); i<N; i++) {
         if(i>=labels.size()) {
             labels.push_back(cf->getStructure()->getFieldName(i));
+        } else {
+            csvEscape(labels[i]);
         }
         widths[i] = labels[i].size();
 
-        static_cast<const PVScalarArray*>(columns[i].get())->getAs(coldat[i]);
+        {
+            shared_vector<const std::string> ro;
+            static_cast<const PVScalarArray*>(columns[i].get())->getAs(ro);
+            coldat[i] = thaw(ro);
+        }
 
+        // truncate if some columns are longer than others
         nrows = std::min(nrows, coldat[i].size());
 
         for(size_t j=0, M=coldat[i].size(); j<M; j++) {
+            csvEscape(coldat[i][j]);
             widths[i] = std::max(widths[i], coldat[i][j].size());
         }
     }
 
-    size_t sep = 0;
-
+    // output header line
     strm<<format::indent();
     for(size_t c=0, N=coldat.size(); c<N; c++) {
-        sep += widths[c];
         strm<<std::setw(widths[c])<<std::right<<labels[c];
         if(c+1!=N) {
-            strm<<" | ";
-            sep += 3;
+            strm<<", ";
         }
     }
-    strm<<'\n';
-
-    strm<<format::indent();
-    for(size_t c=0; c<sep; c++)
-        strm.put('=');
     strm<<'\n';
 
     for(size_t r=0; r<nrows; r++) {
@@ -255,7 +271,7 @@ bool printTable(std::ostream& strm, const PVStructure& top)
         for(size_t c=0, N=coldat.size(); c<N; c++) {
             strm<<std::setw(widths[c])<<std::right<<coldat[c][r];
             if(c+1!=N)
-                strm<<" | ";
+                strm<<", ";
         }
         strm<<'\n';
     }
