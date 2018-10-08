@@ -357,7 +357,7 @@ void testEscape()
 
 MAIN(testprinter)
 {
-    testPlan(16);
+    testPlan(20);
     showNTScalarNumeric();
     showNTScalarString();
     showNTEnum();
