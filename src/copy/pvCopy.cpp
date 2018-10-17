@@ -13,6 +13,9 @@
 #include <sstream>
 
 #include <epicsThread.h>
+#include <compilerDependencies.h>
+#undef EPICS_DEPRECATED
+#define EPICS_DEPRECATED
 
 #define epicsExportSharedSymbols
 

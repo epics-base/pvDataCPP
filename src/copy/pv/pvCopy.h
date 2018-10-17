@@ -13,6 +13,7 @@
 #include <stdexcept>
 #include <memory>
 
+#include <compilerDependencies.h>
 #include <shareLib.h>
 
 #include <pv/pvData.h>
@@ -58,7 +59,7 @@ typedef std::tr1::shared_ptr<CopyStructureNode> CopyStructureNodePtr;
  * Class that manages one or more PVStructures that holds an arbitrary subset of the fields
  * in another PVStructure called master.
  */
-class epicsShareClass PVCopy : 
+class epicsShareClass EPICS_DEPRECATED PVCopy :
     public std::tr1::enable_shared_from_this<PVCopy>
 {
 public:

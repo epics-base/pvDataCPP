@@ -20,6 +20,10 @@
 #include <epicsUnitTest.h>
 #include <testMain.h>
 
+#include <compilerDependencies.h>
+#undef EPICS_DEPRECATED
+#define EPICS_DEPRECATED
+
 #include <pv/standardField.h>
 #include <pv/standardPVField.h>
 #include <pv/convert.h>
