@@ -764,11 +764,11 @@ WARN_LOGFILE           =
 # Note: If this tag is empty the current directory is searched.
 
 INPUT                  = ../src/pv \
-                         ./mainpage.h \
+                         ./mainpage.dox \
                          ../src/copy/pv \
                          ../src/misc/pv \
                          ../src/json/pv \
-                         ./release_notes.h
+                         ./release_notes.dox
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses
