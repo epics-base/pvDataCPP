@@ -28,9 +28,10 @@ TimerCallback::TimerCallback()
 }
 
 Timer::Timer(string threadName,ThreadPriority priority)
-: waitForWork(false),
-  alive(true),
-  thread(threadName,priority,this)
+    :waitForWork(false)
+    ,waiting(false)
+    ,alive(true)
+    ,thread(threadName,priority,this)
 {}
 
 struct TimerCallback::IncreasingTime {
@@ -90,6 +91,7 @@ void Timer::run()
 
         if(queue.empty()) {
             // no jobs, just go to sleep
+            waiting = true;
             epicsGuardRelease<epicsMutex> U(G);
 
             waitForWork.wait();
@@ -117,12 +119,14 @@ void Timer::run()
             // don't update 'now' until all expired jobs run
 
         } else {
+            waiting = true;
             // wait for first un-expired
             epicsGuardRelease<epicsMutex> U(G);
 
             waitForWork.wait(waitfor);
             now = epicsTime::getCurrent();
         }
+        waiting = false;
     }
 }
 
@@ -164,7 +168,7 @@ void Timer::schedulePeriodic(
 {
     epicsTime now(epicsTime::getCurrent());
 
-    bool wasempty;
+    bool wakeup;
     {
         Lock xx(mutex);
         if(timerCallback->onList) {
@@ -180,10 +184,10 @@ void Timer::schedulePeriodic(
         timerCallback->timeToRun = now + delay;
         timerCallback->period = period;
 
-        wasempty = queue.empty();
+        wakeup = waiting && (queue.empty() || queue.front()->timeToRun > timerCallback->timeToRun);
         addElement(timerCallback);
     }
-    if(wasempty) waitForWork.signal();
+    if(wakeup) waitForWork.signal();
 }
 
 void Timer::dump(std::ostream& o) const

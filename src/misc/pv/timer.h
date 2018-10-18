@@ -126,6 +126,7 @@ private:
     mutable Mutex mutex;
     queue_t queue;
     Event waitForWork;
+    bool waiting;
     bool alive;
     Thread thread;
 };
