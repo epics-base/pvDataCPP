@@ -50,6 +50,8 @@ namespace epics { namespace pvData {
      * synchronization.
      *
      * Based on Java implementation.
+     *
+     * @since 7.0.0 Many methods return BitSet& to facilite method chaining.
      */
     class epicsShareClass BitSet : public Serializable {
     public:

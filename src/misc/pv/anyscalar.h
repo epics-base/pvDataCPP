@@ -117,6 +117,7 @@ public:
 
     //! Construct from un-typed pointer.
     //! Caller is responsible to ensure that buf actually points to the provided type
+    //! @version Added after 7.0.0
     AnyScalar(ScalarType type, const void *buf);
 
     AnyScalar(const AnyScalar& o);
@@ -147,7 +148,7 @@ public:
 #endif
 
     //! Reset internal state.
-    //! Added after 7.0.0
+    //! @version Added after 7.0.0
     //! @post empty()==true
     void clear();
 
@@ -174,6 +175,7 @@ public:
 
     //! Provide read-only access to underlying buffer.
     //! For a string this is std::string::c_str().
+    //! @version Added after 7.0.0
     const void* bufferUnsafe() const;
 
     /** Return typed reference to wrapped value.  Non-const reference allows value modification

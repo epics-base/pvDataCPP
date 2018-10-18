@@ -7,6 +7,7 @@ Release 7.1.0 (UNRELEASED)
 
 - Deprecations
  - pv/localStaticLock.h
+ - pv/pvCopy.h (see epics::pvData::PVRequestMapper)
 - Removals
  - Remove previously deprecated executor.h, queue.h and timerFunction.h
  - Remove *HashFunction functors to "hash" Field sub-classes which were never fully implemented.
@@ -14,14 +15,19 @@ Release 7.1.0 (UNRELEASED)
  - Make thread safe getFieldCreate() and getPVDataCreate()
  - Workaround for MSVC pickyness that iterators be non-NULL, even when not de-referenced.
  - Fix alignment fault during (de)serialization on RTEMS/vxWorks.
- - Fix shared_vector::swap() for void specialization.
- - Changes in several Field sub-classes to return const ref. instead of a copy.
+ - Fix epics::pvData::shared_vector::swap() for void specialization.
+ - Changes in several epics::pvData::Field sub-classes to return const ref. instead of a copy.
 - Additions
- - shared_vector add c++11 move and construct for initializer list.
- - Add AnyScalar::clear()
- - Add ctor AnyScalar(ScalarType, const void*) to allow construction from an untyped buffer.
- - Add Timer::close()
- - Allow castUnsafe() from const char* without first allocating a std::string.
+ - epics::pvData::shared_vector add c++11 move and construct for initializer list.
+ - Add epics::pvData::AnyScalar::clear()
+ - Add ctor epics::pvData::AnyScalar(ScalarType, const void*) to allow construction from an untyped buffer.
+ - Add epics::pvData::Timer::close()
+ - Allow epics::pvData::castUnsafe() from const char* without first allocating a std::string.
+ - De-duplication of epics::pvData::Field instances is performed using a global hash table.
+   Identical definitions will share a single instance.  Allows O(0) comparision.
+ - Add epics::pvData::PVRequestMapper to facilitate (partial) copying between PVStructure instances
+   modified by a pvRequest.
+ - Add shorthand notations epics::pvData::FieldBuilder::begin() and epics::pvData::Field::build()
 
 Release 7.0.0 (Dec 2017)
 ========================
@@ -42,6 +48,9 @@ Release 7.0.0 (Dec 2017)
   - Can also be constructed using an existing PVStructure to allow "editing".
  - Add debugPtr.h wrapper with reference tracking to assist in troubleshooting shared_ptr related ref. loops.
  - Add @ref pvjson utilities
+ - Add reftrack @ref pvd_reftrack
+ - Add header typemap.h to facilitate boilerplate switch() over ScalarType
+ - Add epics::auto_ptr typedef in help writing code supporting both c++98 and c++11 w/o copious deprecation warnings.
 
 
 Release 6.0.1

@@ -349,6 +349,7 @@ public:
     virtual std::ostream& dump(std::ostream& o) const = 0;
 
    //! Allocate a new instance
+   //! @version Added after 7.0.0
     std::tr1::shared_ptr<PVField> build() const;
 
 protected:
@@ -399,6 +400,7 @@ public:
     virtual void deserialize(ByteBuffer *buffer, DeserializableControl *control) OVERRIDE FINAL;
 
     //! Allocate a new instance
+    //! @version Added after 7.0.0
     std::tr1::shared_ptr<PVScalar> build() const;
     
 protected:
@@ -507,6 +509,7 @@ public:
     virtual void deserialize(ByteBuffer *buffer, DeserializableControl *control) OVERRIDE FINAL;
 
     //! Allocate a new instance
+    //! @version Added after 7.0.0
      std::tr1::shared_ptr<PVScalarArray> build() const;
     
     virtual ~ScalarArray();
@@ -611,6 +614,7 @@ public:
     virtual void deserialize(ByteBuffer *buffer, DeserializableControl *control) OVERRIDE FINAL;
 
     //! Allocate a new instance
+    //! @version Added after 7.0.0
      std::tr1::shared_ptr<PVValueArray<std::tr1::shared_ptr<PVStructure> > > build() const;
 
 protected:
@@ -655,6 +659,7 @@ public:
     virtual void deserialize(ByteBuffer *buffer, DeserializableControl *control) OVERRIDE FINAL;
 
     //! Allocate a new instance
+    //! @version Added after 7.0.0
      std::tr1::shared_ptr<PVValueArray<std::tr1::shared_ptr<PVUnion> > > build() const;
 
 protected:
@@ -766,6 +771,7 @@ public:
     virtual void deserialize(ByteBuffer *buffer, DeserializableControl *control) OVERRIDE FINAL;
 
     //! Allocate a new instance
+    //! @version Added after 7.0.0
     std::tr1::shared_ptr<PVStructure> build() const;
 
 protected:
@@ -904,6 +910,7 @@ public:
     virtual void deserialize(ByteBuffer *buffer, DeserializableControl *control) OVERRIDE FINAL;
 
     //! Allocate a new instance
+    //! @version Added after 7.0.0
     std::tr1::shared_ptr<PVUnion> build() const;
     
 protected:
@@ -939,6 +946,7 @@ class epicsShareClass FieldBuilder :
 {
 public:
     //! Create a new instance of in-line @c Field builder.
+    //! @version Added after 7.0.0
     static FieldBuilderPtr begin();
     //! Create a new instance of in-line @c Field builder pre-initialized with and existing Structure
     static FieldBuilderPtr begin(StructureConstPtr S);

@@ -1659,9 +1659,3 @@ namespace std{
 }
 
 #endif  /* PVDATA_H */
-
-/** @page Overview Documentation
- *
- * <a href = "pvDataCPP.html">pvData.html</a>
- *
- */

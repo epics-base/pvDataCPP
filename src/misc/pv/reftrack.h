@@ -5,6 +5,38 @@
 #ifndef REFTRACK_H
 #define REFTRACK_H
 
+/** @page pvd_reftrack RefTrack
+ *
+ * reftrack.h is a utility for listing, finding, and reading global atomic counters.
+ * By convention used to expose object instance counters as a way of detecting (slow)
+ * reference/resource leaks before they cause problems.
+ *
+ * cf. the IOC shell commands "refshow", "refsave", and "refdiff".
+ *
+ * Example usage:
+ *
+ * @code
+ *   // my header.h
+ *   struct MyClass {
+ *      MyClass();
+ *      ~MyClass();
+ *      static size_t num_instances;
+ *      ...
+ *   };
+ *   ...
+ *   // my src.cpp
+ *   size_t MyClass::num_instances;
+ *   MyClass::MyClass() {
+ *      REFTRACE_INCREMENT(num_instances);
+ *   }
+ *   MyClass::~MyClass() {
+ *      REFTRACE_DECREMENT(num_instances);
+ *   }
+ *   // in some IOC registrar or global ctor
+ *   registerRefCounter("MyClass", &MyClass::num_instances);
+ * @endcode
+ */
+
 #ifdef __cplusplus
 
 #include <map>

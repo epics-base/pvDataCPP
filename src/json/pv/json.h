@@ -52,6 +52,7 @@ struct epicsShareClass JSONPrintOptions
 /** Print PVStructure as JSON
  *
  * 'mask' selects those fields which will be printed.
+ * @version Overload added after 7.0.0
  */
 epicsShareFunc
 void printJSON(std::ostream& strm,
@@ -60,6 +61,7 @@ void printJSON(std::ostream& strm,
                const JSONPrintOptions& opts = JSONPrintOptions());
 
 /** Print PVField as JSON
+ * @version Overload added after 7.0.0
  */
 epicsShareFunc
 void printJSON(std::ostream& strm,
@@ -97,6 +99,7 @@ PVStructure::shared_pointer parseJSON(std::istream& strm);
  * @param dest Store in fields of this structure
  * @param assigned Which fields of _dest_ were assigned. (Optional)
  * @throws std::runtime_error on failure.  dest and assigned may be modified.
+ * @version Overload added after 7.0.0
  */
 epicsShareFunc
 void parseJSON(std::istream& strm,

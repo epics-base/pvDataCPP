@@ -23,33 +23,32 @@ See pv/pvData.h header.
 Define a structure type and create a container with default values.
 
 @code
-epics::pvData::StructureConstPtr stype; // aka std::tr1::shared_ptr<const epics::pvData::Structure>
-stype = epics::pvData::getFieldCreate()->createFieldBuilder()
-                        ->add("fld1", epics::pvData::pvInt)
+namespace pvd = epics::pvData;
+pvd::StructureConstPtr stype(pvd::FieldBuilder::begin()
+                        ->add("fld1", pvd::pvInt)
                         ->addNestedStructure("sub")
-                            ->add("fld2", epics::pvData::pvString)
+                            ->add("fld2", pvd::pvString)
                         ->endNested()
-                        ->createStructure();
+                        ->createStructure());
 
-epics::pvData::PVStructuretPtr value; // aka std::tr1::shared_ptr<epics::pvData::PVStructure>
-value = epics::pvData::getPVDataCreate()->createPVStructure(stype);
+pvd::PVStructuretPtr value(stype->build());
 
-value->getSubField<epics::pvData::PVInt>("fld1")->put(4); // store integer 4
-value->getSubField<epics::pvData::PVScalar>("sub.fld2")->putFrom(4.2); // convert and store string "4.2"
+value->getSubFieldT<pvd::PVInt>("fld1")->put(4); // store integer 4.  would throw if not pvInt
+value->getSubFieldT<pvd::PVScalar>("sub.fld2")->putFrom(4.2); // convert and store string "4.2"
 @endcode
 
 is equivalent to the following pseudo-code.
 
 @code
 struct stype {
-    epics::pvData::int32 fld1;
+    pvd::int32 fld1;
     struct {
         std::string fld2;
     } sub;
 };
 stype value;
 value.fld1 = 4;
-value.fld2 = epics::pvData::castUnsafe<std::string>(4.2);
+value.fld2 = pvd::castUnsafe<std::string>(4.2);
 @endcode
 
 */
