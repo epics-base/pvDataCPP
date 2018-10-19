@@ -184,8 +184,8 @@ void Timer::schedulePeriodic(
         timerCallback->timeToRun = now + delay;
         timerCallback->period = period;
 
-        wakeup = waiting && (queue.empty() || queue.front()->timeToRun > timerCallback->timeToRun);
         addElement(timerCallback);
+        wakeup = waiting && queue.front()==timerCallback;
     }
     if(wakeup) waitForWork.signal();
 }
