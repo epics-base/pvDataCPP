@@ -140,13 +140,13 @@ void showNTScalarNumeric()
     pvd::PVStructurePtr input(pvd::getPVDataCreate()->createPVStructure(scalarNumeric));
     input->getSubFieldT<pvd::PVScalar>("value")->putFrom(-42);
 
-    testDiff("<undefined> -42 \n", print(input->stream()));
+    testDiff("<undefined>              -42 \n", print(input->stream()));
 
     input->getSubFieldT<pvd::PVScalar>("alarm.severity")->putFrom(1);
     input->getSubFieldT<pvd::PVScalar>("alarm.status")->putFrom(1);
     input->getSubFieldT<pvd::PVString>("alarm.message")->put("FOO");
 
-    testDiff("<undefined> -42 MINOR DEVICE FOO \n", print(input->stream()));
+    testDiff("<undefined>              -42 MINOR DEVICE FOO \n", print(input->stream()));
 }
 
 static const pvd::StructureConstPtr scalarString(pvd::getFieldCreate()->createFieldBuilder()
@@ -160,17 +160,17 @@ void showNTScalarString()
 {
     testDiag("%s", CURRENT_FUNCTION);
     pvd::PVStructurePtr input(pvd::getPVDataCreate()->createPVStructure(scalarString));
-    testDiff("<undefined>  \n", print(input->stream()));
+    testDiff("<undefined>               \n", print(input->stream()));
 
     input->getSubFieldT<pvd::PVString>("value")->put("bar");
 
-    testDiff("<undefined> bar \n", print(input->stream()));
+    testDiff("<undefined>              bar \n", print(input->stream()));
 
     input->getSubFieldT<pvd::PVScalar>("alarm.severity")->putFrom(1);
     input->getSubFieldT<pvd::PVScalar>("alarm.status")->putFrom(1);
     input->getSubFieldT<pvd::PVString>("alarm.message")->put("FOO");
 
-    testDiff("<undefined> bar MINOR DEVICE FOO \n", print(input->stream()));
+    testDiff("<undefined>              bar MINOR DEVICE FOO \n", print(input->stream()));
 }
 
 static const pvd::StructureConstPtr ntenum(pvd::getFieldCreate()->createFieldBuilder()
@@ -188,7 +188,7 @@ void showNTEnum()
 {
     testDiag("%s", CURRENT_FUNCTION);
     pvd::PVStructurePtr input(pvd::getPVDataCreate()->createPVStructure(ntenum));
-    testDiff("<undefined> (0) <undefined>\n", print(input->stream()), "empty");
+    testDiff("<undefined>              (0) <undefined>\n", print(input->stream()), "empty");
 
     pvd::PVStringArray::svector sarr;
     sarr.push_back("one");
@@ -197,11 +197,11 @@ void showNTEnum()
 
     input->getSubFieldT<pvd::PVInt>("value.index")->put(0);
 
-    testDiff("<undefined> (0) one\n", print(input->stream()), "one");
+    testDiff("<undefined>              (0) one\n", print(input->stream()), "one");
 
     input->getSubFieldT<pvd::PVInt>("value.index")->put(1);
 
-    testDiff("<undefined> (1) a two\n", print(input->stream()), "two");
+    testDiff("<undefined>              (1) a two\n", print(input->stream()), "two");
 
     testDiff("epics:nt/NTEnum:1.0 \n"
              "    enum_t value (1) a two\n"
@@ -211,7 +211,7 @@ void showNTEnum()
              "        int severity 0\n"
              "        int status 0\n"
              "        string message \n"
-             "    time_t timeStamp <undefined> \n"
+             "    time_t timeStamp <undefined>              \n"
              "        long secondsPastEpoch 0\n"
              "        int nanoseconds 0\n"
              "        int userTag 0\n",
@@ -233,7 +233,7 @@ void showNTTable()
     testDiag("%s", CURRENT_FUNCTION);
     pvd::PVStructurePtr input(pvd::getPVDataCreate()->createPVStructure(table));
 
-    testDiff("<undefined>   \n"
+    testDiff("<undefined>                \n"
              "colA colB\n"
              , print(input->stream()),
              "empty table");
@@ -257,7 +257,7 @@ void showNTTable()
     input->getSubFieldT<pvd::PVStringArray>("value.colB")->replace(pvd::freeze(sarr));
 
 
-    testDiff("<undefined>   \n"
+    testDiff("<undefined>                \n"
              "labelA   \"label B\"\n"
              "     1     one\\x7F\n"
              "     2 \"two words\"\n"

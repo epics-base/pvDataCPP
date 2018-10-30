@@ -132,8 +132,8 @@ void printTimeTx(std::ostream& strm, const PVStructure& tsubop)
     else
         epicsTS.secPastEpoch = 0;
 
-    epicsTimeToStrftime(timeText, sizeof(timeText), "%Y-%m-%dT%H:%M:%S.%03f", &epicsTS);
-    strm << timeText << ' ';
+    epicsTimeToStrftime(timeText, sizeof(timeText), "%Y-%m-%d %H:%M:%S.%03f", &epicsTS);
+    strm <<std::setw(24) <<std::left <<timeText <<' ';
     if (tagf) {
         int64 tagv = tagf->getAs<int64>();
         if(tagv)
