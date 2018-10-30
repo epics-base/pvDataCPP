@@ -234,7 +234,7 @@ void showNTTable()
     pvd::PVStructurePtr input(pvd::getPVDataCreate()->createPVStructure(table));
 
     testDiff("<undefined>   \n"
-             "colA, colB\n"
+             "colA colB\n"
              , print(input->stream()),
              "empty table");
 
@@ -258,10 +258,10 @@ void showNTTable()
 
 
     testDiff("<undefined>   \n"
-             "labelA,   \"label B\"\n"
-             "     1,     one\\x7F\n"
-             "     2, \"two words\"\n"
-             "     3,  \"A \\'\"\"\\'\"\n"
+             "labelA   \"label B\"\n"
+             "     1     one\\x7F\n"
+             "     2 \"two words\"\n"
+             "     3  \"A \\'\"\"\\'\"\n"
              , print(input->stream()),
              "with data");
 }

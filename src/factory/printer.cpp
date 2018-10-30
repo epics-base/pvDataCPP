@@ -269,7 +269,7 @@ bool printTable(std::ostream& strm, const PVStructure& top)
     for(size_t c=0, N=coldat.size(); c<N; c++) {
         strm<<std::setw(widths[c])<<std::right<<labels[c];
         if(c+1!=N) {
-            strm<<", ";
+            strm<<' ';
         }
     }
     strm<<'\n';
@@ -279,7 +279,7 @@ bool printTable(std::ostream& strm, const PVStructure& top)
         for(size_t c=0, N=coldat.size(); c<N; c++) {
             strm<<std::setw(widths[c])<<std::right<<coldat[c][r];
             if(c+1!=N)
-                strm<<", ";
+                strm<<' ';
         }
         strm<<'\n';
     }
