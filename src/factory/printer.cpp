@@ -431,7 +431,7 @@ std::ostream& operator<<(std::ostream& strm, const PVStructure::Formatter& forma
                 case scalar:
                     strm<<format::indent();
                     printTimeT(strm, format.xtop);
-                    strm<<*static_cast<const PVScalar*>(value.get())<<' ';
+                    strm<<std::setprecision(6)<<*static_cast<const PVScalar*>(value.get())<<' ';
                     printAlarmT(strm, format.xtop);
                     strm<<'\n';
                     return strm;
@@ -440,7 +440,7 @@ std::ostream& operator<<(std::ostream& strm, const PVStructure::Formatter& forma
                     strm<<format::indent();
                     printTimeT(strm, format.xtop);
                     printAlarmT(strm, format.xtop);
-                    strm<<*static_cast<const PVScalarArray*>(value.get())<<'\n';
+                    strm<<std::setprecision(6)<<*static_cast<const PVScalarArray*>(value.get())<<'\n';
                     return strm;
 
                 case structure:
