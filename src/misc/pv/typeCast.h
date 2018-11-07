@@ -208,7 +208,7 @@ static FORCE_INLINE
 typename detail::print_convolute<T>::return_t
 print_cast(const T& v) { return detail::print_convolute<T>::op(v); }
 
-class escape;
+struct escape;
 
 epicsShareFunc
 std::ostream& operator<<(std::ostream& strm, const escape& Q);
