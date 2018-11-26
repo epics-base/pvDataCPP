@@ -23,12 +23,14 @@
 
 #include <shareLib.h>
 
-#if !defined(PVD_INTERNAL) && __GNUC__ > 2
+#if defined(PVD_INTERNAL)
+#  define PVD_DEPRECATED(msg)
+#elif __GNUC__ > 4 || __GNUC__ == 4 && __GNUC_MINOR__ >= 5
 #  define PVD_DEPRECATED(msg) __attribute__((deprecated(msg)))
 #else
-#  define PVD_DEPRECATED(msg)
+#  define PVD_DEPRECATED(msg) EPICS_DEPRECATED
 #endif
-#define PVD_DEPRECATED_52 PVD_DEPRECATED("https://github.com/epics-base/pvDataCPP/issues/52")
+#define PVD_DEPRECATED_52 PVD_DEPRECATED("See https://github.com/epics-base/pvDataCPP/issues/52")
 
 /* C++11 keywords
  @code
