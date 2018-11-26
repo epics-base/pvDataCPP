@@ -6,6 +6,8 @@ Release 7.1.0 (UNRELEASED)
 ==========================
 
 - Deprecations
+ - BoundedString, BoundedScalarArray, and FixedScalarArray will be removed unless they are fixed.
+   See https://github.com/epics-base/pvDataCPP/issues/52 for discussion.
  - pv/localStaticLock.h
  - pv/pvCopy.h (see epics::pvData::PVRequestMapper)
 - Removals

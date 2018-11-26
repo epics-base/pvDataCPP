@@ -23,6 +23,13 @@
 
 #include <shareLib.h>
 
+#if !defined(PVD_INTERNAL) && __GNUC__ > 2
+#  define PVD_DEPRECATED(msg) __attribute__((deprecated(msg)))
+#else
+#  define PVD_DEPRECATED(msg)
+#endif
+#define PVD_DEPRECATED_52 PVD_DEPRECATED("https://github.com/epics-base/pvDataCPP/issues/52")
+
 /* C++11 keywords
  @code
  struct Base {
@@ -972,7 +979,7 @@ public:
      * @param maxLength a string maximum length.
      * @return this instance of a @c FieldBuilder.
      */
-    FieldBuilderPtr addBoundedString(std::string const & name, std::size_t maxLength);
+    FieldBuilderPtr addBoundedString(std::string const & name, std::size_t maxLength) PVD_DEPRECATED_52;
 
     /**
      * Add a @c Field (e.g. @c Structure, @c Union).
@@ -997,7 +1004,7 @@ public:
      * @param size Array fixed size.
      * @return this instance of a @c FieldBuilder.
      */
-    FieldBuilderPtr addFixedArray(std::string const & name, ScalarType scalarType, std::size_t size);
+    FieldBuilderPtr addFixedArray(std::string const & name, ScalarType scalarType, std::size_t size) PVD_DEPRECATED_52;
 
     /**
      * Add bounded-size array of @c Scalar elements.
@@ -1006,7 +1013,7 @@ public:
      * @param bound Array maximum capacity (size).
      * @return this instance of a @c FieldBuilder.
      */
-    FieldBuilderPtr addBoundedArray(std::string const & name, ScalarType scalarType, std::size_t bound);
+    FieldBuilderPtr addBoundedArray(std::string const & name, ScalarType scalarType, std::size_t bound) PVD_DEPRECATED_52;
 
     /**
      * Add array of @c Field elements.
@@ -1146,7 +1153,7 @@ public:
      * @return a @c BoundedString interface for the newly created object.
      * @throws IllegalArgumentException if maxLength == 0.
      */
-    BoundedStringConstPtr createBoundedString(std::size_t maxLength) const;
+    BoundedStringConstPtr createBoundedString(std::size_t maxLength) const PVD_DEPRECATED_52;
     /**
      * Create an @c Array field, variable size array.
      * @param elementType The @c ScalarType for array elements
@@ -1159,14 +1166,14 @@ public:
      * @param size Fixed array size.
      * @return An @c Array Interface for the newly created object.
      */
-    ScalarArrayConstPtr createFixedScalarArray(ScalarType elementType, std::size_t size) const;
+    ScalarArrayConstPtr createFixedScalarArray(ScalarType elementType, std::size_t size) const PVD_DEPRECATED_52;
     /**
      * Create an @c Array field, bounded size array.
      * @param elementType The @c ScalarType for array elements
      * @param bound Array maximum capacity.
      * @return An @c Array Interface for the newly created object.
      */
-     ScalarArrayConstPtr createBoundedScalarArray(ScalarType elementType, std::size_t bound) const;
+     ScalarArrayConstPtr createBoundedScalarArray(ScalarType elementType, std::size_t bound) const PVD_DEPRECATED_52;
      /**
       * Create an @c Array field that is has element type @c Structure
       * @param structure The @c Structure for each array element.
