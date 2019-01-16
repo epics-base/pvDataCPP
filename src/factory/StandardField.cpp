@@ -22,32 +22,85 @@ using std::string;
 
 namespace epics { namespace pvData { 
 
+static
+StructureConstPtr buildValueAlarm(ScalarType vtype)
+{
+    return FieldBuilder::begin()
+            ->setId("valueAlarm_t")
+            ->add("active", pvBoolean)
+            ->add("lowAlarmLimit", vtype)
+            ->add("lowWarningLimit", vtype)
+            ->add("highWarningLimit", vtype)
+            ->add("highAlarmLimit", vtype)
+            ->add("lowAlarmSeverity", pvInt)
+            ->add("lowWarningSeverity", pvInt)
+            ->add("highWarningSeverity", pvInt)
+            ->add("highAlarmSeverity", pvInt)
+            ->add("hysteresis", pvByte)
+            ->createStructure();
+}
 
 StandardField::StandardField()
-:  fieldCreate(getFieldCreate()),
-   notImplemented("not implemented"),
-   valueFieldName("value")
-{}
+    :fieldCreate(getFieldCreate())
+    ,notImplemented("not implemented")
+    ,valueFieldName("value")
 
-void StandardField::init()
-{
-    createAlarm();
-    createTimeStamp();
-    createDisplay();
-    createControl();
-    createBooleanAlarm();
-    createByteAlarm();
-    createShortAlarm();
-    createIntAlarm();
-    createLongAlarm();
-    createUByteAlarm();
-    createUShortAlarm();
-    createUIntAlarm();
-    createULongAlarm();
-    createFloatAlarm();
-    createDoubleAlarm();
-    createEnumeratedAlarm();
-}
+    ,alarmField(FieldBuilder::begin()
+                ->setId("alarm_t")
+                ->add("severity", pvInt)
+                ->add("status", pvInt)
+                ->add("message", pvString)
+                ->createStructure())
+
+    ,timeStampField(FieldBuilder::begin()
+                    ->setId("time_t")
+                    ->add("secondsPastEpoch", pvLong)
+                    ->add("nanoseconds", pvInt)
+                    ->add("userTag", pvInt)
+                    ->createStructure())
+
+    ,displayField(FieldBuilder::begin()
+                  ->setId("display_t")
+                  ->add("limitLow", pvDouble)
+                  ->add("limitHigh", pvDouble)
+                  ->add("description", pvString)
+                  ->add("format", pvString)
+                  ->add("units", pvString)
+                  ->createStructure())
+
+    ,controlField(FieldBuilder::begin()
+                  ->setId("control_t")
+                  ->add("limitLow", pvDouble)
+                  ->add("limitHigh", pvDouble)
+                  ->add("minStep", pvDouble)
+                  ->createStructure())
+
+    ,booleanAlarmField(FieldBuilder::begin()
+                       ->setId("valueAlarm_t")
+                       ->add("active", pvBoolean)
+                       ->add("falseSeverity", pvInt)
+                       ->add("trueSeverity", pvInt)
+                       ->add("changeStateSeverity", pvInt)
+                       ->createStructure())
+
+    ,byteAlarmField(buildValueAlarm(pvByte))
+    ,shortAlarmField(buildValueAlarm(pvShort))
+    ,intAlarmField(buildValueAlarm(pvInt))
+    ,longAlarmField(buildValueAlarm(pvLong))
+    ,ubyteAlarmField(buildValueAlarm(pvUByte))
+    ,ushortAlarmField(buildValueAlarm(pvUShort))
+    ,uintAlarmField(buildValueAlarm(pvUInt))
+    ,ulongAlarmField(buildValueAlarm(pvULong))
+    ,floatAlarmField(buildValueAlarm(pvFloat))
+    ,doubleAlarmField(buildValueAlarm(pvDouble))
+
+    ,enumeratedAlarmField(FieldBuilder::begin()
+                          ->setId("valueAlarm_t")
+                          ->add("active", pvBoolean)
+                          ->add("stateSeverity", pvInt)
+                          ->add("changeStateSeverity", pvInt)
+                          ->createStructure())
+{}
 
 StandardField::~StandardField(){}
 
@@ -145,361 +198,6 @@ StructureConstPtr StandardField::createProperties(string id,FieldConstPtr field,
     return fieldCreate->createStructure(id,names,fields);
 }
 
-void StandardField::createAlarm() {
-    size_t num = 3;
-    FieldConstPtrArray fields(num);
-    StringArray names(num);
-    names[0] = "severity";
-    names[1] = "status";
-    names[2] = "message";
-    fields[0] = fieldCreate->createScalar(pvInt);
-    fields[1] = fieldCreate->createScalar(pvInt);
-    fields[2] = fieldCreate->createScalar(pvString);
-    alarmField = fieldCreate->createStructure("alarm_t",names,fields);
-}
-
-void StandardField::createTimeStamp() {
-    size_t num = 3;
-    FieldConstPtrArray fields(num);
-    StringArray names(num);
-    names[0] = "secondsPastEpoch";
-    names[1] = "nanoseconds";
-    names[2] = "userTag";
-    fields[0] = fieldCreate->createScalar(pvLong);
-    fields[1] = fieldCreate->createScalar(pvInt);
-    fields[2] = fieldCreate->createScalar(pvInt);
-    timeStampField = fieldCreate->createStructure("time_t",names,fields);
-}
-
-void StandardField::createDisplay() {
-    size_t num = 5;
-    FieldConstPtrArray fields(num);
-    StringArray names(num);
-    names[0] = "limitLow";
-    names[1] = "limitHigh";
-    names[2] = "description";
-    names[3] = "format";
-    names[4] = "units";
-    fields[0] = fieldCreate->createScalar(pvDouble);
-    fields[1] = fieldCreate->createScalar(pvDouble);
-    fields[2] = fieldCreate->createScalar(pvString);
-    fields[3] = fieldCreate->createScalar(pvString);
-    fields[4] = fieldCreate->createScalar(pvString);
-    displayField = fieldCreate->createStructure("display_t",names,fields);
-}
-
-void StandardField::createControl() {
-    size_t num = 3;
-    FieldConstPtrArray fields(num);
-    StringArray names(num);
-    names[0] = "limitLow";
-    names[1] = "limitHigh";
-    names[2] = "minStep";
-    fields[0] = fieldCreate->createScalar(pvDouble);
-    fields[1] = fieldCreate->createScalar(pvDouble);
-    fields[2] = fieldCreate->createScalar(pvDouble);
-    controlField = fieldCreate->createStructure("control_t",names,fields);
-}
-
-void StandardField::createBooleanAlarm() {
-    size_t numFields = 4;
-    FieldConstPtrArray fields(numFields);
-    StringArray names(numFields);
-    names[0] = "active";
-    names[1] = "falseSeverity";
-    names[2] = "trueSeverity";
-    names[3] = "changeStateSeverity";
-    fields[0] = fieldCreate->createScalar(pvBoolean);
-    fields[1] = fieldCreate->createScalar(pvInt);
-    fields[2] = fieldCreate->createScalar(pvInt);
-    fields[3] = fieldCreate->createScalar(pvInt);
-    booleanAlarmField = fieldCreate->createStructure("valueAlarm_t",names,fields);
-}
-
-void StandardField::createByteAlarm() {
-    size_t numFields = 10;
-    FieldConstPtrArray fields(numFields);
-    StringArray names(numFields);
-    names[0] = "active";
-    names[1] = "lowAlarmLimit";
-    names[2] = "lowWarningLimit";
-    names[3] = "highWarningLimit";
-    names[4] = "highAlarmLimit";
-    names[5] = "lowAlarmSeverity";
-    names[6] = "lowWarningSeverity";
-    names[7] = "highWarningSeverity";
-    names[8] = "highAlarmSeverity";
-    names[9] =  "hysteresis";
-    fields[0] = fieldCreate->createScalar(pvBoolean);
-    fields[1] = fieldCreate->createScalar(pvByte);
-    fields[2] = fieldCreate->createScalar(pvByte);
-    fields[3] = fieldCreate->createScalar(pvByte);
-    fields[4] = fieldCreate->createScalar(pvByte);
-    fields[5] = fieldCreate->createScalar(pvInt);
-    fields[6] = fieldCreate->createScalar(pvInt);
-    fields[7] = fieldCreate->createScalar(pvInt);
-    fields[8] = fieldCreate->createScalar(pvInt);
-    fields[9] = fieldCreate->createScalar(pvByte);
-    byteAlarmField = fieldCreate->createStructure("valueAlarm_t",names,fields);
-}
-
-void StandardField::createShortAlarm() {
-    size_t numFields = 10;
-    FieldConstPtrArray fields(numFields);
-    StringArray names(numFields);
-    names[0] = "active";
-    names[1] = "lowAlarmLimit";
-    names[2] = "lowWarningLimit";
-    names[3] = "highWarningLimit";
-    names[4] = "highAlarmLimit";
-    names[5] = "lowAlarmSeverity";
-    names[6] = "lowWarningSeverity";
-    names[7] = "highWarningSeverity";
-    names[8] = "highAlarmSeverity";
-    names[9] =  "hysteresis";
-    fields[0] = fieldCreate->createScalar(pvBoolean);
-    fields[1] = fieldCreate->createScalar(pvShort);
-    fields[2] = fieldCreate->createScalar(pvShort);
-    fields[3] = fieldCreate->createScalar(pvShort);
-    fields[4] = fieldCreate->createScalar(pvShort);
-    fields[5] = fieldCreate->createScalar(pvInt);
-    fields[6] = fieldCreate->createScalar(pvInt);
-    fields[7] = fieldCreate->createScalar(pvInt);
-    fields[8] = fieldCreate->createScalar(pvInt);
-    fields[9] = fieldCreate->createScalar(pvShort);
-    shortAlarmField = fieldCreate->createStructure("valueAlarm_t",names,fields);
-}
-
-void StandardField::createIntAlarm() {
-    size_t numFields = 10;
-    FieldConstPtrArray fields(numFields);
-    StringArray names(numFields);
-    names[0] = "active";
-    names[1] = "lowAlarmLimit";
-    names[2] = "lowWarningLimit";
-    names[3] = "highWarningLimit";
-    names[4] = "highAlarmLimit";
-    names[5] = "lowAlarmSeverity";
-    names[6] = "lowWarningSeverity";
-    names[7] = "highWarningSeverity";
-    names[8] = "highAlarmSeverity";
-    names[9] =  "hysteresis";
-    fields[0] = fieldCreate->createScalar(pvBoolean);
-    fields[1] = fieldCreate->createScalar(pvInt);
-    fields[2] = fieldCreate->createScalar(pvInt);
-    fields[3] = fieldCreate->createScalar(pvInt);
-    fields[4] = fieldCreate->createScalar(pvInt);
-    fields[5] = fieldCreate->createScalar(pvInt);
-    fields[6] = fieldCreate->createScalar(pvInt);
-    fields[7] = fieldCreate->createScalar(pvInt);
-    fields[8] = fieldCreate->createScalar(pvInt);
-    fields[9] = fieldCreate->createScalar(pvInt);
-    intAlarmField = fieldCreate->createStructure("valueAlarm_t",names,fields);
-}
-
-void StandardField::createLongAlarm() {
-    size_t numFields = 10;
-    FieldConstPtrArray fields(numFields);
-    StringArray names(numFields);
-    names[0] = "active";
-    names[1] = "lowAlarmLimit";
-    names[2] = "lowWarningLimit";
-    names[3] = "highWarningLimit";
-    names[4] = "highAlarmLimit";
-    names[5] = "lowAlarmSeverity";
-    names[6] = "lowWarningSeverity";
-    names[7] = "highWarningSeverity";
-    names[8] = "highAlarmSeverity";
-    names[9] =  "hysteresis";
-    fields[0] = fieldCreate->createScalar(pvBoolean);
-    fields[1] = fieldCreate->createScalar(pvLong);
-    fields[2] = fieldCreate->createScalar(pvLong);
-    fields[3] = fieldCreate->createScalar(pvLong);
-    fields[4] = fieldCreate->createScalar(pvLong);
-    fields[5] = fieldCreate->createScalar(pvInt);
-    fields[6] = fieldCreate->createScalar(pvInt);
-    fields[7] = fieldCreate->createScalar(pvInt);
-    fields[8] = fieldCreate->createScalar(pvInt);
-    fields[9] = fieldCreate->createScalar(pvLong);
-    longAlarmField = fieldCreate->createStructure("valueAlarm_t",names,fields);
-}
-
-void StandardField::createUByteAlarm() {
-    size_t numFields = 10;
-    FieldConstPtrArray fields(numFields);
-    StringArray names(numFields);
-    names[0] = "active";
-    names[1] = "lowAlarmLimit";
-    names[2] = "lowWarningLimit";
-    names[3] = "highWarningLimit";
-    names[4] = "highAlarmLimit";
-    names[5] = "lowAlarmSeverity";
-    names[6] = "lowWarningSeverity";
-    names[7] = "highWarningSeverity";
-    names[8] = "highAlarmSeverity";
-    names[9] =  "hysteresis";
-    fields[0] = fieldCreate->createScalar(pvBoolean);
-    fields[1] = fieldCreate->createScalar(pvUByte);
-    fields[2] = fieldCreate->createScalar(pvUByte);
-    fields[3] = fieldCreate->createScalar(pvUByte);
-    fields[4] = fieldCreate->createScalar(pvUByte);
-    fields[5] = fieldCreate->createScalar(pvInt);
-    fields[6] = fieldCreate->createScalar(pvInt);
-    fields[7] = fieldCreate->createScalar(pvInt);
-    fields[8] = fieldCreate->createScalar(pvInt);
-    fields[9] = fieldCreate->createScalar(pvUByte);
-    ubyteAlarmField = fieldCreate->createStructure("valueAlarm_t",names,fields);
-}
-
-void StandardField::createUShortAlarm() {
-    size_t numFields = 10;
-    FieldConstPtrArray fields(numFields);
-    StringArray names(numFields);
-    names[0] = "active";
-    names[1] = "lowAlarmLimit";
-    names[2] = "lowWarningLimit";
-    names[3] = "highWarningLimit";
-    names[4] = "highAlarmLimit";
-    names[5] = "lowAlarmSeverity";
-    names[6] = "lowWarningSeverity";
-    names[7] = "highWarningSeverity";
-    names[8] = "highAlarmSeverity";
-    names[9] =  "hysteresis";
-    fields[0] = fieldCreate->createScalar(pvBoolean);
-    fields[1] = fieldCreate->createScalar(pvUShort);
-    fields[2] = fieldCreate->createScalar(pvUShort);
-    fields[3] = fieldCreate->createScalar(pvUShort);
-    fields[4] = fieldCreate->createScalar(pvUShort);
-    fields[5] = fieldCreate->createScalar(pvInt);
-    fields[6] = fieldCreate->createScalar(pvInt);
-    fields[7] = fieldCreate->createScalar(pvInt);
-    fields[8] = fieldCreate->createScalar(pvInt);
-    fields[9] = fieldCreate->createScalar(pvUShort);
-    ushortAlarmField = fieldCreate->createStructure("valueAlarm_t",names,fields);
-}
-
-void StandardField::createUIntAlarm() {
-    size_t numFields = 10;
-    FieldConstPtrArray fields(numFields);
-    StringArray names(numFields);
-    names[0] = "active";
-    names[1] = "lowAlarmLimit";
-    names[2] = "lowWarningLimit";
-    names[3] = "highWarningLimit";
-    names[4] = "highAlarmLimit";
-    names[5] = "lowAlarmSeverity";
-    names[6] = "lowWarningSeverity";
-    names[7] = "highWarningSeverity";
-    names[8] = "highAlarmSeverity";
-    names[9] =  "hysteresis";
-    fields[0] = fieldCreate->createScalar(pvBoolean);
-    fields[1] = fieldCreate->createScalar(pvUInt);
-    fields[2] = fieldCreate->createScalar(pvUInt);
-    fields[3] = fieldCreate->createScalar(pvUInt);
-    fields[4] = fieldCreate->createScalar(pvUInt);
-    fields[5] = fieldCreate->createScalar(pvInt);
-    fields[6] = fieldCreate->createScalar(pvInt);
-    fields[7] = fieldCreate->createScalar(pvInt);
-    fields[8] = fieldCreate->createScalar(pvInt);
-    fields[9] = fieldCreate->createScalar(pvUInt);
-    uintAlarmField = fieldCreate->createStructure("valueAlarm_t",names,fields);
-}
-
-void StandardField::createULongAlarm() {
-    size_t numFields = 10;
-    FieldConstPtrArray fields(numFields);
-    StringArray names(numFields);
-    names[0] = "active";
-    names[1] = "lowAlarmLimit";
-    names[2] = "lowWarningLimit";
-    names[3] = "highWarningLimit";
-    names[4] = "highAlarmLimit";
-    names[5] = "lowAlarmSeverity";
-    names[6] = "lowWarningSeverity";
-    names[7] = "highWarningSeverity";
-    names[8] = "highAlarmSeverity";
-    names[9] =  "hysteresis";
-    fields[0] = fieldCreate->createScalar(pvBoolean);
-    fields[1] = fieldCreate->createScalar(pvULong);
-    fields[2] = fieldCreate->createScalar(pvULong);
-    fields[3] = fieldCreate->createScalar(pvULong);
-    fields[4] = fieldCreate->createScalar(pvULong);
-    fields[5] = fieldCreate->createScalar(pvInt);
-    fields[6] = fieldCreate->createScalar(pvInt);
-    fields[7] = fieldCreate->createScalar(pvInt);
-    fields[8] = fieldCreate->createScalar(pvInt);
-    fields[9] = fieldCreate->createScalar(pvULong);
-    ulongAlarmField = fieldCreate->createStructure("valueAlarm_t",names,fields);
-}
-
-void StandardField::createFloatAlarm() {
-    size_t numFields = 10;
-    FieldConstPtrArray fields(numFields);
-    StringArray names(numFields);
-    names[0] = "active";
-    names[1] = "lowAlarmLimit";
-    names[2] = "lowWarningLimit";
-    names[3] = "highWarningLimit";
-    names[4] = "highAlarmLimit";
-    names[5] = "lowAlarmSeverity";
-    names[6] = "lowWarningSeverity";
-    names[7] = "highWarningSeverity";
-    names[8] = "highAlarmSeverity";
-    names[9] =  "hysteresis";
-    fields[0] = fieldCreate->createScalar(pvBoolean);
-    fields[1] = fieldCreate->createScalar(pvFloat);
-    fields[2] = fieldCreate->createScalar(pvFloat);
-    fields[3] = fieldCreate->createScalar(pvFloat);
-    fields[4] = fieldCreate->createScalar(pvFloat);
-    fields[5] = fieldCreate->createScalar(pvInt);
-    fields[6] = fieldCreate->createScalar(pvInt);
-    fields[7] = fieldCreate->createScalar(pvInt);
-    fields[8] = fieldCreate->createScalar(pvInt);
-    fields[9] = fieldCreate->createScalar(pvFloat);
-    floatAlarmField = fieldCreate->createStructure("valueAlarm_t",names,fields);
-}
-
-void StandardField::createDoubleAlarm() {
-    size_t numFields = 10;
-    FieldConstPtrArray fields(numFields);
-    StringArray names(numFields);
-    names[0] = "active";
-    names[1] = "lowAlarmLimit";
-    names[2] = "lowWarningLimit";
-    names[3] = "highWarningLimit";
-    names[4] = "highAlarmLimit";
-    names[5] = "lowAlarmSeverity";
-    names[6] = "lowWarningSeverity";
-    names[7] = "highWarningSeverity";
-    names[8] = "highAlarmSeverity";
-    names[9] =  "hysteresis";
-    fields[0] = fieldCreate->createScalar(pvBoolean);
-    fields[1] = fieldCreate->createScalar(pvDouble);
-    fields[2] = fieldCreate->createScalar(pvDouble);
-    fields[3] = fieldCreate->createScalar(pvDouble);
-    fields[4] = fieldCreate->createScalar(pvDouble);
-    fields[5] = fieldCreate->createScalar(pvInt);
-    fields[6] = fieldCreate->createScalar(pvInt);
-    fields[7] = fieldCreate->createScalar(pvInt);
-    fields[8] = fieldCreate->createScalar(pvInt);
-    fields[9] = fieldCreate->createScalar(pvDouble);
-    doubleAlarmField = fieldCreate->createStructure("valueAlarm_t",names,fields);
-}
-
-void StandardField::createEnumeratedAlarm() {
-    size_t numFields = 3;
-    FieldConstPtrArray fields(numFields);
-    StringArray names(numFields);
-    names[0] = "active";
-    names[1] = "stateSeverity";
-    names[2] = "changeStateSeverity";
-    fields[0] = fieldCreate->createScalar(pvBoolean);
-    fields[1] = fieldCreate->createScalarArray(pvInt);
-    fields[2] = fieldCreate->createScalar(pvInt);
-    enumeratedAlarmField = fieldCreate->createStructure("valueAlarm_t",names,fields);
-}
-
-
 StructureConstPtr StandardField::scalar(
     ScalarType type,string  const &properties)
 {
@@ -564,86 +262,6 @@ StructureConstPtr StandardField::enumerated(string  const &properties)
     return createProperties("epics:nt/NTEnum:1.0",field,properties);
 }
 
-StructureConstPtr StandardField::alarm()
-{
-    return alarmField;
-}
-
-StructureConstPtr StandardField::timeStamp()
-{
-    return timeStampField;
-}
-
-StructureConstPtr StandardField::display()
-{
-    return displayField;
-}
-
-StructureConstPtr StandardField::control()
-{
-    return controlField;
-}
-
-StructureConstPtr StandardField::booleanAlarm()
-{
-    return booleanAlarmField;
-}
-
-StructureConstPtr StandardField::byteAlarm()
-{
-    return byteAlarmField;
-}
-
-StructureConstPtr StandardField::ubyteAlarm()
-{
-    return ubyteAlarmField;
-}
-
-StructureConstPtr StandardField::shortAlarm()
-{
-    return shortAlarmField;
-}
-
-StructureConstPtr StandardField::ushortAlarm()
-{
-    return ushortAlarmField;
-}
-
-StructureConstPtr StandardField::intAlarm()
-{
-    return intAlarmField;
-}
-
-StructureConstPtr StandardField::uintAlarm()
-{
-    return uintAlarmField;
-}
-
-StructureConstPtr StandardField::longAlarm()
-{
-    return longAlarmField;
-}
-
-StructureConstPtr StandardField::ulongAlarm()
-{
-    return ulongAlarmField;
-}
-
-StructureConstPtr StandardField::floatAlarm()
-{
-    return floatAlarmField;
-}
-
-StructureConstPtr StandardField::doubleAlarm()
-{
-    return doubleAlarmField;
-}
-
-StructureConstPtr StandardField::enumeratedAlarm()
-{
-    return enumeratedAlarmField;
-}
-
 const StandardFieldPtr &StandardField::getStandardField()
 {
     static StandardFieldPtr standardFieldCreate;
@@ -653,7 +271,6 @@ const StandardFieldPtr &StandardField::getStandardField()
     if(standardFieldCreate.get()==0)
     {
         standardFieldCreate = StandardFieldPtr(new StandardField());
-        standardFieldCreate->init();
     }
     return standardFieldCreate;
 }

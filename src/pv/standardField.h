@@ -131,123 +131,105 @@ public:
      * create an alarm structure
      * @return The const shared pointer to the structure.
      */
-    StructureConstPtr alarm();
+    inline const StructureConstPtr& alarm() const { return alarmField; }
     /**
      * create a timeStamp structure
      * @return The const shared pointer to the structure.
      */
-    StructureConstPtr timeStamp();
+    inline const StructureConstPtr& timeStamp() const { return timeStampField; }
     /**
      * create a display structure
      * @return The const shared pointer to the structure.
      */
-    StructureConstPtr display();
+    inline const StructureConstPtr& display() const { return displayField; }
     /**
      * create a control structure
      * @return The const shared pointer to the structure.
      */
-    StructureConstPtr control();
+    inline const StructureConstPtr& control() const { return controlField; }
     /**
      * create a boolean alarm structure
      * @return The const shared pointer to the structure.
      */
-    StructureConstPtr booleanAlarm();
+    inline const StructureConstPtr& booleanAlarm() const { return booleanAlarmField; }
     /**
      * create a byte alarm structure
      * @return The const shared pointer to the structure.
      */
-    StructureConstPtr byteAlarm();
+    inline const StructureConstPtr& byteAlarm() const { return byteAlarmField; }
     /**
      * create a unsigned byte alarm structure
      * @return The const shared pointer to the structure.
      */
-    StructureConstPtr ubyteAlarm();
+    inline const StructureConstPtr& ubyteAlarm() const { return ubyteAlarmField; }
     /**
      * create a short alarm structure
      * @return The const shared pointer to the structure.
      */
-    StructureConstPtr shortAlarm();
+    inline const StructureConstPtr& shortAlarm() const { return shortAlarmField; }
     /**
      * create a unsigned short alarm structure
      * @return The const shared pointer to the structure.
      */
-    StructureConstPtr ushortAlarm();
+    inline const StructureConstPtr& ushortAlarm() const { return ushortAlarmField; }
     /**
      * create an int alarm structure
      * @return The const shared pointer to the structure.
      */
-    StructureConstPtr intAlarm();
+    inline const StructureConstPtr& intAlarm() const { return intAlarmField; }
     /**
      * create a unsigned int alarm structure
      * @return The const shared pointer to the structure.
      */
-    StructureConstPtr uintAlarm();
+    inline const StructureConstPtr& uintAlarm() const { return uintAlarmField; }
     /**
      * create a long alarm structure
      * @return The const shared pointer to the structure.
      */
-    StructureConstPtr longAlarm();
+    inline const StructureConstPtr& longAlarm() const { return longAlarmField; }
     /**
      * create a unsigned long alarm structure
      * @return The const shared pointer to the structure.
      */
-    StructureConstPtr ulongAlarm();
+    inline const StructureConstPtr& ulongAlarm() const { return ulongAlarmField; }
     /**
      * create a float alarm structure
      * @return The const shared pointer to the structure.
      */
-    StructureConstPtr floatAlarm();
+    inline const StructureConstPtr& floatAlarm() const { return floatAlarmField; }
     /**
      * create a double alarm structure
      * @return The const shared pointer to the structure.
      */
-    StructureConstPtr doubleAlarm();
+    inline const StructureConstPtr& doubleAlarm() const { return doubleAlarmField; }
     /**
      * create an enumerated alarm structure
      * @return The const shared pointer to the structure.
      */
-    StructureConstPtr enumeratedAlarm();
+    inline const StructureConstPtr& enumeratedAlarm() const { return enumeratedAlarmField; }
 private:
     StandardField();
-    void init();
     StructureConstPtr createProperties(
         std::string id,FieldConstPtr field,std::string properties);
-    FieldCreatePtr fieldCreate;
-    std::string notImplemented;
-    std::string valueFieldName;
-    StructureConstPtr alarmField;
-    StructureConstPtr timeStampField;
-    StructureConstPtr displayField;
-    StructureConstPtr controlField;
-    StructureConstPtr booleanAlarmField;
-    StructureConstPtr byteAlarmField;
-    StructureConstPtr shortAlarmField;
-    StructureConstPtr intAlarmField;
-    StructureConstPtr longAlarmField;
-    StructureConstPtr ubyteAlarmField;
-    StructureConstPtr ushortAlarmField;
-    StructureConstPtr uintAlarmField;
-    StructureConstPtr ulongAlarmField;
-    StructureConstPtr floatAlarmField;
-    StructureConstPtr doubleAlarmField;
-    StructureConstPtr enumeratedAlarmField;
-    void createAlarm();
-    void createTimeStamp();
-    void createDisplay();
-    void createControl();
-    void createBooleanAlarm();
-    void createByteAlarm();
-    void createShortAlarm();
-    void createIntAlarm();
-    void createLongAlarm();
-    void createUByteAlarm();
-    void createUShortAlarm();
-    void createUIntAlarm();
-    void createULongAlarm();
-    void createFloatAlarm();
-    void createDoubleAlarm();
-    void createEnumeratedAlarm();
-    //friend StandardFieldPtr getStandardField();
+    const FieldCreatePtr fieldCreate;
+    const std::string notImplemented;
+    const std::string valueFieldName;
+    const StructureConstPtr alarmField;
+    const StructureConstPtr timeStampField;
+    const StructureConstPtr displayField;
+    const StructureConstPtr controlField;
+    const StructureConstPtr booleanAlarmField;
+    const StructureConstPtr byteAlarmField;
+    const StructureConstPtr shortAlarmField;
+    const StructureConstPtr intAlarmField;
+    const StructureConstPtr longAlarmField;
+    const StructureConstPtr ubyteAlarmField;
+    const StructureConstPtr ushortAlarmField;
+    const StructureConstPtr uintAlarmField;
+    const StructureConstPtr ulongAlarmField;
+    const StructureConstPtr floatAlarmField;
+    const StructureConstPtr doubleAlarmField;
+    const StructureConstPtr enumeratedAlarmField;
 };
 
 FORCE_INLINE const StandardFieldPtr& getStandardField() {
