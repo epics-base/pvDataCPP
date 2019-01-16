@@ -29,11 +29,6 @@ bool PVDisplay::attach(PVFieldPtr const & pvField)
     PVStructurePtr pvStructure = static_pointer_cast<PVStructure>(pvField);
     pvDescription = pvStructure->getSubField<PVString>("description");
     if(pvDescription.get()==NULL) return false;
-    pvFormat = pvStructure->getSubField<PVString>("format");
-    if(pvFormat.get()==NULL) {
-        detach();
-        return false;
-    }
     pvUnits = pvStructure->getSubField<PVString>("units");
     if(pvUnits.get()==NULL) {
         detach();
@@ -55,7 +50,6 @@ bool PVDisplay::attach(PVFieldPtr const & pvField)
 void PVDisplay::detach()
 {
     pvDescription.reset();
-    pvFormat.reset();
     pvUnits.reset();
     pvLow.reset();
     pvHigh.reset();
@@ -72,7 +66,6 @@ void PVDisplay::get(Display & display) const
         throw std::logic_error(notAttached);
     }
     display.setDescription(pvDescription->get());
-    display.setFormat(pvFormat->get());
     display.setUnits(pvUnits->get());
     display.setLow(pvLow->get());
     display.setHigh(pvHigh->get());
@@ -83,7 +76,7 @@ bool PVDisplay::set(Display const & display)
     if(pvDescription.get()==NULL) {
         throw std::logic_error(notAttached);
     }
-    if(pvDescription->isImmutable() || pvFormat->isImmutable()) return false;
+    if(pvDescription->isImmutable()) return false;
     if(pvUnits->isImmutable() || pvLow->isImmutable() || pvHigh->isImmutable())
     {
          return false;
@@ -94,11 +87,6 @@ bool PVDisplay::set(Display const & display)
     if(current.getDescription()!=display.getDescription())
     {
         pvDescription->put(display.getDescription());
-        returnValue = true;
-    }
-    if(current.getFormat()!=display.getFormat())
-    {
-        pvFormat->put(display.getFormat());
         returnValue = true;
     }
     if(current.getUnits()!=display.getUnits())
