@@ -13,7 +13,7 @@
 
 #include <pv/templateMeta.h>
 #include <pv/typeCast.h>
-#include <pv/pvIntrospect.h> /* for ScalarType enum */
+#include <pv/pvType.h> /* for ScalarType enum */
 
 namespace epics{namespace pvData{
 namespace detail {

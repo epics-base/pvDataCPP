@@ -16,9 +16,10 @@
 #endif
 
 #include <cassert>
+#include <stddef.h>
 
 #include "pv/sharedPtr.h"
-#include "pv/pvIntrospect.h"
+#include "pv/pvType.h"
 #include "pv/typeCast.h"
 #include "pv/templateMeta.h"
 

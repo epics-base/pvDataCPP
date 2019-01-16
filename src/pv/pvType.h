@@ -44,7 +44,34 @@ typedef epicsInt64 int64_t;
 #include <stdint.h>
 #endif
 
+#include <shareLib.h>
+
 #include <pv/sharedPtr.h>
+
+/* C++11 keywords
+ @code
+ struct Base {
+   virtual void foo();
+ };
+ struct Class : public Base {
+   virtual void foo() OVERRIDE FINAL;
+ };
+ @endcode
+ */
+#ifndef FINAL
+#  if __cplusplus>=201103L
+#    define FINAL final
+#  else
+#    define FINAL
+#  endif
+#endif
+#ifndef OVERRIDE
+#  if __cplusplus>=201103L
+#    define OVERRIDE override
+#  else
+#    define OVERRIDE
+#  endif
+#endif
 
 //! epics
 namespace epics {
@@ -135,6 +162,198 @@ inline StringArray const & getVector(StringArrayPtr const &value)
 }
 typedef std::vector<std::string>::iterator StringArray_iterator;
 typedef std::vector<std::string>::const_iterator StringArray_const_iterator;
+
+/**
+ * Definition of support field types.
+ */
+enum Type {
+    /**
+     * The type is scalar. It has a scalarType
+     */
+    scalar,
+    /**
+     * The type is scalarArray. Each element is a scalar of the same scalarType.
+     */
+    scalarArray,
+    /**
+     * The type is structure.
+     */
+    structure,
+    /**
+     * The type is structureArray. Each element is a structure.
+     */
+    structureArray,
+    /**
+     * The type is an union.
+     */
+    union_,
+    /**
+     * The type is an array of unions.
+     */
+    unionArray
+};
+
+/**
+ * @brief Convenience functions for Type.
+ *
+ */
+namespace TypeFunc {
+    /**
+     * Get a name for the type.
+     * @param  type The type.
+     * @return The name for the type.
+     */
+    epicsShareExtern const char* name(Type type);
+};
+
+epicsShareExtern std::ostream& operator<<(std::ostream& o, const Type& type);
+
+
+/**
+ * Definition of support scalar types.
+ */
+enum ScalarType {
+    /**
+     * The type is boolean, i.e. value can be @c false or @c true
+     */
+    pvBoolean,
+    /**
+     * The type is byte, i.e. a 8 bit signed integer.
+     */
+    pvByte,
+    /**
+     * The type is short, i.e. a 16 bit signed integer.
+     */
+    pvShort,
+    /**
+     * The type is int, i.e. a 32 bit signed integer.
+     */
+    pvInt,
+    /**
+     * The type is long, i.e. a 64 bit signed integer.
+     */
+    pvLong,
+    /**
+     * The type is unsigned byte, i.e. a 8 bit unsigned integer.
+     */
+    pvUByte,
+    /**
+     * The type is unsigned short, i.e. a 16 bit unsigned integer.
+     */
+    pvUShort,
+    /**
+     * The type is unsigned int, i.e. a 32 bit unsigned integer.
+     */
+    pvUInt,
+    /**
+     * The type is unsigned long, i.e. a 64 bit unsigned integer.
+     */
+    pvULong,
+    /**
+     * The type is float, i.e. 32 bit IEEE floating point,
+     */
+    pvFloat,
+    /**
+     * The type is float, i.e. 64 bit IEEE floating point,
+     */
+    pvDouble,
+    /**
+     * The type is string, i.e. a UTF8 character string.
+     */
+    pvString
+};
+
+#define MAX_SCALAR_TYPE pvString
+
+/**
+ * @brief Convenience functions for ScalarType.
+ *
+ */
+namespace ScalarTypeFunc {
+    /**
+     * Is the type an integer, i.e. is it one of byte,...ulong
+     * @param  scalarType The type.
+     * @return (false,true) if the scalarType is an integer.
+     */
+    epicsShareExtern bool isInteger(ScalarType scalarType);
+    /**
+     * Is the type an unsigned integer, i.e. is it one of ubyte,...ulong
+     * @param  scalarType The type.
+     * @return (false,true) if the scalarType is an integer.
+     */
+    epicsShareExtern bool isUInteger(ScalarType scalarType);
+    /**
+     * Is the type numeric, i.e. is it one of byte,...,double
+     * @param  scalarType The type.
+     * @return (false,true) if the scalarType is a numeric
+     */
+    epicsShareExtern bool isNumeric(ScalarType scalarType);
+    /**
+     * Is the type primitive, i.e. not string
+     * @param  scalarType The type.
+     * @return (false,true) if the scalarType is primitive.
+     */
+    epicsShareExtern bool isPrimitive(ScalarType scalarType);
+    /**
+     * Get the scalarType for value.
+     * @param  value The name of the scalar type.
+     * @return The scalarType.
+     * An exception is thrown if the name is not the name of a scalar type.
+     */
+    epicsShareExtern ScalarType getScalarType(std::string const &value);
+    /**
+     * Get a name for the scalarType.
+     * @param  scalarType The type.
+     * @return The name for the scalarType.
+     */
+    epicsShareExtern const char* name(ScalarType scalarType);
+
+    //! gives sizeof(T) where T depends on the scalar type id.
+    epicsShareExtern size_t elementSize(ScalarType id);
+};
+
+epicsShareExtern std::ostream& operator<<(std::ostream& o, const ScalarType& scalarType);
+
+/** Define a compile time mapping from
+ * type to enum value.
+ @code
+  ScalarType code = (ScalarType)ScalarTypeID<int8>::value;
+  assert(code==pvByte);
+ @endcode
+ *
+ * For unspecified types this evaluates to an invalid ScalarType
+ * value (eg -1).
+ */
+template<typename T>
+struct ScalarTypeID {};
+
+/**
+ * Static mapping from ScalarType enum to value type.
+ @code
+   typename ScalarTypeTraits<pvByte>::type value = 4;
+ @endcode
+ */
+template<ScalarType ID>
+struct ScalarTypeTraits {};
+
+#define OP(ENUM, TYPE) \
+template<> struct ScalarTypeTraits<ENUM> {typedef TYPE type;}; \
+template<> struct ScalarTypeID<TYPE> { enum {value=ENUM}; }; \
+template<> struct ScalarTypeID<const TYPE> { enum {value=ENUM}; };
+
+OP(pvBoolean, boolean)
+OP(pvByte, int8)
+OP(pvShort, int16)
+OP(pvInt, int32)
+OP(pvLong, int64)
+OP(pvUByte, uint8)
+OP(pvUShort, uint16)
+OP(pvUInt, uint32)
+OP(pvULong, uint64)
+OP(pvFloat, float)
+OP(pvDouble, double)
+OP(pvString, std::string)
+#undef OP
 
 }}
 

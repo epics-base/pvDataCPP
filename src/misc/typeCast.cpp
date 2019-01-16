@@ -12,6 +12,7 @@
 
 #define epicsExportSharedSymbols
 #include "pv/typeCast.h"
+#include "pv/epicsException.h"
 
 using epics::pvData::castUnsafe;
 using epics::pvData::ScalarType;
