@@ -33,8 +33,6 @@ using std::string;
 
 namespace epics { namespace pvData {
 
-static DebugLevel debugLevel = lowDebug;
-
 size_t Field::num_instances;
 
 
@@ -405,9 +403,7 @@ StructureArray::StructureArray(StructureConstPtr const & structure)
 {
 }
 
-StructureArray::~StructureArray() {
-    if(debugLevel==highDebug) printf("~StructureArray\n");
-}
+StructureArray::~StructureArray() {}
 
 string StructureArray::getID() const
 {
@@ -444,9 +440,7 @@ UnionArray::UnionArray(UnionConstPtr const & _punion)
 {
 }
 
-UnionArray::~UnionArray() {
-    if(debugLevel==highDebug) printf("~UnionArray\n");
-}
+UnionArray::~UnionArray() {}
 
 string UnionArray::getID() const
 {
