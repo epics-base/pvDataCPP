@@ -11,6 +11,7 @@
 #include <stdexcept>
 
 #include <epicsMutex.h>
+#include <epicsThread.h>
 
 #define epicsExportSharedSymbols
 #include <pv/lock.h>
@@ -262,17 +263,21 @@ StructureConstPtr StandardField::enumerated(string  const &properties)
     return createProperties("epics:nt/NTEnum:1.0",field,properties);
 }
 
+static StandardFieldPtr *stdFieldGbl;
+
+static epicsThreadOnceId stdFieldGblOnce = EPICS_THREAD_ONCE_INIT;
+
+void StandardField::once(void*)
+{
+    stdFieldGbl = new StandardFieldPtr;
+    stdFieldGbl->reset(new StandardField);
+}
+
 const StandardFieldPtr &StandardField::getStandardField()
 {
-    static StandardFieldPtr standardFieldCreate;
-    static Mutex mutex;
-    Lock xx(mutex);
+    epicsThreadOnce(&stdFieldGblOnce, &StandardField::once, 0);
 
-    if(standardFieldCreate.get()==0)
-    {
-        standardFieldCreate = StandardFieldPtr(new StandardField());
-    }
-    return standardFieldCreate;
+    return *stdFieldGbl;
 }
 
 }}

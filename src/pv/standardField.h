@@ -61,6 +61,7 @@ typedef std::tr1::shared_ptr<StandardField> StandardFieldPtr;
  * }
  */
 class epicsShareClass StandardField {
+    static void once(void*);
 public:
     /** 
      * getStandardField returns the singleton.
