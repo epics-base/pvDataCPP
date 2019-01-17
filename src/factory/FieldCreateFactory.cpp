@@ -119,11 +119,22 @@ Scalar::Scalar(ScalarType scalarType)
         THROW_EXCEPTION2(std::invalid_argument, "Can't construct Scalar from invalid ScalarType");
 }
 
+Scalar::Scalar(const AnyScalar& defval)
+    :Field(scalar)
+    ,scalarType(defval.type())
+    ,defval(defval)
+{
+    assert(!defval.empty());
+}
+
 Scalar::~Scalar(){}
 
 std::ostream& Scalar::dump(std::ostream& o) const
 {
-    return o << format::indent() << getID();
+    o << format::indent() << getID();
+    if(!defval.empty())
+        o << " = "<<defval;
+    return o;
 }
 
 string Scalar::getID() const
@@ -307,6 +318,14 @@ ScalarArray::ScalarArray(ScalarType elementType)
         throw std::invalid_argument("Can't construct ScalarArray from invalid ScalarType");
 }
 
+ScalarArray::ScalarArray(const shared_vector<const void>& defval)
+    :Array(scalarArray)
+    ,elementType(defval.original_type())
+    ,defval(defval)
+{
+    assert(!defval.empty());
+}
+
 ScalarArray::~ScalarArray() {}
 
 const string ScalarArray::getIDScalarArrayLUT() const
@@ -335,7 +354,10 @@ string ScalarArray::getID() const
 
 std::ostream& ScalarArray::dump(std::ostream& o) const
 {
-    return o << format::indent() << getID();
+    o << format::indent() << getID();
+    if(!defval.empty())
+        o<<" = "<<defval;
+    return o;
 }
 
 void ScalarArray::serialize(ByteBuffer *buffer, SerializableControl *control) const {
@@ -951,6 +973,11 @@ FieldBuilderPtr FieldBuilder::add(string const & name, ScalarType scalarType)
     return add(name, fieldCreate->createScalar(scalarType));
 }
 
+FieldBuilderPtr FieldBuilder::add(std::string const & name, const AnyScalar& defval)
+{
+    return add(name, fieldCreate->createScalar(defval));
+}
+
 FieldBuilderPtr FieldBuilder::addBoundedString(std::string const & name, std::size_t maxLength)
 {
     return add(name, fieldCreate->createBoundedString(maxLength));
@@ -970,6 +997,11 @@ FieldBuilderPtr FieldBuilder::add(string const & name, FieldConstPtr const & fie
 FieldBuilderPtr FieldBuilder::addArray(string const & name, ScalarType scalarType)
 {
     return add(name, fieldCreate->createScalarArray(scalarType));
+}
+
+FieldBuilderPtr FieldBuilder::addArray(std::string const & name, const shared_vector<const void>& defval)
+{
+    return add(name, fieldCreate->createScalarArray(defval));
 }
 
 FieldBuilderPtr FieldBuilder::addFixedArray(string const & name, ScalarType scalarType, size_t size)
@@ -1173,6 +1205,15 @@ ScalarConstPtr FieldCreate::createScalar(ScalarType scalarType) const
     return scalars[scalarType];
 }
 
+ScalarConstPtr FieldCreate::createScalar(const AnyScalar& defval) const
+{
+    if(defval.empty())
+        THROW_EXCEPTION2(std::logic_error, "Scalar default value must be defined");
+    Scalar::shared_pointer ret(new Scalar(defval));
+    Helper::cache(this, ret);
+    return ret;
+}
+
 BoundedStringConstPtr FieldCreate::createBoundedString(std::size_t maxLength) const
 {
     std::tr1::shared_ptr<BoundedString> s(new BoundedString(maxLength));
@@ -1189,6 +1230,15 @@ ScalarArrayConstPtr FieldCreate::createScalarArray(ScalarType elementType) const
     }
         
     return scalarArrays[elementType];
+}
+
+ScalarArrayConstPtr FieldCreate::createScalarArray(const shared_vector<const void>& defval) const
+{
+    if(defval.empty())
+        THROW_EXCEPTION2(std::logic_error, "ScalarArray default value must be defined");
+    ScalarArray::shared_pointer ret(new ScalarArray(defval));
+    Helper::cache(this, ret);
+    return ret;
 }
 
 ScalarArrayConstPtr FieldCreate::createFixedScalarArray(ScalarType elementType, size_t size) const

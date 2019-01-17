@@ -12,6 +12,7 @@
 
 #define epicsExportSharedSymbols
 #include "pv/typeCast.h"
+#include <pv/sharedVector.h>
 #include "pv/epicsException.h"
 
 using epics::pvData::castUnsafe;
@@ -273,6 +274,23 @@ void castUnsafeV(size_t count, ScalarType to, void *dest, ScalarType from, const
     }
 
     THROW_EXCEPTION2(std::logic_error, "Undefined cast");
+}
+
+std::ostream& operator<<(std::ostream& strm, const shared_vector<const void>& arr)
+{
+    if(arr.empty()) {
+
+    } else switch(arr.original_type()) {
+//    case pvUByte: strm<<static_shared_vector_cast<const ::epics::pvData::uint8>(arr); break;
+#define CASE(BASETYPE, PVATYPE, DBFTYPE, PVACODE) case pv ## PVACODE: strm<<static_shared_vector_cast<const PVATYPE>(arr); break;
+#define CASE_REAL_INT64
+#define CASE_STRING
+#include "pv/typemap.h"
+#undef CASE
+#undef CASE_REAL_INT64
+#undef CASE_STRING
+    }
+    return strm;
 }
 
 }}

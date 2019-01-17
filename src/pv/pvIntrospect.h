@@ -20,6 +20,8 @@
 #include <pv/byteBuffer.h>
 #include <pv/serialize.h>
 #include <pv/pvdVersion.h>
+#include <pv/sharedVector.h>
+#include <pv/anyscalar.h>
 
 #include <shareLib.h>
 
@@ -227,6 +229,8 @@ public:
     
     virtual std::string getID() const OVERRIDE;
 
+    const AnyScalar& defaultValue() const { return defval; }
+
     virtual std::ostream& dump(std::ostream& o) const OVERRIDE FINAL;
 
     virtual void serialize(ByteBuffer *buffer, SerializableControl *control) const OVERRIDE;
@@ -238,9 +242,11 @@ public:
     
 protected:
     Scalar(ScalarType scalarType);
+    Scalar(const AnyScalar& defval);
 private:
     static int8 getTypeCodeLUT(ScalarType scalarType);
     ScalarType scalarType;
+    const AnyScalar defval;
     friend class FieldCreate;
     friend class ScalarArray;
     friend class BoundedScalarArray;
@@ -319,11 +325,14 @@ public:
     typedef ScalarArray& reference;
     typedef const ScalarArray& const_reference;
 
+protected:
     /**
      * Constructor
      * @param scalarType The scalarType for the field.
      */
     ScalarArray(ScalarType scalarType);
+    ScalarArray(const shared_vector<const void>& defval);
+public:
     /**
      * Get the scalarType for the elements.
      * @return the scalarType
@@ -335,6 +344,8 @@ public:
     virtual std::size_t getMaximumCapacity() const OVERRIDE {return 0;}
 
     virtual std::string getID() const OVERRIDE;
+
+    const shared_vector<const void>& defaultValue() const { return defval; }
 
     virtual std::ostream& dump(std::ostream& o) const OVERRIDE FINAL;
 
@@ -349,6 +360,7 @@ public:
 private:
     const std::string getIDScalarArrayLUT() const;
     ScalarType elementType;
+    const shared_vector<const void> defval;
     friend class FieldCreate;
     EPICS_NOT_COPYABLE(ScalarArray)
 };
@@ -799,6 +811,9 @@ public:
      */
     FieldBuilderPtr add(std::string const & name, ScalarType scalarType);
 
+    //! Add Scalar w/ default value
+    FieldBuilderPtr add(std::string const & name, const AnyScalar& defval);
+
     /**
      * Add a @c BoundedString.
      * @param name name of the array.
@@ -822,6 +837,8 @@ public:
      * @return this instance of a @c FieldBuilder.
      */
     FieldBuilderPtr addArray(std::string const & name, ScalarType scalarType);
+
+    FieldBuilderPtr addArray(std::string const & name, const shared_vector<const void>& defval);
     
     /**
      * Add fixed-size array of @c Scalar elements.
@@ -973,6 +990,8 @@ public:
      * @throws IllegalArgumentException if an illegal type is specified.
      */
     ScalarConstPtr createScalar(ScalarType scalarType) const;
+    //! Create Scalar with default value
+    ScalarConstPtr createScalar(const AnyScalar& defval) const;
     /**
      * Create a @c BoundedString.
      * @param maxLength a string maximum length.
@@ -986,6 +1005,8 @@ public:
      * @return An @c Array Interface for the newly created object.
      */
     ScalarArrayConstPtr createScalarArray(ScalarType elementType) const;
+    //! Create array of scalars with default value
+    ScalarArrayConstPtr createScalarArray(const shared_vector<const void>& defval) const;
     /*
      * Create an @c Array field, fixed size array.
      * @param elementType The @c ScalarType for array elements

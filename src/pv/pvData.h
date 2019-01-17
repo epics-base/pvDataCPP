@@ -438,8 +438,7 @@ public:
         DeserializableControl *pflusher) OVERRIDE FINAL;
 
 protected:
-    explicit PVScalarValue(ScalarConstPtr const & scalar)
-    : PVScalar(scalar), storage() {}
+    explicit PVScalarValue(ScalarConstPtr const & scalar);
     virtual void getAs(void * result, ScalarType rtype) const OVERRIDE FINAL
     {
         const T src = get();
