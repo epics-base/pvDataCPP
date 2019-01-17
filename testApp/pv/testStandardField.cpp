@@ -29,9 +29,7 @@ static StandardFieldPtr standardField = getStandardField();
 
 static void print(const string& name, FieldConstPtr const & f)
 {
-    std::ostringstream strm;
-    strm << std::endl << name << std::endl << f << std::endl;
-    testDiag("%s", strm.str().c_str());
+    testShow()<<name<<'\n'<<format::indent_level(1)<<f;
 }
 
 MAIN(testStandardField)
