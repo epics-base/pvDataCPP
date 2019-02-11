@@ -180,10 +180,11 @@ public:
 
     /** Return typed reference to wrapped value.  Non-const reference allows value modification
      *
+     * @throws bad_cast when the requested type does not match the stored type
      @code
        AnyScalar v(42);
-       v.ref<uint32>() = 42;
-       assert(v.ref<uint32>() = 43);
+       v.ref<uint32>() = 43;
+       assert(v.ref<uint32>() == 43);
      @endcode
      */
     template<typename T>
@@ -201,9 +202,10 @@ public:
 
     /** Return typed reference to wrapped value.  Const reference does not allow modification.
      *
+     * @throws bad_cast when the requested type does not match the stored type
      @code
-       AnyScalar v(42);
-       assert(v.ref<uint32>() = 42);
+       const AnyScalar v(42);
+       assert(v.ref<uint32>() == 42);
      @endcode
      */
     template<typename T>
@@ -219,7 +221,10 @@ public:
         return reinterpret_cast<typename meta::decorate_const<TT>::type&>(_wrap.blob);
     }
 
-    /** copy out wrapped value, with a value conversion. */
+    /** copy out wrapped value, with a value conversion.
+     *
+     * @throws bad_cast when empty()==true
+     */
     template<typename T>
     inline
     T as() const {
