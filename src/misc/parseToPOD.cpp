@@ -254,7 +254,7 @@ epicsParseFloat(const char *str, float *to, char **units)
 #endif
 
 // Sometimes we have to provide our own copy of strtoll()
-#if defined(_WIN32) && !defined(_MINGW)
+#if defined(_WIN32) && !defined(_MINGW) && !(defined(_MSC_VER) && _MSC_VER >= 1800)
 // On Windows with MSVC, Base-3.15 provides strtoll()
 #    define NEED_OLL_FUNCS (EPICS_VERSION_INT < VERSION_INT(3,15,0,1))
 #elif defined(vxWorks)
