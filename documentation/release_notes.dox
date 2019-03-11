@@ -2,8 +2,15 @@
 
 @page release_notes Release Notes
 
+Release 7.1.1 (XXX)
+===================
+
+- Fixes
+ - Init order issue with StandardField::getStandardField()
+ - Build fix for Visual Studio 2013+
+
 Release 7.1.0 (Nov 2018)
-==========================
+========================
 
 - Deprecations
  - BoundedString, BoundedScalarArray, and FixedScalarArray will be removed unless they are fixed.
