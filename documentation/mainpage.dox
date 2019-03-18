@@ -3,7 +3,8 @@
 /**
 @mainpage pvDataCPP documentation
 
-- [Download](https://sourceforge.net/projects/epics-pvdata/files/)
+- This module is included in [EPICS Base releases](https://epics-controls.org/resources-and-support/base/) beginning with 7.0.1
+- It may also be [Downloaded](https://github.com/epics-base/pvDataCPP/releases) and built separately.
 - @htmlonly <a href="modules.html">API components</a> @endhtmlonly
 - @ref release_notes
 
