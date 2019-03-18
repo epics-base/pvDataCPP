@@ -2,8 +2,8 @@
 
 @page release_notes Release Notes
 
-Release 7.1.1 (XXX)
-===================
+Release 7.1.1 (Mar 2019)
+========================
 
 - Fixes
  - Init order issue with StandardField::getStandardField()
