@@ -17,15 +17,14 @@
 
 #include "pv/sharedVector.h"
 
-using std::string;
-using namespace epics::pvData;
-
 namespace {
+
+namespace pvd = epics::pvData;
 
 void testEmpty()
 {
     testDiag("Test empty vector");
-    epics::pvData::shared_vector<int32> empty, empty2, empty3(0u);
+    pvd::shared_vector<pvd::int32> empty, empty2, empty3(0u);
 
     testOk1(empty.size()==0);
     testOk1(empty.empty());
@@ -47,7 +46,7 @@ void testInternalAlloc()
 {
     testDiag("Test vector alloc w/ new[]");
 
-    epics::pvData::shared_vector<int32> internal(5);
+    pvd::shared_vector<pvd::int32> internal(5);
 
     testOk1(internal.size()==5);
     testOk1(!internal.empty());
@@ -62,7 +61,7 @@ void testInternalAlloc()
     internal[2] = 42;
     testOk1(internal[2]==42);
 
-    epics::pvData::shared_vector<int32> internal2(15, 500);
+    pvd::shared_vector<pvd::int32> internal2(15, 500);
 
     testOk1(internal2.size()==15);
     testOk1(internal2[1]==500);
@@ -83,8 +82,8 @@ void testInternalAlloc()
 //Note: STL shared_ptr requires that deletors be copy constructable
 template<typename E>
 struct callCounter {
-    std::tr1::shared_ptr<int32> count;
-    callCounter():count(new int32){*count=0;}
+    std::tr1::shared_ptr<pvd::int32> count;
+    callCounter():count(new pvd::int32){*count=0;}
     callCounter(const callCounter& o):count(o.count) {}
     callCounter& operator=(const callCounter& o){count=o.count;}
     void operator()(E){(*count)++;}
@@ -95,8 +94,8 @@ void testExternalAlloc()
     testDiag("Test vector external alloc");
 
     // Simulate a failed malloc() or similar
-    int32 *oops=0;
-    epics::pvData::shared_vector<int32> nullPtr(oops, 42, 100);
+    pvd::int32 *oops=0;
+    pvd::shared_vector<pvd::int32> nullPtr(oops, 42, 100);
 
     testOk1(nullPtr.size()==0);
     testOk1(nullPtr.empty());
@@ -105,8 +104,8 @@ void testExternalAlloc()
 
     testOk1(nullPtr.data()==NULL);
 
-    int32 *raw=new int32[5];
-    epics::pvData::shared_vector<int32> newData(raw, 1, 4);
+    pvd::int32 *raw=new pvd::int32[5];
+    pvd::shared_vector<pvd::int32> newData(raw, 1, 4);
 
     testOk1(newData.size()==4);
     testOk1(!newData.empty());
@@ -116,11 +115,11 @@ void testExternalAlloc()
     testOk1(newData[0]==14);
 
     // Check use of custom deleter
-    int32 localVar[4] = {1,2,3,4};
-    callCounter<int32*> tracker;
+    pvd::int32 localVar[4] = {1,2,3,4};
+    callCounter<pvd::int32*> tracker;
     testOk1(*tracker.count==0);
 
-    epics::pvData::shared_vector<int32> locvar(localVar,
+    pvd::shared_vector<pvd::int32> locvar(localVar,
                                              tracker,
                                              0, 4);
 
@@ -140,8 +139,8 @@ void testShare()
 {
     testDiag("Test vector Sharing");
 
-    epics::pvData::shared_vector<int32> one, two(15);
-    epics::pvData::shared_vector<int32> three(two);
+    pvd::shared_vector<pvd::int32> one, two(15);
+    pvd::shared_vector<pvd::int32> three(two);
 
     testOk1(one.unique());
     testOk1(!two.unique());
@@ -202,22 +201,22 @@ void testConst()
 {
     testDiag("Test constant vector");
 
-    epics::pvData::shared_vector<int32> writable(15, 100);
+    pvd::shared_vector<pvd::int32> writable(15, 100);
 
-    epics::pvData::shared_vector<int32>::reference wr = writable[0];
-    epics::pvData::shared_vector<int32>::const_reference ror = writable[0];
+    pvd::shared_vector<pvd::int32>::reference wr = writable[0];
+    pvd::shared_vector<pvd::int32>::const_reference ror = writable[0];
 
     testOk1(wr==ror);
 
-    int32 *compare = writable.data();
+    pvd::int32 *compare = writable.data();
 
     testOk1(writable.unique());
 
     // can re-target container, but data is R/O
-    epics::pvData::shared_vector<const int32> rodata(freeze(writable));
+    pvd::shared_vector<const pvd::int32> rodata(freeze(writable));
 
-    epics::pvData::shared_vector<const int32>::reference wcr = rodata[0];
-    epics::pvData::shared_vector<const int32>::const_reference rocr = rodata[0];
+    pvd::shared_vector<const pvd::int32>::reference wcr = rodata[0];
+    pvd::shared_vector<const pvd::int32>::const_reference rocr = rodata[0];
 
     testOk1(wcr==rocr);
 
@@ -230,7 +229,7 @@ void testConst()
 
     testOk1(rodata.data()==compare);
 
-    epics::pvData::shared_vector<const int32> rodata2(rodata);
+    pvd::shared_vector<const pvd::int32> rodata2(rodata);
 
     testOk1(rodata.data()==rodata2.data());
 
@@ -243,9 +242,9 @@ void testSlice()
 {
     testDiag("Test vector slicing");
 
-    epics::pvData::shared_vector<int32> original(10, 100);
+    pvd::shared_vector<pvd::int32> original(10, 100);
 
-    epics::pvData::shared_vector<int32> half1(original), half2(original), half2a(original);
+    pvd::shared_vector<pvd::int32> half1(original), half2(original), half2a(original);
 
     half1.slice(0, 5);
     half2.slice(5, 5);
@@ -293,9 +292,9 @@ void testCapacity()
 {
     testDiag("Test vector capacity");
 
-    epics::pvData::shared_vector<int32> vect(10, 100);
+    pvd::shared_vector<pvd::int32> vect(10, 100);
 
-    int32 *peek = vect.dataPtr().get();
+    pvd::int32 *peek = vect.dataPtr().get();
 
     vect.slice(0, 5);
 
@@ -333,7 +332,7 @@ void testCapacity()
 
 void testPush()
 {
-    epics::pvData::shared_vector<int32> vect;
+    pvd::shared_vector<pvd::int32> vect;
 
     testDiag("Test push_back optimizations");
 
@@ -360,16 +359,16 @@ void testVoid()
 {
     testDiag("Test vector cast to/from void");
 
-    epics::pvData::shared_vector<int32> IV(4);
+    pvd::shared_vector<pvd::int32> IV(4);
 
-    epics::pvData::shared_vector<void> VV(epics::pvData::static_shared_vector_cast<void>(IV));
+    pvd::shared_vector<void> VV(pvd::static_shared_vector_cast<void>(IV));
 
     testOk1(IV.dataPtr().get()==VV.dataPtr().get());
-    testOk1(IV.size()*sizeof(int)==VV.size());
+    testOk1(IV.size()*sizeof(pvd::int32)==VV.size());
 
-    VV.slice(sizeof(int), 2*sizeof(int));
+    VV.slice(sizeof(pvd::int32), 2*sizeof(pvd::int32));
 
-    IV = epics::pvData::static_shared_vector_cast<int32>(VV);
+    IV = pvd::static_shared_vector_cast<pvd::int32>(VV);
 
     testOk1(IV.dataOffset()==1);
     testOk1(IV.size()==2);
@@ -380,23 +379,23 @@ void testConstVoid()
 {
     testDiag("Test vector cast to/from const void");
 
-    epics::pvData::shared_vector<const int32> CIV(4);
+    pvd::shared_vector<const pvd::int32> CIV(4);
 
-    epics::pvData::shared_vector<const void> CVV(epics::pvData::static_shared_vector_cast<const void>(CIV));
+    pvd::shared_vector<const void> CVV(pvd::static_shared_vector_cast<const void>(CIV));
     // case const void to const void
-    epics::pvData::shared_vector<const void> CVV2(epics::pvData::static_shared_vector_cast<const void>(CVV));
+    pvd::shared_vector<const void> CVV2(pvd::static_shared_vector_cast<const void>(CVV));
 
     testOk1(CIV.dataPtr().get()==CVV2.dataPtr().get());
     testOk1(CIV.size()*sizeof(int)==CVV2.size());
 
     CVV2.slice(sizeof(int), 2*sizeof(int));
 
-    CIV = epics::pvData::static_shared_vector_cast<const int32>(CVV2);
+    CIV = pvd::static_shared_vector_cast<const pvd::int32>(CVV2);
 
     testOk1(CIV.dataOffset()==1);
     testOk1(CIV.size()==2);
 
-    epics::pvData::shared_vector<void> VV;
+    pvd::shared_vector<void> VV;
     // not possible to thaw() void as shared_vector<void> has no make_unique()
     //VV = thaw(CVV);
     CVV = freeze(VV);
@@ -408,8 +407,8 @@ void testNonPOD()
 {
     testDiag("Test vector of non-POD types");
 
-    epics::pvData::shared_vector<string> strings(6);
-    epics::pvData::shared_vector<std::tr1::shared_ptr<dummyStruct> > structs(5);
+    pvd::shared_vector<std::string> strings(6);
+    pvd::shared_vector<std::tr1::shared_ptr<dummyStruct> > structs(5);
 
     testOk1(strings[0].empty());
     testOk1(structs[0].get()==NULL);
@@ -417,7 +416,7 @@ void testNonPOD()
     structs[1].reset(new dummyStruct);
     dummyStruct *temp = structs[1].get();
 
-    epics::pvData::shared_vector<std::tr1::shared_ptr<dummyStruct> > structs2(structs);
+    pvd::shared_vector<std::tr1::shared_ptr<dummyStruct> > structs2(structs);
 
     testOk1(!structs.unique());
     testOk1(structs[1].unique());
@@ -436,22 +435,22 @@ void testVectorConvert()
 {
     testDiag("Test shared_vector_convert");
 
-    epics::pvData::shared_vector<int32> ints(6, 42), moreints;
-    epics::pvData::shared_vector<float> floats;
-    epics::pvData::shared_vector<string> strings;
-    epics::pvData::shared_vector<void> voids;
+    pvd::shared_vector<pvd::int32> ints(6, 42), moreints;
+    pvd::shared_vector<float> floats;
+    pvd::shared_vector<std::string> strings;
+    pvd::shared_vector<void> voids;
 
     testOk1(ints.unique());
 
     // no-op convert.  Just returns another reference
-    moreints = epics::pvData::shared_vector_convert<int32>(ints);
+    moreints = pvd::shared_vector_convert<pvd::int32>(ints);
 
     testOk1(!ints.unique());
     moreints.clear();
 
     // conversion when both types are known.
     // returns a new vector
-    floats = epics::pvData::shared_vector_convert<float>(ints);
+    floats = pvd::shared_vector_convert<float>(ints);
 
     testOk1(ints.unique());
     testOk1(floats.size()==ints.size());
@@ -459,16 +458,16 @@ void testVectorConvert()
 
     // convert to void is static_shared_vector_cast<void>()
     // returns a reference
-    voids = epics::pvData::shared_vector_convert<void>(ints);
+    voids = pvd::shared_vector_convert<void>(ints);
 
     testOk1(!ints.unique());
-    testOk1(voids.size()==ints.size()*sizeof(int32));
+    testOk1(voids.size()==ints.size()*sizeof(pvd::int32));
 
     // convert from void uses shared_vector<void>::original_type()
     // to find that the actual type is 'int32'.
     // returns a new vector
-    testOk1(voids.original_type()==epics::pvData::pvInt);
-    strings = epics::pvData::shared_vector_convert<string>(voids);
+    testOk1(voids.original_type()==pvd::pvInt);
+    strings = pvd::shared_vector_convert<std::string>(voids);
 
     voids.clear();
 
@@ -481,11 +480,11 @@ void testWeak()
 {
     testDiag("Test weak_ptr counting");
 
-    epics::pvData::shared_vector<int32> data(6);
+    pvd::shared_vector<pvd::int32> data(6);
 
     testOk1(data.unique());
 
-    std::tr1::shared_ptr<int32> pdata(data.dataPtr());
+    std::tr1::shared_ptr<pvd::int32> pdata(data.dataPtr());
 
     testOk1(!data.unique());
 
@@ -493,7 +492,7 @@ void testWeak()
 
     testOk1(data.unique());
 
-    std::tr1::weak_ptr<int32> wdata(data.dataPtr());
+    std::tr1::weak_ptr<pvd::int32> wdata(data.dataPtr());
 
     testOk1(data.unique()); // True, but I wish it wasn't!!!
 
@@ -506,16 +505,16 @@ void testICE()
 {
     testDiag("Test freeze and thaw");
 
-    epics::pvData::shared_vector<int32> A(6, 42), C;
-    epics::pvData::shared_vector<const int32> B, D;
+    pvd::shared_vector<pvd::int32> A(6, 42), C;
+    pvd::shared_vector<const pvd::int32> B, D;
 
-    int32 *check = A.data();
+    pvd::int32 *check = A.data();
 
     // check freeze w/ unique reference
 
     // clears A and moves reference to B
     // no copy
-    B = epics::pvData::freeze(A);
+    B = pvd::freeze(A);
 
     testOk1(A.unique());
     testOk1(B.unique());
@@ -528,7 +527,7 @@ void testICE()
 
     // clears D, but reference to B
     // remains, so a copy is made
-    C = epics::pvData::thaw(D);
+    C = pvd::thaw(D);
 
     testOk1(B.unique());
     testOk1(C.unique());
@@ -542,7 +541,7 @@ void testICE()
 
     // clears B and moves reference to A
     // no copy
-    A = epics::pvData::thaw(B);
+    A = pvd::thaw(B);
 
     testOk1(A.unique());
     testOk1(B.unique());
@@ -559,7 +558,7 @@ void testICE()
         // would clear A, but remaining reference C
         // fails operation.  A not cleared
         // and exception thrown
-        B = epics::pvData::freeze(A);
+        B = pvd::freeze(A);
         testFail("Froze non-unique vector!");
     } catch(std::runtime_error& e) {
         testPass("freeze of non-unique throws runtime_error as expected");
@@ -568,12 +567,12 @@ void testICE()
 
 void testBad()
 {
-    epics::pvData::shared_vector<int> I;
-    epics::pvData::shared_vector<const int> CI;
-    epics::pvData::shared_vector<float> F;
-    epics::pvData::shared_vector<const float> CF;
-    epics::pvData::shared_vector<void> V;
-    epics::pvData::shared_vector<const void> CV;
+    pvd::shared_vector<int> I;
+    pvd::shared_vector<const int> CI;
+    pvd::shared_vector<float> F;
+    pvd::shared_vector<const float> CF;
+    pvd::shared_vector<void> V;
+    pvd::shared_vector<const void> CV;
     (void)I;
     (void)CI;
     (void)F;
@@ -588,38 +587,38 @@ void testBad()
     // No copy from const to non-const
     //CI = I;
     //I = CI;
-    //epics::pvData::shared_vector<const int> CI2(I);
-    //epics::pvData::shared_vector<int> I2(CI);
+    //pvd::shared_vector<const int> CI2(I);
+    //pvd::shared_vector<int> I2(CI);
 
     // shared_vector_convert can't thaw()
-    //I = epics::pvData::shared_vector_convert<int>(CI);
-    //V = epics::pvData::shared_vector_convert<void>(CV);
+    //I = pvd::shared_vector_convert<int>(CI);
+    //V = pvd::shared_vector_convert<void>(CV);
 
     // shared_vector_convert can't freeze()
-    //CI = epics::pvData::shared_vector_convert<const int>(I);
-    //CV = epics::pvData::shared_vector_convert<const void>(V);
+    //CI = pvd::shared_vector_convert<const int>(I);
+    //CV = pvd::shared_vector_convert<const void>(V);
 
     // static_shared_vector_cast can't thaw()
-    //I = epics::pvData::static_shared_vector_cast<int>(CI);
-    //V = epics::pvData::static_shared_vector_cast<void>(CV);
+    //I = pvd::static_shared_vector_cast<int>(CI);
+    //V = pvd::static_shared_vector_cast<void>(CV);
 
     // static_shared_vector_cast can't freeze()
-    //CI = epics::pvData::static_shared_vector_cast<const int>(I);
-    //CV = epics::pvData::static_shared_vector_cast<const void>(V);
+    //CI = pvd::static_shared_vector_cast<const int>(I);
+    //CV = pvd::static_shared_vector_cast<const void>(V);
 
     // freeze() can't change type.
     // the error here will be with the assignment
-    //I = epics::pvData::freeze(CV);
-    //I = epics::pvData::freeze(CF);
-    //CI = epics::pvData::freeze(V);
-    //CI = epics::pvData::freeze(F);
+    //I = pvd::freeze(CV);
+    //I = pvd::freeze(CF);
+    //CI = pvd::freeze(V);
+    //CI = pvd::freeze(F);
 
     // that() can't change type.
     // the error here will be with the assignment
-    //CI = epics::pvData::thaw(V);
-    //CI = epics::pvData::thaw(F);
-    //I = epics::pvData::thaw(CV);
-    //I = epics::pvData::that(CF);
+    //CI = pvd::thaw(V);
+    //CI = pvd::thaw(F);
+    //I = pvd::thaw(CV);
+    //I = pvd::that(CF);
 }
 
 void testAutoSwap()
@@ -636,8 +635,8 @@ void testCXX11Move()
 {
 #if __cplusplus>=201103L
     testDiag("Check std::move()");
-    shared_vector<int32> A(4, 42),
-                         B(std::move(A));
+    pvd::shared_vector<pvd::int32> A(4, 42),
+                                   B(std::move(A));
 
     testOk1(A.unique());
     testOk1(B.unique());
@@ -653,8 +652,8 @@ void testCXX11Move()
     testOk1(A.size()==4);
     testOk1(!A.empty() && A[0]==42);
 
-    shared_vector<void> C(shared_vector_convert<void>(A)),
-                        D(std::move(C));
+    pvd::shared_vector<void> C(pvd::shared_vector_convert<void>(A)),
+                             D(std::move(C));
     A.clear();
 
     testOk1(C.unique());
@@ -678,11 +677,11 @@ void testCXX11Init()
 #if __cplusplus>=201103L
     testDiag("Check c++11 style array initialization");
 
-    shared_vector<const int32> A = {1.0, 2.0, 3.0};
+    pvd::shared_vector<const pvd::int32> A = {1.0, 2.0, 3.0};
 
     testOk1(A.size()==3);
 
-    int32 sum = 0;
+    pvd::int32 sum = 0;
     for (auto V: A) {
         sum += V;
     }
@@ -699,8 +698,8 @@ MAIN(testSharedVector)
     testPlan(191);
     testDiag("Tests for shared_vector");
 
-    testDiag("sizeof(shared_vector<int32>)=%lu",
-             (unsigned long)sizeof(epics::pvData::shared_vector<int32>));
+    testDiag("sizeof(shared_vector<pvd::int32>)=%lu",
+             (unsigned long)sizeof(pvd::shared_vector<pvd::int32>));
 
     testEmpty();
     testInternalAlloc();
