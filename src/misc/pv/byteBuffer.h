@@ -803,8 +803,8 @@ private:
         assert(n<=getRemaining());
 
         if (reverse<T>()) {
-            for(std::size_t i=0; i<n; i+=sizeof(T)) {
-                detail::store_unaligned(_position+i, swap<T>(values[i]));
+            for(std::size_t i=0; i<count; i++) {
+                detail::store_unaligned(_position+i*sizeof(T), swap<T>(values[i]));
             }
         } else {
             memcpy(_position, values, n);
@@ -819,8 +819,8 @@ private:
         assert(n<=getRemaining());
 
         if (reverse<T>()) {
-            for(std::size_t i=0; i<n; i+=sizeof(T)) {
-                values[i] = swap<T>(detail::load_unaligned<T>(_position+i));
+            for(std::size_t i=0; i<count; i++) {
+                values[i] = swap<T>(detail::load_unaligned<T>(_position+i*sizeof(T)));
             }
         } else {
             memcpy(values, _position, n);
