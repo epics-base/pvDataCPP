@@ -251,14 +251,68 @@ void testUnaligned()
     testOk1(memcmp(buf.getBuffer(), "\x42\x12\x34\x56\x78\x90\xab\xcd\xef\x41\x41\x41", 8)==0);
 }
 
+static
+void testArrayLE()
+{
+    testDiag("testArray() LE");
+
+    ByteBuffer buf(8, EPICS_ENDIAN_LITTLE);
+
+    std::vector<uint32> vals;
+    vals.push_back(0x12345678);
+    vals.push_back(0x01020304);
+
+    buf.putArray(&vals[0], vals.size());
+    testEqual(buf.getPosition(), 8);
+
+    testOk1(memcmp(buf.getBuffer(), "\x78\x56\x34\x12\x04\x03\x02\x01", 8)==0);
+
+    buf.clear();
+    buf.put("\x40\x30\x20\x10\xa4\xa3\xa2\xa1", 0, 8);
+    buf.flip();
+
+    buf.getArray(&vals[0], 2);
+
+    testEqual(vals[0], 0x10203040);
+    testEqual(vals[1], 0xa1a2a3a4);
+}
+
+static
+void testArrayBE()
+{
+    testDiag("testArray() BE");
+
+    ByteBuffer buf(8, EPICS_ENDIAN_BIG);
+
+    std::vector<uint32> vals;
+    vals.push_back(0x12345678);
+    vals.push_back(0x01020304);
+
+    buf.putArray(&vals[0], vals.size());
+    testEqual(buf.getPosition(), 8);
+
+    testOk1(memcmp(buf.getBuffer(), "\x12\x34\x56\x78\x01\x02\x03\x04", 8)==0);
+
+    buf.clear();
+    buf.put("\x10\x20\x30\x40\xa1\xa2\xa3\xa4", 0, 8);
+    buf.flip();
+
+    buf.getArray(&vals[0], 2);
+
+    testEqual(vals[0], 0x10203040);
+    testEqual(vals[1], 0xa1a2a3a4);
+}
+
 MAIN(testByteBuffer)
 {
-    testPlan(96);
+    testPlan(104);
     testDiag("Tests byteBuffer");
     testBasicOperations();
     testInverseEndianness(EPICS_ENDIAN_BIG, expect_be);
     testInverseEndianness(EPICS_ENDIAN_LITTLE, expect_le);
     testSwap();
     testUnaligned();
+    testArrayLE();
+    testArrayBE();
     return testDone();
 }
