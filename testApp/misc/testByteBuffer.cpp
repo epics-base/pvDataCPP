@@ -14,15 +14,13 @@
 #include <cstring>
 #include <memory>
 
-#include <epicsUnitTest.h>
 #include <testMain.h>
 
+#include <pv/pvUnitTest.h>
 #include <pv/byteBuffer.h>
 #include <pv/pvIntrospect.h>
 
 using namespace epics::pvData;
-using std::string;
-using std::cout;
 
 static
 void testBasicOperations() {
@@ -175,7 +173,7 @@ void testBasicOperations() {
     testOk1(buff->getPosition()==6);
     testOk1(strncmp(&src[2],&dst[2],6)==0);
 
-    cout<<"#    First 10 characters of destination: >>"<<string(dst, 10)<<"<<\n";
+    testShow()<<"First 10 characters of destination: >>"<<std::string(dst, 10)<<"<<\n";
 }
 
 static const char expect_be[] = "abcdef";
