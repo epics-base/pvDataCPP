@@ -2,6 +2,12 @@
 
 @page release_notes Release Notes
 
+Release 7.1.3 (Apr 2019)
+========================
+
+- Fix for array serialization error to/from big endian.
+  https://github.com/epics-base/pvDataCPP/issues/65
+
 Release 7.1.2 (Mar 2019)
 ========================
 
