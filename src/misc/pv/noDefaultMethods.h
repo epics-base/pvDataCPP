@@ -28,7 +28,7 @@
     public:
         ...
     };
- @code
+ @endcode
  *
  * @note This macro contains 'private:'.
  */
