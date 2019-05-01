@@ -172,7 +172,6 @@ static void testDisplay()
     dy.setLow(-10.0);
     dy.setHigh(-1.0);
     dy.setDescription(string("testDescription"));
-    dy.setFormat(string("%f10.0"));
     dy.setUnits(string("volts"));
     result = pvDisplay.set(dy);
     testOk1(result);
@@ -180,7 +179,6 @@ static void testDisplay()
     testOk1(dy.getLow()==display.getLow());
     testOk1(dy.getHigh()==display.getHigh());
     testOk1(dy.getDescription().compare(display.getDescription())==0);
-    testOk1(dy.getFormat().compare(display.getFormat())==0);
     testOk1(dy.getUnits().compare(display.getUnits())==0);
     double low = display.getLow();
     double high = display.getHigh();
@@ -217,7 +215,7 @@ static void testEnumerated()
 
 MAIN(testProperty)
 {
-    testPlan(27);
+    testPlan(26);
     testDiag("Tests property");
     fieldCreate = getFieldCreate();
     pvDataCreate = getPVDataCreate();
