@@ -16,7 +16,6 @@
 
 /* copy */
 int testCreateRequest(void);
-int testPVCopy(void);
 
 /* misc */
 int testBaseException(void);
@@ -81,7 +80,6 @@ void pvDataAllTests(void)
 
     /* copy */
     runTest(testCreateRequest);
-    runTest(testPVCopy);
 
     /* property */
     runTest(testCreateRequest);
