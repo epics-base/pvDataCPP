@@ -42,7 +42,8 @@ public:
      * Constructor
      */
     Display()
-    :low(0.0),high(0.0) {}
+    : description(std::string("")),format(std::string("")),units(std::string("")),
+        low(0.0),high(0.0) {}
     //default constructors and destructor are OK
     /**
      * Get the current value of limitLow.
@@ -75,6 +76,17 @@ public:
      */
     void setDescription(std::string const & value) {description = value;}
     /**
+     * Get the current value of format.
+     * @return The current value.
+     */
+    std::string getFormat() const {return format;}
+    /**
+     * Set format to a new value.
+     * @param value The value.
+     * The rules for a valid syntax has not been specified.
+     */
+    void setFormat(std::string const & value) {format = value;}
+    /**
      * Get the current value of units.
      * @return The current value.
      */
@@ -86,6 +98,7 @@ public:
     void setUnits(std::string const & value) {units = value;}
 private:
     std::string description;
+    std::string format;
     std::string units;
     double low;
     double high;

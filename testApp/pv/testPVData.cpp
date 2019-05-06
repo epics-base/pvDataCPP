@@ -224,6 +224,10 @@ static void testPVScalarWithProperties(
             string("display.description"));
         testOk1(desc.get()!=0);
         desc->put(string("this is a description"));
+        PVStringPtr format = pvStructure->getSubField<PVString>(
+            string("display.format"));
+        testOk1(format.get()!=0);
+        format->put(string("f10.2"));
         PVStringPtr units = pvStructure->getSubField<PVString>(
             string("display.units"));
         testOk1(units.get()!=0);
@@ -736,7 +740,7 @@ static void testSubField()
 
 MAIN(testPVData)
 {
-    testPlan(261);
+    testPlan(271);
     try{
         fieldCreate = getFieldCreate();
         pvDataCreate = getPVDataCreate();

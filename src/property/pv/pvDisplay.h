@@ -79,6 +79,7 @@ private:
     static std::string noDisplayFound;
     static std::string notAttached;
     PVStringPtr pvDescription;
+    PVStringPtr pvFormat;
     PVStringPtr pvUnits;
     PVDoublePtr pvLow;
     PVDoublePtr pvHigh;
