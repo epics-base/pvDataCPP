@@ -719,7 +719,7 @@ public:
      * @return The introspection interface.
      * This will hold a null pointer if the field is not in the structure.
      */
-    FieldConstPtr getField(std::string const &fieldName) const;
+    FieldConstPtr getField(std::string const &fieldName) const {return getFieldImpl(fieldName, false);};
 
     template<typename FT>
     std::tr1::shared_ptr<const FT> getField(std::string const &fieldName) const
@@ -733,11 +733,25 @@ public:
 
     /**
      * Get the field for the specified fieldName.
+     * @param fieldName The name of the field to get;
+     * @return The introspection interface.
+     * This will throw a runtime_error exception if the field is not in the structure.
+     */
+    FieldConstPtr getFieldT(std::string const &fieldName) const {return getFieldImpl(fieldName, true);};
+
+    template<typename FT>
+    std::tr1::shared_ptr<const FT> getFieldT(std::string const &fieldName) const
+    {
+        return std::tr1::dynamic_pointer_cast<const FT>(getFieldT(fieldName));
+    }
+
+    /**
+     * Get the field for the specified fieldName.
      * @param index The index of the field to get;
      * @return The introspection interface.
      * This will hold a null pointer if the field is not in the structure.
      */
-    const FieldConstPtr& getField(std::size_t index) const {return fields.at(index);}
+    FieldConstPtr getField(std::size_t index) const {return getFieldImpl(index, false);}
 
     template<typename FT>
     std::tr1::shared_ptr<const FT> getField(std::size_t index) const
@@ -747,6 +761,20 @@ public:
             return std::tr1::dynamic_pointer_cast<const FT>(field);
         else
             return std::tr1::shared_ptr<const FT>();
+    }
+
+    /**
+     * Get the field for the specified fieldName.
+     * @param index The index of the field to get;
+     * @return The introspection interface.
+     * This will throw a runtime_error exception if the field is not in the structure.
+     */
+    FieldConstPtr getFieldT(std::size_t index) const {return getFieldImpl(index, true);}
+
+    template<typename FT>
+    std::tr1::shared_ptr<const FT> getFieldT(std::size_t index) const
+    {
+        return std::tr1::dynamic_pointer_cast<const FT>(getFieldT(index));
     }
 
     /**
@@ -790,6 +818,8 @@ private:
     FieldConstPtrArray fields;
     std::string id;
 
+    FieldConstPtr getFieldImpl(const std::string& fieldName, bool throws) const;
+    FieldConstPtr getFieldImpl(const std::size_t fieldOffset, bool throws) const;
     void dumpFields(std::ostream& o) const;
     
     friend class FieldCreate;
@@ -842,7 +872,7 @@ public:
      * @return The introspection interface.
      * This will hold a null pointer if the field is not in the union.
      */
-    FieldConstPtr getField(std::string const &fieldName) const;
+    FieldConstPtr getField(std::string const &fieldName) const {return getFieldImpl(fieldName, false);};
 
     template<typename FT>
     std::tr1::shared_ptr<const FT> getField(std::string const &fieldName) const
@@ -856,11 +886,25 @@ public:
 
     /**
      * Get the field for the specified fieldName.
+     * @param fieldName The name of the field to get;
+     * @return The introspection interface.
+     * This will throw a runtime_error exception if the field is not in the union.
+     */
+    FieldConstPtr getFieldT(std::string const &fieldName) const {return getFieldImpl(fieldName, true);};
+
+    template<typename FT>
+    std::tr1::shared_ptr<const FT> getFieldT(std::string const &fieldName) const
+    {
+        return std::tr1::dynamic_pointer_cast<const FT>(getFieldT(fieldName));
+    }
+
+    /**
+     * Get the field for the specified fieldName.
      * @param index The index of the field to get;
      * @return The introspection interface.
      * This will hold a null pointer if the field is not in the union.
      */
-    FieldConstPtr getField(std::size_t index) const {return fields.at(index);}
+    FieldConstPtr getField(std::size_t index) const {return getFieldImpl(index, false);}
 
     template<typename FT>
     std::tr1::shared_ptr<const FT> getField(std::size_t index) const
@@ -870,6 +914,20 @@ public:
             return std::tr1::dynamic_pointer_cast<const FT>(field);
         else
             return std::tr1::shared_ptr<const FT>();
+    }
+
+    /**
+     * Get the field for the specified fieldName.
+     * @param index The index of the field to get;
+     * @return The introspection interface.
+     * This will throw a runtime_error exception if the field is not in the union.
+     */
+    FieldConstPtr getFieldT(std::size_t index) const {return getFieldImpl(index, true);}
+
+    template<typename FT>
+    std::tr1::shared_ptr<const FT> getFieldT(std::size_t index) const
+    {
+        return std::tr1::dynamic_pointer_cast<const FT>(getFieldT(index));
     }
 
     /**
@@ -929,7 +987,9 @@ private:
    StringArray fieldNames;
    FieldConstPtrArray fields;
    std::string id;
-   
+
+   FieldConstPtr getFieldImpl(const std::string& fieldName, bool throws) const;
+   FieldConstPtr getFieldImpl(const std::size_t fieldOffset, bool throws) const;
    void dumpFields(std::ostream& o) const;
 
    friend class FieldCreate;

@@ -146,6 +146,28 @@ static void testStructure()
     testOk1(struct1->getFieldName(0)==names1[0]);
     testOk1(struct1->getFieldName(1)==names1[1]);
 
+    testOk1(struct1->getField("nonexistent").get()==NULL);
+    testOk1(struct1->getField(9999).get()==NULL);
+
+    testOk1(struct1->getFieldT("innerA")==fields1[0]);
+    testOk1(struct1->getFieldT("innerB")==fields1[1]);
+    testOk1(struct1->getFieldT(0)==fields1[0]);
+    testOk1(struct1->getFieldT(1)==fields1[1]);
+
+    try {
+        FieldConstPtr field(struct1->getFieldT("nonexistent"));
+        testFail("missing required exception");
+    } catch (std::runtime_error& e) {
+        testPass("caught expected exception: %s", e.what());
+    }
+
+    try {
+        FieldConstPtr field(struct1->getFieldT(9999));
+        testFail("missing required exception");
+    } catch (std::runtime_error& e) {
+        testPass("caught expected exception: %s", e.what());
+    }
+
     testOk1(struct1->getID() == Structure::DEFAULT_ID);
 
     testOk1(fields1 == struct1->getFields()); // vector equality
@@ -189,6 +211,28 @@ static void testUnion()
     testOk1(union1->getField(1)==fields1[1]);
     testOk1(union1->getFieldName(0)==names1[0]);
     testOk1(union1->getFieldName(1)==names1[1]);
+
+    testOk1(union1->getField("nonexistent").get()==NULL);
+    testOk1(union1->getField(9999).get()==NULL);
+
+    testOk1(union1->getFieldT("innerA")==fields1[0]);
+    testOk1(union1->getFieldT("innerB")==fields1[1]);
+    testOk1(union1->getFieldT(0)==fields1[0]);
+    testOk1(union1->getFieldT(1)==fields1[1]);
+
+    try {
+        FieldConstPtr field(union1->getFieldT("nonexistent"));
+        testFail("missing required exception");
+    } catch (std::runtime_error& e) {
+        testPass("caught expected exception: %s", e.what());
+    }
+
+    try {
+        FieldConstPtr field(union1->getFieldT(9999));
+        testFail("missing required exception");
+    } catch (std::runtime_error& e) {
+        testPass("caught expected exception: %s", e.what());
+    }
 
     testOk1(union1->getID() == Union::DEFAULT_ID);
 
@@ -311,7 +355,7 @@ static void testMapping()
 
 MAIN(testIntrospect)
 {
-    testPlan(326);
+    testPlan(342);
     fieldCreate = getFieldCreate();
     pvDataCreate = getPVDataCreate();
     standardField = getStandardField();
