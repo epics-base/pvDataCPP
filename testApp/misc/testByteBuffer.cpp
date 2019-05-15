@@ -263,7 +263,7 @@ void testArrayLE()
     vals.push_back(0x01020304);
 
     buf.putArray(&vals[0], vals.size());
-    testEqual(buf.getPosition(), 8);
+    testEqual(buf.getPosition(), 8u);
 
     testOk1(memcmp(buf.getBuffer(), "\x78\x56\x34\x12\x04\x03\x02\x01", 8)==0);
 
@@ -273,8 +273,8 @@ void testArrayLE()
 
     buf.getArray(&vals[0], 2);
 
-    testEqual(vals[0], 0x10203040);
-    testEqual(vals[1], 0xa1a2a3a4);
+    testEqual(vals[0], 0x10203040u);
+    testEqual(vals[1], 0xa1a2a3a4u);
 }
 
 static
@@ -285,11 +285,11 @@ void testArrayBE()
     ByteBuffer buf(8, EPICS_ENDIAN_BIG);
 
     std::vector<uint32> vals;
-    vals.push_back(0x12345678);
-    vals.push_back(0x01020304);
+    vals.push_back(0x12345678u);
+    vals.push_back(0x01020304u);
 
     buf.putArray(&vals[0], vals.size());
-    testEqual(buf.getPosition(), 8);
+    testEqual(buf.getPosition(), 8u);
 
     testOk1(memcmp(buf.getBuffer(), "\x12\x34\x56\x78\x01\x02\x03\x04", 8)==0);
 
@@ -299,8 +299,8 @@ void testArrayBE()
 
     buf.getArray(&vals[0], 2);
 
-    testEqual(vals[0], 0x10203040);
-    testEqual(vals[1], 0xa1a2a3a4);
+    testEqual(vals[0], 0x10203040u);
+    testEqual(vals[1], 0xa1a2a3a4u);
 }
 
 MAIN(testByteBuffer)
