@@ -17,6 +17,8 @@
 #include <iostream>
 #include <iomanip>
 
+#include <epicsAssert.h>
+
 #include <pv/pvIntrospect.h>
 #include <pv/typeCast.h>
 #include <pv/anyscalar.h>
@@ -237,6 +239,7 @@ public:
     void copyUnchecked(const PVField& from);
 
     static size_t num_instances; // use atomic::get() or volatile* access
+    enum {isPVField=1};
 protected:
     PVField::shared_pointer getPtrSelf()
     {
@@ -762,12 +765,14 @@ public:
     template<typename PVD, typename A>
     inline std::tr1::shared_ptr<PVD> getSubField(A a)
     {
+        STATIC_ASSERT(PVD::isPVField); // only allow cast from PVField sub-class
         return std::tr1::dynamic_pointer_cast<PVD>(getSubFieldImpl(a, false));
     }
 
     template<typename PVD, typename A>
     inline std::tr1::shared_ptr<const PVD> getSubField(A a) const
     {
+        STATIC_ASSERT(PVD::isPVField); // only allow cast from PVField sub-class
         return std::tr1::dynamic_pointer_cast<const PVD>(getSubFieldImpl(a, false));
     }
 
@@ -800,6 +805,7 @@ public:
     template<typename PVD, typename A>
     inline std::tr1::shared_ptr<PVD> getSubFieldT(A a)
     {
+        STATIC_ASSERT(PVD::isPVField); // only allow cast from PVField sub-class
         std::tr1::shared_ptr<PVD> ret(std::tr1::dynamic_pointer_cast<PVD>(getSubFieldImpl(a, true)));
         if(!ret)
             throwBadFieldType(a);
@@ -809,6 +815,7 @@ public:
     template<typename PVD, typename A>
     inline std::tr1::shared_ptr<const PVD> getSubFieldT(A a) const
     {
+        STATIC_ASSERT(PVD::isPVField); // only allow cast from PVField sub-class
         std::tr1::shared_ptr<const PVD> ret(std::tr1::dynamic_pointer_cast<const PVD>(getSubFieldImpl(a, true)));
         if(!ret)
             throwBadFieldType(a);
@@ -963,11 +970,13 @@ public:
    
     template<typename PVT>
     inline std::tr1::shared_ptr<PVT> get() {
+        STATIC_ASSERT(PVT::isPVField); // only allow cast from PVField sub-class
         return std::tr1::dynamic_pointer_cast<PVT>(get());
     }
 
     template<typename PVT>
     inline std::tr1::shared_ptr<const PVT> get() const {
+        STATIC_ASSERT(PVT::isPVField); // only allow cast from PVField sub-class
         return std::tr1::dynamic_pointer_cast<const PVT>(get());
     }
 
@@ -981,6 +990,7 @@ public:
 
     template<typename PVT>
     inline std::tr1::shared_ptr<PVT> select(int32 index) {
+        STATIC_ASSERT(PVT::isPVField); // only allow cast from PVField sub-class
         return std::tr1::dynamic_pointer_cast<PVT>(select(index));
     }
 
