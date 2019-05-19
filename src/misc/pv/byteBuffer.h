@@ -16,6 +16,7 @@
 #include <epicsEndian.h>
 #include <shareLib.h>
 #include <epicsAssert.h>
+#include <compilerDependencies.h>
 
 #include <pv/templateMeta.h>
 #include <pv/pvType.h>
@@ -695,7 +696,7 @@ public:
     EPICS_ALWAYS_INLINE double getDouble (std::size_t  index) { return get<double>(index); }
 
     // TODO remove
-    EPICS_ALWAYS_INLINE const char* getArray() const
+    EPICS_ALWAYS_INLINE const char* getArray() const EPICS_DEPRECATED
     {
         return _buffer;
     }

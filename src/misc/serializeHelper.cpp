@@ -109,7 +109,7 @@ namespace epics {
                 {
                     // entire string is in buffer, simply create a string out of it (copy)
                     std::size_t pos = buffer->getPosition();
-                    string str(buffer->getArray()+pos, size);
+                    string str(buffer->getBuffer()+pos, size);
                     buffer->setPosition(pos+size);
                     return str;
                 }
@@ -122,7 +122,7 @@ namespace epics {
                         while(true) {
                             std::size_t toRead = min(size-i, buffer->getRemaining());
                             std::size_t pos = buffer->getPosition();
-                            str.append(buffer->getArray()+pos, toRead);
+                            str.append(buffer->getBuffer()+pos, toRead);
                             buffer->setPosition(pos+toRead);
                             i += toRead;
                             if(i<size)
