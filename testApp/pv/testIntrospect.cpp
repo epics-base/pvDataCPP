@@ -147,7 +147,12 @@ static void testStructure()
     testOk1(struct1->getFieldName(1)==names1[1]);
 
     testOk1(struct1->getField("nonexistent").get()==NULL);
-    testOk1(struct1->getField(9999).get()==NULL);
+    try {
+        FieldConstPtr field(struct1->getField(9999).get());
+        testFail("missing expected exception");
+    } catch (std::out_of_range& e) {
+        testPass("caught expected exception: %s", e.what());
+    }
 
     testOk1(struct1->getFieldT("innerA")==fields1[0]);
     testOk1(struct1->getFieldT("innerB")==fields1[1]);
@@ -213,7 +218,13 @@ static void testUnion()
     testOk1(union1->getFieldName(1)==names1[1]);
 
     testOk1(union1->getField("nonexistent").get()==NULL);
-    testOk1(union1->getField(9999).get()==NULL);
+
+    try {
+        FieldConstPtr field(union1->getField(9999).get());
+        testFail("missing expected exception");
+    } catch (std::out_of_range& e) {
+        testPass("caught expected exception: %s", e.what());
+    }
 
     testOk1(union1->getFieldT("innerA")==fields1[0]);
     testOk1(union1->getFieldT("innerB")==fields1[1]);
