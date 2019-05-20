@@ -566,20 +566,6 @@ FieldConstPtr Structure::getFieldImpl(string const & fieldName, bool throws) con
     }
 }
 
-FieldConstPtr Structure::getFieldImpl(size_t fieldOffset, bool throws) const {
-    if (fieldOffset < fields.size())
-        return fields[fieldOffset];
-
-    if (throws) {
-        std::stringstream ss;
-        ss << "Failed to get field with offset "
-           << fieldOffset << " (Invalid offset)";
-        throw std::runtime_error(ss.str());
-    } else {
-        return FieldConstPtr();
-    }
-}
-
 std::ostream& Structure::dump(std::ostream& o) const
 {
     o << format::indent() << getID() << std::endl;
@@ -788,20 +774,6 @@ FieldConstPtr Union::getFieldImpl(string const & fieldName, bool throws) const {
         std::stringstream ss;
         ss << "Failed to get field: "
            << fieldName << " (not found)";
-        throw std::runtime_error(ss.str());
-    } else {
-        return FieldConstPtr();
-    }
-}
-
-FieldConstPtr Union::getFieldImpl(size_t fieldOffset, bool throws) const {
-    if (fieldOffset < fields.size())
-        return fields[fieldOffset];
-
-    if (throws) {
-        std::stringstream ss;
-        ss << "Failed to get field with offset "
-           << fieldOffset << " (Invalid offset)";
         throw std::runtime_error(ss.str());
     } else {
         return FieldConstPtr();

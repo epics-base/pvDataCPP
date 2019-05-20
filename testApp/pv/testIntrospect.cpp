@@ -169,7 +169,7 @@ static void testStructure()
     try {
         FieldConstPtr field(struct1->getFieldT(9999));
         testFail("missing required exception");
-    } catch (std::runtime_error& e) {
+    } catch (std::out_of_range& e) {
         testPass("caught expected exception: %s", e.what());
     }
 
@@ -241,7 +241,7 @@ static void testUnion()
     try {
         FieldConstPtr field(union1->getFieldT(9999));
         testFail("missing required exception");
-    } catch (std::runtime_error& e) {
+    } catch (std::out_of_range& e) {
         testPass("caught expected exception: %s", e.what());
     }
 
