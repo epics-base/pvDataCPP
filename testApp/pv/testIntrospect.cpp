@@ -148,10 +148,10 @@ static void testStructure()
 
     testOk1(struct1->getField("nonexistent").get()==NULL);
     try {
-        FieldConstPtr field(struct1->getField(9999).get());
-        testFail("missing expected exception");
+        FieldConstPtr field(struct1->getField(9999));
+        testFail("struct1->getField(9999): missing expected exception");
     } catch (std::out_of_range& e) {
-        testPass("caught expected exception: %s", e.what());
+        testPass("struct1->getField(9999): caught expected exception: %s", e.what());
     }
 
     testOk1(struct1->getFieldT("innerA")==fields1[0]);
@@ -161,16 +161,37 @@ static void testStructure()
 
     try {
         FieldConstPtr field(struct1->getFieldT("nonexistent"));
-        testFail("missing required exception");
+        testFail("struct1->getFieldT('nonexistent'): missing required exception");
     } catch (std::runtime_error& e) {
-        testPass("caught expected exception: %s", e.what());
+        testPass("struct1->getFieldT('nonexistent'): caught expected exception: %s", e.what());
     }
 
     try {
         FieldConstPtr field(struct1->getFieldT(9999));
-        testFail("missing required exception");
+        testFail("struct1->getFieldT(9999): missing required exception");
     } catch (std::out_of_range& e) {
-        testPass("caught expected exception: %s", e.what());
+        testPass("struct1->getFieldT(9999): caught expected exception: %s", e.what());
+    }
+
+    testOk1(struct1->getField<Scalar>("innerA").get()!=NULL);
+    testOk1(struct1->getField<Structure>("innerA").get()==NULL);
+    testOk1(struct1->getField<ScalarArray>(1).get()!=NULL);
+    testOk1(struct1->getField<Structure>(1).get()==NULL);
+
+    testOk1(struct1->getFieldT<Scalar>("innerA").get()!=NULL);
+    try {
+        StructureConstPtr s(struct1->getFieldT<Structure>("innerA"));
+        testFail("struct1->getFieldT<Structure>('innnerA'): missing required exception");
+    } catch (std::runtime_error& e) {
+        testPass("struct1->getFieldT<Structure>('innnerA'): caught expected exception: %s", e.what());
+    }
+
+    testOk1(struct1->getFieldT<ScalarArray>(1).get()!=NULL);
+    try {
+        StructureConstPtr s(struct1->getFieldT<Structure>(1));
+        testFail("struct1->getFieldT<Structure>(1): missing required exception");
+    } catch (std::runtime_error& e) {
+        testPass("struct1->getFieldT<Structure>(1): caught expected exception: %s", e.what());
     }
 
     testOk1(struct1->getID() == Structure::DEFAULT_ID);
@@ -221,9 +242,9 @@ static void testUnion()
 
     try {
         FieldConstPtr field(union1->getField(9999).get());
-        testFail("missing expected exception");
+        testFail("union1->getField(9999): missing expected exception");
     } catch (std::out_of_range& e) {
-        testPass("caught expected exception: %s", e.what());
+        testPass("union1->getField(9999): caught expected exception: %s", e.what());
     }
 
     testOk1(union1->getFieldT("innerA")==fields1[0]);
@@ -233,16 +254,37 @@ static void testUnion()
 
     try {
         FieldConstPtr field(union1->getFieldT("nonexistent"));
-        testFail("missing required exception");
+        testFail("union1->getFieldT('nonexistent'): missing required exception");
     } catch (std::runtime_error& e) {
-        testPass("caught expected exception: %s", e.what());
+        testPass("union1->getFieldT('nonexistent'): caught expected exception: %s", e.what());
     }
 
     try {
         FieldConstPtr field(union1->getFieldT(9999));
-        testFail("missing required exception");
+        testFail("union1->getFieldT(9999): missing required exception");
     } catch (std::out_of_range& e) {
-        testPass("caught expected exception: %s", e.what());
+        testPass("union1->getFieldT(9999): caught expected exception: %s", e.what());
+    }
+
+    testOk1(union1->getField<Scalar>("innerA").get()!=NULL);
+    testOk1(union1->getField<Structure>("innerA").get()==NULL);
+    testOk1(union1->getField<ScalarArray>(1).get()!=NULL);
+    testOk1(union1->getField<Structure>(1).get()==NULL);
+
+    testOk1(union1->getFieldT<Scalar>("innerA").get()!=NULL);
+    try {
+        StructureConstPtr s(union1->getFieldT<Structure>("innerA"));
+        testFail("union1->getFieldT<Structure>('innnerA'): missing required exception");
+    } catch (std::runtime_error& e) {
+        testPass("union1->getFieldT<Structure>('innnerA'): caught expected exception: %s", e.what());
+    }
+
+    testOk1(union1->getFieldT<ScalarArray>(1).get()!=NULL);
+    try {
+        StructureConstPtr s(union1->getFieldT<Structure>(1));
+        testFail("union1->getFieldT<Structure>(1): missing required exception");
+    } catch (std::runtime_error& e) {
+        testPass("union1->getFieldT<Structure>(1): caught expected exception: %s", e.what());
     }
 
     testOk1(union1->getID() == Union::DEFAULT_ID);
@@ -366,7 +408,7 @@ static void testMapping()
 
 MAIN(testIntrospect)
 {
-    testPlan(342);
+    testPlan(358);
     fieldCreate = getFieldCreate();
     pvDataCreate = getPVDataCreate();
     standardField = getStandardField();
