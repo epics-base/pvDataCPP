@@ -14,6 +14,8 @@
 #include <iostream>
 #include <map>
 
+#include <epicsAssert.h>
+
 #include <pv/lock.h>
 #include <pv/noDefaultMethods.h>
 #include <pv/pvType.h>
@@ -360,6 +362,8 @@ public:
    //! Allocate a new instance
    //! @version Added after 7.0.0
     std::tr1::shared_ptr<PVField> build() const;
+
+    enum {isField=1};
 
 protected:
     /**
@@ -724,6 +728,7 @@ public:
     template<typename FT>
     std::tr1::shared_ptr<const FT> getField(std::string const &fieldName) const
     {
+        STATIC_ASSERT(FT::isField); // only allow cast from Field sub-class
         FieldConstPtr field(getField(fieldName));
         if (field)
             return std::tr1::dynamic_pointer_cast<const FT>(field);
@@ -742,6 +747,7 @@ public:
     template<typename FT>
     std::tr1::shared_ptr<const FT> getFieldT(std::string const &fieldName) const
     {
+        STATIC_ASSERT(FT::isField); // only allow cast from Field sub-class
         return std::tr1::dynamic_pointer_cast<const FT>(getFieldT(fieldName));
     }
 
@@ -756,6 +762,7 @@ public:
     template<typename FT>
     std::tr1::shared_ptr<const FT> getField(std::size_t index) const
     {
+        STATIC_ASSERT(FT::isField); // only allow cast from Field sub-class
         const FieldConstPtr& field(getField(index));
         if (field)
             return std::tr1::dynamic_pointer_cast<const FT>(field);
@@ -774,6 +781,7 @@ public:
     template<typename FT>
     std::tr1::shared_ptr<const FT> getFieldT(std::size_t index) const
     {
+        STATIC_ASSERT(FT::isField); // only allow cast from Field sub-class
         return std::tr1::dynamic_pointer_cast<const FT>(getFieldT(index));
     }
 
@@ -877,6 +885,7 @@ public:
     template<typename FT>
     std::tr1::shared_ptr<const FT> getField(std::string const &fieldName) const
     {
+        STATIC_ASSERT(FT::isField); // only allow cast from Field sub-class
         FieldConstPtr field = getField(fieldName);
         if (field)
             return std::tr1::dynamic_pointer_cast<const FT>(field);
@@ -895,6 +904,7 @@ public:
     template<typename FT>
     std::tr1::shared_ptr<const FT> getFieldT(std::string const &fieldName) const
     {
+        STATIC_ASSERT(FT::isField); // only allow cast from Field sub-class
         return std::tr1::dynamic_pointer_cast<const FT>(getFieldT(fieldName));
     }
 
@@ -909,6 +919,7 @@ public:
     template<typename FT>
     std::tr1::shared_ptr<const FT> getField(std::size_t index) const
     {
+        STATIC_ASSERT(FT::isField); // only allow cast from Field sub-class
         FieldConstPtr field = getField(index);
         if (field)
             return std::tr1::dynamic_pointer_cast<const FT>(field);
@@ -927,6 +938,7 @@ public:
     template<typename FT>
     std::tr1::shared_ptr<const FT> getFieldT(std::size_t index) const
     {
+        STATIC_ASSERT(FT::isField); // only allow cast from Field sub-class
         return std::tr1::dynamic_pointer_cast<const FT>(getFieldT(index));
     }
 
