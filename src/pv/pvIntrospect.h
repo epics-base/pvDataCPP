@@ -719,7 +719,7 @@ public:
      * @return The introspection interface.
      * This will hold a null pointer if the field is not in the structure.
      */
-    FieldConstPtr getField(std::string const &fieldName) const {return getFieldImpl(fieldName, false);};
+    FieldConstPtr getField(std::string const &fieldName) const;
 
     template<typename FT>
     std::tr1::shared_ptr<const FT> getField(std::string const &fieldName) const
@@ -751,7 +751,7 @@ public:
      * @return The introspection interface.
      * This will hold a null pointer if the field is not in the structure.
      */
-    FieldConstPtr getField(std::size_t index) const {return getFieldImpl(index, false);}
+    const FieldConstPtr& getField(std::size_t index) const {return fields.at(index);}
 
     template<typename FT>
     std::tr1::shared_ptr<const FT> getField(std::size_t index) const
@@ -872,7 +872,7 @@ public:
      * @return The introspection interface.
      * This will hold a null pointer if the field is not in the union.
      */
-    FieldConstPtr getField(std::string const &fieldName) const {return getFieldImpl(fieldName, false);};
+    FieldConstPtr getField(std::string const &fieldName) const;
 
     template<typename FT>
     std::tr1::shared_ptr<const FT> getField(std::string const &fieldName) const
@@ -904,7 +904,7 @@ public:
      * @return The introspection interface.
      * This will hold a null pointer if the field is not in the union.
      */
-    FieldConstPtr getField(std::size_t index) const {return getFieldImpl(index, false);}
+    FieldConstPtr getField(std::size_t index) const {return fields.at(index);}
 
     template<typename FT>
     std::tr1::shared_ptr<const FT> getField(std::size_t index) const
