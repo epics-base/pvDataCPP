@@ -758,6 +758,18 @@ template class PVScalarValue<uint64>;
 template class PVScalarValue<float>;
 template class PVScalarValue<double>;
 template class PVScalarValue<std::string>;
+template class PVValueArray<boolean>;
+template class PVValueArray<int8>;
+template class PVValueArray<uint8>;
+template class PVValueArray<int16>;
+template class PVValueArray<uint16>;
+template class PVValueArray<int32>;
+template class PVValueArray<uint32>;
+template class PVValueArray<int64>;
+template class PVValueArray<uint64>;
+template class PVValueArray<float>;
+template class PVValueArray<double>;
+template class PVValueArray<std::string>;
 
 }} // namespace epics::pvData
 
