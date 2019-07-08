@@ -158,7 +158,7 @@ public:
     Thread(std::string name,
            ThreadPriority priority,
            Runnable *runnable,
-           epicsThreadStackSizeClass stkcls=epicsThreadStackSmall);
+           epicsThreadStackSizeClass stkcls=epicsThreadStackBig);
 
     /**
      * 

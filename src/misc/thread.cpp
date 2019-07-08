@@ -52,7 +52,7 @@ void Thread::Config::x_setdefault()
     this->p_prio = epicsThreadPriorityLow;
     this->p_autostart = true;
     this->p_runner = NULL;
-    (*this).stack(epicsThreadStackSmall);
+    (*this).stack(epicsThreadStackBig);
 }
 
 size_t Thread::num_instances;

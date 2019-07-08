@@ -223,7 +223,7 @@ void RefMonitor::start(double period)
     impl->period = period;
     impl->worker.reset(new epicsThread(*impl,
                                        "RefMonitor",
-                                       epicsThreadGetStackSize(epicsThreadStackSmall),
+                                       epicsThreadGetStackSize(epicsThreadStackBig),
                                        epicsThreadPriorityMin));
     impl->worker->start();
 }
