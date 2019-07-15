@@ -74,7 +74,7 @@ struct ValueBuilder::child_scalar_array : public ValueBuilder::child
     {
         builder->addArray(name, array.original_type());
     }
-    virtual void store(const PVFieldPtr& val)
+    virtual void store(const PVFieldPtr& val) OVERRIDE FINAL
     {
         if(val->getField()->getType()!=scalarArray)
             THROW_EXCEPTION2(std::logic_error, "Scalar Array type mis-match");
