@@ -22,6 +22,8 @@
 #include <pv/byteBuffer.h>
 #include <pv/serialize.h>
 #include <pv/pvdVersion.h>
+#include <pv/sharedVector.h>
+#include <pv/anyscalar.h>
 
 #include <shareLib.h>
 
@@ -33,31 +35,6 @@
 #  define PVD_DEPRECATED(msg) EPICS_DEPRECATED
 #endif
 #define PVD_DEPRECATED_52 PVD_DEPRECATED("See https://github.com/epics-base/pvDataCPP/issues/52")
-
-/* C++11 keywords
- @code
- struct Base {
-   virtual void foo();
- };
- struct Class : public Base {
-   virtual void foo() OVERRIDE FINAL;
- };
- @endcode
- */
-#ifndef FINAL
-#  if __cplusplus>=201103L
-#    define FINAL final
-#  else
-#    define FINAL
-#  endif
-#endif
-#ifndef OVERRIDE
-#  if __cplusplus>=201103L
-#    define OVERRIDE override
-#  else
-#    define OVERRIDE
-#  endif
-#endif
 
 namespace epics { namespace pvData { 
 
@@ -177,157 +154,6 @@ typedef std::tr1::shared_ptr<const UnionArray> UnionArrayConstPtr;
  */
 typedef std::tr1::shared_ptr<const BoundedString> BoundedStringConstPtr;
 
-/**
- * Definition of support field types.
- */
-enum Type {
-    /**
-     * The type is scalar. It has a scalarType
-     */
-    scalar,
-    /**
-     * The type is scalarArray. Each element is a scalar of the same scalarType.
-     */
-    scalarArray,
-    /**
-     * The type is structure.
-     */
-    structure,
-    /**
-     * The type is structureArray. Each element is a structure.
-     */
-    structureArray,
-    /**
-     * The type is an union.
-     */
-    union_,
-    /**
-     * The type is an array of unions.
-     */
-    unionArray
-};
-
-/**
- * @brief Convenience functions for Type.
- *
- */
-namespace TypeFunc {
-    /**
-     * Get a name for the type.
-     * @param  type The type.
-     * @return The name for the type.
-     */
-    epicsShareExtern const char* name(Type type);
-};
-
-epicsShareExtern std::ostream& operator<<(std::ostream& o, const Type& type);
-
-
-/**
- * Definition of support scalar types.
- */
-enum ScalarType {
-    /**
-     * The type is boolean, i.e. value can be @c false or @c true
-     */
-    pvBoolean,
-    /**
-     * The type is byte, i.e. a 8 bit signed integer.
-     */
-    pvByte,
-    /**
-     * The type is short, i.e. a 16 bit signed integer.
-     */
-    pvShort,
-    /**
-     * The type is int, i.e. a 32 bit signed integer.
-     */
-    pvInt,
-    /**
-     * The type is long, i.e. a 64 bit signed integer.
-     */
-    pvLong,
-    /**
-     * The type is unsigned byte, i.e. a 8 bit unsigned integer.
-     */
-    pvUByte,
-    /**
-     * The type is unsigned short, i.e. a 16 bit unsigned integer.
-     */
-    pvUShort,
-    /**
-     * The type is unsigned int, i.e. a 32 bit unsigned integer.
-     */
-    pvUInt,
-    /**
-     * The type is unsigned long, i.e. a 64 bit unsigned integer.
-     */
-    pvULong,
-    /**
-     * The type is float, i.e. 32 bit IEEE floating point,
-     */
-    pvFloat,
-    /**
-     * The type is float, i.e. 64 bit IEEE floating point,
-     */
-    pvDouble,
-    /**
-     * The type is string, i.e. a UTF8 character string.
-     */
-    pvString
-};
-
-#define MAX_SCALAR_TYPE pvString
-
-/**
- * @brief Convenience functions for ScalarType.
- *
- */
-namespace ScalarTypeFunc {
-    /**
-     * Is the type an integer, i.e. is it one of byte,...ulong
-     * @param  scalarType The type.
-     * @return (false,true) if the scalarType is an integer.
-     */
-    epicsShareExtern bool isInteger(ScalarType scalarType);
-    /**
-     * Is the type an unsigned integer, i.e. is it one of ubyte,...ulong
-     * @param  scalarType The type.
-     * @return (false,true) if the scalarType is an integer.
-     */
-    epicsShareExtern bool isUInteger(ScalarType scalarType);
-    /**
-     * Is the type numeric, i.e. is it one of byte,...,double
-     * @param  scalarType The type.
-     * @return (false,true) if the scalarType is a numeric
-     */
-    epicsShareExtern bool isNumeric(ScalarType scalarType);
-    /**
-     * Is the type primitive, i.e. not string
-     * @param  scalarType The type.
-     * @return (false,true) if the scalarType is primitive.
-     */
-    epicsShareExtern bool isPrimitive(ScalarType scalarType);
-    /**
-     * Get the scalarType for value.
-     * @param  value The name of the scalar type.
-     * @return The scalarType.
-     * An exception is thrown if the name is not the name of a scalar type.
-     */
-    epicsShareExtern ScalarType getScalarType(std::string const &value);
-    /**
-     * Get a name for the scalarType.
-     * @param  scalarType The type.
-     * @return The name for the scalarType.
-     */
-    epicsShareExtern const char* name(ScalarType scalarType);
-
-    //! gives sizeof(T) where T depends on the scalar type id.
-    epicsShareExtern size_t elementSize(ScalarType id);
-};
-
-epicsShareExtern std::ostream& operator<<(std::ostream& o, const ScalarType& scalarType);
-
 
 /**
  * @brief This class implements introspection object for field.
@@ -407,6 +233,8 @@ public:
     
     virtual std::string getID() const OVERRIDE;
 
+    const AnyScalar& defaultValue() const { return defval; }
+
     virtual std::ostream& dump(std::ostream& o) const OVERRIDE FINAL;
 
     virtual void serialize(ByteBuffer *buffer, SerializableControl *control) const OVERRIDE;
@@ -418,9 +246,11 @@ public:
     
 protected:
     Scalar(ScalarType scalarType);
+    Scalar(const AnyScalar& defval);
 private:
     static int8 getTypeCodeLUT(ScalarType scalarType);
     ScalarType scalarType;
+    const AnyScalar defval;
     friend class FieldCreate;
     friend class ScalarArray;
     friend class BoundedScalarArray;
@@ -499,11 +329,14 @@ public:
     typedef ScalarArray& reference;
     typedef const ScalarArray& const_reference;
 
+protected:
     /**
      * Constructor
      * @param scalarType The scalarType for the field.
      */
     ScalarArray(ScalarType scalarType);
+    ScalarArray(const shared_vector<const void>& defval);
+public:
     /**
      * Get the scalarType for the elements.
      * @return the scalarType
@@ -515,6 +348,8 @@ public:
     virtual std::size_t getMaximumCapacity() const OVERRIDE {return 0;}
 
     virtual std::string getID() const OVERRIDE;
+
+    const shared_vector<const void>& defaultValue() const { return defval; }
 
     virtual std::ostream& dump(std::ostream& o) const OVERRIDE FINAL;
 
@@ -529,6 +364,7 @@ public:
 private:
     const std::string getIDScalarArrayLUT() const;
     ScalarType elementType;
+    const shared_vector<const void> defval;
     friend class FieldCreate;
     EPICS_NOT_COPYABLE(ScalarArray)
 };
@@ -1093,6 +929,9 @@ public:
      */
     FieldBuilderPtr add(std::string const & name, ScalarType scalarType);
 
+    //! Add Scalar w/ default value
+    FieldBuilderPtr add(std::string const & name, const AnyScalar& defval);
+
     /**
      * Add a @c BoundedString.
      * @param name name of the array.
@@ -1116,6 +955,8 @@ public:
      * @return this instance of a @c FieldBuilder.
      */
     FieldBuilderPtr addArray(std::string const & name, ScalarType scalarType);
+
+    FieldBuilderPtr addArray(std::string const & name, const shared_vector<const void>& defval);
     
     /**
      * Add fixed-size array of @c Scalar elements.
@@ -1267,6 +1108,8 @@ public:
      * @throws IllegalArgumentException if an illegal type is specified.
      */
     ScalarConstPtr createScalar(ScalarType scalarType) const;
+    //! Create Scalar with default value
+    ScalarConstPtr createScalar(const AnyScalar& defval) const;
     /**
      * Create a @c BoundedString.
      * @param maxLength a string maximum length.
@@ -1280,6 +1123,8 @@ public:
      * @return An @c Array Interface for the newly created object.
      */
     ScalarArrayConstPtr createScalarArray(ScalarType elementType) const;
+    //! Create array of scalars with default value
+    ScalarArrayConstPtr createScalarArray(const shared_vector<const void>& defval) const;
     /*
      * Create an @c Array field, fixed size array.
      * @param elementType The @c ScalarType for array elements
@@ -1415,47 +1260,6 @@ private:
 FORCE_INLINE const FieldCreatePtr& getFieldCreate() {
     return FieldCreate::getFieldCreate();
 }
-
-/** Define a compile time mapping from
- * type to enum value.
- @code
-  ScalarType code = (ScalarType)ScalarTypeID<int8>::value;
-  assert(code==pvByte);
- @endcode
- *
- * For unspecified types this evaluates to an invalid ScalarType
- * value (eg -1).
- */
-template<typename T>
-struct ScalarTypeID {};
-
-/**
- * Static mapping from ScalarType enum to value type.
- @code
-   typename ScalarTypeTraits<pvByte>::type value = 4;
- @endcode
- */
-template<ScalarType ID>
-struct ScalarTypeTraits {};
-
-#define OP(ENUM, TYPE) \
-template<> struct ScalarTypeTraits<ENUM> {typedef TYPE type;}; \
-template<> struct ScalarTypeID<TYPE> { enum {value=ENUM}; }; \
-template<> struct ScalarTypeID<const TYPE> { enum {value=ENUM}; };
-
-OP(pvBoolean, boolean)
-OP(pvByte, int8)
-OP(pvShort, int16)
-OP(pvInt, int32)
-OP(pvLong, int64)
-OP(pvUByte, uint8)
-OP(pvUShort, uint16)
-OP(pvUInt, uint32)
-OP(pvULong, uint64)
-OP(pvFloat, float)
-OP(pvDouble, double)
-OP(pvString, std::string)
-#undef OP
 
 bool epicsShareExtern compare(const Field&, const Field&);
 bool epicsShareExtern compare(const Scalar&, const Scalar&);

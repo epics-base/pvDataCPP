@@ -57,6 +57,13 @@ template<> const ScalarType PVFloatArray::typeCode = pvFloat;
 template<> const ScalarType PVDoubleArray::typeCode = pvDouble;
 template<> const ScalarType PVStringArray::typeCode = pvString;
 
+template<typename T>
+PVScalarValue<T>::PVScalarValue(ScalarConstPtr const & scalar)
+    :PVScalar(scalar)
+{
+    if(!scalar->defaultValue().empty())
+        storage.value = scalar->defaultValue().ref<T>();
+}
 
 template<typename T>
 PVScalarValue<T>::~PVScalarValue() {}
@@ -140,6 +147,9 @@ PVString::PVString(ScalarConstPtr const & scalar)
         storage.maxLength = boundedString->getMaximumLength();
     else
         storage.maxLength = 0;
+
+    if(!scalar->defaultValue().empty())
+        storage.value = scalar->defaultValue().ref<std::string>();
 }
 
 std::ostream& PVString::dumpValue(std::ostream& o) const
@@ -190,9 +200,13 @@ void PVArray::checkLength(size_t len) const
 template<typename T>
 PVValueArray<T>::PVValueArray(ScalarArrayConstPtr const & scalarArray)
     :base_t(scalarArray)
-    ,value()
+    ,value(static_shared_vector_cast<const T>(scalarArray->defaultValue()))
   
-{}
+{
+    // should be ensured by FieldCreate
+    assert(scalarArray->defaultValue().empty()
+           || scalarArray->defaultValue().original_type()==scalarArray->getElementType());
+}
 
 PVValueArray<PVStructurePtr>::PVValueArray(StructureArrayConstPtr const & structureArray)
     :base_t(structureArray)

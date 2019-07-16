@@ -22,6 +22,7 @@
 #include <pv/standardPVField.h>
 #include <pv/pvTimeStamp.h>
 #include <pv/bitSet.h>
+#include <pv/current_function.h>
 
 using namespace epics::pvData;
 using std::tr1::static_pointer_cast;
@@ -738,9 +739,46 @@ static void testSubField()
     testEqual(value->getSubField(9), PVFieldPtr());
 }
 
+static void testDef()
+{
+    testDiag("In %s", CURRENT_FUNCTION);
+
+    testThrows(std::logic_error, getFieldCreate()->createScalar(AnyScalar()));
+    testThrows(std::logic_error, getFieldCreate()->createScalarArray(shared_vector<const void>()));
+
+    AnyScalar scalar(int32(5));
+
+    shared_vector<const int32> arr;
+    {
+        shared_vector<int32> temp;
+
+        temp.push_back(1);
+        temp.push_back(2);
+        arr = freeze(temp);
+    }
+    shared_vector<const void> varr(static_shared_vector_cast<const void>(arr));
+
+    StructureConstPtr def(FieldBuilder::begin()
+                          ->addArray("empty", pvInt)
+                          ->addArray("def", varr)
+                          ->add("sempty", pvInt)
+                          ->add("sdef", scalar)
+                          ->createStructure());
+
+    testOk1(def->getField<ScalarArray>("empty")->defaultValue().empty());
+    testOk1(def->getField<Scalar>("sempty")->defaultValue().empty());
+
+    PVStructurePtr inst(def->build());
+
+    testOk1(inst->getSubFieldT<PVIntArray>("empty")->view().empty());
+    testEqual(inst->getSubFieldT<PVInt>("sempty")->get(), int32(0));
+    testEqual(inst->getSubFieldT<PVIntArray>("def")->view(), arr);
+    testEqual(inst->getSubFieldT<PVInt>("sdef")->get(), int32(5));
+}
+
 MAIN(testPVData)
 {
-    testPlan(271);
+    testPlan(279);
     try{
         fieldCreate = getFieldCreate();
         pvDataCreate = getPVDataCreate();
@@ -756,6 +794,7 @@ MAIN(testPVData)
         testFieldAccess();
         testAnyScalar();
         testSubField();
+        testDef();
     }catch(std::exception& e){
         PRINT_EXCEPTION(e);
         testAbort("Unhandled Exception: %s", e.what());

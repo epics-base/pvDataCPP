@@ -16,11 +16,14 @@
 #endif
 
 #include <cassert>
+#include <stddef.h>
 
 #include "pv/sharedPtr.h"
-#include "pv/pvIntrospect.h"
+#include "pv/pvType.h"
 #include "pv/typeCast.h"
 #include "pv/templateMeta.h"
+
+#include <shareLib.h>
 
 namespace epics { namespace pvData {
 
@@ -959,8 +962,6 @@ namespace ScalarTypeFunc {
     }
 }
 
-}} // namespace epics::pvData
-
 // Global operators for shared_vector
 
 template<typename A, typename B>
@@ -998,6 +999,10 @@ std::ostream& operator<<(std::ostream& strm, const epics::pvData::shared_vector<
     return strm;
 }
 
+epicsShareFunc
+std::ostream& operator<<(std::ostream& strm, const shared_vector<const void>& arr);
+
+}} // namespace epics::pvData
 
 #endif // SHAREDVECTOR_H
 
