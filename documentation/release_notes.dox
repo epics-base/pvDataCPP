@@ -2,6 +2,17 @@
 
 @page release_notes Release Notes
 
+Release 8.0.0 (July 2019)
+=========================
+
+- Deprecations
+ - ByteBuffer::getArray()
+- Removals
+ - pv/localStaticLock.h
+ - pv/pvCopy.h (see epics::pvData::PVRequestMapper)
+- Additions
+ - Add {Structure,Union}::getFieldT
+
 Release 7.1.3 (Apr 2019)
 ========================
 
