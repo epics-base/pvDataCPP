@@ -61,7 +61,10 @@ bool Timer::cancel(TimerCallbackPtr const &timerCallback)
 {
     Lock xx(mutex);
     if(!timerCallback->onList) return false;
-    if(!alive) return true;
+    if(!alive) {
+        timerCallback->onList = false;
+        return true;
+    }
     for(queue_t::iterator it(queue.begin()), end(queue.end()); it != end; ++it)
     {
         TimerCallbackPtr& cur = *it;
