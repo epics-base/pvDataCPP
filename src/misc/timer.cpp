@@ -61,6 +61,7 @@ bool Timer::cancel(TimerCallbackPtr const &timerCallback)
 {
     Lock xx(mutex);
     if(!timerCallback->onList) return false;
+    if(!alive) return true;
     for(queue_t::iterator it(queue.begin()), end(queue.end()); it != end; ++it)
     {
         TimerCallbackPtr& cur = *it;
@@ -111,7 +112,7 @@ void Timer::run()
                 work->callback();
             }
 
-            if(work->period > 0.0) {
+            if(work->period > 0.0 && alive) {
                 work->timeToRun += work->period;
                 addElement(work);
             }
