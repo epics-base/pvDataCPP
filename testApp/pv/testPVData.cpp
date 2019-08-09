@@ -38,6 +38,30 @@ static string alarmTimeStamp("alarm,timeStamp");
 static string alarmTimeStampValueAlarm("alarm,timeStamp,valueAlarm");
 static string allProperties("alarm,timeStamp,display,control,valueAlarm");
 
+static void testSizes()
+{
+#define SHOW(T) testDiag("sizeof(" #T ")==%zu", sizeof(T))
+    SHOW(Field);
+    SHOW(Structure);
+    SHOW(StructureArray);
+    SHOW(Union);
+    SHOW(UnionArray);
+    SHOW(Scalar);
+    SHOW(ScalarArray);
+    SHOW(PVField);
+    SHOW(PVStructure);
+    SHOW(PVStructureArray);
+    SHOW(PVUnion);
+    SHOW(PVUnionArray);
+    SHOW(PVScalar);
+    SHOW(PVScalarArray);
+    SHOW(PVInt);
+    SHOW(PVIntArray);
+    SHOW(PVString);
+    SHOW(PVStringArray);
+#undef SHOW
+}
+
 static void testCreatePVStructure()
 {
     PVStructurePtr pv0 = standardPVField->scalar(
@@ -747,6 +771,7 @@ MAIN(testPVData)
         standardField = getStandardField();
         standardPVField = getStandardPVField();
         convert = getConvert();
+        testSizes();
         testCreatePVStructure();
         testCreatePVStructureWithInvalidName();
         testPVScalar();
