@@ -19,9 +19,7 @@
 #define epicsExportSharedSymbols
 #include <pv/bitSet.h>
 #include <pv/pvData.h>
-#if EPICS_VERSION_INT>=VERSION_INT(3,15,0,1)
-#  include <pv/json.h>
-#endif
+#include <pv/json.h>
 
 namespace epics { namespace pvData {
 
@@ -404,15 +402,11 @@ void printRaw(std::ostream& strm, const PVStructure::Formatter& format, const PV
 std::ostream& operator<<(std::ostream& strm, const PVStructure::Formatter& format)
 {
     if(format.xfmt==PVStructure::Formatter::JSON) {
-#if EPICS_VERSION_INT>=VERSION_INT(3,15,0,1)
         JSONPrintOptions opts;
         opts.multiLine = false;
         printJSON(strm, format.xtop, format.xshow ? *format.xshow : BitSet().set(0), opts);
         strm<<'\n';
         return strm;
-#else
-        // fall through to Raw
-#endif
 
     } else if(format.xfmt==PVStructure::Formatter::NT) {
         std::string id(format.xtop.getStructure()->getID()),

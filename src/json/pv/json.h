@@ -13,8 +13,6 @@
 #include <pv/pvdVersion.h>
 #include <pv/pvData.h>
 
-#if EPICS_VERSION_INT>=VERSION_INT(3,15,0,1)
-
 #ifdef epicsExportSharedSymbols
 #   define pvjson_epicsExportSharedSymbols
 #   undef epicsExportSharedSymbols
@@ -146,9 +144,5 @@ typedef size_t size_arg;
 /** @} */
 
 }} // namespace epics::pvData
-
-#else
-#  error JSON parser requires EPICS Base >= 3.15.0.1
-#endif // EPICS_VERSION_INT
 
 #endif // PV_JSON_H

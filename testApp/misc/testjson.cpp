@@ -7,8 +7,6 @@
 
 #include <pv/pvdVersion.h>
 
-#if EPICS_VERSION_INT>=VERSION_INT(3,15,0,1)
-
 #include <pv/json.h>
 #include <pv/bitSet.h>
 #include <pv/valueBuilder.h>
@@ -290,15 +288,3 @@ MAIN(testjson)
     }
     return testDone();
 }
-
-#else // EPICS_VERSION_INT
-
-#include <epicsUnitTest.h>
-
-MAIN(testjson)
-{
-    testPlan(1);
-    testSkip(1, "JSON parser requires Base >=3.15.0.1");
-    return testDone();
-}
-#endif //EPICS_VERSION_INT

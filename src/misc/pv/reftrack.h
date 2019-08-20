@@ -46,27 +46,10 @@
 #include <stdlib.h>
 
 #include <epicsVersion.h>
+#include <epicsAtomic.h>
 
-#ifndef VERSION_INT
-#  define VERSION_INT(V,R,M,P) ( ((V)<<24) | ((R)<<16) | ((M)<<8) | (P))
-#endif
-
-#ifndef EPICS_VERSION_INT
-#  define EPICS_VERSION_INT VERSION_INT(EPICS_VERSION, EPICS_REVISION, EPICS_MODIFICATION, EPICS_PATCH_LEVEL)
-#endif
-
-#if EPICS_VERSION_INT>=VERSION_INT(3,15,1,0)
-#  include <epicsAtomic.h>
-#  define REFTRACK_USE_ATOMIC
-#endif
-
-#ifdef REFTRACK_USE_ATOMIC
-#  define REFTRACE_INCREMENT(counter) ::epics::atomic::increment(counter)
-#  define REFTRACE_DECREMENT(counter) ::epics::atomic::decrement(counter)
-#else
-#  define REFTRACE_INCREMENT(counter) do{}while(0)
-#  define REFTRACE_DECREMENT(counter) do{}while(0)
-#endif
+#define REFTRACE_INCREMENT(counter) ::epics::atomic::increment(counter)
+#define REFTRACE_DECREMENT(counter) ::epics::atomic::decrement(counter)
 
 #include <shareLib.h>
 

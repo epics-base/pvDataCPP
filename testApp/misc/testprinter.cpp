@@ -16,10 +16,6 @@
 #include <pv/pvData.h>
 #include <pv/standardField.h>
 
-#if EPICS_VERSION_INT>=VERSION_INT(3,15,0,1)
-#  define USE_JSON
-#endif
-
 namespace pvd = epics::pvData;
 
 typedef std::vector<std::string> lines_t;

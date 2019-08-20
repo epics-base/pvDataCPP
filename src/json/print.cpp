@@ -11,9 +11,6 @@
 #include <pv/pvData.h>
 #include <pv/valueBuilder.h>
 #include <pv/bitSet.h>
-
-#if EPICS_VERSION_INT>=VERSION_INT(3,15,0,1)
-
 #include "pv/json.h"
 
 namespace pvd = epics::pvData;
@@ -232,5 +229,3 @@ void printJSON(std::ostream& strm,
 }
 
 }} // namespace epics::pvData
-
-#endif // EPICS_VERSION_INT

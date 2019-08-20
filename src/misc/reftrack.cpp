@@ -25,15 +25,6 @@
 
 namespace {
 
-#ifndef REFTRACK_USE_ATOMIC
-static inline
-size_t readref(const size_t *ref)
-{
-    volatile const size_t *vref = ref;
-    return *vref;
-}
-#endif
-
 typedef epicsGuard<epicsMutex> Guard;
 typedef epicsGuardRelease<epicsMutex> UnGuard;
 
@@ -88,11 +79,7 @@ size_t readRefCounter(const char *name)
     refgbl_t::counters_t::iterator it(refgbl->counters.find(name));
     if(it==refgbl->counters.end())
         return 0;
-#ifdef REFTRACK_USE_ATOMIC
     return atomic::get(*it->second);
-#else
-    return readref(it->second);
-#endif
 }
 
 const RefSnapshot::Count&
@@ -119,11 +106,7 @@ void RefSnapshot::update()
                                             end=counters.end();
         it!=end; ++it)
     {
-#ifdef REFTRACK_USE_ATOMIC
         size_t cnt = atomic::get(*it->second);
-#else
-        size_t cnt = readref(it->second);
-#endif
 
         counts[it->first] = Count(cnt, 0);
     }

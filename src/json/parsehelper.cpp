@@ -9,8 +9,6 @@
 #define epicsExportSharedSymbols
 #include <pv/pvdVersion.h>
 
-#if EPICS_VERSION_INT>=VERSION_INT(3,15,0,1)
-
 #include "pv/json.h"
 
 namespace {
@@ -118,5 +116,3 @@ bool yajl_parse_helper(std::istream& src,
 }
 
 }} // namespace epics::pvData
-
-#endif // EPICS_VERSION_INT
