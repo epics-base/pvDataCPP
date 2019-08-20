@@ -2,6 +2,12 @@
 
 @page release_notes Release Notes
 
+Release X.Y.Z (UNRELEASED)
+==========================
+
+- Incompatible changes
+ - Requires Base >= 3.15
+
 Release 8.0.0 (July 2019)
 =========================
 
