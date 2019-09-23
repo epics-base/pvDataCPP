@@ -1,8 +1,5 @@
-sudo: false
-dist: trusty
 language: c++
-compiler:
-  - gcc
+
 addons:
   apt:
     packages:
@@ -12,18 +9,35 @@ addons:
     - clang
     - g++-mingw-w64-i686
     - qemu-system-x86
+
+matrix:
+  include:
+  - dist: bionic
+    env: BRBASE=7.0 CMPLR=gcc
+  - dist: trusty
+    env: BRBASE=7.0 CMPLR=gcc
+  - dist: bionic
+    env: BRBASE=7.0 CMPLR=clang
+  - dist: trusty
+    env: BRBASE=7.0 CMPLR=clang
+  - dist: trusty
+    env: BRBASE=7.0 USR_CXXFLAGS=-std=c++11
+  - dist: trusty
+    env: BRBASE=7.0 CMPLR=clang USR_CXXFLAGS=-std=c++11
+  - dist: trusty
+    env: BRBASE=7.0 WINE=32 TEST=NO STATIC=YES
+  - dist: trusty
+    env: BRBASE=7.0 WINE=32 TEST=NO STATIC=NO
+  - dist: trusty
+    env: BRBASE=7.0 RTEMS=4.10 TEST=NO
+  - dist: trusty
+    env: BRBASE=7.0 RTEMS=4.9 TEST=NO
+  - dist: trusty
+    env: BRBASE=3.16
+  - dist: trusty
+    env: BRBASE=3.15
+
 install:
  - ./.ci/travis-prepare.sh
 script:
  - ./.ci/travis-build.sh
-env:
- - BRBASE=7.0 CMPLR=gcc
- - BRBASE=7.0 CMPLR=clang
- - BRBASE=7.0 USR_CXXFLAGS=-std=c++11
- - BRBASE=7.0 CMPLR=clang USR_CXXFLAGS=-std=c++11
- - BRBASE=7.0 WINE=32 TEST=NO STATIC=YES
- - BRBASE=7.0 WINE=32 TEST=NO STATIC=NO
- - BRBASE=7.0 RTEMS=4.10 TEST=NO
- - BRBASE=7.0 RTEMS=4.9 TEST=NO
- - BRBASE=3.16
- - BRBASE=3.15
