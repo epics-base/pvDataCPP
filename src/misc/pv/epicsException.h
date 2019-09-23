@@ -207,7 +207,7 @@ public:
     /**
      * Constructor.
      */
-    explicit BaseException(const std::string msg) : std::logic_error(msg) {}
+    explicit BaseException(const std::string& msg) : std::logic_error(msg) {}
 
     /**
      * Destructor.
