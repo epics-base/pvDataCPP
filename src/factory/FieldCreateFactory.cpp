@@ -222,17 +222,15 @@ BoundedString::~BoundedString()
 }
 
 
-static string emptyStringtring;
-
 static void serializeStructureField(const Structure* structure, ByteBuffer* buffer, SerializableControl* control)
 {
-	// to optimize default (non-empty) IDs optimization
-	// empty IDs are not allowed
-	string id = structure->getID();
-	if (id == Structure::DEFAULT_ID)	// TODO slow comparison
-		SerializeHelper::serializeString(emptyStringtring, buffer, control);
-	else
-	    SerializeHelper::serializeString(id, buffer, control);
+    // to optimize default (non-empty) IDs optimization
+    // empty IDs are not allowed
+    string id = structure->getID();
+    if (id == Structure::DEFAULT_ID)	// TODO slow comparison
+        SerializeHelper::serializeString(string(), buffer, control);
+    else
+        SerializeHelper::serializeString(id, buffer, control);
 
     FieldConstPtrArray const & fields = structure->getFields();
     StringArray const & fieldNames = structure->getFieldNames();
@@ -260,7 +258,7 @@ static StructureConstPtr deserializeStructureField(const FieldCreate* fieldCreat
     if (id.empty())
         return fieldCreate->createStructure(fieldNames, fields);
     else
-    	return fieldCreate->createStructure(id, fieldNames, fields);
+        return fieldCreate->createStructure(id, fieldNames, fields);
 }
 
 static void serializeUnionField(const Union* punion, ByteBuffer* buffer, SerializableControl* control)
@@ -269,7 +267,7 @@ static void serializeUnionField(const Union* punion, ByteBuffer* buffer, Seriali
 	// empty IDs are not allowed
 	string id = punion->getID();
 	if (id == Union::DEFAULT_ID)	// TODO slow comparison
-		SerializeHelper::serializeString(emptyStringtring, buffer, control);
+        SerializeHelper::serializeString(string(), buffer, control);
 	else
 	    SerializeHelper::serializeString(id, buffer, control);
 
