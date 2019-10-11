@@ -58,8 +58,9 @@ struct FieldCreate::Helper {
 
         std::pair<cache_t::iterator, cache_t::iterator> itp(create->cache.equal_range(hash));
         for(; itp.first!=itp.second; ++itp.first) {
-            Field* const cent(itp.first->second);
-            if(compare(*cent, *ent)) {
+            Field* cent(itp.first->second);
+            FLD* centx(dynamic_cast<FLD*>(cent));
+            if(centx && compare(*centx, *ent)) {
                 try{
                     ent = std::tr1::static_pointer_cast<FLD>(cent->shared_from_this());
                     return;
