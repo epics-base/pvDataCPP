@@ -87,7 +87,11 @@ Field::Field(Type type)
 
 Field::~Field() {
     REFTRACE_DECREMENT(num_instances);
-    FieldCreatePtr create(getFieldCreate());
+}
+
+void Field::cacheCleanup()
+{
+    const FieldCreatePtr& create(getFieldCreate());
 
     Lock G(create->mutex);
 
@@ -119,7 +123,10 @@ Scalar::Scalar(ScalarType scalarType)
         THROW_EXCEPTION2(std::invalid_argument, "Can't construct Scalar from invalid ScalarType");
 }
 
-Scalar::~Scalar(){}
+Scalar::~Scalar()
+{
+    cacheCleanup();
+}
 
 std::ostream& Scalar::dump(std::ostream& o) const
 {
@@ -209,7 +216,10 @@ BoundedString::BoundedString(std::size_t maxStringLength) :
         THROW_EXCEPTION2(std::invalid_argument, "maxLength == 0");
 }
 
-BoundedString::~BoundedString() {}
+BoundedString::~BoundedString()
+{
+    cacheCleanup();
+}
 
 
 static string emptyStringtring;
@@ -307,7 +317,10 @@ ScalarArray::ScalarArray(ScalarType elementType)
         throw std::invalid_argument("Can't construct ScalarArray from invalid ScalarType");
 }
 
-ScalarArray::~ScalarArray() {}
+ScalarArray::~ScalarArray()
+{
+    cacheCleanup();
+}
 
 const string ScalarArray::getIDScalarArrayLUT() const
 {
@@ -353,7 +366,10 @@ std::tr1::shared_ptr<PVScalarArray> ScalarArray::build() const
 }
 
 
-BoundedScalarArray::~BoundedScalarArray() {}
+BoundedScalarArray::~BoundedScalarArray()
+{
+    cacheCleanup();
+}
 
 BoundedScalarArray::BoundedScalarArray(ScalarType elementType, size_t size)
     : ScalarArray(elementType),
@@ -375,7 +391,10 @@ void BoundedScalarArray::serialize(ByteBuffer *buffer, SerializableControl *cont
 }
 
 
-FixedScalarArray::~FixedScalarArray() {}
+FixedScalarArray::~FixedScalarArray()
+{
+    cacheCleanup();
+}
 
 FixedScalarArray::FixedScalarArray(ScalarType elementType, size_t size)
     : ScalarArray(elementType),
@@ -403,7 +422,10 @@ StructureArray::StructureArray(StructureConstPtr const & structure)
 {
 }
 
-StructureArray::~StructureArray() {}
+StructureArray::~StructureArray()
+{
+    cacheCleanup();
+}
 
 string StructureArray::getID() const
 {
@@ -440,7 +462,10 @@ UnionArray::UnionArray(UnionConstPtr const & _punion)
 {
 }
 
-UnionArray::~UnionArray() {}
+UnionArray::~UnionArray()
+{
+    cacheCleanup();
+}
 
 string UnionArray::getID() const
 {
@@ -524,7 +549,10 @@ Structure::Structure (
     }
 }
 
-Structure::~Structure() { }
+Structure::~Structure()
+{
+    cacheCleanup();
+}
 
 
 string Structure::getID() const
@@ -702,7 +730,10 @@ Union::Union (
     }
 }
 
-Union::~Union() { }
+Union::~Union()
+{
+    cacheCleanup();
+}
 
 int32 Union::guess(Type t, ScalarType s) const
 {

@@ -371,6 +371,7 @@ protected:
      * @param  type The field type.
      */
    Field(Type type);
+   void cacheCleanup();
 private:
    const Type m_fieldType;
    unsigned int m_hash;
