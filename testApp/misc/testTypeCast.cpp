@@ -7,6 +7,7 @@
 #include <fstream>
 #include <iostream>
 #include <algorithm>
+#include <cmath>
 #include <limits>
 #include <typeinfo>
 #include <stddef.h>
@@ -23,6 +24,7 @@
 #include "pv/typeCast.h"
 
 using std::string;
+using std::isnan;
 
 namespace {
     // Mangle value to be printable as per print_convolute<>
