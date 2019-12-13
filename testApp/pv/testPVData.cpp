@@ -41,6 +41,10 @@ static string allProperties("alarm,timeStamp,display,control,valueAlarm");
 static void testSizes()
 {
 #define SHOW(T) testDiag("sizeof(" #T ")==%zu", sizeof(T))
+    SHOW(std::string);
+    SHOW(std::vector<int>);
+    SHOW(shared_vector<int>);
+    SHOW(std::tr1::shared_ptr<PVField>);
     SHOW(Field);
     SHOW(Structure);
     SHOW(StructureArray);
