@@ -32,7 +32,7 @@ namespace epics {
         }
 
         void SerializeHelper::writeSize(std::size_t s, ByteBuffer* buffer) {
-            if(s==(std::size_t)-1) // null    // TODO remove
+            if(s==(std::size_t)-1) // null    not a size, but used in PVUnion::serialize()
                 buffer->putByte(-1);
             else if(s<254)
                 buffer->putByte(static_cast<int8>(s));
