@@ -748,7 +748,7 @@ void testBoundedString() {
     try {
         pvStr->put("tooLargeString");
         testFail("too large string accepted");
-    } catch (std::overflow_error oe) {
+    } catch (std::overflow_error& oe) {
         // OK
     }
 
