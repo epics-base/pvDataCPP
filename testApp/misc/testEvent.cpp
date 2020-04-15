@@ -47,4 +47,3 @@ MAIN(testEvent)
     testBasicEvent();
     return testDone();
 }
-

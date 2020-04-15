@@ -127,4 +127,3 @@ MAIN(testBitSetUtil)
     test();
     return testDone();
 }
-

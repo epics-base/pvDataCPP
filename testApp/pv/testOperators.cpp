@@ -95,4 +95,3 @@ MAIN(testOperators)
 
    return testDone();
 }
-

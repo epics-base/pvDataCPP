@@ -68,4 +68,3 @@ MAIN(testStandardField)
     testPass("testStandardField");
     return testDone();
 }
-

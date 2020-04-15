@@ -232,4 +232,3 @@ MAIN(testProperty)
     printRecords();
     return testDone();;
 }
-

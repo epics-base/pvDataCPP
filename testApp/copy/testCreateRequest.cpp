@@ -730,5 +730,3 @@ MAIN(testCreateRequest)
     testMaskErr();
     return testDone();
 }
-
-
