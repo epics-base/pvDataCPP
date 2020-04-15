@@ -1001,7 +1001,7 @@ FieldBuilderPtr FieldBuilder::begin(StructureConstPtr S)
 FieldBuilderPtr FieldBuilder::setId(string const & id)
 {
     this->id = id;
-    idSet = true; 
+    idSet = true;
     return shared_from_this();
 }
 
@@ -1065,7 +1065,7 @@ FieldBuilderPtr FieldBuilder::addArray(string const & name, FieldConstPtr const 
             msg << element->getType();
             THROW_EXCEPTION2(std::invalid_argument, msg.str());
     }
-    
+
     return add(name, fld);
 }
 
@@ -1100,7 +1100,7 @@ StructureConstPtr FieldBuilder::createStructure()
 {
     if (parentBuilder.get())
         THROW_EXCEPTION2(std::runtime_error, "createStructure() called in nested FieldBuilder");
-    
+
     StructureConstPtr field(static_pointer_cast<const Structure>(createFieldInternal(structure)));
     reset();
     return field;
@@ -1110,7 +1110,7 @@ UnionConstPtr FieldBuilder::createUnion()
 {
     if (parentBuilder.get())
         THROW_EXCEPTION2(std::runtime_error, "createUnion() called in nested FieldBuilder");
-    
+
     UnionConstPtr field(static_pointer_cast<const Union>(createFieldInternal(union_)));
     reset();
     return field;
@@ -1178,7 +1178,7 @@ FieldBuilderPtr FieldBuilder::endNested()
 {
     if (!parentBuilder)
         THROW_EXCEPTION2(std::runtime_error, "FieldBuilder::endNested() can only be called to create nested fields");
-        
+
     FieldConstPtr nestedField = createFieldInternal(nestedClassToBuild);
 
     if(createNested) {
@@ -1246,7 +1246,7 @@ ScalarArrayConstPtr FieldCreate::createScalarArray(ScalarType elementType) const
         strm << elementType;
         THROW_EXCEPTION2(std::invalid_argument, strm.str());
     }
-        
+
     return scalarArrays[elementType];
 }
 
@@ -1448,7 +1448,7 @@ static int decodeScalar(int8 code)
         pvUInt,   // unsigned 32-bits
         pvULong   // unsigned 64-bits
     };
-    
+
     static const int floatLUT[] =
     {
         -1, // reserved

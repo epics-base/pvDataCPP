@@ -19,7 +19,7 @@
 
 using std::string;
 
-namespace epics { namespace pvData { 
+namespace epics { namespace pvData {
 
 TimerCallback::TimerCallback()
 : period(0.0),

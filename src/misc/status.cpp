@@ -32,7 +32,7 @@ Status::Status(StatusType type, string const & message, string const & stackDump
     if (type == STATUSTYPE_OK)
         throw std::invalid_argument("type == STATUSTYPE_OK");
 }
-    
+
 void Status::maximize(const Status& o)
 {
     if(m_statusType < o.m_statusType) {
@@ -57,7 +57,7 @@ void Status::serialize(ByteBuffer *buffer, SerializableControl *flusher) const
         SerializeHelper::serializeString(m_stackDump, buffer, flusher);
     }
 }
-    
+
 void Status::deserialize(ByteBuffer *buffer, DeserializableControl *flusher)
 {
     flusher->ensureData(1);

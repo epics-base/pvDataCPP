@@ -30,9 +30,9 @@ static void castVTyped(size_t count, void *draw, const void *sraw)
 {
     TO *dest=(TO*)draw;
     const FROM *src=(FROM*)sraw;
-    
+
     //std::transform(src, src+count, dest, castUnsafe<TO,FROM>);
-    
+
     try {
         for(size_t i=0; i<count; i++) {
             dest[i] = castUnsafe<TO,FROM>(src[i]);

@@ -81,7 +81,7 @@ void test()
      testOk1(userOverrunBitSet->get(secondsOffset));
      testOk1(userOverrunBitSet->get(nanosecondsOffset));
      testOk1(userOverrunBitSet->get(userTagOffset));
-     
+
      BitSetUtil::compress(userChangeBitSet,pvStructure);
      BitSetUtil::compress(userOverrunBitSet,pvStructure);
      testOk1(userChangeBitSet->cardinality()==4);

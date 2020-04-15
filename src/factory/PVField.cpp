@@ -62,7 +62,7 @@ size_t PVField::getNumberFields() const
 
 void PVField::setImmutable() {immutable = true;}
 
-void PVField::postPut() 
+void PVField::postPut()
 {
    if(postHandler) postHandler->postPut();
 }

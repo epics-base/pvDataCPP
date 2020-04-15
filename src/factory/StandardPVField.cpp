@@ -20,7 +20,7 @@
 
 using std::string;
 
-namespace epics { namespace pvData { 
+namespace epics { namespace pvData {
 
 StandardPVField::StandardPVField()
 : standardField(getStandardField()),

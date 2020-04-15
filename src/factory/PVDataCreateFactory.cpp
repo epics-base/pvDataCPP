@@ -169,7 +169,7 @@ void PVString::serialize(ByteBuffer *pbuffer,
     const size_t maxCount = length - offset;
     if (count > maxCount)
         count = maxCount;
-    
+
     // write
     SerializeHelper::serializeSubstring(storage.value, offset, count, pbuffer, pflusher);
 }
@@ -191,7 +191,7 @@ template<typename T>
 PVValueArray<T>::PVValueArray(ScalarArrayConstPtr const & scalarArray)
     :base_t(scalarArray)
     ,value()
-  
+
 {}
 
 PVValueArray<PVStructurePtr>::PVValueArray(StructureArrayConstPtr const & structureArray)
@@ -627,7 +627,7 @@ PVScalarArrayPtr PVDataCreate::createPVScalarArray(
            return PVScalarArrayPtr(new PVStringArray(scalarArray));
      }
      throw std::logic_error("PVDataCreate::createPVScalarArray should never get here");
-     
+
 }
 
 PVScalarArrayPtr PVDataCreate::createPVScalarArray(

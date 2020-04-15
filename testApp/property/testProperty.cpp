@@ -64,7 +64,7 @@ static void testAlarm()
 {
     testDiag("testAlarm\n");
     Alarm alarm;
-    PVAlarm pvAlarm; 
+    PVAlarm pvAlarm;
     bool result;
     PVFieldPtr pvField = doubleRecord->getSubField<PVStructure>(string("alarm"));
     if(pvField.get()==NULL) {
@@ -93,7 +93,7 @@ static void testTimeStamp()
 {
     testDiag("testTimeStamp\n");
     TimeStamp timeStamp;
-    PVTimeStamp pvTimeStamp; 
+    PVTimeStamp pvTimeStamp;
     bool result;
     PVFieldPtr pvField = doubleRecord->getSubField<PVStructure>(string("timeStamp"));
     if(pvField.get()==NULL) {
@@ -132,7 +132,7 @@ static void testControl()
 {
     testDiag("testControl\n");
     Control control;
-    PVControl pvControl; 
+    PVControl pvControl;
     bool result;
     PVFieldPtr pvField = doubleRecord->getSubField<PVStructure>(string("control"));
     if(pvField.get()==NULL) {
@@ -159,7 +159,7 @@ static void testDisplay()
 {
     testDiag("testDisplay\n");
     Display display;
-    PVDisplay pvDisplay; 
+    PVDisplay pvDisplay;
     bool result;
     PVFieldPtr pvField = doubleRecord->getSubField<PVStructure>(string("display"));
     if(pvField.get()==NULL) {
@@ -191,7 +191,7 @@ static void testDisplay()
 static void testEnumerated()
 {
     testDiag("testEnumerated\n");
-    PVEnumerated pvEnumerated; 
+    PVEnumerated pvEnumerated;
     bool result;
     PVFieldPtr pvField = enumeratedRecord->getSubField<PVStructure>(string("value"));
     if(pvField.get()==NULL) {

@@ -18,7 +18,7 @@
 using std::tr1::static_pointer_cast;
 using std::string;
 
-namespace epics { namespace pvData { 
+namespace epics { namespace pvData {
 
 string PVTimeStamp::noTimeStamp("No timeStamp structure found");
 string PVTimeStamp::notAttached("Not attached to a timeStamp structure");
@@ -93,5 +93,5 @@ bool PVTimeStamp::set(TimeStamp const & timeStamp)
     }
     return returnValue;
 }
-    
+
 }}

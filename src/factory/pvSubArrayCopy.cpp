@@ -17,7 +17,7 @@ using std::cout;
 using std::endl;
 using std::string;
 
-namespace epics { namespace pvData { 
+namespace epics { namespace pvData {
 
 template<typename T>
 void copy(

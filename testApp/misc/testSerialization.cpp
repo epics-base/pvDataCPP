@@ -70,7 +70,7 @@ public:
     virtual void alignBuffer(std::size_t alignment) {
         buffer->align(alignment);
     }
-    
+
     virtual bool directSerialize(ByteBuffer* /*existingBuffer*/, const char* /*toSerialize*/,
                                  std::size_t /*elementCount*/, std::size_t /*elementSize*/)
     {
@@ -169,25 +169,25 @@ void testEquals() {
     PVStructureArrayPtr structureArray1 = factory->createPVStructureArray(getFieldCreate()->createStructureArray(structure1->getStructure()));
     PVStructureArrayPtr structureArray2 = factory->createPVStructureArray(getFieldCreate()->createStructureArray(structure2->getStructure()));
     testOk1((*structureArray1)==(*structureArray2));
-    
+
     // variant union
     PVUnionPtr variantUnion1 = factory->createPVVariantUnion();
     PVUnionPtr variantUnion2 = factory->createPVVariantUnion();
     testOk1((*variantUnion1)==(*variantUnion2));
-    
+
     variantUnion1->set(structure1);
     variantUnion2->set(structure1);
     testOk1((*variantUnion1)==(*variantUnion2));
 
     variantUnion2->set(structureArray1);
     testOk1((*variantUnion1)!=(*variantUnion2));
-    
+
     // variant union array
     PVUnionArrayPtr variantUnionArray1 = factory->createPVVariantUnionArray();
     PVUnionArrayPtr variantUnionArray2 = factory->createPVVariantUnionArray();
     testOk1((*variantUnionArray1)==(*variantUnionArray2));
 
-    // union    
+    // union
     UnionConstPtr punion = getFieldCreate()->createFieldBuilder()->
                             add("double", pvDouble)->
                             add("double2", pvDouble)->
@@ -201,11 +201,11 @@ void testEquals() {
     PVUnionPtr union1 = factory->createPVUnion(punion);
     PVUnionPtr union2 = factory->createPVUnion(punion);
     testOk1((*union1)==(*union2));
-    
+
     union1->select<PVDouble>("double")->put(1.2);
     union2->select<PVDouble>("double")->put(1.2);
     testOk1((*union1)==(*union2));
-    
+
     union2->select<PVDouble>("double")->put(2.2);
     testOk1((*union1)!=(*union2));
 
@@ -216,7 +216,7 @@ void testEquals() {
     testOk1((*union1)!=(*union2));
 
     testOk1((*union1)!=(*variantUnion2));
-    
+
     PVUnionArrayPtr unionArray1 = factory->createPVUnionArray(getFieldCreate()->createUnionArray(punion));
     PVUnionArrayPtr unionArray2 = factory->createPVUnionArray(getFieldCreate()->createUnionArray(punion));
     testOk1((*unionArray1)==(*unionArray2));
@@ -439,17 +439,17 @@ void testUnion() {
 
     PVUnionArrayPtr variantArray = factory->createPVVariantUnionArray();
     testOk1(variantArray.get()!=NULL);
-    
+
     variantArray->setLength(6);
     PVUnionArray::svector data;
 
     PVUnionPtr u = factory->createPVVariantUnion();
     data.push_back(u);
-  
+
     u = factory->createPVVariantUnion();
     u->set(factory->createPVStructure(getStandardField()->timeStamp()));
     data.push_back(u);
-    
+
     u = factory->createPVVariantUnion();
     u->set(factory->createPVStructure(getStandardField()->control()));
     data.push_back(u);
@@ -458,16 +458,16 @@ void testUnion() {
 
     variantArray->replace(freeze(data));
     serializationTest(variantArray);
-    
+
     testDiag("\tVariant union test");
-    
+
     UnionConstPtr punion = getFieldCreate()->createFieldBuilder()->
                             add("doubleValue", pvDouble)->
                             add("intValue", pvInt)->
                             createUnion();
-                            
+
     u = factory->createPVUnion(punion);
-    testOk1(NULL!=u.get());       
+    testOk1(NULL!=u.get());
 
     // null union test
     testOk1(NULL==u->get().get());
@@ -480,13 +480,13 @@ void testUnion() {
     testOk1(0 == u->getSelectedIndex());
     testOk1("doubleValue" == u->getSelectedFieldName());
     serializationTest(u);
-    
+
     u->select<PVInt>("intValue")->put(543);
     testOk1(543 == u->get<PVInt>()->get());
     testOk1(1 == u->getSelectedIndex());
     testOk1("intValue" == u->getSelectedFieldName());
     serializationTest(u);
-    
+
     u->select<PVInt>(1)->put(5432);
     testOk1(5432 == u->get<PVInt>()->get());
     serializationTest(u);
@@ -496,12 +496,12 @@ void testUnion() {
     testOk1(PVUnion::UNDEFINED_INDEX == u->getSelectedIndex());
     testOk1("" == u->getSelectedFieldName());
     serializationTest(u);
-        
+
     u->set("doubleValue", doubleValue);
     testOk1(doubleValue.get() == u->get().get());
     testOk1(0 == u->getSelectedIndex());
     serializationTest(u);
-    
+
     try
     {
         u->set(1, doubleValue);
@@ -523,7 +523,7 @@ void testUnion() {
         // expected
         testPass("PVUnion.select(int32) index out of bounds test");
     }
-    
+
     try
     {
         u->select(-2);
@@ -545,22 +545,22 @@ void testUnion() {
         // expected
         testPass("PVUnion.set(int32, PVFieldPtr const&) index out of bounds test");
     }
-    
+
     testDiag("\tUnion array test");
 
     PVUnionArrayPtr unionArray = factory->createPVUnionArray(getFieldCreate()->createUnionArray(punion));
     testOk1(unionArray.get()!=NULL);
-    
+
     unionArray->setLength(6);
     data.clear();
 
     u = factory->createPVUnion(punion);
     data.push_back(u);
-  
+
     u = factory->createPVUnion(punion);
     u->select<PVDouble>(0)->put(12);
     data.push_back(u);
-    
+
     u = factory->createPVUnion(punion);
     u->select<PVInt>(1)->put(421);
     data.push_back(u);
@@ -569,7 +569,7 @@ void testUnion() {
 
     unionArray->replace(freeze(data));
     serializationTest(unionArray);
-    
+
 }
 
 void testStructureArray() {
@@ -677,11 +677,11 @@ void testIntrospectionSerialization()
      // variant union
      UnionConstPtr variant = factory->createVariantUnion();
      serializationFieldTest(variant);
-     
+
      // variant array union
      UnionArrayConstPtr variantArray = factory->createVariantUnionArray();
      serializationFieldTest(variantArray);
-     
+
      // union
      UnionConstPtr punion = factory->createFieldBuilder()->
                             add("double", pvDouble)->
@@ -693,7 +693,7 @@ void testIntrospectionSerialization()
                             addArray("intArray", pvInt)->
                             createUnion();
      serializationFieldTest(punion);
-     
+
      // union array
      UnionArrayConstPtr punionArray = factory->createUnionArray(punion);
      serializationFieldTest(punionArray);
@@ -877,7 +877,7 @@ MAIN(testSerialization) {
     testStructure();
     testStructureId();
     testStructureArray();
-    
+
     testUnion();
 
     testArraySizeType();

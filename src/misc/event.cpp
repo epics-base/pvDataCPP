@@ -27,7 +27,7 @@
 
 using std::string;
 
-namespace epics { namespace pvData { 
+namespace epics { namespace pvData {
 
 
 Event::~Event() {

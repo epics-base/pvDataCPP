@@ -18,7 +18,7 @@
 using std::tr1::static_pointer_cast;
 using std::string;
 
-namespace epics { namespace pvData { 
+namespace epics { namespace pvData {
 
 string PVAlarm::noAlarmFound("No alarm structure found");
 string PVAlarm::notAttached("Not attached to an alarm structure");

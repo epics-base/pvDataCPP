@@ -42,12 +42,12 @@
 #define CHECK_POST() assert(words.empty() || words.back()!=0)
 
 namespace epics { namespace pvData {
- 
+
     BitSet::shared_pointer BitSet::create(uint32 nbits)
     {
         return BitSet::shared_pointer(new BitSet(nbits));
     }
-    
+
     BitSet::BitSet() {}
 
     BitSet::BitSet(uint32 nbits)
@@ -327,7 +327,7 @@ namespace epics { namespace pvData {
         SerializeHelper::writeSize(len, buffer, flusher);
         flusher->ensureBuffer(len);
 
-        n = len / 8; 
+        n = len / 8;
         for (uint32 i = 0; i < n; i++)
             buffer->putLong(words[i]);
 

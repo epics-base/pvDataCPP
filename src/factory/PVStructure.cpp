@@ -168,7 +168,7 @@ PVFieldPtr PVStructure::getSubFieldImpl(const char *name, bool throws) const
                 std::stringstream ss;
                 ss << "Failed to get field: " << fullName << " ("
                    << std::string(fullName, sep) << " not found)";
-                throw std::runtime_error(ss.str());   
+                throw std::runtime_error(ss.str());
             }
             else
                 return PVFieldPtr();
@@ -184,7 +184,7 @@ PVFieldPtr PVStructure::getSubFieldImpl(const char *name, bool throws) const
                     std::stringstream ss;
                     ss << "Failed to get field: " << fullName
                        << " (" << std::string(fullName, sep)
-                       <<  " is not a structure)"; 
+                       <<  " is not a structure)";
                     throw std::runtime_error(ss.str());
                 }
                 else

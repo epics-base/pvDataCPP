@@ -152,7 +152,7 @@ static void testOperators()
     b2.set(256);
     b1 ^= b2;
     testOk1((b1.cardinality() == 2 && b1.get(1) == true && b1.get(256) == true));
-    
+
 
     testDiag("assign");
     testOk1(b1 != b2);
