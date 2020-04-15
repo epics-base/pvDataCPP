@@ -948,11 +948,11 @@ public:
     typedef PVUnion & reference;
     typedef const PVUnion & const_reference;
 
-	/**
-	 * Undefined index.
-	 * Default value upon PVUnion construction. Can be set by the user.
-	 * Corresponds to @c null value.
-	 */
+        /**
+         * Undefined index.
+         * Default value upon PVUnion construction. Can be set by the user.
+         * Corresponds to @c null value.
+         */
     static const int32 UNDEFINED_INDEX;
 
     /**
@@ -1081,9 +1081,9 @@ private:
     friend class PVDataCreate;
     UnionConstPtr unionPtr; // same as PVField::getField()
 
-	int32 selector;
-	PVFieldPtr value;
-	bool variant;  
+        int32 selector;
+        PVFieldPtr value;
+        bool variant;  
     EPICS_NOT_COPYABLE(PVUnion)
 };
 

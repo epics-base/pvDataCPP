@@ -91,7 +91,7 @@ bool PVField::equals(PVField &pv)
 
 std::ostream& operator<<(std::ostream& o, const PVField& f)
 {
-	return f.dumpValue(o);
+    return f.dumpValue(o);
 };
 
 string PVField::getFullName() const

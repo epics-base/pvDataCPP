@@ -146,48 +146,48 @@ void testEquals() {
     PVDataCreatePtr factory = getPVDataCreate();
     testOk1(factory.get()!=NULL);
 
-	 // be sure all is covered
-	 for (int i = pvBoolean; i < pvString; i++)
-	 {
-		 ScalarType scalarType = static_cast<ScalarType>(i);
+    // be sure all is covered
+    for (int i = pvBoolean; i < pvString; i++)
+    {
+        ScalarType scalarType = static_cast<ScalarType>(i);
 
-		 PVScalarPtr scalar1 = factory->createPVScalar(scalarType);
-		 PVScalarPtr scalar2 = factory->createPVScalar(scalarType);
-		 testOk1((*scalar1)==(*scalar2));
+        PVScalarPtr scalar1 = factory->createPVScalar(scalarType);
+        PVScalarPtr scalar2 = factory->createPVScalar(scalarType);
+        testOk1((*scalar1)==(*scalar2));
 
-		 PVScalarArrayPtr array1 = factory->createPVScalarArray(scalarType);
-		 PVScalarArrayPtr array2 = factory->createPVScalarArray(scalarType);
-		 testOk1((*array1)==(*array2));
-	}
+        PVScalarArrayPtr array1 = factory->createPVScalarArray(scalarType);
+        PVScalarArrayPtr array2 = factory->createPVScalarArray(scalarType);
+        testOk1((*array1)==(*array2));
+    }
 
-	// and a structure
+    // and a structure
     PVStructurePtr structure1 = factory->createPVStructure(getStandardField()->timeStamp());
     PVStructurePtr structure2 = factory->createPVStructure(getStandardField()->timeStamp());
-	testOk1((*structure1)==(*structure2));
+    testOk1((*structure1)==(*structure2));
 
     // and a structure array
     PVStructureArrayPtr structureArray1 = factory->createPVStructureArray(getFieldCreate()->createStructureArray(structure1->getStructure()));
     PVStructureArrayPtr structureArray2 = factory->createPVStructureArray(getFieldCreate()->createStructureArray(structure2->getStructure()));
-	testOk1((*structureArray1)==(*structureArray2));
-	
-	// variant union
-	PVUnionPtr variantUnion1 = factory->createPVVariantUnion();
-	PVUnionPtr variantUnion2 = factory->createPVVariantUnion();
-	testOk1((*variantUnion1)==(*variantUnion2));
-	
-	variantUnion1->set(structure1);
-	variantUnion2->set(structure1);
-	testOk1((*variantUnion1)==(*variantUnion2));
+    testOk1((*structureArray1)==(*structureArray2));
+    
+    // variant union
+    PVUnionPtr variantUnion1 = factory->createPVVariantUnion();
+    PVUnionPtr variantUnion2 = factory->createPVVariantUnion();
+    testOk1((*variantUnion1)==(*variantUnion2));
+    
+    variantUnion1->set(structure1);
+    variantUnion2->set(structure1);
+    testOk1((*variantUnion1)==(*variantUnion2));
 
-	variantUnion2->set(structureArray1);
-	testOk1((*variantUnion1)!=(*variantUnion2));
-	
-	// variant union array
-	PVUnionArrayPtr variantUnionArray1 = factory->createPVVariantUnionArray();
-	PVUnionArrayPtr variantUnionArray2 = factory->createPVVariantUnionArray();
-	testOk1((*variantUnionArray1)==(*variantUnionArray2));
+    variantUnion2->set(structureArray1);
+    testOk1((*variantUnion1)!=(*variantUnion2));
+    
+    // variant union array
+    PVUnionArrayPtr variantUnionArray1 = factory->createPVVariantUnionArray();
+    PVUnionArrayPtr variantUnionArray2 = factory->createPVVariantUnionArray();
+    testOk1((*variantUnionArray1)==(*variantUnionArray2));
 
-    // union	
+    // union    
     UnionConstPtr punion = getFieldCreate()->createFieldBuilder()->
                             add("double", pvDouble)->
                             add("double2", pvDouble)->
@@ -198,30 +198,30 @@ void testEquals() {
                                 endNested()->
                             addArray("intArray", pvInt)->
                             createUnion();
-	PVUnionPtr union1 = factory->createPVUnion(punion);
-	PVUnionPtr union2 = factory->createPVUnion(punion);
-	testOk1((*union1)==(*union2));
-	
-	union1->select<PVDouble>("double")->put(1.2);
-	union2->select<PVDouble>("double")->put(1.2);
-	testOk1((*union1)==(*union2));
-	
-	union2->select<PVDouble>("double")->put(2.2);
-	testOk1((*union1)!=(*union2));
+    PVUnionPtr union1 = factory->createPVUnion(punion);
+    PVUnionPtr union2 = factory->createPVUnion(punion);
+    testOk1((*union1)==(*union2));
+    
+    union1->select<PVDouble>("double")->put(1.2);
+    union2->select<PVDouble>("double")->put(1.2);
+    testOk1((*union1)==(*union2));
+    
+    union2->select<PVDouble>("double")->put(2.2);
+    testOk1((*union1)!=(*union2));
 
-	union2->select<PVDouble>("double2")->put(1.2);
-	testOk1((*union1)!=(*union2));
+    union2->select<PVDouble>("double2")->put(1.2);
+    testOk1((*union1)!=(*union2));
 
-	union2->select("nested");
-	testOk1((*union1)!=(*union2));
+    union2->select("nested");
+    testOk1((*union1)!=(*union2));
 
-	testOk1((*union1)!=(*variantUnion2));
-	
-	PVUnionArrayPtr unionArray1 = factory->createPVUnionArray(getFieldCreate()->createUnionArray(punion));
-	PVUnionArrayPtr unionArray2 = factory->createPVUnionArray(getFieldCreate()->createUnionArray(punion));
-	testOk1((*unionArray1)==(*unionArray2));
+    testOk1((*union1)!=(*variantUnion2));
+    
+    PVUnionArrayPtr unionArray1 = factory->createPVUnionArray(getFieldCreate()->createUnionArray(punion));
+    PVUnionArrayPtr unionArray2 = factory->createPVUnionArray(getFieldCreate()->createUnionArray(punion));
+    testOk1((*unionArray1)==(*unionArray2));
 
-	testOk1((*variantUnionArray1)!=(*unionArray2));
+    testOk1((*variantUnionArray1)!=(*unionArray2));
 }
 
 template<typename PVT>
@@ -264,7 +264,7 @@ void testScalar() {
 
     testDiag("type %s", ScalarTypeFunc::name(pvBoolean));
     PVBooleanPtr pvBoolean =
-    		std::tr1::static_pointer_cast<PVBoolean>(factory->createPVScalar(epics::pvData::pvBoolean));
+            std::tr1::static_pointer_cast<PVBoolean>(factory->createPVScalar(epics::pvData::pvBoolean));
     pvBoolean->put(false);
     serializationTest(pvBoolean);
     pvBoolean->put(true);
@@ -284,7 +284,7 @@ void testScalar() {
 
     testDiag("type %s", ScalarTypeFunc::name(pvString));
     PVStringPtr pvString =
-    		std::tr1::static_pointer_cast<PVString>(factory->createPVScalar(epics::pvData::pvString));
+            std::tr1::static_pointer_cast<PVString>(factory->createPVScalar(epics::pvData::pvString));
     pvString->put("");
     serializationTest(pvString);
     pvString->put("s");
@@ -382,7 +382,7 @@ void testStructure() {
     testOk1(factory.get()!=NULL);
 
     testDiag("\tSimple structure serialization");
-	PVStructurePtr pvStructure = factory->createPVStructure(getStandardField()->timeStamp());
+    PVStructurePtr pvStructure = factory->createPVStructure(getStandardField()->timeStamp());
     pvStructure->getSubField<PVLong>("secondsPastEpoch")->put(123);
     pvStructure->getSubField<PVInt>("nanoseconds")->put(456);
     pvStructure->getSubField<PVInt>("userTag")->put(789);
@@ -390,11 +390,11 @@ void testStructure() {
     serializationTest(pvStructure);
 
     testDiag("\tComplex structure serialization");
-	pvStructure = factory->createPVStructure(
-			getStandardField()->structureArray(
-					getStandardField()->timeStamp(), "alarm,control,display,timeStamp")
-			);
-	// TODO fill with data
+    pvStructure = factory->createPVStructure(
+            getStandardField()->structureArray(
+                    getStandardField()->timeStamp(), "alarm,control,display,timeStamp")
+            );
+    // TODO fill with data
     serializationTest(pvStructure);
 }
 
@@ -469,7 +469,7 @@ void testUnion() {
     u = factory->createPVUnion(punion);
     testOk1(NULL!=u.get());       
 
-	// null union test
+    // null union test
     testOk1(NULL==u->get().get());
     testOk1(PVUnion::UNDEFINED_INDEX == u->getSelectedIndex());
     testOk1("" == u->getSelectedFieldName());
@@ -633,38 +633,38 @@ void serializationFieldTest(FieldConstPtr const & field)
 {
     testShow()<<CURRENT_FUNCTION<<"\n"<<field;
 
-	buffer->clear();
+    buffer->clear();
 
-	// serialize
-	field->serialize(buffer, flusher);
+    // serialize
+    field->serialize(buffer, flusher);
 
-	// deserialize
-	buffer->flip();
+    // deserialize
+    buffer->flip();
 
-	FieldConstPtr deserializedField = getFieldCreate()->deserialize(buffer, control);
+    FieldConstPtr deserializedField = getFieldCreate()->deserialize(buffer, control);
 
     testShow()<<" after "<<(void*)field.get()<<" == "<<(void*)deserializedField.get();
-	testOk1(*field == *deserializedField);
+    testOk1(*field == *deserializedField);
 }
 
 void testIntrospectionSerialization()
 {
-	 testDiag("Testing introspection serialization...");
+    testDiag("Testing introspection serialization...");
 
-	 FieldCreatePtr factory = getFieldCreate();
-	 testOk1(factory.get()!=NULL);
+    FieldCreatePtr factory = getFieldCreate();
+    testOk1(factory.get()!=NULL);
 
-	 // be sure all is covered
-	 for (int i = pvBoolean; i < pvString; i++)
-	 {
-		 ScalarType scalarType = static_cast<ScalarType>(i);
+    // be sure all is covered
+    for (int i = pvBoolean; i < pvString; i++)
+    {
+        ScalarType scalarType = static_cast<ScalarType>(i);
 
-		 ScalarConstPtr scalar = factory->createScalar(scalarType);
-         serializationFieldTest(scalar);
+        ScalarConstPtr scalar = factory->createScalar(scalarType);
+        serializationFieldTest(scalar);
 
-		 ScalarArrayConstPtr array = factory->createScalarArray(scalarType);
-         serializationFieldTest(array);
-	 }
+        ScalarArrayConstPtr array = factory->createScalarArray(scalarType);
+        serializationFieldTest(array);
+    }
 
      // and a structure
      StructureConstPtr structure = getStandardField()->timeStamp();

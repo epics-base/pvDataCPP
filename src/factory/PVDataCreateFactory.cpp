@@ -160,17 +160,17 @@ void PVString::serialize(ByteBuffer *pbuffer,
 void PVString::serialize(ByteBuffer *pbuffer,
     SerializableControl *pflusher, size_t offset, size_t count) const
 {
-	// check bounds
+    // check bounds
     const size_t length = storage.value.length();
-	/*if (offset < 0) offset = 0;
-	else*/ if (offset > length) offset = length;
-	//if (count < 0) count = length;
+    /*if (offset < 0) offset = 0;
+    else*/ if (offset > length) offset = length;
+    //if (count < 0) count = length;
 
-	const size_t maxCount = length - offset;
-	if (count > maxCount)
-		count = maxCount;
-	
-	// write
+    const size_t maxCount = length - offset;
+    if (count > maxCount)
+        count = maxCount;
+    
+    // write
     SerializeHelper::serializeSubstring(storage.value, offset, count, pbuffer, pflusher);
 }
 

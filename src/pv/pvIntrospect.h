@@ -1079,12 +1079,12 @@ public:
     //! Create a new instance of in-line @c Field builder pre-initialized with and existing Structure
     static FieldBuilderPtr begin(StructureConstPtr S);
 
-	/**
-	 * Set ID of an object to be created.
-	 * @param id id to be set.
+        /**
+         * Set ID of an object to be created.
+         * @param id id to be set.
      * @return this instance of a @c FieldBuilder.
-	 */
-	FieldBuilderPtr setId(std::string const & id);
+         */
+        FieldBuilderPtr setId(std::string const & id);
 
     /**
      * Add a @c Scalar.
@@ -1214,20 +1214,20 @@ private:
     FieldBuilder(const FieldBuilderPtr & _parentBuilder, const std::string& name, const Union*);
     FieldBuilder(const FieldBuilderPtr & _parentBuilder, const std::string& name, const UnionArray*);
     FieldBuilder(FieldBuilderPtr const & parentBuilder,
-			std::string const & nestedName,
-			Type nestedClassToBuild, bool nestedArray);
+                        std::string const & nestedName,
+                        Type nestedClassToBuild, bool nestedArray);
 
     const Field *findField(const std::string& name, Type ftype);
-			
-	void reset();
-	FieldConstPtr createFieldInternal(Type type);
+                        
+        void reset();
+        FieldConstPtr createFieldInternal(Type type);
 
     friend class FieldCreate;
     
     const FieldCreatePtr fieldCreate;
 
-	std::string id;
-	bool idSet;
+        std::string id;
+        bool idSet;
 
     StringArray fieldNames;
     FieldConstPtrArray fields;
@@ -1251,11 +1251,11 @@ class epicsShareClass FieldCreate {
     friend struct detail::field_factory;
 public:
     static const FieldCreatePtr &getFieldCreate();
-	/**
-	 * Create a new instance of in-line @c Field builder.
-	 * @return a new instance of a @c FieldBuilder.
-	 */
-	FieldBuilderPtr createFieldBuilder() const;
+        /**
+         * Create a new instance of in-line @c Field builder.
+         * @return a new instance of a @c FieldBuilder.
+         */
+        FieldBuilderPtr createFieldBuilder() const;
     /**
      * Create a new instance of in-line @c Field builder pre-initialized with and existing Structure
      * @return a new instance of a @c FieldBuilder.
@@ -1323,7 +1323,7 @@ public:
      * @return a @c Structure interface for the newly created object.
      */
     StructureConstPtr createStructure (
-    	std::string const & id,
+        std::string const & id,
         StringArray const & fieldNames,
         FieldConstPtrArray const & fields) const;
      /**
@@ -1359,7 +1359,7 @@ public:
      * @return a @c Union interface for the newly created object.
      */
     UnionConstPtr createUnion (
-    	std::string const & id,
+        std::string const & id,
         StringArray const & fieldNames,
         FieldConstPtrArray const & fields) const;
     /**

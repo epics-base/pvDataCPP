@@ -203,8 +203,8 @@ static void testCreateRequestInternal() {
 
     request = string("record[process=true,xxx=yyy]")
         + "putField(power.value)"
-    	+ "getField(alarm,timeStamp,power{value,alarm},"
-    	+ "current{value,alarm},voltage{value,alarm})";
+        + "getField(alarm,timeStamp,power{value,alarm},"
+        + "current{value,alarm},voltage{value,alarm})";
 
     pvRequest = createRequest->createRequest(request);
     if(!pvRequest) { cout<< createRequest->getMessage() << endl;}
@@ -241,10 +241,10 @@ static void testCreateRequestInternal() {
     testPass("request %s",request.c_str());
 
     request = string("record[process=true,xxx=yyy]")
-    	+ "putField(power.value)"
-    	+ "getField(alarm,timeStamp,power{value,alarm},"
-    	+ "current{value,alarm},voltage{value,alarm},"
-    	+ "ps0{alarm,timeStamp,power{value,alarm},current{value,alarm},voltage{value,alarm}},"
+        + "putField(power.value)"
+        + "getField(alarm,timeStamp,power{value,alarm},"
+        + "current{value,alarm},voltage{value,alarm},"
+        + "ps0{alarm,timeStamp,power{value,alarm},current{value,alarm},voltage{value,alarm}},"
         + "ps1{alarm,timeStamp,power{value,alarm},current{value,alarm},voltage{value,alarm}}"
         + ")";
 

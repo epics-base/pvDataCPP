@@ -23,7 +23,7 @@ using std::size_t;
 using std::string;
 
 namespace epics { namespace pvData {
-	
+    
 #define PVUNION_UNDEFINED_INDEX -1
 const int32 PVUnion::UNDEFINED_INDEX = PVUNION_UNDEFINED_INDEX;
 
@@ -75,13 +75,13 @@ PVFieldPtr PVUnion::select(int32 index)
 
     return value;
 }
-	
+    
 PVFieldPtr PVUnion::select(string const & fieldName)
 {
     int32 index = variant ? -1 : static_cast<int32>(unionPtr->getFieldIndex(fieldName));
-	if (index == -1)
+    if (index == -1)
         throw std::invalid_argument("no such fieldName");
-	return select(index);
+    return select(index);
 }
 
 void PVUnion::set(int32 index, PVFieldPtr const & value)
@@ -94,14 +94,14 @@ void PVUnion::set(int32 index, PVFieldPtr const & value)
         {
             // for undefined index we accept only null values
             if (value)
-				throw std::invalid_argument("non-null value for index == UNDEFINED_INDEX");
+                throw std::invalid_argument("non-null value for index == UNDEFINED_INDEX");
         }
         else if (index < 0 || size_t(index) >= unionPtr->getFields().size())
             throw std::invalid_argument("index out of bounds");
         else if (!value)
             throw std::invalid_argument("Can't set defined index w/ NULL");
         else if (value->getField() != unionPtr->getField(index))
-			throw std::invalid_argument("selected field and its introspection data do not match");
+            throw std::invalid_argument("selected field and its introspection data do not match");
     }
 
     selector = index;
@@ -180,20 +180,20 @@ std::ostream& PVUnion::dumpValue(std::ostream& o) const
 {
     o << format::indent() << getUnion()->getID() << ' ' << getFieldName() << std::endl;
     {
-    	format::indent_scope s(o);
+        format::indent_scope s(o);
         const PVField::const_shared_pointer& fieldField = get();
-		if (fieldField.get() == NULL)
-		  o << format::indent() << "(none)" << std::endl;
-		else
-		{
-    		Type type = fieldField->getField()->getType();
-    		if (type == scalar || type == scalarArray)
-    			o << format::indent() << fieldField->getField()->getID() << ' ' << fieldField->getFieldName() << ' ' << *(fieldField.get()) << std::endl;
-    		else
-    			o << *(fieldField.get());
-	   } 
+        if (fieldField.get() == NULL)
+          o << format::indent() << "(none)" << std::endl;
+        else
+        {
+            Type type = fieldField->getField()->getType();
+            if (type == scalar || type == scalarArray)
+                o << format::indent() << fieldField->getField()->getID() << ' ' << fieldField->getFieldName() << ' ' << *(fieldField.get()) << std::endl;
+            else
+                o << *(fieldField.get());
+       } 
     }
- 	return o;
+    return o;
 }
 
 void PVUnion::copy(const PVUnion& from)
