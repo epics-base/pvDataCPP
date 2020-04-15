@@ -894,4 +894,3 @@ MAIN(testSerialization) {
 
     return testDone();
 }
-

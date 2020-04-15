@@ -64,4 +64,3 @@ MAIN(testPVType)
     printf("PASSED\n");
     return testDone();
 }
-
