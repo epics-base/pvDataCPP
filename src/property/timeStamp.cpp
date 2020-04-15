@@ -19,7 +19,7 @@
 #include <pv/pvType.h>
 #include <pv/timeStamp.h>
 
-namespace epics { namespace pvData { 
+namespace epics { namespace pvData {
 
 const int32 milliSecPerSec = 1000;
 const int32 microSecPerSec = 1000000;

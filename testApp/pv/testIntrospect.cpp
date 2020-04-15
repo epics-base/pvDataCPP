@@ -32,7 +32,7 @@ static void testScalarCommon(ScalarType stype,
     ScalarConstPtr pscalar = fieldCreate->createScalar(stype);
     Type type = pscalar->getType();
     testOk1(type==scalar);
-    
+
     std::ostringstream oss;
     oss << type;
     testOk1(oss.str().compare("scalar")==0);
@@ -307,17 +307,17 @@ static void testUnion()
 
     testOk1(union1arr->getUnion()==union1);
     testOk1(union1arr->getID()=="union[]");
-    
+
     UnionConstPtr variantUnion1 = fieldCreate->createVariantUnion();
 
     testOk1(variantUnion1->getNumberFields()==0);
     testOk1(variantUnion1->getID() == Union::ANY_ID);
-    
+
     UnionArrayConstPtr variantUnion1arr = fieldCreate->createVariantUnionArray();
 
     testOk1(variantUnion1arr->getUnion()==variantUnion1);
     testOk1(variantUnion1arr->getID()=="any[]");
-    
+
 }
 
 static void testBoundedString()

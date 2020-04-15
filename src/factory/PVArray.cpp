@@ -28,7 +28,7 @@ PVArray::PVArray(FieldConstPtr const & field)
  {
      capacityMutable = false;
      PVField::setImmutable();
- } 
+ }
 
  bool PVArray::isCapacityMutable() const
  {

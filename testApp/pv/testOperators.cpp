@@ -72,7 +72,7 @@ MAIN(testOperators)
 
     pvStructure = standardPVField->scalarArray(pvDouble,"alarm,timeStamp");
     std::cout << *pvStructure << std::endl;
-    
+
     PVDoubleArray::svector values(3);
     values[0] = 1.1; values[1] = 2.2; values[2] = 3.3;
     PVDoubleArrayPtr darray = pvStructure->getSubField<PVDoubleArray>("value");

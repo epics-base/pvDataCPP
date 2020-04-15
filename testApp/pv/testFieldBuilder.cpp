@@ -34,7 +34,7 @@ void test_structure()
 
     FieldCreatePtr fieldCreate = getFieldCreate();
     FieldBuilderPtr fb = fieldCreate->createFieldBuilder();
-    
+
     // test with simple (non-nested) structure
     std::string ID = "testStructureID";
     StructureConstPtr s = fb->setId(ID)->
@@ -44,7 +44,7 @@ void test_structure()
     testOk1(s.get() != 0);
     testOk1(ID == s->getID());
     testOk1(2 == s->getFields().size());
-    
+
     FieldConstPtr f0 = s->getField(0);
     testOk1(scalar == f0->getType());
     testOk1("double" == s->getFieldName(0));
@@ -54,13 +54,13 @@ void test_structure()
     testOk1(scalarArray == f1->getType());
     testOk1("intArray" == s->getFieldName(1));
     testOk(pvInt == std::tr1::static_pointer_cast<const ScalarArray>(f1)->getElementType(), "f1 element type == int");
-    
+
     // test reuse with empty structure
     StructureConstPtr emptyStructure = fb->createStructure();
     testOk1(emptyStructure.get() != 0);
     testOk1(Structure::DEFAULT_ID == emptyStructure->getID());
     testOk1(0 == emptyStructure->getFields().size());
-    
+
     // test add/addArray with Field
     StructureConstPtr s2 = fb->add("s", s)->
                             addArray("sArray", s)->
@@ -137,7 +137,7 @@ void test_nestedStructure()
     testDiag("Test test_nestedStructure()");
 
     FieldCreatePtr fieldCreate = getFieldCreate();
-    
+
     std::string NESTED_ID = "nestedID";
     StructureConstPtr s = fieldCreate->createFieldBuilder()->
                             add("double", pvDouble)->
@@ -163,21 +163,21 @@ void test_nestedStructure()
 
     {
         StructureConstPtr s2 = std::tr1::static_pointer_cast<const Structure>(f1);
-        
+
         testOk1(s2.get() != 0);
         testOk1(NESTED_ID == s2->getID());
         testOk1(2 == s2->getFields().size());
-        
+
         FieldConstPtr f20 = s2->getField(0);
         testOk1(scalar == f20->getType());
         testOk1("short" == s2->getFieldName(0));
         testOk(pvShort == std::tr1::static_pointer_cast<const Scalar>(f20)->getScalarType(), "f20 scalar type == short");
-    
+
         FieldConstPtr f21 = s2->getField(1);
         testOk1(scalar == f21->getType());
         testOk1("long" == s2->getFieldName(1));
         testOk(pvLong == std::tr1::static_pointer_cast<const Scalar>(f21)->getScalarType(), "f21 element type == long");
-        
+
     }
 
     FieldConstPtr f2 = s->getField(2);
@@ -185,15 +185,15 @@ void test_nestedStructure()
     testOk1("intArray" == s->getFieldName(2));
     testOk(pvInt == std::tr1::static_pointer_cast<const ScalarArray>(f2)->getElementType(), "f2 element type == int");
 
-}   
-    
+}
+
 
 void test_nestedStructureArray()
 {
     testDiag("Test test_nestedStructureArray()");
 
     FieldCreatePtr fieldCreate = getFieldCreate();
-    
+
     std::string NESTED_ID = "nestedID";
     StructureConstPtr s = fieldCreate->createFieldBuilder()->
                             add("double", pvDouble)->
@@ -219,21 +219,21 @@ void test_nestedStructureArray()
 
     {
         StructureConstPtr s2 = std::tr1::static_pointer_cast<const StructureArray>(f1)->getStructure();
-        
+
         testOk1(s2.get() != 0);
         testOk1(NESTED_ID == s2->getID());
         testOk1(2 == s2->getFields().size());
-        
+
         FieldConstPtr f20 = s2->getField(0);
         testOk1(scalar == f20->getType());
         testOk1("short" == s2->getFieldName(0));
         testOk(pvShort == std::tr1::static_pointer_cast<const Scalar>(f20)->getScalarType(), "f20 scalar type == short");
-    
+
         FieldConstPtr f21 = s2->getField(1);
         testOk1(scalar == f21->getType());
         testOk1("long" == s2->getFieldName(1));
         testOk(pvLong == std::tr1::static_pointer_cast<const Scalar>(f21)->getScalarType(), "f21 element type == long");
-        
+
     }
 
     FieldConstPtr f2 = s->getField(2);

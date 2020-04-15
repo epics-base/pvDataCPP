@@ -72,7 +72,7 @@ static bool checkBitSetPVField(
 
 bool BitSetUtil::compress(BitSetPtr const &bitSet,PVStructurePtr const &pvStructure)
 {
-    return checkBitSetPVField(pvStructure,bitSet,0);   
+    return checkBitSetPVField(pvStructure,bitSet,0);
 }
 
 }}

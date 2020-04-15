@@ -18,7 +18,7 @@
 using std::tr1::static_pointer_cast;
 using std::string;
 
-namespace epics { namespace pvData { 
+namespace epics { namespace pvData {
 
 string PVDisplay::noDisplayFound("No display structure found");
 string PVDisplay::notAttached("Not attached to an display structure");

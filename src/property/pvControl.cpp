@@ -15,7 +15,7 @@
 #include <pv/pvData.h>
 #include <pv/pvControl.h>
 
-namespace epics { namespace pvData { 
+namespace epics { namespace pvData {
 
 using std::tr1::static_pointer_cast;
 using std::string;

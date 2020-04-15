@@ -59,7 +59,7 @@ namespace ScalarTypeFunc {
         if(type>=pvBoolean && type<=pvDouble) return true;
         return false;
     }
-    
+
     static const char* names[] = {
         "boolean",
         "byte", "short", "int", "long",

@@ -23,7 +23,7 @@ using std::size_t;
 using std::string;
 
 namespace epics { namespace pvData {
-    
+
 #define PVUNION_UNDEFINED_INDEX -1
 const int32 PVUnion::UNDEFINED_INDEX = PVUNION_UNDEFINED_INDEX;
 
@@ -75,7 +75,7 @@ PVFieldPtr PVUnion::select(int32 index)
 
     return value;
 }
-    
+
 PVFieldPtr PVUnion::select(string const & fieldName)
 {
     int32 index = variant ? -1 : static_cast<int32>(unionPtr->getFieldIndex(fieldName));
@@ -136,7 +136,7 @@ void PVUnion::serialize(ByteBuffer *pbuffer, SerializableControl *pflusher) cons
         // write selector value
         SerializeHelper::writeSize(selector, pbuffer, pflusher);
         // write value, no value for UNDEFINED_INDEX
-        if (selector != UNDEFINED_INDEX) 
+        if (selector != UNDEFINED_INDEX)
             value->serialize(pbuffer, pflusher);
     }
 }
@@ -191,7 +191,7 @@ std::ostream& PVUnion::dumpValue(std::ostream& o) const
                 o << format::indent() << fieldField->getField()->getID() << ' ' << fieldField->getFieldName() << ' ' << *(fieldField.get()) << std::endl;
             else
                 o << *(fieldField.get());
-       } 
+       }
     }
     return o;
 }

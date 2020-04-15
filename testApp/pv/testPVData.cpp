@@ -81,7 +81,7 @@ static void testCreatePVStructure()
     pvFields.push_back(pv1);
     PVStructurePtr pvParent = pvDataCreate->createPVStructure(
         fieldNames,pvFields);
-        
+
     std::cout << "testCreatePVStructure PASSED" << std::endl;
 }
 
@@ -344,7 +344,7 @@ static void testPVScalar()
     testPVScalarWithProperties(string("float"),pvFloat);
     testPVScalarWithProperties(string("double"),pvDouble);
     testPVScalarWithProperties(string("string"),pvString);
-    
+
     std::cout << "testPVScalar PASSED" << std::endl;
 }
 
@@ -386,7 +386,7 @@ static void testScalarArray()
 }
 
 static void testRequest()
-{        
+{
     StringArray nullNames;
     FieldConstPtrArray nullFields;
     StringArray optionNames(1);

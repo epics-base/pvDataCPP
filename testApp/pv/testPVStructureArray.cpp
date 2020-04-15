@@ -113,9 +113,9 @@ static void testCompress()
 static void testRemove()
 {
     testDiag("Test structure array remove");
-    
+
     PVStructureArray::svector contents(10);
-    
+
     for(size_t i=0; i<contents.size(); i++)
         contents[i] = standardField->alarm()->build();
 

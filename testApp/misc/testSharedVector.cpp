@@ -522,7 +522,7 @@ void testICE()
     testOk1(B.size()==6);
     testOk1(A.data()!=check);
     testOk1(B.data()==check);
-    
+
     D = B; // create second const reference
 
     // clears D, but reference to B

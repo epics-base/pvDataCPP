@@ -30,7 +30,7 @@ static FieldCreatePtr fieldCreate = getFieldCreate();
 
 struct CreateRequestImpl {
 
-    struct Node 
+    struct Node
     {
         string name;
         vector<Node> nodes;
@@ -55,7 +55,7 @@ struct CreateRequestImpl {
 
 
     CreateRequestImpl() {}
-         
+
 
     void removeBlanks(string& str)
     {

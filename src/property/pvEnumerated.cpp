@@ -18,7 +18,7 @@
 using std::tr1::static_pointer_cast;
 using std::string;
 
-namespace epics { namespace pvData { 
+namespace epics { namespace pvData {
 
 string PVEnumerated::notFound("No enumerated structure found");
 string PVEnumerated::notAttached("Not attached to an enumerated structure");

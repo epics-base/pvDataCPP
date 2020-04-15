@@ -21,7 +21,7 @@
 using std::tr1::static_pointer_cast;
 using std::string;
 
-namespace epics { namespace pvData { 
+namespace epics { namespace pvData {
 
 static
 StructureConstPtr buildValueAlarm(ScalarType vtype)
@@ -157,7 +157,7 @@ StructureConstPtr StandardField::createProperties(string id,FieldConstPtr field,
                     if(first->getType()==epics::pvData::scalar
                     && second->getType()==epics::pvData::scalarArray) {
                         ScalarConstPtr scalarFirst = static_pointer_cast<const Scalar>(first);
-                        ScalarArrayConstPtr scalarArraySecond = 
+                        ScalarArrayConstPtr scalarArraySecond =
                             static_pointer_cast<const ScalarArray>(second);
                         if(scalarFirst->getScalarType()==pvInt
                         && scalarArraySecond->getElementType()==pvString) {
