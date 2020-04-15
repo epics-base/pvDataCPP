@@ -25,7 +25,7 @@ void test_factory()
     testOk1(fb.get() != 0);
 
     FieldBuilderPtr fb2 = fieldCreate->createFieldBuilder();
-	testOk1(fb.get() != fb2.get());
+    testOk1(fb.get() != fb2.get());
 }
 
 void test_structure()
@@ -185,8 +185,8 @@ void test_nestedStructure()
     testOk1("intArray" == s->getFieldName(2));
     testOk(pvInt == std::tr1::static_pointer_cast<const ScalarArray>(f2)->getElementType(), "f2 element type == int");
 
-}	
-	
+}   
+    
 
 void test_nestedStructureArray()
 {

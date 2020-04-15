@@ -28,10 +28,10 @@ namespace epics { namespace pvData {
         class epicsShareClass Status : public epics::pvData::Serializable {
             public:
                 POINTER_DEFINITIONS(Status);
-        	/**
-        	 * Status type enum.
-        	 */
-        	enum StatusType { 
+                /**
+                 * Status type enum.
+                 */
+                enum StatusType { 
                     /** Operation completed successfully. */
                     STATUSTYPE_OK,
                     /** Operation completed successfully, but there is a warning message. */
@@ -40,11 +40,11 @@ namespace epics { namespace pvData {
                     STATUSTYPE_ERROR,
                     /** Operation failed due to an unexpected error. */
                     STATUSTYPE_FATAL
-        	};
-        	
-        	static const char* StatusTypeName[];
-        	
-        	static Status Ok;
+                };
+                
+                static const char* StatusTypeName[];
+                
+                static Status Ok;
 
             static inline Status warn(const std::string& m) { return Status(STATUSTYPE_WARNING, m); }
             static inline Status error(const std::string& m) { return Status(STATUSTYPE_ERROR, m); }
@@ -54,10 +54,10 @@ namespace epics { namespace pvData {
              * Creates OK status; STATUSTYPE_OK, empty message and stackDump.
              */
             Status() :m_statusType(STATUSTYPE_OK) {}
-        	
-        	/**
-        	 * Create non-OK status.
-        	 */
+                
+                /**
+                 * Create non-OK status.
+                 */
             Status(StatusType type, std::string const & message);
         
             /**

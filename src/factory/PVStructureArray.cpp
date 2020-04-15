@@ -218,10 +218,10 @@ std::ostream& PVStructureArray::dumpValue(std::ostream& o) const
     size_t length = getLength();
     if (length > 0)
     {
-    	format::indent_scope s(o);
+        format::indent_scope s(o);
 
         for (size_t i = 0; i < length; i++)
-        	dumpValue(o, i);
+            dumpValue(o, i);
     }
 
     return o;

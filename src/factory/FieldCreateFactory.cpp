@@ -113,7 +113,7 @@ std::tr1::shared_ptr<PVField> Field::build() const
 
 std::ostream& operator<<(std::ostream& o, const Field& f)
 {
-	return f.dump(o);
+    return f.dump(o);
 };
 
 Scalar::Scalar(ScalarType scalarType)
@@ -136,18 +136,18 @@ std::ostream& Scalar::dump(std::ostream& o) const
 string Scalar::getID() const
 {
     static const string idScalarLUT[] = {
-	"boolean", // pvBoolean
-	"byte",    // pvByte
-	"short",   // pvShort
-	"int",     // pvInt
-	"long",    // pvLong
-	"ubyte",   // pvUByte
-	"ushort",  // pvUShort
-	"uint",    // pvUInt
-	"ulong",   // pvULong
-	"float",   // pvFloat
-	"double",  // pvDouble
-	"string"   // pvString
+        "boolean", // pvBoolean
+        "byte",    // pvByte
+        "short",   // pvShort
+        "int",     // pvInt
+        "long",    // pvLong
+        "ubyte",   // pvUByte
+        "ushort",  // pvUShort
+        "uint",    // pvUInt
+        "ulong",   // pvULong
+        "float",   // pvFloat
+        "double",  // pvDouble
+        "string"   // pvString
     };
     return idScalarLUT[scalarType];
 }
@@ -227,7 +227,7 @@ static void serializeStructureField(const Structure* structure, ByteBuffer* buff
     // to optimize default (non-empty) IDs optimization
     // empty IDs are not allowed
     string id = structure->getID();
-    if (id == Structure::DEFAULT_ID)	// TODO slow comparison
+    if (id == Structure::DEFAULT_ID)    // TODO slow comparison
         SerializeHelper::serializeString(string(), buffer, control);
     else
         SerializeHelper::serializeString(id, buffer, control);
@@ -263,13 +263,13 @@ static StructureConstPtr deserializeStructureField(const FieldCreate* fieldCreat
 
 static void serializeUnionField(const Union* punion, ByteBuffer* buffer, SerializableControl* control)
 {
-	// to optimize default (non-empty) IDs optimization
-	// empty IDs are not allowed
-	string id = punion->getID();
-	if (id == Union::DEFAULT_ID)	// TODO slow comparison
+    // to optimize default (non-empty) IDs optimization
+    // empty IDs are not allowed
+    string id = punion->getID();
+    if (id == Union::DEFAULT_ID)    // TODO slow comparison
         SerializeHelper::serializeString(string(), buffer, control);
-	else
-	    SerializeHelper::serializeString(id, buffer, control);
+    else
+        SerializeHelper::serializeString(id, buffer, control);
 
     FieldConstPtrArray const & fields = punion->getFields();
     StringArray const & fieldNames = punion->getFieldNames();
@@ -297,7 +297,7 @@ static UnionConstPtr deserializeUnionField(const FieldCreate* fieldCreate, ByteB
     if (id.empty())
         return fieldCreate->createUnion(fieldNames, fields);
     else
-    	return fieldCreate->createUnion(id, fieldNames, fields);
+        return fieldCreate->createUnion(id, fieldNames, fields);
 }
 
 Array::Array(Type type)
@@ -323,18 +323,18 @@ ScalarArray::~ScalarArray()
 const string ScalarArray::getIDScalarArrayLUT() const
 {
     static const string idScalarArrayLUT[] = {
-    "boolean[]", // pvBoolean
-    "byte[]",    // pvByte
-    "short[]",   // pvShort
-	"int[]",     // pvInt
-	"long[]",    // pvLong
-	"ubyte[]",   // pvUByte
-	"ushort[]",  // pvUShort
-	"uint[]",    // pvUInt
-	"ulong[]",   // pvULong
-	"float[]",   // pvFloat
-	"double[]",  // pvDouble
-	"string[]"   // pvString
+        "boolean[]", // pvBoolean
+        "byte[]",    // pvByte
+        "short[]",   // pvShort
+        "int[]",     // pvInt
+        "long[]",    // pvLong
+        "ubyte[]",   // pvUByte
+        "ushort[]",  // pvUShort
+        "uint[]",    // pvUInt
+        "ulong[]",   // pvULong
+        "float[]",   // pvFloat
+        "double[]",  // pvDouble
+        "string[]"   // pvString
     };
     return idScalarArrayLUT[elementType];
 }
@@ -427,7 +427,7 @@ StructureArray::~StructureArray()
 
 string StructureArray::getID() const
 {
-	return pstructure->getID() + "[]";
+    return pstructure->getID() + "[]";
 }
 
 std::ostream& StructureArray::dump(std::ostream& o) const
@@ -467,7 +467,7 @@ UnionArray::~UnionArray()
 
 string UnionArray::getID() const
 {
-	return punion->getID() + "[]";
+    return punion->getID() + "[]";
 }
 
 std::ostream& UnionArray::dump(std::ostream& o) const
@@ -555,7 +555,7 @@ Structure::~Structure()
 
 string Structure::getID() const
 {
-	return id;
+    return id;
 }
 
 FieldConstPtr  Structure::getField(string const & fieldName) const {
@@ -771,7 +771,7 @@ int32 Union::guess(Type t, ScalarType s) const
 
 string Union::getID() const
 {
-	return id;
+    return id;
 }
 
 FieldConstPtr  Union::getField(string const & fieldName) const {
@@ -966,7 +966,7 @@ FieldBuilder::FieldBuilder(const FieldBuilderPtr & _parentBuilder,
 {}
 
 FieldBuilder::FieldBuilder(FieldBuilderPtr const & _parentBuilder,
-			string const & _nestedName,
+            string const & _nestedName,
             Type _nestedClassToBuild, bool _nestedArray)
     :fieldCreate(_parentBuilder->fieldCreate)
     ,idSet(false)
@@ -979,10 +979,10 @@ FieldBuilder::FieldBuilder(FieldBuilderPtr const & _parentBuilder,
 
 void FieldBuilder::reset()
 {
-	id.erase();
+    id.erase();
     idSet = false;
-	fieldNames.clear();
-	fields.clear();
+    fieldNames.clear();
+    fields.clear();
 }
 
 FieldBuilderPtr FieldBuilder::begin()
@@ -1023,7 +1023,7 @@ FieldBuilderPtr FieldBuilder::add(string const & name, FieldConstPtr const & fie
     } else if(*cur!=*field) {
         THROW_EXCEPTION2(std::runtime_error, "duplicate field name w/ different type : "+name);
     } // else exact duplicate is silently ignored
-	return shared_from_this();
+    return shared_from_this();
 }
 
 FieldBuilderPtr FieldBuilder::addArray(string const & name, ScalarType scalarType)
@@ -1100,7 +1100,7 @@ StructureConstPtr FieldBuilder::createStructure()
 {
     if (parentBuilder.get())
         THROW_EXCEPTION2(std::runtime_error, "createStructure() called in nested FieldBuilder");
-	
+    
     StructureConstPtr field(static_pointer_cast<const Structure>(createFieldInternal(structure)));
     reset();
     return field;
@@ -1110,7 +1110,7 @@ UnionConstPtr FieldBuilder::createUnion()
 {
     if (parentBuilder.get())
         THROW_EXCEPTION2(std::runtime_error, "createUnion() called in nested FieldBuilder");
-	
+    
     UnionConstPtr field(static_pointer_cast<const Union>(createFieldInternal(union_)));
     reset();
     return field;

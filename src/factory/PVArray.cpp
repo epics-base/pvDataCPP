@@ -49,7 +49,7 @@ PVArray::PVArray(FieldConstPtr const & field)
 
 std::ostream& operator<<(format::array_at_internal const& manip, const PVArray& array)
 {
-	return array.dumpValue(manip.stream, manip.index);
+    return array.dumpValue(manip.stream, manip.index);
 }
 
 }}

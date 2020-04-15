@@ -44,40 +44,40 @@ void Status::maximize(const Status& o)
 
 void Status::serialize(ByteBuffer *buffer, SerializableControl *flusher) const
 {
-	flusher->ensureBuffer(1);
-	if (m_statusType == STATUSTYPE_OK)
-	{
-		// special code for okStatus (optimization)
-		buffer->putByte((int8)-1);
-	}
-	else
-	{
-		buffer->putByte((int8)m_statusType);
-		SerializeHelper::serializeString(m_message, buffer, flusher);
-		SerializeHelper::serializeString(m_stackDump, buffer, flusher);
-	}
+    flusher->ensureBuffer(1);
+    if (m_statusType == STATUSTYPE_OK)
+    {
+        // special code for okStatus (optimization)
+        buffer->putByte((int8)-1);
+    }
+    else
+    {
+        buffer->putByte((int8)m_statusType);
+        SerializeHelper::serializeString(m_message, buffer, flusher);
+        SerializeHelper::serializeString(m_stackDump, buffer, flusher);
+    }
 }
     
 void Status::deserialize(ByteBuffer *buffer, DeserializableControl *flusher)
 {
-	flusher->ensureData(1);
-	int8 typeCode = buffer->getByte();
-	if (typeCode == (int8)-1)
-	{
-	   // in most of the cases status will be OK, we statistically optimize
-	   if (m_statusType != STATUSTYPE_OK)
-	   {
-	       m_statusType = STATUSTYPE_OK;
+    flusher->ensureData(1);
+    int8 typeCode = buffer->getByte();
+    if (typeCode == (int8)-1)
+    {
+       // in most of the cases status will be OK, we statistically optimize
+       if (m_statusType != STATUSTYPE_OK)
+       {
+           m_statusType = STATUSTYPE_OK;
            m_message.clear();
            m_stackDump.clear();
-	   }
-	}
-	else
-	{
-	    m_statusType = (StatusType)typeCode;
-		m_message = SerializeHelper::deserializeString(buffer, flusher);
-		m_stackDump = SerializeHelper::deserializeString(buffer, flusher);
-	}
+       }
+    }
+    else
+    {
+        m_statusType = (StatusType)typeCode;
+        m_message = SerializeHelper::deserializeString(buffer, flusher);
+        m_stackDump = SerializeHelper::deserializeString(buffer, flusher);
+    }
 }
 
 void Status::dump(std::ostream& o) const
