@@ -2,6 +2,12 @@
 
 @page release_notes Release Notes
 
+Release 8.0.2 (May 2020)
+========================
+
+- Changes to documentation and unittests.
+  No functional changes to library.
+
 Release 8.0.1 (Nov 2019)
 ==========================
 
