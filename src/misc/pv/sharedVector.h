@@ -544,11 +544,11 @@ private:
     /* Hack alert.
      * For reasons of simplicity and efficiency, we want to use raw pointers for iteration.
      * However, shared_ptr::get() isn't defined when !m_sdata, although practically it gives NULL.
-     * Unfortunately, many of the MSVC (<= VS 2010) STL methods assert() that iterators are never NULL.
+     * Unfortunately, many of the MSVC (<= VS 2013) STL methods assert() that iterators are never NULL.
      * So we fudge here by abusing 'this' so that our iterators are always !NULL.
      */
     inline E* base_ptr() const {
-#if defined(_MSC_VER) && _MSC_VER<=1600
+#if defined(_MSC_VER) && _MSC_VER<=1800
         return this->m_count ? this->m_sdata.get() : (E*)(this-1);
 #else
         return this->m_sdata.get();
