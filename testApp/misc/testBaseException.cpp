@@ -31,31 +31,11 @@ void Unroller::unroll<0>(double /*d*/) {
     THROW_BASE_EXCEPTION("the root cause");
 }
 
-void internalTestBaseException(int /*unused*/ = 0)
-{
-    try {
-        // NOTE: 5, 4, 3, 2, 1 calls will be optimized and not shown
-        Unroller().unroll<5>(42.0);
-    } catch (BaseException& be3) {
-        THROW_BASE_EXCEPTION_CAUSE("exception 1", be3);
-    }
-}
-
 void testBaseExceptionTest() {
     printf("testBaseException... ");
 
     try {
         THROW_BASE_EXCEPTION("all is OK");
-    } catch (BaseException& be) {
-        printf("\n\n%s\n\n", be.what());
-    }
-
-    try {
-        try {
-            internalTestBaseException();
-        } catch (BaseException& be2) {
-            THROW_BASE_EXCEPTION_CAUSE("exception 2", be2);
-        }
     } catch (BaseException& be) {
         printf("\n\n%s\n\n", be.what());
     }

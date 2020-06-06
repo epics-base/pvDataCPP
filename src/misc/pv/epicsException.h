@@ -229,7 +229,6 @@ private:
 #endif
 
 #define THROW_BASE_EXCEPTION(msg) THROW_EXCEPTION2(::epics::pvData::BaseException, msg)
-#define THROW_BASE_EXCEPTION_CAUSE(msg, cause) THROW_EXCEPTION2(::epics::pvData::BaseException, msg)
 
     }
 }
