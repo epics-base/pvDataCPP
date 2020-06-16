@@ -237,6 +237,14 @@ public:
     std::ostream& operator<<(std::ostream& strm, const escape& Q);
 };
 
+struct maybeQuote {
+    const std::string& s;
+    maybeQuote(const std::string& s) :s(s) {}
+};
+
+epicsShareExtern
+std::ostream& operator<<(std::ostream& strm, const maybeQuote& q);
+
 }} // end namespace
 
 #endif // PVTYPECAST_H

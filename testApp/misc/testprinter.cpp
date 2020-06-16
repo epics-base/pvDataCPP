@@ -197,12 +197,12 @@ void showNTEnum()
 
     input->getSubFieldT<pvd::PVInt>("value.index")->put(1);
 
-    testDiff("<undefined>              (1) a two\n", print(input->stream()), "two");
+    testDiff("<undefined>              (1) \"a two\"\n", print(input->stream()), "two");
 
     testDiff("epics:nt/NTEnum:1.0 \n"
-             "    enum_t value (1) a two\n"
+             "    enum_t value (1) \"a two\"\n"
              "        int index 1\n"
-             "        string[] choices [\"one\", \"a two\"]\n"
+             "        string[] choices [one, \"a two\"]\n"
              "    alarm_t alarm \n"
              "        int severity 0\n"
              "        int status 0\n"
@@ -299,7 +299,7 @@ void testRaw()
 
     testDiff("omg \n"
              "    string scalar \n"          // bit 1
-             "    string[] scalarArray [\"hello\", \"world\\x7F\"]\n"
+             "    string[] scalarArray [hello, \"world\\x7F\"]\n"
              "    structure below\n"
              "        int A 0\n"             // bit 4
              "        union select\n"
@@ -319,7 +319,7 @@ void testRaw()
 
     testDiff("omg \n"
              "\033[1m    string scalar \n"
-             "\033[0m\033[1m    string[] scalarArray [\"hello\", \"world\\x7F\"]\n"
+             "\033[0m\033[1m    string[] scalarArray [hello, \"world\\x7F\"]\n"
              "\033[0m    structure below\n"
              "\033[1m        int A 0\n"
              "\033[0m        union select\n"
@@ -347,13 +347,20 @@ void testEscape()
     testEqual("hello\"\"world", std::string(SB()<<pvd::escape("hello\"world").style(pvd::escape::CSV)));
 
     testEqual("hello\"\"world", pvd::escape("hello\"world").style(pvd::escape::CSV).str());
+
+    testEqual("hello_world", std::string(SB()<<pvd::maybeQuote("hello_world")));
+    testEqual("\"hello_world\\\"\"", std::string(SB()<<pvd::maybeQuote("hello_world\"")));
+    testEqual("\"hello world\"", std::string(SB()<<pvd::maybeQuote("hello world")));
+    testEqual("\"hello\\nworld\"", std::string(SB()<<pvd::maybeQuote("hello\nworld")));
+    testEqual("\"hello\\\"world\"", std::string(SB()<<pvd::maybeQuote("hello\"world")));
+    testEqual("\"hello\\x7Fworld\"", std::string(SB()<<pvd::maybeQuote("hello\x7Fworld")));
 }
 
 } // namespace
 
 MAIN(testprinter)
 {
-    testPlan(20);
+    testPlan(26);
     showNTScalarNumeric();
     showNTScalarString();
     showNTEnum();

@@ -144,8 +144,7 @@ PVString::PVString(ScalarConstPtr const & scalar)
 
 std::ostream& PVString::dumpValue(std::ostream& o) const
 {
-    // we escape, but do not quote, for scalar string
-    o<<escape(get());
+    o<<maybeQuote(get());
     return o;
 }
 
@@ -233,7 +232,7 @@ std::ostream& PVValueArray<T>::dumpValue(std::ostream& o) const
 template<>
 std::ostream& PVValueArray<std::string>::dumpValue(std::ostream& o, size_t index) const
 {
-    return o << '"' << escape(this->view().at(index)) << '"';
+    return o << maybeQuote(this->view().at(index));
 }
 
 template<>
@@ -244,9 +243,9 @@ std::ostream& PVValueArray<std::string>::dumpValue(std::ostream& o) const
                                   end(v.end());
     o << '[';
     if(it!=end) {
-        o << '"' << escape(*it++) << '"';
+        o << maybeQuote(*it++);
         for(; it!=end; ++it)
-            o << ", \"" << escape(*it) << '"';
+            o << ", " << maybeQuote(*it);
 
     }
     return o << ']';
