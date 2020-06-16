@@ -2,6 +2,15 @@
 
 @page release_notes Release Notes
 
+Release 8.0.3 (XXX YYYY)
+========================
+
+- Incompatible changes
+ - Removed THROW_BASE_EXCEPTION_CAUSE() macro which has long ignored its cause.
+   Any external users should switch to the functionally identical THROW_BASE_EXCEPTION_CAUSE()
+ - Various printing of functions now conditionally escape strings
+   including quote '\"' and similar charactors.
+
 Release 8.0.2 (May 2020)
 ========================
 
