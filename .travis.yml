@@ -1,8 +1,6 @@
 # .travis.yml for use with EPICS Base ci-scripts
 # (see: https://github.com/epics-base/ci-scripts)
 
-# This is YAML - indentation levels are crucial
-
 language: cpp
 compiler: gcc
 dist: bionic
@@ -13,7 +11,7 @@ cache:
 
 env:
   global:
-    - SETUP_PATH=.ci-local:.ci
+    - SETUP_PATH=.ci-local
 
 addons:
   apt:
@@ -31,33 +29,23 @@ addons:
     - qemu-system-x86
 
 install:
-  - ./.ci/travis/prepare.sh
+  - python .ci/cue.py prepare
 
 script:
-  - ./.ci/travis/build.sh
-
-# If you need to do more during install and build,
-# add a local directory to your module and do e.g.
-#  - ./.ci-local/travis/install-extras.sh
-
-# Define build jobs
-
-# Well-known variables to use
-# SET      source setup file
-# EXTRA    content will be added to make command line
-# STATIC   set to YES for static build (default: NO)
-# TEST     set to NO to skip running the tests (default: YES)
-# VV       set to make build scripts verbose (default: unset)
-
-# Usually from setup files, but may be specified or overridden
-#  on a job line
-# MODULES  list of dependency modules
-# BASE     branch or release tag name of the EPICS Base to use
-# <MODULE> branch or release tag for a specific module
-# ...      see README for setup file syntax description
+  - python .ci/cue.py build
+  - python .ci/cue.py test-results
 
 jobs:
   include:
+
+# Windows builds
+
+  - env: BASE=7.0
+    os: windows
+    compiler: vs2017
+
+  - env: BASE=7.0
+    os: windows
 
 # Different configurations of default gcc and clang
 
@@ -84,11 +72,9 @@ jobs:
 
 # Cross-compilations to Windows using MinGW and WINE
     
-  - env: BASE=7.0 WINE=32 TEST=NO STATIC=YES
-    compiler: mingw
+  - env: BASE=7.0 WINE=32 TEST=NO BCFG=static
 
-  - env: BASE=7.0 WINE=64 TEST=NO STATIC=NO
-    compiler: mingw
+  - env: BASE=7.0 WINE=64 TEST=NO
 
 # Other gcc versions (added as an extra package)
 
