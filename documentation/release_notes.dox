@@ -2,8 +2,8 @@
 
 @page release_notes Release Notes
 
-Release 8.0.3 (XXX YYYY)
-========================
+Release 8.0.3 (July 2020)
+=========================
 
 - Incompatible changes
  - Removed THROW_BASE_EXCEPTION_CAUSE() macro which has long ignored its cause.
