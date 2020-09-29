@@ -837,9 +837,13 @@ namespace detail {
             typedef typename meta::strip_const<TO>::type to_t;
             ScalarType stype = src.original_type(),
                        dtype = (ScalarType)ScalarTypeID<TO>::value;
-            if(stype==dtype) {
+            if(src.empty()) {
+                return shared_vector<TO>();
+
+            } else if(stype==dtype) {
                 // no convert needed
                 return shared_vector<TO>(src, detail::_shared_vector_cast_tag());
+
             } else {
                 // alloc and convert
                 shared_vector<to_t> ret(src.size()/ScalarTypeFunc::elementSize(stype));

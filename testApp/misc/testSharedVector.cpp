@@ -474,6 +474,9 @@ void testVectorConvert()
     testOk1(ints.unique());
     testOk1(strings.size()==ints.size());
     testOk1(strings.at(0)=="42");
+
+    testDiag("convert empty array");
+    testOk1(pvd::shared_vector_convert<double>(pvd::shared_vector<pvd::int32>()).empty());
 }
 
 void testWeak()
@@ -695,7 +698,7 @@ void testCXX11Init()
 
 MAIN(testSharedVector)
 {
-    testPlan(191);
+    testPlan(192);
     testDiag("Tests for shared_vector");
 
     testDiag("sizeof(shared_vector<pvd::int32>)=%lu",
