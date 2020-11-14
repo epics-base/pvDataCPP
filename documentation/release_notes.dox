@@ -2,6 +2,15 @@
 
 @page release_notes Release Notes
 
+Release 8.1.0 (UNRELEASED)
+==========================
+
+- Incompatible changes
+ - Remove ByteBuffer::align()
+- Compatible changes
+ - Deprecate SerializableControl::alignBuffer() and DeserializableControl::alignData()
+ - shared_vector_convert<>() fix convert of empty, untyped, array
+
 Release 8.0.3 (July 2020)
 =========================
 
