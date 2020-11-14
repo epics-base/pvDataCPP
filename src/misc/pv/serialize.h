@@ -16,6 +16,14 @@
 
 #include <shareLib.h>
 
+#if defined(PVD_INTERNAL)
+#  define PVD_DEPRECATED(msg)
+#elif __GNUC__ > 4 || __GNUC__ == 4 && __GNUC_MINOR__ >= 5
+#  define PVD_DEPRECATED(msg) __attribute__((deprecated(msg)))
+#else
+#  define PVD_DEPRECATED(msg) EPICS_DEPRECATED
+#endif
+
 namespace epics { namespace pvData { 
 
     class SerializableControl;
@@ -47,11 +55,7 @@ namespace epics { namespace pvData {
          * @param size The number of bytes.
          */
         virtual void ensureBuffer(std::size_t size) =0;
-        /**
-         * Add pad bytes to buffer.
-         * @param alignment alignment required.
-         */
-        virtual void alignBuffer(std::size_t alignment) =0;
+        virtual void alignBuffer(std::size_t alignment) PVD_DEPRECATED("Deprecated for lack of use") {}
         /**
          * Method for serializing primitive array data.
          * Hook for supplying custom serialization implementation.
@@ -98,14 +102,8 @@ namespace epics { namespace pvData {
          * @param size The number of bytes.
          */
         virtual void ensureData(std::size_t size) =0;
-        /**
-         * Align buffer.
-         * Note that this takes care only current buffer alignment.
-         * If streaming protocol is used,
-         * care must be taken that entire stream is aligned.
-         * @param alignment size in bytes, must be power of two.
-         */
-        virtual void alignData(std::size_t alignment) =0;
+        // Deprecated for lack of use
+        virtual void alignData(std::size_t alignment) PVD_DEPRECATED("Deprecated for lack of use") {};
         /**
          * Method for deserializing array data.
          * Hook for supplying custom deserialization implementation.

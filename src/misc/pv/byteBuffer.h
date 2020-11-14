@@ -495,23 +495,6 @@ public:
         return sizeof(T)>1 && _reverseEndianess;
     }
     /**
-     * Adjust position to the next multiple of 'size.
-     * @param  size The alignment requirement, must be a power of 2. (unchecked)
-     * @param  fill value to use for padding bytes (default '\0').
-     *
-     * @note This alignment is absolute, not necessarily with respect to _buffer.
-     */
-    inline void align(std::size_t size, char fill='\0')
-    {
-        const std::size_t k = size - 1, bufidx = (std::size_t)_position;
-        if(bufidx&k) {
-            std::size_t npad = size-(bufidx&k);
-            assert(npad<=getRemaining());
-            std::fill(_position, _position+npad, fill);
-            _position += npad;
-        }
-    }
-    /**
      * Put a boolean value into the byte buffer.
      *
      * @param  value The value.

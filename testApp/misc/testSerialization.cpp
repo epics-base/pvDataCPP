@@ -67,10 +67,6 @@ public:
     virtual void ensureBuffer(std::size_t /*size*/) {
     }
 
-    virtual void alignBuffer(std::size_t alignment) {
-        buffer->align(alignment);
-    }
-
     virtual bool directSerialize(ByteBuffer* /*existingBuffer*/, const char* /*toSerialize*/,
                                  std::size_t /*elementCount*/, std::size_t /*elementSize*/)
     {
@@ -93,10 +89,6 @@ class DeserializableControlImpl : public DeserializableControl {
     EPICS_NOT_COPYABLE(DeserializableControlImpl)
 public:
     virtual void ensureData(size_t /*size*/) {
-    }
-
-    virtual void alignData(size_t alignment) {
-        buffer->align(alignment);
     }
 
     virtual bool directDeserialize(ByteBuffer* /*existingBuffer*/, char* /*deserializeTo*/,

@@ -217,38 +217,6 @@ void testUnaligned()
 {
     testDiag("test correctness of unaligned access");
 
-    ByteBuffer buf(32, EPICS_ENDIAN_BIG);
-
-    // malloc() should give us a buffer aligned to at least native integer size
-    buf.align(sizeof(int));
-    testOk1(buf.getPosition()==0);
-
-    buf.clear();
-    buf.put<uint8>(0x42);
-    buf.put<uint16>(0x1020);
-    buf.align(2, '\x41');
-    testOk1(buf.getPosition()==4);
-
-    testOk1(memcmp(buf.getBuffer(), "\x42\x10\x20\x41", 4)==0);
-
-    buf.clear();
-    buf.put<uint8>(0x42);
-    buf.put<uint32>(0x12345678);
-    buf.align(4, '\x41');
-    testOk1(buf.getPosition()==8);
-
-    testOk1(memcmp(buf.getBuffer(), "\x42\x12\x34\x56\x78\x41\x41\x41", 8)==0);
-
-    buf.clear();
-    buf.put<uint8>(0x42);
-    uint64 val = 0x12345678;
-    val<<=32;
-    val |= 0x90abcdef;
-    buf.put<uint64>(val);
-    buf.align(8, '\x41');
-    testOk1(buf.getPosition()==16);
-
-    testOk1(memcmp(buf.getBuffer(), "\x42\x12\x34\x56\x78\x90\xab\xcd\xef\x41\x41\x41", 8)==0);
 }
 
 static
@@ -305,7 +273,7 @@ void testArrayBE()
 
 MAIN(testByteBuffer)
 {
-    testPlan(104);
+    testPlan(97);
     testDiag("Tests byteBuffer");
     testBasicOperations();
     testInverseEndianness(EPICS_ENDIAN_BIG, expect_be);

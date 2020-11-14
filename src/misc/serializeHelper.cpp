@@ -174,14 +174,6 @@ struct ToString : public epics::pvData::SerializableControl
         assert(bufwrap.getRemaining()>0);
     }
 
-    virtual void alignBuffer(std::size_t alignment)
-    {
-        if(bufwrap.getRemaining()<alignment)
-            flushSerializeBuffer();
-        assert(bufwrap.getRemaining()>=alignment);
-        bufwrap.align(alignment);
-    }
-
     virtual bool directSerialize(
         ByteBuffer *existingBuffer,
         const char* toSerialize,
@@ -230,16 +222,6 @@ struct FromString : public epics::pvData::DeserializableControl
     {
         if(size>buf.getRemaining())
             throw std::logic_error("Incomplete buffer");
-    }
-
-    virtual void alignData(std::size_t alignment)
-    {
-        size_t pos = buf.getPosition(), k = alignment-1;
-        if(pos&k) {
-            std::size_t npad = alignment-(pos&k);
-            ensureData(npad);
-            buf.align(alignment);
-        }
     }
 
     virtual bool directDeserialize(
