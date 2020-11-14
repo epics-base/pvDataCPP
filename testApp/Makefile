@@ -12,6 +12,8 @@ include $(PVDATA_TEST)/pv/Makefile
 include $(PVDATA_TEST)/property/Makefile
 include $(PVDATA_TEST)/copy/Makefile
 
+PROD_SRCS_RTEMS += rtemsTestData.c
+
 # pvDataAllTests runs all the test programs in a known working order.
 testHarness_SRCS += pvDataAllTests.c
 
@@ -29,6 +31,11 @@ TESTSPEC_RTEMS = pvdTestHarness.$(MUNCH_SUFFIX); pvDataAllTests
 
 # Build test scripts for hosts
 TESTSCRIPTS_HOST += $(TESTS:%=%.t)
+
+ifneq ($(filter $(T_A),$(CROSS_COMPILER_RUNTEST_ARCHS)),)
+TESTPROD = $(TESTPROD_HOST)
+TESTSCRIPTS += $(TESTS:%=%.t)
+endif
 
 include $(TOP)/configure/RULES
 

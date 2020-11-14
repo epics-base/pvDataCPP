@@ -59,6 +59,12 @@ jobs:
   - env: BASE=7.0 EXTRA="CMD_CXXFLAGS=-std=c++11"
     compiler: clang
 
+# RTEMS
+
+  - env: BASE=7.0 RTEMS=4.10
+
+  - env: BASE=7.0 RTEMS=4.9
+
 # Trusty: compiler versions very close to RHEL 7
 
   - env: BASE=7.0

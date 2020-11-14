@@ -134,12 +134,12 @@ void showNTScalarNumeric()
 {
     testDiag("%s", CURRENT_FUNCTION);
     pvd::PVStructurePtr input(pvd::getPVDataCreate()->createPVStructure(scalarNumeric));
-    input->getSubFieldT<pvd::PVScalar>("value")->putFrom(-42);
+    input->getSubFieldT<pvd::PVScalar>("value")->putFrom(pvd::int32(-42));
 
     testDiff("<undefined>              -42 \n", print(input->stream()));
 
-    input->getSubFieldT<pvd::PVScalar>("alarm.severity")->putFrom(1);
-    input->getSubFieldT<pvd::PVScalar>("alarm.status")->putFrom(1);
+    input->getSubFieldT<pvd::PVScalar>("alarm.severity")->putFrom(pvd::int32(1));
+    input->getSubFieldT<pvd::PVScalar>("alarm.status")->putFrom(pvd::int32(1));
     input->getSubFieldT<pvd::PVString>("alarm.message")->put("FOO");
 
     testDiff("<undefined>              -42 MINOR DEVICE FOO \n", print(input->stream()));
@@ -162,8 +162,8 @@ void showNTScalarString()
 
     testDiff("<undefined>              bar \n", print(input->stream()));
 
-    input->getSubFieldT<pvd::PVScalar>("alarm.severity")->putFrom(1);
-    input->getSubFieldT<pvd::PVScalar>("alarm.status")->putFrom(1);
+    input->getSubFieldT<pvd::PVScalar>("alarm.severity")->putFrom(pvd::int32(1));
+    input->getSubFieldT<pvd::PVScalar>("alarm.status")->putFrom(pvd::int32(1));
     input->getSubFieldT<pvd::PVString>("alarm.message")->put("FOO");
 
     testDiff("<undefined>              bar MINOR DEVICE FOO \n", print(input->stream()));
