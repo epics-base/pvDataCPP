@@ -2,8 +2,8 @@
 
 @page release_notes Release Notes
 
-Release 8.1.0 (UNRELEASED)
-==========================
+Release 8.1.0 (Feb 2021)
+========================
 
 - Incompatible changes
  - Remove ByteBuffer::align()
