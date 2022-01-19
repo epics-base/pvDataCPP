@@ -6,6 +6,9 @@
 #include <vector>
 #include <sstream>
 
+#include <errlog.h>
+#include <yajl_gen.h>
+
 #define epicsExportSharedSymbols
 #include <pv/pvdVersion.h>
 #include <pv/pvData.h>
@@ -16,27 +19,83 @@
 namespace pvd = epics::pvData;
 
 namespace {
+using namespace pvd::yajl;
+
+void yg(yajl_gen_status sts) {
+    const char *msg = "<\?\?\?>";
+    switch(sts) {
+    case yajl_gen_status_ok:
+    case yajl_gen_generation_complete:
+        return;
+#define CASE(STS) case STS: msg = #STS; break
+    CASE(yajl_gen_keys_must_be_strings);
+    CASE(yajl_gen_in_error_state);
+    CASE(yajl_gen_no_buf);
+    CASE(yajl_gen_invalid_number);
+    CASE(yajl_max_depth_exceeded);
+#ifdef EPICS_YAJL_VERSION
+    CASE(yajl_gen_invalid_string);
+#endif
+#undef CASE
+    }
+    throw std::runtime_error(msg);
+}
+
+static
+void stream_printer(void * ctx,
+                    const char * str,
+                    size_arg len)
+{
+    std::ostream *strm = (std::ostream*)ctx;
+    strm->write(str, len);
+}
 
 struct args {
-    std::ostream& strm;
+    yajl_gen handle;
     const pvd::JSONPrintOptions& opts;
 
-    unsigned indent;
+    std::string indent;
 
     args(std::ostream& strm,
          const pvd::JSONPrintOptions& opts)
-        :strm(strm)
-        ,opts(opts)
-        ,indent(opts.indent)
-    {}
+        :opts(opts)
+        ,indent(opts.indent, ' ')
+    {
+#ifndef EPICS_YAJL_VERSION
+        yajl_gen_config conf;
+        conf.beautify = opts.multiLine;
+        conf.indentString = indent.c_str();
+        if(!(handle = yajl_gen_alloc2(stream_printer, NULL, NULL, &strm)))
+            throw std::bad_alloc();
 
-    void doIntent() {
-        if(!opts.multiLine) return;
-        strm.put('\n');
-        unsigned i=indent;
-        while(i--) strm.put(' ');
+        if(opts.json5) {
+            static bool warned;
+            if(!warned) {
+                warned = true;
+                errlogPrintf("Warning: Ignoring request to print JSON5.  Update Base >= 7.0.5");
+            }
+        }
+#else
+        if(!(handle = yajl_gen_alloc(NULL)))
+            throw std::bad_alloc();
+        if(opts.multiLine) {
+            yajl_gen_config(handle, yajl_gen_beautify, 1);
+            yajl_gen_config(handle, yajl_gen_indent_string, indent.c_str());
+        } else {
+            yajl_gen_config(handle, yajl_gen_beautify, 0);
+        }
+        yajl_gen_config(handle, yajl_gen_json5, (int)opts.json5);
+        yajl_gen_config(handle, yajl_gen_print_callback, stream_printer, &strm);
+#endif
+    }
+    ~args() {
+        yajl_gen_free(handle);
     }
 };
+
+void yg_string(yajl_gen handle, const std::string& s) {
+    yg(yajl_gen_string(handle, (const unsigned char*)s.c_str(), s.size()));
+}
 
 void show_field(args& A, const pvd::PVField* fld, const pvd::BitSet *mask);
 
@@ -47,26 +106,17 @@ void show_struct(args& A, const pvd::PVStructure* fld, const pvd::BitSet *mask)
 
     const pvd::StringArray& names = type->getFieldNames();
 
-    A.strm.put('{');
-    A.indent++;
+    yg(yajl_gen_map_open(A.handle));
 
-    bool first = true;
     for(size_t i=0, N=names.size(); i<N; i++)
     {
         if(mask && !mask->get(children[i]->getFieldOffset())) continue;
 
-        if(first)
-            first = false;
-        else
-            A.strm.put(',');
-        A.doIntent();
-        A.strm<<'\"'<<names[i]<<"\": ";
+        yg_string(A.handle, names[i]);
         show_field(A, children[i].get(), mask);
     }
 
-    A.indent--;
-    A.doIntent();
-    A.strm.put('}');
+    yg(yajl_gen_map_close(A.handle));
 }
 
 void show_field(args& A, const pvd::PVField* fld, const pvd::BitSet *mask)
@@ -76,34 +126,59 @@ void show_field(args& A, const pvd::PVField* fld, const pvd::BitSet *mask)
     case pvd::scalar:
     {
         const pvd::PVScalar *scalar=static_cast<const pvd::PVScalar*>(fld);
-        if(scalar->getScalar()->getScalarType()==pvd::pvString) {
-            A.strm<<'\"'<<scalar->getAs<std::string>()<<'\"';
-        } else {
-            A.strm<<scalar->getAs<std::string>();
+        switch(scalar->getScalar()->getScalarType()) {
+        case pvd::pvString: yg_string(A.handle, scalar->getAs<std::string>()); break;
+        case pvd::pvBoolean: yg(yajl_gen_bool(A.handle, scalar->getAs<pvd::boolean>())); break;
+        case pvd::pvDouble:
+        case pvd::pvFloat: yg(yajl_gen_double(A.handle, scalar->getAs<double>())); break;
+        // case pvd::pvULong: // can't always be exactly represented...
+        default:
+            yg(yajl_gen_integer(A.handle, scalar->getAs<pvd::int64>())); break;
         }
     }
         return;
     case pvd::scalarArray:
     {
         const pvd::PVScalarArray *scalar=static_cast<const pvd::PVScalarArray*>(fld);
-        const bool isstring = scalar->getScalarArray()->getElementType()==pvd::pvString;
 
         pvd::shared_vector<const void> arr;
         scalar->getAs<void>(arr);
 
-        pvd::shared_vector<const std::string> sarr(pvd::shared_vector_convert<const std::string>(arr));
+        yg(yajl_gen_array_open(A.handle));
 
-        A.strm.put('[');
-        for(size_t i=0, N=sarr.size(); i<N; i++) {
-            if(i!=0)
-                A.strm.put(',');
-            if(isstring)
-                A.strm.put('\"');
-            A.strm<<sarr[i];
-            if(isstring)
-                A.strm.put('\"');
+        switch(arr.original_type()) {
+        case pvd::pvString: {
+            pvd::shared_vector<const std::string> sarr(pvd::shared_vector_convert<const std::string>(arr));
+            for(size_t i=0, N=sarr.size(); i<N; i++) {
+                yg_string(A.handle, sarr[i]);
+            }
+            break;
         }
-        A.strm.put(']');
+        case pvd::pvBoolean: {
+            pvd::shared_vector<const pvd::boolean> sarr(pvd::shared_vector_convert<const pvd::boolean>(arr));
+            for(size_t i=0, N=sarr.size(); i<N; i++) {
+                yg(yajl_gen_bool(A.handle, sarr[i]));
+            }
+            break;
+        }
+        case pvd::pvDouble:
+        case pvd::pvFloat: {
+            pvd::shared_vector<const double> sarr(pvd::shared_vector_convert<const double>(arr));
+            for(size_t i=0, N=sarr.size(); i<N; i++) {
+                yg(yajl_gen_double(A.handle, sarr[i]));
+            }
+            break;
+        }
+        default: {
+            pvd::shared_vector<const pvd::int64> sarr(pvd::shared_vector_convert<const pvd::int64>(arr));
+            for(size_t i=0, N=sarr.size(); i<N; i++) {
+                yg(yajl_gen_integer(A.handle, sarr[i]));
+            }
+            break;
+        }
+        }
+
+        yg(yajl_gen_array_close(A.handle));
     }
         return;
     case pvd::structure:
@@ -112,22 +187,16 @@ void show_field(args& A, const pvd::PVField* fld, const pvd::BitSet *mask)
     case pvd::structureArray:
     {
         pvd::PVStructureArray::const_svector arr(static_cast<const pvd::PVStructureArray*>(fld)->view());
-        A.strm.put('[');
-        A.indent++;
+        yg(yajl_gen_array_open(A.handle));
 
         for(size_t i=0, N=arr.size(); i<N; i++) {
-            if(i!=0)
-                A.strm.put(',');
-            A.doIntent();
             if(arr[i])
                 show_struct(A, arr[i].get(), 0);
             else
-                A.strm<<"NULL";
+                yg(yajl_gen_null(A.handle));
         }
 
-        A.indent--;
-        A.doIntent();
-        A.strm.put(']');
+        yg(yajl_gen_array_close(A.handle));
     }
         return;
     case pvd::union_:
@@ -136,7 +205,7 @@ void show_field(args& A, const pvd::PVField* fld, const pvd::BitSet *mask)
         const pvd::PVField::const_shared_pointer& C(U->get());
 
         if(!C) {
-            A.strm<<"null";
+            yg(yajl_gen_null(A.handle));
         } else {
             show_field(A, C.get(), 0);
         }
@@ -145,29 +214,23 @@ void show_field(args& A, const pvd::PVField* fld, const pvd::BitSet *mask)
     case pvd::unionArray: {
         const pvd::PVUnionArray *U=static_cast<const pvd::PVUnionArray*>(fld);
         pvd::PVUnionArray::const_svector arr(U->view());
-        A.strm.put('[');
-        A.indent++;
+
+        yg(yajl_gen_array_open(A.handle));
 
         for(size_t i=0, N=arr.size(); i<N; i++) {
-            if(i!=0)
-                A.strm.put(',');
-            A.doIntent();
             if(arr[i])
                 show_field(A, arr[i].get(), 0);
             else
-                A.strm<<"NULL";
+                yg(yajl_gen_null(A.handle));
         }
 
-        A.indent--;
-        A.doIntent();
-        A.strm.put(']');
-
+        yg(yajl_gen_array_close(A.handle));
     }
         return;
     }
     // should not be reached
     if(A.opts.ignoreUnprintable)
-        A.strm<<"// unprintable field type";
+        yg(yajl_gen_null(A.handle));
     else
         throw std::runtime_error("Encountered unprintable field type");
 }
@@ -206,6 +269,7 @@ JSONPrintOptions::JSONPrintOptions()
     :multiLine(true)
     ,ignoreUnprintable(true)
     ,indent(0)
+    ,json5(false)
 {}
 
 void printJSON(std::ostream& strm,

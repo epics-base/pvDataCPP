@@ -123,7 +123,7 @@ const char bigtest[] =
         "  ,{\"a\":9, \"b\":10}\n"
         "  ],\n"
         " \"any\": \"4.2\",\n"
-        " \"almost\": \"hello\"\n"
+        " \"almost\": \"long string /with\\\\ several \\\" and ' characters\\u001f\\u2705\"\n"
         "}";
 // intentionally not setting "extra"
 
@@ -204,7 +204,7 @@ void testInto()
     }
 
     testFieldEqual<pvd::PVString>(val, "any", "4.2");
-    testFieldEqual<pvd::PVString>(val, "almost", "hello");
+    testFieldEqual<pvd::PVString>(val, "almost", "long string /with\\ several \" and ' characters\x1f\xe2\x9c\x85");
 }
 
 void testroundtrip()
@@ -255,19 +255,19 @@ void testroundtrip()
         round2 = strm.str();
     }
 
-    testEqual(round2, "{\"scalar\": 42,"
-                       "\"ivec\": [1,2,3],"
-                       "\"svec\": [\"one\",\"two\"],"
-                       "\"sub\": {"
-                         "\"x\": {"
-                          "\"y\": 43"
+    testEqual(round2, "{\"scalar\":42,"
+                       "\"ivec\":[1,2,3],"
+                       "\"svec\":[\"one\",\"two\"],"
+                       "\"sub\":{"
+                         "\"x\":{"
+                          "\"y\":43"
                        "}},"
-                       "\"extra\": 0,"
-                       "\"sarr\": [{\"a\": 5,\"b\": 6},"
-                                  "{\"a\": 7,\"b\": 8},"
-                                  "{\"a\": 9,\"b\": 10}],"
-                      "\"any\": \"4.2\","
-                      "\"almost\": \"hello\""
+                       "\"extra\":0,"
+                       "\"sarr\":[{\"a\":5,\"b\":6},"
+                                  "{\"a\":7,\"b\":8},"
+                                  "{\"a\":9,\"b\":10}],"
+                      "\"any\":\"4.2\","
+                      "\"almost\":\"long string /with\\\\ several \\\" and ' characters\\u001F\xe2\x9c\x85\""
                       "}");
 }
 
