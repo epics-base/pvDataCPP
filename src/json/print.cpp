@@ -72,7 +72,7 @@ struct args {
             static bool warned;
             if(!warned) {
                 warned = true;
-                errlogPrintf("Warning: Ignoring request to print JSON5.  Update Base >= 7.0.5");
+                errlogPrintf("Warning: Ignoring request to print JSON5.  Update Base >= 7.0.6.1");
             }
         }
 #else
@@ -84,7 +84,17 @@ struct args {
         } else {
             yajl_gen_config(handle, yajl_gen_beautify, 0);
         }
+#  if EPICS_VERSION_INT>=VERSION_INT(7,0,6,1)
         yajl_gen_config(handle, yajl_gen_json5, (int)opts.json5);
+#  else
+    if(opts.json5) {
+        static bool warned;
+        if(!warned) {
+            warned = true;
+            errlogPrintf("Warning: Ignoring request to print JSON5.  Update Base >= 7.0.6.1");
+        }
+    }
+#  endif
         yajl_gen_config(handle, yajl_gen_print_callback, stream_printer, &strm);
 #endif
     }
