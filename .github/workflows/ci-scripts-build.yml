@@ -219,6 +219,12 @@ jobs:
       matrix:
         # Job names also name artifacts, character limitations apply
         include:
+          - name: "CentOS-7 3.16"
+            image: centos:7
+            cmp: gcc
+            configuration: default
+            base: "3.16"
+
           - name: "CentOS-7 3.15"
             image: centos:7
             cmp: gcc
