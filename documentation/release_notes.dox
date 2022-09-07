@@ -2,7 +2,13 @@
 
 @page release_notes Release Notes
 
-Release 8.1.0 (Feb 2021)
+Release 8.0.5 (Sep 2022)
+========================
+
+- Compatible changes
+ - Internal changes to use the YAJL API for generating JSON and JSON-5 output.
+
+Release 8.0.4 (Feb 2021)
 ========================
 
 - Incompatible changes

@@ -44,7 +44,7 @@ struct epicsShareClass JSONPrintOptions
     bool multiLine;        //!< include new lines
     bool ignoreUnprintable;//!< ignore union/union array when encountered
     unsigned indent;       //!< Initial indentation (# of spaces)
-    bool json5;            //!< Output extended JSON (eg. NaN).  @since UNRELEASED
+    bool json5;            //!< Output extended JSON (eg. NaN).  @since 8.1.0
     JSONPrintOptions();
 };
 
