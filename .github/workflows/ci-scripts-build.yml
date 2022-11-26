@@ -52,34 +52,34 @@ jobs:
       matrix:
         # Job names also name artifacts, character limitations apply
         include:
-          - os: ubuntu-20.04
+          - os: ubuntu-latest
             cmp: gcc
             configuration: default
             base: "7.0"
             wine: "64"
             name: "Ub-20 gcc-9 + MinGW"
 
-          - os: ubuntu-20.04
+          - os: ubuntu-latest
             cmp: gcc
             configuration: static
             base: "7.0"
             wine: "64"
             name: "Ub-20 gcc-9 + MinGW, static"
 
-          - os: ubuntu-20.04
+          - os: ubuntu-latest
             cmp: gcc
             configuration: static
             base: "7.0"
             extra: "CMD_CXXFLAGS=-std=c++11"
             name: "Ub-20 gcc-9 C++11, static"
 
-          - os: ubuntu-20.04
+          - os: ubuntu-latest
             cmp: clang
             configuration: default
             base: "7.0"
             name: "Ub-20 clang-10"
 
-          - os: ubuntu-20.04
+          - os: ubuntu-latest
             cmp: clang
             configuration: default
             base: "7.0"
@@ -175,7 +175,7 @@ jobs:
             name: "Win2019 mingw"
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: true
     - name: Automatic core dumper analysis
@@ -193,7 +193,7 @@ jobs:
       run: python .ci/cue.py -T 60M test
     - name: Upload tapfiles Artifact
       if: ${{ always() }}
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: tapfiles ${{ matrix.name }}
         path: '**/O.*/*.tap'
@@ -237,12 +237,6 @@ jobs:
             configuration: default
             base: "7.0"
 
-          - name: "CentOS-8"
-            image: centos:8
-            cmp: gcc
-            configuration: default
-            base: "7.0"
-
           - name: "Fedora-33"
             image: fedora:33
             cmp: gcc
@@ -282,7 +276,7 @@ jobs:
         # people would rather just break all existing scripts...
         [ -e /usr/bin/python ] || ln -sf python3 /usr/bin/python
         python --version
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: true
     - name: Automatic core dumper analysis
@@ -295,7 +289,7 @@ jobs:
       run: python .ci/cue.py -T 20M test
     - name: Upload tapfiles Artifact
       if: ${{ always() }}
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: tapfiles ${{ matrix.name }}
         path: '**/O.*/*.tap'
