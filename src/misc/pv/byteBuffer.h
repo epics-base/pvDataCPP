@@ -157,7 +157,7 @@ struct swap<8> {
  * in execution time and/or object code size of byte-wise copy.
  */
 
-#ifdef _ARCH_PPC
+#if defined(_ARCH_PPC) || defined(__arm__) || defined(_M_ARM)
 
 template<typename T>
 union alignu {
