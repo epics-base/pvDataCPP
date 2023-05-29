@@ -30,7 +30,7 @@ using std::min;
 
 namespace epics { namespace pvData {
 
-
+#if __cplusplus < 201103L
 template<> const ScalarType PVBoolean::typeCode = pvBoolean;
 template<> const ScalarType PVByte::typeCode = pvByte;
 template<> const ScalarType PVShort::typeCode = pvShort;
@@ -56,7 +56,7 @@ template<> const ScalarType PVULongArray::typeCode = pvULong;
 template<> const ScalarType PVFloatArray::typeCode = pvFloat;
 template<> const ScalarType PVDoubleArray::typeCode = pvDouble;
 template<> const ScalarType PVStringArray::typeCode = pvString;
-
+#endif
 
 template<typename T>
 PVScalarValue<T>::~PVScalarValue() {}
