@@ -16,7 +16,7 @@
 #include <iterator>
 #include <iostream>
 #include <iomanip>
-#if __cplusplus >= 201103L
+#if defined(__clang__) && defined(_MSC_VER)
 #include <type_traits>
 #endif
 
@@ -127,7 +127,7 @@ typedef std::tr1::shared_ptr<PVUnionArrayPtrArray> PVUnionArrayPtrArrayPtr;
 class PVDataCreate;
 typedef std::tr1::shared_ptr<PVDataCreate> PVDataCreatePtr;
 
-#if __cplusplus >= 201103L
+#if defined(__clang__) && defined(_MSC_VER)
 template <typename T>
 constexpr ScalarType typeToCode() {
     if (std::is_same<T, boolean>::value)
@@ -416,10 +416,10 @@ public:
     typedef T* pointer;
     typedef const T* const_pointer;
 
-    #if __cplusplus < 201103L
-    static const ScalarType typeCode;
-    #else
+    #if defined(__clang__) && defined(_MSC_VER)
     constexpr static const ScalarType typeCode = typeToCode<T>();
+    #else
+    static const ScalarType typeCode;
     #endif
 
     /**
@@ -1221,10 +1221,10 @@ public:
     typedef ::epics::pvData::shared_vector<T> svector;
     typedef ::epics::pvData::shared_vector<const T> const_svector;
 
-    #if __cplusplus < 201103L
-    static const ScalarType typeCode;
-    #else
+    #if defined(__clang__) && defined(_MSC_VER)
     constexpr static const ScalarType typeCode = typeToCode<T>();
+    #else
+    static const ScalarType typeCode;
     #endif
 
     /**
