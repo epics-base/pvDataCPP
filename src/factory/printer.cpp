@@ -404,6 +404,9 @@ std::ostream& operator<<(std::ostream& strm, const PVStructure::Formatter& forma
     if(format.xfmt==PVStructure::Formatter::JSON) {
         JSONPrintOptions opts;
         opts.multiLine = false;
+#if EPICS_VERSION_INT>=VERSION_INT(7,0,6,1)
+        opts.json5 = true;
+#endif
         printJSON(strm, format.xtop, format.xshow ? *format.xshow : BitSet().set(0), opts);
         strm<<'\n';
         return strm;
