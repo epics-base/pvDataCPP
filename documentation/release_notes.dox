@@ -5,6 +5,8 @@
 Release 8.0.6 (UNRELEASED)
 ========================
 
+- Compatible changes
+  - Actually enable JSON-5 output in PVStructure::Formatter::JSON when available.
 
 Release 8.0.5 (Sep 2022)
 ========================
