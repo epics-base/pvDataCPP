@@ -1,0 +1,5 @@
+<map id="epics::debug::weak_ptr&lt; T &gt;" name="epics::debug::weak_ptr&lt; T &gt;">
+<area shape="rect" id="node2" href="$classepics_1_1debug_1_1weak__ptr__base.html" title="epics::debug::weak\l_ptr_base" alt="" coords="25,174,159,215"/>
+<area shape="rect" id="node3" href="$classepics_1_1debug_1_1ptr__base.html" title="epics::debug::ptr_base" alt="" coords="15,96,169,123"/>
+<area shape="rect" id="node4" href="/home/phoebus4/ANJ/epics/base/7.0/modules/pvData/documentation/libstdc++.tag$a07343.html" title="std::shared_ptr\&lt; tracker \&gt;" alt="" coords="5,5,179,32"/>
+</map>

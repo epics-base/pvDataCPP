@@ -1,0 +1,6 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="/home/phoebus4/ANJ/epics/base/7.0/modules/pvData/documentation/libstdc++.tag$a05615.html" title="std::exception" alt="" coords="5,41,109,68"/>
+<area shape="rect" id="node2" href="$structepics_1_1pv_data_1_1_any_scalar_1_1bad__cast.html" title="epics::pvData::AnyScalar\l::bad_cast" alt="" coords="157,5,328,46"/>
+<area shape="rect" id="node3" href="/home/phoebus4/ANJ/epics/base/7.0/modules/pvData/documentation/libstdc++.tag$a03331.html" title="std::logic_error" alt="" coords="189,71,297,97"/>
+<area shape="rect" id="node4" href="$classepics_1_1pv_data_1_1_base_exception.html" title="Base for pvData exceptions. " alt="" coords="377,71,575,97"/>
+</map>

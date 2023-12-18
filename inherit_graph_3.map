@@ -1,0 +1,8 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$classepics_1_1debug_1_1ptr__base.html" title="epics::debug::ptr_base" alt="" coords="5,45,160,72"/>
+<area shape="rect" id="node2" href="$classepics_1_1debug_1_1shared__ptr__base.html" title="epics::debug::shared\l_ptr_base" alt="" coords="209,5,351,46"/>
+<area shape="rect" id="node4" href="$classepics_1_1debug_1_1weak__ptr__base.html" title="epics::debug::weak\l_ptr_base" alt="" coords="213,70,347,111"/>
+<area shape="rect" id="node3" href="$classepics_1_1debug_1_1shared__ptr.html" title="epics::debug::shared\l_ptr\&lt; T \&gt;" alt="" coords="401,5,543,46"/>
+<area shape="rect" id="node5" href="$classepics_1_1debug_1_1weak__ptr.html" title="epics::debug::weak\l_ptr\&lt; T \&gt;" alt="" coords="405,70,539,111"/>
+<area shape="rect" id="node6" href="$classepics_1_1debug_1_1weak__ptr.html" title="epics::debug::weak\l_ptr\&lt; Base \&gt;" alt="" coords="405,135,539,177"/>
+</map>

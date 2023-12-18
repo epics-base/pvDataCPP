@@ -1,0 +1,4 @@
+<map id="epics::pvData::BaseException" name="epics::pvData::BaseException">
+<area shape="rect" id="node2" href="/home/phoebus4/ANJ/epics/base/7.0/modules/pvData/documentation/libstdc++.tag$a03331.html" title="std::logic_error" alt="" coords="50,80,157,107"/>
+<area shape="rect" id="node3" href="/home/phoebus4/ANJ/epics/base/7.0/modules/pvData/documentation/libstdc++.tag$a05615.html" title="std::exception" alt="" coords="52,5,156,32"/>
+</map>

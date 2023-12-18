@@ -1,0 +1,5 @@
+<map id="epics::pvData::PVStructure" name="epics::pvData::PVStructure">
+<area shape="rect" id="node2" href="$classepics_1_1pv_data_1_1_p_v_field.html" title="PVField is the base class for each PVData field. " alt="" coords="111,96,268,123"/>
+<area shape="rect" id="node3" href="$classepics_1_1pv_data_1_1_serializable.html" title="Base class for serialization. " alt="" coords="5,13,184,40"/>
+<area shape="rect" id="node5" href="$classepics_1_1pv_data_1_1_bit_set_serializable.html" title="Class for serializing bitSets. " alt="" coords="293,96,507,123"/>
+</map>

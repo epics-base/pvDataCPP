@@ -1,0 +1,7 @@
+<map id="epics::pvData::PVScalar" name="epics::pvData::PVScalar">
+<area shape="rect" id="node5" href="$classepics_1_1pv_data_1_1_p_v_scalar_value.html" title="Class that holds the data for each possible scalar type. " alt="" coords="5,253,235,280"/>
+<area shape="rect" id="node6" href="$classepics_1_1pv_data_1_1_p_v_scalar_value.html" title="epics::pvData::PVScalarValue\l\&lt; std::string \&gt;" alt="" coords="259,246,457,287"/>
+<area shape="rect" id="node2" href="$classepics_1_1pv_data_1_1_p_v_field.html" title="PVField is the base class for each PVData field. " alt="" coords="160,96,317,123"/>
+<area shape="rect" id="node3" href="$classepics_1_1pv_data_1_1_serializable.html" title="Base class for serialization. " alt="" coords="55,13,233,40"/>
+<area shape="rect" id="node7" href="$classepics_1_1pv_data_1_1_p_v_string.html" title="PVString is special case, since it implements SerializableArray. " alt="" coords="277,336,440,363"/>
+</map>

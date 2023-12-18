@@ -1,0 +1,4 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$structepics_1_1pv_data_1_1meta_1_1detail_1_1__same__type.html" title="epics::pvData::meta\l::detail::_same_type\l\&lt; detail::_has_const\l\&lt; A \&gt;::type, detail::\l_has_const\&lt; B \&gt;::type, R \&gt;" alt="" coords="6,5,191,91"/>
+<area shape="rect" id="node2" href="$structepics_1_1pv_data_1_1meta_1_1same__const.html" title="Check if both A and B are either const or non&#45;const. " alt="" coords="241,27,410,69"/>
+</map>
