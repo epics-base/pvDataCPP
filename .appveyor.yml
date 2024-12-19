@@ -5,15 +5,6 @@ cache:
   - C:\Users\appveyor\.tools
 
 #---------------------------------#
-#       additional packages       #
-#---------------------------------#
-
-install:
-# for the sequencer
-  - cinst re2c
-  - cmd: git submodule update --init --recursive
-
-#---------------------------------#
 #       repository cloning        #
 #---------------------------------#
 
@@ -40,39 +31,55 @@ configuration:
 environment:
   # common / default variables for all jobs
   SETUP_PATH: .ci-local
+  BASE: 7.0
 
   matrix:
-  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
-    CMP: vs2019
-    BASE: 7.0
-  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
-    CMP: gcc
-    BASE: 7.0
-  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-    CMP: vs2017
-    BASE: 7.0
-  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
-    CMP: vs2019
-    BASE: 3.15
+  - CMP: vs2019
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+  - CMP: vs2017
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+  - CMP: vs2015
+  - CMP: vs2013
+  - CMP: gcc
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+    # TODO: static linking w/ readline isn't working.  Bypass auto-detect
+    COMMANDLINE_LIBRARY: EPICS
 
 # Platform: processor architecture
 platform:
   - x64
 
+# Matrix configuration: exclude sets of jobs
+matrix:
+  exclude:
+  # MinGW debug builds use the same libraries, unlike VS
+  - configuration: dynamic-debug
+    CMP: gcc
+  - configuration: static-debug
+    CMP: gcc
+
 #---------------------------------#
 #     building & testing          #
 #---------------------------------#
 
-build_script:
+install:
+  - cmd: git submodule update --init --recursive
+  - cmd: pip install git+https://github.com/mdavidsaver/ci-core-dumper#egg=ci-core-dumper
   - cmd: python .ci/cue.py prepare
+
+build_script:
   - cmd: python .ci/cue.py build
 
 test_script:
-  - cmd: python .ci/cue.py test
+  - cmd: python -m ci_core_dumper install
+  - cmd: python .ci/cue.py -T 20M test
 
 on_finish:
   - ps: Get-ChildItem *.tap -Recurse -Force | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
-  - cmd: python .ci/cue.py build test-results -s
+  - cmd: python .ci/cue.py -T 5M test-results
+
+on_failure:
+  - cmd: python -m ci_core_dumper report
 
 #---------------------------------#
 #         debugging               #
