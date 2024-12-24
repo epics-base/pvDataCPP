@@ -1,6 +1,8 @@
 # .appveyor.yml for use with EPICS Base ci-scripts
 # (see: https://github.com/epics-base/ci-scripts)
 
+# This is YAML - indentation levels are crucial
+
 cache:
   - C:\Users\appveyor\.tools
 
@@ -12,13 +14,15 @@ init:
   # Set autocrlf to make batch files work
   - git config --global core.autocrlf true
 
-clone_depth: 50
+clone_depth: 5
 
 # Skipping commits affecting only specific files
 skip_commits:
   files:
-    - 'documentation/*'
-    - '**/*.md'
+  - 'documentation/*'
+  - '.github/*'
+  - '**/*.md'
+  - '.readthedocs.yml'
 
 # Build Configurations: dll/static, regular/debug
 configuration:
@@ -36,6 +40,9 @@ environment:
   matrix:
   - CMP: vs2019
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+  - CMP: vs2019
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+    BASE: 3.15
   - CMP: vs2017
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
   - CMP: vs2015
