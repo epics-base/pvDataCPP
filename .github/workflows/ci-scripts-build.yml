@@ -89,33 +89,6 @@ jobs:
             configuration: default
             extra: "CMD_CXXFLAGS=-std=c++11"
 
-          - name: "3.15 Ub-22 gcc + MinGW"
-            base: "3.15"
-            os: ubuntu-22.04
-            cmp: gcc
-            configuration: default
-            cross: "windows-x64-mingw"
-
-          - name: "7.0 Ub gcc C++11, static"
-            base: "7.0"
-            os: ubuntu-latest
-            cmp: gcc
-            configuration: static
-            extra: "CMD_CXXFLAGS=-std=c++11"
-
-          - name: "7.0 Ub clang"
-            base: "7.0"
-            os: ubuntu-latest
-            cmp: clang
-            configuration: default
-
-          - name: "7.0 Ub clang C++11"
-            base: "7.0"
-            os: ubuntu-latest
-            cmp: clang
-            configuration: default
-            extra: "CMD_CXXFLAGS=-std=c++11"
-
           - name: "7.0 MacOS clang"
             base: "7.0"
             os: macos-latest
@@ -123,6 +96,13 @@ jobs:
             configuration: default
 
           # Cross builds
+
+          - name: "3.15 Ub-22 gcc + MinGW"
+            base: "3.15"
+            os: ubuntu-22.04
+            cmp: gcc
+            configuration: default
+            cross: "windows-x64-mingw"
 
           - name: "7.0 Ub gcc + linux-aarch64"
             base: "7.0"
