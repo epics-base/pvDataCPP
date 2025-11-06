@@ -18,16 +18,9 @@ cache:
 
 init:
   # Set autocrlf to make batch files work
-  - git config --global core.autocrlf true
+  - cmd: git config --global core.autocrlf true
 
 clone_depth: 5
-
-#---------------------------------#
-#       additional packages       #
-#---------------------------------#
-
-install:
-  - cmd: git submodule update --init --recursive
 
 #---------------------------------#
 #   build matrix configuration    #

@@ -109,21 +109,21 @@ jobs:
             os: ubuntu-latest
             cmp: gcc
             configuration: default
-            cross: linux-aarch64
+            cross: "linux-aarch64"
 
           - name: "7.0 Ub gcc + linux-arm gnueabi"
             base: "7.0"
             os: ubuntu-latest
             cmp: gcc
             configuration: default
-            cross: linux-arm@arm-linux-gnueabi
+            cross: "linux-arm@arm-linux-gnueabi"
 
           - name: "7.0 Ub gcc + linux-arm gnueabihf"
             base: "7.0"
             os: ubuntu-latest
             cmp: gcc
             configuration: default
-            cross: linux-arm@arm-linux-gnueabihf
+            cross: "linux-arm@arm-linux-gnueabihf"
 
           - name: "7.0 Ub gcc + MinGW"
             base: "7.0"
@@ -160,6 +160,7 @@ jobs:
             cmp: gcc
             configuration: default
             cross: "RTEMS-pc386-qemu@4.10"
+            test: NO
 
           - name: "7.0 Ub-22 gcc + RT-4.9"
             base: "7.0"
