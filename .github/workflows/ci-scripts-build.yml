@@ -17,7 +17,7 @@ on:
 env:
     SETUP_PATH: .ci-local:.ci
     EPICS_TEST_IMPRECISE_TIMING: YES
-    EPICS_TEST_TIMEOUT: 300 # 5 min (RTEMS epicsMessageQueue is slowest)
+    EPICS_TEST_TIMEOUT: 300 # 5 min
 
 jobs:
   native:
@@ -129,8 +129,8 @@ jobs:
             base: "7.0"
             os: ubuntu-latest
             cmp: gcc
-            cross: "windows-x64-mingw"
             configuration: default
+            cross: "windows-x64-mingw"
 
           - name: "7.0 Ub gcc + MinGW, static"
             base: "7.0"
@@ -138,6 +138,21 @@ jobs:
             cmp: gcc
             configuration: static
             cross: "windows-x64-mingw"
+
+          - name: "7.0 Ub-22 gcc + RT-4.9 pc386"
+            base: "7.0"
+            os: ubuntu-22.04
+            cmp: gcc
+            configuration: default
+            cross: "RTEMS-pc386-qemu@4.9"
+
+          - name: "7.0 Ub-22 gcc + RT-4.10 pc386"
+            base: "7.0"
+            os: ubuntu-22.04
+            cmp: gcc
+            configuration: default
+            cross: "RTEMS-pc386-qemu@4.10"
+            test: NO
 
           - name: "7.0 Ub-22 gcc + RT-5.1 pc686"
             base: "7.0"
@@ -153,21 +168,6 @@ jobs:
             configuration: default
             cross: "RTEMS-beatnik@5:RTEMS-xilinx_zynq_a9_qemu@5:RTEMS-uC5282@5"
             test: NO
-
-          - name: "7.0 Ub-22 gcc + RT-4.10"
-            base: "7.0"
-            os: ubuntu-22.04
-            cmp: gcc
-            configuration: default
-            cross: "RTEMS-pc386-qemu@4.10"
-            test: NO
-
-          - name: "7.0 Ub-22 gcc + RT-4.9"
-            base: "7.0"
-            os: ubuntu-22.04
-            cmp: gcc
-            configuration: default
-            cross: "RTEMS-pc386-qemu@4.9"
 
           # Windows builds
 
@@ -188,20 +188,7 @@ jobs:
             os: windows-2022
             cmp: vs2022
             configuration: debug
-
-          - name: "7.0 Win-22 MSC-22 C++17 debug"
-            base: "7.0"
-            os: windows-2022
-            cmp: vs2022
-            configuration: debug
-            extra: "CMD_CXXFLAGS='-analyze -Zc:__cplusplus -std:c++17'"
-
-          - name: "7.0 Win-22 MSC-22 C++17 s-debug"
-            base: "7.0"
-            os: windows-2022
-            cmp: vs2022
-            configuration: static-debug
-            extra: "CMD_CXXFLAGS='-analyze -Zc:__cplusplus -std:c++17'"
+            extra: "CMD_CXXFLAGS=-analyze"
 
           - name: "7.0 Win-22 MinGW"
             base: "7.0"
@@ -272,7 +259,7 @@ jobs:
             cmp: gcc
             configuration: default
 
-          - name: "7.0 Fedora-latest gcc"
+          - name: "7.0 Fedora gcc"
             base: "7.0"
             image: fedora:latest
             cmp: gcc
