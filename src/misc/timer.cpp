@@ -118,6 +118,18 @@ void Timer::run()
             work->processing = true;
             queue.pop_front();
 
+            if(work->period > 0.0 && alive && !work->cancelled) {
+                /*
+                 * If the distance between the time now and the time
+                 * the timer was to run is more than the period move
+                 * the timer's run time to now and avoid the timer
+                 * spinning issuing callbacks for missed timer events
+                 */
+                if ((now - work->timeToRun) > work->period) {
+                    work->timeToRun = now;
+                }
+            }
+
             {
                 epicsGuardRelease<epicsMutex> U(G);
 
