@@ -1,0 +1,5 @@
+<map id="epics::pvData::meta::same_const&lt; A, B, R &gt;" name="epics::pvData::meta::same_const&lt; A, B, R &gt;">
+<area shape="rect" id="Node000001" title="Check if both A and B are either const or non&#45;const." alt="" coords="252,28,419,68"/>
+<area shape="rect" id="Node000002" href="$structepics_1_1pv_data_1_1meta_1_1detail_1_1__same__type.html" title=" " alt="" coords="5,5,204,91"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="219,46,251,46,251,51,219,51"/>
+</map>

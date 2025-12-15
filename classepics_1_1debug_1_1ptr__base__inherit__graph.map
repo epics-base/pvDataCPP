@@ -1,0 +1,13 @@
+<map id="epics::debug::ptr_base" name="epics::debug::ptr_base">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,46,159,72"/>
+<area shape="rect" id="Node000002" href="$classepics_1_1debug_1_1shared__ptr__base.html" title=" " alt="" coords="207,5,349,46"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="174,41,206,35,207,40,174,46"/>
+<area shape="rect" id="Node000004" href="$classepics_1_1debug_1_1weak__ptr__base.html" title=" " alt="" coords="211,71,345,111"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="174,71,211,77,210,83,174,77"/>
+<area shape="rect" id="Node000003" href="$classepics_1_1debug_1_1shared__ptr.html" title=" " alt="" coords="397,5,539,46"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="365,23,397,23,397,28,365,28"/>
+<area shape="rect" id="Node000005" href="$classepics_1_1debug_1_1weak__ptr.html" title=" " alt="" coords="401,71,535,111"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="360,88,401,88,401,94,360,94"/>
+<area shape="rect" id="Node000006" href="$classepics_1_1debug_1_1weak__ptr.html" title=" " alt="" coords="401,136,535,177"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="354,114,408,133,406,138,352,119"/>
+</map>

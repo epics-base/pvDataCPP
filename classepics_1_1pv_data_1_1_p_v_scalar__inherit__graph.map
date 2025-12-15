@@ -1,0 +1,15 @@
+<map id="epics::pvData::PVScalar" name="epics::pvData::PVScalar">
+<area shape="rect" id="Node000001" title="PVScalar is the base class for each scalar field." alt="" coords="140,168,305,193"/>
+<area shape="rect" id="Node000005" href="$classepics_1_1pv_data_1_1_p_v_scalar_value.html" title=" " alt="" coords="5,241,203,282"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="193,204,135,243,132,239,190,200"/>
+<area shape="rect" id="Node000007" href="$classepics_1_1pv_data_1_1_p_v_scalar_value.html" title="Class that holds the data for each possible scalar type." alt="" coords="227,249,456,274"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="255,200,325,246,322,251,252,204"/>
+<area shape="rect" id="Node000002" href="$classepics_1_1pv_data_1_1_p_v_field.html" title="PVField is the base class for each PVData field." alt="" coords="144,94,301,120"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="225,135,225,167,220,167,220,135"/>
+<area shape="rect" id="Node000003" href="$classepics_1_1pv_data_1_1_serializable.html" title="Base class for serialization." alt="" coords="39,13,217,38"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="156,47,210,91,206,96,152,51"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="240,5,394,46"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="284,58,239,95,236,91,281,54"/>
+<area shape="rect" id="Node000006" href="$classepics_1_1pv_data_1_1_p_v_string.html" title="PVString is special case, since it implements SerializableArray." alt="" coords="23,330,185,356"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="107,298,107,329,101,329,101,298"/>
+</map>

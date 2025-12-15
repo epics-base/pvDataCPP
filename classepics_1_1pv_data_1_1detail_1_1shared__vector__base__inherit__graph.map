@@ -1,0 +1,7 @@
+<map id="epics::pvData::detail::shared_vector_base&lt; E &gt;" name="epics::pvData::detail::shared_vector_base&lt; E &gt;">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,41,185,82"/>
+<area shape="rect" id="Node000002" href="$classepics_1_1pv_data_1_1shared__vector.html" title="A holder for a contiguous piece of memory." alt="" coords="249,5,398,46"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="199,43,248,35,249,40,200,48"/>
+<area shape="rect" id="Node000003" href="$classepics_1_1pv_data_1_1shared__vector_3_01_e_00_01typename_01meta_1_1is__void_3_01_e_01_4_1_1type_01_4.html" title="Specialization for storing untyped pointers." alt="" coords="233,70,414,126"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="200,76,233,81,232,86,200,81"/>
+</map>
