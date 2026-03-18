@@ -888,6 +888,7 @@ public:
         const BitSet* xhighlight;
         mode_t xmode;
         format_t xfmt;
+        bool xarrAsStr;
     public:
         explicit Formatter(const PVStructure& top)
             :xtop(top)
@@ -895,6 +896,7 @@ public:
             ,xhighlight(0)
             ,xmode(Auto)
             ,xfmt(NT)
+            ,xarrAsStr(false)
         {}
 
         // those fields (and their parents) to be printed.  non-NT mode.
@@ -905,6 +907,8 @@ public:
         FORCE_INLINE Formatter& mode(mode_t m) { xmode = m; return *this; }
 
         FORCE_INLINE Formatter& format(format_t f) { xfmt = f; return *this; }
+
+        FORCE_INLINE Formatter& arrayAsString(bool b) { xarrAsStr = b; return *this; }
 
         friend epicsShareFunc std::ostream& operator<<(std::ostream& strm, const Formatter& format);
         friend void printRaw(std::ostream& strm, const PVStructure::Formatter& format, const PVStructure& cur);
