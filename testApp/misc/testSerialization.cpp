@@ -849,11 +849,38 @@ void testFromString(int byteOrder)
     testOk1(_data->getSubFieldT<PVString>("Y")->get()=="testing");
 }
 
+void testDeserializeTypeFail(const char *buf, size_t buflen)
+{
+
+    std::vector<char> bytes(buf, buf + buflen);
+    ByteBuffer B(&bytes[0], bytes.size(), EPICS_ENDIAN_BIG);
+
+    try{
+        FieldConstPtr ptr(getFieldCreate()->deserialize(&B, control));
+    }catch(std::exception& e) {
+        testPass("Expected exception: %s", e.what());
+        return;
+    }
+    testFail("Unexpected success? %d", __LINE__);
+}
+
+void testMalformed()
+{
+    testDiag("testMalformed()");
+
+#define CASE(STR) testDeserializeTypeFail(STR, sizeof(STR)-1)
+    // a structure array where the element type is not a structure
+    CASE("\x88\x83\x2b\x01\x01");
+    // a union array where ...
+    CASE("\x89\x83\x2b\x01\x01");
+#undef CASE
+}
+
 } // end namespace
 
 MAIN(testSerialization) {
 
-    testPlan(234);
+    testPlan(236);
 
     flusher = new SerializableControlImpl();
     control = new DeserializableControlImpl();
@@ -879,6 +906,8 @@ MAIN(testSerialization) {
     testToString(EPICS_ENDIAN_LITTLE);
     testFromString(EPICS_ENDIAN_BIG);
     testFromString(EPICS_ENDIAN_LITTLE);
+
+    testMalformed();
 
     delete buffer;
     delete control;

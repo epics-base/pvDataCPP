@@ -1564,7 +1564,9 @@ FieldConstPtr FieldCreate::deserialize(ByteBuffer* buffer, DeserializableControl
                 throw std::invalid_argument("fixed and bounded structure array not supported");
 
             // Type type = Type.structureArray;
-            StructureConstPtr elementStructure = std::tr1::static_pointer_cast<const Structure>(control->cachedDeserialize(buffer));
+            StructureConstPtr elementStructure = std::tr1::dynamic_pointer_cast<const Structure>(control->cachedDeserialize(buffer));
+            if(!elementStructure)
+                throw std::invalid_argument("Expected Structure");
             // TODO use std::make_shared
             std::tr1::shared_ptr<Field> sp(new StructureArray(elementStructure));
             Helper::cache(this, sp);
@@ -1577,7 +1579,9 @@ FieldConstPtr FieldCreate::deserialize(ByteBuffer* buffer, DeserializableControl
                 throw std::invalid_argument("fixed and bounded structure array not supported");
 
             // Type type = Type.unionArray;
-            UnionConstPtr elementUnion = std::tr1::static_pointer_cast<const Union>(control->cachedDeserialize(buffer));
+            UnionConstPtr elementUnion = std::tr1::dynamic_pointer_cast<const Union>(control->cachedDeserialize(buffer));
+            if(!elementUnion)
+                throw std::invalid_argument("Expected Union");
             // TODO use std::make_shared
             std::tr1::shared_ptr<Field> sp(new UnionArray(elementUnion));
             Helper::cache(this, sp);
