@@ -18,6 +18,8 @@
 #include <pv/factory.h>
 #include <pv/bitSet.h>
 
+#include "factoryPvt.h"
+
 using std::tr1::static_pointer_cast;
 using std::size_t;
 using std::string;
@@ -224,6 +226,7 @@ void PVStructure::serialize(ByteBuffer *pbuffer,
 
 void PVStructure::deserialize(ByteBuffer *pbuffer,
         DeserializableControl *pcontrol) {
+    RecurseGuard G;
     size_t fieldsSize = pvFields.size();
     for(size_t i = 0; i<fieldsSize; i++)
         pvFields[i]->deserialize(pbuffer, pcontrol);

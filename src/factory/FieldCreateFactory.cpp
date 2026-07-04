@@ -28,6 +28,8 @@
 #include <pv/thread.h>
 #include <pv/pvData.h>
 
+#include "factoryPvt.h"
+
 using std::tr1::static_pointer_cast;
 using std::size_t;
 using std::string;
@@ -35,7 +37,6 @@ using std::string;
 namespace epics { namespace pvData {
 
 size_t Field::num_instances;
-
 
 struct Field::Helper {
     static unsigned hash(Field *fld) {
@@ -1476,6 +1477,7 @@ static int decodeScalar(int8 code)
 
 FieldConstPtr FieldCreate::deserialize(ByteBuffer* buffer, DeserializableControl* control) const
 {
+    RecurseGuard RG;
     control->ensureData(1);
     int8 code = buffer->getByte();
     if (code == -1)
@@ -1604,6 +1606,7 @@ FieldConstPtr FieldCreate::deserialize(ByteBuffer* buffer, DeserializableControl
 namespace detail {
 struct field_factory {
     FieldCreatePtr fieldCreate;
+    epicsThreadPrivate<unsigned> deserDepth;
     field_factory() :fieldCreate(new FieldCreate()) {
         registerRefCounter("Field", &Field::num_instances);
         registerRefCounter("Thread", &Thread::num_instances);
@@ -1613,6 +1616,23 @@ struct field_factory {
 
 static detail::field_factory* field_factory_s;
 static epicsThreadOnceId field_factory_once = EPICS_THREAD_ONCE_INIT;
+
+#if defined(__rtems__) || defined(vxWorks)
+// lower limit on embedded targets
+const unsigned maxDepth = 10;
+#else
+const unsigned maxDepth = 20;
+#endif
+RecurseGuard::RecurseGuard() {
+    size_t current = (size_t)field_factory_s->deserDepth.get();
+    if(current>=maxDepth)
+        throw std::logic_error("FieldCreateFactory recursion depth exceeded");
+    field_factory_s->deserDepth.set((unsigned*)(current+1));
+}
+RecurseGuard::~RecurseGuard() {
+    size_t current = (size_t)field_factory_s->deserDepth.get();
+    field_factory_s->deserDepth.set((unsigned*)(current-1));
+}
 
 static void field_factory_init(void*)
 {

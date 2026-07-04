@@ -16,6 +16,8 @@
 #include <pv/factory.h>
 #include <pv/serializeHelper.h>
 
+#include "factoryPvt.h"
+
 using std::tr1::static_pointer_cast;
 using std::size_t;
 
@@ -157,6 +159,7 @@ void PVUnionArray::serialize(ByteBuffer *pbuffer,
 
 void PVUnionArray::deserialize(ByteBuffer *pbuffer,
         DeserializableControl *pcontrol) {
+    RecurseGuard G;
     svector data(reuse());
 
     size_t size = this->getArray()->getArraySizeType() == Array::fixed ?

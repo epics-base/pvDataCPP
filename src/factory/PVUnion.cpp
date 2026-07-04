@@ -18,6 +18,8 @@
 #include <pv/factory.h>
 #include <pv/serializeHelper.h>
 
+#include "factoryPvt.h"
+
 using std::tr1::static_pointer_cast;
 using std::size_t;
 using std::string;
@@ -143,6 +145,7 @@ void PVUnion::serialize(ByteBuffer *pbuffer, SerializableControl *pflusher) cons
 
 void PVUnion::deserialize(ByteBuffer *pbuffer, DeserializableControl *pcontrol)
 {
+    RecurseGuard G;
     if (variant)
     {
         FieldConstPtr field = pcontrol->cachedDeserialize(pbuffer);

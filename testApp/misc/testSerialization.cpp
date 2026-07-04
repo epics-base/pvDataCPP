@@ -874,13 +874,35 @@ void testMalformed()
     // a union array where ...
     CASE("\x89\x83\x2b\x01\x01");
 #undef CASE
+    {
+        std::vector<char> inp(500u);
+        for(size_t i=0; i<inp.size(); i+=5) {
+            inp[i+0] = '\x80'; // Struct
+            inp[i+1] = '\xff'; // null ID String
+            inp[i+2] = '\x01'; // 1 member field
+            inp[i+3] = '\x01'; // member name length 1
+            inp[i+4] = 'x'   ; // member name
+        }
+        testDeserializeTypeFail(&inp[0], inp.size());
+    }
+    {
+        std::vector<char> inp(500u);
+        for(size_t i=0; i<inp.size(); i+=5) {
+            inp[i+0] = '\x81'; // Union
+            inp[i+1] = '\xff'; // null ID String
+            inp[i+2] = '\x01'; // 1 member field
+            inp[i+3] = '\x01'; // member name length 1
+            inp[i+4] = 'x'   ; // member name
+        }
+        testDeserializeTypeFail(&inp[0], inp.size());
+    }
 }
 
 } // end namespace
 
 MAIN(testSerialization) {
 
-    testPlan(236);
+    testPlan(238);
 
     flusher = new SerializableControlImpl();
     control = new DeserializableControlImpl();
