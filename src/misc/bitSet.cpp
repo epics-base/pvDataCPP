@@ -337,16 +337,14 @@ namespace epics { namespace pvData {
     }
 
     void BitSet::deserialize(ByteBuffer* buffer, DeserializableControl* control) {
+        size_t size = SerializeHelper::readSize(buffer, control);
+        uint32 bytes = (size == (size_t) -1) ? 0 : static_cast<uint32>(size);
 
-        uint32 bytes = static_cast<uint32>(SerializeHelper::readSize(buffer, control)); // in bytes
+        // Validate availability before allocating storage
+        control->ensureData(bytes);
 
         size_t wordsInUse = (bytes + 7) / BYTES_PER_WORD;
         words.resize(wordsInUse);
-
-        if (wordsInUse == 0)
-            return;
-
-        control->ensureData(bytes);
 
         uint32 i = 0;
         uint32 longs = bytes / 8;

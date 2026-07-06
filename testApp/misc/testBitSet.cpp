@@ -303,15 +303,57 @@ static void testSerialize()
 #undef TOFRO
 }
 
+static void testDeserializeOversize()
+{
+    testDiag("testDeserializeOversize");
+
+    // Size field declares INT32_MAX bytes but no payload follows: 0xFE
+    // long-form marker + big-endian int32. deserialize() must reject this
+    // via ensureData() before allocating a ~2GB backing store.
+    const char msg[] = {(char)0xFE, 0x7F, (char)0xFF, (char)0xFF, (char)0xFF};
+    BitSet dut;
+    ByteBuffer buf((char*)msg, sizeof(msg), EPICS_ENDIAN_BIG);
+    try {
+        deserializeFromBuffer(&dut, buf);
+        testFail("oversized BitSet size was not rejected");
+    } catch(std::exception& e) {
+        testPass("oversized BitSet size rejected: %s", e.what());
+    }
+}
+
+static void testDeserializeNull()
+{
+    testDiag("testDeserializeNull");
+
+    // A NULL size is encoded on the wire as the single byte 0xFF. Without
+    // the null check in deserialize() this would be cast to UINT32_MAX bytes
+    // and overflow the allocation size; it must instead yield an empty BitSet.
+    const char msg[] = {(char)0xFF};
+    BitSet dut;
+    dut.set(5); // ensure deserialize actually clears/replaces existing bits
+    ByteBuffer buf((char*)msg, sizeof(msg), EPICS_ENDIAN_BIG);
+    try {
+        deserializeFromBuffer(&dut, buf);
+        testPass("NULL BitSet size accepted");
+    } catch(std::exception& e) {
+        testFail("NULL BitSet size rejected: %s", e.what());
+    }
+    testOk1(dut.isEmpty());
+    testOk(buf.getRemaining()==0, "buffer remaining 0 == %u",
+        (unsigned)buf.getRemaining());
+}
+
 } // namespace
 
 MAIN(testBitSet)
 {
-    testPlan(90);
+    testPlan(94);
     testInitialize();
     testGetSetClearFlip();
     testOperators();
     testLogical();
     testSerialize();
+    testDeserializeOversize();
+    testDeserializeNull();
     return testDone();
 }
