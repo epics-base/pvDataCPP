@@ -160,28 +160,28 @@ void PVStructureArray::deserialize(ByteBuffer *pbuffer,
         DeserializableControl *pcontrol) {
     svector data(reuse());
 
-    size_t size = this->getArray()->getArraySizeType() == Array::fixed ?
-                this->getArray()->getMaximumCapacity() :
-                SerializeHelper::readSize(pbuffer, pcontrol);
-
-    data.resize(size);
+    const size_t size = this->getArray()->getArraySizeType() == Array::fixed ?
+        this->getArray()->getMaximumCapacity() :
+        SerializeHelper::readSize(pbuffer, pcontrol);
 
     StructureConstPtr structure = structureArray->getStructure();
 
     PVDataCreatePtr pvDataCreate = getPVDataCreate();
 
+    // Don't trust 'size' for new or larger arrays, start
+    // small and grow them as elements are deserialized.
+    data.resize(0);
+    data.reserve(size < 64 ? size : 64);
     for(size_t i = 0; i<size; i++) {
         pcontrol->ensureData(1);
         size_t temp = pbuffer->getByte();
-        if(temp==0) {
-            data[i].reset();
+
+        PVStructurePtr pvStructure;
+        if(temp!=0) {
+            pvStructure = pvDataCreate->createPVStructure(structure);
+            pvStructure->deserialize(pbuffer, pcontrol);
         }
-        else {
-            if(data[i].get()==NULL || !data[i].unique()) {
-                data[i] = pvDataCreate->createPVStructure(structure);
-            }
-            data[i]->deserialize(pbuffer, pcontrol);
-        }
+        data.push_back(pvStructure);
     }
     replace(freeze(data)); // calls postPut()
 }

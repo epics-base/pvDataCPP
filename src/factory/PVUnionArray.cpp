@@ -159,28 +159,28 @@ void PVUnionArray::deserialize(ByteBuffer *pbuffer,
         DeserializableControl *pcontrol) {
     svector data(reuse());
 
-    size_t size = this->getArray()->getArraySizeType() == Array::fixed ?
-                this->getArray()->getMaximumCapacity() :
-                SerializeHelper::readSize(pbuffer, pcontrol);
-
-    data.resize(size);
+    const size_t size = this->getArray()->getArraySizeType() == Array::fixed ?
+        this->getArray()->getMaximumCapacity() :
+        SerializeHelper::readSize(pbuffer, pcontrol);
 
     UnionConstPtr punion = unionArray->getUnion();
 
     PVDataCreatePtr pvDataCreate = getPVDataCreate();
 
+    // Don't trust 'size' for new or larger arrays, start
+    // small and grow them as elements are deserialized.
+    data.resize(0);
+    data.reserve(size < 64 ? size : 64);
     for(size_t i = 0; i<size; i++) {
         pcontrol->ensureData(1);
         size_t temp = pbuffer->getByte();
-        if(temp==0) {
-            data[i].reset();
+
+        PVUnionPtr pvUnion;
+        if(temp!=0) {
+            pvUnion = pvDataCreate->createPVUnion(punion);
+            pvUnion->deserialize(pbuffer, pcontrol);
         }
-        else {
-            if(data[i].get()==NULL || !data[i].unique()) {
-                data[i] = pvDataCreate->createPVUnion(punion);
-            }
-            data[i]->deserialize(pbuffer, pcontrol);
-        }
+        data.push_back(pvUnion);
     }
     replace(freeze(data)); // calls postPut()
 }
