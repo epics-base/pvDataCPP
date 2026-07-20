@@ -513,7 +513,7 @@ typedef std::tr1::shared_ptr<PVULong> PVULongPtr;
 typedef std::tr1::shared_ptr<PVFloat> PVFloatPtr;
 typedef std::tr1::shared_ptr<PVDouble> PVDoublePtr;
 
-#ifdef _WIN32
+#ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable:4250)
 #endif
@@ -542,7 +542,7 @@ protected:
     EPICS_NOT_COPYABLE(PVString)
 };
 typedef std::tr1::shared_ptr<PVString> PVStringPtr;
-#ifdef _WIN32
+#ifdef _MSC_VER
 #pragma warning(pop)
 #endif
 
