@@ -47,12 +47,13 @@ namespace epics {
                 DeserializableControl* control) {
             control->ensureData(1);
             int8 b = buffer->getByte();
-            if(b==-1)
-                return -1;
-            else if(b==-2) {
+            if (b == -1)
+                return -1;  // NULL
+            else if (b == -2) {
                 control->ensureData(sizeof(int32));
                 int32 s = buffer->getInt();
-                if(s<0) THROW_BASE_EXCEPTION("negative size");
+                if (s < 0)
+                    THROW_BASE_EXCEPTION("negative size");
                 return s;
             }
             else
@@ -100,44 +101,37 @@ namespace epics {
         }
 
         string SerializeHelper::deserializeString(ByteBuffer* buffer,
-                DeserializableControl* control) {
+                DeserializableControl* control, std::size_t max) {
 
             std::size_t size = SerializeHelper::readSize(buffer, control);
-            if(size!=(size_t)-1)    // TODO null strings check, to be removed in the future
-            {
-                if (buffer->getRemaining()>=size)
-                {
-                    // entire string is in buffer, simply create a string out of it (copy)
-                    std::size_t pos = buffer->getPosition();
-                    string str(buffer->getBuffer()+pos, size);
-                    buffer->setPosition(pos+size);
-                    return str;
-                }
-                else
-                {
-                    string str;
-                    str.reserve(size);
-                    try {
-                        std::size_t i = 0;
-                        while(true) {
-                            std::size_t toRead = min(size-i, buffer->getRemaining());
-                            std::size_t pos = buffer->getPosition();
-                            str.append(buffer->getBuffer()+pos, toRead);
-                            buffer->setPosition(pos+toRead);
-                            i += toRead;
-                            if(i<size)
-                                control->ensureData(1); // at least one
-                            else
-                                break;
-                        }
-                        return str;
-                    } catch(...) {
-                        throw;
-                    }
-                }
+            if (size == (std::size_t) -1)
+                return std::string();   // NULL from old implementations
+
+            if (size > max)
+                THROW_BASE_EXCEPTION("string too long");
+
+            if (buffer->getRemaining() >= size) { // All present
+                std::size_t pos = buffer->getPosition();
+                string str(buffer->getBuffer() + pos, size);
+                buffer->setPosition(pos + size);
+                return str;
             }
-            else
-                return std::string();
+
+            string str;
+            str.reserve(size);
+            std::size_t i = 0;
+            while (true) {
+                std::size_t toRead = min(size-i, buffer->getRemaining());
+                std::size_t pos = buffer->getPosition();
+                str.append(buffer->getBuffer() + pos, toRead);
+                buffer->setPosition(pos + toRead);
+                i += toRead;
+                if (i < size)
+                    control->ensureData(1); // at least one
+                else
+                    break;
+            }
+            return str;
         }
     }
 }
