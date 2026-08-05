@@ -849,11 +849,202 @@ void testFromString(int byteOrder)
     testOk1(_data->getSubFieldT<PVString>("Y")->get()=="testing");
 }
 
+
+static UnionConstPtr growTestUnion()
+{
+    static UnionConstPtr un(getFieldCreate()->createFieldBuilder()
+                            ->add("i", pvInt)
+                            ->add("d", pvDouble)
+                            ->createUnion());
+    return un;
+}
+
+// Structure array of alarm structures. Some elements are
+// NULL to use both branches of the deserialize loop.
+static PVStructureArrayPtr makeStructureArray(size_t n)
+{
+    PVStructureArrayPtr pv(getPVDataCreate()->createPVStructureArray(
+        getFieldCreate()->createStructureArray(getStandardField()->alarm())));
+    PVStructureArray::svector d(n);
+    for(size_t i=0; i<n; i++) {
+        if(i%7 != 0) {
+            PVStructurePtr s(getPVDataCreate()->createPVStructure(
+                getStandardField()->alarm()));
+            s->getSubFieldT<PVInt>("severity")->put(static_cast<int32>(i));
+            d[i] = s;
+        }
+    }
+    pv->replace(freeze(d));
+    return pv;
+}
+
+// Union array of 'n' unions, some NULL.
+static PVUnionArrayPtr makeUnionArray(size_t n)
+{
+    PVUnionArrayPtr pv(getPVDataCreate()->createPVUnionArray(
+        getFieldCreate()->createUnionArray(growTestUnion())));
+    PVUnionArray::svector d(n);
+    for(size_t i=0; i<n; i++) {
+        if(i%5 != 0) {
+            PVUnionPtr u(getPVDataCreate()->createPVUnion(growTestUnion()));
+            u->select<PVInt>("i")->put(static_cast<int32>(i));
+            d[i] = u;
+        }
+    }
+    pv->replace(freeze(d));
+    return pv;
+}
+
+// String array of distinct strings.
+static PVStringArrayPtr makeStringArray(size_t n)
+{
+    PVStringArrayPtr pv(std::tr1::static_pointer_cast<PVStringArray>(
+        getPVDataCreate()->createPVScalarArray(pvString)));
+    PVStringArray::svector d(n);
+    for(size_t i=0; i<n; i++) {
+        std::ostringstream oss;
+        oss << "s" << i;
+        d[i] = oss.str();
+    }
+    pv->replace(freeze(d));
+    return pv;
+}
+
+// Serialize 'field' and deserialize into 'target', testing
+// the reuse & grow branches of the deserializer.
+static void roundTripInto(const PVFieldPtr& field, const PVFieldPtr& target)
+{
+    size_t len = std::tr1::static_pointer_cast<PVArray>(field)->getLength();
+    buffer->clear();
+    field->serialize(buffer, flusher);
+    buffer->flip();
+    target->deserialize(buffer, control);
+    testOk(*field == *target, "grow/reuse round trip, %u elements",
+           (unsigned)len);
+}
+
+#if defined(__rtems__)
+#  include <rtems.h>
+#endif
+void testLargeArrayGrowth()
+{
+    testDiag("Testing deserialize growth of large variable arrays...");
+
+#if defined(__RTEMS_MAJOR__) && __RTEMS_MAJOR__ == 4 && __RTEMS_MINOR__ <= 9
+    // Avoid fatal errors on RT-4.9, resource limits?
+    testSkip(3 * (8 + 7), "Not run on this target");
+#else
+
+    static const size_t sizes[] = {0, 1, 63, 64, 65, 100, 129, 1100};
+
+    for(size_t k=0; k<NELEMENTS(sizes); k++) {
+        size_t n = sizes[k];
+
+        PVStructureArrayPtr sa(makeStructureArray(n));
+        PVUnionArrayPtr ua(makeUnionArray(n));
+        PVStringArrayPtr ta(makeStringArray(n));
+
+        roundTripInto(sa, getPVDataCreate()->createPVField(sa->getField()));
+        roundTripInto(ua, getPVDataCreate()->createPVField(ua->getField()));
+        roundTripInto(ta, getPVDataCreate()->createPVField(ta->getField()));
+    }
+
+    // Reuse: Test shrink and grow behavior,
+    // crossing 64 elements both ways.
+    static const size_t seq[] = {10, 100, 5, 200, 64, 65, 63};
+
+    PVFieldPtr saTarget(getPVDataCreate()->createPVField(
+        FieldConstPtr(getFieldCreate()->createStructureArray(
+            getStandardField()->alarm()))));
+    PVFieldPtr uaTarget(getPVDataCreate()->createPVField(
+        FieldConstPtr(getFieldCreate()->createUnionArray(growTestUnion()))));
+    PVFieldPtr taTarget(getPVDataCreate()->createPVField(
+        FieldConstPtr(getFieldCreate()->createScalarArray(pvString))));
+
+    for(size_t k=0; k<NELEMENTS(seq); k++) {
+        roundTripInto(makeStructureArray(seq[k]), saTarget);
+        roundTripInto(makeUnionArray(seq[k]), uaTarget);
+        roundTripInto(makeStringArray(seq[k]), taTarget);
+    }
+#endif
+}
+
+// Deserialize raw bytes into 'field', returning true on bad input.
+// Can't use 'control' which has a no-op ensureData().
+static bool rejects(FieldConstPtr field, const char* msg, size_t n,
+                    int order = EPICS_ENDIAN_BIG)
+{
+    PVFieldPtr pv(getPVDataCreate()->createPVField(field));
+    ByteBuffer buf((char*)msg, n, order);
+    try {
+        deserializeFromBuffer(pv.get(), buf);
+        return false;
+    } catch(std::exception&) {
+        return true;
+    }
+}
+
+// Feed malicious data to deserialize() methods for string, structure and
+// union arrays.
+void testMaliciousArrays()
+{
+    testDiag("Testing array deserialize() responses to malicious input...");
+
+    const FieldConstPtr strArr(getFieldCreate()->createScalarArray(pvString));
+    const FieldConstPtr structArr(getFieldCreate()->createStructureArray(
+        getStandardField()->alarm()));
+    const FieldConstPtr unionArr(getFieldCreate()->createUnionArray(
+        growTestUnion()));
+
+    // 1. Oversized msg:
+    //    0xFE long-form marker + INT32_MAX big-endian, NO payload.
+    const char oversize[] = {(char)0xFE, 0x7F, (char)0xFF, (char)0xFF, (char)0xFF};
+    testOk(rejects(strArr, oversize, sizeof(oversize)),
+           "oversized string array size rejected");
+    testOk(rejects(structArr, oversize, sizeof(oversize)),
+           "oversized structure array size rejected");
+    testOk(rejects(unionArr, oversize, sizeof(oversize)),
+           "oversized union array size rejected");
+
+    // 2. Truncated element stream:
+    //    Plausible size (100) then fewer elements than promised.
+    const char shortStruct[] = {0x64, 0x00, 0x00, 0x00};
+    const char shortUnion[]  = {0x64, 0x00, 0x00, 0x00};
+    testOk(rejects(structArr, shortStruct, sizeof(shortStruct)),
+           "truncated structure array rejected");
+    testOk(rejects(unionArr, shortUnion, sizeof(shortUnion)),
+           "truncated union array rejected");
+    //    String array 100, two 1-char strings, end in third element's size.
+    const char shortStr[] = {0x64, 0x01, 'a', 0x01, 'b'};
+    testOk(rejects(strArr, shortStr, sizeof(shortStr)),
+           "truncated string array rejected");
+
+    // 3. Negative size:
+    //    0xFE marker + INT32_MIN.
+    const char negsize[] = {(char)0xFE, (char)0x80, 0x00, 0x00, 0x00};
+    testOk(rejects(strArr, negsize, sizeof(negsize)),
+           "negative string array size rejected");
+    testOk(rejects(structArr, negsize, sizeof(negsize)),
+           "negative structure array size rejected");
+    testOk(rejects(unionArr, negsize, sizeof(negsize)),
+           "negative union array size rejected");
+
+    // 4. Bad nested elements in valid array:
+    //    Union array, 1 element (0x01), with index out of range.
+    const char badSelector[] = {0x01, 0x01, 0x05};
+    testOk(rejects(unionArr, badSelector, sizeof(badSelector)),
+           "union array element with out-of-range selector rejected");
+    //    Structure array, 1 element (0x01) with bad child structure (no data)
+    const char badStruct[] = {0x01, 0x01};
+    testOk(rejects(structArr, badStruct, sizeof(badStruct)),
+           "structure array element with truncated child rejected");
+}
+
 } // end namespace
 
 MAIN(testSerialization) {
 
-    testPlan(234);
+    testPlan(290);
 
     flusher = new SerializableControlImpl();
     control = new DeserializableControlImpl();
@@ -874,6 +1065,9 @@ MAIN(testSerialization) {
 
     testArraySizeType();
     testBoundedString();
+
+    testLargeArrayGrowth();
+    testMaliciousArrays();
 
     testToString(EPICS_ENDIAN_BIG);
     testToString(EPICS_ENDIAN_LITTLE);

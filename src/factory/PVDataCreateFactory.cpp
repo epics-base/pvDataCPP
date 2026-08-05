@@ -409,23 +409,19 @@ template<>
 void PVValueArray<string>::deserialize(ByteBuffer *pbuffer,
         DeserializableControl *pcontrol) {
 
-    size_t size = this->getArray()->getArraySizeType() == Array::fixed ?
-                this->getArray()->getMaximumCapacity() :
-                SerializeHelper::readSize(pbuffer, pcontrol);
+    const size_t size = this->getArray()->getArraySizeType() == Array::fixed ?
+        this->getArray()->getMaximumCapacity() :
+        SerializeHelper::readSize(pbuffer, pcontrol);
 
-    svector nextvalue(thaw(value));
+    svector nextvalue(thaw(value)); // Reuse old storage
 
-    // Decide if we must re-allocate
-    if(size > nextvalue.size() || !nextvalue.unique())
-        nextvalue.resize(size);
-    else if(size < nextvalue.size())
-        nextvalue.slice(0, size);
-
-
-    string * pvalue = nextvalue.data();
-    for(size_t i = 0; i<size; i++) {
-        pvalue[i] = SerializeHelper::deserializeString(pbuffer,
-                                                       pcontrol);
+    // Don't trust 'size' for new or larger arrays, start
+    // small and grow them as elements are deserialized.
+    nextvalue.resize(0);
+    nextvalue.reserve(size < 64 ? size : 64);
+    for (size_t i = 0; i<size; i++) {
+        nextvalue.push_back(
+            SerializeHelper::deserializeString(pbuffer, pcontrol));
     }
     value = freeze(nextvalue);
     // inform about the change?

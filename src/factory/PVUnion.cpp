@@ -158,21 +158,26 @@ void PVUnion::deserialize(ByteBuffer *pbuffer, DeserializableControl *pcontrol)
     }
     else
     {
-        int32 previousSelector = selector;
-        selector = static_cast<int32>(SerializeHelper::readSize(pbuffer, pcontrol));
-        if (selector != UNDEFINED_INDEX)
+        int32 index = static_cast<int32>(SerializeHelper::readSize(pbuffer, pcontrol));
+        if (index == UNDEFINED_INDEX)
         {
-            if (selector != previousSelector)
+            selector = index;
+            value.reset();
+        }
+        else if (index < 0 || size_t(index) >= unionPtr->getFields().size())
+            throw std::runtime_error("union index out of bounds");
+        else
+        {
+            if (selector != index)
             {
-                FieldConstPtr field = unionPtr->getField(selector);
+                selector = index;
+                FieldConstPtr field = unionPtr->getField(index);
                 // try to reuse existing field instance
                 if (!value.get() || *value->getField() != *field)
                     value = pvDataCreate->createPVField(field);
             }
             value->deserialize(pbuffer, pcontrol);
         }
-        else
-            value.reset();
     }
 }
 

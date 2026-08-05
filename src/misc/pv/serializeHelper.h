@@ -50,7 +50,7 @@ namespace epics {
              *
              * @param[in] buffer deserialization buffer.
              * @param[in] control the DeserializableControl.
-             * @returns array size.
+             * @returns array size, or (size_t) -1.
              */
             static std::size_t readSize(ByteBuffer* buffer,
                     DeserializableControl* control);
@@ -80,20 +80,18 @@ namespace epics {
 
             /**
              * std::string deserialization helper method.
-             * TODO This method cannot return "null", but Java implementation
-             * could have serialized "null" value as well. We need to decide
-             * how to deserialize "null".
              *
              * @param[in] buffer deserialization buffer
              * @param[in] control control
+             * @param[in] max length limit
              * @returns deserialized string
              *
              * @todo This method cannot return "null", but Java implementation
-             * could have serialized "null" value as well. We need to decide
-             * how to deserialize "null".
+             * could have serialized "null" value as well. This implementation
+             * returns an empty string in that event.
              */
             static std::string deserializeString(ByteBuffer* buffer,
-                    DeserializableControl* control);
+                    DeserializableControl* control, std::size_t max = INT32_MAX);
 
         private:
             SerializeHelper() {};
@@ -111,5 +109,7 @@ namespace epics {
 
     }
 }
+
+#define DESERIALIZE_STRING_HAS_LIMIT
 
 #endif /* SERIALIZEHELPER_H_ */

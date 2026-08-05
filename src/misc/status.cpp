@@ -72,6 +72,14 @@ void Status::deserialize(ByteBuffer *buffer, DeserializableControl *flusher)
            m_stackDump.clear();
        }
     }
+    else if (typeCode < 0 || typeCode > STATUSTYPE_FATAL)
+    {
+        // Leave *this as fatal and throw
+        m_statusType = STATUSTYPE_FATAL;
+        m_message = "deserialized type code was invalid";
+        m_stackDump.clear();
+        THROW_BASE_EXCEPTION("invalid Status type code");
+    }
     else
     {
         m_statusType = (StatusType)typeCode;
