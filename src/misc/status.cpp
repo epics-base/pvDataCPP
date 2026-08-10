@@ -74,6 +74,8 @@ void Status::deserialize(ByteBuffer *buffer, DeserializableControl *flusher)
     }
     else
     {
+        if(typeCode < 0 || typeCode > STATUSTYPE_FATAL)
+            typeCode = STATUSTYPE_FATAL;
         m_statusType = (StatusType)typeCode;
         m_message = SerializeHelper::deserializeString(buffer, flusher);
         m_stackDump = SerializeHelper::deserializeString(buffer, flusher);
