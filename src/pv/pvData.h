@@ -16,6 +16,9 @@
 #include <iterator>
 #include <iostream>
 #include <iomanip>
+#if defined(__clang__) && defined(_MSC_VER)
+#include <type_traits>
+#endif
 
 #include <epicsAssert.h>
 
@@ -123,6 +126,36 @@ typedef std::tr1::shared_ptr<PVUnionArrayPtrArray> PVUnionArrayPtrArrayPtr;
 
 class PVDataCreate;
 typedef std::tr1::shared_ptr<PVDataCreate> PVDataCreatePtr;
+
+#if defined(__clang__) && defined(_MSC_VER)
+template <typename T>
+constexpr ScalarType typeToCode() {
+    if (std::is_same<T, boolean>::value)
+        return pvBoolean;
+    else if (std::is_same<T, int8>::value)
+        return pvByte;
+    else if (std::is_same<T, uint8>::value)
+        return pvUByte;
+    else if (std::is_same<T, int16>::value)
+        return pvShort;
+    else if (std::is_same<T, uint16>::value)
+        return pvUShort;
+    else if (std::is_same<T, int32>::value)
+        return pvInt;
+    else if (std::is_same<T, uint32>::value)
+        return pvUInt;
+    else if (std::is_same<T, int64>::value)
+        return pvLong;
+    else if (std::is_same<T, uint64>::value)
+        return pvULong;
+    else if (std::is_same<T, float>::value)
+        return pvFloat;
+    else if (std::is_same<T, double>::value)
+        return pvDouble;
+    else if (std::is_same<T, std::string>::value)
+        return pvString;
+}
+#endif
 
 /**
  * @brief This class is implemented by code that calls setPostHander
@@ -383,7 +416,11 @@ public:
     typedef T* pointer;
     typedef const T* const_pointer;
 
+    #if defined(__clang__) && defined(_MSC_VER)
+    constexpr static const ScalarType typeCode = typeToCode<T>();
+    #else
     static const ScalarType typeCode;
+    #endif
 
     /**
      * Destructor
@@ -1184,8 +1221,11 @@ public:
     typedef ::epics::pvData::shared_vector<T> svector;
     typedef ::epics::pvData::shared_vector<const T> const_svector;
 
-
+    #if defined(__clang__) && defined(_MSC_VER)
+    constexpr static const ScalarType typeCode = typeToCode<T>();
+    #else
     static const ScalarType typeCode;
+    #endif
 
     /**
      * Destructor
