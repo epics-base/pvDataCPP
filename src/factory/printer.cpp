@@ -401,12 +401,11 @@ void printRaw(std::ostream& strm, const PVStructure::Formatter& format, const PV
 
 std::ostream& operator<<(std::ostream& strm, const PVStructure::Formatter& format)
 {
-    if(format.xfmt==PVStructure::Formatter::JSON) {
+    if(format.xfmt==PVStructure::Formatter::JSON || \
+       format.xfmt==PVStructure::Formatter::JSON5) {
         JSONPrintOptions opts;
         opts.multiLine = false;
-#if EPICS_VERSION_INT>=VERSION_INT(7,0,6,1)
-        opts.json5 = true;
-#endif
+        opts.json5 = format.xfmt==PVStructure::Formatter::JSON5 ? true : false;
         printJSON(strm, format.xtop, format.xshow ? *format.xshow : BitSet().set(0), opts);
         strm<<'\n';
         return strm;
