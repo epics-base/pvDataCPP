@@ -881,6 +881,7 @@ public:
             Raw,
             NT,
             JSON,
+            JSON5,
         };
     private:
         const PVStructure& xtop;
