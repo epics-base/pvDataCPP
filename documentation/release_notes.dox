@@ -2,6 +2,12 @@
 
 @page release_notes Release Notes
 
+Release 8.0.8 (Oct 2026)
+========================
+
+- Add a max string len param to epics::pvData::SerializeHelper::deserializeString() (Andrew Johnson)
+- Add method epics::pvData::PVStructure::Formatter::arrayAsString() (Jeremy Lorelli)
+
 Release 8.0.7 (Dec 2025)
 ========================
 
