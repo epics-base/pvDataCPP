@@ -1,0 +1,6 @@
+<map id="epics::pvData::shared_vector&lt; E, typename meta::is_void&lt; E &gt;::type &gt;" name="epics::pvData::shared_vector&lt; E, typename meta::is_void&lt; E &gt;::type &gt;">
+<area shape="rect" id="Node000001" title="Specialization for storing untyped pointers." alt="" coords="5,94,187,150"/>
+<area shape="rect" id="Node000002" href="$classepics_1_1pv_data_1_1detail_1_1shared__vector__base.html" title=" " alt="" coords="6,5,186,46"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="89,59,90,94,85,93,86,64"/>
+<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="106,59,107,94,102,92,103,63"/>
+</map>

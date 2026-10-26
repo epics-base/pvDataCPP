@@ -1,0 +1,13 @@
+<map id="epics::pvData::BoundedScalarArray" name="epics::pvData::BoundedScalarArray">
+<area shape="rect" id="Node000001" title="This class implements introspection object for bounded scalar array." alt="" coords="90,315,288,356"/>
+<area shape="rect" id="Node000002" href="$classepics_1_1pv_data_1_1_scalar_array.html" title="This class implements introspection object for scalar array." alt="" coords="100,241,278,267"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="191,281,191,316,186,313,187,284"/>
+<area shape="rect" id="Node000003" href="$classepics_1_1pv_data_1_1_array.html" title="This class implements introspection object for Array." alt="" coords="118,168,259,193"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="190,207,191,242,186,240,187,211"/>
+<area shape="rect" id="Node000004" href="$classepics_1_1pv_data_1_1_field.html" title="This class implements introspection object for field." alt="" coords="120,94,258,120"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="190,133,191,168,186,166,188,138"/>
+<area shape="rect" id="Node000005" href="$classepics_1_1pv_data_1_1_serializable.html" title="Base class for serialization." alt="" coords="5,13,183,38"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="120,46,177,93,172,94,120,51"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="206,5,360,46"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="247,58,205,95,201,91,250,54"/>
+</map>
