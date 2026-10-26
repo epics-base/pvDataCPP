@@ -90,7 +90,7 @@ namespace epics {
              * could have serialized "null" value as well. This implementation
              * returns an empty string in that event.
              *
-             * @since UNRELEASED Added the max argument.
+             * @since 8.0.9 Added the max argument.
              *        Test for the DESERIALIZE_STRING_HAS_LIMIT macro to detect.
              *        Retroactive default is 2 GiB
              */
@@ -118,7 +118,7 @@ namespace epics {
  *
  *  of SerializeHelper::deserializeString()
  *
- *  @since UNRELEASED added
+ *  @since 8.0.9 added
  */
 #define DESERIALIZE_STRING_HAS_LIMIT
 
